@@ -42,7 +42,7 @@
 	Tim Wood, 2014, fishuyo@gmail.com
 */
 
-#include "allocore/math/al_Vec.hpp"
+#include "al/core/math/al_Vec.hpp"
 
 namespace al {
 

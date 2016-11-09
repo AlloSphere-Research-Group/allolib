@@ -20,49 +20,63 @@ include_directories(include)
 # should not have dependencies, except c++11 (14?)
 
 set(core_headers
+	include/al/core/math/al_Analysis.hpp
+	include/al/core/math/al_Complex.hpp
 	include/al/core/math/al_Constants.hpp
+	include/al/core/math/al_Frustum.hpp
 	include/al/core/math/al_Functions.hpp
+	include/al/core/math/al_Interpolation.hpp
+	include/al/core/math/al_Interval.hpp
 	include/al/core/math/al_Mat.hpp
 	include/al/core/math/al_Matrix4.hpp
+	include/al/core/math/al_Plane.hpp
 	include/al/core/math/al_Quat.hpp
+	include/al/core/math/al_Ray.hpp
+	include/al/core/math/al_Spherical.hpp
 	include/al/core/math/al_Vec.hpp
+	include/al/core/spatial/al_Curve.hpp
+	include/al/core/spatial/al_DistAtten.hpp
+	include/al/core/spatial/al_Pose.hpp
+	include/al/core/system/al_Config.h
+	include/al/core/system/al_Printing.hpp
+	include/al/core/system/pstdint.h
 	include/al/core/types/al_Color.hpp
 )
 
 set(core_sources
+	src/core/spatial/al_Pose.cpp
+	src/core/system/al_Printing.cpp
 	src/core/types/al_Color.cpp
 )
 
 # build audio
 # dependencies: allocore, portaudio, ?, ?
 if(build_audio)
-	find_libs
-	gamma
+	# find_libs
+	# gamma
 endif(build_audio)
 
 # build graphics
 # dependencies: allocore, opengl
 # different files depending on gl version
 if(build_gl)
-	lfind opengl
-
-
+	# lfind opengl
 endif(build_gl)
 
 # build sphere
 # dependencies: allocore, omnirender, cuttlebone
 if(build_sphere)
-	cuttlbone
+	# cuttlbone, 
 endif(build_sphere)
 
 # build util
 #dependencies: allocore, ?, ?
 if(build_util)
-	glv
+	# glv
 endif(build_util)
 
 list(APPEND headers ${core_headers})
 list(APPEND sources ${core_sources})
 
 # shared? static?
-add_library(allo ${headers} ${sources})
+add_library(al ${headers} ${sources})

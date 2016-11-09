@@ -43,10 +43,10 @@
 	Graham Wakefield, 2010, grrrwaaa@gmail.com
 */
 
-#include "allocore/math/al_Constants.hpp"
-#include "allocore/math/al_Quat.hpp"
-#include "allocore/math/al_Mat.hpp"
-#include "allocore/math/al_Vec.hpp"
+#include "al/core/math/al_Constants.hpp"
+#include "al/core/math/al_Quat.hpp"
+#include "al/core/math/al_Mat.hpp"
+#include "al/core/math/al_Vec.hpp"
 
 namespace al {
 

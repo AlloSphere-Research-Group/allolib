@@ -1,0 +1,9 @@
+CMakeFiles/
+test/CMakeFiles/
+cmake_install.cmake
+test/cmake_install.cmake
+CMakeCache.txt
+test/CMakeCache.txt
+Makefile
+test/Makefile
+*.a

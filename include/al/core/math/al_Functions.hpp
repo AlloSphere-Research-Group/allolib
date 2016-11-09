@@ -44,12 +44,12 @@
 */
 
 /*
-	AL_LONE project
+	AL_LIB project
 	[ ] update: use c++11/14 std
 */
 
 #include <cmath>
-// #include "allocore/system/al_Config.h"
+#include "al/core/system/al_Config.h"
 #include "al/core/math/al_Constants.hpp"
 
 

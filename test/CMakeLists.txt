@@ -8,4 +8,4 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 add_executable(al_test main.cpp)
 
-target_link_libraries(bin ${CMAKE_CURRENT_SOURCE_DIR}/../liballo.a)
+target_link_libraries(al_test ${CMAKE_CURRENT_SOURCE_DIR}/../liballo.a)

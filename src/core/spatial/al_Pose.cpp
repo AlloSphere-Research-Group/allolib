@@ -1,4 +1,4 @@
-#include "allocore/spatial/al_Pose.hpp"
+#include "al/core/spatial/al_Pose.hpp"
 
 namespace al{
 

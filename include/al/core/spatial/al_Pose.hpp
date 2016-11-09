@@ -45,8 +45,8 @@
 	Wesley Smith, 2010, wesley.hoke@gmail.com
 */
 
-#include "allocore/math/al_Vec.hpp"
-#include "allocore/math/al_Quat.hpp"
+#include "al/core/math/al_Vec.hpp"
+#include "al/core/math/al_Quat.hpp"
 #include <stdio.h>
 
 

@@ -43,9 +43,9 @@
 */
 
 
-#include "allocore/math/al_Complex.hpp"
-#include "allocore/math/al_Functions.hpp"
-#include "allocore/math/al_Vec.hpp"
+#include "al/core/math/al_Complex.hpp"
+#include "al/core/math/al_Functions.hpp"
+#include "al/core/math/al_Vec.hpp"
 
 namespace al{
 

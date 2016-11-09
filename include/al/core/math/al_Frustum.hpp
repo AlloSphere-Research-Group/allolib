@@ -42,8 +42,8 @@
 	Lance Putnam, 2011, putnam.lance@gmail.com
 */
 
-#include "allocore/math/al_Plane.hpp"
-#include "allocore/math/al_Vec.hpp"
+#include "al/core/math/al_Plane.hpp"
+#include "al/core/math/al_Vec.hpp"
 
 
 namespace al {

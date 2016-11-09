@@ -33,7 +33,7 @@
 	Graham Wakefield, 2010, grrrwaaa@gmail.com
 */
 
-#include "allocore/math/al_Functions.hpp"
+#include "al/core/math/al_Functions.hpp"
 
 #include<limits>
 
