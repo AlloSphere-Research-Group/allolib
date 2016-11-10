@@ -2,10 +2,10 @@ compiling the lib: `cmake .`, then `make`
 
 compiling the test: `cd test`, `cmake .`, the `make`
 
-[ ] replace al::Buffer with std::vector
+[ ] support for std::vector in the places for al::Buffer
 
-[ ] replace al::Array with std::array
+[ ] support for std::array in the places for al::Array
 
 [ ] remove opengl implementations in al::Graphics (leave only enums?)
 
-[ ] use matrix stack (cpu side) for al::Graphics
+[ ] use matrix stack (cpu side) for al::Graphics -> divide graphics to graphics & glgraphics
