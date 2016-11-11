@@ -19,8 +19,10 @@
 #include "al/core/spatial/al_DistAtten.hpp"
 #include "al/core/spatial/al_Pose.hpp"
 
-#include "al/core/system/al_Config.h"
 #include "al/core/system/al_Printing.hpp"
-#include "al/core/system/pstdint.h"
 
+#include "al/core/types/al_Array.hpp"
+#include "al/core/types/al_Buffer.hpp"
 #include "al/core/types/al_Color.hpp"
+#include "al/core/types/al_Conversion.hpp"
+#include "al/core/types/al_SingleRWRingBuffer.hpp"

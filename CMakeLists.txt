@@ -12,67 +12,74 @@ set(build_cv 1)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall")
+set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-unused")
 
 include_directories(include)
 
 # build core
-# should not have dependencies, except c++11 (14?)
+# should not have dependencies, except c++11 (c++14 will be cool...)
 
 set(core_headers
-	include/al/core/math/al_Analysis.hpp
-	include/al/core/math/al_Complex.hpp
-	include/al/core/math/al_Constants.hpp
-	include/al/core/math/al_Frustum.hpp
-	include/al/core/math/al_Functions.hpp
-	include/al/core/math/al_Interpolation.hpp
-	include/al/core/math/al_Interval.hpp
-	include/al/core/math/al_Mat.hpp
-	include/al/core/math/al_Matrix4.hpp
-	include/al/core/math/al_Plane.hpp
-	include/al/core/math/al_Quat.hpp
-	include/al/core/math/al_Ray.hpp
-	include/al/core/math/al_Spherical.hpp
-	include/al/core/math/al_Vec.hpp
-	include/al/core/spatial/al_Curve.hpp
-	include/al/core/spatial/al_DistAtten.hpp
-	include/al/core/spatial/al_Pose.hpp
-	include/al/core/system/al_Config.h
-	include/al/core/system/al_Printing.hpp
-	include/al/core/system/pstdint.h
-	include/al/core/types/al_Color.hpp
+  include/al/core/math/al_Analysis.hpp
+  include/al/core/math/al_Complex.hpp
+  include/al/core/math/al_Constants.hpp
+  include/al/core/math/al_Frustum.hpp
+  include/al/core/math/al_Functions.hpp
+  include/al/core/math/al_Interpolation.hpp
+  include/al/core/math/al_Interval.hpp
+  include/al/core/math/al_Mat.hpp
+  include/al/core/math/al_Matrix4.hpp
+  include/al/core/math/al_Plane.hpp
+  include/al/core/math/al_Quat.hpp
+  include/al/core/math/al_Ray.hpp
+  include/al/core/math/al_Spherical.hpp
+  include/al/core/math/al_Vec.hpp
+  include/al/core/spatial/al_Curve.hpp
+  include/al/core/spatial/al_DistAtten.hpp
+  include/al/core/spatial/al_Pose.hpp
+  include/al/core/system/al_Config.h
+  include/al/core/system/al_Printing.hpp
+  include/al/core/system/pstdint.h
+  include/al/core/types/al_Array.h
+  include/al/core/types/al_Array.hpp
+  include/al/core/types/al_Buffer.hpp
+  include/al/core/types/al_Color.hpp
+  include/al/core/types/al_Conversion.hpp
+  include/al/core/types/al_SingleRWRingBuffer.hpp
 )
 
 set(core_sources
-	src/core/spatial/al_Pose.cpp
-	src/core/system/al_Printing.cpp
-	src/core/types/al_Color.cpp
+  src/core/spatial/al_Pose.cpp
+  src/core/system/al_Printing.cpp
+  src/core/types/al_Array.cpp
+  src/core/types/al_Array_C.c
+  src/core/types/al_Color.cpp
 )
 
 # build audio
 # dependencies: allocore, portaudio, ?, ?
 if(build_audio)
-	# find_libs
-	# gamma
+  # find_libs
+  # gamma
 endif(build_audio)
 
 # build graphics
 # dependencies: allocore, opengl
 # different files depending on gl version
 if(build_gl)
-	# lfind opengl
+  # lfind opengl
 endif(build_gl)
 
 # build sphere
 # dependencies: allocore, omnirender, cuttlebone
 if(build_sphere)
-	# cuttlbone, 
+  # cuttlbone, 
 endif(build_sphere)
 
 # build util
 #dependencies: allocore, ?, ?
 if(build_util)
-	# glv
+  # glv
 endif(build_util)
 
 list(APPEND headers ${core_headers})
