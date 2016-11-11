@@ -1,7 +1,3 @@
-compiling the lib: `cmake .`, then `make`
-
-compiling the test: `cd test`, `cmake .`, the `make`
-
 [ ] support for std::vector in the places for al::Buffer
 
 [ ] support for std::array in the places for al::Array
