@@ -17,6 +17,7 @@
 
 #include "al/core/spatial/al_Curve.hpp"
 #include "al/core/spatial/al_DistAtten.hpp"
+#include "al/core/spatial/al_HashSpace.hpp"
 #include "al/core/spatial/al_Pose.hpp"
 
 #include "al/core/system/al_Printing.hpp"

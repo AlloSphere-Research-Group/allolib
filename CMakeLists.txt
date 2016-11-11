@@ -1,20 +1,32 @@
 cmake_minimum_required(VERSION 3.0)
 project(allo)
 
+# CHECK PLATFORM ###########################################
+if (APPLE)
+  set(MACOS 1)
+  message("MACOS")
+elseif (UNIX)
+  set(LINUX 1)
+  message("LINUX")
+else ()
+  set(WINDOWS 1)
+  message("WINDOWS")
+endif (APPLE)
+
 # select modules to include in building
 set(build_audio 0)
 set(build_gl 0)
 set(build_sphere 0)
 set(build_util 0)
 
-set(gl_profile "core") # or "compat"
-set(build_cv 1)
+set(gl_profile "core") # or "compat" ???
+# set(build_cv 1)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-unused")
 
-include_directories(include)
+include_directories(include) # so users can say #include al/core.hpp
 
 # build core
 # should not have dependencies, except c++11 (c++14 will be cool...)
@@ -36,6 +48,7 @@ set(core_headers
   include/al/core/math/al_Vec.hpp
   include/al/core/spatial/al_Curve.hpp
   include/al/core/spatial/al_DistAtten.hpp
+  include/al/core/spatial/al_HashSpace.hpp
   include/al/core/spatial/al_Pose.hpp
   include/al/core/system/al_Config.h
   include/al/core/system/al_Printing.hpp
@@ -49,6 +62,7 @@ set(core_headers
 )
 
 set(core_sources
+  src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
   src/core/system/al_Printing.cpp
   src/core/types/al_Array.cpp
