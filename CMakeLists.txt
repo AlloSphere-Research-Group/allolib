@@ -13,6 +13,9 @@ else ()
   message("WINDOWS")
 endif (APPLE)
 
+# select gl loader
+set(gl_loader "glew") # or "raw" or "gl3w" ???
+
 # select modules to include in building
 set(build_audio 0)
 set(build_gl 0)
