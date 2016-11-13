@@ -6,8 +6,8 @@
 #include <vector>
 #include <fstream>
 #include "al/core/graphics/al_Mesh.hpp"
-// #include "al/core/system/al_Printing.hpp"
-// #include "al/core/graphics/al_Graphics.hpp"
+#include "al/core/system/al_Printing.hpp"
+#include "al/core/graphics/al_Graphics.hpp"
 
 namespace al{
 

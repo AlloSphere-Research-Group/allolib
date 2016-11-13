@@ -24,8 +24,6 @@ else ()
 	find_package(GLEW REQUIRED)
 	find_package(PkgConfig REQUIRED)
 	pkg_search_module(GLFW REQUIRED glfw3)
-	if (MACOS)
-	endif (MACOS)
 endif (WINDOWS)
 
 # INCLUDE DIRECTORIES ######################################
@@ -37,9 +35,5 @@ add_executable(al_gl_test main.cpp)
 
 target_link_libraries(al_gl_test ${CMAKE_CURRENT_SOURCE_DIR}/../libal.a)
 target_link_libraries(al_gl_test ${OPENGL_LIBRARY})
-if (MACOS)
-endif (MACOS)
-if (LINUX)
-endif (LINUX)
 target_link_libraries(al_gl_test ${GLFW_LIBRARIES})
 target_link_libraries(al_gl_test ${GLEW_LIBRARIES})

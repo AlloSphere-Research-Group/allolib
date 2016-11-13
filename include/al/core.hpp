@@ -1,5 +1,10 @@
 #pragma once
 
+#include "al/core/graphics/al_GPUObject.hpp"
+#include "al/core/graphics/al_Graphics.hpp"
+#include "al/core/graphics/al_Mesh.hpp"
+#include "al/core/graphics/al_Shapes.hpp"
+
 #include "al/core/math/al_Analysis.hpp"
 #include "al/core/math/al_Complex.hpp"
 #include "al/core/math/al_Constants.hpp"

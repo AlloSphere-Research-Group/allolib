@@ -35,6 +35,10 @@ include_directories(include) # so users can say #include al/core.hpp
 # should not have dependencies, except c++11 (c++14 will be cool...)
 
 set(core_headers
+  include/al/core/graphics/al_GPUObject.hpp
+  include/al/core/graphics/al_Graphics.hpp
+  include/al/core/graphics/al_Mesh.hpp
+  include/al/core/graphics/al_Shapes.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
@@ -65,6 +69,10 @@ set(core_headers
 )
 
 set(core_sources
+  src/core/graphics/al_GPUObject.cpp
+  src/core/graphics/al_Graphics.cpp
+  src/core/graphics/al_Mesh.cpp
+  src/core/graphics/al_Shapes.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
   src/core/system/al_Printing.cpp
