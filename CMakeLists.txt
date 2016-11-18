@@ -5,13 +5,25 @@ project(allo)
 if (APPLE)
   set(MACOS 1)
   message("MACOS")
+  add_definitions(-DAL_OSX)
 elseif (UNIX)
   set(LINUX 1)
   message("LINUX")
+  add_definitions(-DAL_LINUX)
 else ()
   set(WINDOWS 1)
   message("WINDOWS")
+  add_definitions(-DAL_WINDOWS)
 endif (APPLE)
+
+# original allosystem version
+# if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#   add_definitions(-DAL_OSX)
+# elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+#   add_definitions(-DAL_LINUX)
+# elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+#   add_definitions(-DAL_WINDOWS)
+# endif()
 
 # select gl loader
 set(gl_loader "glew") # or "raw" or "gl3w" ???
@@ -37,6 +49,7 @@ include_directories(include) # so users can say #include al/core.hpp
 set(core_headers
   include/al/core/graphics/al_GPUObject.hpp
   include/al/core/graphics/al_Graphics.hpp
+  include/al/core/graphics/al_Lens.hpp
   include/al/core/graphics/al_Mesh.hpp
   include/al/core/graphics/al_Shapes.hpp
   include/al/core/math/al_Analysis.hpp
@@ -71,6 +84,7 @@ set(core_headers
 set(core_sources
   src/core/graphics/al_GPUObject.cpp
   src/core/graphics/al_Graphics.cpp
+  src/core/graphics/al_Lens.cpp
   src/core/graphics/al_Mesh.cpp
   src/core/graphics/al_Shapes.cpp
   src/core/spatial/al_HashSpace.cpp

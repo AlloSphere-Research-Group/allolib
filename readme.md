@@ -6,5 +6,7 @@
 
 [ ] use matrix stack (cpu side) for al::Graphics -> divide graphics to graphics & glgraphics
 
+[ ] platform definitions (AL_OSX, etc.) are originally done in cmake. do we want it do be done in c++? (maybe in al_Config.hpp)
+
 mark fuctions that needs to be commented out temporarily with:
 `/* !LATER! */`

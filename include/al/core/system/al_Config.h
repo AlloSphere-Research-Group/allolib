@@ -43,6 +43,17 @@
   Graham Wakefield, 2010, grrrwaaa@gmail.com
 */
 
+// [!] currently definitions provided via cmake,
+//     do we want it to be done in c++ ???
+
+// #if defined(__WIN32__) || defined(_WIN32)
+//   #define AL_WINDOWS
+// #elif defined(__APPLE__)
+//   #define AL_MACOS
+// #else
+//   #define AL_LINUX
+// #endif
+
 #ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
 #endif

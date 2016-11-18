@@ -106,16 +106,16 @@ struct Viewport {
 
 /// Interface for setting graphics state and rendering Mesh
 
-///  It also owns a Mesh, to simulate immediate mode (where it draws its own data)
+///  It also owns a Mesh, to simulate immediate mode
 ///
 /// @ingroup allocore
 class Graphics : public GPUObject {
 public:
 
   enum AntiAliasMode {
-    DONT_CARE = 0, /**< No preference */
-    FASTEST,       /**< Fastest render, possibly lower quality */
-    NICEST         /**< Highest quality, possibly slower render */
+    DONT_CARE, /**< No preference */
+    FASTEST,   /**< Fastest render, possibly lower quality */
+    NICEST     /**< Highest quality, possibly slower render */
   };
 
   enum AttributeBit {
