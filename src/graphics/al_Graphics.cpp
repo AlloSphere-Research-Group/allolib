@@ -5,7 +5,7 @@
 
 #include "al/core/system/al_Printing.hpp"
 #include "al/core/types/al_Array.hpp"
-#include "al/core/graphics/al_Graphics.hpp"
+#include "al/graphics/al_Graphics.hpp"
 
 namespace al{
 

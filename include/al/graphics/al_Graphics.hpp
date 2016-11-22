@@ -51,10 +51,10 @@
 #include "al/core/types/al_Color.hpp"
 #include "al/core/system/al_Printing.hpp"
 
-#include "al/core/graphics/al_GPUObject.hpp"
-#include "al/core/graphics/al_Mesh.hpp"
-// #include "al/core/graphics/al_OpenGL.hpp"
-// #include "al/core/graphics/al_MeshVBO.hpp"
+#include "al/graphics/al_GPUObject.hpp"
+#include "al/graphics/al_Mesh.hpp"
+// #include "al/core/gl/al_OpenGL.hpp"
+// #include "al/core/gl/al_MeshVBO.hpp"
 
 /*!
   \def AL_GRAPHICS_ERROR(msg, ID)

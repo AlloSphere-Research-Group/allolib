@@ -2,19 +2,25 @@ cmake_minimum_required(VERSION 3.0)
 project(allo)
 
 # CHECK PLATFORM ###########################################
-if (APPLE)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(MACOS 1)
   message("MACOS")
   add_definitions(-DAL_OSX)
-elseif (UNIX)
+elseif (WIN32)
+  set(WINDOWS 1)
+  message("WINDOWS")
+  add_definitions(-DAL_WINDOWS)
+elseif (CYGWIN)
+  set(WINDOWS_CYGWIN 1)
+  message("WINDWOS_CYGWIN")
+  # later change to AL_WINDOWS_CYGWIN?
+  add_definitions(-DAL_WINDOWS)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(LINUX 1)
   message("LINUX")
   add_definitions(-DAL_LINUX)
 else ()
-  set(WINDOWS 1)
-  message("WINDOWS")
-  add_definitions(-DAL_WINDOWS)
-endif (APPLE)
+endif ()
 
 # original allosystem version
 # if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -25,18 +31,6 @@ endif (APPLE)
 #   add_definitions(-DAL_WINDOWS)
 # endif()
 
-# select gl loader
-set(gl_loader "glew") # or "raw" or "gl3w" ???
-
-# select modules to include in building
-set(build_audio 0)
-set(build_gl 0)
-set(build_sphere 0)
-set(build_util 0)
-
-set(gl_profile "core") # or "compat" ???
-# set(build_cv 1)
-
 set(CMAKE_BUILD_TYPE Debug)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-unused")
@@ -44,14 +38,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-unused")
 include_directories(include) # so users can say #include al/core.hpp
 
 # build core
-# should not have dependencies, except c++11 (c++14 will be cool...)
-
 set(core_headers
-  include/al/core/graphics/al_GPUObject.hpp
-  include/al/core/graphics/al_Graphics.hpp
-  include/al/core/graphics/al_Lens.hpp
-  include/al/core/graphics/al_Mesh.hpp
-  include/al/core/graphics/al_Shapes.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
@@ -82,11 +69,6 @@ set(core_headers
 )
 
 set(core_sources
-  src/core/graphics/al_GPUObject.cpp
-  src/core/graphics/al_Graphics.cpp
-  src/core/graphics/al_Lens.cpp
-  src/core/graphics/al_Mesh.cpp
-  src/core/graphics/al_Shapes.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
   src/core/system/al_Printing.cpp
@@ -95,34 +77,36 @@ set(core_sources
   src/core/types/al_Color.cpp
 )
 
-# build audio
-# dependencies: allocore, portaudio, ?, ?
-if(build_audio)
-  # find_libs
-  # gamma
-endif(build_audio)
+# audio
 
-# build graphics
-# dependencies: allocore, opengl
-# different files depending on gl version
-if(build_gl)
-  # lfind opengl
-endif(build_gl)
+# graphics
+set(graphics_headers
+  include/al/graphics/al_GPUObject.hpp
+  include/al/graphics/al_Graphics.hpp
+  include/al/graphics/al_Lens.hpp
+  include/al/graphics/al_Mesh.hpp
+  include/al/graphics/al_Shapes.hpp
+)
+set(graphics_sources
+  src/graphics/al_GPUObject.cpp
+  src/graphics/al_Graphics.cpp
+  src/graphics/al_Lens.cpp
+  src/graphics/al_Mesh.cpp
+  src/graphics/al_Shapes.cpp
+)
 
-# build sphere
-# dependencies: allocore, omnirender, cuttlebone
-if(build_sphere)
-  # cuttlbone, 
-endif(build_sphere)
+# AlloSphere
 
-# build util
-#dependencies: allocore, ?, ?
-if(build_util)
-  # glv
-endif(build_util)
+# utils
 
-list(APPEND headers ${core_headers})
-list(APPEND sources ${core_sources})
+list(APPEND headers
+  ${core_headers}
+  ${graphics_headers}
+)
+list(APPEND sources
+  ${core_sources}
+  ${graphics_sources}
+)
 
 # shared? static?
 add_library(al ${headers} ${sources})

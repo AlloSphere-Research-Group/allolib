@@ -1,6 +1,6 @@
 #include <math.h>
 #include "al/core/math/al_Constants.hpp"
-#include "al/core/graphics/al_Lens.hpp"
+#include "al/graphics/al_Lens.hpp"
 
 namespace al{
 

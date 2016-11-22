@@ -1,10 +1,7 @@
 #pragma once
 
-#include "al/core/graphics/al_GPUObject.hpp"
-#include "al/core/graphics/al_Graphics.hpp"
-#include "al/core/graphics/al_Lens.hpp"
-#include "al/core/graphics/al_Mesh.hpp"
-#include "al/core/graphics/al_Shapes.hpp"
+#include "al/core/gl/al_GPUObject.hpp"
+#include "al/core/gl/al_Graphics.hpp"
 
 #include "al/core/math/al_Analysis.hpp"
 #include "al/core/math/al_Complex.hpp"

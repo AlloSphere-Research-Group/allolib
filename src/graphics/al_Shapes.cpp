@@ -1,8 +1,8 @@
 #include <map>
 #include <math.h>
 #include "al/core/math/al_Constants.hpp"
-#include "al/core/graphics/al_Shapes.hpp"
-#include "al/core/graphics/al_Graphics.hpp"
+#include "al/graphics/al_Shapes.hpp"
+#include "al/graphics/al_Graphics.hpp"
 
 /*
 Platonic solids code derived from:
