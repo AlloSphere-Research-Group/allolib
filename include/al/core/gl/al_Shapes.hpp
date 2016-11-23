@@ -42,7 +42,7 @@
   Lance Putnam, 2010, putnam.lance@gmail.com
 */
 
-#include "al/graphics/al_Mesh.hpp"
+#include "al/core/gl/al_Mesh.hpp"
 
 namespace al{
 

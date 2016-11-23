@@ -5,12 +5,12 @@
 
 #include "al/core/system/al_Printing.hpp"
 #include "al/core/types/al_Array.hpp"
-#include "al/graphics/al_Graphics.hpp"
+#include "al/core/gl/al_Graphics.hpp"
 
 namespace al{
 
 Graphics::Graphics()
-:  mRescaleNormal(0), mInImmediateMode(false)
+: mRescaleNormal(0), mInImmediateMode(false)
 {}
 
 Graphics::~Graphics(){}
@@ -40,33 +40,32 @@ int Graphics::numComponents(Format v){
     case RGBA:
     case BGRA:        return 4;
     case RGB:
-    case BGR:        return 3;
-    case LUMINANCE_ALPHA:  return 2;
+    case BGR:       return 3;
+    case LUMINANCE_ALPHA: return 2;
     case DEPTH_COMPONENT:
     case LUMINANCE:
     case RED:
     case GREEN:
     case BLUE:
-    case ALPHA:        return 1;
+    case ALPHA:       return 1;
     default:        return 0;
   };
 }
 
-/* !LATER! */
 int Graphics::numBytes(DataType v){
   #define CS(a,b) case a: return sizeof(b);
   switch(v){
-    // CS(BYTE, GLbyte)
-    // CS(UBYTE, GLubyte)
-    // CS(SHORT, GLshort)
-    // CS(USHORT, GLushort)
-    // CS(INT, GLint)
-    // CS(UINT, GLuint)
-    // CS(BYTES_2, char[2])
-    // CS(BYTES_3, char[3])
-    // CS(BYTES_4, char[4])
-    // CS(FLOAT, GLfloat)
-    // CS(DOUBLE, GLdouble)
+    CS(BYTE, GLbyte)
+    CS(UBYTE, GLubyte)
+    CS(SHORT, GLshort)
+    CS(USHORT, GLushort)
+    CS(INT, GLint)
+    CS(UINT, GLuint)
+    CS(BYTES_2, char[2])
+    CS(BYTES_3, char[3])
+    CS(BYTES_4, char[4])
+    CS(FLOAT, GLfloat)
+    CS(DOUBLE, GLdouble)
     default: return 0;
   };
   #undef CS
@@ -85,8 +84,8 @@ Graphics::DataType Graphics::toDataType(AlloTy v){
   switch(v){
     case AlloFloat32Ty: return FLOAT;
     case AlloFloat64Ty: return DOUBLE;
-    case AlloSInt8Ty:  return BYTE;
-    case AlloUInt8Ty:  return UBYTE;
+    case AlloSInt8Ty: return BYTE;
+    case AlloUInt8Ty: return UBYTE;
     case AlloSInt16Ty:  return SHORT;
     case AlloUInt16Ty:  return USHORT;
     case AlloSInt32Ty:  return INT;
@@ -98,90 +97,84 @@ Graphics::DataType Graphics::toDataType(AlloTy v){
 AlloTy Graphics :: toAlloTy(Graphics::DataType v) {
   switch (v) {
     case BYTE:    return AlloSInt8Ty;
-    case UBYTE:    return AlloUInt8Ty;
-    case SHORT:    return AlloSInt16Ty;
+    case UBYTE:   return AlloUInt8Ty;
+    case SHORT:   return AlloSInt16Ty;
     case USHORT:  return AlloUInt16Ty;
-    case INT:    return AlloSInt32Ty;
+    case INT:   return AlloSInt32Ty;
     case UINT:    return AlloUInt32Ty;
-    case FLOAT:    return AlloFloat32Ty;
+    case FLOAT:   return AlloFloat32Ty;
     case DOUBLE:  return AlloFloat64Ty;
     default:    return AlloVoidTy;
   }
 }
 
-/* !LATER! */
 const char * Graphics::errorString(bool verbose){
-  // GLenum err = glGetError();
-  // #define CS(GL_ERR, desc) case GL_ERR: return verbose ? #GL_ERR ", " desc : #GL_ERR;
-  // switch(err){
-  //   case GL_NO_ERROR: return "";
-  //   CS(GL_INVALID_ENUM, "An unacceptable value is specified for an enumerated argument.")
-  //   CS(GL_INVALID_VALUE, "A numeric argument is out of range.")
-  //   CS(GL_INVALID_OPERATION, "The specified operation is not allowed in the current state.")
-  // #ifdef GL_INVALID_FRAMEBUFFER_OPERATION
-  //   CS(GL_INVALID_FRAMEBUFFER_OPERATION, "The framebuffer object is not complete.")
-  // #endif
-  //   CS(GL_OUT_OF_MEMORY, "There is not enough memory left to execute the command.")
-  //   CS(GL_STACK_OVERFLOW, "This command would cause a stack overflow.")
-  //   CS(GL_STACK_UNDERFLOW, "This command would cause a stack underflow.")
-  // #ifdef GL_TABLE_TOO_LARGE
-  //   CS(GL_TABLE_TOO_LARGE, "The specified table exceeds the implementation's maximum supported table size.")
-  // #endif
-  //   default: return "Unknown error code.";
-  // }
-  // #undef CS
-  return "";
+  GLenum err = glGetError();
+  #define CS(GL_ERR, desc) case GL_ERR: return verbose ? #GL_ERR ", " desc : #GL_ERR;
+  switch(err){
+    case GL_NO_ERROR: return "";
+    CS(GL_INVALID_ENUM, "An unacceptable value is specified for an enumerated argument.")
+    CS(GL_INVALID_VALUE, "A numeric argument is out of range.")
+    CS(GL_INVALID_OPERATION, "The specified operation is not allowed in the current state.")
+  #ifdef GL_INVALID_FRAMEBUFFER_OPERATION
+    CS(GL_INVALID_FRAMEBUFFER_OPERATION, "The framebuffer object is not complete.")
+  #endif
+    CS(GL_OUT_OF_MEMORY, "There is not enough memory left to execute the command.")
+    CS(GL_STACK_OVERFLOW, "This command would cause a stack overflow.")
+    CS(GL_STACK_UNDERFLOW, "This command would cause a stack underflow.")
+  #ifdef GL_TABLE_TOO_LARGE
+    CS(GL_TABLE_TOO_LARGE, "The specified table exceeds the implementation's maximum supported table size.")
+  #endif
+    default: return "Unknown error code.";
+  }
+  #undef CS
 }
 
 bool Graphics::error(const char * msg, int ID){
   const char * errStr = errorString();
   if(errStr[0]){
-    if(ID>=0)  AL_WARN_ONCE("Error %s (id=%d): %s", msg, ID, errStr);
+    if(ID>=0) AL_WARN_ONCE("Error %s (id=%d): %s", msg, ID, errStr);
     else    AL_WARN_ONCE("Error %s: %s", msg, errStr);
     return true;
   }
   return false;
 }
 
-/* !LATER! */
+
 void Graphics::antialiasing(AntiAliasMode v){
-  // glHint(GL_POINT_SMOOTH_HINT, v);
-  // glHint(GL_LINE_SMOOTH_HINT, v);
-  // glHint(GL_POLYGON_SMOOTH_HINT, v);
+  glHint(GL_POINT_SMOOTH_HINT, v);
+  glHint(GL_LINE_SMOOTH_HINT, v);
+  glHint(GL_POLYGON_SMOOTH_HINT, v);
 
-  // if (FASTEST != v) {
-  //   glEnable(GL_POLYGON_SMOOTH);
-  //   glEnable(GL_LINE_SMOOTH);
-  //   glEnable(GL_POINT_SMOOTH);
-  // } else {
-  //   glDisable(GL_POLYGON_SMOOTH);
-  //   glDisable(GL_LINE_SMOOTH);
-  //   glDisable(GL_POINT_SMOOTH);
-  // }
+  if (FASTEST != v) {
+    glEnable(GL_POLYGON_SMOOTH);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POINT_SMOOTH);
+  } else {
+    glDisable(GL_POLYGON_SMOOTH);
+    glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_POINT_SMOOTH);
+  }
 }
 
-/* !LATER! */
 void Graphics::fog(float end, float start, const Color& c){
-  // glEnable(GL_FOG);
-  // glFogi(GL_FOG_MODE, GL_LINEAR);
-  // glFogf(GL_FOG_START, start); glFogf(GL_FOG_END, end);
-  // float fogColor[4] = {c.r, c.g, c.b, c.a};
-  // glFogfv(GL_FOG_COLOR, fogColor);
+  glEnable(GL_FOG);
+  glFogi(GL_FOG_MODE, GL_LINEAR);
+  glFogf(GL_FOG_START, start); glFogf(GL_FOG_END, end);
+  float fogColor[4] = {c.r, c.g, c.b, c.a};
+  glFogfv(GL_FOG_COLOR, fogColor);
 }
 
-/* !LATER! */
 void Graphics::viewport(int x, int y, int width, int height) {
-  // glViewport(x, y, width, height);
-  // enable(SCISSOR_TEST);
-  // glScissor(x, y, width, height);
+  glViewport(x, y, width, height);
+  enable(SCISSOR_TEST);
+  glScissor(x, y, width, height);
 }
 
-/* !LATER! */
 Viewport Graphics::viewport() const {
-  // GLint vp[4];
-  // glGetIntegerv(GL_VIEWPORT, vp);
-  // return Viewport(vp[0], vp[1], vp[2], vp[3]);
-  return Viewport(0, 0, 1, 1);
+  GLint vp[4];
+  glGetIntegerv(GL_VIEWPORT, vp);
+  return Viewport(vp[0], vp[1], vp[2], vp[3]);
 }
 
 
@@ -239,9 +232,8 @@ void Graphics::draw(int num_vertices, const Mesh& m){
   draw(m, num_vertices);
 }
 
-/* !LATER! */
 void Graphics::draw(const Mesh& v, int count, int begin){
-/*
+
   const int Nv = v.vertices().size();
   if(0 == Nv) return; // nothing to draw, so just return...
 
@@ -257,8 +249,8 @@ void Graphics::draw(const Mesh& v, int count, int begin){
   //if(count > Nmax) count = Nmax;
   //if(begin+count >= iend) return;
 
-  if(begin >= Nmax) return;  // Begin index past end?
-  if(begin + count > Nmax){  // If end index past end, then truncate it
+  if(begin >= Nmax) return; // Begin index past end?
+  if(begin + count > Nmax){ // If end index past end, then truncate it
     count = Nmax - begin;
   }
 
@@ -334,20 +326,19 @@ void Graphics::draw(const Mesh& v, int count, int begin){
   // Disable arrays
   glDisableClientState(GL_VERTEX_ARRAY);
   if(Nn)          glDisableClientState(GL_NORMAL_ARRAY);
-  if(Nc || Nci)      glDisableClientState(GL_COLOR_ARRAY);
-  if(Nt1 || Nt2 || Nt3)  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-*/
+  if(Nc || Nci)     glDisableClientState(GL_COLOR_ARRAY);
+  if(Nt1 || Nt2 || Nt3) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 // draw a MeshVBO
 /* !LATER! */
 // void Graphics::draw(MeshVBO& meshVBO) {
-  // if (!meshVBO.isBound()) meshVBO.bind();
+//   if (!meshVBO.isBound()) meshVBO.bind();
 
-  // if (meshVBO.hasIndices()) glDrawElements(meshVBO.primitive(), meshVBO.getNumIndices(), GL_UNSIGNED_INT, NULL);
-  // else glDrawArrays(meshVBO.primitive(), 0, meshVBO.getNumVertices());
+//   if (meshVBO.hasIndices()) glDrawElements(meshVBO.primitive(), meshVBO.getNumIndices(), GL_UNSIGNED_INT, NULL);
+//   else glDrawArrays(meshVBO.primitive(), 0, meshVBO.getNumVertices());
 
-  // meshVBO.unbind();
+//   meshVBO.unbind();
 // }
 
 

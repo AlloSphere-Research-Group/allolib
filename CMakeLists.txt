@@ -35,10 +35,18 @@ set(CMAKE_BUILD_TYPE Debug)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-unused")
 
-include_directories(include) # so users can say #include al/core.hpp
-
 # build core
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+
 set(core_headers
+  include/al/core/gl/al_GPUObject.hpp
+  include/al/core/gl/al_Graphics.hpp
+  include/al/core/gl/al_Lens.hpp
+  include/al/core/gl/al_Mesh.hpp
+  include/al/core/gl/al_OpenGL.hpp
+  include/al/core/gl/al_Shader.hpp
+  include/al/core/gl/al_Shapes.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
@@ -69,6 +77,12 @@ set(core_headers
 )
 
 set(core_sources
+  src/core/gl/al_GPUObject.cpp
+  src/core/gl/al_Graphics.cpp
+  src/core/gl/al_Lens.cpp
+  src/core/gl/al_Mesh.cpp
+  src/core/gl/al_Shader.cpp
+  src/core/gl/al_Shapes.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
   src/core/system/al_Printing.cpp
@@ -81,18 +95,8 @@ set(core_sources
 
 # graphics
 set(graphics_headers
-  include/al/graphics/al_GPUObject.hpp
-  include/al/graphics/al_Graphics.hpp
-  include/al/graphics/al_Lens.hpp
-  include/al/graphics/al_Mesh.hpp
-  include/al/graphics/al_Shapes.hpp
 )
 set(graphics_sources
-  src/graphics/al_GPUObject.cpp
-  src/graphics/al_Graphics.cpp
-  src/graphics/al_Lens.cpp
-  src/graphics/al_Mesh.cpp
-  src/graphics/al_Shapes.cpp
 )
 
 # AlloSphere
@@ -108,5 +112,11 @@ list(APPEND sources
   ${graphics_sources}
 )
 
+include_directories(include)
+include_directories(${GLEW_INCLUDE_DIRS})
+
 # shared? static?
 add_library(al ${headers} ${sources})
+
+target_link_libraries(al ${OPENGL_LIBRARY})
+target_link_libraries(al ${GLEW_LIBRARIES})

@@ -1,4 +1,4 @@
-#include "al/graphics/al_GPUObject.hpp"
+#include "al/core/gl/al_GPUObject.hpp"
 
 #include <map>
 #include <set>

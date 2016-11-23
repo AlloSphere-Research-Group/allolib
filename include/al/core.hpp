@@ -2,6 +2,11 @@
 
 #include "al/core/gl/al_GPUObject.hpp"
 #include "al/core/gl/al_Graphics.hpp"
+#include "al/core/gl/al_Lens.hpp"
+#include "al/core/gl/al_Mesh.hpp"
+#include "al/core/gl/al_OpenGL.hpp"
+#include "al/core/gl/al_Shader.hpp"
+#include "al/core/gl/al_Shapes.hpp"
 
 #include "al/core/math/al_Analysis.hpp"
 #include "al/core/math/al_Complex.hpp"

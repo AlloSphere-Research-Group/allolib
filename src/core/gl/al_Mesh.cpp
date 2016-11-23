@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include "al/graphics/al_Mesh.hpp"
+#include "al/core/gl/al_Mesh.hpp"
 #include "al/core/system/al_Printing.hpp"
-#include "al/graphics/al_Graphics.hpp"
+#include "al/core/gl/al_Graphics.hpp"
 
 namespace al{
 
