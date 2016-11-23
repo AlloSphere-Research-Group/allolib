@@ -47,6 +47,7 @@ set(core_headers
   include/al/core/gl/al_OpenGL.hpp
   include/al/core/gl/al_Shader.hpp
   include/al/core/gl/al_Shapes.hpp
+  include/al/core/gl/al_Texture.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
@@ -83,6 +84,7 @@ set(core_sources
   src/core/gl/al_Mesh.cpp
   src/core/gl/al_Shader.cpp
   src/core/gl/al_Shapes.cpp
+  src/core/gl/al_Texture.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
   src/core/system/al_Printing.cpp
