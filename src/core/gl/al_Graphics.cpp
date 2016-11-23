@@ -331,15 +331,14 @@ void Graphics::draw(const Mesh& v, int count, int begin){
 }
 
 // draw a MeshVBO
-/* !LATER! */
-// void Graphics::draw(MeshVBO& meshVBO) {
-//   if (!meshVBO.isBound()) meshVBO.bind();
+void Graphics::draw(MeshVBO& meshVBO) {
+  if (!meshVBO.isBound()) meshVBO.bind();
 
-//   if (meshVBO.hasIndices()) glDrawElements(meshVBO.primitive(), meshVBO.getNumIndices(), GL_UNSIGNED_INT, NULL);
-//   else glDrawArrays(meshVBO.primitive(), 0, meshVBO.getNumVertices());
+  if (meshVBO.hasIndices()) glDrawElements(meshVBO.primitive(), meshVBO.getNumIndices(), GL_UNSIGNED_INT, NULL);
+  else glDrawArrays(meshVBO.primitive(), 0, meshVBO.getNumVertices());
 
-//   meshVBO.unbind();
-// }
+  meshVBO.unbind();
+}
 
 
 void Graphics::onCreate(){

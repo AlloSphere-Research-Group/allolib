@@ -54,7 +54,7 @@
 #include "al/core/gl/al_GPUObject.hpp"
 #include "al/core/gl/al_Mesh.hpp"
 #include "al/core/gl/al_OpenGL.hpp"
-// #include "al/core/gl/al_MeshVBO.hpp"
+#include "al/core/gl/al_MeshVBO.hpp"
 
 /*!
   \def AL_GRAPHICS_ERROR(msg, ID)
@@ -523,8 +523,7 @@ public:
   void draw(){ draw(mMesh); }
 
   /// Draw MeshVBO
-  /* !LATER! */
-  // void draw(MeshVBO& meshVBO);
+  void draw(MeshVBO& meshVBO);
 
 
   // Utility functions: converting, reporting, etc.

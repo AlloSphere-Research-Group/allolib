@@ -40,13 +40,20 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
 set(core_headers
+  include/al/core/gl/al_BufferObject.hpp
+  include/al/core/gl/al_DisplayList.hpp
+  include/al/core/gl/al_EasyFBO.hpp
+  include/al/core/gl/al_FBO.hpp
   include/al/core/gl/al_GPUObject.hpp
   include/al/core/gl/al_Graphics.hpp
   include/al/core/gl/al_Lens.hpp
+  include/al/core/gl/al_Light.hpp
   include/al/core/gl/al_Mesh.hpp
   include/al/core/gl/al_OpenGL.hpp
   include/al/core/gl/al_Shader.hpp
   include/al/core/gl/al_Shapes.hpp
+  include/al/core/gl/al_Slab.hpp
+  include/al/core/gl/al_Stereographic.hpp
   include/al/core/gl/al_Texture.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
@@ -78,12 +85,17 @@ set(core_headers
 )
 
 set(core_sources
+  src/core/gl/al_BufferObject.cpp
+  src/core/gl/al_FBO.cpp
   src/core/gl/al_GPUObject.cpp
   src/core/gl/al_Graphics.cpp
   src/core/gl/al_Lens.cpp
+  src/core/gl/al_Light.cpp
   src/core/gl/al_Mesh.cpp
+  src/core/gl/al_MeshVBO.cpp
   src/core/gl/al_Shader.cpp
   src/core/gl/al_Shapes.cpp
+  src/core/gl/al_Stereographic.cpp
   src/core/gl/al_Texture.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
