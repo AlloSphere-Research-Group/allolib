@@ -7,3 +7,4 @@ test/CMakeCache.txt
 Makefile
 test/Makefile
 *.a
+gl_test/al_gl_test
