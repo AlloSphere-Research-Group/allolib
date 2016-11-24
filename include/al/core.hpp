@@ -1,9 +1,11 @@
 #pragma once
 
 #include "al/core/gl/al_BufferObject.hpp"
+#include "al/core/gl/al_CubeMapFBO.hpp"
 #include "al/core/gl/al_DisplayList.hpp"
 #include "al/core/gl/al_EasyFBO.hpp"
 #include "al/core/gl/al_FBO.hpp"
+#include "al/core/gl/al_FrameBufferGL.hpp"
 #include "al/core/gl/al_GPUObject.hpp"
 #include "al/core/gl/al_Graphics.hpp"
 #include "al/core/gl/al_Lens.hpp"
@@ -16,6 +18,7 @@
 #include "al/core/gl/al_Slab.hpp"
 #include "al/core/gl/al_Stereographic.hpp"
 #include "al/core/gl/al_Texture.hpp"
+#include "al/core/gl/al_TextureGL.hpp"
 
 #include "al/core/math/al_Analysis.hpp"
 #include "al/core/math/al_Complex.hpp"
