@@ -32,12 +32,17 @@
 #include "al/core/math/al_Spherical.hpp"
 #include "al/core/math/al_Vec.hpp"
 
+#include "al/core/protocol/al_Serialize.hpp"
+
 #include "al/core/spatial/al_Curve.hpp"
 #include "al/core/spatial/al_DistAtten.hpp"
 #include "al/core/spatial/al_HashSpace.hpp"
 #include "al/core/spatial/al_Pose.hpp"
 
+#include "al/core/system/al_Info.hpp"
 #include "al/core/system/al_Printing.hpp"
+#include "al/core/system/al_Time.hpp"
+#include "al/core/system/al_Watcher.hpp"
 
 #include "al/core/types/al_Array.hpp"
 #include "al/core/types/al_Buffer.hpp"
