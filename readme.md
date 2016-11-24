@@ -10,3 +10,6 @@
 
 mark fuctions that needs to be commented out temporarily with:
 `/* !LATER! */`
+
+al_Memory -> smart pointer? not added for now because of APR dependency
+al_Time to use c++ std time classes/functions

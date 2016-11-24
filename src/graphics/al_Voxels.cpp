@@ -248,21 +248,21 @@ void Voxels::print(FILE * fp) {
 }
 
 bool Voxels::getdir(std::string path, std::vector<std::string> &files) {
-	al::Dir dir;
-	if(dir.open(path)){
-		while(dir.read()){
-			auto& file = dir.entry();
-			if(file.type() == al::FileInfo::REG){
-				auto& name = file.name();
-				if(name != "info.txt" && name != ".DS_Store"){
-					std::cout << name << "\n";
-					files.push_back(path + "/" + name);
-				}
-			}
-		}
-		return true;
-	}
-	return false;
+  al::Dir dir;
+  if(dir.open(path)){
+    while(dir.read()){
+      auto& file = dir.entry();
+      if(file.type() == al::FileInfo::REG){
+        auto& name = file.name();
+        if(name != "info.txt" && name != ".DS_Store"){
+          std::cout << name << "\n";
+          files.push_back(path + "/" + name);
+        }
+      }
+    }
+    return true;
+  }
+  return false;
 }
   
     
@@ -279,7 +279,7 @@ bool Voxels::parseInfo(std::string dir, std::vector<std::string> &data) {
     {
       getline(infile, strOneLine);
       if (strOneLine.length() > 0){
-      	data.push_back(strOneLine.substr(strOneLine.find(":")+2,strOneLine.length()));
+        data.push_back(strOneLine.substr(strOneLine.find(":")+2,strOneLine.length()));
       }
     }
 
@@ -353,13 +353,13 @@ bool Voxels::loadFromDirectory(std::string dir) {
 
     if (!parseInfo(dir,info)) {
       if (info.size() == 4) {
-      	type = atoi(info[0].c_str());
-      	vx = atof(info[1].c_str());
-      	vy = atof(info[2].c_str());
-      	vz = atof(info[3].c_str());
-      	std::cout << "imported values from info.txt: " << type << ", " << vx << ", " << vy << ", " << vz << "\n";
+        type = atoi(info[0].c_str());
+        vx = atof(info[1].c_str());
+        vy = atof(info[2].c_str());
+        vz = atof(info[3].c_str());
+        std::cout << "imported values from info.txt: " << type << ", " << vx << ", " << vy << ", " << vz << "\n";
       } else {
-      	std::cout << info.size() << " info.txt doesn't have enough info, using default data" << "\n";
+        std::cout << info.size() << " info.txt doesn't have enough info, using default data" << "\n";
       }
     } else {
       std::cout << "no info.txt, using default data" << "\n";
@@ -378,21 +378,21 @@ bool Voxels::loadFromDirectory(std::string dir) {
       std::string &filename = *it;
 
       if (RGBImage.load(filename)) {
-      	std::cout << "loaded " << filename <<
-      	  " (" << slice+1 << " of " << files.size() << ")" << "\n";
+        std::cout << "loaded " << filename <<
+          " (" << slice+1 << " of " << files.size() << ")" << "\n";
       } else {
-      	std::cout << "Failed to read image from " << filename << "\n";
-      	return false;
+        std::cout << "Failed to read image from " << filename << "\n";
+        return false;
       }
 
       // Verify XY resolution
       if (int(RGBImage.width()) != nx || int(RGBImage.height()) != ny) {
-      	std::cout << "Error:  resolution mismatch!" << "\n";
-      	std::cout << "   " << files[0] << ": " << nx << " by " << ny << "\n";
-      	std::cout << "   " << filename << ": " << RGBImage.width() << " by " << RGBImage.height() << "\n";
-      	return false;
+        std::cout << "Error:  resolution mismatch!" << "\n";
+        std::cout << "   " << files[0] << ": " << nx << " by " << ny << "\n";
+        std::cout << "   " << filename << ": " << RGBImage.width() << " by " << RGBImage.height() << "\n";
+        return false;
       }
-	
+  
 
       // Access the read-in image data
       Array& array(RGBImage.array());
@@ -402,12 +402,12 @@ bool Voxels::loadFromDirectory(std::string dir) {
 
       // Copy it out pixel-by-pixel:
       for (size_t row = 0; row < array.height(); ++row) {
-      	for (size_t col = 0; col < array.width(); ++col) {
-      	  array.read(&pixel, col, row);
+        for (size_t col = 0; col < array.width(); ++col) {
+          array.read(&pixel, col, row);
 
-      	  // For now we'll take only the red and put it in the single component; that's lame.
-      	  elem<char>(0, col, row, slice) = (char) pixel.r;
-      	}
+          // For now we'll take only the red and put it in the single component; that's lame.
+          elem<char>(0, col, row, slice) = (char) pixel.r;
+        }
       }
     }
     return true;
@@ -609,7 +609,7 @@ Array Voxels::slice(Vec3f planeCenter, Vec3f planeNormal, std::vector<Vec3f> &fi
       Vec3f z_axis = planeNormal.cross(y_axis);
       //http://stackoverflow.com/questions/23472048/projecting-3d-points-to-2d-plane
       for (unsigned i = 0; i < P.size(); i++) {
-	Vec3f pi = P[i]-planeCenter;
+  Vec3f pi = P[i]-planeCenter;
         float t_1 = y_axis.dot(pi);
         float t_2 = z_axis.dot(pi);
         minA2D = std::min(minA2D, t_1);
@@ -643,14 +643,14 @@ Array Voxels::slice(Vec3f planeCenter, Vec3f planeNormal, std::vector<Vec3f> &fi
       for (unsigned i = 0; i < list.size(); i++){
         std::vector<Vec3f> space = linspace(list[i], list2[i], oDirection);  //XXX should this be oDirection or aDirection, please check!
         for (unsigned j = 0; j < space.size(); j++){
-	  Vec3f point = space[j];
-   	  float temp[1] = {0};
-	  if (point.x >= 0 && point.y >= 0 && point.z >= 0 && point.x <=  width()* m_voxWidth[2] && point.y <=  height()* m_voxWidth[1] && point.z <=  depth()* m_voxWidth[2]){
- 	    Vec3f p = Vec3f(point.x/ m_voxWidth[0],point.y/ m_voxWidth[1],point.z/ m_voxWidth[2]);
-  	     read_interp(temp, p);
-	  }
-	  result.write(temp,i,j);
-	}
+    Vec3f point = space[j];
+       float temp[1] = {0};
+    if (point.x >= 0 && point.y >= 0 && point.z >= 0 && point.x <=  width()* m_voxWidth[2] && point.y <=  height()* m_voxWidth[1] && point.z <=  depth()* m_voxWidth[2]){
+       Vec3f p = Vec3f(point.x/ m_voxWidth[0],point.y/ m_voxWidth[1],point.z/ m_voxWidth[2]);
+         read_interp(temp, p);
+    }
+    result.write(temp,i,j);
+  }
       }
     }
    delete [] p2D; 

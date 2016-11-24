@@ -5,8 +5,8 @@
 namespace al{
 
 /*
-	 6 --------  7
-	 /|       /|
+   6 --------  7
+   /|       /|
     / |      / |
  2 |--------|3 |
    | 4|-----|--| 5
@@ -313,315 +313,315 @@ static const char sTriTable[256][16] = {
 { 0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}
 };
 
-//	for(int j=0; j<256; ++j){
-//		printf("{");
-//		int numTri=0;
-//		for(int i=0; sTriTable[j][i] != -1; i+=3) ++numTri;
+//  for(int j=0; j<256; ++j){
+//    printf("{");
+//    int numTri=0;
+//    for(int i=0; sTriTable[j][i] != -1; i+=3) ++numTri;
 //
-//		printf("%2d", numTri*3);
-//		for(int i=0; i<15; ++i){
-//			printf(",%d", sTriTable[j][i]);
-//		}
-//		printf("},\n");
-//	}
+//    printf("%2d", numTri*3);
+//    for(int i=0; i<15; ++i){
+//      printf(",%d", sTriTable[j][i]);
+//    }
+//    printf("},\n");
+//  }
 
 
 Isosurface::NoVertexAction Isosurface::noVertexAction;
 
 Isosurface::Isosurface(float lev, VertexAction& va)
-:	mIsolevel(lev), mVertexAction(&va),
-	mValidSurface(false), mComputeNormals(true), mNormalize(true), mInBox(false)
+:  mIsolevel(lev), mVertexAction(&va),
+  mValidSurface(false), mComputeNormals(true), mNormalize(true), mInBox(false)
 {
-	cellLengths(1);
-	fieldDims(0);
+  cellLengths(1);
+  fieldDims(0);
 }
 
 Isosurface::~Isosurface(){}
 
 /*
-Edge No:	integer identifier for local edge within cube
-Edge ID:	unique integer for cube edge within entire domain of cubes
-			format is 3*v + e where v is cube vertex and e is 0, 1, or 2 for x, y, or z direction edge
-Vertex ID:	unique integer for cube position within entire domain of cubes
+Edge No:  integer identifier for local edge within cube
+Edge ID:  unique integer for cube edge within entire domain of cubes
+      format is 3*v + e where v is cube vertex and e is 0, 1, or 2 for x, y, or z direction edge
+Vertex ID:  unique integer for cube position within entire domain of cubes
 
 Cube-by-cube pass:
 
-	1. Check eight values on corners of cube against isolevel
-		a. Bitwise OR corner tests to obtain surface type (256 possible)
+  1. Check eight values on corners of cube against isolevel
+    a. Bitwise OR corner tests to obtain surface type (256 possible)
 
-	2. Use surface type to look up what edges are intersected
-		a. For each edge, compute point where surface intersects
-		b. Store vertex in edge-to-vertex map
+  2. Use surface type to look up what edges are intersected
+    a. For each edge, compute point where surface intersects
+    b. Store vertex in edge-to-vertex map
 
-	3. Use surface type to obtain triangle indices (in terms of edge ID)
-		a. Compute edge ID as combination of vertex ID and edge number
+  3. Use surface type to obtain triangle indices (in terms of edge ID)
+    a. Compute edge ID as combination of vertex ID and edge number
 
 
 Compression pass:
 
-	1. For each edge in edge-to-vertex map:
-		a. Add edge vertex position to vertex buffer
-		b. Assign index in vertex buffer to vertex.index
+  1. For each edge in edge-to-vertex map:
+    a. Add edge vertex position to vertex buffer
+    b. Assign index in vertex buffer to vertex.index
 
-	2. For each triangle:
-		a. Look up vertex position in edge-to-vertex map
-		b. Append vertex.index to index buffer
+  2. For each triangle:
+    a. Look up vertex position in edge-to-vertex map
+    b. Append vertex.index to index buffer
 
-	3. Generate per-vertex normals
+  3. Generate per-vertex normals
 
 */
 
 void Isosurface::addCell(const int * cellIdx3, const float * vals){
-	const int &ix = cellIdx3[0];
-	const int &iy = cellIdx3[1];
-	const int &iz = cellIdx3[2];
+  const int &ix = cellIdx3[0];
+  const int &iy = cellIdx3[1];
+  const int &iz = cellIdx3[2];
 
-	// Get isosurface cell index depending on field values at corners of cell
-	int idx = 0;
-	if(vals[0] < level()) idx |=   1;
-	if(vals[2] < level()) idx |=   2;
-	if(vals[3] < level()) idx |=   4;
-	if(vals[1] < level()) idx |=   8;
-	if(vals[4] < level()) idx |=  16;
-	if(vals[6] < level()) idx |=  32;
-	if(vals[7] < level()) idx |=  64;
-	if(vals[5] < level()) idx |= 128;
+  // Get isosurface cell index depending on field values at corners of cell
+  int idx = 0;
+  if(vals[0] < level()) idx |=   1;
+  if(vals[2] < level()) idx |=   2;
+  if(vals[3] < level()) idx |=   4;
+  if(vals[1] < level()) idx |=   8;
+  if(vals[4] < level()) idx |=  16;
+  if(vals[6] < level()) idx |=  32;
+  if(vals[7] < level()) idx |=  64;
+  if(vals[5] < level()) idx |= 128;
 
-	// Create a triangulation of the isosurface in this cell
-	const int edgeCode = sEdgeTable[idx];
-	if(edgeCode){
+  // Create a triangulation of the isosurface in this cell
+  const int edgeCode = sEdgeTable[idx];
+  if(edgeCode){
 
-		int cID = cellID(ix,iy,iz);
+    int cID = cellID(ix,iy,iz);
 
-		// Compute interpolated vertices on edges of box
-		//		(int EdgeID, PointID vertex) pair is created in mEdgeToVertex
-		//		EdgeID is a unique integer ID of box edge
-		if(edgeCode &    1) addEdgeVertex(ix,iy,iz,cID, 0, vals);
-		if(edgeCode &    2) addEdgeVertex(ix,iy,iz,cID, 1, vals);
-		if(edgeCode &    4) addEdgeVertex(ix,iy,iz,cID, 2, vals);
-		if(edgeCode &    8) addEdgeVertex(ix,iy,iz,cID, 3, vals);
-		if(edgeCode &   16) addEdgeVertex(ix,iy,iz,cID, 4, vals);
-		if(edgeCode &   32) addEdgeVertex(ix,iy,iz,cID, 5, vals);
-		if(edgeCode &   64) addEdgeVertex(ix,iy,iz,cID, 6, vals);
-		if(edgeCode &  128) addEdgeVertex(ix,iy,iz,cID, 7, vals);
-		if(edgeCode &  256) addEdgeVertex(ix,iy,iz,cID, 8, vals);
-		if(edgeCode &  512) addEdgeVertex(ix,iy,iz,cID, 9, vals);
-		if(edgeCode & 1024) addEdgeVertex(ix,iy,iz,cID,10, vals);
-		if(edgeCode & 2048) addEdgeVertex(ix,iy,iz,cID,11, vals);
+    // Compute interpolated vertices on edges of box
+    //    (int EdgeID, PointID vertex) pair is created in mEdgeToVertex
+    //    EdgeID is a unique integer ID of box edge
+    if(edgeCode &    1) addEdgeVertex(ix,iy,iz,cID, 0, vals);
+    if(edgeCode &    2) addEdgeVertex(ix,iy,iz,cID, 1, vals);
+    if(edgeCode &    4) addEdgeVertex(ix,iy,iz,cID, 2, vals);
+    if(edgeCode &    8) addEdgeVertex(ix,iy,iz,cID, 3, vals);
+    if(edgeCode &   16) addEdgeVertex(ix,iy,iz,cID, 4, vals);
+    if(edgeCode &   32) addEdgeVertex(ix,iy,iz,cID, 5, vals);
+    if(edgeCode &   64) addEdgeVertex(ix,iy,iz,cID, 6, vals);
+    if(edgeCode &  128) addEdgeVertex(ix,iy,iz,cID, 7, vals);
+    if(edgeCode &  256) addEdgeVertex(ix,iy,iz,cID, 8, vals);
+    if(edgeCode &  512) addEdgeVertex(ix,iy,iz,cID, 9, vals);
+    if(edgeCode & 1024) addEdgeVertex(ix,iy,iz,cID,10, vals);
+    if(edgeCode & 2048) addEdgeVertex(ix,iy,iz,cID,11, vals);
 
-		// Add up to 5 triangles (15 vertices) representing surface through cell
-		// Each triangle consists of 3 vertex indices stored in mEdgeToVertex
-		for(int i=1; i <= sTriTable[idx][0]; i+=3){
-			// Add 3 edge indices of triangle
-			index(edgeID(cID, sTriTable[idx][i+2]));
-			index(edgeID(cID, sTriTable[idx][i+1]));
-			index(edgeID(cID, sTriTable[idx][i  ]));
-		}
-	}
+    // Add up to 5 triangles (15 vertices) representing surface through cell
+    // Each triangle consists of 3 vertex indices stored in mEdgeToVertex
+    for(int i=1; i <= sTriTable[idx][0]; i+=3){
+      // Add 3 edge indices of triangle
+      index(edgeID(cID, sTriTable[idx][i+2]));
+      index(edgeID(cID, sTriTable[idx][i+1]));
+      index(edgeID(cID, sTriTable[idx][i  ]));
+    }
+  }
 }
 
 
 void Isosurface::addEdgeVertex(int ix, int iy, int iz, int cellID, int edgeNo, const float * vals){
 
-	int eIdx = edgeID(cellID, edgeNo);
+  int eIdx = edgeID(cellID, edgeNo);
 
-	if(inBox()){
-		if(mEdgeToVertexArray[eIdx] < 0){
-			EdgeVertex ev = calcIntersection(ix,iy,iz, edgeNo, vals);
+  if(inBox()){
+    if(mEdgeToVertexArray[eIdx] < 0){
+      EdgeVertex ev = calcIntersection(ix,iy,iz, edgeNo, vals);
 
-			ev.pos[0] = ix;
-			ev.pos[1] = iy;
-			ev.pos[2] = iz;
+      ev.pos[0] = ix;
+      ev.pos[1] = iy;
+      ev.pos[2] = iz;
 
-			int vIdx = Mesh::vertices().size();
-			mEdgeToVertexArray[eIdx] = vIdx;
+      int vIdx = Mesh::vertices().size();
+      mEdgeToVertexArray[eIdx] = vIdx;
 
-			Mesh::vertex(ev.x, ev.y, ev.z);
+      Mesh::vertex(ev.x, ev.y, ev.z);
 
-			(*mVertexAction)(ev, *this);
-		}
-	}
-	else{
-		EdgeToVertex::iterator it = mEdgeToVertex.find(eIdx);
+      (*mVertexAction)(ev, *this);
+    }
+  }
+  else{
+    EdgeToVertex::iterator it = mEdgeToVertex.find(eIdx);
 
-		// If this edge vertex has not been computed yet, then compute it
-		if(mEdgeToVertex.end() == it){
-			EdgeVertex ev = calcIntersection(ix,iy,iz, edgeNo, vals);
+    // If this edge vertex has not been computed yet, then compute it
+    if(mEdgeToVertex.end() == it){
+      EdgeVertex ev = calcIntersection(ix,iy,iz, edgeNo, vals);
 
-			ev.pos[0] = ix;
-			ev.pos[1] = iy;
-			ev.pos[2] = iz;
-	//		ev.idx = cellID/3;
+      ev.pos[0] = ix;
+      ev.pos[1] = iy;
+      ev.pos[2] = iz;
+  //    ev.idx = cellID/3;
 
-			int vIdx = Mesh::vertices().size();
-			mEdgeToVertex[eIdx] = vIdx;
+      int vIdx = Mesh::vertices().size();
+      mEdgeToVertex[eIdx] = vIdx;
 
-			Mesh::vertex(ev.x, ev.y, ev.z);
+      Mesh::vertex(ev.x, ev.y, ev.z);
 
-			(*mVertexAction)(ev, *this);
+      (*mVertexAction)(ev, *this);
 
-	//		if(cols) Mesh::color(cols[ev.i0] + ev.mu * (cols[ev.i1] - cols[ev.i0]));
+  //    if(cols) Mesh::color(cols[ev.i0] + ev.mu * (cols[ev.i1] - cols[ev.i0]));
 
-	//		if(1) Mesh::color(HSV((vIdx % 100)/100., 1,1));
-		}
-	}
+  //    if(1) Mesh::color(HSV((vIdx % 100)/100., 1,1));
+    }
+  }
 };
 
 
 Isosurface::EdgeVertex
 Isosurface::calcIntersection(int ix, int iy, int iz, int edgeNo, const float * vals) const{
 
-	// Positions of cube vertices
-	static const int cubeVertices[8][3] = {
-	/*	0        1        2        3        4        5        6        7 */
-		{0,0,0}, {1,0,0}, {0,1,0}, {1,1,0}, {0,0,1}, {1,0,1}, {0,1,1}, {1,1,1}
-	};
+  // Positions of cube vertices
+  static const int cubeVertices[8][3] = {
+  /*  0        1        2        3        4        5        6        7 */
+    {0,0,0}, {1,0,0}, {0,1,0}, {1,1,0}, {0,0,1}, {1,0,1}, {0,1,1}, {1,1,1}
+  };
 
-	// Store differences between cube vertices for faster interpolation
-	static const float edgeDirections[12][3] = {
-		{0,1,0}, {1,0,0}, {0,-1,0}, {-1,0,0},
-		{0,1,0}, {1,0,0}, {0,-1,0}, {-1,0,0},
-		{0,0,1}, {0,0,1}, {0, 0,1}, { 0,0,1}
-	};
+  // Store differences between cube vertices for faster interpolation
+  static const float edgeDirections[12][3] = {
+    {0,1,0}, {1,0,0}, {0,-1,0}, {-1,0,0},
+    {0,1,0}, {1,0,0}, {0,-1,0}, {-1,0,0},
+    {0,0,1}, {0,0,1}, {0, 0,1}, { 0,0,1}
+  };
 
-	// Edge number to cell corners map
-	static const char edgeCorners[12][2] = {
-		{0,2}, {2,3}, {3,1}, {1,0},
-		{4,6}, {6,7}, {7,5}, {5,4},
-		{0,4}, {2,6}, {3,7}, {1,5}
-	};
+  // Edge number to cell corners map
+  static const char edgeCorners[12][2] = {
+    {0,2}, {2,3}, {3,1}, {1,0},
+    {4,6}, {6,7}, {7,5}, {5,4},
+    {0,4}, {2,6}, {3,7}, {1,5}
+  };
 
-	const char& c0 = edgeCorners[edgeNo][0];
-	const char& c1 = edgeCorners[edgeNo][1];
-	const float& val1 = vals[c0];
-	const float& val2 = vals[c1];
-	const int * e1 = cubeVertices[c0];
-	const float * ed = edgeDirections[edgeNo];
+  const char& c0 = edgeCorners[edgeNo][0];
+  const char& c1 = edgeCorners[edgeNo][1];
+  const float& val1 = vals[c0];
+  const float& val2 = vals[c1];
+  const int * e1 = cubeVertices[c0];
+  const float * ed = edgeDirections[edgeNo];
 
-	// Interpolate between two grid points to produce the point at which
-	// the isosurface intersects an edge.
+  // Interpolate between two grid points to produce the point at which
+  // the isosurface intersects an edge.
 
-	// 'mu' is the fraction along the edge where the vertex lies
-	float mu = float((level() - val1)/(val2 - val1));
+  // 'mu' is the fraction along the edge where the vertex lies
+  float mu = float((level() - val1)/(val2 - val1));
 
-	EdgeVertex r;
-	r.x = (ix + e1[0] + mu*ed[0]) * mL[0];
-	r.y = (iy + e1[1] + mu*ed[1]) * mL[1];
-	r.z = (iz + e1[2] + mu*ed[2]) * mL[2];
+  EdgeVertex r;
+  r.x = (ix + e1[0] + mu*ed[0]) * mL[0];
+  r.y = (iy + e1[1] + mu*ed[1]) * mL[1];
+  r.z = (iz + e1[2] + mu*ed[2]) * mL[2];
 
-//	r.corners[0] = i0;
-//	r.corners[1] = i1;
-	for(int i=0; i<3; ++i){
-		r.corners[0][i] = cubeVertices[c0][i];
-		r.corners[1][i] = cubeVertices[c1][i];
-	}
-	r.mu=mu;
+//  r.corners[0] = i0;
+//  r.corners[1] = i1;
+  for(int i=0; i<3; ++i){
+    r.corners[0][i] = cubeVertices[c0][i];
+    r.corners[1][i] = cubeVertices[c1][i];
+  }
+  r.mu=mu;
 
-	return r;
+  return r;
 }
 
 
 void Isosurface::begin(){
-	mValidSurface = false;
-	reset();
+  mValidSurface = false;
+  reset();
 }
 
 
 void Isosurface::end(){
-	compressTriangles();
-	primitive(Graphics::TRIANGLES); // must be set for proper normal generation
-	if(mComputeNormals) generateNormals(mNormalize);
-	mValidSurface = true;
+  compressTriangles();
+  primitive(Graphics::TRIANGLES); // must be set for proper normal generation
+  if(mComputeNormals) generateNormals(mNormalize);
+  mValidSurface = true;
 }
 
 
 // Compress vertices and triangles so that they can be accessed more efficiently
 void Isosurface::compressTriangles(){
 
-	// Convert edge indices into vertex buffer indices
+  // Convert edge indices into vertex buffer indices
 
-	if(inBox()){
-		for(int i=0; i<indices().size(); ++i){
-			int ei = indices()[i];
-			int vi = mEdgeToVertexArray[ei];
-			indices()[i] = vi;
-		}
-		mEdgeToVertexArray.assign(mEdgeToVertexArray.size(), -1);
-	}
+  if(inBox()){
+    for(int i=0; i<indices().size(); ++i){
+      int ei = indices()[i];
+      int vi = mEdgeToVertexArray[ei];
+      indices()[i] = vi;
+    }
+    mEdgeToVertexArray.assign(mEdgeToVertexArray.size(), -1);
+  }
 
-	// Lookup vertex buffer indices in map
-	// This is slower, but uses less memory
-	else{
-		for(int i=0; i<indices().size(); ++i){
-			int ei = indices()[i];
-			int vi = mEdgeToVertex[ei];
-			indices()[i] = vi;
-		}
-	}
+  // Lookup vertex buffer indices in map
+  // This is slower, but uses less memory
+  else{
+    for(int i=0; i<indices().size(); ++i){
+      int ei = indices()[i];
+      int vi = mEdgeToVertex[ei];
+      indices()[i] = vi;
+    }
+  }
 
-	mEdgeToVertex.clear();
-	mEdgeTriangles.reset();
+  mEdgeToVertex.clear();
+  mEdgeTriangles.reset();
 }
 
 
 Isosurface& Isosurface::cellLengths(double dx, double dy, double dz){
-	mL[0]=dx; mL[1]=dy; mL[2]=dz;
-	return *this;
+  mL[0]=dx; mL[1]=dy; mL[2]=dz;
+  return *this;
 }
 
 
 Isosurface& Isosurface::fieldDims(int nx, int ny, int nz){
-	mNF[0] = nx;
-	mNF[1] = ny;
-	mNF[2] = nz;
+  mNF[0] = nx;
+  mNF[1] = ny;
+  mNF[2] = nz;
 
-	// offsets for edges going in positive directions at each corner
-	static const int ex = 0;
-	static const int ey = 1;
-	static const int ez = 2;
+  // offsets for edges going in positive directions at each corner
+  static const int ex = 0;
+  static const int ey = 1;
+  static const int ez = 2;
 
-	mEdgeIDOffsets[ 3] = ex;
-	mEdgeIDOffsets[ 0] = ey;
-	mEdgeIDOffsets[ 8] = ez;
+  mEdgeIDOffsets[ 3] = ex;
+  mEdgeIDOffsets[ 0] = ey;
+  mEdgeIDOffsets[ 8] = ez;
 
-	mEdgeIDOffsets[ 2] = ey + 3;
-	mEdgeIDOffsets[11] = ez + 3;
+  mEdgeIDOffsets[ 2] = ey + 3;
+  mEdgeIDOffsets[11] = ez + 3;
 
-	mEdgeIDOffsets[ 1] = ex + 3*mNF[0];
-	mEdgeIDOffsets[ 9] = ez + 3*mNF[0];
+  mEdgeIDOffsets[ 1] = ex + 3*mNF[0];
+  mEdgeIDOffsets[ 9] = ez + 3*mNF[0];
 
-	mEdgeIDOffsets[ 7] = ex + 3*mNF[0]*mNF[1];
-	mEdgeIDOffsets[ 4] = ey + 3*mNF[0]*mNF[1];
+  mEdgeIDOffsets[ 7] = ex + 3*mNF[0]*mNF[1];
+  mEdgeIDOffsets[ 4] = ey + 3*mNF[0]*mNF[1];
 
-	mEdgeIDOffsets[10] = ez + 3*(1 + mNF[0]                );
-	mEdgeIDOffsets[ 5] = ex + 3*(    mNF[0] + mNF[0]*mNF[1]);
-	mEdgeIDOffsets[ 6] = ey + 3*(1          + mNF[0]*mNF[1]);
+  mEdgeIDOffsets[10] = ez + 3*(1 + mNF[0]                );
+  mEdgeIDOffsets[ 5] = ex + 3*(    mNF[0] + mNF[0]*mNF[1]);
+  mEdgeIDOffsets[ 6] = ey + 3*(1          + mNF[0]*mNF[1]);
 
-	return *this;
+  return *this;
 }
 
 
 Isosurface& Isosurface::inBox(bool v){
-	mInBox=v;
-	if(inBox()){
-		unsigned numEdges = 3 * (mNF[0]+1) * (mNF[1]+1) * (mNF[2]+1);
-		if(numEdges != mEdgeToVertexArray.size()){
-			mEdgeToVertexArray.resize(numEdges);
-			mEdgeToVertexArray.assign(numEdges, -1);
-		}
-	}
-	return *this;
+  mInBox=v;
+  if(inBox()){
+    unsigned numEdges = 3 * (mNF[0]+1) * (mNF[1]+1) * (mNF[2]+1);
+    if(numEdges != mEdgeToVertexArray.size()){
+      mEdgeToVertexArray.resize(numEdges);
+      mEdgeToVertexArray.assign(numEdges, -1);
+    }
+  }
+  return *this;
 }
 
 
 bool Isosurface::volumeLengths(double& volLengthX, double& volLengthY, double& volLengthZ) const {
-	if(validSurface()){
-		volLengthX = mL[0]*(mNF[0]-1);
-		volLengthY = mL[1]*(mNF[1]-1);
-		volLengthZ = mL[2]*(mNF[2]-1);
-		return true;
-	}
-	return false;
+  if(validSurface()){
+    volLengthX = mL[0]*(mNF[0]-1);
+    volLengthY = mL[1]*(mNF[1]-1);
+    volLengthZ = mL[2]*(mNF[2]-1);
+    return true;
+  }
+  return false;
 }
 
 } // al::
@@ -629,10 +629,10 @@ bool Isosurface::volumeLengths(double& volLengthX, double& volLengthY, double& v
 /*
 
 Edge index:
-22 - 31		cube z coord		[0, 1023]
-12 - 21		cube y coord		[0, 1023]
-02 - 11		cube x coord		[0, 1023]
-00 - 01		cube edge number	[0,    3] -> [x, y, z, *]
+22 - 31    cube z coord    [0, 1023]
+12 - 21    cube y coord    [0, 1023]
+02 - 11    cube x coord    [0, 1023]
+00 - 01    cube edge number  [0,    3] -> [x, y, z, *]
 
 edgeIdx = edgeNo | (ix << 2) | (iy << 12) | (iz << 22);
 
@@ -653,32 +653,32 @@ Biggest hit is lookup into the edge-to-vertex map.
 
 Speed improvements:
 
-	1. Use an array rather than map for storing edge vertices.
-		Q. How will edges be assigned to array indices?
-		A. Edge IDs must be range reduced. We must know the position
-			of the isosurface before doing marching cubes. Field indices must
-			lie in range (0,0,0) to (N1, N2, N3).
+  1. Use an array rather than map for storing edge vertices.
+    Q. How will edges be assigned to array indices?
+    A. Edge IDs must be range reduced. We must know the position
+      of the isosurface before doing marching cubes. Field indices must
+      lie in range (0,0,0) to (N1, N2, N3).
 
-12.9%	12.9%	isosurface	al::Isosurface<float>::addCell(float const*, int const*)
-12.7%	12.7%	isosurface	std::tr1::hashtable<int, std::pair<int const, al::Isosurface<float>::PointID>, std::allocator<std::pair<int const, al::Isosurface<float>::PointID> >, Internal::extract1st<std::pair<int const, al::Isosurface<float>::PointID> >, std::equal_to<int>, al::Isosurface<float>::IsosurfaceHashInt, Internal::mod_range_hashing, Internal::default_ranged_hash, Internal::prime_rehash_policy, false, true, true>::insert(std::pair<int const, al::Isosurface<float>::PointID> const&, std::tr1::integral_constant<bool, true>)
-0.0%	9.9%	isosurface		al::Isosurface<float>::compressTriangles()
-0.0%	2.6%	isosurface		al::Isosurface<float>::addEdgeVertex(int, int, int, int, int, float const*)
-0.0%	0.1%	isosurface		al::Isosurface<float>::generate(float const*, int, int, int, float, float, float)
-9.0%	9.0%	isosurface	al::Isosurface<float>::compressTriangles()
-7.8%	7.8%	libSystem.B.dylib	szone_free
-7.5%	7.5%	isosurface	al::Mesh::generateNormals(float)
-7.1%	7.1%	isosurface	al::Isosurface<float>::generate(float const*, int, int, int, float, float, float)
-6.4%	6.4%	isosurface	std::tr1::hashtable<int, std::pair<int const, al::Isosurface<float>::PointID>, std::allocator<std::pair<int const, al::Isosurface<float>::PointID> >, Internal::extract1st<std::pair<int const, al::Isosurface<float>::PointID> >, std::equal_to<int>, al::Isosurface<float>::IsosurfaceHashInt, Internal::mod_range_hashing, Internal::default_ranged_hash, Internal::prime_rehash_policy, false, true, true>::find(int const&)
-0.0%	6.3%	isosurface		al::Isosurface<float>::addEdgeVertex(int, int, int, int, int, float const*)
-0.0%	0.2%	isosurface		al::Isosurface<float>::addCell(float const*, int const*)
-3.7%	3.7%	libSystem.B.dylib	tiny_malloc_from_free_list
-3.2%	3.2%	isosurface	al::Isosurface<float>::calcIntersection(int, int, int, int, float const*) const
-3.2%	3.2%	isosurface	al::Isosurface<float>::addEdgeVertex(int, int, int, int, int, float const*)
+12.9%  12.9%  isosurface  al::Isosurface<float>::addCell(float const*, int const*)
+12.7%  12.7%  isosurface  std::tr1::hashtable<int, std::pair<int const, al::Isosurface<float>::PointID>, std::allocator<std::pair<int const, al::Isosurface<float>::PointID> >, Internal::extract1st<std::pair<int const, al::Isosurface<float>::PointID> >, std::equal_to<int>, al::Isosurface<float>::IsosurfaceHashInt, Internal::mod_range_hashing, Internal::default_ranged_hash, Internal::prime_rehash_policy, false, true, true>::insert(std::pair<int const, al::Isosurface<float>::PointID> const&, std::tr1::integral_constant<bool, true>)
+0.0%  9.9%  isosurface    al::Isosurface<float>::compressTriangles()
+0.0%  2.6%  isosurface    al::Isosurface<float>::addEdgeVertex(int, int, int, int, int, float const*)
+0.0%  0.1%  isosurface    al::Isosurface<float>::generate(float const*, int, int, int, float, float, float)
+9.0%  9.0%  isosurface  al::Isosurface<float>::compressTriangles()
+7.8%  7.8%  libSystem.B.dylib  szone_free
+7.5%  7.5%  isosurface  al::Mesh::generateNormals(float)
+7.1%  7.1%  isosurface  al::Isosurface<float>::generate(float const*, int, int, int, float, float, float)
+6.4%  6.4%  isosurface  std::tr1::hashtable<int, std::pair<int const, al::Isosurface<float>::PointID>, std::allocator<std::pair<int const, al::Isosurface<float>::PointID> >, Internal::extract1st<std::pair<int const, al::Isosurface<float>::PointID> >, std::equal_to<int>, al::Isosurface<float>::IsosurfaceHashInt, Internal::mod_range_hashing, Internal::default_ranged_hash, Internal::prime_rehash_policy, false, true, true>::find(int const&)
+0.0%  6.3%  isosurface    al::Isosurface<float>::addEdgeVertex(int, int, int, int, int, float const*)
+0.0%  0.2%  isosurface    al::Isosurface<float>::addCell(float const*, int const*)
+3.7%  3.7%  libSystem.B.dylib  tiny_malloc_from_free_list
+3.2%  3.2%  isosurface  al::Isosurface<float>::calcIntersection(int, int, int, int, float const*) const
+3.2%  3.2%  isosurface  al::Isosurface<float>::addEdgeVertex(int, int, int, int, int, float const*)
 
 
 struct CellVertex{
-	float value;
-	Color color;
-	Index index;
+  float value;
+  Color color;
+  Index index;
 };
 */

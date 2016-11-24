@@ -16,13 +16,13 @@
 namespace al {
 
 std::string frameworkResourcePath() {
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+  NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
-	NSBundle * alloFramework = [NSBundle bundleForClass:[AlloOSInfo class]];
-	std::string str = [[alloFramework resourcePath] UTF8String];
+  NSBundle * alloFramework = [NSBundle bundleForClass:[AlloOSInfo class]];
+  std::string str = [[alloFramework resourcePath] UTF8String];
 
-	[pool release];
-	return str;
+  [pool release];
+  return str;
 }
 
 } // al::

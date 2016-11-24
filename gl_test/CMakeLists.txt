@@ -3,14 +3,14 @@ project(proj_al_test)
 
 # CHECK PLATFORM ###########################################
 if (APPLE)
-	set(MACOS 1)
-	message("MACOS")
+  set(MACOS 1)
+  message("MACOS")
 elseif (UNIX)
-	set(LINUX 1)
-	message("LINUX")
+  set(LINUX 1)
+  message("LINUX")
 else ()
-	set(WINDOWS 1)
-	message("WINDOWS")
+  set(WINDOWS 1)
+  message("WINDOWS")
 endif (APPLE)
 
 # SETTINGS #################################################
@@ -21,9 +21,9 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-unused")
 find_package(OpenGL REQUIRED)
 if (WINDOWS)
 else ()
-	find_package(GLEW REQUIRED)
-	find_package(PkgConfig REQUIRED)
-	pkg_search_module(GLFW REQUIRED glfw3)
+  find_package(GLEW REQUIRED)
+  find_package(PkgConfig REQUIRED)
+  pkg_search_module(GLFW REQUIRED glfw3)
 endif (WINDOWS)
 
 # INCLUDE DIRECTORIES ######################################

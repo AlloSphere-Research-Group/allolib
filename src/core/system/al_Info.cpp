@@ -40,7 +40,7 @@ int numProcessors(){
 
 #ifndef AL_OSX
 std::string frameworkResourcePath() {
-	return "/";
+  return "/";
 }
 #endif
 

@@ -12,27 +12,27 @@ typedef std::map<std::string, Watchers> WatchersMap;
 static WatchersMap gWatchers;
 
 void Watcher::watch(std::string name) {
-	Watchers& w = gWatchers[name];
-	w.insert(this);
+  Watchers& w = gWatchers[name];
+  w.insert(this);
 }
 
 void Watcher::unwatch(std::string name) {
-	Watchers& w = gWatchers[name];
-	w.erase(this);
+  Watchers& w = gWatchers[name];
+  w.erase(this);
 }
 
 void Watcher::unwatch() {
-	for (WatchersMap::iterator it=gWatchers.begin(); it!=gWatchers.end(); it++) {
-		unwatch(it->first);
-	}
+  for (WatchersMap::iterator it=gWatchers.begin(); it!=gWatchers.end(); it++) {
+    unwatch(it->first);
+  }
 }
 
 void Watcher::notify(std::string name, std::string event) {
-	Watchers& w = gWatchers[name];
-	for (Watchers::iterator it=w.begin(); it!=w.end(); it++) {
-		Watcher * rw = *it;
-		rw->onEvent(name, event);
-	}
+  Watchers& w = gWatchers[name];
+  for (Watchers::iterator it=w.begin(); it!=w.end(); it++) {
+    Watcher * rw = *it;
+    rw->onEvent(name, event);
+  }
 }
 
 

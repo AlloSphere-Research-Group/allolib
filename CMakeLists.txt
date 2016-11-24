@@ -126,12 +126,15 @@ set(graphics_sources
 
 # AlloSphere
 
-# utils
+# ui
+
+# util
 
 list(APPEND headers
   ${core_headers}
   ${graphics_headers}
 )
+
 list(APPEND sources
   ${core_sources}
   ${graphics_sources}
