@@ -6,6 +6,10 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(MACOS 1)
   message("MACOS")
   add_definitions(-DAL_OSX)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(LINUX 1)
+  message("LINUX")
+  add_definitions(-DAL_LINUX)
 elseif (WIN32)
   set(WINDOWS 1)
   message("WINDOWS")
@@ -15,25 +19,12 @@ elseif (CYGWIN)
   message("WINDWOS_CYGWIN")
   # later change to AL_WINDOWS_CYGWIN?
   add_definitions(-DAL_WINDOWS)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(LINUX 1)
-  message("LINUX")
-  add_definitions(-DAL_LINUX)
 else ()
 endif ()
 
-# original allosystem version
-# if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-#   add_definitions(-DAL_OSX)
-# elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-#   add_definitions(-DAL_LINUX)
-# elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-#   add_definitions(-DAL_WINDOWS)
-# endif()
-
 set(CMAKE_BUILD_TYPE Debug)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-unused")
+set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
 
 # build core
 find_package(OpenGL REQUIRED)
@@ -42,7 +33,6 @@ find_package(GLEW REQUIRED)
 set(core_headers
   include/al/core/gl/al_BufferObject.hpp
   include/al/core/gl/al_CubeMapFBO.hpp
-  include/al/core/gl/al_DisplayList.hpp
   include/al/core/gl/al_EasyFBO.hpp
   include/al/core/gl/al_FBO.hpp
   include/al/core/gl/al_FrameBufferGL.hpp
@@ -54,7 +44,6 @@ set(core_headers
   include/al/core/gl/al_OpenGL.hpp
   include/al/core/gl/al_Shader.hpp
   include/al/core/gl/al_Shapes.hpp
-  include/al/core/gl/al_Slab.hpp
   include/al/core/gl/al_Stereographic.hpp
   include/al/core/gl/al_Texture.hpp
   include/al/core/gl/al_TextureGL.hpp
@@ -81,7 +70,6 @@ set(core_headers
   include/al/core/system/al_Config.h
   include/al/core/system/al_Info.hpp
   include/al/core/system/al_Printing.hpp
-  include/al/core/system/al_Time.h
   include/al/core/system/al_Time.hpp
   include/al/core/system/al_Watcher.hpp
   include/al/core/system/pstdint.h

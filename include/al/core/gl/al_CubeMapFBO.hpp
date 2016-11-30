@@ -44,7 +44,6 @@
 
 #include "al/core/gl/al_Graphics.hpp"
 #include "al/core/gl/al_Lens.hpp"
-#include "al/core/gl/al_DisplayList.hpp"
 #include "al/core/gl/al_TextureGL.hpp"
 
 #include <stdio.h>

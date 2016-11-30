@@ -1,195 +1,66 @@
 #include <sstream> // ostringstream
 #include <iomanip> // std::setw
+#include <thread>
+#include <chrono>
 #include "al/core/math/al_Constants.hpp"
 #include "al/core/system/al_Time.hpp"
 
-/* Windows */
-#if defined(AL_WINDOWS)
-#include <windows.h>
-/*
-Info on Windows timing:
-http://windowstimestamp.com/description
-*/
-/*
-// singleton object to force init/quit of timing
-static struct TimeSingleton{
-  TimeSingleton(){ timeBeginPeriod(1); }
-  ~TimeSingleton(){ timeEndPeriod(1); }
-} timeSingleton;
-
-// interface to Windows API
-static DWORD time_ms(){ return timeGetTime(); }
-static void sleep_ms(unsigned long long ms){ Sleep(DWORD(ms)); }
-
-// allocore definitions
-al_sec al_time(){        return time_ms() * 1e-3; }
-al_nsec al_time_nsec(){      return al_nsec(time_ms()) * al_nsec(1e6); }
-void al_sleep(al_sec v){    sleep_ms(v * 1e3); }
-void al_sleep_nsec(al_nsec v){  sleep_ms(v / 1e6); }
-//*/
-
-//*
-static void sleep_ms(unsigned long long ms){ Sleep(DWORD(ms)); }
-
-// Method to supposedly get microsecond sleep
-// From: http://blogs.msdn.com/b/cellfish/archive/2008/09/17/sleep-less-than-one-millisecond.aspx
-/*
-#include <Winsock2.h> // SOCKET
-static int sleep_us(long usec){
-  static bool first = true;
-  if(first){
-    first = false;
-    WORD wVersionRequested = MAKEWORD(1,0);
-    WSADATA wsaData;
-    WSAStartup(wVersionRequested, &wsaData);
-  }
-  struct timeval tv;
-  fd_set dummy;
-  SOCKET s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-  FD_ZERO(&dummy);
-  FD_SET(s, &dummy);
-  tv.tv_sec = usec/1000000L;
-  tv.tv_usec = usec%1000000L;
-  return select(0, 0, 0, &dummy, &tv);
-}*/
-
-// system time as 100-nanosecond interval
-al_nsec system_time_100ns(){
-  SYSTEMTIME st;
-  GetSystemTime(&st);
-  //printf("%d/%d/%d %d:%d:%d\n", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
-  FILETIME time;
-  SystemTimeToFileTime(&st, &time);
-  //GetSystemTimeAsFileTime(&time);
-  ULARGE_INTEGER timeULI = {{time.dwLowDateTime, time.dwHighDateTime}};
-  al_nsec res = timeULI.QuadPart; // in 100-nanosecond intervals
-  res -= al_nsec(116444736000000000); // convert epoch from 1601 to 1970
-  return res;
-}
-
-al_nsec steady_time_us(){
-  // Windows 10 and above
-  //PULONGLONG time;
-  //QueryInterruptTimePrecise(&time);
-
-  LARGE_INTEGER freq; // ticks/second
-  LARGE_INTEGER time; // tick count
-  QueryPerformanceFrequency(&freq);
-  QueryPerformanceCounter(&time);
-  // convert ticks to microseconds
-  time.QuadPart *= 1000000;
-  time.QuadPart /= freq.QuadPart;
-  return al_nsec(time.QuadPart);
-}
-
-al_sec  al_system_time(){    return system_time_100ns() * 1e-7; }
-al_nsec al_system_time_nsec(){  return system_time_100ns() * al_nsec(100); }
-al_sec  al_steady_time(){    return steady_time_us() * 1e-6; }
-al_nsec al_steady_time_nsec(){  return steady_time_us() * al_nsec(1e3); }
-void al_sleep(al_sec v){    sleep_ms(v * 1e3); }
-void al_sleep_nsec(al_nsec v){  sleep_ms(v / 1e6); }
-//void al_sleep(al_sec v){    sleep_us(v * 1e6); }
-//void al_sleep_nsec(al_nsec v){  sleep_us(v / 1e3); }
-//*/
-
-/* Posix (Mac, Linux) */
-#else
-#include <time.h> // nanosleep, clock_gettime
-#include <sys/time.h> // gettimeofday
-#include <unistd.h> // _POSIX_TIMERS
-
-al_sec  al_system_time(){
-  timeval t;
-  gettimeofday(&t, NULL);
-  return al_sec(t.tv_sec) + al_sec(t.tv_usec) * 1e-6;
-}
-
-al_nsec al_system_time_nsec(){
-  timeval t;
-  gettimeofday(&t, NULL);
-  return al_nsec(t.tv_sec) * al_nsec(1e9) + al_nsec(t.tv_usec) * al_nsec(1e3);
-}
-
-#ifdef AL_OSX
-#include <mach/mach_time.h>
-
-// Code from:
-// http://stackoverflow.com/questions/23378063/how-can-i-use-mach-absolute-time-without-overflowing
-
-al_sec al_steady_time(){
-  return al_steady_time_nsec() * 1e-9;
-}
-
-al_nsec al_steady_time_nsec(){
-  uint64_t now = mach_absolute_time();
-  static struct Data {
-    Data(uint64_t bias_) : bias(bias_) {
-      mach_timebase_info(&tb);
-      if (tb.denom > 1024) {
-        double frac = (double)tb.numer/tb.denom;
-        tb.denom = 1024;
-        tb.numer = tb.denom * frac + 0.5;
-      }
+auto t0(bool reset = false) {
+    static auto t = std::chrono::steady_clock::now();
+    if (reset) {
+        t = std::chrono::steady_clock::now();
     }
-    mach_timebase_info_data_t tb;
-    uint64_t bias;
-  } data(now);
-  return (now - data.bias) * data.tb.numer / data.tb.denom;
+    return t;
 }
-
-// Posix timers available?
-#elif _POSIX_TIMERS > 0 && defined(_POSIX_MONOTONIC_CLOCK)
-al_sec al_steady_time(){
-  struct timespec t;
-  clock_gettime(CLOCK_MONOTONIC, &t);
-  return al_sec(t.tv_sec) + al_sec(t.tv_nsec) * 1e-9;
-}
-
-al_nsec al_steady_time_nsec(){
-  struct timespec t;
-  clock_gettime(CLOCK_MONOTONIC, &t);
-  return al_nsec(t.tv_sec) * al_nsec(1e9) + al_nsec(t.tv_nsec);
-}
-
-// Otherwise fallback to system time
-#else
-al_sec  al_steady_time(){
-  return al_system_time();
-}
-
-al_nsec al_steady_time_nsec(){
-  return al_system_time_nsec();
-}
-#endif
-
-
-void al_sleep(al_sec v) {
-  time_t sec = (time_t)v;
-  al_nsec nsec = al_time_s2ns * (v - (al_sec)sec);
-  timespec tspec = { sec, nsec };
-  while (nanosleep(&tspec, &tspec) == -1)
-    continue;
-}
-
-void al_sleep_nsec(al_nsec v) {
-  al_sleep((al_sec)v * al_time_ns2s);
-}
-
-#endif
-/* end platform specific */
-
-
-void al_sleep_until(al_sec target) {
-  al_sec dt = target - al_time();
-  if (dt > 0) al_sleep(dt);
-}
-
-al_sec  al_time(){        return al_system_time(); }
-al_nsec al_time_nsec(){      return al_system_time_nsec(); }
-
-
 
 namespace al {
+
+/// Get current wall time in seconds
+al_sec al_system_time() {
+  return al_system_time_ns() * al_time_ns2s;
+}
+
+al_nsec al_system_time_ns() {
+  return (
+    std::chrono::duration_cast<std::chrono::nanoseconds>(
+      std::chrono::system_clock::now().time_since_epoch()
+    ).count()
+  );
+}
+
+void al_start_steady_clock() {
+  t0();
+}
+
+void al_reset_steady_clock() {
+  t0(true);
+}
+
+al_sec al_steady_time() {
+  return al_steady_time_ns() * al_time_ns2s;
+}
+
+al_nsec al_steady_time_ns() {
+  return (
+    std::chrono::duration_cast<std::chrono::nanoseconds>(
+      std::chrono::steady_clock::now() - t0()
+    ).count()
+  );
+}
+
+/// Sleep for an interval of seconds
+void al_sleep(al_sec dt) {
+  al_sleep_ns(dt * al_time_s2ns);
+}
+
+void al_sleep_ns(al_nsec dt) {
+  std::this_thread::sleep_for(std::chrono::nanoseconds(dt));
+}
+
+void al_sleep_until(al_sec target) {
+  al_sec dt = target - al_system_time();
+  if (dt > 0) al_sleep(dt);
+}
 
 std::string toTimecode(al_nsec t, const std::string& format){
   unsigned day = t/(al_nsec(1000000000) * 60 * 60 * 24); // basically for overflow

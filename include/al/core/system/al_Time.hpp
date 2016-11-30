@@ -41,6 +41,8 @@
   File author(s):
   Graham Wakefield, 2010, grrrwaaa@gmail.com
   Lance Putnam, 2010, putnam.lance@gmail.com
+  
+  Keehong Youn, 2016, younkeehong@gmail.com
 */
 
 /*
@@ -48,20 +50,47 @@
 */
 
 #include <string>
-#include "al/core/system/al_Time.h"
+// #include "al/core/system/al_Config.h"
+#include <limits.h>
+#include <math.h>
 
-namespace al{
+typedef long long int al_nsec;        /**< nanoseconds type (accurate to +/- 292.5 years) */
+typedef double al_sec;            /**< seconds type */
 
-/// Sleep for an interval of seconds
-inline void wait(al_sec dt){ al_sleep(dt); }
+// #define AL_TIME_NSEC_NEVER (ULLONG_MAX)
+
+// #ifdef AL_WINDOWS
+// /**! print format for al_nsec */
+// #define AL_NSEC_FMT "I64d"
+// #else
+// /**! print format for al_nsec */
+// #define AL_NSEC_FMT "lld"
+// #endif
+
+
+/**! conversion factors for nanoseconds/seconds */
+#define al_time_ns2s    1.0e-9
+#define al_time_s2ns    1.0e9
+
+namespace al {
 
 /// Get current wall time in seconds
-inline al_sec walltime(){ return al_time(); }
-inline al_sec timeNow(){ return al_time(); }
+al_sec al_system_time();
+al_nsec al_system_time_ns();
+
+void al_start_steady_clock();
+void al_reset_steady_clock();
+al_sec al_steady_time();
+al_nsec al_steady_time_ns();
+
+/// Sleep for an interval of seconds
+void al_sleep(al_sec dt);
+void al_sleep_ns(al_nsec dt);
+
+void al_sleep_until(al_sec target);
 
 /// Convert nanoseconds to timecode string
 std::string toTimecode(al_nsec t, const std::string& format="D:H:M:S:m:u");
-
 
 /// Timer with stopwatch-like functionality for benchmarking, etc.
 ///
@@ -79,10 +108,10 @@ public:
   al_sec elapsedSec() const { return al_time_ns2s * elapsed(); }
 
   /// Set start time to current time
-  void start(){ mStart=al_steady_time_nsec(); }
+  void start(){ mStart=al_steady_time_ns(); }
 
   /// Set stop time to current time
-  void stop(){ mStop=al_steady_time_nsec(); }
+  void stop(){ mStop=al_steady_time_ns(); }
 
 private:
   al_nsec mStart=0, mStop=0;  // start and stop times
@@ -156,12 +185,12 @@ public:
 
   /// Constructor that defaults to realtime mode
   Clock(bool useRT = true)
-  : mNow(0), mReferenceTime(al_time()), mDT(0.33), mFPS(1./mDT), mFrame(0), bUseRT(useRT)
+  : mNow(0), mReferenceTime(al_system_time()), mDT(0.33), mFPS(1./mDT), mFrame(0), bUseRT(useRT)
   {}
 
   /// Constructor that defaults to a fixed 'frame rate'
   Clock(al_sec dt)
-  : mNow(0), mReferenceTime(al_time()), mDT(dt), mFPS(1./mDT), mFrame(0), bUseRT(false)
+  : mNow(0), mReferenceTime(al_system_time()), mDT(dt), mFPS(1./mDT), mFrame(0), bUseRT(false)
   {}
 
   /// get current clock time
@@ -183,7 +212,7 @@ public:
   /// update the internal clock.
   al_sec update() {
     if (bUseRT) {
-      al_sec t2 = al_time() - mReferenceTime;
+      al_sec t2 = al_system_time() - mReferenceTime;
       mDT = t2 - mNow;
       mNow = t2;
       mFrame++;
@@ -204,7 +233,7 @@ public:
   void useRT() {
     if (!bUseRT) {
       // need to reset reference time:
-      mReferenceTime = al_time() - mNow;
+      mReferenceTime = al_system_time() - mNow;
     }
     bUseRT = true;
   }
@@ -220,8 +249,6 @@ protected:
   unsigned mFrame;
   bool bUseRT;
 };
-
-
 
 } // al::
 

@@ -2,7 +2,6 @@
 
 #include "al/core/gl/al_BufferObject.hpp"
 #include "al/core/gl/al_CubeMapFBO.hpp"
-#include "al/core/gl/al_DisplayList.hpp"
 #include "al/core/gl/al_EasyFBO.hpp"
 #include "al/core/gl/al_FBO.hpp"
 #include "al/core/gl/al_FrameBufferGL.hpp"
@@ -15,7 +14,6 @@
 #include "al/core/gl/al_OpenGL.hpp"
 #include "al/core/gl/al_Shader.hpp"
 #include "al/core/gl/al_Shapes.hpp"
-#include "al/core/gl/al_Slab.hpp"
 #include "al/core/gl/al_Stereographic.hpp"
 #include "al/core/gl/al_Texture.hpp"
 #include "al/core/gl/al_TextureGL.hpp"
