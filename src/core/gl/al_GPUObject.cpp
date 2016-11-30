@@ -1,9 +1,11 @@
 #include "al/core/gl/al_GPUObject.hpp"
 
-#include <map>
-#include <set>
+// #include <map>
+// #include <set>
 
 using namespace al;
+
+/*
 
 typedef std::set<al::GPUObject *>    ResourceSet;  // resource list
 typedef std::map<int, ResourceSet>    ContextMap;    // context ID to resource list
@@ -54,6 +56,8 @@ int GPUContext::defaultContextID(){
   return 1;
 }
 
+*/
+
 /*
 Scenario:
 a. GPUObjects constructed with default context (= 1)
@@ -66,6 +70,8 @@ Problem:
 Do we change context id of GPUObjects to 2 or change Window 2 context id to 1?
 
 */
+
+/*
 
 void GPUContext::makeDefaultContext(){
   const int myID = contextID();
@@ -143,19 +149,24 @@ void GPUContext :: contextDestroy() { //printf("GPUContext::contextDestroy %d\n"
   }
 }
 
+*/
 
+GPUObject::GPUObject()
+: mID(0), mResubmit(false)
+{
+  //
+}
 
+// GPUObject::GPUObject(int ctx)
+// :  mID(0), mResubmit(false)
+// {  contextRegister(ctx); }
 
-GPUObject::GPUObject(int ctx)
-:  mID(0), mResubmit(false)
-{  contextRegister(ctx); }
-
-GPUObject::GPUObject(GPUContext& ctx)
-:  mID(0), mResubmit(false)
-{  contextRegister(ctx.contextID()); }
+// GPUObject::GPUObject(GPUContext& ctx)
+// :  mID(0), mResubmit(false)
+// {  contextRegister(ctx.contextID()); }
 
 GPUObject::~GPUObject(){
-  contextUnregister();
+  /*contextUnregister();*/
 }
 
 void GPUObject::validate(){
@@ -184,30 +195,30 @@ void GPUObject::destroy(){
   mID=0;
 }
 
-void GPUObject :: contextRegister(int ctx) {
-  contextUnregister();
-  ContextMap& contexts = getContextMap();
-  ResourceMap& resources = getResourceMap();
-  contexts[ctx].insert(this);
-  resources[this] = ctx;
-}
+// void GPUObject :: contextRegister(int ctx) {
+//   contextUnregister();
+//   ContextMap& contexts = getContextMap();
+//   ResourceMap& resources = getResourceMap();
+//   contexts[ctx].insert(this);
+//   resources[this] = ctx;
+// }
 
-void GPUObject :: contextUnregister() {
-  ContextMap& contexts = getContextMap();
-  ResourceMap& resources = getResourceMap();
+// void GPUObject :: contextUnregister() {
+//   ContextMap& contexts = getContextMap();
+//   ResourceMap& resources = getResourceMap();
 
-  ResourceMap::iterator rit = resources.find(this);
-  if(rit != resources.end()) {
-    ContextMap::iterator it = contexts.find( rit->second );
-    if(it != contexts.end()) {
-      ResourceSet &ctx_set = it->second;
-      ResourceSet::iterator sit = ctx_set.find(this);
-      if(sit != ctx_set.end()) {
-        ctx_set.erase(sit);
-      }
-    }
-    resources.erase(rit);
-  }
-}
+//   ResourceMap::iterator rit = resources.find(this);
+//   if(rit != resources.end()) {
+//     ContextMap::iterator it = contexts.find( rit->second );
+//     if(it != contexts.end()) {
+//       ResourceSet &ctx_set = it->second;
+//       ResourceSet::iterator sit = ctx_set.find(this);
+//       if(sit != ctx_set.end()) {
+//         ctx_set.erase(sit);
+//       }
+//     }
+//     resources.erase(rit);
+//   }
+// }
 
 

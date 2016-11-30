@@ -43,7 +43,6 @@
 */
 
 #include <vector>
-#include "al/core/gl/al_GPUObject.hpp"
 #include "al/core/gl/al_Graphics.hpp"
 
 namespace al{

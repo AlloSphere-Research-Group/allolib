@@ -68,6 +68,8 @@
 
 namespace al{
 
+/*
+
 /// Context for signaling resource changes to GPU objects
 ///
 /// @ingroup allocore
@@ -92,6 +94,8 @@ protected:
   int mContextID;
 };
 
+*/
+
 
 /// Base class for allocated resources on the GPU
 ///
@@ -100,10 +104,10 @@ class GPUObject{
 public:
 
   /// @param[in] ctx  a GPU context ID to attach to
-  GPUObject(int ctx = GPUContext::defaultContextID());
+  GPUObject(/*int ctx = GPUContext::defaultContextID()*/);
 
   /// @param[in] ctx  a GPU context to attach to
-  GPUObject(GPUContext& ctx);
+  // GPUObject(GPUContext& ctx);
 
   virtual ~GPUObject();
 
@@ -127,7 +131,7 @@ public:
 
   /// This will unregister any existing context registration.
   ///
-  void contextRegister(int ctx);
+  // void contextRegister(int ctx);
 
   /// Ensure that the GPUObject is ready to use
 
@@ -151,7 +155,7 @@ protected:
   virtual void onDestroy() = 0;
 
   // remove from the context:
-  void contextUnregister();
+  // void contextUnregister();
 };
 
 } // ::al
