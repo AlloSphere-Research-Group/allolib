@@ -10,15 +10,17 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(LINUX 1)
   message("LINUX")
   add_definitions(-DAL_LINUX)
-elseif (WIN32)
-  set(WINDOWS 1)
-  message("WINDOWS")
-  add_definitions(-DAL_WINDOWS)
-elseif (CYGWIN)
-  set(WINDOWS_CYGWIN 1)
-  message("WINDWOS_CYGWIN")
-  # later change to AL_WINDOWS_CYGWIN?
-  add_definitions(-DAL_WINDOWS)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  if (CYGWIN)
+    set(WINDOWS_CYGWIN 1)
+    message("WINDWOS_CYGWIN")
+    # later change to AL_WINDOWS_CYGWIN?
+    add_definitions(-DAL_WINDOWS)
+  else () # WIN32
+    set(WINDOWS 1)
+    message("WINDOWS")
+    add_definitions(-DAL_WINDOWS)
+  endif()
 else ()
 endif ()
 
@@ -131,11 +133,11 @@ list(APPEND sources
   ${graphics_sources}
 )
 
-include_directories(include)
-include_directories(${GLEW_INCLUDE_DIRS})
-
 # shared? static?
 add_library(al ${headers} ${sources})
+
+target_include_directories(al PRIVATE include)
+target_include_directories(al PRIVATE ${GLEW_INCLUDE_DIRS})
 
 target_link_libraries(al ${OPENGL_LIBRARY})
 target_link_libraries(al ${GLEW_LIBRARIES})

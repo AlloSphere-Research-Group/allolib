@@ -2,6 +2,7 @@
 #include <iomanip> // std::setw
 #include <thread>
 #include <chrono>
+#include <iostream>
 #include "al/core/math/al_Constants.hpp"
 #include "al/core/system/al_Time.hpp"
 
@@ -54,7 +55,21 @@ void al_sleep(al_sec dt) {
 }
 
 void al_sleep_ns(al_nsec dt) {
-  std::this_thread::sleep_for(std::chrono::nanoseconds(dt));
+  // simple but less accurate
+  // std::this_thread::sleep_for(std::chrono::nanoseconds(dt));
+
+  // much more accurate but might result high CPU cycle
+  auto start = std::chrono::steady_clock::now();
+  auto passed = 0ll;
+  while (passed < dt) {
+      std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+      passed = al_nsec(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+          std::chrono::steady_clock::now() - start
+        ).count()
+      );
+  }
+
 }
 
 void al_sleep_until(al_sec target) {
