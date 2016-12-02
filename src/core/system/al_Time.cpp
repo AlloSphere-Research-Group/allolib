@@ -55,10 +55,21 @@ void al_sleep(al_sec dt) {
 }
 
 void al_sleep_ns(al_nsec dt) {
-  // simple but less accurate
-  // std::this_thread::sleep_for(std::chrono::nanoseconds(dt));
+  std::this_thread::sleep_for(
+    std::chrono::nanoseconds(dt)
+  );
+}
 
-  // much more accurate but might result high CPU cycle
+void al_sleep_until(al_sec target) {
+  al_sec dt = target - al_system_time();
+  if (dt > 0) al_sleep(dt);
+}
+
+void al_sleep_highres(al_sec dt) {
+  al_sleep_ns_highres(dt * al_time_s2ns);
+}
+
+void al_sleep_ns_highres(al_nsec dt) {
   auto start = std::chrono::steady_clock::now();
   auto passed = 0ll;
   while (passed < dt) {
@@ -69,12 +80,11 @@ void al_sleep_ns(al_nsec dt) {
         ).count()
       );
   }
-
 }
 
-void al_sleep_until(al_sec target) {
+void al_sleep_until_highres(al_sec target) {
   al_sec dt = target - al_system_time();
-  if (dt > 0) al_sleep(dt);
+  if (dt > 0) al_sleep_highres(dt);
 }
 
 std::string toTimecode(al_nsec t, const std::string& format){

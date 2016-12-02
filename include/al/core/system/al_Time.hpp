@@ -56,7 +56,6 @@
 
 typedef long long int al_nsec;        /**< nanoseconds type (accurate to +/- 292.5 years) */
 typedef double al_sec;            /**< seconds type */
-
 // #define AL_TIME_NSEC_NEVER (ULLONG_MAX)
 
 // #ifdef AL_WINDOWS
@@ -86,8 +85,13 @@ al_nsec al_steady_time_ns();
 /// Sleep for an interval of seconds
 void al_sleep(al_sec dt);
 void al_sleep_ns(al_nsec dt);
-
 void al_sleep_until(al_sec target);
+
+// more precise but expensive, only use when needed
+void al_sleep_highres(al_sec dt);
+void al_sleep_ns_highres(al_nsec dt);
+void al_sleep_until_highres(al_sec target);
+
 
 /// Convert nanoseconds to timecode string
 std::string toTimecode(al_nsec t, const std::string& format="D:H:M:S:m:u");

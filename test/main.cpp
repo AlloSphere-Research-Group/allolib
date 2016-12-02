@@ -7,13 +7,16 @@ using namespace al;
 int main(int argc, char* argv[]) {
 	auto now = al_system_time();
 	al_sleep(2);
+	// al_sleep_highres(2);
 	auto later = al_system_time();
 	al_start_steady_clock();
 	auto t0 = al_steady_time();
 	al_sleep_until(now + 5);
+	// al_sleep_until_highres(now + 5);
 	auto t1 = al_steady_time();
 	al_reset_steady_clock();
 	al_sleep(2);
+	// al_sleep_highres(2);
 	auto t2 = al_steady_time();
 
 	cout << "start: " << now << "\n";

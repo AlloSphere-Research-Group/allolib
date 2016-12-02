@@ -13,6 +13,5 @@ al_Memory -> smart pointer? not added for now because of APR dependency
 [v] al_Time to use c++ std time classes/functions
 
 follow AlloSystem commit
-al_functions
 al_color
 al_mesh
