@@ -75,21 +75,21 @@ namespace al {
 
 /// Get current wall time in seconds
 al_sec al_system_time();
-al_nsec al_system_time_ns();
+al_nsec al_system_time_nsec();
 
 void al_start_steady_clock();
 void al_reset_steady_clock();
 al_sec al_steady_time();
-al_nsec al_steady_time_ns();
+al_nsec al_steady_time_nsec();
 
 /// Sleep for an interval of seconds
 void al_sleep(al_sec dt);
-void al_sleep_ns(al_nsec dt);
+void al_sleep_nsec(al_nsec dt);
 void al_sleep_until(al_sec target);
 
 // more precise but expensive, only use when needed
 void al_sleep_highres(al_sec dt);
-void al_sleep_ns_highres(al_nsec dt);
+void al_sleep_nsec_highres(al_nsec dt);
 void al_sleep_until_highres(al_sec target);
 
 
@@ -112,13 +112,17 @@ public:
   al_sec elapsedSec() const { return al_time_ns2s * elapsed(); }
 
   /// Set start time to current time
-  void start(){ mStart=al_steady_time_ns(); }
+  void start(){ mStart = getTime(); }
 
   /// Set stop time to current time
-  void stop(){ mStop=al_steady_time_ns(); }
+  void stop(){ mStop = getTime(); }
+
+  /// Print current elapsed time
+  void print() const;
 
 private:
   al_nsec mStart=0, mStop=0;  // start and stop times
+  static al_nsec getTime(){ return al_steady_time_nsec(); }
 };
 
 

@@ -12,8 +12,5 @@ mark fuctions that needs to be commented out temporarily with:
 `/* !LATER! */`
 
 al_Memory -> smart pointer? not added for now because of APR dependency
-[v] al_Time to use c++ std time classes/functions
 
-follow AlloSystem commit
-al_color
-al_mesh
+[v] al_Time to use c++ std time classes/functions

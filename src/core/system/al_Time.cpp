@@ -1,5 +1,6 @@
 #include <sstream> // ostringstream
 #include <iomanip> // std::setw
+#include <stdio.h> // printf
 #include <thread>
 #include <chrono>
 #include <iostream>
@@ -18,10 +19,10 @@ namespace al {
 
 /// Get current wall time in seconds
 al_sec al_system_time() {
-  return al_system_time_ns() * al_time_ns2s;
+  return al_system_time_nsec() * al_time_ns2s;
 }
 
-al_nsec al_system_time_ns() {
+al_nsec al_system_time_nsec() {
   return (
     std::chrono::duration_cast<std::chrono::nanoseconds>(
       std::chrono::system_clock::now().time_since_epoch()
@@ -38,10 +39,10 @@ void al_reset_steady_clock() {
 }
 
 al_sec al_steady_time() {
-  return al_steady_time_ns() * al_time_ns2s;
+  return al_steady_time_nsec() * al_time_ns2s;
 }
 
-al_nsec al_steady_time_ns() {
+al_nsec al_steady_time_nsec() {
   return (
     std::chrono::duration_cast<std::chrono::nanoseconds>(
       std::chrono::steady_clock::now() - t0()
@@ -51,10 +52,10 @@ al_nsec al_steady_time_ns() {
 
 /// Sleep for an interval of seconds
 void al_sleep(al_sec dt) {
-  al_sleep_ns(dt * al_time_s2ns);
+  al_sleep_nsec(dt * al_time_s2ns);
 }
 
-void al_sleep_ns(al_nsec dt) {
+void al_sleep_nsec(al_nsec dt) {
   std::this_thread::sleep_for(
     std::chrono::nanoseconds(dt)
   );
@@ -66,10 +67,10 @@ void al_sleep_until(al_sec target) {
 }
 
 void al_sleep_highres(al_sec dt) {
-  al_sleep_ns_highres(dt * al_time_s2ns);
+  al_sleep_nsec_highres(dt * al_time_s2ns);
 }
 
-void al_sleep_ns_highres(al_nsec dt) {
+void al_sleep_nsec_highres(al_nsec dt) {
   auto start = std::chrono::steady_clock::now();
   auto passed = 0ll;
   while (passed < dt) {
@@ -112,6 +113,13 @@ std::string toTimecode(al_nsec t, const std::string& format){
   }
 
   return s.str();
+}
+
+void Timer::print() const {
+  auto t = getTime();
+  auto dt = t-mStart;
+  double dtSec = al_time_ns2s * dt;
+  printf("%g sec (%g ms) elapsed\n", dtSec, dtSec*1000.);
 }
 
 

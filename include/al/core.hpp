@@ -29,6 +29,7 @@
 #include "al/core/math/al_Matrix4.hpp"
 #include "al/core/math/al_Plane.hpp"
 #include "al/core/math/al_Quat.hpp"
+#include "al/core/math/al_Random.hpp"
 #include "al/core/math/al_Ray.hpp"
 #include "al/core/math/al_Spherical.hpp"
 #include "al/core/math/al_Vec.hpp"
