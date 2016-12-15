@@ -9,3 +9,4 @@ test/Makefile
 *.a
 gl_test/al_gl_test
 test/al_test
+*/al_test

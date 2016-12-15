@@ -31,8 +31,13 @@ set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
 # build core
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_search_module(GLFW REQUIRED glfw3)
 
 set(core_headers
+  include/al/core/base/al_GLEW.hpp
+  include/al/core/base/al_GLFW.hpp
+  include/al/core/base/al_Window.hpp
   include/al/core/gl/al_BufferObject.hpp
   include/al/core/gl/al_CubeMapFBO.hpp
   include/al/core/gl/al_EasyFBO.hpp
@@ -85,6 +90,10 @@ set(core_headers
 )
 
 set(core_sources
+  src/core/base/al_GLEW.cpp
+  src/core/base/al_GLFW.cpp
+  src/core/base/al_Window.cpp
+  src/core/base/al_WindowGLFW.cpp
   src/core/gl/al_BufferObject.cpp
   src/core/gl/al_FBO.cpp
   src/core/gl/al_GPUObject.cpp
@@ -138,7 +147,9 @@ list(APPEND sources
 add_library(al ${headers} ${sources})
 
 target_include_directories(al PRIVATE include)
+target_include_directories(al PRIVATE ${GLFW_INCLUDE_DIRS})
 target_include_directories(al PRIVATE ${GLEW_INCLUDE_DIRS})
 
 target_link_libraries(al ${OPENGL_LIBRARY})
 target_link_libraries(al ${GLEW_LIBRARIES})
+target_link_libraries(al ${GLFW_LIBRARIES})
