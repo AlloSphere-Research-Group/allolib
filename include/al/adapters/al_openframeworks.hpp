@@ -1,3 +1,0 @@
-of::draw(al::mesh) {
-  
-}

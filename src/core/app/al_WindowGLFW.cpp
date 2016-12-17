@@ -1,7 +1,6 @@
-#include "al/core/base/al_Window.hpp"
-// #include "allocore/system/al_Printing.hpp"  // warnings
-#include "al/core/base/al_GLEW.hpp"
-#include "al/core/base/al_GLFW.hpp"
+#include "al/core/app/al_Window.hpp"
+#include "al/core/app/al_GLEW.hpp"
+#include "al/core/app/al_GLFW.hpp"
 
 #include <map>
 #include <iostream>
@@ -300,21 +299,10 @@ public:
   }
 
   void refresh() {
-    // TODO?
-    // const char * err = errorString(true);
-    // if (err[0]) {
-    //   AL_WARN_ONCE(
-    //     "Error after rendering frame in window (id=%d): %s",
-    //     mGLFWwindow,
-    //     err
-    //   );
-    // }
-
     // [!] POLLEVENTS IS AFTER SWAPBUFFERS
     // why: if an event destroys window
     //      swapbuffers will throw error
     //      since mGLFWwindow becomes nullptr
-
     glfwSwapBuffers(mGLFWwindow);
   	glfwPollEvents();
   }

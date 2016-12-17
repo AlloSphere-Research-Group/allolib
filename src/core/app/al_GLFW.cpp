@@ -1,4 +1,4 @@
-#include "al/core/base/al_GLFW.hpp"
+#include "al/core/app/al_GLFW.hpp"
 
 #include <iostream>
 #include <cstdlib> // exit, EXIT_FAILURE

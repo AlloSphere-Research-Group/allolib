@@ -1,5 +1,10 @@
 #pragma once
 
+#include "al/core/app/al_GLEW.hpp"
+#include "al/core/app/al_GLFW.hpp"
+#include "al/core/app/al_Window.hpp"
+#include "al/core/app/al_WindowApp.hpp"
+
 #include "al/core/gl/al_BufferObject.hpp"
 #include "al/core/gl/al_CubeMapFBO.hpp"
 #include "al/core/gl/al_EasyFBO.hpp"
