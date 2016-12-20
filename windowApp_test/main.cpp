@@ -4,18 +4,19 @@
 using namespace al;
 using namespace std;
 
-class MyWindow : public WindowApp {
+class MyApp : public WindowApp {
 public:
   void onCreate() {
-    std::cout << "MyWindow onCreate" << std::endl;
+    std::cout << "MyApp onCreate" << std::endl;
   }
 
   void onDraw() {
     static int i = 0;
-    std::cout << "MyWindow onDraw " << i << std::endl;
     GLfloat const color[] = {1.0f, 0.0f, 0.0f, 1.0f};
     glClearBufferfv(GL_COLOR, 0, color);
-    if (i > 20) {
+    if (i >= 6000) {
+      // run for 600 frames and print average fps when done
+      std::cout << (6000 / sec()) << std::endl;
       quit();
     }
     i += 1;
@@ -28,6 +29,8 @@ public:
 };
 
 int main(int argc, char* argv[]) {
-  MyWindow().start();
+  MyApp app;
+  app.fps(60);
+  app.start();
   return 0;
 }

@@ -11,6 +11,7 @@
 // younkeehong@gmail.com
 
 #include "al/core/app/al_Window.hpp"
+#include "al/core/system/al_Time.hpp"
 #include <atomic>
 
 namespace al {
@@ -19,6 +20,9 @@ class WindowApp : public Window, public WindowEventHandler {
 public:
   StandardWindowKeyControls stdControls;
   std::atomic<bool> should_quit;
+  al_nsec nsec = 0;
+  al_nsec interval = 16666666ll; // 60 fps
+  double _fps = 60;
 
   WindowApp();
   virtual ~WindowApp();
@@ -29,6 +33,12 @@ public:
     Window::DisplayMode mode = Window::DEFAULT_BUF
   );
   void quit();
+
+  void fps(double f);
+  double fps();
+
+  double sec();
+  double msec();
   
   // user override these
   virtual void onCreate() {}

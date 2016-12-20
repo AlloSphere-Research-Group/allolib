@@ -46,7 +46,7 @@
 #include "al/core/spatial/al_HashSpace.hpp"
 #include "al/core/spatial/al_Pose.hpp"
 
-#include "al/core/system/al_Info.hpp"
+// #include "al/core/system/al_Info.hpp"
 #include "al/core/system/al_Printing.hpp"
 #include "al/core/system/al_Time.hpp"
 #include "al/core/system/al_Watcher.hpp"

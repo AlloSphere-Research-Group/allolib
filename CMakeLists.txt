@@ -77,7 +77,7 @@ set(core_headers
   include/al/core/spatial/al_HashSpace.hpp
   include/al/core/spatial/al_Pose.hpp
   include/al/core/system/al_Config.h
-  include/al/core/system/al_Info.hpp
+  # include/al/core/system/al_Info.hpp
   include/al/core/system/al_Printing.hpp
   include/al/core/system/al_Time.hpp
   include/al/core/system/al_Watcher.hpp
@@ -111,8 +111,8 @@ set(core_sources
   src/core/protocol/al_Serialize.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
-  src/core/system/al_Info.cpp
-  src/core/system/al_InfoOSX.mm
+  # src/core/system/al_Info.cpp
+  # src/core/system/al_InfoOSX.mm
   src/core/system/al_Printing.cpp
   src/core/system/al_Time.cpp
   src/core/system/al_Watcher.cpp

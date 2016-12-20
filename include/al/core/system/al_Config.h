@@ -54,27 +54,27 @@
 //   #define AL_LINUX
 // #endif
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
+// #ifndef __STDC_CONSTANT_MACROS
+// #define __STDC_CONSTANT_MACROS
+// #endif
 
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
-#endif
+// #ifndef __STDC_LIMIT_MACROS
+// #define __STDC_LIMIT_MACROS
+// #endif
 
-#define AL_SYSTEM_LIB_VERSION 0.01
+// #define AL_SYSTEM_LIB_VERSION 0.01
 
-#ifdef AL_WINDOWS
+// #ifdef AL_WINDOWS
 
-  #ifdef AL_EXPORTS
-    #define AL_API __declspec(dllexport)
-  #else
-    #define AL_API __declspec(dllimport)
-  #endif
+//   #ifdef AL_EXPORTS
+//     #define AL_API __declspec(dllexport)
+//   #else
+//     #define AL_API __declspec(dllimport)
+//   #endif
 
-#else
-  #define AL_API extern
-#endif
+// #else
+//   #define AL_API extern
+// #endif
 
 /*
   primitive typedefs
@@ -87,7 +87,7 @@
   #define AL_PRINTF_LL "ll"
 #endif
 
-#define AL_STRINGIFY(...) #__VA_ARGS__
+// #define AL_STRINGIFY(...) #__VA_ARGS__
 #define AL_DEBUGLN printf("In %s: line %d\n", __FILE__, __LINE__);
 
 #endif /* INCLUDE_AL_SYSTEM_CONFIG_H */

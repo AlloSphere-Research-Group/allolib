@@ -1,7 +1,6 @@
 #include "al/core/app/al_WindowApp.hpp"
 
-#include <thread>
-#include <chrono>
+#include <algorithm> // max
 
 al::WindowApp::WindowApp() : should_quit(false) {
   append(stdControls);
@@ -16,11 +15,18 @@ void al::WindowApp::start(
 ) {
   create(dim, title, mode);
   onCreate();
+  al_nsec dt = interval;
+  nsec = 0;
+  al_start_steady_clock();
   while (!should_quit && created()) {
-    onAnimate(0);
+    onAnimate(al_time_ns2s * dt);
     onDraw();
     refresh();
-    std::this_thread::sleep_for(chrono::milliseconds(100));
+    al_nsec after_loop = al_steady_time_nsec();
+    al_nsec to_sleep = std::max(interval - (after_loop - nsec), 0ll);
+    al_sleep_nsec(to_sleep);
+    dt = after_loop + to_sleep - nsec;
+    nsec = after_loop + to_sleep;
   }
   onExit();
 }
@@ -28,6 +34,25 @@ void al::WindowApp::start(
 void al::WindowApp::quit() {
   should_quit = true;
 }
+
+void al::WindowApp::fps(double f) {
+  _fps = f;
+  interval = al_time_s2ns / f;
+}
+
+double al::WindowApp::fps() {
+  return _fps;
+}
+
+
+double al::WindowApp::sec() {
+  return nsec * al_time_ns2s;
+}
+
+double al::WindowApp::msec() {
+  return nsec * 1.0e-6;
+}
+
 
 // call user event functions using WindowEventHandler class
 bool al::WindowApp::keyDown(const Keyboard& k) {
