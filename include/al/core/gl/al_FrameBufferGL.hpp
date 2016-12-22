@@ -43,7 +43,7 @@
 */
 
 #include "al/core/gl/al_Graphics.hpp"
-#include "al/core/gl/al_OpenGL.hpp"
+#include "al/core/gl/al_GLEW.hpp"
 
 /*
  Dealing with Framebuffers in OpenGL can be tricky. This object tries to make it easier.

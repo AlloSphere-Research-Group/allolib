@@ -78,7 +78,7 @@ protected:
 /// A shader object represents your source code. You are able to pass your
 /// source code to a shader object and compile the shader object.
 /// @ingroup allocore
-class Shader : public ShaderBase{
+class Shader : public ShaderBase {
 public:
 
   enum Type {
@@ -119,7 +119,7 @@ private:
 /// A program object represents a useable part of render pipeline.
 /// It links one or more shader units into a single program object.
 /// @ingroup allocore
-class ShaderProgram : public ShaderBase{
+class ShaderProgram : public ShaderBase {
 public:
 
   /*!
@@ -167,7 +167,6 @@ public:
   /// Any attached shaders will automatically be detached, but not deleted.
   virtual ~ShaderProgram();
 
-
   /// Attach shader to program
 
   /// The input shader will be compiled if necessary.
@@ -192,7 +191,6 @@ public:
     const std::string& fragSource,
     const std::string& geomSource=""
   );
-
 
   const ShaderProgram& use();
 

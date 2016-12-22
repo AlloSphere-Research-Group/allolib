@@ -1,4 +1,4 @@
-#include "al/core/app/al_GLEW.hpp"
+#include "al/core/gl/al_GLEW.hpp"
 
 #include <iostream>
 #include <cstdlib> // exit, EXIT_FAILURE

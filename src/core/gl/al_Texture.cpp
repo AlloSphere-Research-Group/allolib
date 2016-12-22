@@ -235,8 +235,9 @@ void Texture :: bind(int unit) {
   if(tryBind()){
     AL_GRAPHICS_ERROR("binding texture", id());
 
-    glEnable(target());
-      AL_GRAPHICS_ERROR("enable target binding texture", id());
+    // no glEnable(GL_TEXTURE_2D) in gl 3.3 or higher
+    // glEnable(target());
+      // AL_GRAPHICS_ERROR("enable target binding texture", id());
 
     shapeFromArray();
 
@@ -254,7 +255,7 @@ void Texture :: unbind(int unit) {
   // multitexturing:
   glActiveTexture(GL_TEXTURE0 + unit);
   glBindTexture(target(), 0);
-  glDisable(target());
+  // glDisable(target());
 }
 
 void Texture :: resetArray(unsigned align) {

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <map>
 #include <string>
+#include <iostream>
 
 using std::map;
 using std::string;
@@ -163,9 +164,9 @@ ShaderProgram::~ShaderProgram(){
 
 ShaderProgram& ShaderProgram::attach(Shader& s){
   validate();
-  s.compile();
-  glAttachObjectARB((GLhandleARB)id(), (GLhandleARB)s.id());
-  //glAttachShader(id(), s.id());
+  // s.compile();
+  // glAttachObjectARB((GLhandleARB)id(), (GLhandleARB)s.id());
+  glAttachShader(id(), s.id());
 
   // TODO: check for geometry shader extensions
 //#ifdef GL_EXT_geometry_shader4
@@ -211,34 +212,46 @@ bool ShaderProgram::compile(
   const std::string& fragSource,
   const std::string& geomSource
 ){
+  if(!created()) {
+    create();
+  }
+  else {
+    // recreate
+    destroy();
+    create();
+  }
+
   mVertSource = vertSource;
   mFragSource = fragSource;
   mGeomSource = geomSource;
 
-  if(!created()) return false;
-
   Shader mShaderV, mShaderF, mShaderG;
   mShaderV.source(vertSource, al::Shader::VERTEX);
+  mShaderV.compile();
+  mShaderV.printLog();
   attach(mShaderV);
+
   mShaderF.source(fragSource, al::Shader::FRAGMENT);
+  mShaderF.compile();
+  mShaderF.printLog();
   attach(mShaderF);
-  
+
   bool bGeom = geomSource[0];
   if(bGeom){
     mShaderG.source(geomSource, al::Shader::GEOMETRY);
+    mShaderG.compile();
+    mShaderG.printLog();
     attach(mShaderG);
   }
+
   link(false);
-  mShaderV.printLog();
-  mShaderF.printLog();
-  if(bGeom) mShaderG.printLog();
   printLog();
 
   // OpenGL.org says to detach shaders after linking:
   //   https://www.opengl.org/wiki/Shader_Compilation
   detach(mShaderV);
   detach(mShaderF);
-  if(bGeom) detach(mShaderG);
+  if (bGeom) detach(mShaderG);
 
   return linked();
 }
@@ -249,9 +262,9 @@ void ShaderProgram::onCreate(){
   mID = glCreateProgram();
 
   // Automatically compile any code set with ShaderProgram::compile
-  if(!mVertSource.empty()){
-    compile(mVertSource, mFragSource, mGeomSource);
-  }
+  // if(!mVertSource.empty()){
+    // compile(mVertSource, mFragSource, mGeomSource);
+  // }
 }
 void ShaderProgram::onDestroy(){
   glDeleteProgram(id());

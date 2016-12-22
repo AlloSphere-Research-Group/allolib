@@ -2,6 +2,7 @@
 
 // #include <map>
 // #include <set>
+#include <iostream>
 
 using namespace al;
 
@@ -167,6 +168,7 @@ GPUObject::GPUObject()
 
 GPUObject::~GPUObject(){
   /*contextUnregister();*/
+  destroy();
 }
 
 void GPUObject::validate(){

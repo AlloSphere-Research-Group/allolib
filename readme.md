@@ -14,3 +14,5 @@ mark fuctions that needs to be commented out temporarily with:
 al_Memory -> smart pointer? not added for now because of APR dependency
 
 [v] al_Time to use c++ std time classes/functions
+
+[ ] texture needs some rewrite (GL_TEXTURE0 related)

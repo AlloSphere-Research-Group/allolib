@@ -35,8 +35,6 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 
 set(core_headers
-  include/al/core/app/al_GLEW.hpp
-  include/al/core/app/al_GLFW.hpp
   include/al/core/app/al_Window.hpp
   include/al/core/app/al_WindowApp.hpp
   include/al/core/gl/al_BufferObject.hpp
@@ -44,17 +42,17 @@ set(core_headers
   include/al/core/gl/al_EasyFBO.hpp
   include/al/core/gl/al_FBO.hpp
   include/al/core/gl/al_FrameBufferGL.hpp
+  include/al/core/gl/al_GLEW.hpp
+  include/al/core/gl/al_GLFW.hpp
   include/al/core/gl/al_GPUObject.hpp
   include/al/core/gl/al_Graphics.hpp
   include/al/core/gl/al_Lens.hpp
   include/al/core/gl/al_Light.hpp
   include/al/core/gl/al_Mesh.hpp
-  include/al/core/gl/al_OpenGL.hpp
   include/al/core/gl/al_Shader.hpp
   include/al/core/gl/al_Shapes.hpp
   include/al/core/gl/al_Stereographic.hpp
   include/al/core/gl/al_Texture.hpp
-  include/al/core/gl/al_TextureGL.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
@@ -91,13 +89,13 @@ set(core_headers
 )
 
 set(core_sources
-  src/core/app/al_GLEW.cpp
-  src/core/app/al_GLFW.cpp
   src/core/app/al_Window.cpp
   src/core/app/al_WindowApp.cpp
   src/core/app/al_WindowGLFW.cpp
   src/core/gl/al_BufferObject.cpp
   src/core/gl/al_FBO.cpp
+  src/core/gl/al_GLEW.cpp
+  src/core/gl/al_GLFW.cpp
   src/core/gl/al_GPUObject.cpp
   src/core/gl/al_Graphics.cpp
   src/core/gl/al_Lens.cpp

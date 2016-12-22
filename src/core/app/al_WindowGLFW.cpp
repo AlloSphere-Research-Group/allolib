@@ -1,6 +1,6 @@
 #include "al/core/app/al_Window.hpp"
-#include "al/core/app/al_GLEW.hpp"
-#include "al/core/app/al_GLFW.hpp"
+#include "al/core/gl/al_GLEW.hpp"
+#include "al/core/gl/al_GLFW.hpp"
 
 #include <map>
 #include <iostream>

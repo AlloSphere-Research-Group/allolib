@@ -60,7 +60,7 @@
 ///
 /// @ingroup allocore
 #include "al/core/gl/al_Mesh.hpp"
-#include "al/core/gl/al_OpenGL.hpp"
+#include "al/core/gl/al_GLEW.hpp"
 #include <cstdint>
 
 namespace al{
