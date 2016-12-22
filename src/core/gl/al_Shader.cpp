@@ -212,14 +212,7 @@ bool ShaderProgram::compile(
   const std::string& fragSource,
   const std::string& geomSource
 ){
-  if(!created()) {
-    create();
-  }
-  else {
-    // recreate
-    destroy();
-    create();
-  }
+  create(); // will destroy and recreate if already created
 
   mVertSource = vertSource;
   mFragSource = fragSource;
