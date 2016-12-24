@@ -168,7 +168,6 @@ GPUObject::GPUObject()
 
 GPUObject::~GPUObject(){
   /*contextUnregister();*/
-  destroy();
 }
 
 void GPUObject::validate(){

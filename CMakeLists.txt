@@ -39,7 +39,7 @@ set(core_headers
   include/al/core/app/al_WindowApp.hpp
   include/al/core/gl/al_BufferObject.hpp
   include/al/core/gl/al_CubeMapFBO.hpp
-  include/al/core/gl/al_EasyFBO.hpp
+  # include/al/core/gl/al_EasyFBO.hpp
   include/al/core/gl/al_FBO.hpp
   include/al/core/gl/al_FrameBufferGL.hpp
   include/al/core/gl/al_GLEW.hpp
