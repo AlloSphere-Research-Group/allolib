@@ -55,7 +55,7 @@ class Texture : public GPUObject {
 protected:
   unsigned int mTarget;
   int mInternalFormat;
-  unsigned int mWidth = 1, mHeight = 1, mDepth = 1;
+  unsigned int mWidth, mHeight, mDepth;
   unsigned int mFormat;
   unsigned int mType;
 
@@ -152,25 +152,13 @@ public:
   ///
   Texture& generateMipmap();
 
-  /// Submit the texture to GPU using an Array as source
-
-  /// NOTE: the graphics context (e.g. Window) must have been created.
-  /// If reconfigure is true, it will attempt to derive size & layout from the
-  /// array.
-  void submit(const Array& src, bool reconfigure=false);
-
   /// Copy client pixels to GPU texels
 
   /// NOTE: the graphics context (e.g. Window) must have been created
   /// If pixels is NULL, then the only effect is to resize the texture
   /// remotely.
-  void submit(const void * pixels, uint32_t align=4);
+  void submit(const void * pixels);
 
-  /// Submit the client texture state to GPU
-
-  /// If the client pixels have been allocated, then they will be sent if
-  /// marked dirty. Otherwise, the texture is simply reconfigured on the GPU.
-  void submit();
 
 protected:
   virtual void onCreate() override;

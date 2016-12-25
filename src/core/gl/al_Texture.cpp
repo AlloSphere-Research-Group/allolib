@@ -1,5 +1,6 @@
-#include <stdlib.h>
+// #include <stdlib.h>
 #include "al/core/gl/al_Texture.hpp"
+#include <iostream>
 
 namespace al{
 
@@ -26,6 +27,8 @@ void Texture::create2D(
 
   create();
   bind();
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
   glTexImage2D(
     target(),
     0, // level
@@ -83,6 +86,38 @@ Texture& Texture::wrapR(int v) {
 Texture& Texture::generateMipmap() {
   glGenerateMipmap(target());
   return *this;
+}
+
+void Texture::submit(const void * pixels) {
+  if (!pixels) {
+    return;
+  }
+
+  switch (target()) {
+    case GL_TEXTURE_1D:
+      glTexSubImage1D(
+        target(), 0,
+        0, width(),
+        format(), type(), pixels
+      );
+      break;
+    case GL_TEXTURE_2D:
+      glTexSubImage2D(
+        target(), 0,
+        0, 0, width(), height(),
+        format(), type(), pixels
+      );
+      break;
+    case GL_TEXTURE_3D:
+      glTexSubImage3D(
+        target(), 0,
+        0, 0, 0, width(), height(), depth(),
+        format(), type(), pixels
+      );
+      break;
+    default:
+      AL_WARN("invalid texture target %d", target());
+  }
 }
 
 } // al::
