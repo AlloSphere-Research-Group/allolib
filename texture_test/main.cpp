@@ -58,7 +58,7 @@ public:
     int internal = GL_RGBA8; // GL_RGBA16/32F/16F,
                              // GL_DEPTH_COMPONENT32F/24/16, ...
     int format = GL_RGBA; // GL_RGB, GL_DEPTH_COMPONENT, ...
-    int type = GL_FLOAT; // GL_UNSIGNED_BYTE
+    int type = GL_FLOAT; // GL_UNSIGNED_BYTE (what data type will we give?)
     texture.create2D(w, h, internal, format, type);
 
     array<float, 256 * 256 * 4> arr;
@@ -71,12 +71,9 @@ public:
         arr[4 * idx + 3] = 1.0f;
       }
     }
-
-    texture.bind();
     texture.submit(arr.data());
-    texture.generateMipmap();
-    texture.unbind();
-    
+    texture.mipmap(true); // tuen on only if needed
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
   }

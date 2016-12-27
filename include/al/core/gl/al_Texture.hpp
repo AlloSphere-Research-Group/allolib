@@ -59,11 +59,13 @@ protected:
   unsigned int mFormat;
   unsigned int mType;
 
-  int mWrapS = GL_CLAMP_TO_EDGE;
-  int mWrapT = GL_CLAMP_TO_EDGE;
-  int mWrapR = GL_CLAMP_TO_EDGE;
-  int mFilterMin = GL_LINEAR;
-  int mFilterMag = GL_LINEAR;
+  int mWrapS, mWrapT, mWrapR;
+  int mFilterMin, mFilterMag;
+
+  bool mUseMipmap = false;
+
+  bool mParamsUpdated; // Flags change in texture params (wrap, filter)
+  bool mUseMipmapUpdated;
 
 public:
   Texture();
@@ -122,48 +124,59 @@ public:
   /// Get R wrapping type
   int wrapR() const { return mWrapR; }
 
+  bool mipmap() const { return mUseMipmap; }
+
   /// Set minification and magnification filter types
-  Texture& filter(int v){ return filterMin(v).filterMag(v); }
+  void filter(int v){ filterMin(v); filterMag(v); }
 
   /// Set minification filter type
-  Texture& filterMin(int v);
+  void filterMin(int v);
 
   /// Set magnification filter type
-  Texture& filterMag(int v);
+  void filterMag(int v);
 
   /// Set wrapping mode for all dimensions
-  Texture& wrap(int v){ return wrap(v,v,v); }
+  void wrap(int v){ return wrap(v,v,v); }
 
-  Texture& wrapS(int v);
-  Texture& wrapT(int v);
-  Texture& wrapR(int v);
+  void wrapS(int v);
+  void wrapT(int v);
+  void wrapR(int v);
 
   /// Set 2D wrapping modes
-  Texture& wrap(int S, int T){ return wrapS(S).wrapT(T); }
+  void wrap(int S, int T){ wrapS(S); wrapT(T); }
 
   /// Set 3D wrapping modes
-  Texture& wrap(int S, int T, int R) {
-    return wrapS(S).wrapT(T).wrapR(R);
+  void wrap(int S, int T, int R) {
+    wrapS(S); wrapT(T); wrapR(R);
   };
 
-  /// Generate mipmaps
-
-  /// NOTE: This is only valid when the graphics context is valid.
-  ///
-  Texture& generateMipmap();
+  /// Set whether to generate mipmaps
+  void mipmap(bool b);
 
   /// Copy client pixels to GPU texels
 
   /// NOTE: the graphics context (e.g. Window) must have been created
   /// If pixels is NULL, then the only effect is to resize the texture
   /// remotely.
-  void submit(const void * pixels);
+  /// give unit if wanted a specific binding point to be used
+  /// -1 for unit if don't want to bind internally (manual binding from outside)
+  void submit(const void * pixels, int unit=0);
 
+  // update the changes in params or settings
+  /// give unit if wanted a specific binding point to be used
+  /// -1 for unit if don't want to bind internally (manual binding from outside)
+  void update(bool force=false, int unit=0);
 
 protected:
   virtual void onCreate() override;
   virtual void onDestroy() override;
 
+  // Pattern for setting a variable that when changed sets a notification flag
+  // if v != var, update var and set flag to true
+  template<class T>
+  void update_param(const T& v, T& var, bool& flag){
+    if(v!=var){ var=v; flag=true; }
+  }
 };
 
 } // al::
