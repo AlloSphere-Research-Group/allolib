@@ -27,6 +27,7 @@ void Texture::create2D(
   mFormat = _format;
   mType = _type;
 
+  // AL_GRAPHICS_ERROR("before creating 2D texture", id());
   create();
   bind();
   glTexImage2D(
@@ -37,6 +38,8 @@ void Texture::create2D(
     0, // border
     format(), type(), NULL
   );
+  // AL_GRAPHICS_ERROR("creating 2D texture", id());
+
   wrapS(GL_CLAMP_TO_EDGE);
   wrapT(GL_CLAMP_TO_EDGE);
   wrapR(GL_CLAMP_TO_EDGE);
@@ -57,8 +60,10 @@ void Texture::onDestroy() {
 }
 
 void Texture::bind(int unit) {
+  // AL_GRAPHICS_ERROR("(before Texture::bind)", id());
   glActiveTexture(GL_TEXTURE0 + unit);
   glBindTexture(target(), id());
+  // AL_GRAPHICS_ERROR("binding texture", id());
   // no force update, no internal binding (cuz we already did the binding)
   update(false, -1);
 }
@@ -123,6 +128,8 @@ void Texture::submit(const void * pixels, int unit) {
   if (unit >= 0) {
     bind(unit);
   }
+
+  // AL_GRAPHICS_ERROR("before Texture::submit (glTexSubImage)", id());
   switch (target()) {
     case GL_TEXTURE_1D:
       glTexSubImage1D(
@@ -148,6 +155,7 @@ void Texture::submit(const void * pixels, int unit) {
     default:
       AL_WARN("invalid texture target %d", target());
   }
+  // AL_GRAPHICS_ERROR("Texture::submit (glTexSubImage)", id());
 
   update(true, -1); // force update, no internal binding
   if (unit >= 0) {
