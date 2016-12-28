@@ -10,6 +10,9 @@ class MyApp : public WindowApp {
 public:
   ShaderProgram shader;
   Texture texture;
+  FBO fbo;
+  Texture color;
+  RBO depth;
   GLuint vao;
 
   void onCreate() {
@@ -74,19 +77,38 @@ public:
     texture.submit(arr.data()); // give raw pointer
     texture.mipmap(true); // tuen on only if needed
 
+    color.create2D(128, 128);
+    depth.create(128, 128);
+    fbo.attachTexture2D(color);
+    fbo.attachRBO(depth);
+    printf("fbo status %s\n", fbo.statusString());
+
+    fbo.begin();
+    GLfloat const clear_color[] = {0.0f, 1.0f, 0.0f, 1.0f};
+    glClearBufferfv(GL_COLOR, 0, clear_color);
+    fbo.end();
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
   }
 
   void onDraw() {
     static int i = 0;
-    GLfloat const color[] = {1.0f, 0.0f, 0.0f, 1.0f};
-    glClearBufferfv(GL_COLOR, 0, color);
+    GLfloat const clear_color[] = {1.0f, 0.0f, 0.0f, 1.0f};
+    glClearBufferfv(GL_COLOR, 0, clear_color);
 
     shader.begin();
+
     texture.bind();
+    glViewport(0, 0, width() / 2, height());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     texture.unbind();
+
+    color.bind();
+    glViewport(width() / 2, 0, width() / 2, height());
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    color.unbind();
+
     shader.end();
 
     if (i >= 6000) {

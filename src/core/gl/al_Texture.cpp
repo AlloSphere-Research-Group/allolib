@@ -47,7 +47,7 @@ void Texture::create2D(
   filterMin(GL_LINEAR);
   filterMag(GL_LINEAR);
   mipmap(false);
-  update(true, -1);
+  update(-1, true);
   unbind();
 }
 
@@ -65,7 +65,7 @@ void Texture::bind(int unit) {
   glBindTexture(target(), id());
   // AL_GRAPHICS_ERROR("binding texture", id());
   // no force update, no internal binding (cuz we already did the binding)
-  update(false, -1);
+  update(-1, false);
 }
 
 void Texture::unbind(int unit) {
@@ -157,13 +157,13 @@ void Texture::submit(const void * pixels, int unit) {
   }
   // AL_GRAPHICS_ERROR("Texture::submit (glTexSubImage)", id());
 
-  update(true, -1); // force update, no internal binding
+  update(-1, true); // force update, no internal binding
   if (unit >= 0) {
     unbind(unit);
   }
 }
 
-void Texture::update(bool force, int unit) {
+void Texture::update(int unit, bool force) {
   // (unit == -1) means binding is handled outside this method
   // so don't bind internally
   if (unit >= 0) {

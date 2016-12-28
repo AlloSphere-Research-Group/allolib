@@ -4,7 +4,7 @@
 
 [ ] al_Config.h >> could this now be replaced with std headers? (pstdint.h)and 
 
-[ ] texture needs some rewrite (GL_TEXTURE0 related)
+[ ] client side data for Texture
 
 * mark fuctions that needs to be commented out temporarily with:
 `/* !LATER! */`

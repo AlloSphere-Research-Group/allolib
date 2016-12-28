@@ -61,8 +61,7 @@ protected:
 
   int mWrapS, mWrapT, mWrapR;
   int mFilterMin, mFilterMag;
-
-  bool mUseMipmap = false;
+  bool mUseMipmap;
 
   bool mParamsUpdated; // Flags change in texture params (wrap, filter)
   bool mUseMipmapUpdated;
@@ -165,7 +164,7 @@ public:
   // update the changes in params or settings
   /// give unit if wanted a specific binding point to be used
   /// -1 for unit if don't want to bind internally (manual binding from outside)
-  void update(bool force=false, int unit=0);
+  void update(int unit=0, bool force=false);
 
 protected:
   virtual void onCreate() override;

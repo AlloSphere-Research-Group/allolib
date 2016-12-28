@@ -145,7 +145,7 @@ public:
   void invalidate();
 
 protected:
-  unsigned long mID;
+  unsigned int mID;
   bool mResubmit;
 
   /// Called when currently assigned context is created

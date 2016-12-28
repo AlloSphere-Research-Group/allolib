@@ -47,6 +47,7 @@
 
 namespace al{
 
+class Texture;
 
 /// Render buffer object
 
@@ -54,17 +55,37 @@ namespace al{
 /// image of a renderable internal format, such as color, depth, or stencil.
 ///
 /// @ingroup allocore
+
+/* supported format for renderbuffer
+(not every format can be renderbuffer format)
+GL_RGBA8, GL_RG8, GL_RED8
+GL_RGBA16, GL_RG16, GL_RED16
+
+GL_RGBA16F, GL_RG16F, GL_RED16F
+GL_RGBA32F, GL_RG32F, GL_RED32F
+
+GL_RGBA8I, GL_RG8I, GL_RED8I
+GL_RGBA16I, GL_RG16I, GL_RED16I
+GL_RGBA32I, GL_RG32I, GL_RED32I
+
+GL_RGBA8UI, GL_RG8UI, GL_RED8UI
+GL_RGBA16UI, GL_RG16UI, GL_RED16UI
+GL_RGBA32UI, GL_RG32UI, GL_RED32UI
+
+GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32F
+GL_DEPTH24_STENCIL8, GL_DEPTH32F_STENCIL8
+*/
 class RBO : public GPUObject{
 public:
 
   /// @param[in] format  internal format of buffer
-  RBO(Graphics::Format format = Graphics::DEPTH_COMPONENT);
+  RBO(unsigned int format = GL_DEPTH_COMPONENT16);
 
   /// Get internal pixel format
-  Graphics::Format format() const;
+  unsigned int format() const;
 
   /// Set internal pixel format
-  RBO& format(Graphics::Format v);
+  RBO& format(unsigned int v);
 
   /// Bind object
   void bind();
@@ -79,24 +100,28 @@ public:
   /// \returns whether the resize was successful
   bool resize(unsigned width, unsigned height);
 
+  void create(
+    unsigned int width, unsigned int height,
+    unsigned int format=GL_DEPTH_COMPONENT16
+  ) {
+    mFormat = format;
+    resize(width, height);
+  }
 
   /// Get maximum buffer size
   static unsigned maxSize();
 
   static void bind(unsigned id);
-  static bool resize(Graphics::Format format, unsigned width, unsigned height);
+  static bool resize(
+    unsigned int format,
+    unsigned width, unsigned height
+  );
 
 protected:
-  Graphics::Format mFormat;
+  unsigned int mFormat;
 
   virtual void onCreate();
   virtual void onDestroy();
-
-public:
-  /// \deprecated
-  void begin(){ bind(); }
-  /// \deprecated
-  static void end(){ bind(0); }
 };
 
 
@@ -116,6 +141,14 @@ public:
 /// not an implementation-imposed limitation.
 ///
 /// @ingroup allocore
+
+/*
+  GL_COLOR_ATTACHMENTi
+  GL_DEPTH_ATTACHMENT
+  GL_STENCIL_ATTACHMENT
+  GL_DEPTH_STENCIL_ATTACHMENT
+*/
+
 class FBO : public GPUObject {
 public:
 
@@ -129,22 +162,28 @@ public:
     STENCIL_ATTACHMENT      = GL_STENCIL_ATTACHMENT_EXT
   };
 
-
   /// Attach RBO at specified attachment point
-  FBO& attachRBO(const RBO& rbo, Attachment attach);
+  FBO& attachRBO(
+    const RBO& rbo,
+    unsigned int attachment=GL_DEPTH_ATTACHMENT
+  );
 
   /// Detach RBO at specified attachment point
-  FBO& detachRBO(Attachment attach);
+  FBO& detachRBO(unsigned int attachment);
 
   /// Attach a texture
 
   /// @param[in] texID  texture ID
   /// @param[in] attach  Attachment type
   /// @param[in] level  mipmap level of texture
-  FBO& attachTexture2D(unsigned texID, Attachment attach=COLOR_ATTACHMENT0, int level=0);
+  FBO& attachTexture2D(
+    Texture const& tex,
+    unsigned int attach=GL_COLOR_ATTACHMENT0,
+    int level=0
+  );
 
   /// Detach texture at a specified attachment point and mipmap level
-  FBO& detachTexture2D(Attachment attach, int level=0);
+  FBO& detachTexture2D(unsigned int attachment, int level=0);
 
   /// Bind object (start rendering to attached objects)
   void bind();
@@ -152,24 +191,28 @@ public:
   /// Unbind object
   void unbind();
 
+  void begin() { bind(); }
+  void end() { unbind(); }
+
   /// Get status of frame buffer object
   GLenum status();
   const char * statusString();
   const char * statusString(GLenum stat);
 
   static void bind(unsigned fboID);
-  static void renderBuffer(unsigned rboID, Attachment attach);
-  static void texture2D(unsigned texID, Attachment attach=COLOR_ATTACHMENT0, int level=0);
+  static void renderBuffer(
+    unsigned rboID,
+    unsigned int attachment
+  );
+  static void texture2D(
+    unsigned texID,
+    unsigned int attachment=GL_COLOR_ATTACHMENT0,
+    int level=0
+  );
 
 protected:
   virtual void onCreate();
   virtual void onDestroy();
-
-public:
-  /// \deprecated
-  void begin(){ bind(); }
-  /// \deprecated
-  static void end();
 };
 
 } // al::
