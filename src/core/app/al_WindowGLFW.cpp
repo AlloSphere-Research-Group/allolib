@@ -246,6 +246,7 @@ bool Window::implCreated() const {
 }
 
 void Window::implRefresh() {
+  mImpl->makeCurrent();
   // [!] POLLEVENTS IS AFTER SWAPBUFFERS
   // why: if an event destroys window
   //      swapbuffers will throw error
@@ -262,10 +263,19 @@ void Window::implSetCursor() {
 }
 
 void Window::implSetDimensions() {
-
+  mImpl->makeCurrent();
+  if (!mFullScreen) {
+    glfwSetWindowMonitor(
+    mImpl->mGLFWwindow,
+    NULL,
+    mDim.l, mDim.t, mDim.w, mDim.h,
+    GLFW_DONT_CARE // refreshRate 
+  );
+  }
 }
 
 void Window::implSetFullScreen() {
+  mImpl->makeCurrent();
   GLFWmonitor* primary = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(primary);
   glfwSetWindowMonitor(
@@ -277,6 +287,7 @@ void Window::implSetFullScreen() {
     mFullScreen? mode->height : mDim.h,
     GLFW_DONT_CARE // refreshRate 
   );
+  // onresize callback will update mFullScreenDim
 }
 
 void Window::implSetTitle() {

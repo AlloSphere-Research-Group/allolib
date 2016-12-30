@@ -221,19 +221,27 @@ Window& Window::iconify() {
 
 int Window::height() const {
   if (!mFullScreen) {
-    return mDim.h * highres_factor_h;
+    return mDim.h;
   }
   else {
-    return mFullScreenDim.h  * highres_factor_h;
+    return mFullScreenDim.h;
   }
 }
 int Window::width() const { 
   if (!mFullScreen) {
-    return mDim.w * highres_factor_w;
+    return mDim.w;
   }
   else {
-    return mFullScreenDim.w * highres_factor_w;
+    return mFullScreenDim.w;
   }
+}
+
+int Window::fbHeight() const {
+  return int(mDim.h * highres_factor_h);
+}
+
+int Window::fbWidth() const {
+  return int(mDim.w * highres_factor_w);
 }
 
 Window& Window::insert(WindowEventHandler& v, int i){

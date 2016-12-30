@@ -127,6 +127,7 @@ public:
 
   void onKeyUp(Keyboard const& k) {
     std::cout << "onKeyUp" << char(k.key()) << std::endl;
+    dimensions(Window::Dim(100, 100, 200, 100));
   }
 
 };

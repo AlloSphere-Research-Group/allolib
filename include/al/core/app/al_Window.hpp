@@ -286,8 +286,8 @@ public:
   // get frambuffer size
   // it will be different from window widht and height
   // if the display is a high resolution one (ex: RETINA display)
-  int fbHeight() const { return int(mDim.h * highres_factor_h); };
-  int fbWidth() const { return int(mDim.w * highres_factor_w); };
+  int fbHeight() const;
+  int fbWidth() const;
 
   Window& cursor(Cursor v);      ///< Set cursor type
   Window& cursorHide(bool v);      ///< Set cursor hiding
