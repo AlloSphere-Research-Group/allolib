@@ -1,4 +1,5 @@
 #include "al/core/app/al_WindowApp.hpp"
+#include "al/core/gl/al_GLFW.hpp"
 
 #include <algorithm> // max
 
@@ -13,7 +14,12 @@ void al::WindowApp::start(
   const std::string title,
   Window::DisplayMode mode
 ) {
-  create(dim, title, mode);
+  mDim = dim;
+  mTitle = title;
+  mDisplayMode = mode;
+  al::glfw::init();
+  beforeCreate();
+  create();
   onCreate();
   al_nsec dt = interval;
   nsec = 0;
@@ -29,6 +35,7 @@ void al::WindowApp::start(
     nsec = after_loop + to_sleep;
   }
   onExit();
+  al::glfw::destroy();
 }
 
 void al::WindowApp::quit() {

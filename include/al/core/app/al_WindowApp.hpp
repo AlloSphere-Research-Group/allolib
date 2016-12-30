@@ -28,8 +28,8 @@ public:
   virtual ~WindowApp();
 
   void start(
-    const Window::Dim& dim = Window::Dim(800,600),
-    const std::string title="",
+    const Window::Dim& dim = Window::Dim(900, 450),
+    const std::string title="AlloSystem 2",
     Window::DisplayMode mode = Window::DEFAULT_BUF
   );
   void quit();
@@ -41,6 +41,7 @@ public:
   double msec();
   
   // user override these
+  virtual void beforeCreate() {}
   virtual void onCreate() {}
   virtual void onAnimate(double dt) {}
   virtual void onDraw() {}

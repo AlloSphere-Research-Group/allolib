@@ -15,6 +15,12 @@ public:
   RBO depth;
   GLuint vao;
 
+  void beforeCreate() {
+    GLFWmonitor* primary = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(primary);
+    dimensions(500, 500);
+  }
+
   void onCreate() {
     std::cout << "MyApp onCreate" << std::endl;
 

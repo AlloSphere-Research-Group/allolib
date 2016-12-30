@@ -72,47 +72,27 @@ void WindowEventHandler::removeFromWindow(){
   }
 }
 
-
-Window::Window() :
-  mDim(0, 0, 800, 600), mDisplayMode(DEFAULT_BUF), mCursor(POINTER),
-  mASAP(false), mCursorHide(false), mFullScreen(false),
-  mVisible(false), mVSync(true)
-{
-  implCtor(); // must call first!
-}
-
-Window::~Window() {
-  destroy();
-  implDtor();
-}
-
-bool Window::create(
-  const Dim& dim, const std::string& title, DisplayMode mode
-){
-  if(!created()){
-    mDim = dim;
-    mTitle = title;
-    mDisplayMode = mode;
-    if(implCreate()){
+bool Window::create() {
+  if (!created()) {
+    if (implCreate()) {
       return true;
     }
   }
   return false;
 }
 
+bool Window::created() const {
+  return implCreated();
+}
+
+void Window::refresh() {
+  implRefresh();
+}
+
 void Window::destroy(){
   if(created()){
     implDestroy();
   }
-}
-
-bool Window::asap() const {
-  return mASAP;
-}
-
-Window& Window::asap(bool v){
-  mASAP=v;
-  return *this;
 }
 
 double Window::aspect() const {
@@ -140,7 +120,8 @@ bool Window::cursorHide() const {
 
 Window& Window::cursorHide(bool v){
   mCursorHide = v;
-  if(created()) implSetCursorHide();
+  // TODO
+  // if(created()) implSetCursorHide();
   return *this;
 }
 
@@ -152,6 +133,10 @@ Window& Window::dimensions(const Dim& v){
   mDim = v;
   if(created()) implSetDimensions();
   return *this;
+}
+
+Window& Window::dimensions(int w, int h) {
+  return dimensions(Window::Dim(0, 0, w, h));
 }
 
 Window::DisplayMode Window::displayMode() const {
@@ -168,7 +153,7 @@ Window& Window::displayMode(DisplayMode v){
       const std::string& title_ = title();
 
       destroy();
-      create(dim_, title_, v);
+      create();
       cursor(cursor_);
       cursorHide(cursorHide_);
       fullScreen(fullScreen_);
@@ -223,6 +208,32 @@ Window& Window::vsync(bool v){
 
 bool Window::enabled(DisplayMode v) const {
   return mDisplayMode & v;
+}
+
+Window& Window::hide() {
+  if (created()) implHide();
+  return *this;
+}
+Window& Window::iconify() {
+  if (created()) implIconify();
+  return *this;
+}
+
+int Window::height() const {
+  if (!mFullScreen) {
+    return mDim.h * highres_factor_h;
+  }
+  else {
+    return mFullScreenDim.h  * highres_factor_h;
+  }
+}
+int Window::width() const { 
+  if (!mFullScreen) {
+    return mDim.w * highres_factor_w;
+  }
+  else {
+    return mFullScreenDim.w * highres_factor_w;
+  }
 }
 
 Window& Window::insert(WindowEventHandler& v, int i){

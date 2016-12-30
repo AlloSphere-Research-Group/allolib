@@ -10,3 +10,8 @@
 `/* !LATER! */`
 
 * al_Memory -> smart pointer?
+
+[ ] window::cursorhide could be set by window::cursor(None)
+[ ] multiple key down handling
+
+[ ] window(glfw) error

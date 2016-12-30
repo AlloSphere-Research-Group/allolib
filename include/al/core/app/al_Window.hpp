@@ -49,6 +49,7 @@
 #include <string>
 #include <stdio.h>
 #include <iostream>
+#include <memory>
 
 using namespace std;
 
@@ -253,19 +254,10 @@ public:
   virtual ~Window();
 
   /// Create window and its associated graphics context using current settings
-  /// Create window and its associated graphics context
   /// This will create a new window only if the the window has not already
   /// been created.
   /// \returns whether a valid window is created
-  /// @param[in] dim    Window dimensions in pixels
-  /// @param[in] title  Title of window
-  /// @param[in] fps    Desired frames/second
-  /// @param[in] mode    Display mode bit flags
-  bool create(
-    const Dim& dim = Window::Dim(800,600),
-    const std::string& title="",
-    DisplayMode mode = DEFAULT_BUF
-  );
+  bool create();
 
   // refresh window (swap buffers, poll events, etc.)
   void refresh();
@@ -287,21 +279,21 @@ public:
   const std::string& title() const;  ///< Get title of window
   bool visible() const;        ///< Get whether window is visible
   bool vsync() const;          ///< Get whether v-sync is enabled
-  bool asap() const;          ///< Get whether window is rendering as fast as possible
 
-  int height() const { return mDim.h; } ///< Get window height, in pixels
-  int width() const { return mDim.w; } ///< Get window width, in pixels
+  int height() const; ///< Get window height, in pixels
+  int width() const; ///< Get window width, in pixels
 
   // get frambuffer size
   // it will be different from window widht and height
   // if the display is a high resolution one (ex: RETINA display)
-  int fbHeight() const { return int(mDim.h * HIGHRES_FACTOR_H); };
-  int fbWidth() const { return int(mDim.w * HIGHRES_FACTOR_W); };
+  int fbHeight() const { return int(mDim.h * highres_factor_h); };
+  int fbWidth() const { return int(mDim.w * highres_factor_w); };
 
   Window& cursor(Cursor v);      ///< Set cursor type
   Window& cursorHide(bool v);      ///< Set cursor hiding
   Window& cursorHideToggle();      ///< Toggle cursor hiding
   Window& dimensions(const Dim& v);  ///< Set dimensions
+  Window& dimensions(int w, int h);  ///< Set dimensions
   Window& displayMode(DisplayMode v);  ///< Set display mode; will recreate window if different from current
 
   /// This will make the window go fullscreen without borders and,
@@ -336,36 +328,37 @@ public:
 protected:
   friend class WindowImpl;
 
-  class WindowImpl * mImpl;
+  // class WindowImpl * mImpl;
+  std::unique_ptr<class WindowImpl> mImpl;
   Keyboard mKeyboard;
   Mouse mMouse;
   WindowEventHandlers mWindowEventHandlers;
-  Dim mDim;
-  DisplayMode mDisplayMode;
-  std::string mTitle;
-  Cursor mCursor;
-  bool mASAP;
-  bool mCursorHide;
-  bool mFullScreen;
-  bool mVisible;
-  bool mVSync;
+  Dim mDim {0, 0, 900, 450};
+  Dim mFullScreenDim {0, 0, 900, 450};
+  DisplayMode mDisplayMode = DEFAULT_BUF;
+  std::string mTitle = "";
+  Cursor mCursor = POINTER;
+  bool mCursorHide = false;
+  bool mFullScreen = false;
+  bool mVisible = false;
+  bool mVSync = false;
 
   // for high pixel density monitors (RETINA, etc.)
-  float HIGHRES_FACTOR_H = 1;
-  float HIGHRES_FACTOR_W = 1;
+  float highres_factor_h = 1;
+  float highres_factor_w = 1;
 
   // Must be defined in pimpl-specific file
-  void implCtor();
-  void implDtor();
   bool implCreate();
+  bool implCreated() const;
   void implRefresh();
   void implDestroy();
   void implSetCursor();
-  void implSetCursorHide();
   void implSetDimensions();
   void implSetFullScreen();
   void implSetTitle();
   void implSetVSync();
+  void implHide();
+  void implIconify();
 
   Window& insert(WindowEventHandler& v, int i);
 
