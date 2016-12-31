@@ -288,24 +288,25 @@ public:
   // if the display is a high resolution one (ex: RETINA display)
   int fbHeight() const;
   int fbWidth() const;
+  bool decorated() const;
 
-  Window& cursor(Cursor v);      ///< Set cursor type
-  Window& cursorHide(bool v);      ///< Set cursor hiding
-  Window& cursorHideToggle();      ///< Toggle cursor hiding
-  Window& dimensions(const Dim& v);  ///< Set dimensions
-  Window& dimensions(int w, int h);  ///< Set dimensions
-  Window& displayMode(DisplayMode v);  ///< Set display mode; will recreate window if different from current
+  void cursor(Cursor v);      ///< Set cursor type
+  void cursorHide(bool v);      ///< Set cursor hiding
+  void cursorHideToggle();      ///< Toggle cursor hiding
+  void dimensions(const Dim& v);  ///< Set dimensions
+  void dimensions(int w, int h);  ///< Set dimensions
+  void displayMode(DisplayMode v);  ///< Set display mode; will recreate window if different from current
 
   /// This will make the window go fullscreen without borders and,
   /// if posssible, without changing the display resolution.
-  Window& fullScreen(bool on);
-  Window& fullScreenToggle(); ///< Toggle fullscreen
-  Window& hide(); ///< Hide window (if showing)
-  Window& iconify(); ///< Iconify window
-  Window& show(); ///< Show window (if hidden)
-  Window& title(const std::string& v); ///< Set title
-  Window& vsync(bool v); ///< Set whether to sync the frame rate to the monitor's refresh rate
-  Window& asap(bool v);  ///< Set whether window renders as fast as possible
+  void fullScreen(bool on);
+  void fullScreenToggle(); ///< Toggle fullscreen
+  void hide(); ///< Hide window (if showing)
+  void iconify(); ///< Iconify window
+  void show(); ///< Show window (if hidden)
+  void title(const std::string& v); ///< Set title
+  void vsync(bool v); ///< Set whether to sync the frame rate to the monitor's refresh rate
+  void decorated(bool b);
 
   WindowEventHandlers const& windowEventHandlers() const {
     return mWindowEventHandlers;
@@ -334,7 +335,7 @@ protected:
   Mouse mMouse;
   WindowEventHandlers mWindowEventHandlers;
   Dim mDim {0, 0, 900, 450};
-  Dim mFullScreenDim {0, 0, 900, 450};
+  Dim mFullScreenDim {0};
   DisplayMode mDisplayMode = DEFAULT_BUF;
   std::string mTitle = "";
   Cursor mCursor = POINTER;
@@ -342,6 +343,7 @@ protected:
   bool mFullScreen = false;
   bool mVisible = false;
   bool mVSync = false;
+  bool mDecorated = true;
 
   // for high pixel density monitors (RETINA, etc.)
   float highres_factor_h = 1;
@@ -353,12 +355,14 @@ protected:
   void implRefresh();
   void implDestroy();
   void implSetCursor();
+  void implSetCursorHide();
   void implSetDimensions();
   void implSetFullScreen();
   void implSetTitle();
   void implSetVSync();
   void implHide();
   void implIconify();
+  void implSetDecorated();
 
   Window& insert(WindowEventHandler& v, int i);
 

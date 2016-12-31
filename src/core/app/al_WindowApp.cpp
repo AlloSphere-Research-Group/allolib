@@ -63,7 +63,7 @@ double al::WindowApp::msec() {
 
 // call user event functions using WindowEventHandler class
 bool al::WindowApp::keyDown(const Keyboard& k) {
-  onKeydown(k);
+  onKeyDown(k);
   return true;
 }
 

@@ -3,12 +3,9 @@
 
 namespace al{
 
-Keyboard::Keyboard()
-:  mKeycode(-1), mDown(false)
-{
+Keyboard::Keyboard(): mKeycode(-1), mDown(false) {
   for(int i=0; i<5; ++i) mModifiers[i] = false;
 }
-
 int Keyboard::key() const { return mKeycode; }
 int Keyboard::keyAsNumber() const { return key() - 48; }
 bool Keyboard::down() const { return mDown; }
@@ -25,7 +22,6 @@ void Keyboard::ctrl (bool state){mModifiers[2] = state;}
 void Keyboard::meta (bool state){mModifiers[4] = state;}
 void Keyboard::shift(bool state){mModifiers[0] = state;}
 void Keyboard::setKey(int k, bool v){ mKeycode=k; mDown=v; }
-
 void Keyboard::print() const {
   fprintf(stderr,
     "key=%3d (%c), alt=%i, ctrl=%i, meta=%i, shift=%i, caps=%i\n",
@@ -39,38 +35,32 @@ Mouse::Mouse(): mX(0), mY(0), mDX(0), mDY(0), mButton(LEFT){
     mBX[i] = mBY[i] = 0; mB[i] = false;
   }
 }
-
 int Mouse::x() const { return mX; }
 int Mouse::y() const { return mY; }
 int Mouse::dx() const { return mDX; }
 int Mouse::dy() const { return mDY; }
-
 int Mouse::button() const { return mButton; }
 bool Mouse::down() const { return down(mButton); }
 bool Mouse::down(int button) const { return mB[button]; }
 bool Mouse::left() const { return mB[LEFT]; }
 bool Mouse::middle() const { return mB[MIDDLE]; }
 bool Mouse::right() const { return mB[RIGHT]; }
-
-void Mouse::button(int b, bool v){ mButton=b; mB[b]=v; if(v){ mBX[b]=mX; mBY[b]=mY; } }
-void Mouse::position(int x, int y){ mDX=x-mX; mDY=y-mY; mX=x; mY=y; }
-
-
-WindowEventHandler::WindowEventHandler() :
-  mWindow(NULL)
-{
-  //
+void Mouse::button(int b, bool v){
+  mButton=b; mB[b]=v; if(v){ mBX[b]=mX; mBY[b]=mY; }
+}
+void Mouse::position(int x, int y){
+  mDX=x-mX; mDY=y-mY; mX=x; mY=y;
 }
 
+
+WindowEventHandler::WindowEventHandler(): mWindow(NULL) { }
 WindowEventHandler::~WindowEventHandler() {
   removeFromWindow();
 }
-
 void WindowEventHandler::removeFromWindow(){
-  if(attached()){
-    window().remove(this); // Window::remove calls onResize
-  }
+  if(attached()){ window().remove(this); }
 }
+
 
 bool Window::create() {
   if (!created()) {
@@ -80,62 +70,54 @@ bool Window::create() {
   }
   return false;
 }
-
-bool Window::created() const {
-  return implCreated();
-}
-
-void Window::refresh() {
-  implRefresh();
-}
-
-void Window::destroy(){
-  if(created()){
-    implDestroy();
-  }
-}
-
-double Window::aspect() const {
-  return dimensions().aspect();
-}
-
-Window& Window::cursorHideToggle(){
-  cursorHide(!cursorHide());
-  return *this;
-}
-
-Window::Cursor Window::cursor() const {
-  return mCursor;
-}
-
-Window& Window::cursor(Cursor v){
-  mCursor = v;
-  if(created()) implSetCursor();
-  return *this;
-}
-
-bool Window::cursorHide() const {
-  return mCursorHide;
-}
-
-Window& Window::cursorHide(bool v){
-  mCursorHide = v;
-  // TODO
-  // if(created()) implSetCursorHide();
-  return *this;
-}
+bool Window::created() const {return implCreated(); }
+void Window::refresh() { implRefresh(); }
+void Window::destroy(){ if(created()){ implDestroy(); } }
 
 Window::Dim Window::dimensions() const {
-  return mDim;
+  if (!mFullScreen) { return mDim; }
+  else { return mFullScreenDim; }
+}
+double Window::aspect() const { return dimensions().aspect(); }
+bool Window::cursorHide() const { return mCursorHide; }
+bool Window::fullScreen() const { return mFullScreen; }
+const std::string& Window::title() const { return mTitle; }
+bool Window::visible() const { return mVisible; }
+bool Window::vsync() const { return mVSync; }
+bool Window::enabled(DisplayMode v) const {
+  return mDisplayMode & v;
+}
+int Window::height() const { return dimensions().h; }
+int Window::width() const { return dimensions().w; }
+int Window::fbHeight() const {
+  return int(height() * highres_factor_h);
+}
+int Window::fbWidth() const {
+  return int(width() * highres_factor_w);
+}
+Window::Cursor Window::cursor() const { return mCursor; }
+bool Window::decorated() const { return mDecorated; }
+
+void Window::cursorHideToggle(){
+  cursorHide(!cursorHide());
 }
 
-Window& Window::dimensions(const Dim& v){
+void Window::cursor(Cursor v){
+  mCursor = v;
+  if(created()) implSetCursor();
+}
+
+void Window::cursorHide(bool v){
+  mCursorHide = v;
+  if(created()) implSetCursorHide();
+}
+
+void Window::dimensions(const Dim& v){
   mDim = v;
   if(created()) implSetDimensions();
-  return *this;
 }
 
-Window& Window::dimensions(int w, int h) {
+void Window::dimensions(int w, int h) {
   return dimensions(Window::Dim(0, 0, w, h));
 }
 
@@ -143,7 +125,7 @@ Window::DisplayMode Window::displayMode() const {
   return mDisplayMode;
 }
 
-Window& Window::displayMode(DisplayMode v){
+void Window::displayMode(DisplayMode v){
   if(mDisplayMode != v){
     if(created()){
       const Cursor cursor_ = cursor();
@@ -153,6 +135,8 @@ Window& Window::displayMode(DisplayMode v){
       const std::string& title_ = title();
 
       destroy();
+      dimensions(dim_);
+      title(title_);
       create();
       cursor(cursor_);
       cursorHide(cursorHide_);
@@ -162,86 +146,40 @@ Window& Window::displayMode(DisplayMode v){
       mDisplayMode = v;
     }
   }
-  return *this;
 }
 
-bool Window::fullScreen() const {
-  return mFullScreen;
-}
-
-Window& Window::fullScreen(bool v){
+void Window::fullScreen(bool v){
   if(v != mFullScreen){
     mFullScreen = v;
     if(created()) implSetFullScreen();
   }
-  return *this;
 }
 
-Window& Window::fullScreenToggle(){
+void Window::fullScreenToggle(){
   fullScreen(!fullScreen());
-  return *this;
 }
 
-const std::string& Window::title() const {
-  return mTitle;
-}
-
-Window& Window::title(const std::string& v){
+void Window::title(const std::string& v){
   mTitle = v;
   if(created()) implSetTitle();
-  return *this;
 }
 
-bool Window::visible() const {
-  return mVisible;
-}
-
-bool Window::vsync() const {
-  return mVSync;
-}
-
-Window& Window::vsync(bool v){
+void Window::vsync(bool v){
   mVSync = v;
   if(created()) implSetVSync();
-  return *this;
 }
 
-bool Window::enabled(DisplayMode v) const {
-  return mDisplayMode & v;
-}
-
-Window& Window::hide() {
+void Window::hide() {
   if (created()) implHide();
-  return *this;
 }
-Window& Window::iconify() {
+
+void Window::iconify() {
   if (created()) implIconify();
-  return *this;
 }
 
-int Window::height() const {
-  if (!mFullScreen) {
-    return mDim.h;
-  }
-  else {
-    return mFullScreenDim.h;
-  }
-}
-int Window::width() const { 
-  if (!mFullScreen) {
-    return mDim.w;
-  }
-  else {
-    return mFullScreenDim.w;
-  }
-}
-
-int Window::fbHeight() const {
-  return int(mDim.h * highres_factor_h);
-}
-
-int Window::fbWidth() const {
-  return int(mDim.w * highres_factor_w);
+void Window::decorated(bool b) {
+  mDecorated = b;
+  if (created()) implSetDecorated();
 }
 
 Window& Window::insert(WindowEventHandler& v, int i){

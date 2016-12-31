@@ -46,7 +46,7 @@ public:
   virtual void onAnimate(double dt) {}
   virtual void onDraw() {}
   virtual void onExit() {}
-  virtual void onKeydown(Keyboard const& k) {}
+  virtual void onKeyDown(Keyboard const& k) {}
   virtual void onKeyUp(Keyboard const& k) {}
   virtual void onMouseDown(Mouse const& m) {}
   virtual void onMouseUp(Mouse const& m) {}

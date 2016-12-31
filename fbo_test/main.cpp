@@ -18,7 +18,9 @@ public:
   void beforeCreate() {
     GLFWmonitor* primary = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(primary);
-    dimensions(500, 500);
+    // dimensions(mode->width / 2, mode->height / 2);
+    dimensions(mode->width, mode->height);
+    decorated(false);
   }
 
   void onCreate() {
@@ -100,18 +102,25 @@ public:
 
   void onDraw() {
     static int i = 0;
-    GLfloat const clear_color[] = {1.0f, 0.0f, 0.0f, 1.0f};
-    glClearBufferfv(GL_COLOR, 0, clear_color);
+
+    if (fullScreen()) {
+      GLfloat const clear_color[] = {1.0f, 0.0f, 0.0f, 1.0f};
+      glClearBufferfv(GL_COLOR, 0, clear_color);
+    }
+    else {
+      GLfloat const clear_color[] = {0.0f, 0.0f, 1.0f, 1.0f};
+      glClearBufferfv(GL_COLOR, 0, clear_color); 
+    }
 
     shader.begin();
 
     texture.bind();
-    glViewport(0, 0, width() / 2, height());
+    glViewport(0, 0, fbWidth() / 2, fbHeight());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     texture.unbind();
 
     color.bind();
-    glViewport(width() / 2, 0, width() / 2, height());
+    glViewport(fbWidth() / 2, 0, fbWidth() / 2, fbHeight());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     color.unbind();
 
@@ -125,9 +134,16 @@ public:
     i += 1;
   }
 
-  void onKeyUp(Keyboard const& k) {
-    std::cout << "onKeyUp" << char(k.key()) << std::endl;
+  void onKeyDown(Keyboard const& k) {
+    std::cout << "onKeyDown" << char(k.key()) << std::endl;
     dimensions(Window::Dim(100, 100, 200, 100));
+  }
+
+  void onResize(int w, int h) {
+    cout << "resize:" << endl;
+    cout << w << ", " << h << endl;
+    cout << width() << ", " << height() << endl;
+    cout << dimensions().l << ", " << dimensions().t << endl;
   }
 
 };

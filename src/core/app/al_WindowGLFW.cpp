@@ -143,14 +143,10 @@ public:
   static void cbReshape(GLFWwindow* window, int w, int h) {
     auto* win = getWindow(window);
     if (!win) return;
-
     Window::Dim& dimCurr = win->mFullScreen? win->mFullScreenDim : win->mDim;
-    if (dimCurr.w != w || dimCurr.h != h) {
-      dimCurr.w = w;
-      dimCurr.h = h;
-      win->callHandlersResize(w, h);
-    }
-    
+    dimCurr.w = w;
+    dimCurr.h = h;
+    win->callHandlersResize(w, h);
   }
 
   void registerCBs(){ 
@@ -206,8 +202,9 @@ bool Window::implCreate(){
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_DECORATED, mDecorated? GLFW_TRUE : GLFW_FALSE);
 
   // TODO
   // bits: DOUBLE_BUF STENCIL_BUF etc. ...
@@ -255,39 +252,50 @@ void Window::implRefresh() {
   glfwPollEvents();
 }
 
-void Window::implDestroy(){
+void Window::implDestroy() {
   mImpl->destroy();
 }
 
 void Window::implSetCursor() {
+  
+}
+
+void Window::implSetCursorHide() {
+
 }
 
 void Window::implSetDimensions() {
   mImpl->makeCurrent();
-  if (!mFullScreen) {
-    glfwSetWindowMonitor(
-    mImpl->mGLFWwindow,
-    NULL,
-    mDim.l, mDim.t, mDim.w, mDim.h,
-    GLFW_DONT_CARE // refreshRate 
-  );
+  if (mFullScreen) {
+    fullScreen(false);
+  }
+  else {
+    glfwSetWindowSize(mImpl->mGLFWwindow, mDim.w, mDim.h);
+    glfwSetWindowPos(mImpl->mGLFWwindow, mDim.l, mDim.t);
   }
 }
 
 void Window::implSetFullScreen() {
   mImpl->makeCurrent();
-  GLFWmonitor* primary = glfwGetPrimaryMonitor();
-  const GLFWvidmode* mode = glfwGetVideoMode(primary);
-  glfwSetWindowMonitor(
-    mImpl->mGLFWwindow,
-    mFullScreen? primary : NULL,
-    mFullScreen? 0 : mDim.l,
-    mFullScreen? 0 : mDim.t,
-    mFullScreen? mode->width : mDim.w,
-    mFullScreen? mode->height : mDim.h,
-    GLFW_DONT_CARE // refreshRate 
-  );
-  // onresize callback will update mFullScreenDim
+  if (mFullScreen) {
+    // TODO: selection for multi-monitor
+    GLFWmonitor* primary = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(primary);
+    glfwSetWindowMonitor(
+      mImpl->mGLFWwindow, primary,
+      0, 0, mode->width, mode->height,
+      GLFW_DONT_CARE // refreshRate 
+    );
+    glfwGetWindowSize(mImpl->mGLFWwindow, &mFullScreenDim.w, &mFullScreenDim.h);
+    glfwGetWindowPos(mImpl->mGLFWwindow, &mFullScreenDim.l, &mFullScreenDim.t);
+  }
+  else {
+    glfwSetWindowMonitor(
+      mImpl->mGLFWwindow, NULL,
+      mDim.l, mDim.t, mDim.w, mDim.h,
+      GLFW_DONT_CARE // refreshRate 
+    );
+  }
 }
 
 void Window::implSetTitle() {
@@ -307,6 +315,9 @@ void Window::implIconify() {
 
 }
 
+void Window::implSetDecorated() {
+
+}
 
 void Window::destroyAll(){
   //printf("Window::destroyAll\n");
