@@ -14,4 +14,10 @@
 [ ] window::cursorhide could be set by window::cursor(None)
 [ ] multiple key down handling
 
-[ ] window(glfw) error
+[ ] window(glfw) get_error
+
+priorities:
+- the whole audio code
+- mesh
+- al::Graphics
+- file

@@ -255,7 +255,6 @@ void Graphics::draw(const Mesh& v, int count, int begin){
   }
 
   const int Nc = v.colors().size();
-  const int Nci= v.coloris().size();
   const int Nn = v.normals().size();
   const int Nt1= v.texCoord1s().size();
   const int Nt2= v.texCoord2s().size();
@@ -277,20 +276,13 @@ void Graphics::draw(const Mesh& v, int count, int begin){
     glEnableClientState(GL_COLOR_ARRAY);
     glColorPointer(4, GL_FLOAT, 0, &v.colors()[0]);
   }
-  else if(Nci >= Nv){
-    glEnableClientState(GL_COLOR_ARRAY);
-    glColorPointer(4, GL_UNSIGNED_BYTE, 0, &v.coloris()[0]);
-    //printf("using integer colors\n");
-  }
-  else if(0 == Nc && 0 == Nci){
+  else if(0 == Nc){
     // just use whatever the last glColor() call used!
   }
   else{
     if(Nc)
       //glColor4f(v.colors()[0][0], v.colors()[0][1], v.colors()[0][2], v.colors()[0][3]);
       glColor4fv(v.colors()[0].components);
-    else
-      glColor3ubv(v.coloris()[0].components);
   }
 
   if(Nt1 >= Nv){
@@ -326,7 +318,7 @@ void Graphics::draw(const Mesh& v, int count, int begin){
   // Disable arrays
   glDisableClientState(GL_VERTEX_ARRAY);
   if(Nn)          glDisableClientState(GL_NORMAL_ARRAY);
-  if(Nc || Nci)     glDisableClientState(GL_COLOR_ARRAY);
+  if(Nc)     glDisableClientState(GL_COLOR_ARRAY);
   if(Nt1 || Nt2 || Nt3) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 

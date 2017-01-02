@@ -9,10 +9,6 @@ using namespace std;
 class MyApp : public WindowApp {
 public:
   ShaderProgram shader;
-  Texture texture;
-  FBO fbo;
-  Texture color;
-  RBO depth;
   GLuint vao;
 
   void onCreate() {
@@ -59,12 +55,26 @@ public:
       0, 0.5, 0, 1,
     };
 
+    Mesh mesh = {GL_STATIC_DRAW};
+    mesh.vertex(-0.5, -0.5, 0);
+    mesh.vertex(0.5, -0.5, 0);
+    mesh.vertex(0, 0.5, 0);
+    for (auto const& v : mesh.vertices()) {
+      cout << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << endl;
+    }
+
     GLuint index = 0;
     glEnableVertexAttribArray(index);
     GLuint position_buffer;
     glGenBuffers(1, &position_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, position_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+    glBufferData(
+      GL_ARRAY_BUFFER,
+      sizeof(float) * 4 * mesh.vertices().size(),
+      mesh.vertices().data(),
+      GL_STATIC_DRAW
+    );
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
     glVertexAttribPointer(
       index,
       4, // size
@@ -78,8 +88,6 @@ public:
   }
 
   void onDraw() {
-    static int i = 0;
-
     GLfloat const clear_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
     glClearBufferfv(GL_COLOR, 0, clear_color);
 
@@ -90,11 +98,6 @@ public:
     glBindVertexArray(0);
 
     shader.end();
-
-    if (i >= 600) {
-      quit();
-    }
-    i += 1;
   }
 
 };

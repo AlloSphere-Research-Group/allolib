@@ -46,9 +46,9 @@
 
 #include <stdio.h>
 #include <string>
+#include <vector>
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/math/al_Mat.hpp"
-#include "al/core/types/al_Buffer.hpp"
 #include "al/core/types/al_Color.hpp"
 
 namespace al{
@@ -61,28 +61,24 @@ namespace al{
 class Mesh {
 public:
 
-  typedef Vec3f      Vertex;
+  typedef Vec4f      Vertex;
   typedef Vec3f      Normal;
-  //typedef Vec4f      Color;
   typedef float      TexCoord1;
   typedef Vec2f      TexCoord2;
   typedef Vec3f      TexCoord3;
-  typedef unsigned int  Index;
-  typedef Vec3i      TriFace;
-  typedef Vec4i      QuadFace;
+  typedef unsigned int Index;
 
-  typedef Buffer<Vertex>    Vertices;
-  typedef Buffer<Normal>    Normals;
-  typedef Buffer<Color>    Colors;
-  typedef Buffer<Colori>    Coloris;
-  typedef Buffer<TexCoord1>  TexCoord1s;
-  typedef Buffer<TexCoord2>  TexCoord2s;
-  typedef Buffer<TexCoord3>  TexCoord3s;
-  typedef Buffer<Index>    Indices;
+  typedef std::vector<Vertex> Vertices;
+  typedef std::vector<Normal> Normals;
+  typedef std::vector<Color> Colors;
+  typedef std::vector<TexCoord1> TexCoord1s;
+  typedef std::vector<TexCoord2> TexCoord2s;
+  typedef std::vector<TexCoord3> TexCoord3s;
+  typedef std::vector<Index> Indices;
 
 
   /// @param[in] primitive  renderer-dependent primitive number
-  Mesh(int primitive=0);
+  Mesh(unsigned int primitive=0);
 
   Mesh(const Mesh& cpy);
 
@@ -94,7 +90,7 @@ public:
   void getBounds(Vec3f& min, Vec3f& max) const;
 
   /// Get center of vertices
-  Vertex getCenter() const;
+  Vec3f getCenter() const;
 
 
   // destructive edits to internal vertices:
@@ -206,25 +202,24 @@ public:
   void smooth(float amount=1, int weighting=0);
 
 
-  int primitive() const { return mPrimitive; }
-  const Buffer<Vertex>& vertices() const { return mVertices; }
-  const Buffer<Normal>& normals() const { return mNormals; }
-  const Buffer<Color>& colors() const { return mColors; }
-  const Buffer<Colori>& coloris() const { return mColoris; }
-  const Buffer<TexCoord1>& texCoord1s() const { return mTexCoord1s; }
-  const Buffer<TexCoord2>& texCoord2s() const { return mTexCoord2s; }
-  const Buffer<TexCoord3>& texCoord3s() const { return mTexCoord3s; }
-  const Buffer<Index>& indices() const { return mIndices; }
+  unsigned int primitive() const { return mPrimitive; }
+  const std::vector<Vertex>& vertices() const { return mVertices; }
+  const std::vector<Normal>& normals() const { return mNormals; }
+  const std::vector<Color>& colors() const { return mColors; }
+  const std::vector<TexCoord1>& texCoord1s() const { return mTexCoord1s; }
+  const std::vector<TexCoord2>& texCoord2s() const { return mTexCoord2s; }
+  const std::vector<TexCoord3>& texCoord3s() const { return mTexCoord3s; }
+  const std::vector<Index>& indices() const { return mIndices; }
 
 
   /// Set geometric primitive
-  Mesh& primitive(int prim){ mPrimitive=prim; return *this; }
+  Mesh& primitive(unsigned int prim){ mPrimitive=prim; return *this; }
 
   /// Repeat last vertex element(s)
   Mesh& repeatLast();
 
   /// Append index to index buffer
-  void index(unsigned int i){ indices().append(i); }
+  void index(unsigned int i){ indices().push_back(i); }
 
   /// Append indices to index buffer
   template <class Tindex>
@@ -238,16 +233,13 @@ public:
   }
 
   /// Append color to color buffer
-  void color(const Color& v) { colors().append(v); }
+  void color(const Color& v) { colors().push_back(v); }
 
   /// Append color to color buffer
-  void color(const Colori& v) { coloris().append(v); }
+  void color(const HSV& v) { colors().push_back(v); }
 
   /// Append color to color buffer
-  void color(const HSV& v) { colors().append(v); }
-
-  /// Append color to color buffer
-  void color(const RGB& v) { colors().append(v); }
+  void color(const RGB& v) { colors().push_back(v); }
 
   /// Append color to color buffer
   void color(float r, float g, float b, float a=1){ color(Color(r,g,b,a)); }
@@ -263,23 +255,11 @@ public:
   }
 
 
-  /// Append floating-point color to integer color buffer
-  void colori(const Color& v) { coloris().append(Colori(v)); }
-
-  /// Append integer colors from flat array
-  template <class T>
-  void colori(const T * src, int numColors){
-    for(int i=0; i<numColors; ++i){
-      coloris().append(Colori(src[4*i+0], src[4*i+1], src[4*i+2], src[4*i+3]));
-    }
-  }
-
-
   /// Append normal to normal buffer
   void normal(float x, float y, float z=0){ normal(Normal(x,y,z)); }
 
   /// Append normal to normal buffer
-  void normal(const Normal& v) { normals().append(v); }
+  void normal(const Normal& v) { normals().push_back(v); }
 
   /// Append normal to normal buffer
   template <class T>
@@ -293,17 +273,17 @@ public:
 
 
   /// Append texture coordinate to 1D texture coordinate buffer
-  void texCoord(float u){ texCoord1s().append(TexCoord1(u)); }
+  void texCoord(float u){ texCoord1s().push_back(TexCoord1(u)); }
 
   /// Append texture coordinate to 2D texture coordinate buffer
-  void texCoord(float u, float v){ texCoord2s().append(TexCoord2(u,v)); }
+  void texCoord(float u, float v){ texCoord2s().push_back(TexCoord2(u,v)); }
 
   /// Append texture coordinate to 2D texture coordinate buffer
   template <class T>
   void texCoord(const Vec<2,T>& v){ texCoord(v[0], v[1]); }
 
   /// Append texture coordinate to 3D texture coordinate buffer
-  void texCoord(float u, float v, float w){ texCoord3s().append(TexCoord3(u,v,w)); }
+  void texCoord(float u, float v, float w){ texCoord3s().push_back(TexCoord3(u,v,w)); }
 
   /// Append texture coordinate to 3D texture coordinate buffer
   template <class T>
@@ -311,10 +291,10 @@ public:
 
 
   /// Append vertex to vertex buffer
-  void vertex(float x, float y, float z=0){ vertex(Vertex(x,y,z)); }
+  void vertex(float x, float y, float z=0){ vertex(Vertex(x,y,z, 1.0)); }
 
   /// Append vertex to vertex buffer
-  void vertex(const Vertex& v){ vertices().append(v); }
+  void vertex(const Vertex& v){ vertices().push_back(v); }
 
   /// Append vertex to vertex buffer
   template <class T>
@@ -336,7 +316,6 @@ public:
   Vertices& vertices(){ return mVertices; }
   Normals& normals(){ return mNormals; }
   Colors& colors(){ return mColors; }
-  Coloris& coloris(){ return mColoris; }
   TexCoord1s& texCoord1s(){ return mTexCoord1s; }
   TexCoord2s& texCoord2s(){ return mTexCoord2s; }
   TexCoord3s& texCoord3s(){ return mTexCoord3s; }
@@ -385,33 +364,14 @@ protected:
   Vertices mVertices;
   Normals mNormals;
   Colors mColors;
-  Coloris mColoris;
   TexCoord1s mTexCoord1s;
   TexCoord2s mTexCoord2s;
   TexCoord3s mTexCoord3s;
   Indices mIndices;
 
-  int mPrimitive;
-
-public:
-  /// \deprecated
-  bool exportSTL(const char * filePath, const char * solidName = "") const;
-  /// \deprecated
-  bool exportPLY(const char * filePath, const char * solidName = "") const;
+  unsigned int mPrimitive;
+  unsigned int mUsage;
 };
-
-
-
-
-template <class T>
-Mesh& Mesh::transform(const Mat<4,T>& m, int begin, int end){
-  if(end<0) end += vertices().size()+1; // negative index wraps to end of array
-  for(int i=begin; i<end; ++i){
-    Vertex& v = vertices()[i];
-    v.set(m * Vec<4,T>(v, 1));
-  }
-  return *this;
-}
 
 } // al::
 
