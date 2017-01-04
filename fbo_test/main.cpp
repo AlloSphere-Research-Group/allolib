@@ -16,15 +16,15 @@ public:
   GLuint vao;
 
   void beforeCreate() {
+    std::cout << "MyApp beforeCreate" << std::endl;
     GLFWmonitor* primary = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(primary);
-    // dimensions(mode->width / 2, mode->height / 2);
-    dimensions(mode->width, mode->height);
+    dimensions(mode->width / 2, mode->height / 2);
     decorated(false);
   }
 
   void onCreate() {
-    std::cout << "MyApp onCreate" << std::endl;
+    //std::cout << "MyApp onCreate" << std::endl;
 
     string const vert_source = R"(
       #version 330
@@ -61,23 +61,25 @@ public:
 
     shader.compile(vert_source, frag_source);
     shader.begin();
-    shader.uniform1("tex", 0);
+    auto loc = glGetUniformLocation(shader.id(), "tex");
+    glUniform1f(loc, 0);
+    //shader.uniform1("tex", 0);
     shader.end();
     
-    int w = 256;
-    int h = 256;
+    int w = 16;
+    int h = 16  ;
     int internal = GL_RGBA8; // GL_RGBA16/32F/16F,
                              // GL_DEPTH_COMPONENT32F/24/16, ...
     int format = GL_RGBA; // GL_RGB, GL_DEPTH_COMPONENT, ...
     int type = GL_FLOAT; // GL_UNSIGNED_BYTE (what data type will we give?)
     texture.create2D(w, h, internal, format, type);
 
-    array<float, 256 * 256 * 4> arr;
-    for (int i = 0; i < 256; i++) {
-      for (int j = 0; j < 256; j++) {
-        int idx = i + 256 * j;
-        arr[4 * idx + 0] = i / 255.0f;
-        arr[4 * idx + 1] = j / 255.0f;
+    array<float, 16 * 16 * 4> arr;
+    for (int i = 0; i < 16; i++) {
+      for (int j = 0; j < 16; j++) {
+        int idx = i + 16 * j;
+        arr[4 * idx + 0] = i / 15.0f;
+        arr[4 * idx + 1] = j / 15.0f;
         arr[4 * idx + 2] = 1.0f;
         arr[4 * idx + 3] = 1.0f;
       }

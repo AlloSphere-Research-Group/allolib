@@ -47,7 +47,7 @@
 #include "al/core/system/al_Time.hpp"
 #include "al/core/system/al_Watcher.hpp"
 
-#include "al/core/types/al_Array.hpp"
+// #include "al/core/types/al_Array.hpp"
 #include "al/core/types/al_Buffer.hpp"
 #include "al/core/types/al_Color.hpp"
 #include "al/core/types/al_Conversion.hpp"

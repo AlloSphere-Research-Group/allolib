@@ -42,7 +42,7 @@
   Lance Putnam, 2011, putnam.lance@gmail.com
 */
 
-#include "al/core/system/al_Config.h"
+// #include "al/core/system/al_Config.h"
 
 #include "GL/glew.h"
 #define AL_GRAPHICS_USE_OPENGL

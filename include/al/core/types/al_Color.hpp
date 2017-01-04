@@ -47,7 +47,7 @@
 */
 
 // #include "al/core/system/al_Config.h"
-#include <stdint.h> // uint8_t
+#include <cstdint> // uint8_t
 
 namespace al{
 

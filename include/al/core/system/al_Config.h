@@ -79,11 +79,15 @@
 /*
   primitive typedefs
 */
+
+#include <cstdint>
+
 #ifdef AL_WINDOWS
-  #include <stdint.h>
+  // #include <stdint.h>
+
   #define AL_PRINTF_LL "I64"
 #else
-  #include "al/core/system/pstdint.h"
+  // #include "al/core/system/pstdint.h"
   #define AL_PRINTF_LL "ll"
 #endif
 

@@ -10,3 +10,5 @@ test/Makefile
 gl_test/al_gl_test
 test/al_test
 */al_test
+libs/glfw/
+libs/glew/

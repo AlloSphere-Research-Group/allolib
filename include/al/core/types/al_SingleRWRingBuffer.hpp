@@ -44,7 +44,7 @@
 
 #include <cstring>
 
-#include "al/core/system/pstdint.h"
+#include "al/core/system/al_Config.h"
 
 namespace al {
 

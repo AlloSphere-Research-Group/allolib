@@ -13,7 +13,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   if (CYGWIN)
     set(WINDOWS_CYGWIN 1)
-    message("WINDWOS_CYGWIN")
+    message("WINDOWS_CYGWIN")
     # later change to AL_WINDOWS_CYGWIN?
     add_definitions(-DAL_WINDOWS)
   else () # WIN32
@@ -26,13 +26,26 @@ endif ()
 
 set(CMAKE_BUILD_TYPE Debug)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
+if (WINDOWS)
+  set(CMAKE_CXX_FLAGS "/W1")
+else ()
+  set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
+endif (WINDOWS)
 
-# build core
+
+# core dependencies
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(PkgConfig REQUIRED)
-pkg_search_module(GLFW REQUIRED glfw3)
+if (WINDOWS)
+  # use static libs if windows (for now)
+  set(GLFW_INCLUDE_DIRS libs/glfw/include)
+  set(GLFW_LIBRARIES libs/glfw/lib-vc2015/glfw3.lib)
+  set(GLEW_INCLUDE_DIRS libs/glew/include)
+  set(GLEW_LIBRARIES libs/glew/lib/Release/x64/glew32s.lib)
+else ()
+  find_package(GLEW REQUIRED)
+  find_package(PkgConfig REQUIRED)
+  pkg_search_module(GLFW REQUIRED glfw3)
+endif (WINDOWS)
 
 set(core_headers
   include/al/core/app/al_Window.hpp
@@ -79,9 +92,9 @@ set(core_headers
   include/al/core/system/al_Printing.hpp
   include/al/core/system/al_Time.hpp
   include/al/core/system/al_Watcher.hpp
-  include/al/core/system/pstdint.h
-  include/al/core/types/al_Array.h
-  include/al/core/types/al_Array.hpp
+  # include/al/core/system/pstdint.h
+  # include/al/core/types/al_Array.h
+  # include/al/core/types/al_Array.hpp
   include/al/core/types/al_Buffer.hpp
   include/al/core/types/al_Color.hpp
   include/al/core/types/al_Conversion.hpp
@@ -114,8 +127,8 @@ set(core_sources
   src/core/system/al_Printing.cpp
   src/core/system/al_Time.cpp
   src/core/system/al_Watcher.cpp
-  src/core/types/al_Array.cpp
-  src/core/types/al_Array_C.c
+  # src/core/types/al_Array.cpp
+  # src/core/types/al_Array_C.c
   src/core/types/al_Color.cpp
 )
 
@@ -135,16 +148,16 @@ set(graphics_sources
 
 list(APPEND headers
   ${core_headers}
-  ${graphics_headers}
+  # ${graphics_headers}
 )
 
 list(APPEND sources
   ${core_sources}
-  ${graphics_sources}
+  # ${graphics_sources}
 )
 
-# shared? static?
-add_library(al ${headers} ${sources})
+# static for now
+add_library(al STATIC ${headers} ${sources})
 
 target_include_directories(al PRIVATE include)
 target_include_directories(al PRIVATE ${GLFW_INCLUDE_DIRS})
