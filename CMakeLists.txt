@@ -37,7 +37,7 @@ pkg_search_module(GLFW REQUIRED glfw3)
 set(core_headers
   include/al/core/app/al_Window.hpp
   include/al/core/app/al_WindowApp.hpp
-  # include/al/core/gl/al_BufferObject.hpp
+  include/al/core/gl/al_BufferObject.hpp
   include/al/core/gl/al_CubeMapFBO.hpp
   include/al/core/gl/al_FBO.hpp
   # include/al/core/gl/al_FrameBufferGL.hpp
@@ -92,7 +92,7 @@ set(core_sources
   src/core/app/al_Window.cpp
   src/core/app/al_WindowApp.cpp
   src/core/app/al_WindowGLFW.cpp
-  # src/core/gl/al_BufferObject.cpp
+  src/core/gl/al_BufferObject.cpp
   src/core/gl/al_FBO.cpp
   src/core/gl/al_GLEW.cpp
   src/core/gl/al_GLFW.cpp

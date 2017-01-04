@@ -68,242 +68,70 @@ clients, like display lists and textures. Since VBO is on the server's side,
 multiple clients will be able to access the same buffer with the corresponding
 identifier.
 */
+
+// [!] made for FLOAT
+
 class BufferObject : public GPUObject {
 public:
-
-  /// Buffer access mode
-  enum AccessMode{
-    READ_ONLY        = GL_READ_ONLY,
-    WRITE_ONLY        = GL_WRITE_ONLY,
-    READ_WRITE        = GL_READ_WRITE
-  };
-
-  /// Array type
-  enum ArrayType{
-    VERTEX_ARRAY      = GL_VERTEX_ARRAY,
-    NORMAL_ARRAY      = GL_NORMAL_ARRAY,
-    COLOR_ARRAY        = GL_COLOR_ARRAY,
-    INDEX_ARRAY        = GL_INDEX_ARRAY,
-    TEXTURE_COORD_ARRAY    = GL_TEXTURE_COORD_ARRAY,
-    EDGE_FLAG_ARRAY      = GL_EDGE_FLAG_ARRAY
-  };
-
-  /// Buffer type
-  enum BufferType{
-    ARRAY_BUFFER      = GL_ARRAY_BUFFER,
-    ELEMENT_ARRAY_BUFFER  = GL_ELEMENT_ARRAY_BUFFER,
-    PIXEL_PACK_BUFFER    = GL_PIXEL_PACK_BUFFER,      /**< Transfer to PBO */
-    PIXEL_UNPACK_BUFFER    = GL_PIXEL_UNPACK_BUFFER    /**< Transfer from PBO */
-  };
-
-
-  /*
-  "Static" means the data in VBO will not be changed, "Dynamic" means the data
-  will be changed frequently, and "Stream" means the data will be changed every
-  frame. "Draw" means the data will be sent to the GPU from the application,
-  "Read" means the data will be read by the application from the GPU, and "Copy"
-  means the data will be copied internally on the GPU.
-  */
-  enum BufferUsage{
-    STREAM_DRAW    = GL_STREAM_DRAW,
-    //STREAM_READ    = GL_STREAM_READ,
-    //STREAM_COPY    = GL_STREAM_COPY,
-    STATIC_DRAW    = GL_STATIC_DRAW,
-    //STATIC_READ    = GL_STATIC_READ,
-    //STATIC_COPY    = GL_STATIC_COPY,
-    DYNAMIC_DRAW  = GL_DYNAMIC_DRAW,
-    //DYNAMIC_READ  = GL_DYNAMIC_READ,
-    //DYNAMIC_COPY  = GL_DYNAMIC_COPY
-  };
-
-  /// @param[in] bufType  buffer type (array, element, etc.)
-  /// @param[in] bufUsage  buffer usage (stream, static, etc.)
-  BufferObject(BufferType bufType, BufferUsage bufUsage);
+  BufferObject();
 
   virtual ~BufferObject();
 
 
   /// Get buffer store size, in bytes
   int size() const;
-
-  /// Get data type
-  Graphics::DataType dataType() const { return mDataType; }
-
   /// Get number of components in each data element (e.g., 4 for RGBA)
-  int numComps() const { return mNumComps; }
-
-  /// Get number of elements (e.g., colors)
-  int numElems() const { return mNumElems; }
-
+  int numComps() const;
+  /// Get number of elements
+  int numElems() const;
 
   /// Set buffer type
-  void bufferType(BufferType v);
-
+  void bufferType(unsigned int v);
   /// Set buffer usage
-  void usage(BufferUsage v);
-
-  /// Set size, in bytes, of buffer without sending data
-  void resize(int numBytes);
-
-  /// Set buffer data store and copy over client data
-  void data(const void * src, Graphics::DataType dataType, int numElems, int numComps=1);
-
-  /// Set buffer data store and copy over client data
-  template <class T>
-  void data(const T * src, int numElems, int numComps=1);
-
-  /// Set buffer data store without copying client data
-  void data(Graphics::DataType dataType, int numElems, int numComps=1);
-
-  /// Set buffer data store using cached values
-  void data();
-
-  /// Set subregion of buffer store
-  template <class T>
-  int subData(const T * src, int numElems, int byteOffset=0);
-
+  void usage(unsigned int v);
 
   /// Bind buffer
   void bind();
-
   /// Unbind buffer
   void unbind() const;
 
-  void operator()();
-  void send();
+  void data(int numComps, int numElems, float const* src=NULL);
+  // void subdata(int offset, int numElems, float const* src);
 
-
-  void print() const;
-
-
-  #ifdef AL_GRAPHICS_USE_OPENGL
+  // #ifdef AL_GRAPHICS_USE_OPENGL
   /* Warning: these are not supported in OpenGL ES */
 
   /// Set map mode
-  void mapMode(AccessMode v);
+  void mapMode(unsigned int v);
 
   /// Map data store to client address space
 
   /// If successful, returns a valid pointer to the data, otherwise, it returns
   /// NULL.
   /// After using the pointer, call unmap() as soon as possible
-  void * map();
+  float* map();
 
   /// Map data store to client address space
 
   /// If successful, returns true and sets argument to address of data,
   /// otherwise, returns false and leaves argument unaffected.
   /// After using the pointer, call unmap() as soon as possible
-  template <class T>
-  bool map(T *& buf){
-    if(Graphics::toDataType<T>() == mDataType){
-      void * r = map();
-      if(r){ buf=(T *)r; return true; }
-    }
-    return false;
-  }
+  bool map(float*& buf);
 
   /// Unmaps data store from client address
   /// After unmap(), the mapped pointer is invalid
   bool unmap();
-  #endif
+  // #endif
 
 protected:
-  AccessMode mMapMode;
-  BufferType mType;
-  BufferUsage mUsage;
-  Graphics::DataType mDataType;
+  unsigned int mType;
+  unsigned int mUsage;
+  unsigned int mMapMode;
   int mNumComps;
   int mNumElems;
-  void * mData;
-  struct SubData{
-    SubData(const void * data_=NULL, unsigned size_=0, unsigned offset_=0)
-    :  data(data_), size(size_), offset(offset_){}
-    const void * data;
-    unsigned size;
-    unsigned offset;
-  };
-  std::vector<SubData> mSubData;
-
   virtual void onCreate();
   virtual void onDestroy();
-  virtual void onPointerFunc(){};
 };
-
-
-/// Vertex buffer object
-class VBO : public BufferObject {
-public:
-  VBO(BufferUsage usage=STREAM_DRAW);
-
-  static void enable();
-  static void disable();
-
-protected:
-  virtual void onPointerFunc();
-};
-
-
-/// Color buffer object
-class CBO : public BufferObject {
-public:
-  CBO(BufferUsage usage=STREAM_DRAW);
-
-  static void enable();
-  static void disable();
-
-protected:
-  virtual void onPointerFunc();
-};
-
-
-/// Pixel buffer object
-class PBO : public BufferObject {
-public:
-  PBO(bool packMode, BufferUsage usage=STREAM_DRAW);
-
-protected:
-  virtual void onPointerFunc();
-};
-
-
-/// Element object buffer
-class EBO : public BufferObject {
-public:
-  EBO(Graphics::Primitive prim=Graphics::POINTS, BufferUsage usage=STATIC_DRAW);
-
-  EBO& primitive(Graphics::Primitive v);
-  EBO& range(int start, int end);
-
-protected:
-  Graphics::Primitive mPrim;
-  int mStart, mEnd;
-
-  virtual void onPointerFunc();
-};
-
-const char * toString(BufferObject::BufferType v);
-const char * toString(BufferObject::BufferUsage v);
-
-// IMPLEMENTATION --------------------------------------------------------------
-
-template <class T>
-void BufferObject::data(const T * src, int numElems, int numComps){
-  data(src, Graphics::toDataType<T>(), numElems, numComps);
-}
-
-template <class T>
-int BufferObject::subData(const T * src, int numElems, int byteOffset){
-  if(numElems){
-    bind();
-    glBufferSubData(mType, byteOffset, numElems*sizeof(T), src);
-    unbind();
-    mSubData.push_back(SubData(src, numElems*sizeof(T), byteOffset));
-  }
-  return numElems*sizeof(T) + byteOffset;
-}
-
-
 
 } // al::
 #endif

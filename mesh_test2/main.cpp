@@ -11,6 +11,7 @@ public:
   ShaderProgram shader;
   GLuint vao;
   GLuint position_buffer;
+  BufferObject bufferObject;
 
   void onCreate() {
     std::cout << "MyApp onCreate" << std::endl;
@@ -55,21 +56,27 @@ public:
       cout << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << endl;
     }
 
-    glGenBuffers(1, &position_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, position_buffer);
-    glBufferData(
-      GL_ARRAY_BUFFER,
-      sizeof(float) * 4 * mesh.vertices().size(),
-      mesh.vertices().data(),
-      GL_STATIC_DRAW
-    );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    bufferObject.create();
+    bufferObject.bind();
+    bufferObject.data(4, mesh.vertices().size(), (float*)mesh.vertices().data());
+    bufferObject.unbind();
+
+    // glGenBuffers(1, &position_buffer);
+    // glBindBuffer(GL_ARRAY_BUFFER, position_buffer);
+    // glBufferData(
+    //   GL_ARRAY_BUFFER,
+    //   sizeof(float) * 4 * mesh.vertices().size(),
+    //   mesh.vertices().data(),
+    //   GL_STATIC_DRAW
+    // );
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     GLuint index = 0;
     glEnableVertexAttribArray(index);
-    glBindBuffer(GL_ARRAY_BUFFER, position_buffer);
+    // glBindBuffer(GL_ARRAY_BUFFER, position_buffer);
+    bufferObject.bind();
     glVertexAttribPointer(
       index,
       4, // size
@@ -78,7 +85,8 @@ public:
       0, // stride
       NULL // offset of the first component of the first generic vertex attribute
     );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
+    bufferObject.unbind();
     glBindVertexArray(0);
 
   }
@@ -97,7 +105,7 @@ public:
   }
 
   void onExit() {
-    glDeleteBuffers(1, &position_buffer);
+    // glDeleteBuffers(1, &position_buffer);
     glDeleteVertexArrays(1, &vao);
   }
 };
