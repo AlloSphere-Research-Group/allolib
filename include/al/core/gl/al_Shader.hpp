@@ -218,9 +218,9 @@ public:
 
 
   // These parameters must be set before attaching geometry shaders
-  void setGeometryInputPrimitive(Graphics::Primitive prim){ mInPrim = prim; }
-  void setGeometryOutputPrimitive(Graphics::Primitive prim){ mOutPrim = prim; }
-  void setGeometryOutputVertices(unsigned int i){ mOutVertices = i; }
+  // void setGeometryInputPrimitive(Graphics::Primitive prim){ mInPrim = prim; }
+  // void setGeometryOutputPrimitive(Graphics::Primitive prim){ mOutPrim = prim; }
+  // void setGeometryOutputVertices(unsigned int i){ mOutVertices = i; }
 
   /// Print out all the input parameters to the shader
   void listParams() const;
@@ -352,8 +352,8 @@ public:
   static void use(unsigned programID);
 
 protected:
-  Graphics::Primitive mInPrim, mOutPrim;  // IO primitives for geometry shaders
-  unsigned int mOutVertices;
+  // Graphics::Primitive mInPrim, mOutPrim;  // IO primitives for geometry shaders
+  // unsigned int mOutVertices;
   std::string mVertSource, mFragSource, mGeomSource;
   mutable std::unordered_map<std::string, int> mUniformLocs, mAttribLocs;
   bool mActive;

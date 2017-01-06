@@ -153,10 +153,9 @@ static ShaderProgram::Type param_type_from_gltype(GLenum gltype) {
   }
 }
 
-ShaderProgram::ShaderProgram()
-:  mInPrim(Graphics::TRIANGLES), mOutPrim(Graphics::TRIANGLES), mOutVertices(3),
-  mActive(true)
-{}
+ShaderProgram::ShaderProgram(): mActive(true) {
+  //-
+}
 
 ShaderProgram::~ShaderProgram(){
   destroy();
@@ -176,11 +175,11 @@ ShaderProgram& ShaderProgram::attach(Shader& s){
 //  printf("GL_ARB_geometry_shader4 defined\n");
 //#endif
 
-  if (s.type() == Shader::GEOMETRY) {
-    glProgramParameteriEXT(id(),GL_GEOMETRY_INPUT_TYPE_EXT, mInPrim);
-    glProgramParameteriEXT(id(),GL_GEOMETRY_OUTPUT_TYPE_EXT, mOutPrim);
-    glProgramParameteriEXT(id(),GL_GEOMETRY_VERTICES_OUT_EXT,mOutVertices);
-  }
+  // if (s.type() == Shader::GEOMETRY) {
+  //   glProgramParameteriEXT(id(),GL_GEOMETRY_INPUT_TYPE_EXT, mInPrim);
+  //   glProgramParameteriEXT(id(),GL_GEOMETRY_OUTPUT_TYPE_EXT, mOutPrim);
+  //   glProgramParameteriEXT(id(),GL_GEOMETRY_VERTICES_OUT_EXT,mOutVertices);
+  // }
 
   return *this;
 }

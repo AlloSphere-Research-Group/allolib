@@ -4,7 +4,7 @@
 #include "al/core/app/al_WindowApp.hpp"
 
 #include "al/core/gl/al_BufferObject.hpp"
-#include "al/core/gl/al_CubeMapFBO.hpp"
+// #include "al/core/gl/al_CubeMapFBO.hpp"
 #include "al/core/gl/al_FBO.hpp"
 #include "al/core/gl/al_GLEW.hpp"
 #include "al/core/gl/al_GLFW.hpp"
@@ -18,6 +18,8 @@
 // #include "al/core/gl/al_Shapes.hpp"
 #include "al/core/gl/al_Stereographic.hpp"
 #include "al/core/gl/al_Texture.hpp"
+#include "al/core/gl/al_VAO.hpp"
+#include "al/core/gl/al_VAOMesh.hpp"
 
 #include "al/core/math/al_Analysis.hpp"
 #include "al/core/math/al_Complex.hpp"

@@ -1,13 +1,14 @@
 #include "al/core/gl/al_BufferObject.hpp"
 
+#include <iostream>
+
 namespace al{
 
 BufferObject::BufferObject():
   mType(GL_ARRAY_BUFFER),
   mUsage(GL_DYNAMIC_DRAW),
-  // mDataType(GL_FLOAT),
   mMapMode(GL_MAP_READ_BIT | GL_MAP_WRITE_BIT),
-  mNumComps(0), mNumElems(0)
+  mSize(0)
 {
   //
 }
@@ -17,15 +18,16 @@ BufferObject::~BufferObject(){
 }
 
 int BufferObject::size() const {
-  return mNumElems * mNumComps;// * size_in_bytes(mDataType);
+  return mSize;
 }
 
-// unsigned int BufferObject::dataType() const { return mDataType; }
-int BufferObject::numComps() const { return mNumComps; }
-int BufferObject::numElems() const { return mNumElems; }
+void BufferObject::bufferType(unsigned int v){
+  mType=v;
+}
 
-void BufferObject::bufferType(unsigned int v){ mType=v; }
-void BufferObject::usage(unsigned int v){ mUsage=v; }
+void BufferObject::usage(unsigned int v){
+  mUsage=v;
+}
 
 void BufferObject::bind(){
   glBindBuffer(mType, id());
@@ -36,10 +38,12 @@ void BufferObject::unbind() const {
 }
 
 // #ifdef AL_GRAPHICS_USE_OPENGL
-void BufferObject::mapMode(unsigned int v){ mMapMode=v; }
+void BufferObject::mapMode(unsigned int v){
+  mMapMode=v;
+}
 
-float* BufferObject::map(){
-  return (float*)glMapBuffer(mType, mMapMode);
+void* BufferObject::map(){
+  return glMapBuffer(mType, mMapMode);
 }
 
 bool BufferObject::unmap(){
@@ -55,13 +59,23 @@ void BufferObject::onDestroy() {
   glDeleteBuffers(1, &mID);
 }
 
-void BufferObject::data(int numComps, int numElems, float const* src) {
-  glBufferData(
-    mType,
-    sizeof(float) * numComps * numElems,
-    src,
-    mUsage
-  );
+void BufferObject::data(int size, void const* src) {
+  glBufferData(mType, size, 0, mUsage);
+  GLint s {0};
+  glGetBufferParameteriv(mType, GL_BUFFER_SIZE, &s);
+  if (s == size) {
+    mSize = size;
+  }
+  else {
+    std::cout << "buffer size does not match requested size" << std::endl;
+  }
+  if (src) {
+    subdata(0, mSize, src);
+  }
+}
+
+void BufferObject::subdata(int offset, int size, void const* src) {
+  glBufferSubData(mType, offset, size, src);
 }
 
 // void BufferObject::print() const {

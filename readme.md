@@ -18,6 +18,7 @@
 
 priorities:
 - the whole audio code
-- mesh
+- mesh indexed drawing
+- shader.uniforms
 - al::Graphics
-- file
+- al::file

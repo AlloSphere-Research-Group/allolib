@@ -9,28 +9,22 @@ using namespace std;
 class MyApp : public WindowApp {
 public:
   ShaderProgram shader;
-  GLuint vao;
-  GLuint position_buffer;
-  BufferObject bufferObject;
+  BufferObject position, color;
+  VAO vao;
+  VAOMesh mesh;
 
   void onCreate() {
-    std::cout << "MyApp onCreate" << std::endl;
-
     string const vert_source = R"(
       #version 330
 
       layout (location = 0) in vec4 position;
+      layout (location = 1) in vec4 color;
 
       out vec4 _color;
 
       void main() {
-        const vec4[] vertex_color = vec4[3](
-          vec4(1.0, 0.0, 0.0, 1.0),
-          vec4(0.0, 1.0, 0.0, 1.0),
-          vec4(0.0, 0.0, 1.0, 1.0)
-        );
         gl_Position = position;
-        _color = vertex_color[gl_VertexID];
+        _color = color;
       }
     )";
 
@@ -48,47 +42,15 @@ public:
 
     shader.compile(vert_source, frag_source);
 
-    Mesh mesh = {GL_STATIC_DRAW};
+    mesh.init();
+    mesh.primitive(TRIANGLES);
     mesh.vertex(-0.5, -0.5, 0);
+    mesh.color(1.0, 0.0, 0.0);
     mesh.vertex(0.5, -0.5, 0);
+    mesh.color(0.0, 1.0, 0.0);
     mesh.vertex(0, 0.5, 0);
-    for (auto const& v : mesh.vertices()) {
-      cout << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << endl;
-    }
-
-    bufferObject.create();
-    bufferObject.bind();
-    bufferObject.data(4, mesh.vertices().size(), (float*)mesh.vertices().data());
-    bufferObject.unbind();
-
-    // glGenBuffers(1, &position_buffer);
-    // glBindBuffer(GL_ARRAY_BUFFER, position_buffer);
-    // glBufferData(
-    //   GL_ARRAY_BUFFER,
-    //   sizeof(float) * 4 * mesh.vertices().size(),
-    //   mesh.vertices().data(),
-    //   GL_STATIC_DRAW
-    // );
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    GLuint index = 0;
-    glEnableVertexAttribArray(index);
-    // glBindBuffer(GL_ARRAY_BUFFER, position_buffer);
-    bufferObject.bind();
-    glVertexAttribPointer(
-      index,
-      4, // size
-      GL_FLOAT, // type
-      GL_FALSE, // normalized
-      0, // stride
-      NULL // offset of the first component of the first generic vertex attribute
-    );
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-    bufferObject.unbind();
-    glBindVertexArray(0);
-
+    mesh.color(0.0, 0.0, 1.0);
+    mesh.update();
   }
 
   void onDraw() {
@@ -97,17 +59,56 @@ public:
 
     shader.begin();
 
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
-    glBindVertexArray(0);
+    mesh.draw();
+    // mesh.bind();
+    // glDrawArrays(GL_TRIANGLES, 0, mesh.vertices().size());
+    // mesh.unbind();
 
     shader.end();
   }
 
-  void onExit() {
-    // glDeleteBuffers(1, &position_buffer);
-    glDeleteVertexArrays(1, &vao);
+  void onKeyDown(Keyboard const& k) {
+    if (k.key() == 'c') {
+      mesh.reset();
+      mesh.vertex(-0.5, -0.5, 0);
+      mesh.color(0.0, 1.0, 0.0);
+      mesh.vertex(0.5, -0.5, 0);
+      mesh.color(0.0, 0.0, 1.0);
+      mesh.vertex(0, 0.5, 0);
+      mesh.color(1.0, 0.0, 0.0);
+
+      mesh.vertex(0.0, 0.5, 0);
+      mesh.color(0.0, 0.0, 1.0);
+      mesh.vertex(0.5, -0.5, 0);
+      mesh.color(0.0, 1.0, 0.0);
+      mesh.vertex(0.5, 0.5, 0);
+      mesh.color(1.0, 0.0, 0.0);
+      mesh.update();
+      return;
+    }
+    if (k.key() == 'v') {
+      mesh.reset();
+      mesh.vertex(-0.5, -0.5, 0);
+      mesh.color(0.0, 1.0, 1.0);
+      mesh.vertex(0.5, -0.5, 0);
+      mesh.color(1.0, 0.0, 1.0);
+      mesh.vertex(0, 0.5, 0);
+      mesh.color(1.0, 1.0, 0.0);
+      mesh.update();
+      return;
+    }
+    if (k.key() == 'x') {
+      mesh.reset();
+      mesh.vertex(-0.5, -0.5, 0);
+      mesh.color(1.0, 0.0, 0.0);
+      mesh.vertex(0.5, -0.5, 0);
+      mesh.color(0.0, 1.0, 0.0);
+      mesh.vertex(0, 0.5, 0);
+      mesh.color(0.0, 0.0, 1.0);
+      mesh.update();
+    }
   }
+
 };
 
 int main(int argc, char* argv[]) {

@@ -183,6 +183,7 @@ void Texture::update(int unit, bool force) {
       glGenerateMipmap(target());
     }
     else {
+      // base level is 0 if untouched
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
     }
     mUseMipmapUpdated = false;

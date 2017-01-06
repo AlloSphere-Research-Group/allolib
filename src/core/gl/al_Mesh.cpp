@@ -12,9 +12,9 @@
 
 namespace al{
 
-Mesh::Mesh(unsigned int primitive)
-:  mPrimitive(primitive)
-{}
+Mesh::Mesh(Primitive p): mPrimitive(p) {
+  //
+}
 
 Mesh::Mesh(const Mesh& cpy)
 :  mVertices(cpy.mVertices),
@@ -104,7 +104,7 @@ void Mesh::createNormalsMesh(Mesh& mesh, float length, bool perFace){
     static void initMesh(Mesh& m, int n){
       m.vertices().reserve(n * 2);
       m.reset();
-      m.primitive(Graphics::LINES);
+      m.primitive(LINES);
     }
   };
 
@@ -258,7 +258,7 @@ void Mesh::generateNormals(bool normalize, bool equalWeightPerFace) {
 
     unsigned Ni = indices().size();
 
-    if(primitive() == Graphics::TRIANGLES){
+    if(primitive() == TRIANGLES){
       Ni = Ni - (Ni%3); // must be multiple of 3
 
       for(unsigned i=0; i<Ni; i+=3){
@@ -276,7 +276,7 @@ void Mesh::generateNormals(bool normalize, bool equalWeightPerFace) {
         normals()[i3] += vn;
       }
     }
-    else if(primitive() == Graphics::TRIANGLE_STRIP){
+    else if(primitive() == TRIANGLE_STRIP){
       for(unsigned i=0; i<Ni-2; ++i){
 
         // Flip every other normal due to change in winding direction
@@ -304,7 +304,7 @@ void Mesh::generateNormals(bool normalize, bool equalWeightPerFace) {
   // non-indexed case
   else{
     // compute face based normals
-    if(primitive() == Graphics::TRIANGLES){
+    if(primitive() == TRIANGLES){
       unsigned N = Nv - (Nv % 3);
 
       for(unsigned i=0; i<N; i+=3){
@@ -324,7 +324,7 @@ void Mesh::generateNormals(bool normalize, bool equalWeightPerFace) {
       }
     }
     // compute vertex based normals
-    else if(primitive() == Graphics::TRIANGLE_STRIP){
+    else if(primitive() == TRIANGLE_STRIP){
 
       for(unsigned i=0; i<Nv; ++i) normals()[i].set(0,0,0);
 
@@ -657,8 +657,8 @@ static void stripToTri(std::vector<T>& buf){
 
 void Mesh::toTriangles(){
 
-  if(Graphics::TRIANGLE_STRIP == primitive()){
-    primitive(Graphics::TRIANGLES);
+  if(TRIANGLE_STRIP == primitive()){
+    primitive(TRIANGLES);
     int Nv = vertices().size();
     int Ni = indices().size();
 
@@ -687,7 +687,7 @@ void Mesh::toTriangles(){
 bool Mesh::saveSTL(const std::string& filePath, const std::string& solidName) const {
   int prim = primitive();
 
-  if(Graphics::TRIANGLES != prim && Graphics::TRIANGLE_STRIP != prim){
+  if(TRIANGLES != prim && TRIANGLE_STRIP != prim){
     AL_WARN("Unsupported primitive type. Must be either triangles or triangle strip.");
     return false;
   }
@@ -732,7 +732,7 @@ bool Mesh::savePLY(const std::string& filePath, const std::string& solidName, bo
 
   int prim = primitive();
 
-  if(Graphics::TRIANGLES != prim && Graphics::TRIANGLE_STRIP != prim){
+  if(TRIANGLES != prim && TRIANGLE_STRIP != prim){
     AL_WARN("Unsupported primitive type. Must be either triangles or triangle strip.");
     return false;
   }

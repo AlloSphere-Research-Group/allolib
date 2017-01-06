@@ -54,7 +54,6 @@
 #include "al/core/gl/al_GPUObject.hpp"
 #include "al/core/gl/al_Mesh.hpp"
 #include "al/core/gl/al_GLEW.hpp"
-#include "al/core/gl/al_MeshVBO.hpp"
 
 /*!
   \def AL_GRAPHICS_ERROR(msg, ID)
@@ -204,18 +203,18 @@ public:
     FILL          = GL_FILL         /**< Render vertices normally according to primitive */
   };
 
-  enum Primitive {
-    POINTS          = GL_POINTS,        /**< Points */
-    LINES         = GL_LINES,         /**< Connect sequential vertex pairs with lines */
-    LINE_STRIP        = GL_LINE_STRIP,      /**< Connect sequential vertices with a continuous line */
-    LINE_LOOP       = GL_LINE_LOOP,       /**< Connect sequential vertices with a continuous line loop */
-    TRIANGLES       = GL_TRIANGLES,       /**< Draw triangles using sequential vertex triplets */
-    TRIANGLE_STRIP      = GL_TRIANGLE_STRIP,    /**< Draw triangle strip using sequential vertices */
-    TRIANGLE_FAN      = GL_TRIANGLE_FAN,      /**< Draw triangle fan using sequential vertices */
-    QUADS         = GL_QUADS,         /**< Draw quadrilaterals using sequential vertex quadruplets */
-    QUAD_STRIP        = GL_QUAD_STRIP,      /**< Draw quadrilateral strip using sequential vertices */
-    POLYGON         = GL_POLYGON        /**< Draw polygon using sequential vertices */
-  };
+  // enum Primitive {
+  //   POINTS          = GL_POINTS,        /**< Points */
+  //   LINES         = GL_LINES,         /**< Connect sequential vertex pairs with lines */
+  //   LINE_STRIP        = GL_LINE_STRIP,      /**< Connect sequential vertices with a continuous line */
+  //   LINE_LOOP       = GL_LINE_LOOP,       /**< Connect sequential vertices with a continuous line loop */
+  //   TRIANGLES       = GL_TRIANGLES,       /**< Draw triangles using sequential vertex triplets */
+  //   TRIANGLE_STRIP      = GL_TRIANGLE_STRIP,    /**< Draw triangle strip using sequential vertices */
+  //   TRIANGLE_FAN      = GL_TRIANGLE_FAN,      /**< Draw triangle fan using sequential vertices */
+  //   QUADS         = GL_QUADS,         /**< Draw quadrilaterals using sequential vertex quadruplets */
+  //   QUAD_STRIP        = GL_QUAD_STRIP,      /**< Draw quadrilateral strip using sequential vertices */
+  //   POLYGON         = GL_POLYGON        /**< Draw polygon using sequential vertices */
+  // };
 
   enum ShadeModel {
     FLAT          = GL_FLAT,          /**< */
@@ -523,7 +522,7 @@ public:
   void draw(){ draw(mMesh); }
 
   /// Draw MeshVBO
-  void draw(MeshVBO& meshVBO);
+  // void draw(MeshVBO& meshVBO);
 
 
   // Utility functions: converting, reporting, etc.

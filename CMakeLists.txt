@@ -32,7 +32,6 @@ else ()
   set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
 endif (WINDOWS)
 
-
 # core dependencies
 find_package(OpenGL REQUIRED)
 if (WINDOWS)
@@ -51,7 +50,7 @@ set(core_headers
   include/al/core/app/al_Window.hpp
   include/al/core/app/al_WindowApp.hpp
   include/al/core/gl/al_BufferObject.hpp
-  include/al/core/gl/al_CubeMapFBO.hpp
+  # include/al/core/gl/al_CubeMapFBO.hpp
   include/al/core/gl/al_FBO.hpp
   # include/al/core/gl/al_FrameBufferGL.hpp
   include/al/core/gl/al_GLEW.hpp
@@ -66,6 +65,8 @@ set(core_headers
   # include/al/core/gl/al_Shapes.hpp
   include/al/core/gl/al_Stereographic.hpp
   include/al/core/gl/al_Texture.hpp
+  include/al/core/gl/al_VAO.hpp
+  include/al/core/gl/al_VAOMesh.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
@@ -119,6 +120,8 @@ set(core_sources
   # src/core/gl/al_Shapes.cpp
   src/core/gl/al_Stereographic.cpp
   src/core/gl/al_Texture.cpp
+  src/core/gl/al_VAO.cpp
+  src/core/gl/al_VAOMesh.cpp
   src/core/protocol/al_Serialize.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
@@ -156,7 +159,7 @@ list(APPEND sources
   # ${graphics_sources}
 )
 
-# static for now
+# static for now?
 add_library(al STATIC ${headers} ${sources})
 
 target_include_directories(al PRIVATE include)

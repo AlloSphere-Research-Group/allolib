@@ -69,22 +69,13 @@ multiple clients will be able to access the same buffer with the corresponding
 identifier.
 */
 
-// [!] made for FLOAT
-
 class BufferObject : public GPUObject {
 public:
   BufferObject();
-
   virtual ~BufferObject();
-
 
   /// Get buffer store size, in bytes
   int size() const;
-  /// Get number of components in each data element (e.g., 4 for RGBA)
-  int numComps() const;
-  /// Get number of elements
-  int numElems() const;
-
   /// Set buffer type
   void bufferType(unsigned int v);
   /// Set buffer usage
@@ -95,8 +86,8 @@ public:
   /// Unbind buffer
   void unbind() const;
 
-  void data(int numComps, int numElems, float const* src=NULL);
-  // void subdata(int offset, int numElems, float const* src);
+  void data(int size, void const* src=NULL);
+  void subdata(int offset, int size, void const* src);
 
   // #ifdef AL_GRAPHICS_USE_OPENGL
   /* Warning: these are not supported in OpenGL ES */
@@ -109,14 +100,14 @@ public:
   /// If successful, returns a valid pointer to the data, otherwise, it returns
   /// NULL.
   /// After using the pointer, call unmap() as soon as possible
-  float* map();
+  void* map();
 
   /// Map data store to client address space
 
   /// If successful, returns true and sets argument to address of data,
   /// otherwise, returns false and leaves argument unaffected.
   /// After using the pointer, call unmap() as soon as possible
-  bool map(float*& buf);
+  // bool map(void*& buf);
 
   /// Unmaps data store from client address
   /// After unmap(), the mapped pointer is invalid
@@ -127,8 +118,7 @@ protected:
   unsigned int mType;
   unsigned int mUsage;
   unsigned int mMapMode;
-  int mNumComps;
-  int mNumElems;
+  int mSize;
   virtual void onCreate();
   virtual void onDestroy();
 };

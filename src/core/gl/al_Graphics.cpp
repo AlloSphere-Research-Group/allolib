@@ -301,7 +301,7 @@ void Graphics::draw(const Mesh& v, int count, int begin){
   // Draw
   if(Ni){
     glDrawElements(
-      ((Graphics::Primitive)v.primitive()),
+      ((Primitive)v.primitive()),
       count, // number of indexed elements to render
       GL_UNSIGNED_INT,
       &v.indices()[begin]
@@ -309,7 +309,7 @@ void Graphics::draw(const Mesh& v, int count, int begin){
   }
   else{
     glDrawArrays(
-      ((Graphics::Primitive)v.primitive()),
+      ((Primitive)v.primitive()),
       begin,
       count
     );
@@ -323,14 +323,14 @@ void Graphics::draw(const Mesh& v, int count, int begin){
 }
 
 // draw a MeshVBO
-void Graphics::draw(MeshVBO& meshVBO) {
-  if (!meshVBO.isBound()) meshVBO.bind();
+// void Graphics::draw(MeshVBO& meshVBO) {
+//   if (!meshVBO.isBound()) meshVBO.bind();
 
-  if (meshVBO.hasIndices()) glDrawElements(meshVBO.primitive(), meshVBO.getNumIndices(), GL_UNSIGNED_INT, NULL);
-  else glDrawArrays(meshVBO.primitive(), 0, meshVBO.getNumVertices());
+//   if (meshVBO.hasIndices()) glDrawElements(meshVBO.primitive(), meshVBO.getNumIndices(), GL_UNSIGNED_INT, NULL);
+//   else glDrawArrays(meshVBO.primitive(), 0, meshVBO.getNumVertices());
 
-  meshVBO.unbind();
-}
+//   meshVBO.unbind();
+// }
 
 
 void Graphics::onCreate(){

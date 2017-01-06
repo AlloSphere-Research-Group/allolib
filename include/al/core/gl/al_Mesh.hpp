@@ -53,6 +53,20 @@
 
 namespace al{
 
+enum Primitive {
+  POINTS=0,
+  LINES,
+  LINE_STRIP,
+  LINE_LOOP,
+  TRIANGLES,
+  TRIANGLE_STRIP,
+  TRIANGLE_FAN,
+  LINES_ADJACENCY,
+  LINE_STRIP_ADJACENCY,
+  TRIANGLES_ADJACENCY,
+  TRIANGLE_STRIP_ADJACENCY
+};
+
 /// Stores buffers related to rendering graphical objects
 
 /// A mesh is a collection of buffers storing vertices, colors, indices, etc.
@@ -76,9 +90,8 @@ public:
   typedef std::vector<TexCoord3> TexCoord3s;
   typedef std::vector<Index> Indices;
 
-
   /// @param[in] primitive  renderer-dependent primitive number
-  Mesh(unsigned int primitive=0);
+  Mesh(Primitive p=TRIANGLES);
 
   Mesh(const Mesh& cpy);
 
@@ -202,7 +215,7 @@ public:
   void smooth(float amount=1, int weighting=0);
 
 
-  unsigned int primitive() const { return mPrimitive; }
+  Primitive primitive() const { return mPrimitive; }
   const std::vector<Vertex>& vertices() const { return mVertices; }
   const std::vector<Normal>& normals() const { return mNormals; }
   const std::vector<Color>& colors() const { return mColors; }
@@ -213,7 +226,8 @@ public:
 
 
   /// Set geometric primitive
-  Mesh& primitive(unsigned int prim){ mPrimitive=prim; return *this; }
+  // virtual for graphics lib implementations
+  Mesh& primitive(Primitive p){ mPrimitive=p; return *this; }
 
   /// Repeat last vertex element(s)
   Mesh& repeatLast();
@@ -369,8 +383,7 @@ protected:
   TexCoord3s mTexCoord3s;
   Indices mIndices;
 
-  unsigned int mPrimitive;
-  unsigned int mUsage;
+  Primitive mPrimitive;
 };
 
 } // al::
