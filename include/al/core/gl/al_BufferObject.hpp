@@ -93,14 +93,14 @@ public:
   /* Warning: these are not supported in OpenGL ES */
 
   /// Set map mode
-  void mapMode(unsigned int v);
+  // void mapMode(unsigned int v);
 
   /// Map data store to client address space
 
   /// If successful, returns a valid pointer to the data, otherwise, it returns
   /// NULL.
   /// After using the pointer, call unmap() as soon as possible
-  void* map();
+  // void* map();
 
   /// Map data store to client address space
 
@@ -111,13 +111,13 @@ public:
 
   /// Unmaps data store from client address
   /// After unmap(), the mapped pointer is invalid
-  bool unmap();
+  // bool unmap();
   // #endif
 
 protected:
   unsigned int mType;
   unsigned int mUsage;
-  unsigned int mMapMode;
+  // unsigned int mMapMode;
   int mSize;
   virtual void onCreate();
   virtual void onDestroy();

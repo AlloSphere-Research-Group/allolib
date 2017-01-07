@@ -8,18 +8,33 @@
 
 namespace al {
 
+// layout for (GL) <-> (glsl shader)
+enum AttribLayout: unsigned int {
+  ATTRIB_POSITION = 0,
+  ATTRIB_COLOR = 1,
+  ATTRIB_TEXCOORD = 2,
+  ATTRIB_NORMAL = 3,
+};
+
 class VAOMesh : public Mesh {
 public:
     static std::unordered_map<Primitive, unsigned int> mPrimMap;
 
+    struct MeshAttrib {
+        unsigned int index;
+        int size;
+        BufferObject buffer;
+        MeshAttrib(unsigned int i, int s): index(i), size(s) {}
+    };
+
     unsigned int mGLPrimMode = GL_TRIANGLES;
     VAO vao;
-    BufferObject
-        position_buffer,
-        color_buffer,
-        // texcoord_buffer,
-        normal_buffer
-        // index_buffer
+    MeshAttrib
+        position_att {ATTRIB_POSITION, 4},
+        color_att {ATTRIB_COLOR, 4},
+        // texcoord_att {ATTRIB_TEXCOORD, 2},
+        normal_att {ATTRIB_NORMAL, 3}
+        // index_att
     ;
 
     void init();
@@ -30,9 +45,7 @@ public:
 
     template <typename T>
     void updateAttrib(
-        std::vector<T> const& data,
-        BufferObject& buffer,
-        unsigned int index
+        std::vector<T> const& data, MeshAttrib& att
     );
 
     void draw();

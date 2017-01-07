@@ -42,7 +42,6 @@ public:
 
     shader.compile(vert_source, frag_source);
 
-    mesh.init();
     mesh.primitive(TRIANGLES);
     mesh.vertex(-0.5, -0.5, 0);
     mesh.color(1.0, 0.0, 0.0);

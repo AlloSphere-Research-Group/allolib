@@ -76,7 +76,6 @@
 
 namespace al {
 
-
 /// A framed area on a display screen
 /// @ingroup allocore
 struct Viewport {

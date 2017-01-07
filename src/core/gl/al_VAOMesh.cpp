@@ -24,73 +24,59 @@ void VAOMesh::unbind() {
   vao.unbind();
 }
 
-void VAOMesh::init() {
-  vao.create();
-  position_buffer.create();
-  color_buffer.create();
-  // texcoord_buffer.create();
-  normal_buffer.create();
-  // index_buffer.create();
-  // index_buffer.bufferType(GL_ELEMENT_ARRAY_BUFFER);
-  vao.bind();
-  vao.attribPointer(0, position_buffer, 4);
-  vao.attribPointer(1, color_buffer, 4);
-  // vao.attribPointer(2, texcoord_buffer, 2);
-  vao.attribPointer(3, normal_buffer, 3);
-  vao.unbind();
-}
-
 void VAOMesh::update() {
   mGLPrimMode = mPrimMap[mPrimitive];
   vao.validate();
   vao.bind();
-  updateAttrib(vertices(), position_buffer, 0);
-  updateAttrib(colors(), color_buffer, 1);
-  // updateAttrib(texCoord2s(), texcoord_buffer);
-  updateAttrib(normals(), normal_buffer, 3);
-  // updateAttrib(normals(), normal_buffer);
+  updateAttrib(vertices(), position_att);
+  updateAttrib(colors(), color_att);
+  // updateAttrib(texCoord2s(), texcoord_att, 2);
+  updateAttrib(normals(), normal_att);
+  // updateAttrib(normals(), normal_att);
   // updateAttrib(indices(), index_buffer);
   vao.unbind();
 }
 
 template <typename T>
 void VAOMesh::updateAttrib(
-  std::vector<T> const& data,
-  BufferObject& buffer,
-  unsigned int index
+  std::vector<T> const& data, MeshAttrib& att
 ) {
-  if (!(data.size() > 0)) {
-    vao.disableAttrib(index);
+  // only enable attribs with content
+  if (data.size() > 0) {
+    vao.enableAttrib(att.index);
+  }
+  else {
+    vao.disableAttrib(att.index);
     return;
   }
-  vao.enableAttrib(index);
 
+  // buffer yet created, make it and set vao to point to it
+  if (!att.buffer.created()) {
+    att.buffer.create();
+    vao.attribPointer(att.index, att.buffer, att.size);
+  }
+
+  // upload CPU size data to buffer in GPU
   auto s = sizeof(T);
-  buffer.bind();
-  // if size changed, (re)allocate buffer
-  if (s * data.size() != buffer.size()) {
-    buffer.data(s * data.size(), data.data());
-  }
-  else { // just re-submit data
-    buffer.subdata(0, s * data.size(), data.data());
-  }
-  buffer.unbind(); 
+  att.buffer.bind();
+  att.buffer.data(s * data.size(), data.data());
+  att.buffer.unbind(); 
 }
 
 template void VAOMesh::updateAttrib<float>(
-  std::vector<float> const& data, BufferObject& buffer, unsigned int index
+  std::vector<float> const& data, MeshAttrib& att
 );
 
 template void VAOMesh::updateAttrib<Vec2f>(
-  std::vector<Vec2f> const& data, BufferObject& buffer, unsigned int index
+  std::vector<Vec2f> const& data, MeshAttrib& att
 );
 
 template void VAOMesh::updateAttrib<Vec3f>(
-  std::vector<Vec3f> const& data, BufferObject& buffer, unsigned int index
+  std::vector<Vec3f> const& data, MeshAttrib& att
 );
 
 template void VAOMesh::updateAttrib<Vec4f>(
-  std::vector<Vec4f> const& data, BufferObject& buffer, unsigned int index
+  std::vector<Vec4f> const& data, MeshAttrib& att
 );
 
 void VAOMesh::draw() {
