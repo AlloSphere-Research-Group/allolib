@@ -16,9 +16,9 @@ public:
     VAO vao;
     BufferObject
         position_buffer,
-        color_buffer
+        color_buffer,
         // texcoord_buffer,
-        // normal_buffer,
+        normal_buffer
         // index_buffer
     ;
 
@@ -29,7 +29,11 @@ public:
     void unbind();
 
     template <typename T>
-    void updateAttrib(std::vector<T> const& data, BufferObject& buffer);
+    void updateAttrib(
+        std::vector<T> const& data,
+        BufferObject& buffer,
+        unsigned int index
+    );
 
     void draw();
 };

@@ -17,10 +17,11 @@ public:
     void unbind();
 
     void enableAttrib(unsigned int index);
+    void disableAttrib(unsigned int index);
     void attribPointer(
         unsigned int index,
         BufferObject& buffer,
-        int size,
+        int size, // components
         unsigned int type = GL_FLOAT,
         unsigned char normalized = GL_FALSE,
         int stride = 0,

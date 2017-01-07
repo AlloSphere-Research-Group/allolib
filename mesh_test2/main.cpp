@@ -56,14 +56,8 @@ public:
   void onDraw() {
     GLfloat const clear_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
     glClearBufferfv(GL_COLOR, 0, clear_color);
-
     shader.begin();
-
     mesh.draw();
-    // mesh.bind();
-    // glDrawArrays(GL_TRIANGLES, 0, mesh.vertices().size());
-    // mesh.unbind();
-
     shader.end();
   }
 
@@ -100,11 +94,11 @@ public:
     if (k.key() == 'x') {
       mesh.reset();
       mesh.vertex(-0.5, -0.5, 0);
-      mesh.color(1.0, 0.0, 0.0);
+      // mesh.color(1.0, 0.0, 0.0);
       mesh.vertex(0.5, -0.5, 0);
-      mesh.color(0.0, 1.0, 0.0);
+      // mesh.color(0.0, 1.0, 0.0);
       mesh.vertex(0, 0.5, 0);
-      mesh.color(0.0, 0.0, 1.0);
+      // mesh.color(0.0, 0.0, 1.0);
       mesh.update();
     }
   }

@@ -30,6 +30,10 @@ void VAO::enableAttrib(unsigned int index) {
     glEnableVertexAttribArray(index);
 }
 
+void VAO::disableAttrib(unsigned int index) {
+    glDisableVertexAttribArray(index);
+}
+
 void VAO::attribPointer(
     unsigned int index,
     BufferObject& buffer,
