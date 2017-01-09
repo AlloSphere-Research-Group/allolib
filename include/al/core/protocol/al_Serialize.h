@@ -55,7 +55,7 @@
 
 #include <stddef.h>
 #include <string.h>
-#include "al/core/system/al_Config.h"
+#include <cstdint>
 
 
 #ifdef __cplusplus

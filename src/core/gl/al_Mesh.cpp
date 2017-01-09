@@ -360,8 +360,8 @@ Mesh& Mesh::repeatLast(){
     if(vertices().size()) vertices().push_back(vertices().back());
     if(normals().size()) normals().push_back(normals().back());
     if(texCoord2s().size()) texCoord2s().push_back(texCoord2s().back());
-    else if(texCoord3s().size()) texCoord3s().push_back(texCoord3s().back());
-    else if(texCoord1s().size()) texCoord1s().push_back(texCoord1s().back());
+    if(texCoord3s().size()) texCoord3s().push_back(texCoord3s().back());
+    if(texCoord1s().size()) texCoord1s().push_back(texCoord1s().back());
   }
   return *this;
 }

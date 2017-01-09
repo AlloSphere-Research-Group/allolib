@@ -84,8 +84,11 @@ public:
         arr[4 * idx + 3] = 1.0f;
       }
     }
+    texture.bind();
     texture.submit(arr.data()); // give raw pointer
-    texture.mipmap(true); // tuen on only if needed
+    texture.mipmap(true); // turn on only if needed
+    texture.update();
+    texture.unbind();
 
     color.create2D(128, 128);
     depth.create(128, 128);

@@ -77,9 +77,9 @@ public:
   /// Get buffer store size, in bytes
   int size() const;
   /// Set buffer type
-  void bufferType(unsigned int v);
+  void bufferType(unsigned int v); // GL_ARRAY_BUFFER, ...
   /// Set buffer usage
-  void usage(unsigned int v);
+  void usage(unsigned int v); // GL_DYNAMIC_DRAW, ...
 
   /// Bind buffer
   void bind();

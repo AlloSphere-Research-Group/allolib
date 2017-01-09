@@ -46,7 +46,6 @@
   Owen Campbell, 2014, owen.campbell@gmail.com
 */
 
-// #include "al/core/system/al_Config.h"
 #include <cstdint> // uint8_t
 
 namespace al{
@@ -169,10 +168,6 @@ struct Color{
   /// Set from an array of RGBA components
   template <class T>
   Color& set(const T* rgba){ return set(rgba[0],rgba[1],rgba[2],rgba[3]); }
-
-  /// Set components from tightly packed RGBA array
-  template <class Array4>
-  Color& operator= (const Array4& v){ return set(v[0], v[1], v[2], v[3]); }
 
   /// Set from gray value
   Color& operator= (float v){ return set(v); }
@@ -573,10 +568,6 @@ struct RGB{
   /// Set from an array of RGB components
   template <class T>
   RGB& set(const T* rgb){ return set(rgb[0],rgb[1],rgb[2]); }
-
-  /// Set components from tightly packed RGB array
-  template <class Array3>
-  RGB& operator= (const Array3& v){ return set(v[0],v[1],v[2]); }
 
   /// Set from gray value
   RGB& operator= (float v){ return set(v); }

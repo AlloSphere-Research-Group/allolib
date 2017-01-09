@@ -50,7 +50,6 @@
 */
 
 #include <string>
-// #include "al/core/system/al_Config.h"
 #include <limits.h>
 #include <math.h>
 
@@ -86,12 +85,6 @@ al_nsec al_steady_time_nsec();
 void al_sleep(al_sec dt);
 void al_sleep_nsec(al_nsec dt);
 void al_sleep_until(al_sec target);
-
-// more precise but expensive, only use when needed
-void al_sleep_highres(al_sec dt);
-void al_sleep_nsec_highres(al_nsec dt);
-void al_sleep_until_highres(al_sec target);
-
 
 /// Convert nanoseconds to timecode string
 std::string toTimecode(al_nsec t, const std::string& format="D:H:M:S:m:u");

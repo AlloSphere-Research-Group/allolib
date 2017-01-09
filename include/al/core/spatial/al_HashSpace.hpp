@@ -2,7 +2,6 @@
 #define INCLUDE_AL_HASHSPACE_HPP
 
 #include "al/core/math/al_Vec.hpp"
-#include "al/core/types/al_Array.hpp"
 
 #include <vector>
 

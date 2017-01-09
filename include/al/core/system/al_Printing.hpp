@@ -43,7 +43,15 @@
 */
 
 #include <stdio.h>
-#include "al/core/system/al_Config.h"
+#include <cstdint>
+#ifdef AL_WINDOWS
+  #define AL_PRINTF_LL "I64"
+#else
+  #define AL_PRINTF_LL "ll"
+#endif
+
+// #define AL_STRINGIFY(...) #__VA_ARGS__
+#define AL_DEBUGLN printf("In %s: line %d\n", __FILE__, __LINE__);
 
 namespace al{
 

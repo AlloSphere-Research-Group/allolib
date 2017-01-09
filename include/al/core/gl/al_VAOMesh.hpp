@@ -8,12 +8,14 @@
 
 namespace al {
 
-// layout for (GL) <-> (glsl shader)
+// layout (attribute location) for (GL) <-> (glsl shader)
 enum AttribLayout: unsigned int {
   ATTRIB_POSITION = 0,
   ATTRIB_COLOR = 1,
-  ATTRIB_TEXCOORD = 2,
+  ATTRIB_TEXCOORD_2D = 2,
   ATTRIB_NORMAL = 3,
+  ATTRIB_TEXCOORD_3D = 4, // also could be used for other purposes
+  ATTRIB_TEXCOORD_1D = 5, //
 };
 
 class VAOMesh : public Mesh {
@@ -32,10 +34,12 @@ public:
     MeshAttrib
         position_att {ATTRIB_POSITION, 4},
         color_att {ATTRIB_COLOR, 4},
-        // texcoord_att {ATTRIB_TEXCOORD, 2},
-        normal_att {ATTRIB_NORMAL, 3}
-        // index_att
+        texcoord2d_att {ATTRIB_TEXCOORD_2D, 2},
+        normal_att {ATTRIB_NORMAL, 3},
+        texcoord3d_att {ATTRIB_TEXCOORD_3D, 3},
+        texcoord1d_att {ATTRIB_TEXCOORD_1D, 1}
     ;
+    BufferObject index_buffer;
 
     void init();
     void update();

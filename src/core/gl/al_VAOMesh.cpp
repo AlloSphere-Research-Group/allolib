@@ -1,4 +1,5 @@
 #include "al/core/gl/al_VAOMesh.hpp"
+#include <iostream>
 
 using namespace al;
 
@@ -30,11 +31,23 @@ void VAOMesh::update() {
   vao.bind();
   updateAttrib(vertices(), position_att);
   updateAttrib(colors(), color_att);
-  // updateAttrib(texCoord2s(), texcoord_att, 2);
+  updateAttrib(texCoord2s(), texcoord2d_att);
   updateAttrib(normals(), normal_att);
-  // updateAttrib(normals(), normal_att);
-  // updateAttrib(indices(), index_buffer);
+  updateAttrib(texCoord3s(), texcoord3d_att);
+  updateAttrib(texCoord1s(), texcoord1d_att);
   vao.unbind();
+  if (indices().size() > 0) {
+    if (!index_buffer.created()) {
+      index_buffer.create();
+      index_buffer.bufferType(GL_ELEMENT_ARRAY_BUFFER);
+    }
+    index_buffer.bind();
+    index_buffer.data(
+      sizeof(unsigned int) * indices().size(),
+      indices().data()
+    );
+    index_buffer.unbind();
+  }
 }
 
 template <typename T>
@@ -80,7 +93,14 @@ template void VAOMesh::updateAttrib<Vec4f>(
 );
 
 void VAOMesh::draw() {
-  bind();
-  glDrawArrays(mGLPrimMode, 0, vertices().size());
-  unbind();
+  vao.bind();
+  if (indices().size() > 0) {
+    index_buffer.bind();
+    glDrawElements(mGLPrimMode, indices().size(), GL_UNSIGNED_INT, NULL);
+    index_buffer.unbind();
+  }
+  else {
+    glDrawArrays(mGLPrimMode, 0, vertices().size());
+  }
+  vao.unbind();
 }

@@ -66,28 +66,6 @@ void al_sleep_until(al_sec target) {
   if (dt > 0) al_sleep(dt);
 }
 
-void al_sleep_highres(al_sec dt) {
-  al_sleep_nsec_highres(dt * al_time_s2ns);
-}
-
-void al_sleep_nsec_highres(al_nsec dt) {
-  auto start = std::chrono::steady_clock::now();
-  auto passed = 0ll;
-  while (passed < dt) {
-      std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-      passed = al_nsec(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(
-          std::chrono::steady_clock::now() - start
-        ).count()
-      );
-  }
-}
-
-void al_sleep_until_highres(al_sec target) {
-  al_sec dt = target - al_system_time();
-  if (dt > 0) al_sleep_highres(dt);
-}
-
 std::string toTimecode(al_nsec t, const std::string& format){
   unsigned day = t/(al_nsec(1000000000) * 60 * 60 * 24); // basically for overflow
   unsigned hrs = t/(al_nsec(1000000000) * 60 * 60) % 24;

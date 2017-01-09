@@ -48,7 +48,7 @@
 #include <iostream>
 #include <limits.h>
 #include <sstream>    /* string conversion */
-#include "al/core/system/al_Config.h"
+#include <cstdint>
 
 namespace al{
 

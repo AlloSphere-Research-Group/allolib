@@ -52,7 +52,6 @@ set(core_headers
   include/al/core/gl/al_BufferObject.hpp
   # include/al/core/gl/al_CubeMapFBO.hpp
   include/al/core/gl/al_FBO.hpp
-  # include/al/core/gl/al_FrameBufferGL.hpp
   include/al/core/gl/al_GLEW.hpp
   include/al/core/gl/al_GLFW.hpp
   include/al/core/gl/al_GPUObject.hpp
@@ -60,7 +59,6 @@ set(core_headers
   include/al/core/gl/al_Lens.hpp
   include/al/core/gl/al_Light.hpp
   include/al/core/gl/al_Mesh.hpp
-  # include/al/core/gl/al_MeshVBO.hpp
   include/al/core/gl/al_Shader.hpp
   # include/al/core/gl/al_Shapes.hpp
   include/al/core/gl/al_Stereographic.hpp
@@ -88,14 +86,9 @@ set(core_headers
   include/al/core/spatial/al_DistAtten.hpp
   include/al/core/spatial/al_HashSpace.hpp
   include/al/core/spatial/al_Pose.hpp
-  include/al/core/system/al_Config.h
-  # include/al/core/system/al_Info.hpp
   include/al/core/system/al_Printing.hpp
   include/al/core/system/al_Time.hpp
   include/al/core/system/al_Watcher.hpp
-  # include/al/core/system/pstdint.h
-  # include/al/core/types/al_Array.h
-  # include/al/core/types/al_Array.hpp
   include/al/core/types/al_Buffer.hpp
   include/al/core/types/al_Color.hpp
   include/al/core/types/al_Conversion.hpp
@@ -115,7 +108,6 @@ set(core_sources
   src/core/gl/al_Lens.cpp
   src/core/gl/al_Light.cpp
   src/core/gl/al_Mesh.cpp
-  # src/core/gl/al_MeshVBO.cpp
   src/core/gl/al_Shader.cpp
   # src/core/gl/al_Shapes.cpp
   src/core/gl/al_Stereographic.cpp
@@ -125,13 +117,9 @@ set(core_sources
   src/core/protocol/al_Serialize.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
-  # src/core/system/al_Info.cpp
-  # src/core/system/al_InfoOSX.mm
   src/core/system/al_Printing.cpp
   src/core/system/al_Time.cpp
   src/core/system/al_Watcher.cpp
-  # src/core/types/al_Array.cpp
-  # src/core/types/al_Array_C.c
   src/core/types/al_Color.cpp
 )
 

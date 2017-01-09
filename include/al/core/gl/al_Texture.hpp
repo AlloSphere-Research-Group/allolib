@@ -70,6 +70,7 @@ public:
   Texture();
   virtual ~Texture();
 
+  // TODO
   // void create1D();
 
   void create2D(
@@ -79,6 +80,7 @@ public:
     unsigned int type = GL_UNSIGNED_BYTE
   );
 
+  // TODO
   // void create3D();
 
   /// Bind the texture (to a multitexture unit)
@@ -159,12 +161,10 @@ public:
   /// remotely.
   /// give unit if wanted a specific binding point to be used
   /// -1 for unit if don't want to bind internally (manual binding from outside)
-  void submit(const void * pixels, int unit=0);
+  void submit(const void * pixels);
 
   // update the changes in params or settings
-  /// give unit if wanted a specific binding point to be used
-  /// -1 for unit if don't want to bind internally (manual binding from outside)
-  void update(int unit=0, bool force=false);
+  void update(bool force=false);
 
 protected:
   virtual void onCreate() override;

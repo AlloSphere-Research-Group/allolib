@@ -1,4 +1,3 @@
-#include "allocore/system/al_Config.h" // al_sec
 #include "allocore/io/al_Socket.hpp" // Socket::hostname
 #include "allocore/protocol/al_Zeroconf.hpp"
 

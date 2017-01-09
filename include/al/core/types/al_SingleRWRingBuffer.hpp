@@ -43,8 +43,7 @@
 */
 
 #include <cstring>
-
-#include "al/core/system/al_Config.h"
+#include <cstdint>
 
 namespace al {
 

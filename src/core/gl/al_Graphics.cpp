@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 #include "al/core/system/al_Printing.hpp"
-#include "al/core/types/al_Array.hpp"
 #include "al/core/gl/al_Graphics.hpp"
 
 namespace al{
@@ -80,33 +79,33 @@ template<> Graphics::DataType Graphics::toDataType<unsigned int>(){ return UINT;
 template<> Graphics::DataType Graphics::toDataType<float>(){ return FLOAT; }
 template<> Graphics::DataType Graphics::toDataType<double>(){ return DOUBLE; }
 
-Graphics::DataType Graphics::toDataType(AlloTy v){
-  switch(v){
-    case AlloFloat32Ty: return FLOAT;
-    case AlloFloat64Ty: return DOUBLE;
-    case AlloSInt8Ty: return BYTE;
-    case AlloUInt8Ty: return UBYTE;
-    case AlloSInt16Ty:  return SHORT;
-    case AlloUInt16Ty:  return USHORT;
-    case AlloSInt32Ty:  return INT;
-    case AlloUInt32Ty:  return UINT;
-    default:      return BYTE;
-  }
-}
+// Graphics::DataType Graphics::toDataType(AlloTy v){
+//   switch(v){
+//     case AlloFloat32Ty: return FLOAT;
+//     case AlloFloat64Ty: return DOUBLE;
+//     case AlloSInt8Ty: return BYTE;
+//     case AlloUInt8Ty: return UBYTE;
+//     case AlloSInt16Ty:  return SHORT;
+//     case AlloUInt16Ty:  return USHORT;
+//     case AlloSInt32Ty:  return INT;
+//     case AlloUInt32Ty:  return UINT;
+//     default:      return BYTE;
+//   }
+// }
 
-AlloTy Graphics :: toAlloTy(Graphics::DataType v) {
-  switch (v) {
-    case BYTE:    return AlloSInt8Ty;
-    case UBYTE:   return AlloUInt8Ty;
-    case SHORT:   return AlloSInt16Ty;
-    case USHORT:  return AlloUInt16Ty;
-    case INT:   return AlloSInt32Ty;
-    case UINT:    return AlloUInt32Ty;
-    case FLOAT:   return AlloFloat32Ty;
-    case DOUBLE:  return AlloFloat64Ty;
-    default:    return AlloVoidTy;
-  }
-}
+// AlloTy Graphics :: toAlloTy(Graphics::DataType v) {
+//   switch (v) {
+//     case BYTE:    return AlloSInt8Ty;
+//     case UBYTE:   return AlloUInt8Ty;
+//     case SHORT:   return AlloSInt16Ty;
+//     case USHORT:  return AlloUInt16Ty;
+//     case INT:   return AlloSInt32Ty;
+//     case UINT:    return AlloUInt32Ty;
+//     case FLOAT:   return AlloFloat32Ty;
+//     case DOUBLE:  return AlloFloat64Ty;
+//     default:    return AlloVoidTy;
+//   }
+// }
 
 const char * Graphics::errorString(bool verbose){
   GLenum err = glGetError();

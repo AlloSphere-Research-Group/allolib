@@ -19,6 +19,7 @@ public:
 
       layout (location = 0) in vec4 position;
       layout (location = 1) in vec4 color;
+      layout (location = 2) in vec2 texcoord;
 
       out vec4 _color;
 
@@ -98,6 +99,24 @@ public:
       // mesh.color(0.0, 1.0, 0.0);
       mesh.vertex(0, 0.5, 0);
       // mesh.color(0.0, 0.0, 1.0);
+      mesh.update();
+    }
+    if (k.key() == 'z') {
+      mesh.reset();
+      mesh.vertex(-0.5, -0.5, 0);
+      mesh.color(0.0, 0.0, 0.0);
+      mesh.vertex(0.5, -0.5, 0);
+      mesh.color(1.0, 0.0, 0.0);
+      mesh.vertex(0.5, 0.5, 0);
+      mesh.color(1.0, 1.0, 0.0);
+      mesh.vertex(-0.5, 0.5, 0);
+      mesh.color(0.0, 1.0, 0.0);
+      mesh.index(0);
+      mesh.index(1);
+      mesh.index(2);
+      mesh.index(0);
+      mesh.index(2);
+      mesh.index(3);
       mesh.update();
     }
   }

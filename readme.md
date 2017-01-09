@@ -4,15 +4,12 @@
 
 [ ] al_Config.h >> could this now be replaced with std headers? (pstdint.h)and 
 
-[ ] client side data for Texture
+[ ] client side data for Texture (al::ImageTexture?)
 
 * mark fuctions that needs to be commented out temporarily with:
 `/* !LATER! */`
 
 * al_Memory -> smart pointer?
-
-[ ] window::cursorhide could be set by window::cursor(None)
-[ ] multiple key down handling
 
 [ ] window(glfw) get_error
 

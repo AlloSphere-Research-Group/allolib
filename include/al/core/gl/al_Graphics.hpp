@@ -47,7 +47,6 @@
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/math/al_Quat.hpp"
 #include "al/core/math/al_Matrix4.hpp"
-#include "al/core/types/al_Array.hpp"
 #include "al/core/types/al_Color.hpp"
 #include "al/core/system/al_Printing.hpp"
 
@@ -550,10 +549,10 @@ public:
   static DataType toDataType();
 
   /// Returns AlloTy type for a given GL data type:
-  static AlloTy toAlloTy(DataType v);
+  // static AlloTy toAlloTy(DataType v);
 
   /// Returns DataType for a given AlloTy
-  static DataType toDataType(AlloTy type);
+  // static DataType toDataType(AlloTy type);
 
 
   void draw(int numVertices, const Mesh& v);

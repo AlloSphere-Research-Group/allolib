@@ -47,7 +47,7 @@ void Texture::create2D(
   filterMin(GL_LINEAR);
   filterMag(GL_LINEAR);
   mipmap(false);
-  update(-1, true);
+  update(true);
   unbind();
 }
 
@@ -64,8 +64,6 @@ void Texture::bind(int unit) {
   glActiveTexture(GL_TEXTURE0 + unit);
   glBindTexture(target(), id());
   // AL_GRAPHICS_ERROR("binding texture", id());
-  // no force update, no internal binding (cuz we already did the binding)
-  update(-1, false);
 }
 
 void Texture::unbind(int unit) {
@@ -119,14 +117,9 @@ void Texture::mipmap(bool b) {
   update_param(b, mUseMipmap, mUseMipmapUpdated);
 }
 
-void Texture::submit(const void * pixels, int unit) {
+void Texture::submit(const void * pixels) {
   if (!pixels) {
     return;
-  }
-  // (unit == -1) means binding is handled outside this method
-  // so don't bind internally
-  if (unit >= 0) {
-    bind(unit);
   }
 
   // AL_GRAPHICS_ERROR("before Texture::submit (glTexSubImage)", id());
@@ -157,18 +150,11 @@ void Texture::submit(const void * pixels, int unit) {
   }
   // AL_GRAPHICS_ERROR("Texture::submit (glTexSubImage)", id());
 
-  update(-1, true); // force update, no internal binding
-  if (unit >= 0) {
-    unbind(unit);
-  }
+  // update mipmap with new data
+  mUseMipmapUpdated = true;
 }
 
-void Texture::update(int unit, bool force) {
-  // (unit == -1) means binding is handled outside this method
-  // so don't bind internally
-  if (unit >= 0) {
-    bind(unit);
-  }
+void Texture::update(bool force) {
   if (mParamsUpdated || force) {
     glTexParameteri(target(), GL_TEXTURE_MAG_FILTER, filterMag());
     glTexParameteri(target(), GL_TEXTURE_MIN_FILTER, filterMin());
@@ -187,9 +173,6 @@ void Texture::update(int unit, bool force) {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
     }
     mUseMipmapUpdated = false;
-  }
-  if (unit >= 0) {
-    unbind(unit);
   }
 }
 
