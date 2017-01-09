@@ -24,6 +24,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 else ()
 endif ()
 
+# options
+# AL_ENABLE_DEBUG
+
 set(CMAKE_BUILD_TYPE Debug)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 if (WINDOWS)

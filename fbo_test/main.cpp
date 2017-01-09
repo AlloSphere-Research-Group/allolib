@@ -61,9 +61,7 @@ public:
 
     shader.compile(vert_source, frag_source);
     shader.begin();
-    auto loc = glGetUniformLocation(shader.id(), "tex");
-    glUniform1f(loc, 0);
-    //shader.uniform1("tex", 0);
+    shader.uniform("tex", 0);
     shader.end();
     
     int w = 16;
@@ -114,7 +112,7 @@ public:
     }
     else {
       GLfloat const clear_color[] = {0.0f, 0.0f, 1.0f, 1.0f};
-      glClearBufferfv(GL_COLOR, 0, clear_color); 
+      glClearBufferfv(GL_COLOR, 0, clear_color);
     }
 
     shader.begin();

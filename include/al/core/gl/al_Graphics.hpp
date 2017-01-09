@@ -201,34 +201,13 @@ public:
     FILL          = GL_FILL         /**< Render vertices normally according to primitive */
   };
 
-  // enum Primitive {
-  //   POINTS          = GL_POINTS,        /**< Points */
-  //   LINES         = GL_LINES,         /**< Connect sequential vertex pairs with lines */
-  //   LINE_STRIP        = GL_LINE_STRIP,      /**< Connect sequential vertices with a continuous line */
-  //   LINE_LOOP       = GL_LINE_LOOP,       /**< Connect sequential vertices with a continuous line loop */
-  //   TRIANGLES       = GL_TRIANGLES,       /**< Draw triangles using sequential vertex triplets */
-  //   TRIANGLE_STRIP      = GL_TRIANGLE_STRIP,    /**< Draw triangle strip using sequential vertices */
-  //   TRIANGLE_FAN      = GL_TRIANGLE_FAN,      /**< Draw triangle fan using sequential vertices */
-  //   QUADS         = GL_QUADS,         /**< Draw quadrilaterals using sequential vertex quadruplets */
-  //   QUAD_STRIP        = GL_QUAD_STRIP,      /**< Draw quadrilateral strip using sequential vertices */
-  //   POLYGON         = GL_POLYGON        /**< Draw polygon using sequential vertices */
-  // };
-
-  enum ShadeModel {
-    FLAT          = GL_FLAT,          /**< */
-    SMOOTH          = GL_SMOOTH         /**< */
-  };
-
-
 
   Graphics();
   virtual ~Graphics();
 
-
   /// Get the temporary mesh
   Mesh& mesh(){ return mMesh; }
   const Mesh& mesh() const { return mMesh; }
-
 
   // Capabilities
 
@@ -301,7 +280,7 @@ public:
   void polygonFill(Face f=FRONT_AND_BACK){ polygonMode(FILL,f); }
 
   /// Set shading model
-  void shadeModel(ShadeModel m);
+  // void shadeModel(ShadeModel m);
 
 
   /// Set blend mode
@@ -654,7 +633,7 @@ inline void Graphics::pointAtten(float c2, float c1, float c0){
   glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, att);
 }
 inline void Graphics::polygonMode(PolygonMode m, Face f){ glPolygonMode(f,m); }
-inline void Graphics::shadeModel(ShadeModel m){ glShadeModel(m); }
+// inline void Graphics::shadeModel(ShadeModel m){ glShadeModel(m); }
 inline void Graphics::currentColor(float r, float g, float b, float a){ glColor4f(r,g,b,a); }
 
 inline Graphics::AttributeBit operator| (
