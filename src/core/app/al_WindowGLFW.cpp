@@ -202,12 +202,13 @@ bool Window::implCreate(){
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); // if OSX, this is a must
+  glfwWindowHint(GLFW_DECORATED, mDecorated ? GLFW_TRUE : GLFW_FALSE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_DECORATED, mDecorated? GLFW_TRUE : GLFW_FALSE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); // if OSX, this is a must
+  
 
   // TODO
-  // bits: DOUBLE_BUF STENCIL_BUF etc. ...
+  // bits: STENCIL_BUF etc. ...
 
   mImpl->mGLFWwindow = glfwCreateWindow(w, h, mTitle.c_str(), NULL, NULL);
   if (!mImpl->created()) {
@@ -233,7 +234,7 @@ bool Window::implCreate(){
   std::cout << "highres factor: " << highres_factor_w << ", " << highres_factor_h << std::endl;
 
   mImpl->registerCBs();
-  vsync(mVSync); // glfwSwapInterval(1);
+  vsync(mVSync);
   WindowImpl::windows()[mImpl->mGLFWwindow] = mImpl.get();
   return true;
 }
@@ -284,7 +285,7 @@ void Window::implSetFullScreen() {
     glfwSetWindowMonitor(
       mImpl->mGLFWwindow, primary,
       0, 0, mode->width, mode->height,
-      GLFW_DONT_CARE // refreshRate 
+      mode->refreshRate
     );
     glfwGetWindowSize(mImpl->mGLFWwindow, &mFullScreenDim.w, &mFullScreenDim.h);
     glfwGetWindowPos(mImpl->mGLFWwindow, &mFullScreenDim.l, &mFullScreenDim.t);

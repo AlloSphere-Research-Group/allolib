@@ -12,3 +12,8 @@ test/al_test
 */al_test
 libs/glfw/
 libs/glew/
+build/
+*/build/
+.vs/
+Debug/
+*/Debug/

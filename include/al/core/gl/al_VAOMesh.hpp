@@ -41,7 +41,6 @@ public:
     ;
     BufferObject index_buffer;
 
-    void init();
     void update();
 
     void bind();

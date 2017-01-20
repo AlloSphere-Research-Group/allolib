@@ -7,7 +7,13 @@ al::WindowApp::WindowApp() : should_quit(false) {
   append(stdControls);
   append(windowEventHandler());
 }
+
 al::WindowApp::~WindowApp() {}
+
+void al::WindowApp::loop(double dt) {
+    onAnimate(al_time_ns2s * deltaTime);
+    onDraw();
+}
 
 void al::WindowApp::start(
   const Window::Dim& dim,
@@ -18,21 +24,20 @@ void al::WindowApp::start(
   mTitle = title;
   mDisplayMode = mode;
   al::glfw::init();
-  beforeCreate();
+  onInit();
   create();
   onCreate();
-  al_nsec dt = interval;
-  nsec = 0;
+  deltaTime = interval;
+  al_nsec before_loop = 0;
   al_start_steady_clock();
   while (!should_quit && created()) {
-    onAnimate(al_time_ns2s * dt);
-    onDraw();
+    loop(deltaTime);
     refresh();
     al_nsec after_loop = al_steady_time_nsec();
-    al_nsec to_sleep = std::max(interval - (after_loop - nsec), 0ll);
+    al_nsec to_sleep = std::max(interval - (after_loop - before_loop), 0ll);
     al_sleep_nsec(to_sleep);
-    dt = after_loop + to_sleep - nsec;
-    nsec = after_loop + to_sleep;
+    deltaTime = (after_loop + to_sleep) - before_loop; // new before loop - old before loop
+    before_loop = after_loop + to_sleep;
   }
   onExit();
   al::glfw::destroy();
@@ -43,21 +48,24 @@ void al::WindowApp::quit() {
 }
 
 void al::WindowApp::fps(double f) {
-  _fps = f;
+  mFPSWanted = f;
   interval = al_time_s2ns / f;
 }
 
-double al::WindowApp::fps() {
-  return _fps;
+double al::WindowApp::fpsWanted() {
+  return mFPSWanted;
 }
 
+double al::WindowApp::fps() {
+    return al_time_s2ns / deltaTime;
+}
 
 double al::WindowApp::sec() {
-  return nsec * al_time_ns2s;
+  return  al_steady_time_nsec() * al_time_ns2s;
 }
 
 double al::WindowApp::msec() {
-  return nsec * 1.0e-6;
+  return  al_steady_time_nsec() * 1.0e-6;
 }
 
 

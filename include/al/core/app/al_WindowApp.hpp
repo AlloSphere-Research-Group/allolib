@@ -20,28 +20,33 @@ class WindowApp : public Window, public WindowEventHandler {
 public:
   StandardWindowKeyControls stdControls;
   std::atomic<bool> should_quit;
-  al_nsec nsec = 0;
   al_nsec interval = 16666666ll; // 60 fps
-  double _fps = 60;
+  al_nsec deltaTime;
+  double mFPSWanted = 60;
 
   WindowApp();
   virtual ~WindowApp();
 
   void start(
-    const Window::Dim& dim = Window::Dim(900, 450),
-    const std::string title="AlloSystem 2",
+    const Window::Dim& dim = Window::Dim(100, 100, 900, 450),
+    const std::string title="AlloSystem",
     Window::DisplayMode mode = Window::DEFAULT_BUF
   );
   void quit();
 
   void fps(double f);
+  double fpsWanted();
   double fps();
 
+  // get time
   double sec();
-  double msec();
+  double msec(); // millis
+
+  // place for app specific behind-the-scene loop logic (stereo, omni, default shader)
+  void loop(double dt);
   
   // user override these
-  virtual void beforeCreate() {}
+  virtual void onInit() {}
   virtual void onCreate() {}
   virtual void onAnimate(double dt) {}
   virtual void onDraw() {}

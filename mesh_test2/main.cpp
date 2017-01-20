@@ -9,13 +9,13 @@ using namespace std;
 class MyApp : public WindowApp {
 public:
   ShaderProgram shader;
-  BufferObject position, color;
-  VAO vao;
   VAOMesh mesh;
 
   void onCreate() {
     string const vert_source = R"(
       #version 330
+
+      uniform mat4 m;
 
       layout (location = 0) in vec4 position;
       layout (location = 1) in vec4 color;
@@ -24,7 +24,7 @@ public:
       out vec4 _color;
 
       void main() {
-        gl_Position = position;
+        gl_Position = m * position;
         _color = color;
       }
     )";
@@ -48,15 +48,31 @@ public:
     mesh.color(1.0, 0.0, 0.0);
     mesh.vertex(0.5, -0.5, 0);
     mesh.color(0.0, 1.0, 0.0);
-    mesh.vertex(0, 0.5, 0);
+    mesh.vertex(-0.5, 0.5, 0);
     mesh.color(0.0, 0.0, 1.0);
+    mesh.vertex(-0.5, 0.5, 0);
+    mesh.color(0.0, 0.0, 1.0);
+    mesh.vertex(0.5, -0.5, 0);
+    mesh.color(0.0, 1.0, 0.0);
+    mesh.vertex(0.5, 0.5, 0);
+    mesh.color(0.0, 1.0, 1.0);
     mesh.update();
   }
 
   void onDraw() {
+    glViewport(0, 0, width(), height());
     GLfloat const clear_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
     glClearBufferfv(GL_COLOR, 0, clear_color);
+
+    float w = width();
+    float h = height();
+    Matrix4f mat = Matrix4f::rotate(sec(), 0, 0, 1);
+    mat = Matrix4f::scaling(h / w, 1.0f, 1.0f) * mat;
+
+    //Matrix4f proj = Matrix4f::perspective(60, w / h, 1, 100);
+    
     shader.begin();
+    shader.uniform("m", mat);
     mesh.draw();
     shader.end();
   }
@@ -120,7 +136,6 @@ public:
       mesh.update();
     }
   }
-
 };
 
 int main(int argc, char* argv[]) {

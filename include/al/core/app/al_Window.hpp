@@ -334,7 +334,7 @@ protected:
   Keyboard mKeyboard;
   Mouse mMouse;
   WindowEventHandlers mWindowEventHandlers;
-  Dim mDim {0, 0, 900, 450};
+  Dim mDim {100, 100, 900, 450};
   Dim mFullScreenDim {0};
   DisplayMode mDisplayMode = DEFAULT_BUF;
   std::string mTitle = "";
@@ -342,7 +342,7 @@ protected:
   bool mCursorHide = false;
   bool mFullScreen = false;
   bool mVisible = false;
-  bool mVSync = false;
+  bool mVSync = true;
   bool mDecorated = true;
 
   // for high pixel density monitors (RETINA, etc.)
