@@ -12,6 +12,7 @@ public:
   std::vector<Matrix4f> stack;
 
   MatrixStack() {
+    // default constructor make identity matrix
     stack.emplace_back();
   }
 
@@ -31,13 +32,16 @@ public:
   Matrix4f get() {
     return stack.back();
   }
+
+  void setIdentity() {
+    stack.back().setIdentity();
+  }
 };
 
 }
+
 using namespace al;
 using namespace std;
-
-
 
 class MyApp : public WindowApp {
 public:
