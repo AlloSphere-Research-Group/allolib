@@ -140,7 +140,7 @@ public:
 
 int main(int argc, char* argv[]) {
   MyApp app;
-  app.dimensions(300, 300, 1000, 500);
+  app.dimensions(1000, 500);
   app.title("mesh test");
   app.start();
   return 0;

@@ -126,7 +126,7 @@ void Window::dimensions(const Dim& v){
 }
 
 void Window::dimensions(int w, int h) {
-  return dimensions(Window::Dim(0, 0, w, h));
+  return dimensions(Window::Dim(mDim.l, mDim.t, w, h));
 }
 
 void Window::dimensions(int x, int y, int w, int h) {
