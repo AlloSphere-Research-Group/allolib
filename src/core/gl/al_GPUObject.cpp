@@ -1,8 +1,10 @@
 #include "al/core/gl/al_GPUObject.hpp"
 
-// #include <map>
-// #include <set>
+ //#include <map>
+ //#include <set>
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 using namespace al;
 
@@ -58,6 +60,8 @@ int GPUContext::defaultContextID(){
 }
 
 */
+
+
 
 /*
 Scenario:
@@ -152,10 +156,19 @@ void GPUContext :: contextDestroy() { //printf("GPUContext::contextDestroy %d\n"
 
 */
 
+// ----------
+
+typedef std::vector<al::GPUObject*> GPUObjects;
+
+GPUObjects& getGPUObjects() {
+    static GPUObjects v;
+    return v;
+}
+
 GPUObject::GPUObject()
 : mID(0), mResubmit(false)
 {
-  //
+    //
 }
 
 // GPUObject::GPUObject(int ctx)
@@ -189,11 +202,29 @@ bool GPUObject::created() const {
 void GPUObject::create(){
   if(created()){ destroy(); }
   onCreate();
+  getGPUObjects().push_back(this);
 }
 
 void GPUObject::destroy(){
   if(created()) onDestroy();
   mID=0;
+  auto& v = getGPUObjects();
+  v.erase(std::remove(v.begin(), v.end(), this), v.end());
+}
+
+void GPUObject::destroyAll() {
+    auto& v = getGPUObjects();
+    if (v.size() == 0) {
+        return;
+    }
+    int i = v.size() - 1;
+    for (; i >= 0; i--) {
+        auto g = v[i];
+        g->destroy();
+    }
+    //for (auto g : v) {
+    //    g->destroy();
+    //}
 }
 
 // void GPUObject :: contextRegister(int ctx) {

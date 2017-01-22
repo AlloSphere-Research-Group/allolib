@@ -96,15 +96,15 @@ protected:
 
 */
 
-
 /// Base class for allocated resources on the GPU
 ///
 /// @ingroup allocore
 class GPUObject{
 public:
+    GPUObject();
 
   /// @param[in] ctx  a GPU context ID to attach to
-  GPUObject(/*int ctx = GPUContext::defaultContextID()*/);
+  //GPUObject(int ctx = GPUContext::defaultContextID());
 
   /// @param[in] ctx  a GPU context to attach to
   // GPUObject(GPUContext& ctx);
@@ -120,6 +120,8 @@ public:
 
   /// Destroys object on GPU
   void destroy();
+
+  static void destroyAll();
 
   /// Returns the assigned object id
   unsigned long id() const { return mID; }

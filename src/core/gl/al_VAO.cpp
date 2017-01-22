@@ -1,5 +1,7 @@
 #include "al/core/gl/al_VAO.hpp"
 
+#include <iostream>
+
 using namespace al;
     
 VAO::VAO() {

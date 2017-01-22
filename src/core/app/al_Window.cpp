@@ -73,6 +73,14 @@ bool Window::create() {
 bool Window::created() const {return implCreated(); }
 void Window::refresh() { implRefresh(); }
 void Window::destroy(){ if(created()){ implDestroy(); } }
+bool Window::shouldClose() {
+    if (created()) {
+        return implShouldClose();
+    }
+    else {
+        return true;
+    }
+}
 
 Window::Dim Window::dimensions() const {
   if (!mFullScreen) { return mDim; }
@@ -119,6 +127,10 @@ void Window::dimensions(const Dim& v){
 
 void Window::dimensions(int w, int h) {
   return dimensions(Window::Dim(0, 0, w, h));
+}
+
+void Window::dimensions(int x, int y, int w, int h) {
+    return dimensions(Window::Dim(x, y, w, h));
 }
 
 Window::DisplayMode Window::displayMode() const {

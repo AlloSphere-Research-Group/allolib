@@ -27,11 +27,7 @@ public:
   WindowApp();
   virtual ~WindowApp();
 
-  void start(
-    const Window::Dim& dim = Window::Dim(100, 100, 900, 450),
-    const std::string title="AlloSystem",
-    Window::DisplayMode mode = Window::DEFAULT_BUF
-  );
+  void start();
   void quit();
 
   void fps(double f);

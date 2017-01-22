@@ -8,7 +8,7 @@ using namespace al;
 void glfw::init() {
   static bool inited = false;
   if (inited) {
-    std::cout << "GLFW already initialized" << std::endl;
+    //std::cout << "GLFW already initialized" << std::endl;
     return;
   }
 

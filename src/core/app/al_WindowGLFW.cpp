@@ -149,6 +149,10 @@ public:
     win->callHandlersResize(w, h);
   }
 
+  //static void window_close_callback(GLFWwindow* window) {
+  //  glfwSetWindowShouldClose(window, GLFW_FALSE);
+  //}
+
   void registerCBs(){ 
     glfwSetKeyCallback(mGLFWwindow, cbKeyboard);
     glfwSetMouseButtonCallback(mGLFWwindow, cbMouse);
@@ -156,7 +160,7 @@ public:
     glfwSetCursorPosCallback(mGLFWwindow, cbMotion);
     // glfwSetWindowPosCallback(window, cb_windowpos);
     // glfwSetFramebufferSizeCallback(window, cb_framebuffersize);
-    // glfwSetWindowCloseCallback(window, cb_windowclose);
+    //glfwSetWindowCloseCallback(mGLFWwindow, window_close_callback);
     // glfwSetWindowRefreshCallback(window, cb_windowrefresh);
     // glfwSetWindowFocusCallback(window, cb_windowfocus);
     // glfwSetErrorCallback(errorCallback);
@@ -257,6 +261,15 @@ void Window::implDestroy() {
   mImpl->destroy();
 }
 
+bool Window::implShouldClose() {
+    if (glfwWindowShouldClose(mImpl->mGLFWwindow)) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 void Window::implSetCursor() {
   
 }
@@ -289,6 +302,7 @@ void Window::implSetFullScreen() {
     );
     glfwGetWindowSize(mImpl->mGLFWwindow, &mFullScreenDim.w, &mFullScreenDim.h);
     glfwGetWindowPos(mImpl->mGLFWwindow, &mFullScreenDim.l, &mFullScreenDim.t);
+    vsync(mVSync);
   }
   else {
     glfwSetWindowMonitor(
@@ -296,6 +310,7 @@ void Window::implSetFullScreen() {
       mDim.l, mDim.t, mDim.w, mDim.h,
       GLFW_DONT_CARE // refreshRate 
     );
+    vsync(mVSync);
   }
 }
 

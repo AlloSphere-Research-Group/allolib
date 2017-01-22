@@ -10,7 +10,7 @@ class MyApp : public WindowApp {
 public:
   ShaderProgram shader;
   VAOMesh mesh;
-
+  
   void onCreate() {
     string const vert_source = R"(
       #version 330
@@ -140,6 +140,8 @@ public:
 
 int main(int argc, char* argv[]) {
   MyApp app;
+  app.dimensions(300, 300, 1000, 500);
+  app.title("mesh test");
   app.start();
   return 0;
 }

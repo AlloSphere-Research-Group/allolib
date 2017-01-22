@@ -1,0 +1,65 @@
+cmake_minimum_required(VERSION 3.0)
+project(proj_al_test)
+
+# CHECK PLATFORM ###########################################
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(MACOS 1)
+  message("MACOS")
+  add_definitions(-DAL_OSX)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(LINUX 1)
+  message("LINUX")
+  add_definitions(-DAL_LINUX)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  if (CYGWIN)
+    set(WINDOWS_CYGWIN 1)
+    message("WINDOWS_CYGWIN")
+    # later change to AL_WINDOWS_CYGWIN?
+    add_definitions(-DAL_WINDOWS)
+  else () # WIN32
+    set(WINDOWS 1)
+    message("WINDOWS")
+    add_definitions(-DAL_WINDOWS)
+  endif()
+else ()
+endif ()
+
+# FLAGS ####################################################
+
+set(CMAKE_BUILD_TYPE Debug)
+if (WINDOWS)
+  set(CMAKE_CXX_FLAGS "/W2")
+else ()
+  set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
+endif (WINDOWS)
+
+# FIND LIBS ################################################
+
+find_package(OpenGL REQUIRED)
+if (WINDOWS)
+  # use static libs if windows (for now)
+  set(lib_path C:/Users/keehong/al_lib)
+  set(GLFW_INCLUDE_DIRS ${lib_path}/libs/glfw/include)
+  set(GLFW_LIBRARIES ${lib_path}/libs/glfw/lib-vc2015/glfw3.lib)
+  set(GLEW_INCLUDE_DIRS ${lib_path}/libs/glew/include)
+  set(GLEW_LIBRARIES ${lib_path}/libs/glew/lib/Release/x64/glew32s.lib)
+else ()
+  find_package(GLEW REQUIRED)
+  find_package(PkgConfig REQUIRED)
+  pkg_search_module(GLFW REQUIRED glfw3)
+endif (WINDOWS)
+
+add_executable(al_test main.cpp)
+
+target_include_directories(al_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+target_include_directories(al_test PRIVATE ${GLFW_INCLUDE_DIRS})
+target_include_directories(al_test PRIVATE ${GLEW_INCLUDE_DIRS})
+
+if (WINDOWS)
+	target_link_libraries(al_test ${CMAKE_CURRENT_SOURCE_DIR}/../Debug/al.lib)
+else()
+	target_link_libraries(al_test ${CMAKE_CURRENT_SOURCE_DIR}/../libal.a)
+endif (WINDOWS)
+target_link_libraries(al_test ${OPENGL_LIBRARY})
+target_link_libraries(al_test ${GLEW_LIBRARIES})
+target_link_libraries(al_test ${GLFW_LIBRARIES})

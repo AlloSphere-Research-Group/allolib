@@ -262,6 +262,8 @@ public:
   // refresh window (swap buffers, poll events, etc.)
   void refresh();
 
+  bool shouldClose();
+
   /// Destroy current window and its associated graphics context
   void destroy();
 
@@ -295,6 +297,7 @@ public:
   void cursorHideToggle();      ///< Toggle cursor hiding
   void dimensions(const Dim& v);  ///< Set dimensions
   void dimensions(int w, int h);  ///< Set dimensions
+  void dimensions(int x, int y, int w, int h);  ///< Set dimensions
   void displayMode(DisplayMode v);  ///< Set display mode; will recreate window if different from current
 
   /// This will make the window go fullscreen without borders and,
@@ -303,7 +306,7 @@ public:
   void fullScreenToggle(); ///< Toggle fullscreen
   void hide(); ///< Hide window (if showing)
   void iconify(); ///< Iconify window
-  void show(); ///< Show window (if hidden)
+  //void show(); ///< Show window (if hidden)
   void title(const std::string& v); ///< Set title
   void vsync(bool v); ///< Set whether to sync the frame rate to the monitor's refresh rate
   void decorated(bool b);
@@ -334,10 +337,10 @@ protected:
   Keyboard mKeyboard;
   Mouse mMouse;
   WindowEventHandlers mWindowEventHandlers;
-  Dim mDim {100, 100, 900, 450};
+  Dim mDim {100, 100, 800, 450};
   Dim mFullScreenDim {0};
   DisplayMode mDisplayMode = DEFAULT_BUF;
-  std::string mTitle = "";
+  std::string mTitle = "AlloSystem";
   Cursor mCursor = POINTER;
   bool mCursorHide = false;
   bool mFullScreen = false;
@@ -363,6 +366,7 @@ protected:
   void implHide();
   void implIconify();
   void implSetDecorated();
+  bool implShouldClose();
 
   Window& insert(WindowEventHandler& v, int i);
 
