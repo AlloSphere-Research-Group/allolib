@@ -37,6 +37,7 @@ endif (WINDOWS)
 
 # core dependencies
 find_package(OpenGL REQUIRED)
+
 if (WINDOWS)
   # use static libs if windows (for now)
   set(GLFW_INCLUDE_DIRS libs/glfw/include)
@@ -47,6 +48,12 @@ else ()
   find_package(GLEW REQUIRED)
   find_package(PkgConfig REQUIRED)
   pkg_search_module(GLFW REQUIRED glfw3)
+  pkg_search_module(PORTAUDIO REQUIRED portaudio-2.0)
+
+  # message(1 ${PORTAUDIO_INCLUDE_DIR})
+  message(2 ${PORTAUDIO_INCLUDE_DIRS}) # <- MACOS
+  # message(3 ${PORTAUDIO_LIBRARY})
+  message(4 ${PORTAUDIO_LIBRARIES}) # <- MACOS
 endif (WINDOWS)
 
 set(core_headers
@@ -68,6 +75,8 @@ set(core_headers
   include/al/core/gl/al_Texture.hpp
   include/al/core/gl/al_VAO.hpp
   include/al/core/gl/al_VAOMesh.hpp
+  include/al/core/io/al_AudioIO.hpp
+  include/al/core/io/al_AudioIOData.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
@@ -117,6 +126,8 @@ set(core_sources
   src/core/gl/al_Texture.cpp
   src/core/gl/al_VAO.cpp
   src/core/gl/al_VAOMesh.cpp
+  src/core/io/al_AudioIO.cpp
+  src/core/io/al_AudioIOData.cpp
   src/core/protocol/al_Serialize.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
@@ -150,13 +161,14 @@ list(APPEND sources
   # ${graphics_sources}
 )
 
-# static for now?
 add_library(al STATIC ${headers} ${sources})
 
 target_include_directories(al PRIVATE include)
 target_include_directories(al PRIVATE ${GLFW_INCLUDE_DIRS})
 target_include_directories(al PRIVATE ${GLEW_INCLUDE_DIRS})
+target_include_directories(al PRIVATE ${PORTAUDIO_INCLUDE_DIRS})
 
 target_link_libraries(al ${OPENGL_LIBRARY})
 target_link_libraries(al ${GLEW_LIBRARIES})
 target_link_libraries(al ${GLFW_LIBRARIES})
+target_link_libraries(al ${PORTAUDIO_LIBRARIES})

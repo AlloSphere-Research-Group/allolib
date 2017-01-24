@@ -20,6 +20,9 @@
 #include "al/core/gl/al_VAO.hpp"
 #include "al/core/gl/al_VAOMesh.hpp"
 
+#include "al/core/io/al_AudioIO.hpp"
+#include "al/core/io/al_AudioIOData.hpp"
+
 #include "al/core/math/al_Analysis.hpp"
 #include "al/core/math/al_Complex.hpp"
 #include "al/core/math/al_Constants.hpp"
