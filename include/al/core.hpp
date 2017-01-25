@@ -1,5 +1,9 @@
 #pragma once
 
+#include "al/core/app/al_AudioApp.hpp"
+#include "al/core/app/al_AudioIO.hpp"
+#include "al/core/app/al_AudioIOData.hpp"
+#include "al/core/app/al_FPS.hpp"
 #include "al/core/app/al_Window.hpp"
 #include "al/core/app/al_WindowApp.hpp"
 
@@ -19,9 +23,6 @@
 #include "al/core/gl/al_Texture.hpp"
 #include "al/core/gl/al_VAO.hpp"
 #include "al/core/gl/al_VAOMesh.hpp"
-
-#include "al/core/io/al_AudioIO.hpp"
-#include "al/core/io/al_AudioIOData.hpp"
 
 #include "al/core/math/al_Analysis.hpp"
 #include "al/core/math/al_Complex.hpp"

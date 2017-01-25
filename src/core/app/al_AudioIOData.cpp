@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cassert>
 
-#include "al/core/io/al_AudioIOData.hpp"
+#include "al/core/app/al_AudioIOData.hpp"
 
 namespace al{
 

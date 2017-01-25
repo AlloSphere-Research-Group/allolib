@@ -21,7 +21,7 @@ void glfw::init() {
   inited = true;
 }
 
-void glfw::destroy() {
+void glfw::terminate() {
   std::cout << "Terminating GLFW ... ";
   glfwTerminate();
   std::cout << "Done." << std::endl;

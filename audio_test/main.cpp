@@ -76,16 +76,9 @@ public:
   }
 };
 
-class AudioApp {
+class MyAudioApp : public AudioApp {
 public:
-  AudioIO mAudioIO;
-  AudioIO& audioIO(){ return mAudioIO; }
-  const AudioIO& audioIO() const { return mAudioIO; }
-  void initAudio(
-    double audioRate=44100, int audioBlockSize=128,
-    int audioOutputs=-1, int audioInputs=-1
-  );
-  virtual void onSound(AudioIOData& io){
+  void onSound(AudioIOData& io) {
     static double phase {0};
     // Set the base frequency to 55 Hz
     double freq = 55/io.framesPerSecond();
@@ -104,48 +97,18 @@ public:
       io.out(1) = out2*0.2;
     }
   }
-  bool usingAudio() const;
-  void start(){
-    if(usingAudio()) mAudioIO.start();
-  }
-  void exit(){
-    audioIO().close();
-  }
 };
 
-static void AppAudioCB(AudioIOData& io){
-  AudioApp& app = io.user<AudioApp>();
-  io.frame(0);
-  app.onSound(app.audioIO());
-}
-
-bool AudioApp::usingAudio() const {
-  return audioIO().callback == AppAudioCB;
-}
-
-void AudioApp::initAudio(
-  double audioRate, int audioBlockSize,
-  int audioOutputs, int audioInputs
-) {
-  mAudioIO.callback = AppAudioCB;
-  mAudioIO.user(this);
-  mAudioIO.framesPerSecond(audioRate);
-  mAudioIO.framesPerBuffer(audioBlockSize);
-  mAudioIO.channelsOut(audioOutputs);
-  mAudioIO.channelsIn(audioInputs);
-}
-
 int main(int argc, char* argv[]) {
-
-  AudioApp audioApp;
+  MyAudioApp audioApp;
   audioApp.initAudio();
-  audioApp.start();
+  audioApp.begin();
 
   MyApp app;
   app.dimensions(1000, 500);
   app.title("mesh test");
   app.start();
 
-  audioApp.exit();
+  audioApp.end();
   return 0;
 }

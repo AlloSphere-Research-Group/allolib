@@ -51,14 +51,13 @@ else ()
   find_package(PkgConfig REQUIRED)
   pkg_search_module(GLFW REQUIRED glfw3)
   pkg_search_module(PORTAUDIO REQUIRED portaudio-2.0)
-
-  # message(1 ${PORTAUDIO_INCLUDE_DIR})
-  message(2 ${PORTAUDIO_INCLUDE_DIRS}) # <- MACOS
-  # message(3 ${PORTAUDIO_LIBRARY})
-  message(4 ${PORTAUDIO_LIBRARIES}) # <- MACOS
 endif (WINDOWS)
 
 set(core_headers
+  include/al/core/app/al_AudioApp.hpp
+  include/al/core/app/al_AudioIO.hpp
+  include/al/core/app/al_AudioIOData.hpp
+  include/al/core/app/al_FPS.hpp
   include/al/core/app/al_Window.hpp
   include/al/core/app/al_WindowApp.hpp
   include/al/core/gl/al_BufferObject.hpp
@@ -77,8 +76,6 @@ set(core_headers
   include/al/core/gl/al_Texture.hpp
   include/al/core/gl/al_VAO.hpp
   include/al/core/gl/al_VAOMesh.hpp
-  include/al/core/io/al_AudioIO.hpp
-  include/al/core/io/al_AudioIOData.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
@@ -110,6 +107,10 @@ set(core_headers
 )
 
 set(core_sources
+  src/core/app/al_AudioApp.cpp
+  src/core/app/al_AudioIO.cpp
+  src/core/app/al_AudioIOData.cpp
+  src/core/app/al_FPS.cpp
   src/core/app/al_Window.cpp
   src/core/app/al_WindowApp.cpp
   src/core/app/al_WindowGLFW.cpp
@@ -128,8 +129,6 @@ set(core_sources
   src/core/gl/al_Texture.cpp
   src/core/gl/al_VAO.cpp
   src/core/gl/al_VAOMesh.cpp
-  src/core/io/al_AudioIO.cpp
-  src/core/io/al_AudioIOData.cpp
   src/core/protocol/al_Serialize.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp

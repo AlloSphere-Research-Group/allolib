@@ -8,7 +8,7 @@ namespace al {
 
 namespace glfw {
     void init();
-    void destroy();
+    void terminate();
 }
 
 }

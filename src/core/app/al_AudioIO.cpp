@@ -8,7 +8,7 @@
 
 #include "portaudio.h"
 // #include "al/core/system/al_Config.h"
-#include "al/core/io/al_AudioIO.hpp"
+#include "al/core/app/al_AudioIO.hpp"
 
 namespace al{
 

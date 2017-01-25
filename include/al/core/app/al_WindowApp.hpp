@@ -11,36 +11,32 @@
 // younkeehong@gmail.com
 
 #include "al/core/app/al_Window.hpp"
-#include "al/core/system/al_Time.hpp"
+#include "al/core/app/al_FPS.hpp"
+
 #include <atomic>
 
 namespace al {
 
-class WindowApp : public Window, public WindowEventHandler {
+class WindowApp : public Window, public WindowEventHandler, public FPS {
 public:
   StandardWindowKeyControls stdControls;
-  std::atomic<bool> should_quit;
-  al_nsec interval = 16666666ll; // 60 fps
-  al_nsec deltaTime;
-  double mFPSWanted = 60;
+  std::atomic<bool> mShouldQuitApp;
 
   WindowApp();
   virtual ~WindowApp();
 
-  void start();
   void quit();
+  bool shouldQuit();
 
-  void fps(double f);
-  double fpsWanted();
-  double fps();
+  void start();
 
-  // get time
-  double sec();
-  double msec(); // millis
+  // init glfw and open a window
+  virtual void open();
+  // app specific behind-the-scene loop logic (stereo, omni, default shader)
+  virtual void loop(double dt);
+  // destroy gpu objects, close window, terminate glfw
+  virtual void close();
 
-  // place for app specific behind-the-scene loop logic (stereo, omni, default shader)
-  void loop(double dt);
-  
   // user override these
   virtual void onInit() {}
   virtual void onCreate() {}
