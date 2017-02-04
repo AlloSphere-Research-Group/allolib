@@ -166,8 +166,8 @@ void Graphics::fog(float end, float start, const Color& c){
 
 void Graphics::viewport(int x, int y, int width, int height) {
   glViewport(x, y, width, height);
-  enable(SCISSOR_TEST);
-  glScissor(x, y, width, height);
+  //enable(SCISSOR_TEST);
+  //glScissor(x, y, width, height);
 }
 
 Viewport Graphics::viewport() const {

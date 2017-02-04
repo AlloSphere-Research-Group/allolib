@@ -75,6 +75,37 @@
 
 namespace al {
 
+    class MatrixStack {
+    public:
+        std::vector<Matrix4f> stack;
+
+        MatrixStack() {
+            // default constructor make identity matrix
+            stack.emplace_back();
+        }
+
+        void push() {
+            Matrix4f m = stack.back();
+            stack.push_back(m);
+        }
+
+        void pop() {
+            stack.pop_back();
+        }
+
+        void mult(Matrix4f const& m) {
+            stack.back() = m * stack.back();
+        }
+
+        Matrix4f get() {
+            return stack.back();
+        }
+
+        void setIdentity() {
+            stack.back().setIdentity();
+        }
+    };
+
 /// A framed area on a display screen
 /// @ingroup allocore
 struct Viewport {
@@ -324,13 +355,13 @@ public:
 
 
   /// Clear frame buffer(s)
-  void clear(AttributeBit bits);
+  //void clear(AttributeBit bits);
 
   /// Set clear color
-  void clearColor(float r, float g, float b, float a);
+  //void clearColor(float r, float g, float b, float a);
 
   /// Set clear color
-  void clearColor(const Color& color);
+  //void clearColor(const Color& color);
 
 
   /// Set linear fog parameters
@@ -387,6 +418,9 @@ public:
   void projection(const Matrix4d& m){ matrixMode(PROJECTION); loadMatrix(m); }
   void projection(const Matrix4f& m){ matrixMode(PROJECTION); loadMatrix(m); }
 
+  Matrix4f modelMatrix() {
+      return model_stack.get();
+  }
 
 
   /// Rotate current matrix
@@ -398,7 +432,7 @@ public:
   void rotate(double angle, double x=0., double y=0., double z=1.);
 
   /// Rotate current matrix
-  void rotate(const Quatd& q);
+  void rotate(const Quatf& q);
 
   /// Rotate current matrix
 
@@ -536,7 +570,41 @@ public:
 
   void draw(int numVertices, const Mesh& v);
 
+  void setClearColor(float r, float g, float b, float a = 1) {
+      mClearColor.set(r, g, b, a);
+  }
+
+  void clear(int drawbuffer=0) {
+      glClearBufferfv(GL_COLOR, drawbuffer, mClearColor.components);
+  }
+
+  void clear(float r, float g, float b, float a = 1, int drawbuffer = 0) {
+      setClearColor(r, g, b, a);
+      clear(drawbuffer);
+  }
+
+  void clear(Color const& c, int drawbuffer = 0) {
+      setClearColor(c.r, c.g, c.b, c.a);
+      clear(drawbuffer);
+  }
+
+  void setClearDepth(float d) {
+      mClearDepth = d;
+  }
+
+  void clearDepth() {
+      glClearBufferfv(GL_COLOR, 0, &mClearDepth);
+  }
+
+  void clearDepth(float d) {
+      setClearDepth(d);
+      clearDepth();
+  }
+
 protected:
+    Color mClearColor {0, 0, 0, 1};
+    float mClearDepth {1};
+    MatrixStack model_stack;
   Mesh mMesh;       // used for immediate mode style rendering
   int mRescaleNormal;
   bool mInImmediateMode;  // flag for whether or not in immediate mode
@@ -564,9 +632,9 @@ const char * toString(Graphics::Format v);
 
 // ============== INLINE ==============
 
-inline void Graphics::clear(AttributeBit bits){ glClear(bits); }
-inline void Graphics::clearColor(float r, float g, float b, float a){ glClearColor(r, g, b, a); }
-inline void Graphics::clearColor(const Color& c) { clearColor(c.r, c.g, c.b, c.a); }
+//inline void Graphics::clear(AttributeBit bits){ glClear(bits); }
+//inline void Graphics::clearColor(float r, float g, float b, float a){ glClearColor(r, g, b, a); }
+//inline void Graphics::clearColor(const Color& c) { clearColor(c.r, c.g, c.b, c.a); }
 
 inline void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq){
   glBlendEquation(eq);
@@ -597,19 +665,32 @@ inline void Graphics::cullFace(bool b, Face face) {
   glCullFace(face);
 }
 inline void Graphics::matrixMode(MatrixMode mode){ glMatrixMode(mode); }
-inline void Graphics::pushMatrix(){ glPushMatrix(); }
-inline void Graphics::popMatrix(){ glPopMatrix(); }
+inline void Graphics::pushMatrix(){
+    model_stack.push();
+    //glPushMatrix();
+}
+inline void Graphics::popMatrix(){
+    model_stack.pop();
+    //glPopMatrix();
+}
 inline void Graphics::loadIdentity(){ glLoadIdentity(); }
 inline void Graphics::loadMatrix(const Matrix4d& m){ glLoadMatrixd(m.elems()); }
 inline void Graphics::loadMatrix(const Matrix4f& m){ glLoadMatrixf(m.elems()); }
 inline void Graphics::multMatrix(const Matrix4d& m){ glMultMatrixd(m.elems()); }
 inline void Graphics::multMatrix(const Matrix4f& m){ glMultMatrixf(m.elems()); }
-inline void Graphics::translate(double x, double y, double z){ glTranslated(x,y,z); }
-inline void Graphics::rotate(double angle, double x, double y, double z){ glRotated(angle,x,y,z); }
-inline void Graphics::rotate(const Quatd& q) {
-  Matrix4d m;
+inline void Graphics::translate(double x, double y, double z){
+    model_stack.mult(Matrix4f::translation(x, y, z));
+    //glTranslated(x,y,z);
+}
+inline void Graphics::rotate(double angle, double x, double y, double z){
+    model_stack.mult(Matrix4f::rotate(angle, x, y, z));
+    //glRotated(angle,x,y,z);
+}
+inline void Graphics::rotate(const Quatf& q) {
+  Matrix4f m;
   q.toMatrix(m.elems());
-  multMatrix(m);
+  model_stack.mult(m);
+  //multMatrix(m);
 }
 inline void Graphics::scale(double s){
   if(mRescaleNormal < 1){

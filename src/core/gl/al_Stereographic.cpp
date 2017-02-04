@@ -37,8 +37,8 @@ void Stereographic::sendViewport(Graphics& gl, const Viewport& vp){
 
 void Stereographic::sendClear(Graphics& gl){
   gl.depthMask(true); // ensure writing to depth buffer is enabled
-  gl.clearColor(mClearColor);
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  //gl.clearColor(mClearColor);
+  //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
 
 void Stereographic :: draw(Graphics& gl, const Lens& lens, const Pose& pose, const Viewport& vp, Drawable& draw, bool clear, double pixelaspect) {

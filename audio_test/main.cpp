@@ -10,6 +10,7 @@ class MyApp : public WindowApp {
 public:
   ShaderProgram shader;
   VAOMesh mesh;
+  Graphics g;
   
   void onCreate() {
     string const vert_source = R"(
@@ -57,13 +58,13 @@ public:
     mesh.vertex(0.5, 0.5, 0);
     mesh.color(0.0, 1.0, 1.0);
     mesh.update();
+
+    g.setClearColor(0, 1, 1);
   }
 
   void onDraw() {
-    glViewport(0, 0, fbWidth(), fbHeight());
-    GLfloat const clear_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    glClearBufferfv(GL_COLOR, 0, clear_color);
-
+    g.viewport(0, 0, fbWidth(), fbHeight());
+    g.clear();
     float w = width();
     float h = height();
     Matrix4f mat = Matrix4f::rotate(sec(), 0, 0, 1);
