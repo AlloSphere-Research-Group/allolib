@@ -49,6 +49,7 @@ else ()
   pkg_search_module(GLFW REQUIRED glfw3)
 endif (WINDOWS)
 
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(al_test main.cpp)
 
 target_include_directories(al_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
