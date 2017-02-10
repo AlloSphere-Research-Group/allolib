@@ -57,11 +57,18 @@ if (WINDOWS)
   #   libs/apr/apr-iconv/x64/LibD/apriconv-1.lib
   #   libs/apr/apr-util/x64/LibD/aprutil-1.lib
   # )
+  # set(APR_INCLUDE_DIR
+  #   libs/apr2/include
+  # )
+  # set(APR_LIBRARY
+  #   libs/apr2/lib/v110/x64/Debug/static/libapr-1.lib
+  # )
   set(APR_INCLUDE_DIR
-    libs/apr2/include
+    libs/apr3/include
   )
   set(APR_LIBRARY
-    libs/apr2/lib/v110/x64/Debug/static/libapr-1.lib
+    # libs/apr3/apr-1.lib
+    libs/apr3/libapr-1.lib
   )
 else ()
   find_package(GLEW REQUIRED)

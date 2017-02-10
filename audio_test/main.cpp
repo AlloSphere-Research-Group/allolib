@@ -3,15 +3,29 @@
 #include <string>
 #include <array>
 
+#include "apr_general.h"
+#include "apr_errno.h"
+#include "apr_pools.h"
+
 using namespace al;
 using namespace std;
 
-class MyApp : public WindowApp, public osc::PacketHandler {
+static apr_status_t check_apr(apr_status_t err) {
+    if (err != APR_SUCCESS) {
+        char errstr[256];
+        apr_strerror(err, errstr, sizeof(errstr));
+        fprintf(stderr, "%s\n", errstr);
+    }
+    return err;
+}
+
+//class MyApp : public WindowApp, public osc::PacketHandler {
+class MyApp : public WindowApp {
 public:
   ShaderProgram shader;
   VAOMesh mesh;
   Graphics g;
-  osc::Recv server { 16447, "", 0.05 };
+  //osc::Recv server { 16447, "", 0.05 };
   
   void onCreate() {
     string const vert_source = R"(
@@ -62,8 +76,11 @@ public:
 
     g.setClearColor(0, 1, 1);
 
-    server.handler(*this);
-    server.start();
+    //server.handler(*this);
+    //server.start();
+
+    check_apr(apr_initialize());
+    atexit(apr_terminate);	// FIXME - can we have multiple atexit calls?1
   }
 
   void onDraw() {
@@ -80,20 +97,20 @@ public:
     shader.end();
   }
 
-  void onMessage(osc::Message& m) {
+  //void onMessage(osc::Message& m) {
 
-      // Check that the address and tags match what we expect
-      if (m.addressPattern() == "/test" && m.typeTags() == "si") {
+  //    // Check that the address and tags match what we expect
+  //    if (m.addressPattern() == "/test" && m.typeTags() == "si") {
 
-          // Extract the data out of the packet
-          std::string str;
-          int val;
-          m >> str >> val;
+  //        // Extract the data out of the packet
+  //        std::string str;
+  //        int val;
+  //        m >> str >> val;
 
-          // Print out the extracted packet data
-          std::cout << "SERVER: recv " << str << " " << val << "\n";
-      }
-  }
+  //        // Print out the extracted packet data
+  //        std::cout << "SERVER: recv " << str << " " << val << "\n";
+  //    }
+  //}
 };
 
 class MyAudioApp : public AudioApp {
