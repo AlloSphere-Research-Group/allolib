@@ -6,11 +6,12 @@
 using namespace al;
 using namespace std;
 
-class MyApp : public WindowApp {
+class MyApp : public WindowApp, public osc::PacketHandler {
 public:
   ShaderProgram shader;
   VAOMesh mesh;
   Graphics g;
+  osc::Recv server { 16447, "", 0.05 };
   
   void onCreate() {
     string const vert_source = R"(
@@ -60,6 +61,9 @@ public:
     mesh.update();
 
     g.setClearColor(0, 1, 1);
+
+    server.handler(*this);
+    server.start();
   }
 
   void onDraw() {
@@ -74,6 +78,21 @@ public:
     shader.uniform("m", mat);
     mesh.draw();
     shader.end();
+  }
+
+  void onMessage(osc::Message& m) {
+
+      // Check that the address and tags match what we expect
+      if (m.addressPattern() == "/test" && m.typeTags() == "si") {
+
+          // Extract the data out of the packet
+          std::string str;
+          int val;
+          m >> str >> val;
+
+          // Print out the extracted packet data
+          std::cout << "SERVER: recv " << str << " " << val << "\n";
+      }
   }
 };
 

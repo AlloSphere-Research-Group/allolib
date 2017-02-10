@@ -24,6 +24,8 @@
 #include "al/core/gl/al_VAO.hpp"
 #include "al/core/gl/al_VAOMesh.hpp"
 
+#include "al/core/io/al_Socket.hpp"
+
 #include "al/core/math/al_Analysis.hpp"
 #include "al/core/math/al_Complex.hpp"
 #include "al/core/math/al_Constants.hpp"
@@ -40,6 +42,7 @@
 #include "al/core/math/al_Spherical.hpp"
 #include "al/core/math/al_Vec.hpp"
 
+#include "al/core/protocol/al_OSC.hpp"
 #include "al/core/protocol/al_Serialize.hpp"
 
 #include "al/core/spatial/al_Curve.hpp"
@@ -48,6 +51,7 @@
 #include "al/core/spatial/al_Pose.hpp"
 
 #include "al/core/system/al_Printing.hpp"
+#include "al/core/system/al_Thread.hpp"
 #include "al/core/system/al_Time.hpp"
 #include "al/core/system/al_Watcher.hpp"
 

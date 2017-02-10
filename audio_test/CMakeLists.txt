@@ -38,7 +38,6 @@ endif (WINDOWS)
 find_package(OpenGL REQUIRED)
 if (WINDOWS)
   # use static libs if windows (for now)
-  set(lib_path C:/Users/keehong/al_lib)
   set(lib_path ${CMAKE_CURRENT_SOURCE_DIR}/..)
   set(GLFW_INCLUDE_DIRS ${lib_path}/libs/glfw/include)
   set(GLFW_LIBRARIES ${lib_path}/libs/glfw/lib-vc2015/glfw3.lib)
@@ -46,6 +45,23 @@ if (WINDOWS)
   set(GLEW_LIBRARIES ${lib_path}/libs/glew/lib/Release/x64/glew32s.lib)
   set(PORTAUDIO_INCLUDE_DIRS ${lib_path}/libs/portaudio/include)
   set(PORTAUDIO_LIBRARIES ${lib_path}/libs/portaudio/portaudio_static_x64.lib)
+  # set(APR_INCLUDE_DIR
+  #   ${lib_path}/libs/apr/apr/include
+  #   ${lib_path}/libs/apr/apr-iconv/include
+  #   ${lib_path}/libs/apr/apr-util/include
+  # )
+  # set(APR_LIBRARY
+  #   ${lib_path}/libs/apr/apr/x64/LibD/apr-1.lib
+  #   ${lib_path}/libs/apr/apr/x64/LibD/aprapp-1.lib
+  #   ${lib_path}/libs/apr/apr-iconv/x64/LibD/apriconv-1.lib
+  #   ${lib_path}/libs/apr/apr-util/x64/LibD/aprutil-1.lib
+  # )
+  set(APR_INCLUDE_DIR
+    ${lib_path}/libs/apr2/include
+  )
+  set(APR_LIBRARY
+    ${lib_path}/libs/apr2/lib/v110/x64/Debug/static/libapr-1.lib
+  )
 else ()
   find_package(GLEW REQUIRED)
   find_package(PkgConfig REQUIRED)
@@ -59,11 +75,13 @@ target_include_directories(al_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../includ
 target_include_directories(al_test PRIVATE ${GLFW_INCLUDE_DIRS})
 target_include_directories(al_test PRIVATE ${GLEW_INCLUDE_DIRS})
 target_include_directories(al_test PRIVATE ${PORTAUDIO_INCLUDE_DIRS})
+target_include_directories(al_test PRIVATE ${APR_INCLUDE_DIR})
 
 target_link_libraries(al_test ${OPENGL_LIBRARY})
 target_link_libraries(al_test ${GLEW_LIBRARIES})
 target_link_libraries(al_test ${GLFW_LIBRARIES})
 target_link_libraries(al_test ${PORTAUDIO_LIBRARIES})
+target_link_libraries(al_test ${APR_LIBRARY})
 
 if (WINDOWS)
   target_link_libraries(al_test ${CMAKE_CURRENT_SOURCE_DIR}/../Debug/al.lib)

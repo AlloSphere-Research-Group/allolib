@@ -46,12 +46,41 @@ if (WINDOWS)
   set(GLEW_LIBRARIES libs/glew/lib/Release/x64/glew32s.lib)
   set(PORTAUDIO_INCLUDE_DIRS libs/portaudio/include)
   set(PORTAUDIO_LIBRARIES libs/portaudio/portaudio_static_x64.lib)
+  # set(APR_INCLUDE_DIR
+  #   libs/apr/apr/include
+  #   libs/apr/apr-iconv/include
+  #   libs/apr/apr-util/include
+  # )
+  # set(APR_LIBRARY
+  #   libs/apr/apr/x64/LibD/apr-1.lib
+  #   libs/apr/apr/x64/LibD/aprapp-1.lib
+  #   libs/apr/apr-iconv/x64/LibD/apriconv-1.lib
+  #   libs/apr/apr-util/x64/LibD/aprutil-1.lib
+  # )
+  set(APR_INCLUDE_DIR
+    libs/apr2/include
+  )
+  set(APR_LIBRARY
+    libs/apr2/lib/v110/x64/Debug/static/libapr-1.lib
+  )
 else ()
   find_package(GLEW REQUIRED)
   find_package(PkgConfig REQUIRED)
   pkg_search_module(GLFW REQUIRED glfw3)
   pkg_search_module(PORTAUDIO REQUIRED portaudio-2.0)
 endif (WINDOWS)
+
+set(OSCPACK_SRC
+  external/oscpack/osc/OscOutboundPacketStream.cpp
+  external/oscpack/osc/OscPrintReceivedElements.cpp
+  external/oscpack/osc/OscReceivedElements.cpp
+  external/oscpack/osc/OscTypes.cpp
+)
+
+set(EXTERNAL_INCLUDE_DIR external) # oscpack, etc.
+list(APPEND EXTERNAL_SRC
+  ${OSCPACK_SRC}
+)
 
 set(core_headers
   include/al/core/app/al_AudioApp.hpp
@@ -76,6 +105,7 @@ set(core_headers
   include/al/core/gl/al_Texture.hpp
   include/al/core/gl/al_VAO.hpp
   include/al/core/gl/al_VAOMesh.hpp
+  include/al/core/io/al_Socket.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
@@ -91,13 +121,16 @@ set(core_headers
   include/al/core/math/al_Ray.hpp
   include/al/core/math/al_Spherical.hpp
   include/al/core/math/al_Vec.hpp
+  include/al/core/protocol/al_OSC.hpp
   include/al/core/protocol/al_Serialize.h
   include/al/core/protocol/al_Serialize.hpp
   include/al/core/spatial/al_Curve.hpp
   include/al/core/spatial/al_DistAtten.hpp
   include/al/core/spatial/al_HashSpace.hpp
   include/al/core/spatial/al_Pose.hpp
+  include/al/core/system/al_Config.h
   include/al/core/system/al_Printing.hpp
+  include/al/core/system/al_Thread.hpp
   include/al/core/system/al_Time.hpp
   include/al/core/system/al_Watcher.hpp
   include/al/core/types/al_Buffer.hpp
@@ -129,10 +162,14 @@ set(core_sources
   src/core/gl/al_Texture.cpp
   src/core/gl/al_VAO.cpp
   src/core/gl/al_VAOMesh.cpp
+  src/core/io/al_SocketAPR.cpp
+  src/core/private/al_ImplAPR.h
+  src/core/protocol/al_OSC.cpp
   src/core/protocol/al_Serialize.cpp
   src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
   src/core/system/al_Printing.cpp
+  src/core/system/al_ThreadNative.cpp
   src/core/system/al_Time.cpp
   src/core/system/al_Watcher.cpp
   src/core/types/al_Color.cpp
@@ -159,6 +196,7 @@ list(APPEND headers
 
 list(APPEND sources
   ${core_sources}
+  ${EXTERNAL_SRC}
   # ${graphics_sources}
 )
 
@@ -168,8 +206,11 @@ target_include_directories(al PRIVATE include)
 target_include_directories(al PRIVATE ${GLFW_INCLUDE_DIRS})
 target_include_directories(al PRIVATE ${GLEW_INCLUDE_DIRS})
 target_include_directories(al PRIVATE ${PORTAUDIO_INCLUDE_DIRS})
+target_include_directories(al PRIVATE ${APR_INCLUDE_DIR})
+target_include_directories(al PRIVATE ${EXTERNAL_INCLUDE_DIR})
 
 target_link_libraries(al ${OPENGL_LIBRARY})
 target_link_libraries(al ${GLEW_LIBRARIES})
 target_link_libraries(al ${GLFW_LIBRARIES})
 target_link_libraries(al ${PORTAUDIO_LIBRARIES})
+target_link_libraries(al ${APR_LIBRARY})

@@ -14,6 +14,15 @@ libs/glfw/
 libs/glew/
 build/
 */build/
+*/build2/
 .vs/
 Debug/
 */Debug/
+libs/apr
+libs/apr2
+libs/portaudio
+*.vcxproj
+*.filters
+*.lib
+*.sln
+*.db

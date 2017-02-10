@@ -52,9 +52,10 @@
 #include <string>
 #include <limits.h>
 #include <math.h>
+#include "al/core/system/al_Config.h" // al_nsec & al_sec
 
-typedef long long int al_nsec;        /**< nanoseconds type (accurate to +/- 292.5 years) */
-typedef double al_sec;            /**< seconds type */
+// typedef long long int al_nsec;        /**< nanoseconds type (accurate to +/- 292.5 years) */
+// typedef double al_sec;            /**< seconds type */
 // #define AL_TIME_NSEC_NEVER (ULLONG_MAX)
 
 // #ifdef AL_WINDOWS
