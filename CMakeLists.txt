@@ -27,7 +27,7 @@ endif ()
 # options
 # AL_ENABLE_DEBUG
 
-set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Debug)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 if (WINDOWS)
   set(CMAKE_CXX_FLAGS "/W1")
@@ -39,37 +39,14 @@ endif (WINDOWS)
 find_package(OpenGL REQUIRED)
 
 if (WINDOWS)
-  # use static libs if windows (for now)
   set(GLFW_INCLUDE_DIRS libs/glfw/include)
   set(GLFW_LIBRARIES libs/glfw/lib-vc2015/glfw3.lib)
   set(GLEW_INCLUDE_DIRS libs/glew/include)
-  set(GLEW_LIBRARIES libs/glew/lib/Release/x64/glew32s.lib)
+  set(GLEW_LIBRARIES libs/glew/glew32.lib)
   set(PORTAUDIO_INCLUDE_DIRS libs/portaudio/include)
   set(PORTAUDIO_LIBRARIES libs/portaudio/portaudio_static_x64.lib)
-  # set(APR_INCLUDE_DIR
-  #   libs/apr/apr/include
-  #   libs/apr/apr-iconv/include
-  #   libs/apr/apr-util/include
-  # )
-  # set(APR_LIBRARY
-  #   libs/apr/apr/x64/LibD/apr-1.lib
-  #   libs/apr/apr/x64/LibD/aprapp-1.lib
-  #   libs/apr/apr-iconv/x64/LibD/apriconv-1.lib
-  #   libs/apr/apr-util/x64/LibD/aprutil-1.lib
-  # )
-  # set(APR_INCLUDE_DIR
-  #   libs/apr2/include
-  # )
-  # set(APR_LIBRARY
-  #   libs/apr2/lib/v110/x64/Debug/static/libapr-1.lib
-  # )
-  set(APR_INCLUDE_DIR
-    libs/apr3/include
-  )
-  set(APR_LIBRARY
-    # libs/apr3/apr-1.lib
-    libs/apr3/libapr-1.lib
-  )
+  set(APR_INCLUDE_DIR libs/apr/include)
+  set(APR_LIBRARY libs/apr/libapr-1.lib)
 else ()
   find_package(GLEW REQUIRED)
   find_package(PkgConfig REQUIRED)
@@ -207,7 +184,12 @@ list(APPEND sources
   # ${graphics_sources}
 )
 
-add_library(al STATIC ${headers} ${sources})
+if (WINDOWS)
+  add_library(al STATIC ${headers} ${sources})
+else ()
+  add_library(al STATIC ${headers} ${sources})
+endif (WINDOWS)
+
 
 target_include_directories(al PRIVATE include)
 target_include_directories(al PRIVATE ${GLFW_INCLUDE_DIRS})

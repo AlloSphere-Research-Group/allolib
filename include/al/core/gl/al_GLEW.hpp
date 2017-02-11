@@ -1,8 +1,5 @@
 #pragma once
 
-#ifdef AL_WINDOWS
-#define GLEW_STATIC
-#endif
 #include "GL/glew.h"
 
 namespace al {
