@@ -29,10 +29,9 @@ endif ()
 # FLAGS ####################################################
 
 # set(CMAKE_BUILD_TYPE Debug)
-# set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 if (WINDOWS)
+  SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+  SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bin)
   set(CMAKE_CXX_FLAGS "/W2")
 else ()
   set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
@@ -42,40 +41,15 @@ endif (WINDOWS)
 
 find_package(OpenGL REQUIRED)
 if (WINDOWS)
-  # use static libs if windows (for now)
   set(lib_path ${CMAKE_CURRENT_SOURCE_DIR}/../libs)
   set(GLFW_INCLUDE_DIRS ${lib_path}/glfw/include)
-  # set(GLFW_LIBRARIES ${lib_path}/glfw/lib-vc2015/glfw3.lib)
   set(GLFW_LIBRARIES ${lib_path}/glfw/glfw3dll.lib)
   set(GLEW_INCLUDE_DIRS ${lib_path}/glew/include)
-  # set(GLEW_LIBRARIES ${lib_path}/glew/lib/Release/x64/glew32s.lib)
   set(GLEW_LIBRARIES ${lib_path}/glew/glew32.lib)
   set(PORTAUDIO_INCLUDE_DIRS ${lib_path}/portaudio/include)
   set(PORTAUDIO_LIBRARIES ${lib_path}/portaudio/portaudio_static_x64.lib)
-  # set(APR_INCLUDE_DIR
-  #   ${lib_path}/apr/apr/include
-  #   ${lib_path}/apr/apr-iconv/include
-  #   ${lib_path}/apr/apr-util/include
-  # )
-  # set(APR_LIBRARY
-  #   ${lib_path}/apr/apr/x64/LibD/apr-1.lib
-  #   ${lib_path}/apr/apr/x64/LibD/aprapp-1.lib
-  #   ${lib_path}/apr/apr-iconv/x64/LibD/apriconv-1.lib
-  #   ${lib_path}/apr/apr-util/x64/LibD/aprutil-1.lib
-  # )
-  # set(APR_INCLUDE_DIR
-  #   ${lib_path}/apr2/include
-  # )
-  # set(APR_LIBRARY
-  #   ${lib_path}/apr2/lib/v110/x64/Debug/static/libapr-1.lib
-  # )
-  set(APR_INCLUDE_DIR
-    ${lib_path}/apr/include
-  )
-  set(APR_LIBRARY
-    # ${lib_path}/apr3/apr-1.lib
-    ${lib_path}/apr/libapr-1.lib
-  )
+  set(APR_INCLUDE_DIR ${lib_path}/apr/include)
+  set(APR_LIBRARY ${lib_path}/apr/libapr-1.lib)
 else ()
   find_package(GLEW REQUIRED)
   find_package(PkgConfig REQUIRED)
@@ -99,8 +73,6 @@ target_link_libraries(${app_name} ${PORTAUDIO_LIBRARIES})
 target_link_libraries(${app_name} ${APR_LIBRARY})
 
 if (WINDOWS)
-  # target_link_libraries(${app_name} debug ${CMAKE_CURRENT_SOURCE_DIR}/../Debug/al.lib)
-  # target_link_libraries(${app_name} optimized  ${CMAKE_CURRENT_SOURCE_DIR}/../Release/al.lib)
   target_link_libraries(${app_name} debug ${CMAKE_CURRENT_SOURCE_DIR}/../Debug/al.lib optimized  ${CMAKE_CURRENT_SOURCE_DIR}/../Release/al.lib)
 else()
   target_link_libraries(${app_name} ${CMAKE_CURRENT_SOURCE_DIR}/../libal.a)
