@@ -45,7 +45,8 @@ if (WINDOWS)
   # use static libs if windows (for now)
   set(lib_path ${CMAKE_CURRENT_SOURCE_DIR}/../libs)
   set(GLFW_INCLUDE_DIRS ${lib_path}/glfw/include)
-  set(GLFW_LIBRARIES ${lib_path}/glfw/lib-vc2015/glfw3.lib)
+  # set(GLFW_LIBRARIES ${lib_path}/glfw/lib-vc2015/glfw3.lib)
+  set(GLFW_LIBRARIES ${lib_path}/glfw/glfw3dll.lib)
   set(GLEW_INCLUDE_DIRS ${lib_path}/glew/include)
   # set(GLEW_LIBRARIES ${lib_path}/glew/lib/Release/x64/glew32s.lib)
   set(GLEW_LIBRARIES ${lib_path}/glew/glew32.lib)
@@ -110,6 +111,7 @@ if (WINDOWS)
   set(post_build_command
     robocopy ${lib_path}/apr/ ${CMAKE_CURRENT_SOURCE_DIR}/bin libapr-1.dll &
     robocopy ${lib_path}/glew/ ${CMAKE_CURRENT_SOURCE_DIR}/bin glew32.dll &
+    robocopy ${lib_path}/glfw/ ${CMAKE_CURRENT_SOURCE_DIR}/bin glfw3.dll &
     IF %ERRORLEVEL% LEQ 1 exit 0
   )
 
