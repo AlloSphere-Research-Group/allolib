@@ -3,10 +3,6 @@
 #include <string>
 #include <array>
 
-#include "apr_general.h"
-#include "apr_errno.h"
-#include "apr_pools.h"
-
 using namespace al;
 using namespace std;
 
@@ -68,7 +64,6 @@ public:
 
     server.handler(*this);
     server.start();
-
   }
 
   void onDraw() {
