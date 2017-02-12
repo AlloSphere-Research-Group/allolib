@@ -13,12 +13,12 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   message("LINUX")
   add_definitions(-DAL_LINUX)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  if (CYGWIN)
+  if (MSYS)
     set(WINDOWS_CYGWIN 1)
     message("WINDOWS_CYGWIN")
-    # later change to AL_WINDOWS_CYGWIN?
+    # later change to AL_WINDOWS_MSYS?
     add_definitions(-DAL_WINDOWS)
-  else () # WIN32
+  else () # WIN32 (MSVC)
     set(WINDOWS 1)
     message("WINDOWS")
     add_definitions(-DAL_WINDOWS)
@@ -47,7 +47,7 @@ if (WINDOWS)
   set(GLEW_INCLUDE_DIRS ${lib_path}/glew/include)
   set(GLEW_LIBRARIES ${lib_path}/glew/glew32.lib)
   set(PORTAUDIO_INCLUDE_DIRS ${lib_path}/portaudio/include)
-  set(PORTAUDIO_LIBRARIES ${lib_path}/portaudio/portaudio_static_x64.lib)
+  set(PORTAUDIO_LIBRARIES ${lib_path}/portaudio/portaudio_x64.lib)
   set(APR_INCLUDE_DIR ${lib_path}/apr/include)
   set(APR_LIBRARY ${lib_path}/apr/libapr-1.lib)
 else ()
@@ -84,6 +84,7 @@ if (WINDOWS)
     robocopy ${lib_path}/apr/ ${CMAKE_CURRENT_SOURCE_DIR}/bin libapr-1.dll &
     robocopy ${lib_path}/glew/ ${CMAKE_CURRENT_SOURCE_DIR}/bin glew32.dll &
     robocopy ${lib_path}/glfw/ ${CMAKE_CURRENT_SOURCE_DIR}/bin glfw3.dll &
+    robocopy ${lib_path}/portaudio/ ${CMAKE_CURRENT_SOURCE_DIR}/bin portaudio_x64.dll &
     IF %ERRORLEVEL% LEQ 1 exit 0
   )
 
