@@ -82,16 +82,14 @@ public:
 
   void onMessage(osc::Message& m) {
 
-      // Check that the address and tags match what we expect
-      if (m.addressPattern() == "/test" && m.typeTags() == "si") {
+      if (m.addressPattern() == "/test") {
 
           // Extract the data out of the packet
           std::string str;
-          int val;
-          m >> str >> val;
+          m >> str;
 
           // Print out the extracted packet data
-          std::cout << "SERVER: recv " << str << " " << val << "\n";
+          std::cout << "SERVER: recv " << str << endl;;
       }
   }
 };
