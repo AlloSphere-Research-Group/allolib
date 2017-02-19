@@ -27,10 +27,12 @@ endif ()
 # options
 # AL_ENABLE_DEBUG
 
-# set(CMAKE_BUILD_TYPE Debug)
-set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
 if (WINDOWS)
   set(CMAKE_CXX_FLAGS "/W1")
+  # static libs are considered as archive
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR})
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR})
 else ()
   set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
 endif (WINDOWS)
@@ -187,10 +189,10 @@ list(APPEND sources
 
 if (WINDOWS)
   add_library(al STATIC ${headers} ${sources})
+  set_target_properties(al PROPERTIES DEBUG_POSTFIX _debug)
 else ()
   add_library(al STATIC ${headers} ${sources})
 endif (WINDOWS)
-
 
 target_include_directories(al PRIVATE include)
 target_include_directories(al PRIVATE ${GLFW_INCLUDE_DIRS})
