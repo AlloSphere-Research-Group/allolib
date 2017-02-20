@@ -28,7 +28,7 @@ public:
   void quit();
   bool shouldQuit();
 
-  void start();
+  virtual void start();
 
   // init glfw and open a window
   virtual void open();
@@ -37,7 +37,7 @@ public:
   // destroy gpu objects, close window, terminate glfw
   virtual void close();
 
-  // user override these
+  // user will override these
   virtual void onInit() {}
   virtual void onCreate() {}
   virtual void onAnimate(double dt) {}

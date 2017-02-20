@@ -1,5 +1,6 @@
 #pragma once
 
+#include "al/core/app/al_App.hpp"
 #include "al/core/app/al_AudioApp.hpp"
 #include "al/core/app/al_AudioIO.hpp"
 #include "al/core/app/al_AudioIOData.hpp"

@@ -34,6 +34,7 @@ if (WINDOWS)
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR})
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR})
 else ()
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
   set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
 endif (WINDOWS)
 
@@ -70,6 +71,7 @@ list(APPEND EXTERNAL_SRC
 )
 
 set(core_headers
+  include/al/core/app/al_App.hpp
   include/al/core/app/al_AudioApp.hpp
   include/al/core/app/al_AudioIO.hpp
   include/al/core/app/al_AudioIOData.hpp
