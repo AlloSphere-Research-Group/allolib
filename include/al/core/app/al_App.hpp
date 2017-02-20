@@ -6,6 +6,8 @@
 
 namespace al {
 
+// Unified app class
+// TODO: better osc interface, add console app
 class App: public WindowApp, public AudioApp, public osc::PacketHandler {
 public:
   virtual void start() override {
