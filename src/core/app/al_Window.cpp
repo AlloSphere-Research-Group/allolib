@@ -147,6 +147,7 @@ void Window::displayMode(DisplayMode v){
       const std::string& title_ = title();
 
       destroy();
+      mDisplayMode = v;
       dimensions(dim_);
       title(title_);
       create();

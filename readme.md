@@ -1,8 +1,11 @@
 priorities:
-- audio
-- al::Graphics
-- al::file
-- al::osc
 
-[ ] client side data for Texture (al::ImageTexture?)
-[ ] window(glfw) get_error
+- audio (connect with Gamma)
+- al::Graphics
+- al::file (without apr?)
+- al::osc
+- preset / parameter
+
+[ ] client side data for Texture (al::ImageTexture)
+
+[ ] stereo window 

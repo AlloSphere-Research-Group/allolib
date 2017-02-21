@@ -337,7 +337,7 @@ protected:
   Keyboard mKeyboard;
   Mouse mMouse;
   WindowEventHandlers mWindowEventHandlers;
-  Dim mDim {50, 50, 800, 450};
+  Dim mDim {50, 50, 640, 480};
   Dim mFullScreenDim {0};
   DisplayMode mDisplayMode = DEFAULT_BUF;
   std::string mTitle = "AlloSystem";
