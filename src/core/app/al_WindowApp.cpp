@@ -19,14 +19,14 @@ void WindowApp::open() {
   onCreate();
 }
 
-void WindowApp::loop(double dt) {
-  onAnimate(al_time_ns2s * deltaTime);
+void WindowApp::loop() {
+  // onAnimate(al_time_ns2s * deltaTime);
   onDraw();
   refresh();
 }
 
 void WindowApp::close() {
-  onExit();
+  // onExit();
   // free all GPUObjects (shaders, textures, vao, bo, ...)
   // before terminating glfw (closing window)
   GPUObject::destroyAll();
@@ -38,7 +38,7 @@ void WindowApp::start() {
   open();
   startFPS();
   while (!shouldQuit()) {
-    loop(dt());
+    loop();
     tickFPS();
   }
   close();
