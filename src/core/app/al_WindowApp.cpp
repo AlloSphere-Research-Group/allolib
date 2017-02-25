@@ -2,7 +2,6 @@
 #include "al/core/gl/al_GLFW.hpp"
 #include "al/core/gl/al_GPUObject.hpp"
 
-
 using namespace al;
 
 WindowApp::WindowApp(): mShouldQuitApp(false) {

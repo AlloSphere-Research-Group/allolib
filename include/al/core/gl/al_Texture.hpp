@@ -159,8 +159,6 @@ public:
   /// NOTE: the graphics context (e.g. Window) must have been created
   /// If pixels is NULL, then the only effect is to resize the texture
   /// remotely.
-  /// give unit if wanted a specific binding point to be used
-  /// -1 for unit if don't want to bind internally (manual binding from outside)
   void submit(const void * pixels);
 
   // update the changes in params or settings
