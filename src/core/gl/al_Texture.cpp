@@ -47,7 +47,7 @@ void Texture::create2D(
   filterMin(GL_LINEAR);
   filterMag(GL_LINEAR);
   mipmap(false);
-  update(true);
+  update(true); // true: force update
   unbind();
 }
 

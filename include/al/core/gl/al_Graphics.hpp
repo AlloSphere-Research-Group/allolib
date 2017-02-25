@@ -53,6 +53,8 @@
 #include "al/core/gl/al_GPUObject.hpp"
 #include "al/core/gl/al_Mesh.hpp"
 #include "al/core/gl/al_GLEW.hpp"
+#include "al/core/gl/al_Shader.hpp"
+#include "al/core/gl/al_Texture.hpp"
 
 /*!
   \def AL_GRAPHICS_ERROR(msg, ID)
@@ -570,6 +572,7 @@ public:
 
   void draw(int numVertices, const Mesh& v);
 
+    // al_lib working area ------------------------------------------------------------------
   void setClearColor(float r, float g, float b, float a = 1) {
       mClearColor.set(r, g, b, a);
   }
@@ -605,6 +608,7 @@ protected:
     Color mClearColor {0, 0, 0, 1};
     float mClearDepth {1};
     MatrixStack model_stack;
+
   Mesh mMesh;       // used for immediate mode style rendering
   int mRescaleNormal;
   bool mInImmediateMode;  // flag for whether or not in immediate mode
