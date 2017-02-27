@@ -55,6 +55,7 @@
 #include "al/core/gl/al_GLEW.hpp"
 #include "al/core/gl/al_Shader.hpp"
 #include "al/core/gl/al_Texture.hpp"
+#include "al/core/gl/al_Viewpoint.hpp"
 
 /*!
   \def AL_GRAPHICS_ERROR(msg, ID)
@@ -77,62 +78,36 @@
 
 namespace al {
 
-    class MatrixStack {
-    public:
-        std::vector<Matrix4f> stack;
+class MatrixStack {
+public:
+    std::vector<Matrix4f> stack;
 
-        MatrixStack() {
-            // default constructor make identity matrix
-            stack.emplace_back();
-        }
+    MatrixStack() {
+        // default constructor make identity matrix
+        stack.emplace_back();
+    }
 
-        void push() {
-            Matrix4f m = stack.back();
-            stack.push_back(m);
-        }
+    void push() {
+        Matrix4f m = stack.back();
+        stack.push_back(m);
+    }
 
-        void pop() {
-            stack.pop_back();
-        }
+    void pop() {
+        stack.pop_back();
+    }
 
-        void mult(Matrix4f const& m) {
-            stack.back() = m * stack.back();
-        }
+    void mult(Matrix4f const& m) {
+        stack.back() = m * stack.back();
+    }
 
-        Matrix4f get() {
-            return stack.back();
-        }
+    Matrix4f get() {
+        return stack.back();
+    }
 
-        void setIdentity() {
-            stack.back().setIdentity();
-        }
-    };
-
-/// A framed area on a display screen
-/// @ingroup allocore
-struct Viewport {
-  float l, b, w, h; ///< left, bottom, width, height
-
-  /// @param[in] w  width
-  /// @param[in] h  height
-  Viewport(float w=800, float h=600): l(0), b(0), w(w), h(h) {}
-
-  /// @param[in] l  left edge coordinate
-  /// @param[in] b  bottom edge coordinate
-  /// @param[in] w  width
-  /// @param[in] h  height
-  Viewport(float l, float b, float w, float h): l(l), b(b), w(w), h(h) {}
-
-  ///
-  Viewport(const Viewport& cpy): l(cpy.l), b(cpy.b), w(cpy.w), h(cpy.h) {}
-
-  /// Get aspect ratio (width divided by height)
-  float aspect() const { return (h!=0 && w!=0) ? float(w)/h : 1; }
-
-  /// Set dimensions
-  void set(float l_, float b_, float w_, float h_){ l=l_; b=b_; w=w_; h=h_; }
+    void setIdentity() {
+        stack.back().setIdentity();
+    }
 };
-
 
 /// Interface for setting graphics state and rendering Mesh
 
@@ -573,6 +548,7 @@ public:
   void draw(int numVertices, const Mesh& v);
 
     // al_lib working area ------------------------------------------------------------------
+  // TODO: move implementations to cpp file
   void setClearColor(float r, float g, float b, float a = 1) {
       mClearColor.set(r, g, b, a);
   }

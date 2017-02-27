@@ -24,6 +24,7 @@
 #include "al/core/gl/al_Texture.hpp"
 #include "al/core/gl/al_VAO.hpp"
 #include "al/core/gl/al_VAOMesh.hpp"
+#include "al/core/gl/al_Viewpoint.hpp"
 
 #include "al/core/io/al_Socket.hpp"
 

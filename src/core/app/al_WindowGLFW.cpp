@@ -146,6 +146,14 @@ public:
     Window::Dim& dimCurr = win->mFullScreen? win->mFullScreenDim : win->mDim;
     dimCurr.w = w;
     dimCurr.h = h;
+
+    // TODO: update framebuffer size!?
+    //int fbw, fbh;
+    //glfwGetFramebufferSize(mImpl->mGLFWwindow, &fbw, &fbh);
+    //highres_factor_w = fbw / float(w);
+    //highres_factor_h = fbh / float(h);
+    //std::cout << "highres factor: " << highres_factor_w << ", " << highres_factor_h << std::endl;
+
     win->callHandlersResize(w, h);
   }
 

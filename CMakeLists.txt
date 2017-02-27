@@ -94,6 +94,7 @@ set(core_headers
   include/al/core/gl/al_Texture.hpp
   include/al/core/gl/al_VAO.hpp
   include/al/core/gl/al_VAOMesh.hpp
+  include/al/core/gl/al_Viewpoint.hpp
   include/al/core/io/al_Socket.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
@@ -151,6 +152,7 @@ set(core_sources
   src/core/gl/al_Texture.cpp
   src/core/gl/al_VAO.cpp
   src/core/gl/al_VAOMesh.cpp
+  src/core/gl/al_Viewpoint.cpp
   src/core/io/al_SocketAPR.cpp
   src/core/private/al_ImplAPR.h
   src/core/protocol/al_OSC.cpp
