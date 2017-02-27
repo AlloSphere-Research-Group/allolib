@@ -129,6 +129,21 @@ public:
   /// Call to update viewport using stretch/anchor amounts when parent dimensions change
   void onParentResize(int w, int h);
 
+  Matrix4f viewMatrix() {
+    return Matrix4f::lookAt(
+      ur(), // right
+      uu(), // up
+      uf(), // forward
+      pos() // eyePos
+    );
+  }
+
+  Matrix4f projMatrix() {
+    return Matrix4f::perspective(
+      mLens.fovy(), mViewport.aspect(), mLens.near(), mLens.far()
+    );
+  }
+
 private:
   // Pose* mTransform;           // local transform
   Lens mLens;
