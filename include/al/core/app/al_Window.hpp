@@ -290,6 +290,7 @@ public:
   // if the display is a high resolution one (ex: RETINA display)
   int fbHeight() const;
   int fbWidth() const;
+
   bool decorated() const;
 
   void cursor(Cursor v);      ///< Set cursor type
@@ -349,8 +350,10 @@ protected:
   bool mDecorated = true;
 
   // for high pixel density monitors (RETINA, etc.)
-  float highres_factor_h = 1;
-  float highres_factor_w = 1;
+  float highres_factor_h = 0;
+  float highres_factor_w = 0;
+  int mFramebufferWidth = 0;
+  int mFramebufferHeight = 0;
 
   // Must be defined in pimpl-specific file
   bool implCreate();

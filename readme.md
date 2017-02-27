@@ -7,3 +7,4 @@ priorities:
 
 [ ] class with client side data for Texture (al::Image) -> combine them to be ImageTexture
 [ ] stereo window
+[ ] al::Shape

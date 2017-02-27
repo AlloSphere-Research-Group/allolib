@@ -98,10 +98,10 @@ bool Window::enabled(DisplayMode v) const {
 int Window::height() const { return dimensions().h; }
 int Window::width() const { return dimensions().w; }
 int Window::fbHeight() const {
-  return int(height() * highres_factor_h);
+  return mFramebufferHeight;
 }
 int Window::fbWidth() const {
-  return int(width() * highres_factor_w);
+  return mFramebufferWidth;
 }
 Window::Cursor Window::cursor() const { return mCursor; }
 bool Window::decorated() const { return mDecorated; }

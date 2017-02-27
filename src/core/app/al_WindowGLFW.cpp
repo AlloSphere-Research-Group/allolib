@@ -147,12 +147,10 @@ public:
     dimCurr.w = w;
     dimCurr.h = h;
 
-    // TODO: update framebuffer size!?
-    //int fbw, fbh;
-    //glfwGetFramebufferSize(mImpl->mGLFWwindow, &fbw, &fbh);
-    //highres_factor_w = fbw / float(w);
-    //highres_factor_h = fbh / float(h);
-    //std::cout << "highres factor: " << highres_factor_w << ", " << highres_factor_h << std::endl;
+    // update framebuffer size
+    glfwGetFramebufferSize(window, &(win->mFramebufferWidth), &(win->mFramebufferHeight));
+    win->highres_factor_w = win->mFramebufferWidth / float(w);
+    win->highres_factor_h = win->mFramebufferHeight / float(h);
 
     win->callHandlersResize(w, h);
   }
@@ -206,10 +204,7 @@ Window::~Window() {
 
 }
 
-bool Window::implCreate(){
-  int w = mDim.w;
-  int h = mDim.h;
-
+bool Window::implCreate() {
   glfw::init();
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -222,13 +217,31 @@ bool Window::implCreate(){
   // TODO
   // bits: STENCIL_BUF etc. ...
 
-  mImpl->mGLFWwindow = glfwCreateWindow(w, h, mTitle.c_str(), NULL, NULL);
+  mImpl->mGLFWwindow = glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), NULL, NULL);
   if (!mImpl->created()) {
     return false;
   }
 
   mImpl->makeCurrent();
   glfwSetWindowPos(mImpl->mGLFWwindow, mDim.l, mDim.t);
+
+  // sometimes OS makes window's size different from what we requested
+  int actual_width, actual_height, actual_left, actual_top;
+  glfwGetWindowSize(mImpl->mGLFWwindow, &actual_width, &actual_height);
+  glfwGetWindowPos(mImpl->mGLFWwindow, &actual_left, &actual_top);
+  if (actual_width != mDim.w ||
+      actual_height != mDim.h ||
+      actual_left != mDim.l ||
+      actual_top != mDim.t
+  ) {
+    cout << "screen dimension different from requested" << endl;
+    cout << actual_width << " X " << actual_height << " at " << actual_left << ", " << actual_top << endl;
+    mDim.w = actual_width;
+    mDim.h = actual_height;
+    mDim.l = actual_left;
+    mDim.t = actual_top;
+  }
+  
   glew::init();
 
   const GLubyte* renderer = glGetString(GL_RENDERER);
@@ -239,11 +252,12 @@ bool Window::implCreate(){
   char* glsl_version = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
   std::cout << "glsl version: " << glsl_version << std::endl;
 
-  int fbw, fbh;
-  glfwGetFramebufferSize(mImpl->mGLFWwindow, &fbw, &fbh);
-  highres_factor_w = fbw / float(w);
-  highres_factor_h = fbh / float(h);
-  std::cout << "highres factor: " << highres_factor_w << ", " << highres_factor_h << std::endl;
+  // int fbw, fbh;
+  glfwGetFramebufferSize(mImpl->mGLFWwindow, &mFramebufferWidth, &mFramebufferHeight);
+  highres_factor_w = mFramebufferWidth / float(mDim.w);
+  highres_factor_h = mFramebufferHeight / float(mDim.h);
+  cout << "framebuffer size: " << mFramebufferWidth << ", " << mFramebufferHeight << endl;
+  cout << "highres factor: " << highres_factor_w << ", " << highres_factor_h << endl;
 
   mImpl->registerCBs();
   vsync(mVSync);
