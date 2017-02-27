@@ -164,13 +164,26 @@ public:
 
   /// Copy all attributes from another Pose
   Pose& set(Pose& src){
-    mVec = src.pos(); mQuat = src.quat(); return *this; }
+    mVec = src.pos();
+    mQuat = src.quat();
+    mParentTransform = &(src.parentTransform());
+    return *this;
+  }
 
   /// Set state from another Pose
-  Pose& set(const Pose& v){ mVec=v.vec(); mQuat=v.quat(); return *this; }
+  Pose& set(const Pose& src){
+    mVec=src.vec();
+    mQuat=src.quat();
+    mParentTransform = &(src.parentTransform());
+    return *this;
+  }
 
   /// Set to identity transform
-  Pose& setIdentity(){ quat().setIdentity(); vec().set(0); return *this; }
+  Pose& setIdentity(){
+    quat().setIdentity(); vec().set(0);
+    mParentTransform = nullptr;
+    return *this;
+  }
 
   /// Set position
   template <class T>
@@ -192,6 +205,12 @@ public:
   operator Vec3d() { return pos(); }
   operator Quatd() { return quat(); }
 
+  Pose const& parentTransform() const { return *mParentTransform; }
+  Pose& parentTransform(Pose const& v){ mParentTransform = &v; return *this; }
+  // Pose& parentTransform(Pose* v){ mParentTransform = v; return *this; }
+  Pose worldTransform() const {
+    return mParentTransform ? (*mParentTransform) * (*this) : (*this);
+  }
 
   /// Print to standard output
   void print() const;
@@ -199,6 +218,7 @@ public:
 protected:
   Vec3d mVec;    // position in 3-space
   Quatd mQuat;  // orientation of reference frame as a quaternion (relative to global axes)
+  Pose const* mParentTransform;     // parent transform, nullptr if none
 };
 
 

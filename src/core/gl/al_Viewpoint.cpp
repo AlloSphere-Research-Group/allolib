@@ -2,11 +2,19 @@
 
 using namespace al;
 
-Viewpoint::Viewpoint(const Pose& transform)
-:	mViewport(0,0,0,0),
-	mParentTransform(NULL),
-	mAnchorX(0), mAnchorY(0), mStretchX(1), mStretchY(1),
-	mLens(NULL)
+// Viewpoint::Viewpoint(const Pose& transform)
+// :	mViewport(0,0,0,0),
+// 	mParentTransform(NULL),
+// 	mTransform(&transform),
+// 	mAnchorX(0), mAnchorY(0), mStretchX(1), mStretchY(1)
+// {}
+
+Viewpoint::Viewpoint(Viewport const& vp, Lens const& lens)
+:	Pose(Pose::identity()),
+	mLens(lens),
+	mViewport(vp),
+	// mTransform(&transform),
+	mAnchorX(0), mAnchorY(0), mStretchX(1), mStretchY(1)
 {}
 
 Viewpoint& Viewpoint::anchor(float ax, float ay){

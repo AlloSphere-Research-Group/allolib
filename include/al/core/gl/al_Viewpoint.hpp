@@ -41,7 +41,7 @@
 
 #include "al/core/spatial/al_Pose.hpp"
 #include "al/core/gl/al_Lens.hpp"
-  #include "al/core/math/al_Frustum.hpp"
+#include "al/core/math/al_Frustum.hpp"
 
 namespace al {
 
@@ -52,7 +52,7 @@ struct Viewport {
 
   /// @param[in] w  width
   /// @param[in] h  height
-  Viewport(float w=800, float h=600): l(0), b(0), w(w), h(h) {}
+  Viewport(float w=640, float h=480): l(0), b(0), w(w), h(h) {}
 
   /// @param[in] l  left edge coordinate
   /// @param[in] b  bottom edge coordinate
@@ -76,10 +76,11 @@ struct Viewport {
 /// (3D position and orientation), and a lens.
 ///
 /// @ingroup allocore
-class Viewpoint{
+class Viewpoint : public Pose {
 public:
 
-  Viewpoint(const Pose& transform = Pose::identity());
+  // Viewpoint(const Pose& transform = Pose::identity());
+  Viewpoint(Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
 
   float anchorX() const { return mAnchorX; }
   float anchorY() const { return mAnchorY; }
@@ -98,27 +99,29 @@ public:
   /// @param[in] sy stretch factor relative to bottom edge of window, in [0,1]
   Viewpoint& stretch(float sx, float sy);
 
-  bool hasLens() const { return NULL != mLens; }
+  // bool hasLens() const { return NULL != mLens; }
 
   /// Get lens
-  const Lens& lens() const { return *mLens; }
-  Viewpoint& lens(Lens& v){ mLens=&v; return *this; }
+  const Lens& lens() const { return mLens; }
+  Lens& lens() { return mLens; }
+  Viewpoint& lens(Lens const& v){ mLens=v; return *this; }
 
   /// Get parent transform
-  const Pose* parentTransform() const { return mParentTransform; }
-  Viewpoint& parentTransform(Pose& v){ mParentTransform =&v; return *this; }
-  Viewpoint& parentTransform(Pose* v){ mParentTransform = v; return *this; }
+  // const Pose* parentTransform() const { return mParentTransform; }
+  // Viewpoint& parentTransform(Pose& v){ mParentTransform =&v; return *this; }
+  // Viewpoint& parentTransform(Pose* v){ mParentTransform = v; return *this; }
 
   /// Get local transform
-  const Pose& transform() const { return mTransform; }
-  Pose& transform(){ return mTransform; }
-  Viewpoint& transform(const Pose& v){ mTransform=v; return *this; }
+  const Pose& transform() const { return *this; }
+  Pose& transform(){ return *this; }
+  Viewpoint& transform(const Pose& v){ set(v); return *this; }
 
-  Pose worldTransform() const { return mParentTransform ? (*mParentTransform) * transform() : transform(); }
+  // Pose worldTransform() const { return mParentTransform ? (*mParentTransform) * transform() : transform(); }
 
   /// Get screen viewport
   const Viewport& viewport() const { return mViewport; }
   Viewport& viewport(){ return mViewport; }
+  Viewpoint& viewport(Viewport const& vp){ mViewport = vp; return *this; }
 
   /// Get calculated viewing frustum
   Frustumd frustum() const;
@@ -127,12 +130,12 @@ public:
   void onParentResize(int w, int h);
 
 private:
-  Viewport mViewport;       // screen display region
-  Pose * mParentTransform;    // parent transform, 0 if none
-  Pose mTransform;        // local transform
+  // Pose* mTransform;           // local transform
+  Lens mLens;
+  Viewport mViewport;         // screen display region
+  // Pose* mParentTransform;     // parent transform, nullptr if none
   float mAnchorX, mAnchorY;   // viewport anchor factors relative to parent window
-  float mStretchX, mStretchY;   // viewport stretch factors relative to parent window
-  Lens * mLens;         // if not set, will be set to scene's default lens
+  float mStretchX, mStretchY; // viewport stretch factors relative to parent window
 };
 
 } // al::
