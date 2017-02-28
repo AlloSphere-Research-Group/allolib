@@ -1,10 +1,11 @@
-priorities:
+TODO
 
-- audio (connect with Gamma)
+- audio (with Gamma)
 - al::Graphics
-- al::file (without apr)
-- preset / parameter
-
-[ ] class with client side data for Texture (al::Image) -> combine them to be ImageTexture
-[ ] stereo window
-[ ] al::Shape
+- al::file
+- ui: preset / parameter / glv
+- al::Image -> combine them to be ImageTexture
+- stereo window
+- al::Shape
+- connect omnirender
+- run script

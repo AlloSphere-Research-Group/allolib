@@ -9,13 +9,14 @@ using namespace al;
 // 	mAnchorX(0), mAnchorY(0), mStretchX(1), mStretchY(1)
 // {}
 
-Viewpoint::Viewpoint(Viewport const& vp, Lens const& lens)
-:	Pose(Pose::identity()),
-	mLens(lens),
+Viewpoint::Viewpoint(Pose const& pose, Viewport const& vp, Lens const& lens)
+:	mLens(lens),
 	mViewport(vp),
 	// mTransform(&transform),
 	mAnchorX(0), mAnchorY(0), mStretchX(1), mStretchY(1)
-{}
+{
+	mPose = &pose;
+}
 
 Viewpoint& Viewpoint::anchor(float ax, float ay){
 	mAnchorX=ax; mAnchorY=ay; return *this;
@@ -27,7 +28,7 @@ Viewpoint& Viewpoint::stretch(float sx, float sy){
 
 Frustumd Viewpoint::frustum() const {
 	Frustumd fr;
-	lens().frustum(fr, worldTransform(), viewport().aspect());
+	lens().frustum(fr, mPose->worldTransform(), viewport().aspect());
 	return fr;
 }
 

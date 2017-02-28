@@ -79,13 +79,13 @@ public:
 
 
 Packet::Packet(int size)
-:	mData(size), mImpl(0)
+:	mImpl(0), mData(size)
 {
 	OSCTRY("Packet::Packet", mImpl = new Impl(&mData[0], size);)
 }
 
 Packet::Packet(const char * contents, int size)
-:	mData(size), mImpl(0)
+: mImpl(0), mData(size)
 {
 	OSCTRY("Packet::Packet1",
 		memcpy(&mData[0], contents, size);

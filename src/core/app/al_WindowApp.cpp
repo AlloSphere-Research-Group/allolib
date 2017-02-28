@@ -4,12 +4,12 @@
 
 using namespace al;
 
-WindowApp::WindowApp(): mShouldQuitApp(false) {
-    append(stdControls);
-    append(windowEventHandler());
-}
+// WindowApp::WindowApp(): mShouldQuitApp(false) {
+//     append(stdControls);
+//     append(windowEventHandler());
+// }
 
-WindowApp::~WindowApp() {}
+// WindowApp::~WindowApp() {}
 
 void WindowApp::open() {
   glfw::init();
@@ -34,6 +34,8 @@ void WindowApp::close() {
 }
 
 void WindowApp::start() {
+  append(stdControls);
+  append(windowEventHandler());
   open();
   startFPS();
   while (!shouldQuit()) {

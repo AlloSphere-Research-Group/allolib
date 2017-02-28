@@ -73,10 +73,7 @@ list(APPEND EXTERNAL_SRC
 set(core_headers
   include/al/core/app/al_App.hpp
   include/al/core/app/al_AudioApp.hpp
-  include/al/core/app/al_AudioIO.hpp
-  include/al/core/app/al_AudioIOData.hpp
   include/al/core/app/al_FPS.hpp
-  include/al/core/app/al_Window.hpp
   include/al/core/app/al_WindowApp.hpp
   include/al/core/gl/al_BufferObject.hpp
   # include/al/core/gl/al_CubeMapFBO.hpp
@@ -95,7 +92,11 @@ set(core_headers
   include/al/core/gl/al_VAO.hpp
   include/al/core/gl/al_VAOMesh.hpp
   include/al/core/gl/al_Viewpoint.hpp
+  include/al/core/io/al_AudioIO.hpp
+  include/al/core/io/al_AudioIOData.hpp
+  include/al/core/io/al_ControlNav.hpp
   include/al/core/io/al_Socket.hpp
+  include/al/core/io/al_Window.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
@@ -131,12 +132,8 @@ set(core_headers
 
 set(core_sources
   src/core/app/al_AudioApp.cpp
-  src/core/app/al_AudioIO.cpp
-  src/core/app/al_AudioIOData.cpp
   src/core/app/al_FPS.cpp
-  src/core/app/al_Window.cpp
   src/core/app/al_WindowApp.cpp
-  src/core/app/al_WindowGLFW.cpp
   src/core/gl/al_BufferObject.cpp
   src/core/gl/al_FBO.cpp
   src/core/gl/al_GLEW.cpp
@@ -153,7 +150,12 @@ set(core_sources
   src/core/gl/al_VAO.cpp
   src/core/gl/al_VAOMesh.cpp
   src/core/gl/al_Viewpoint.cpp
+  src/core/io/al_AudioIO.cpp
+  src/core/io/al_AudioIOData.cpp
   src/core/io/al_SocketAPR.cpp
+  src/core/io/al_ControlNav.cpp
+  src/core/io/al_Window.cpp
+  src/core/io/al_WindowGLFW.cpp
   src/core/private/al_ImplAPR.h
   src/core/protocol/al_OSC.cpp
   src/core/protocol/al_Serialize.cpp

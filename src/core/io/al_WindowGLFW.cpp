@@ -1,4 +1,4 @@
-#include "al/core/app/al_Window.hpp"
+#include "al/core/io/al_Window.hpp"
 #include "al/core/gl/al_GLEW.hpp"
 #include "al/core/gl/al_GLFW.hpp"
 

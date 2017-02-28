@@ -10,7 +10,7 @@
 // Keehong Youn, 2016
 // younkeehong@gmail.com
 
-#include "al/core/app/al_Window.hpp"
+#include "al/core/io/al_Window.hpp"
 #include "al/core/app/al_FPS.hpp"
 
 #include <atomic>
@@ -20,10 +20,10 @@ namespace al {
 class WindowApp : public Window, public WindowEventHandler, public FPS {
 public:
   StandardWindowKeyControls stdControls;
-  std::atomic<bool> mShouldQuitApp;
+  std::atomic<bool> mShouldQuitApp {false};
 
-  WindowApp();
-  virtual ~WindowApp();
+  // WindowApp();
+  // virtual ~WindowApp();
 
   void quit();
   bool shouldQuit();

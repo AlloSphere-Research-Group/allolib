@@ -72,15 +72,15 @@ struct Viewport {
 
 /// Viewpoint within a scene
 
-/// A viewpoint is an aggregation of a viewport (screen region), a pose
-/// (3D position and orientation), and a lens.
+/// A viewpoint is an aggregation of a viewport (screen region) and a lens, 
+/// with a pointer to the pose (3D position and orientation) that it is attached to
 ///
 /// @ingroup allocore
-class Viewpoint : public Pose {
+class Viewpoint {
 public:
 
   // Viewpoint(const Pose& transform = Pose::identity());
-  Viewpoint(Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
+  Viewpoint(Pose const& pose, Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
 
   float anchorX() const { return mAnchorX; }
   float anchorY() const { return mAnchorY; }
@@ -112,9 +112,9 @@ public:
   // Viewpoint& parentTransform(Pose* v){ mParentTransform = v; return *this; }
 
   /// Get local transform
-  const Pose& transform() const { return *this; }
-  Pose& transform(){ return *this; }
-  Viewpoint& transform(const Pose& v){ set(v); return *this; }
+  const Pose& pose() const { return *mPose; }
+  // Pose& transform(){ return *this; }
+  // Viewpoint& transform(const Pose& v){ set(v); return *this; }
 
   // Pose worldTransform() const { return mParentTransform ? (*mParentTransform) * transform() : transform(); }
 
@@ -130,12 +130,15 @@ public:
   void onParentResize(int w, int h);
 
   Matrix4f viewMatrix() {
-    return Matrix4f::lookAt(
-      ur(), // right
-      uu(), // up
-      uf(), // forward
-      pos() // eyePos
-    );
+    Vec3d ux, uy, uz;
+    mPose->unitVectors(ux, uy, uz);
+    return Matrix4f::lookAt(ux, uy, uz, mPose->pos());
+
+    // Matrix4f m {matrix()};
+    // m(0,3) = -m(0,3);
+    // m(1,3) = -m(1,3);
+    // m(2,3) = -m(2,3);
+    // return m;
   }
 
   Matrix4f projMatrix() {
@@ -145,13 +148,19 @@ public:
   }
 
 private:
-  // Pose* mTransform;           // local transform
+  Pose const* mPose;          // local transform
   Lens mLens;
   Viewport mViewport;         // screen display region
   // Pose* mParentTransform;     // parent transform, nullptr if none
   float mAnchorX, mAnchorY;   // viewport anchor factors relative to parent window
   float mStretchX, mStretchY; // viewport stretch factors relative to parent window
 };
+
+// viewpoint with navigation control, can be used with NavInputControl class
+// class NavViewpoint : public Viewpoint, public Nav {
+// public:
+//   NavViewpoint(): Viewpoint(this), Nav() {}
+// };
 
 } // al::
 

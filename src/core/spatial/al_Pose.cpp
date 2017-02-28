@@ -52,6 +52,8 @@ Mat4d Pose::matrix() const {
 
 Mat4d Pose::directionMatrix() const {
   Mat4d m = matrix();
+  // why are we flipping z axis?
+  // (not translate component?)
   m(0,2) = -m(0,2);
   m(1,2) = -m(1,2);
   m(2,2) = -m(2,2);

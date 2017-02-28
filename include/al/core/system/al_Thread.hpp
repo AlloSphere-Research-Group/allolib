@@ -131,7 +131,7 @@ public:
 	friend void swap(Thread& a, Thread& b);
 	Thread& operator= (Thread other);
 protected:
-	class Impl;
+	struct Impl;
 	Impl * mImpl;
 	CThreadFunction mCFunc;
 	bool mJoinOnDestroy;

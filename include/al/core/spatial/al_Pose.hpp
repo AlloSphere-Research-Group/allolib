@@ -48,7 +48,7 @@
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/math/al_Quat.hpp"
 #include <stdio.h>
-
+#include <iostream>
 
 namespace al {
 
