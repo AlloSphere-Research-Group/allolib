@@ -1,61 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 project(allo)
-
-# CHECK PLATFORM ###########################################
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(MACOS 1)
-  message("MACOS")
-  add_definitions(-DAL_OSX)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(LINUX 1)
-  message("LINUX")
-  add_definitions(-DAL_LINUX)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  if (MSYS)
-    set(WINDOWS_CYGWIN 1)
-    message("WINDOWS_CYGWIN")
-    # later change to AL_WINDOWS_MSYS?
-    add_definitions(-DAL_WINDOWS)
-  else () # WIN32
-    set(WINDOWS 1)
-    message("WINDOWS")
-    add_definitions(-DAL_WINDOWS)
-  endif()
-else ()
-endif ()
+set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
+include(cmake_modules/configure_platform.cmake)
+include(cmake_modules/find_core_dependencies.cmake)
 
 # options
-# AL_ENABLE_DEBUG
-
-
 if (WINDOWS)
-  set(CMAKE_CXX_FLAGS "/W1")
-  # static libs are considered as archive
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR})
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR})
+  # set(CMAKE_CXX_FLAGS "/W1")
 else ()
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
   set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
-endif (WINDOWS)
-
-# core dependencies
-find_package(OpenGL REQUIRED)
-
-if (WINDOWS)
-  set(GLFW_INCLUDE_DIRS dependencies/glfw/include)
-  set(GLFW_LIBRARIES dependencies/glfw/glfw3dll.lib)
-  set(GLEW_INCLUDE_DIRS dependencies/glew/include)
-  set(GLEW_LIBRARIES dependencies/glew/glew32.lib)
-  set(PORTAUDIO_INCLUDE_DIRS dependencies/portaudio/include)
-  set(PORTAUDIO_LIBRARIES dependencies/portaudio/portaudio_x64.lib)
-  set(APR_INCLUDE_DIRS dependencies/apr/include)
-  set(APR_LIBRARIES dependencies/apr/libapr-1.lib)
-else ()
-  find_package(GLEW REQUIRED)
-  find_package(PkgConfig REQUIRED)
-  pkg_search_module(GLFW REQUIRED glfw3)
-  pkg_search_module(PORTAUDIO REQUIRED portaudio-2.0)
-  pkg_search_module(APR REQUIRED apr-1)
 endif (WINDOWS)
 
 set(OSCPACK_SRC
@@ -168,37 +121,33 @@ set(core_sources
   src/core/types/al_Color.cpp
 )
 
-# audio
-
-# graphics
-set(graphics_headers
-)
-set(graphics_sources
-)
-
-# AlloSphere
-
-# ui
-
+# sphere
 # util
 
 list(APPEND headers
   ${core_headers}
-  # ${graphics_headers}
 )
 
 list(APPEND sources
   ${core_sources}
   ${EXTERNAL_SRC}
-  # ${graphics_sources}
 )
 
 if (WINDOWS)
+  # static libs are considered as archive
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR})
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR})
+else ()
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif (WINDOWS)
+
+if (WINDOWS)
   add_library(al STATIC ${headers} ${sources})
-  set_target_properties(al PROPERTIES DEBUG_POSTFIX _debug)
 else ()
   add_library(al STATIC ${headers} ${sources})
 endif (WINDOWS)
+
+set_target_properties(al PROPERTIES DEBUG_POSTFIX _debug)
 
 target_include_directories(al PRIVATE include)
 target_include_directories(al PRIVATE ${GLFW_INCLUDE_DIRS})

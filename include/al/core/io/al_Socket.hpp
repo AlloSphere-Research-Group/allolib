@@ -172,7 +172,7 @@ protected:
 	virtual bool onOpen(){ return true; }
 
 private:
-	class Impl; Impl * mImpl;
+	struct Impl; Impl * mImpl;
 };
 
 
