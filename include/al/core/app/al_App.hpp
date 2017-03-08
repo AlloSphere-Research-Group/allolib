@@ -30,8 +30,8 @@ public:
     append(windowEventHandler());
 
     open(); // WindowApp (calls glfw::init(); onInit(); create(); onCreate(); )
-    begin(); // AudioApp (only actually begins of `initAudio` was called before)
     startFPS(); // WindowApp (FPS)
+    begin(); // AudioApp (only actually begins of `initAudio` was called before)
     while (!shouldQuit()) {
       // user can quit this loop with WindowApp::quit() or clicking close button
       // or with stdctrl class input (ctrl+q)
@@ -46,8 +46,8 @@ public:
       tickFPS(); // WindowApp (FPS)
     }
     onExit();
-    close(); // WindowApp (calls onExit)
     end(); // AudioApp
+    close(); // WindowApp (calls onExit)
   }
 
   // PacketHandler
