@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <cstring>
 
 using std::map;
 using std::string;

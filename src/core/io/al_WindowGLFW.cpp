@@ -209,9 +209,9 @@ bool Window::implCreate() {
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_DECORATED, mDecorated ? GLFW_TRUE : GLFW_FALSE);
+  glfwWindowHint(GLFW_DECORATED, mDecorated ? true : false);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); // if OSX, this is a must
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, false); // if OSX, this is a must
   
 
   // TODO
@@ -313,6 +313,9 @@ void Window::implSetDimensions() {
 
 void Window::implSetFullScreen() {
   mImpl->makeCurrent();
+
+// glfwSetWindowMonitor came in at glfw 3.2
+#if GLFW_VERSION_MINOR > 1
   if (mFullScreen) {
     // TODO: selection for multi-monitor
     GLFWmonitor* primary = glfwGetPrimaryMonitor();
@@ -334,6 +337,7 @@ void Window::implSetFullScreen() {
     );
     vsync(mVSync);
   }
+#endif
 }
 
 void Window::implSetTitle() {

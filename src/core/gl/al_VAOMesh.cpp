@@ -3,7 +3,7 @@
 
 using namespace al;
 
-std::unordered_map<Primitive, unsigned int> VAOMesh::mPrimMap = {
+std::unordered_map<unsigned int, unsigned int> VAOMesh::mPrimMap = {
   { POINTS, GL_POINTS },
   { LINES, GL_LINES },
   { LINE_STRIP, GL_LINE_STRIP },

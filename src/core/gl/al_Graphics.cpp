@@ -157,11 +157,11 @@ void Graphics::antialiasing(AntiAliasMode v){
 }
 
 void Graphics::fog(float end, float start, const Color& c){
-  glEnable(GL_FOG);
-  glFogi(GL_FOG_MODE, GL_LINEAR);
-  glFogf(GL_FOG_START, start); glFogf(GL_FOG_END, end);
-  float fogColor[4] = {c.r, c.g, c.b, c.a};
-  glFogfv(GL_FOG_COLOR, fogColor);
+  // glEnable(GL_FOG);
+  // glFogi(GL_FOG_MODE, GL_LINEAR);
+  // glFogf(GL_FOG_START, start); glFogf(GL_FOG_END, end);
+  // float fogColor[4] = {c.r, c.g, c.b, c.a};
+  // glFogfv(GL_FOG_COLOR, fogColor);
 }
 
 void Graphics::viewport(int x, int y, int width, int height) {

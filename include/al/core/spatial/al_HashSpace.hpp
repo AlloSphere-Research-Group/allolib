@@ -69,6 +69,8 @@ namespace al {
   within given radii (results will be roughly sorted by distance).
 */
 
+#include <climits>
+
 /// @ingroup allocore
 class HashSpace {
 public:

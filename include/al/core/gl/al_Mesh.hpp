@@ -53,7 +53,7 @@
 
 namespace al{
 
-enum Primitive {
+enum Primitive : unsigned int {
   POINTS=0,
   LINES,
   LINE_STRIP,

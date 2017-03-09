@@ -20,7 +20,7 @@ enum AttribLayout: unsigned int {
 
 class VAOMesh : public Mesh {
 public:
-    static std::unordered_map<Primitive, unsigned int> mPrimMap;
+    static std::unordered_map<unsigned int, unsigned int> mPrimMap;
 
     struct MeshAttrib {
         unsigned int index;
