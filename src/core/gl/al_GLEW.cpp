@@ -11,6 +11,9 @@ void glew::init() {
     std::cout << "GLEW already initialized" << std::endl;
     return;
   }
+#if GLEW_VERSION < 2
+  glewExperimental=GL_TRUE; // MUST if glew version is 1.13 or lower (apt!!!!)
+#endif
   GLenum err = glewInit();
   if (GLEW_OK != err) {
     std::cout << "Error: " << glewGetErrorString(err) << std::endl;
