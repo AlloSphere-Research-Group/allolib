@@ -211,7 +211,7 @@ bool Window::implCreate() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_DECORATED, mDecorated ? true : false);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, false); // if OSX, this is a must
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true); // if OSX, this is a must
   
 
   // TODO
