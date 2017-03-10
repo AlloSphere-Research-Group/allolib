@@ -45,7 +45,7 @@
 */
 
 #include "al/core/gl/al_GPUObject.hpp"
-#include "al/core/gl/al_Graphics.hpp"
+#include "al/core/gl/al_GLEW.hpp"
 
 namespace al {
 

@@ -75,8 +75,5 @@ void BufferObject::subdata(int offset, int size, void const* src) {
   glBufferSubData(mType, offset, size, src);
 }
 
-// void BufferObject::print() const {
-  // printf("%s: %s %s (%d comps %d elems [%d bytes])\n", toString(mType), toString(mUsage), toString(mDataType), mNumComps, mNumElems, size());
-// }
 
 } // al::

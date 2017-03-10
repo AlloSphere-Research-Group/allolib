@@ -17,7 +17,7 @@
 #include "al/core/gl/al_Mesh.hpp"
 #include "al/core/gl/al_Shader.hpp"
 // #include "al/core/gl/al_Shapes.hpp"
-#include "al/core/gl/al_Stereographic.hpp"
+// #include "al/core/gl/al_Stereographic.hpp"
 #include "al/core/gl/al_Texture.hpp"
 #include "al/core/gl/al_VAO.hpp"
 #include "al/core/gl/al_VAOMesh.hpp"

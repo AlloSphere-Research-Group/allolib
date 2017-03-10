@@ -37,10 +37,18 @@ void Pose::faceToward(const Vec3d& point, double amt){
 }
 
 void Pose::faceToward(const Vec3d& point, const Vec3d& up, double amt){
-  Vec3d target(point - pos());
-  target.normalize();
-  Quatd rot = Quatd::getBillboardRotation(-target, up);
-  quat().slerpTo(rot,amt);
+  // Vec3d target(point - pos());
+  // target.normalize();
+  // Quatd rot = Quatd::getBillboardRotation(-target, up);
+  quat().slerpTo(
+    Quatd::getBillboardRotation(
+      -(point - pos()).normalize(),
+      // -target,
+      up
+    ),
+    // rot,
+    amt
+  );
 }
 
 Mat4d Pose::matrix() const {
@@ -52,8 +60,6 @@ Mat4d Pose::matrix() const {
 
 Mat4d Pose::directionMatrix() const {
   Mat4d m = matrix();
-  // why are we flipping z axis?
-  // (not translate component?)
   m(0,2) = -m(0,2);
   m(1,2) = -m(1,2);
   m(2,2) = -m(2,2);

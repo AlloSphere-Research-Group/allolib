@@ -133,9 +133,9 @@ public:
   /// Get world space unit vectors
   template <class T>
   void unitVectors(Vec<3,T>& ux, Vec<3,T>& uy, Vec<3,T>& uz) const {
-    quat().toVectorX(ux);
-    quat().toVectorY(uy);
-    quat().toVectorZ(uz);
+    quat().toVectorX<T>(ux);
+    quat().toVectorY<T>(uy);
+    quat().toVectorZ<T>(uz);
   }
 
   /// Get local right, up, and forward unit vectors

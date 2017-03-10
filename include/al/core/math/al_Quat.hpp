@@ -281,10 +281,12 @@ public:
   void toCoordinateFrame(Vec<3,T>& ux, Vec<3,T>& uy, Vec<3,T>& uz) const;
 
   /// Convert to column-major 4-by-4 projective space transformation matrix
-  void toMatrix(T * matrix) const;
+  template<typename T2>
+  void toMatrix(T2 * matrix) const;
 
   /// Convert to row-major 4-by-4 projective space transformation matrix
-  void toMatrixTransposed(T * matrix) const;
+  template<typename T2>
+  void toMatrixTransposed(T2 * matrix) const;
 
   /// Convert to axis-angle form, in radians
   void toAxisAngle(T& angle, T& ax, T& ay, T& az) const;
@@ -303,19 +305,28 @@ public:
   void toEuler(Vec<3,T>& aeb) const { toEuler(aeb[0], aeb[1], aeb[2]); }
 
   /// Get local x unit vector (1,0,0) in absolute coordinates
-  void toVectorX(T& ax, T& ay, T& az) const;
-  void toVectorX(Vec<3,T>& v) const { toVectorX(v[0],v[1],v[2]); }
-  Vec<3,T> toVectorX() const { Vec<3,T> v; toVectorX(v); return v; }
+  template<typename T2>
+  void toVectorX(T2& ax, T2& ay, T2& az) const;
+  template<typename T2>
+  void toVectorX(Vec<3,T2>& v) const { toVectorX(v[0],v[1],v[2]); }
+  template<typename T2=T>
+  Vec<3,T2> toVectorX() const { Vec<3,T2> v; toVectorX(v); return v; }
 
   /// Get local y unit vector (0,1,0) in absolute coordinates
-  void toVectorY(T& ax, T& ay, T& az) const;
-  void toVectorY(Vec<3,T>& v) const { toVectorY(v[0],v[1],v[2]); }
-  Vec<3,T> toVectorY() const { Vec<3,T> v; toVectorY(v); return v; }
+  template<typename T2>
+  void toVectorY(T2& ax, T2& ay, T2& az) const;
+  template<typename T2>
+  void toVectorY(Vec<3,T2>& v) const { toVectorY(v[0],v[1],v[2]); }
+  template<typename T2=T>
+  Vec<3,T2> toVectorY() const { Vec<3,T2> v; toVectorY(v); return v; }
 
   /// Get local z unit vector (0,0,1) in absolute coordinates
-  void toVectorZ(T& ax, T& ay, T& az) const;
-  void toVectorZ(Vec<3,T>& v) const { toVectorZ(v[0],v[1],v[2]); }
-  Vec<3,T> toVectorZ() const { Vec<3,T> v; toVectorZ(v); return v; }
+  template<typename T2>
+  void toVectorZ(T2& ax, T2& ay, T2& az) const;
+  template<typename T2>
+  void toVectorZ(Vec<3,T2>& v) const { toVectorZ(v[0],v[1],v[2]); }
+  template<typename T2=T>
+  Vec<3,T2> toVectorZ() const { Vec<3,T2> v; toVectorZ(v); return v; }
 
   /// Rotate vector
   /// NOTE: quaternion should be normalized for accurate results.
@@ -678,7 +689,8 @@ LHCS
 */
 
 template<typename T>
-void Quat<T> :: toMatrix(T * m) const {
+template<typename T2>
+void Quat<T> :: toMatrix(T2 * m) const {
   Vec<3,T> ux,uy,uz;
   toCoordinateFrame(ux,uy,uz);
 
@@ -690,7 +702,8 @@ void Quat<T> :: toMatrix(T * m) const {
 
 // Note: same as toMatrix, but with matrix indices transposed
 template<typename T>
-void Quat<T> :: toMatrixTransposed(T * m) const {
+template<typename T2>
+void Quat<T> :: toMatrixTransposed(T2 * m) const {
   Vec<3,T> ux,uy,uz;
   toCoordinateFrame(ux,uy,uz);
 
@@ -701,21 +714,24 @@ void Quat<T> :: toMatrixTransposed(T * m) const {
 }
 
 template<typename T>
-inline void Quat<T> :: toVectorX(T& ax, T& ay, T& az) const {
+template<typename T2>
+inline void Quat<T> :: toVectorX(T2& ax, T2& ay, T2& az) const {
   ax = 1.0 - 2.0*y*y - 2.0*z*z;
   ay = 2.0*x*y + 2.0*z*w;
   az = 2.0*x*z - 2.0*y*w;
 }
 
 template<typename T>
-inline void Quat<T> :: toVectorY(T& ax, T& ay, T& az) const {
+template<typename T2>
+inline void Quat<T> :: toVectorY(T2& ax, T2& ay, T2& az) const {
   ax = 2.0*x*y - 2.0*z*w;
   ay = 1.0 - 2.0*x*x - 2.0*z*z;
   az = 2.0*y*z + 2.0*x*w;
 }
 
 template<typename T>
-inline void Quat<T> :: toVectorZ(T& ax, T& ay, T& az) const {
+template<typename T2>
+inline void Quat<T> :: toVectorZ(T2& ax, T2& ay, T2& az) const {
   ax = 2.0*x*z + 2.0*y*w;
   ay = 2.0*y*z - 2.0*x*w;
   az = 1.0 - 2.0*x*x - 2.0*y*y;

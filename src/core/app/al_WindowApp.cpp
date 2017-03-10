@@ -4,10 +4,30 @@
 
 using namespace al;
 
-// WindowApp::WindowApp(): mShouldQuitApp(false) {
-//     append(stdControls);
-//     append(windowEventHandler());
-// }
+bool WindowApp::StandardWindowAppKeyControls::keyDown(const Keyboard& k){
+      if(k.ctrl()){
+        switch(k.key()){
+          case 'q': _app->quit(); return false;
+          // case 'h': window().hide(); return false;
+          // case 'm': window().iconify(); return false;
+          // case 'c': window().cursorHideToggle(); return false;
+          default:;
+        }
+      }
+      else{
+        switch(k.key()){
+          case Keyboard::ESCAPE: _app->fullScreenToggle(); return false;
+          default:;
+        }
+      }
+      return true;
+    }
+
+WindowApp::WindowApp() {
+    stdControls.app(this);
+    append(stdControls);
+    append(windowEventHandler());
+}
 
 // WindowApp::~WindowApp() {}
 
@@ -34,8 +54,6 @@ void WindowApp::close() {
 }
 
 void WindowApp::start() {
-  append(stdControls);
-  append(windowEventHandler());
   open();
   startFPS();
   while (!shouldQuit()) {

@@ -19,16 +19,23 @@ namespace al {
 
 class WindowApp : public Window, public WindowEventHandler, public FPS {
 public:
-  StandardWindowKeyControls stdControls;
+  // basic window app keyboard actions: fullscreen, quit, ...
+  struct StandardWindowAppKeyControls : WindowEventHandler {
+    WindowApp* _app;
+    void app(WindowApp* const a) { _app = a; }
+    bool keyDown(const Keyboard& k);
+  };
+  StandardWindowAppKeyControls stdControls;
   std::atomic<bool> mShouldQuitApp {false};
 
-  // WindowApp();
+  WindowApp();
   // virtual ~WindowApp();
 
   void quit();
   bool shouldQuit();
 
-  // could be overrided when subclass inherits from other app classes (AudioApp, etc.)
+  // could and should be overrided
+  // when subclass inherits from other app classes (AudioApp, etc.)
   virtual void start();
 
   // init glfw and open a window
@@ -42,9 +49,7 @@ public:
   // user will override these
   virtual void onInit() {}
   virtual void onCreate() {}
-  // virtual void onAnimate(double dt) {}
   virtual void onDraw() {}
-  // virtual void onExit() {}
   virtual void onKeyDown(Keyboard const& k) {}
   virtual void onKeyUp(Keyboard const& k) {}
   virtual void onMouseDown(Mouse const& m) {}

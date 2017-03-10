@@ -12,22 +12,26 @@ namespace al {
 
 // Unified app class: single window, audioIO,
 //   single port osc recv and single port osc send, and al::Graphics
+//   Also has a default nav and viewpoint for camera functionality
 
 // TODO: better osc interface, add console app and graphics
 class App: public WindowApp, public AudioApp, public osc::PacketHandler {
 public:
-  Nav nav;
-  Viewpoint vp {nav};
-  NavInputControl navInputControl {nav};
+  Nav _nav;
+  Viewpoint _vp {_nav};
+  NavInputControl _navInputControl {_nav};
+
+  Viewpoint& viewpoint() { return _vp; }
+  Nav& nav() { return _nav; }
+  Lens& lens() { return _vp.lens(); }
+  Viewport& viewport() { return _vp.viewport(); }
 
   virtual void onAnimate(double dt) {}
   virtual void onExit() {}
 
-  // overrides WindowApp's start
+  // overrides WindowApp's start to also initiate AudioApp and etc.
   virtual void start() override {
-    append(stdControls);
-    append(navInputControl);
-    append(windowEventHandler());
+    append(_navInputControl);
 
     open(); // WindowApp (calls glfw::init(); onInit(); create(); onCreate(); )
     startFPS(); // WindowApp (FPS)
@@ -37,15 +41,14 @@ public:
       // or with stdctrl class input (ctrl+q)
 
       // dt from WindowApp's FPS
-      // TODO: audiorate?
       double dt_ = dt();
-      nav.step();
-      // nav.step(dt_);
+      _nav.step();
+      // nav.step(dt_); TODO?! -> nav velocity value is hard coded!!!
       onAnimate(dt_);
       loop(); // WindowApp (onDraw)
       tickFPS(); // WindowApp (FPS)
     }
-    onExit();
+    onExit(); // user defined
     end(); // AudioApp
     close(); // WindowApp (calls onExit)
   }

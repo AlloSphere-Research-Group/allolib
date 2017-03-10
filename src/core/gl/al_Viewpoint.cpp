@@ -9,22 +9,22 @@ using namespace al;
 // 	mAnchorX(0), mAnchorY(0), mStretchX(1), mStretchY(1)
 // {}
 
-Viewpoint::Viewpoint(Pose const& pose, Viewport const& vp, Lens const& lens)
+Viewpoint::Viewpoint(Pose& pose, Viewport const& vp, Lens const& lens)
 :	mLens(lens),
-	mViewport(vp),
+	mViewport(vp)
 	// mTransform(&transform),
-	mAnchorX(0), mAnchorY(0), mStretchX(1), mStretchY(1)
+	// mAnchorX(0), mAnchorY(0), mStretchX(1), mStretchY(1)
 {
 	mPose = &pose;
 }
 
-Viewpoint& Viewpoint::anchor(float ax, float ay){
-	mAnchorX=ax; mAnchorY=ay; return *this;
-}
+// Viewpoint& Viewpoint::anchor(float ax, float ay){
+// 	mAnchorX=ax; mAnchorY=ay; return *this;
+// }
 
-Viewpoint& Viewpoint::stretch(float sx, float sy){
-	mStretchX=sx; mStretchY=sy; return *this;
-}
+// Viewpoint& Viewpoint::stretch(float sx, float sy){
+// 	mStretchX=sx; mStretchY=sy; return *this;
+// }
 
 Frustumd Viewpoint::frustum() const {
 	Frustumd fr;
@@ -32,9 +32,9 @@ Frustumd Viewpoint::frustum() const {
 	return fr;
 }
 
-void Viewpoint::onParentResize(int w, int h){
-	mViewport.l = w * anchorX();
-	mViewport.b = h * anchorY();
-	mViewport.w = w * stretchX();
-	mViewport.h = h * stretchY();
-}
+// void Viewpoint::onParentResize(int w, int h){
+// 	mViewport.l = w * anchorX();
+// 	mViewport.b = h * anchorY();
+// 	mViewport.w = w * stretchX();
+// 	mViewport.h = h * stretchY();
+// }

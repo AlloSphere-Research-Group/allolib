@@ -401,29 +401,6 @@ operator| (const Window::DisplayMode& a, const Window::DisplayMode& b){ return W
 inline Window::DisplayMode
 operator& (const Window::DisplayMode& a, const Window::DisplayMode& b){ return Window::DisplayMode(+a & +b); }
 
-/// Standard key controls for window
-///
-/// @ingroup allocore
-struct StandardWindowKeyControls : WindowEventHandler {
-  bool keyDown(const Keyboard& k){
-    if(k.ctrl()){
-      switch(k.key()){
-        case 'q': window().destroy(); return false;
-        case 'h': window().hide(); return false;
-        case 'm': window().iconify(); return false;
-        case 'c': window().cursorHideToggle(); return false;
-        default:;
-      }
-    }
-    else{
-      switch(k.key()){
-        case Keyboard::ESCAPE: window().fullScreenToggle(); return false;
-        default:;
-      }
-    }
-    return true;
-  }
-};
 
 } // al::
 

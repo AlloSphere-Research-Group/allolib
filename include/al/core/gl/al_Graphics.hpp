@@ -50,8 +50,7 @@
 #include "al/core/types/al_Color.hpp"
 #include "al/core/system/al_Printing.hpp"
 
-#include "al/core/gl/al_GPUObject.hpp"
-#include "al/core/gl/al_Mesh.hpp"
+#include "al/core/gl/al_VAOMesh.hpp"
 #include "al/core/gl/al_GLEW.hpp"
 #include "al/core/gl/al_Shader.hpp"
 #include "al/core/gl/al_Texture.hpp"
@@ -75,7 +74,6 @@
 #define AL_GRAPHICS_ERROR(msg, ID) ((void)0)
 #endif
 
-
 namespace al {
 
 class MatrixStack {
@@ -97,7 +95,7 @@ public:
     }
 
     void mult(Matrix4f const& m) {
-        stack.back() = m * stack.back();
+        stack.back() = stack.back() * m;
     }
 
     Matrix4f get() {
@@ -114,21 +112,8 @@ public:
 /// It also owns a Mesh, to simulate immediate mode (where it draws its own data)
 ///
 /// @ingroup allocore
-class Graphics : public GPUObject {
+class Graphics {
 public:
-
-  enum AntiAliasMode {
-    DONT_CARE       = GL_DONT_CARE,       /**< No preference */
-    FASTEST         = GL_FASTEST,       /**< Fastest render, possibly lower quality */
-    NICEST          = GL_NICEST         /**< Highest quality, possibly slower render */
-  };
-
-  enum AttributeBit {
-    COLOR_BUFFER_BIT    = GL_COLOR_BUFFER_BIT,    /**< Color-buffer bit */
-    DEPTH_BUFFER_BIT    = GL_DEPTH_BUFFER_BIT,    /**< Depth-buffer bit */
-    ENABLE_BIT        = GL_ENABLE_BIT,      /**< Enable bit */
-    VIEWPORT_BIT      = GL_VIEWPORT_BIT     /**< Viewport bit */
-  };
 
   enum BlendFunc {
     SRC_ALPHA       = GL_SRC_ALPHA,       /**< */
@@ -164,43 +149,10 @@ public:
     NORMALIZE       = GL_NORMALIZE        /**< Rescale normals to counteract non-isotropic modelview scaling */
   };
 
-  enum DataType {
-    BYTE          = GL_BYTE,          /**< */
-    UBYTE         = GL_UNSIGNED_BYTE,     /**< */
-    SHORT         = GL_SHORT,         /**< */
-    USHORT          = GL_UNSIGNED_SHORT,    /**< */
-    INT           = GL_INT,         /**< */
-    UINT          = GL_UNSIGNED_INT,      /**< */
-    BYTES_2         = GL_2_BYTES,       /**< */
-    BYTES_3         = GL_3_BYTES,       /**< */
-    BYTES_4         = GL_4_BYTES,       /**< */
-    FLOAT         = GL_FLOAT,         /**< */
-    DOUBLE          = GL_DOUBLE         /**< */
-  };
-
   enum Face {
     FRONT         = GL_FRONT,         /**< Front face */
     BACK          = GL_BACK,          /**< Back face */
     FRONT_AND_BACK      = GL_FRONT_AND_BACK     /**< Front and back face */
-  };
-
-  enum Format {
-    DEPTH_COMPONENT     = GL_DEPTH_COMPONENT,   /**< */
-    LUMINANCE       = GL_LUMINANCE,       /**< */
-    LUMINANCE_ALPHA     = GL_LUMINANCE_ALPHA,   /**< */
-    RED           = GL_RED,         /**< */
-    GREEN         = GL_GREEN,         /**< */
-    BLUE          = GL_BLUE,          /**< */
-    ALPHA         = GL_ALPHA,         /**< */
-    RGB           = GL_RGB,         /**< */
-    BGR           = GL_BGR,         /**< */
-    RGBA          = GL_RGBA,          /**< */
-    BGRA          = GL_BGRA         /**< */
-  };
-
-  enum MatrixMode {
-    MODELVIEW       = GL_MODELVIEW,       /**< Modelview matrix */
-    PROJECTION        = GL_PROJECTION       /**< Projection matrix */
   };
 
   enum PolygonMode {
@@ -208,16 +160,6 @@ public:
     LINE          = GL_LINE,          /**< Render only lines along vertex path */
     FILL          = GL_FILL         /**< Render vertices normally according to primitive */
   };
-
-
-  Graphics();
-  virtual ~Graphics();
-
-  /// Get the temporary mesh
-  Mesh& mesh(){ return mMesh; }
-  const Mesh& mesh() const { return mMesh; }
-
-  // Capabilities
 
   /// Enable a capability
   void enable(Capability v){ glEnable(v); }
@@ -243,9 +185,6 @@ public:
   /// Turn depth testing on/off
   void depthTesting(bool b);
 
-  /// Turn lighting on/off
-  void lighting(bool b);
-
   /// Turn scissor testing on/off
   void scissorTest(bool b);
 
@@ -255,15 +194,6 @@ public:
   /// Turn face culling on/off and set the culled face
   void cullFace(bool b, Face face);
 
-
-  /// Set antialiasing mode
-  void antialiasing(AntiAliasMode v);
-
-  /// Set antialiasing to nicest
-  void nicest(){ antialiasing(NICEST); }
-
-  /// Set antialiasing to fastest
-  void fastest(){ antialiasing(FASTEST); }
 
   /// Set both line width and point diameter
   void stroke(float v){ lineWidth(v); pointSize(v); }
@@ -331,26 +261,6 @@ public:
   void blendOff(){ depthMask(true); blending(false); }
 
 
-  /// Clear frame buffer(s)
-  //void clear(AttributeBit bits);
-
-  /// Set clear color
-  //void clearColor(float r, float g, float b, float a);
-
-  /// Set clear color
-  //void clearColor(const Color& color);
-
-
-  /// Set linear fog parameters
-
-  /// \param[in] end    distance from viewer to fog end
-  /// \param[in] start  distance from viewer to fog start
-  /// \param[in] col    fog color
-  void fog(float end, float start, const Color& col);
-
-
-  // Coordinate Transforms
-
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
 
@@ -361,44 +271,26 @@ public:
   Viewport viewport() const;
 
 
-  /// Set current matrix
-  void matrixMode(MatrixMode mode);
-
   /// Push current matrix stack
   void pushMatrix();
-
-  /// Push designated matrix stack
-  void pushMatrix(MatrixMode v){ matrixMode(v); pushMatrix(); }
 
   /// Pop current matrix stack
   void popMatrix();
 
-  /// Pop designated matrix stack
-  void popMatrix(MatrixMode v){ matrixMode(v); popMatrix(); }
-
   /// Set current matrix to identity
-  void loadIdentity();
+  void loadIdentity() {/* !!!!!!!!!!!!! */}
 
   /// Set current matrix
-  void loadMatrix(const Matrix4d &m);
-  void loadMatrix(const Matrix4f &m);
+  void loadMatrix(const Matrix4d &m) {/* !!!!!!!!!!!!! */}
+  void loadMatrix(const Matrix4f &m) {/* !!!!!!!!!!!!! */}
 
   /// Multiply current matrix
-  void multMatrix(const Matrix4d &m);
-  void multMatrix(const Matrix4f &m);
-
-  /// Set modelview matrix
-  void modelView(const Matrix4d& m){ matrixMode(MODELVIEW); loadMatrix(m); }
-  void modelView(const Matrix4f& m){ matrixMode(MODELVIEW); loadMatrix(m); }
-
-  /// Set projection matrix
-  void projection(const Matrix4d& m){ matrixMode(PROJECTION); loadMatrix(m); }
-  void projection(const Matrix4f& m){ matrixMode(PROJECTION); loadMatrix(m); }
+  void multMatrix(const Matrix4d &m) {/* !!!!!!!!!!!!! */}
+  void multMatrix(const Matrix4f &m) {/* !!!!!!!!!!!!! */}
 
   Matrix4f modelMatrix() {
       return model_stack.get();
   }
-
 
   /// Rotate current matrix
 
@@ -445,76 +337,6 @@ public:
   void translate(const Vec<2,T>& v){ translate(v[0],v[1]); }
 
 
-  // Immediate Mode
-
-  /// Begin "immediate" mode drawing
-  void begin(Primitive v);
-
-  /// End "immediate" mode
-  void end();
-
-  /// Set current color
-  void currentColor(float r, float g, float b, float a);
-
-  /// Add vertex (immediate mode)
-  void vertex(double x, double y, double z=0.);
-
-  template<class T>
-  void vertex(const Vec<2,T>& v){ vertex(v[0],v[1],T(0)); }
-
-  template<class T>
-  void vertex(const Vec<3,T>& v){ vertex(v[0],v[1],v[2]); }
-
-
-  /// Add texture coordinate (immediate mode)
-  void texCoord(double u, double v);
-
-  template<class T>
-  void texCoord(const Vec<2,T>& v){ texCoord(v[0],v[1]); }
-
-  void texCoord(double u, double v, double w);
-
-  template<class T>
-  void texCoord(const Vec<3,T>& v){ texCoord(v[0],v[1],v[2]); }
-
-
-  /// Add normal (immediate mode)
-  void normal(double x, double y, double z=0.);
-
-  template<class T>
-  void normal(const Vec<3,T>& v){ normal(v[0],v[1],v[2]); }
-
-
-  /// Add color (immediate mode)
-  void color(double r, double g, double b, double a=1.);
-  void color(double gray, double a=1.) { color(gray, gray, gray, a); }
-  void color(const Color& v){ color(v.r, v.g, v.b, v.a); }
-  void color(const Vec3d& v, double a=1.) { color(v[0], v[1], v[2], a); }
-  void color(const Vec3f& v, double a=1.) { color(v[0], v[1], v[2], a); }
-  void color(const Vec4d& v) { color(v[0], v[1], v[2], v[3]); }
-  void color(const Vec4f& v) { color(v[0], v[1], v[2], v[3]); }
-
-  /// Draw vertex data
-
-  /// This draws a range of vertices from a mesh. If the mesh contains
-  /// vertex indices, then the range corresponds to the vertex indices array.
-  /// Negative count or index amounts are relative to one plus the maximum
-  /// possible value.
-  ///
-  /// @param[in] m    Vertex data to draw
-  /// @param[in] count  Number of vertices or indices to draw
-  /// @param[in] begin  Begin index of vertices or indices to draw (inclusive)
-  void draw(const Mesh& m, int count=-1, int begin=0);
-
-  /// Draw internal vertex data
-  void draw(){ draw(mMesh); }
-
-  /// Draw MeshVBO
-  // void draw(MeshVBO& meshVBO);
-
-
-  // Utility functions: converting, reporting, etc.
-
   /// Print current GPU error state
 
   /// @param[in] msg    Custom error message
@@ -528,27 +350,8 @@ public:
   ///
   static const char * errorString(bool verbose=false);
 
-  /// Returns number of components for given color type
-  static int numComponents(Format v);
+// al_lib working area ---------------------------------------------------------
 
-  /// Returns number of bytes for given data type
-  static int numBytes(DataType v);
-
-  /// Get DataType associated with a basic C type
-  template<typename Type>
-  static DataType toDataType();
-
-  /// Returns AlloTy type for a given GL data type:
-  // static AlloTy toAlloTy(DataType v);
-
-  /// Returns DataType for a given AlloTy
-  // static DataType toDataType(AlloTy type);
-
-
-  void draw(int numVertices, const Mesh& v);
-
-    // al_lib working area ------------------------------------------------------------------
-  // TODO: move implementations to cpp file
   void setClearColor(float r, float g, float b, float a = 1) {
       mClearColor.set(r, g, b, a);
   }
@@ -580,41 +383,32 @@ public:
       clearDepth();
   }
 
+  void shader(ShaderProgram& s) {
+    _shader = &s;
+    _shader->use();
+  }
+
+  ShaderProgram& shader() {
+    return *_shader;
+  }
+
+  void draw(VAOMesh& mesh) {
+    if (_shader == nullptr) {
+      AL_WARN_ONCE("shader not bound: bind shader by \"g.shader(my_shader);\"");
+      return;
+    }
+    mesh.draw();
+  }
+
 protected:
+  ShaderProgram* _shader {nullptr};
     Color mClearColor {0, 0, 0, 1};
     float mClearDepth {1};
     MatrixStack model_stack;
 
-  Mesh mMesh;       // used for immediate mode style rendering
-  int mRescaleNormal;
-  bool mInImmediateMode;  // flag for whether or not in immediate mode
-
-  virtual void onCreate(); // GPUObject
-  virtual void onDestroy(); // GPUObject
 };
-
-
-
-/// Abstract base class for any object that can be rendered via Graphics
-class Drawable {
-public:
-
-  /// Place drawing code here
-  virtual void onDraw(Graphics& gl) = 0;
-
-  virtual ~Drawable(){}
-};
-
-
-const char * toString(Graphics::DataType v);
-const char * toString(Graphics::Format v);
-
 
 // ============== INLINE ==============
-
-//inline void Graphics::clear(AttributeBit bits){ glClear(bits); }
-//inline void Graphics::clearColor(float r, float g, float b, float a){ glClearColor(r, g, b, a); }
-//inline void Graphics::clearColor(const Color& c) { clearColor(c.r, c.g, c.b, c.a); }
 
 inline void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq){
   glBlendEquation(eq);
@@ -637,55 +431,34 @@ inline void Graphics::colorMask(bool r, bool g, bool b, bool a){
 inline void Graphics::colorMask(bool b){ colorMask(b,b,b,b); }
 inline void Graphics::depthMask(bool b){ glDepthMask(b?GL_TRUE:GL_FALSE); }
 inline void Graphics::depthTesting(bool b){ capability(DEPTH_TEST, b); }
-inline void Graphics::lighting(bool b){ capability(LIGHTING, b); }
 inline void Graphics::scissorTest(bool b){ capability(SCISSOR_TEST, b); }
 inline void Graphics::cullFace(bool b){ capability(CULL_FACE, b); }
 inline void Graphics::cullFace(bool b, Face face) {
   capability(CULL_FACE, b);
   glCullFace(face);
 }
-inline void Graphics::matrixMode(MatrixMode mode){ glMatrixMode(mode); }
 inline void Graphics::pushMatrix(){
     model_stack.push();
-    //glPushMatrix();
 }
 inline void Graphics::popMatrix(){
     model_stack.pop();
-    //glPopMatrix();
 }
-inline void Graphics::loadIdentity(){ glLoadIdentity(); }
-inline void Graphics::loadMatrix(const Matrix4d& m){ glLoadMatrixd(m.elems()); }
-inline void Graphics::loadMatrix(const Matrix4f& m){ glLoadMatrixf(m.elems()); }
-inline void Graphics::multMatrix(const Matrix4d& m){ glMultMatrixd(m.elems()); }
-inline void Graphics::multMatrix(const Matrix4f& m){ glMultMatrixf(m.elems()); }
 inline void Graphics::translate(double x, double y, double z){
     model_stack.mult(Matrix4f::translation(x, y, z));
-    //glTranslated(x,y,z);
 }
 inline void Graphics::rotate(double angle, double x, double y, double z){
     model_stack.mult(Matrix4f::rotate(angle, x, y, z));
-    //glRotated(angle,x,y,z);
 }
 inline void Graphics::rotate(const Quatf& q) {
   Matrix4f m;
   q.toMatrix(m.elems());
   model_stack.mult(m);
-  //multMatrix(m);
 }
 inline void Graphics::scale(double s){
-  if(mRescaleNormal < 1){
-    mRescaleNormal = 1;
-    enable(RESCALE_NORMAL);
-  }
-  glScaled(s, s, s);
+  scale(s, s, s);
 }
 inline void Graphics::scale(double x, double y, double z){
-  if(mRescaleNormal < 3){
-    mRescaleNormal = 3;
-    disable(RESCALE_NORMAL);
-    enable(NORMALIZE);
-  }
-  glScaled(x, y, z);
+  model_stack.mult(Matrix4f::scaling(x, y, z));
 }
 inline void Graphics::lineWidth(float v) { glLineWidth(v); }
 inline void Graphics::pointSize(float v) { glPointSize(v); }
@@ -694,14 +467,6 @@ inline void Graphics::pointAtten(float c2, float c1, float c0){
   glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, att);
 }
 inline void Graphics::polygonMode(PolygonMode m, Face f){ glPolygonMode(f,m); }
-// inline void Graphics::shadeModel(ShadeModel m){ glShadeModel(m); }
-inline void Graphics::currentColor(float r, float g, float b, float a){ glColor4f(r,g,b,a); }
-
-inline Graphics::AttributeBit operator| (
-  const Graphics::AttributeBit& a, const Graphics::AttributeBit& b
-){
-  return static_cast<Graphics::AttributeBit>(+a|+b);
-}
 
 } // al::
 

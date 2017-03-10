@@ -73,31 +73,31 @@ struct Viewport {
 /// Viewpoint within a scene
 
 /// A viewpoint is an aggregation of a viewport (screen region) and a lens, 
-/// with a pointer to the pose (3D position and orientation) that it is attached to
+/// with a pointer to the pose (3D pos and orientation) that it is attached to
 ///
 /// @ingroup allocore
 class Viewpoint {
 public:
 
   // Viewpoint(const Pose& transform = Pose::identity());
-  Viewpoint(Pose const& pose, Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
+  Viewpoint(Pose& pose, Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
 
-  float anchorX() const { return mAnchorX; }
-  float anchorY() const { return mAnchorY; }
-  float stretchX() const { return mStretchX; }
-  float stretchY() const { return mStretchY; }
+  // float anchorX() const { return mAnchorX; }
+  // float anchorY() const { return mAnchorY; }
+  // float stretchX() const { return mStretchX; }
+  // float stretchY() const { return mStretchY; }
 
   /// Set anchoring factors relative to bottom-left corner of window
 
   /// @param[in] ax anchor factor relative to left edge of window, in [0,1]
   /// @param[in] ay anchor factor relative to bottom edge of window, in [0,1]
-  Viewpoint& anchor(float ax, float ay);
+  // Viewpoint& anchor(float ax, float ay);
 
   /// Set stretch factors relative to bottom-left corner of window
 
   /// @param[in] sx stretch factor relative to left edge of window, in [0,1]
   /// @param[in] sy stretch factor relative to bottom edge of window, in [0,1]
-  Viewpoint& stretch(float sx, float sy);
+  // Viewpoint& stretch(float sx, float sy);
 
   // bool hasLens() const { return NULL != mLens; }
 
@@ -113,8 +113,8 @@ public:
 
   /// Get local transform
   const Pose& pose() const { return *mPose; }
-  // Pose& transform(){ return *this; }
-  // Viewpoint& transform(const Pose& v){ set(v); return *this; }
+  Pose& pose(){ return *mPose; }
+  Viewpoint& pose(Pose& v){ mPose = &v; return *this; }
 
   // Pose worldTransform() const { return mParentTransform ? (*mParentTransform) * transform() : transform(); }
 
@@ -127,18 +127,12 @@ public:
   Frustumd frustum() const;
 
   /// Call to update viewport using stretch/anchor amounts when parent dimensions change
-  void onParentResize(int w, int h);
+  // void onParentResize(int w, int h);
 
   Matrix4f viewMatrix() {
-    Vec3d ux, uy, uz;
+    Vec3f ux, uy, uz;
     mPose->unitVectors(ux, uy, uz);
     return Matrix4f::lookAt(ux, uy, uz, mPose->pos());
-
-    // Matrix4f m {matrix()};
-    // m(0,3) = -m(0,3);
-    // m(1,3) = -m(1,3);
-    // m(2,3) = -m(2,3);
-    // return m;
   }
 
   Matrix4f projMatrix() {
@@ -148,19 +142,13 @@ public:
   }
 
 private:
-  Pose const* mPose;          // local transform
+  Pose* mPose;          // local transform
   Lens mLens;
   Viewport mViewport;         // screen display region
   // Pose* mParentTransform;     // parent transform, nullptr if none
-  float mAnchorX, mAnchorY;   // viewport anchor factors relative to parent window
-  float mStretchX, mStretchY; // viewport stretch factors relative to parent window
+  // float mAnchorX, mAnchorY;   // viewport anchor factors relative to parent window
+  // float mStretchX, mStretchY; // viewport stretch factors relative to parent window
 };
-
-// viewpoint with navigation control, can be used with NavInputControl class
-// class NavViewpoint : public Viewpoint, public Nav {
-// public:
-//   NavViewpoint(): Viewpoint(this), Nav() {}
-// };
 
 } // al::
 
