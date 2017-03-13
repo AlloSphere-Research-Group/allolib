@@ -106,68 +106,71 @@ void Graphics::pointSize(float v) { glPointSize(v); }
 void Graphics::polygonMode(PolygonMode m, Face f){ glPolygonMode(f,m); }
 
 void Graphics::setClearColor(float r, float g, float b, float a) {
-      mClearColor.set(r, g, b, a);
-  }
+    mClearColor.set(r, g, b, a);
+}
 
-  void Graphics::clear(int drawbuffer) {
-      glClearBufferfv(GL_COLOR, drawbuffer, mClearColor.components);
-  }
+void Graphics::clear(int drawbuffer) {
+    glClearBufferfv(GL_COLOR, drawbuffer, mClearColor.components);
+}
 
-  void Graphics::clear(float r, float g, float b, float a, int drawbuffer) {
-      setClearColor(r, g, b, a);
-      clear(drawbuffer);
-  }
+void Graphics::clear(float r, float g, float b, float a, int drawbuffer) {
+    setClearColor(r, g, b, a);
+    clear(drawbuffer);
+}
 
-  void Graphics::clear(Color const& c, int drawbuffer) {
-      setClearColor(c.r, c.g, c.b, c.a);
-      clear(drawbuffer);
-  }
+void Graphics::clear(Color const& c, int drawbuffer) {
+    setClearColor(c.r, c.g, c.b, c.a);
+    clear(drawbuffer);
+}
 
-  void Graphics::setClearDepth(float d) {
-      mClearDepth = d;
-  }
+void Graphics::setClearDepth(float d) {
+    mClearDepth = d;
+}
 
-  void Graphics::clearDepth() {
-      glClearBufferfv(GL_COLOR, 0, &mClearDepth);
-  }
+void Graphics::clearDepth() {
+    glClearBufferfv(GL_COLOR, 0, &mClearDepth);
+}
 
-  void Graphics::clearDepth(float d) {
-      setClearDepth(d);
-      clearDepth();
-  }
+void Graphics::clearDepth(float d) {
+    setClearDepth(d);
+    clearDepth();
+}
 
-  void Graphics::shader(ShaderProgram& s) {
-    if (shader_ != nullptr && s.id() == shader_->id()) {
-      // same shader
-      return;
-    }
-    shader_changed_ = true;
-    shader_ = &s;
-    shader_->use();
+void Graphics::shader(ShaderProgram& s) {
+  if (shader_ != nullptr && s.id() == shader_->id()) {
+    // same shader
+    return;
   }
+  shader_changed_ = true;
+  shader_ = &s;
+  shader_->use();
+}
 
-  ShaderProgram& Graphics::shader() {
-    return *shader_;
-  }
+ShaderProgram& Graphics::shader() {
+  return *shader_;
+}
 
-  void Graphics::camera(Viewpoint& v) {
-    mat_changed_ = true;
-    view_mat_ = v.viewMatrix();
-    proj_mat_ = v.projMatrix();
+void Graphics::camera(Viewpoint& v) {
+  mat_changed_ = true;
+  view_mat_ = v.viewMatrix();
+  proj_mat_ = v.projMatrix();
+  if (!viewport_.isEqual(v.viewport())) {
+    
   }
+}
 
-  void Graphics::draw(VAOMesh& mesh) {
-    if (shader_ == nullptr) {
-      AL_WARN_ONCE("shader not bound: bind shader by \"g.shader(myshader_);\"");
-      return;
-    }
-    if (shader_changed_ || mat_changed_) {
-      shader().uniform("MVP", proj_mat_ * view_mat_ * modelMatrix());
-      shader_changed_ = false;
-      mat_changed_ = false;
-    }
-    mesh.draw();
+void Graphics::draw(VAOMesh& mesh) {
+  if (shader_ == nullptr) {
+    AL_WARN_ONCE("shader not bound: bind shader by \"g.shader(myshader_);\"");
+    return;
   }
+  if (shader_changed_ || mat_changed_) {
+    shader().uniform("MVP", proj_mat_ * view_mat_ * modelMatrix());
+    shader_changed_ = false;
+    mat_changed_ = false;
+  }
+  mesh.draw();
+}
 
 
 } // al::

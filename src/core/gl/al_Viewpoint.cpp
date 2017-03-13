@@ -2,15 +2,15 @@
 
 using namespace al;
 
-Viewpoint::Viewpoint(
-    Pose const& pose, Viewport const& vp, Lens const& lens
-):
-    Pose(pose),
-    mLens(lens),
-    mViewport(vp)
-{
+// Viewpoint::Viewpoint(
+//     Pose const& pose, Viewport const& vp, Lens const& lens
+// ):
+//     Pose(pose),
+//     mLens(lens),
+//     mViewport(vp)
+// {
 
-}
+// }
 
 Viewpoint& Viewpoint::fovy(float deg) {
     mLens.fovy(deg);

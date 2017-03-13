@@ -202,6 +202,12 @@ public:
   	return *pose_;
   }
 
+  Nav& target(Pose& pose) {
+    pose_ = &pose;
+    updateDirectionVectors();
+    return *this;
+  }
+
 protected:
 	Pose* pose_;
   Vec3d mMove0, mMove1;  // linear velocities (raw, smoothed)
@@ -234,8 +240,9 @@ public:
 	const Nav& nav() const { return mNav; }
 	// NavInputControl& nav(Nav& v){ mNav=v; return *this; }
 
-	NavInputControl& target(Pose const& pose) {
-		mNav.set(pose);
+	NavInputControl& target(Pose& pose) {
+    mNav.target(pose);
+    return *this;
 	}
 
 	double vscale() const { return mVScale; }

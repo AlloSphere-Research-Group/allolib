@@ -67,6 +67,10 @@ struct Viewport {
 
   /// Set dimensions
   void set(int l_, int b_, int w_, int h_){ l=l_; b=b_; w=w_; h=h_; }
+
+  bool isEqual(Viewport const& v) {
+    return (l == v.l) && (b ==  v.b) && (w == v.w) && (h == v.h);
+  }
 };
 
 /// Viewpoint within a scene
@@ -77,7 +81,7 @@ struct Viewport {
 /// @ingroup allocore
 class Viewpoint : public Pose {
 public:
-  Viewpoint(Pose const& pose = Pose(), Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
+  // Viewpoint(Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
 
   const Lens& lens() const { return mLens; }
   Lens& lens() { return mLens; }

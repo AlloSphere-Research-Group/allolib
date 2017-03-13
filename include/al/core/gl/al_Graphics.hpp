@@ -357,6 +357,7 @@ protected:
   bool shader_changed_ {false};
   bool mat_changed_ {false};
   ShaderProgram* shader_ {nullptr};
+  Viewport viewport_;
   Matrix4f view_mat_;
   Matrix4f proj_mat_;
   Color mClearColor {0, 0, 0, 1};

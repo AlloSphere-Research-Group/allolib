@@ -6,7 +6,7 @@ namespace al {
 Nav::Nav(double smooth)
 :  pose_(nullptr), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
 {
-  updateDirectionVectors();
+  // updateDirectionVectors();
 }
 
 Nav::Nav(Pose& pose, double smooth)
@@ -142,7 +142,7 @@ void Nav::step(double dt){
 
 
 NavInputControl::NavInputControl(double vscale, double tscale)
-: mVScale(vscale), mTScale(tscale), mUseMouse(true)
+: mNav(), mVScale(vscale), mTScale(tscale), mUseMouse(true)
 {}
 
 NavInputControl::NavInputControl(Pose& pose, double vscale, double tscale)
