@@ -56,10 +56,11 @@
 #include "al/core/gl/al_Texture.hpp"
 #include "al/core/gl/al_Viewpoint.hpp"
 
+#include <iostream>
+
 /*!
   \def AL_GRAPHICS_ERROR(msg, ID)
   Used for reporting graphics errors from source files
-
 */
 //#define AL_ENABLE_DEBUG
 #ifdef AL_ENABLE_DEBUG
@@ -107,15 +108,7 @@ public:
     }
 };
 
-/// Interface for setting graphics state and rendering Mesh
-
-/// It also owns a Mesh, to simulate immediate mode (where it draws its own data)
-///
-/// @ingroup allocore
-class Graphics {
-public:
-
-  enum BlendFunc {
+enum BlendFunc {
     SRC_ALPHA       = GL_SRC_ALPHA,       /**< */
     ONE_MINUS_SRC_ALPHA   = GL_ONE_MINUS_SRC_ALPHA, /**< */
     SRC_COLOR       = GL_SRC_COLOR,       /**< */
@@ -161,6 +154,11 @@ public:
     FILL          = GL_FILL         /**< Render vertices normally according to primitive */
   };
 
+/// Interface for setting graphics state and rendering Mesh
+/// @ingroup allocore
+class Graphics {
+public:
+
   /// Enable a capability
   void enable(Capability v){ glEnable(v); }
 
@@ -204,10 +202,6 @@ public:
   /// Set diameter, in pixels, of points
   void pointSize(float v);
 
-  /// Set distance attenuation of points. The scaling formula is clamp(size * sqrt(1/(c0 + c1*d + c2*d^2)))
-  void pointAtten(float c2=0, float c1=0, float c0=1);
-
-
   /// Set polygon drawing mode
   void polygonMode(PolygonMode m, Face f=FRONT_AND_BACK);
 
@@ -216,10 +210,6 @@ public:
 
   /// Draw filled polygons
   void polygonFill(Face f=FRONT_AND_BACK){ polygonMode(FILL,f); }
-
-  /// Set shading model
-  // void shadeModel(ShadeModel m);
-
 
   /// Set blend mode
   void blendMode(BlendFunc src, BlendFunc dst, BlendEq eq=FUNC_ADD);
@@ -309,7 +299,8 @@ public:
   /// \param[in] axis   rotation axis
   template <class T>
   void rotate(double angle, const Vec<3,T>& axis){
-    rotate(angle, axis[0],axis[1],axis[2]); }
+    rotate(angle, axis[0],axis[1],axis[2]);
+  }
 
   /// Scale current matrix uniformly
   void scale(double s);
@@ -336,7 +327,6 @@ public:
   template <class T>
   void translate(const Vec<2,T>& v){ translate(v[0],v[1]); }
 
-
   /// Print current GPU error state
 
   /// @param[in] msg    Custom error message
@@ -350,124 +340,31 @@ public:
   ///
   static const char * errorString(bool verbose=false);
 
-// al_lib working area ---------------------------------------------------------
+  void setClearColor(float r, float g, float b, float a = 1);
+  void clear(int drawbuffer=0);
+  void clear(float r, float g, float b, float a = 1, int drawbuffer = 0);
+  void clear(Color const& c, int drawbuffer = 0);
+  void setClearDepth(float d);
+  void clearDepth();
+  void clearDepth(float d);
 
-  void setClearColor(float r, float g, float b, float a = 1) {
-      mClearColor.set(r, g, b, a);
-  }
-
-  void clear(int drawbuffer=0) {
-      glClearBufferfv(GL_COLOR, drawbuffer, mClearColor.components);
-  }
-
-  void clear(float r, float g, float b, float a = 1, int drawbuffer = 0) {
-      setClearColor(r, g, b, a);
-      clear(drawbuffer);
-  }
-
-  void clear(Color const& c, int drawbuffer = 0) {
-      setClearColor(c.r, c.g, c.b, c.a);
-      clear(drawbuffer);
-  }
-
-  void setClearDepth(float d) {
-      mClearDepth = d;
-  }
-
-  void clearDepth() {
-      glClearBufferfv(GL_COLOR, 0, &mClearDepth);
-  }
-
-  void clearDepth(float d) {
-      setClearDepth(d);
-      clearDepth();
-  }
-
-  void shader(ShaderProgram& s) {
-    _shader = &s;
-    _shader->use();
-  }
-
-  ShaderProgram& shader() {
-    return *_shader;
-  }
-
-  void draw(VAOMesh& mesh) {
-    if (_shader == nullptr) {
-      AL_WARN_ONCE("shader not bound: bind shader by \"g.shader(my_shader);\"");
-      return;
-    }
-    mesh.draw();
-  }
+  void shader(ShaderProgram& s);
+  ShaderProgram& shader();
+  void camera(Viewpoint& v);
+  void draw(VAOMesh& mesh);
 
 protected:
-  ShaderProgram* _shader {nullptr};
-    Color mClearColor {0, 0, 0, 1};
-    float mClearDepth {1};
-    MatrixStack model_stack;
+  bool shader_changed_ {false};
+  bool mat_changed_ {false};
+  ShaderProgram* shader_ {nullptr};
+  Matrix4f view_mat_;
+  Matrix4f proj_mat_;
+  Color mClearColor {0, 0, 0, 1};
+  float mClearDepth {1};
+  MatrixStack model_stack;
 
 };
 
-// ============== INLINE ==============
-
-inline void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq){
-  glBlendEquation(eq);
-  glBlendFunc(src, dst);
 }
-
-inline void Graphics::capability(Capability cap, bool v){
-  v ? enable(cap) : disable(cap);
-}
-
-inline void Graphics::blending(bool b){ capability(BLEND, b); }
-inline void Graphics::colorMask(bool r, bool g, bool b, bool a){
-  glColorMask(
-    r?GL_TRUE:GL_FALSE,
-    g?GL_TRUE:GL_FALSE,
-    b?GL_TRUE:GL_FALSE,
-    a?GL_TRUE:GL_FALSE
-  );
-}
-inline void Graphics::colorMask(bool b){ colorMask(b,b,b,b); }
-inline void Graphics::depthMask(bool b){ glDepthMask(b?GL_TRUE:GL_FALSE); }
-inline void Graphics::depthTesting(bool b){ capability(DEPTH_TEST, b); }
-inline void Graphics::scissorTest(bool b){ capability(SCISSOR_TEST, b); }
-inline void Graphics::cullFace(bool b){ capability(CULL_FACE, b); }
-inline void Graphics::cullFace(bool b, Face face) {
-  capability(CULL_FACE, b);
-  glCullFace(face);
-}
-inline void Graphics::pushMatrix(){
-    model_stack.push();
-}
-inline void Graphics::popMatrix(){
-    model_stack.pop();
-}
-inline void Graphics::translate(double x, double y, double z){
-    model_stack.mult(Matrix4f::translation(x, y, z));
-}
-inline void Graphics::rotate(double angle, double x, double y, double z){
-    model_stack.mult(Matrix4f::rotate(angle, x, y, z));
-}
-inline void Graphics::rotate(const Quatf& q) {
-  Matrix4f m;
-  q.toMatrix(m.elems());
-  model_stack.mult(m);
-}
-inline void Graphics::scale(double s){
-  scale(s, s, s);
-}
-inline void Graphics::scale(double x, double y, double z){
-  model_stack.mult(Matrix4f::scaling(x, y, z));
-}
-inline void Graphics::lineWidth(float v) { glLineWidth(v); }
-inline void Graphics::pointSize(float v) { glPointSize(v); }
-inline void Graphics::pointAtten(float c2, float c1, float c0){
-  GLfloat att[3] = {c0, c1, c2};
-  glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, att);
-}
-inline void Graphics::polygonMode(PolygonMode m, Face f){ glPolygonMode(f,m); }
-
-} // al::
-
 #endif
+// al::

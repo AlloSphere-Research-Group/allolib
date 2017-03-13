@@ -14,29 +14,29 @@ Texture::~Texture() {
 }
 
 void Texture::create2D(
-  unsigned int _width, unsigned int _height,
-  int _internal,
-  unsigned int _format,
-  unsigned int _type
+  unsigned int width, unsigned int height,
+  int internal,
+  unsigned int format,
+  unsigned int type
 ) {
   mTarget = GL_TEXTURE_2D;
-  mInternalFormat = _internal;
-  mWidth = _width;
-  mHeight = _height;
+  mInternalFormat = internal;
+  mWidth = width;
+  mHeight = height;
   mDepth = 1;
-  mFormat = _format;
-  mType = _type;
+  mFormat = format;
+  mType = type;
 
   // AL_GRAPHICS_ERROR("before creating 2D texture", id());
   create();
   bind();
   glTexImage2D(
-    target(),
+    mTarget,
     0, // level
-    internalFormat(),
-    width(), height(),
+    mInternalFormat,
+    mWidth, mHeight,
     0, // border
-    format(), type(), NULL
+    mFormat, mType, NULL
   );
   // AL_GRAPHICS_ERROR("creating 2D texture", id());
 

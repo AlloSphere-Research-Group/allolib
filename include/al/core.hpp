@@ -13,7 +13,7 @@
 #include "al/core/gl/al_GPUObject.hpp"
 #include "al/core/gl/al_Graphics.hpp"
 #include "al/core/gl/al_Lens.hpp"
-#include "al/core/gl/al_Light.hpp"
+// #include "al/core/gl/al_Light.hpp"
 #include "al/core/gl/al_Mesh.hpp"
 #include "al/core/gl/al_Shader.hpp"
 // #include "al/core/gl/al_Shapes.hpp"

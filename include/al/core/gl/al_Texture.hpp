@@ -74,7 +74,7 @@ public:
   // void create1D();
 
   void create2D(
-    unsigned int _width, unsigned int _height,
+    unsigned int width, unsigned int height,
     int internal = GL_RGBA8,
     unsigned int format = GL_RGBA,
     unsigned int type = GL_UNSIGNED_BYTE

@@ -21,8 +21,8 @@ class WindowApp : public Window, public WindowEventHandler, public FPS {
 public:
   // basic window app keyboard actions: fullscreen, quit, ...
   struct StandardWindowAppKeyControls : WindowEventHandler {
-    WindowApp* _app;
-    void app(WindowApp* const a) { _app = a; }
+    WindowApp* app_;
+    void app(WindowApp* const a) { app_ = a; }
     bool keyDown(const Keyboard& k);
   };
   StandardWindowAppKeyControls stdControls;

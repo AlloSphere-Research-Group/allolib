@@ -47,6 +47,7 @@
 
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/math/al_Quat.hpp"
+#include "al/core/math/al_Matrix4.hpp"
 #include <stdio.h>
 #include <iostream>
 
@@ -88,10 +89,10 @@ public:
 
 
   /// Turn to face a given world-coordinate point
-  void faceToward(const Vec3d& p, double amt = 1.);
+  virtual void faceToward(const Vec3d& p, double amt = 1.);
 
   /// Turn to face a given world-coordinate point, while maintaining an up vector
-  void faceToward(const Vec3d& point, const Vec3d& up, double amt=1.);
+  virtual void faceToward(const Vec3d& point, const Vec3d& up, double amt=1.);
 
 
 
@@ -319,10 +320,10 @@ public:
   Nav& view(const Quatd& v);
 
   /// Turn to face a given world-coordinate point
-  void faceToward(const Vec3d& p, double amt=1.);
+  virtual void faceToward(const Vec3d& p, double amt=1.) override;
 
   /// Turn to face a given world-coordinate point, while maintaining an up vector
-  void faceToward(const Vec3d& point, const Vec3d& up, double amt=1.);
+  virtual void faceToward(const Vec3d& point, const Vec3d& up, double amt=1.) override;
 
   /// Move toward a given world-coordinate point
   void nudgeToward(const Vec3d& p, double amt=1.);
@@ -418,7 +419,7 @@ public:
 
   /// Get transformed pose
   Pose& transformed(){ return mTransformed; }
-
+  
 protected:
   Vec3d mMove0, mMove1;  // linear velocities (raw, smoothed)
   Vec3d mSpin0, mSpin1;  // angular velocities (raw, smoothed)

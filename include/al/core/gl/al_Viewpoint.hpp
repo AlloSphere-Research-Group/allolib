@@ -34,7 +34,6 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE.
   
-
   viewpoint: Pose(view matrix) + Lens(projection matrix) + viewport
 
 */
@@ -48,17 +47,17 @@ namespace al {
 /// A framed area on a display screen
 /// @ingroup allocore
 struct Viewport {
-  float l, b, w, h; ///< left, bottom, width, height
+  int l, b, w, h; ///< left, bottom, width, height
 
   /// @param[in] w  width
   /// @param[in] h  height
-  Viewport(float w=640, float h=480): l(0), b(0), w(w), h(h) {}
+  Viewport(int w=640, int h=480): l(0), b(0), w(w), h(h) {}
 
   /// @param[in] l  left edge coordinate
   /// @param[in] b  bottom edge coordinate
   /// @param[in] w  width
   /// @param[in] h  height
-  Viewport(float l, float b, float w, float h): l(l), b(b), w(w), h(h) {}
+  Viewport(int l, int b, int w, int h): l(l), b(b), w(w), h(h) {}
 
   ///
   Viewport(const Viewport& cpy): l(cpy.l), b(cpy.b), w(cpy.w), h(cpy.h) {}
@@ -67,7 +66,7 @@ struct Viewport {
   float aspect() const { return (h!=0 && w!=0) ? float(w)/h : 1; }
 
   /// Set dimensions
-  void set(float l_, float b_, float w_, float h_){ l=l_; b=b_; w=w_; h=h_; }
+  void set(int l_, int b_, int w_, int h_){ l=l_; b=b_; w=w_; h=h_; }
 };
 
 /// Viewpoint within a scene
@@ -78,76 +77,36 @@ struct Viewport {
 /// @ingroup allocore
 class Viewpoint {
 public:
-
-  // Viewpoint(const Pose& transform = Pose::identity());
   Viewpoint(Pose& pose, Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
 
-  // float anchorX() const { return mAnchorX; }
-  // float anchorY() const { return mAnchorY; }
-  // float stretchX() const { return mStretchX; }
-  // float stretchY() const { return mStretchY; }
-
-  /// Set anchoring factors relative to bottom-left corner of window
-
-  /// @param[in] ax anchor factor relative to left edge of window, in [0,1]
-  /// @param[in] ay anchor factor relative to bottom edge of window, in [0,1]
-  // Viewpoint& anchor(float ax, float ay);
-
-  /// Set stretch factors relative to bottom-left corner of window
-
-  /// @param[in] sx stretch factor relative to left edge of window, in [0,1]
-  /// @param[in] sy stretch factor relative to bottom edge of window, in [0,1]
-  // Viewpoint& stretch(float sx, float sy);
-
-  // bool hasLens() const { return NULL != mLens; }
-
-  /// Get lens
   const Lens& lens() const { return mLens; }
   Lens& lens() { return mLens; }
   Viewpoint& lens(Lens const& v){ mLens=v; return *this; }
+  Viewpoint& fovy(float deg);
+  Viewpoint& near(float n);
+  Viewpoint& far(float f);
 
-  /// Get parent transform
-  // const Pose* parentTransform() const { return mParentTransform; }
-  // Viewpoint& parentTransform(Pose& v){ mParentTransform =&v; return *this; }
-  // Viewpoint& parentTransform(Pose* v){ mParentTransform = v; return *this; }
-
-  /// Get local transform
   const Pose& pose() const { return *mPose; }
   Pose& pose(){ return *mPose; }
   Viewpoint& pose(Pose& v){ mPose = &v; return *this; }
+  Viewpoint& pos(Vec3f v);
+  Viewpoint& faceToward(Vec3f point, Vec3f upvec);
 
-  // Pose worldTransform() const { return mParentTransform ? (*mParentTransform) * transform() : transform(); }
-
-  /// Get screen viewport
   const Viewport& viewport() const { return mViewport; }
   Viewport& viewport(){ return mViewport; }
   Viewpoint& viewport(Viewport const& vp){ mViewport = vp; return *this; }
+  Viewpoint& viewport(int left, int bottom, int width, int height);
 
+  Matrix4f viewMatrix();
+  Matrix4f projMatrix();
+  
   /// Get calculated viewing frustum
   Frustumd frustum() const;
 
-  /// Call to update viewport using stretch/anchor amounts when parent dimensions change
-  // void onParentResize(int w, int h);
-
-  Matrix4f viewMatrix() {
-    Vec3f ux, uy, uz;
-    mPose->unitVectors(ux, uy, uz);
-    return Matrix4f::lookAt(ux, uy, uz, mPose->pos());
-  }
-
-  Matrix4f projMatrix() {
-    return Matrix4f::perspective(
-      mLens.fovy(), mViewport.aspect(), mLens.near(), mLens.far()
-    );
-  }
-
 private:
-  Pose* mPose;          // local transform
+  Pose* mPose; // local transform
   Lens mLens;
-  Viewport mViewport;         // screen display region
-  // Pose* mParentTransform;     // parent transform, nullptr if none
-  // float mAnchorX, mAnchorY;   // viewport anchor factors relative to parent window
-  // float mStretchX, mStretchY; // viewport stretch factors relative to parent window
+  Viewport mViewport; // screen display region
 };
 
 } // al::

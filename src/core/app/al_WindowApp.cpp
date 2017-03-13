@@ -7,7 +7,7 @@ using namespace al;
 bool WindowApp::StandardWindowAppKeyControls::keyDown(const Keyboard& k){
       if(k.ctrl()){
         switch(k.key()){
-          case 'q': _app->quit(); return false;
+          case 'q': app_->quit(); return false;
           // case 'h': window().hide(); return false;
           // case 'm': window().iconify(); return false;
           // case 'c': window().cursorHideToggle(); return false;
@@ -16,7 +16,7 @@ bool WindowApp::StandardWindowAppKeyControls::keyDown(const Keyboard& k){
       }
       else{
         switch(k.key()){
-          case Keyboard::ESCAPE: _app->fullScreenToggle(); return false;
+          case Keyboard::ESCAPE: app_->fullScreenToggle(); return false;
           default:;
         }
       }

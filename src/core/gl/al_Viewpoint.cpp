@@ -2,39 +2,60 @@
 
 using namespace al;
 
-// Viewpoint::Viewpoint(const Pose& transform)
-// :	mViewport(0,0,0,0),
-// 	mParentTransform(NULL),
-// 	mTransform(&transform),
-// 	mAnchorX(0), mAnchorY(0), mStretchX(1), mStretchY(1)
-// {}
-
-Viewpoint::Viewpoint(Pose& pose, Viewport const& vp, Lens const& lens)
-:	mLens(lens),
-	mViewport(vp)
-	// mTransform(&transform),
-	// mAnchorX(0), mAnchorY(0), mStretchX(1), mStretchY(1)
+Viewpoint::Viewpoint(
+    Pose& pose, Viewport const& vp, Lens const& lens
+):
+    mLens(lens),
+    mViewport(vp)
 {
-	mPose = &pose;
+    mPose = &pose;
 }
 
-// Viewpoint& Viewpoint::anchor(float ax, float ay){
-// 	mAnchorX=ax; mAnchorY=ay; return *this;
-// }
+Viewpoint& Viewpoint::fovy(float deg) {
+    mLens.fovy(deg);
+    return *this;
+}
 
-// Viewpoint& Viewpoint::stretch(float sx, float sy){
-// 	mStretchX=sx; mStretchY=sy; return *this;
-// }
+Viewpoint& Viewpoint::near(float n) {
+    mLens.near(n);
+    return *this;
+}
+Viewpoint& Viewpoint::far(float f) {
+    mLens.far(f);
+    return *this;
+}
+
+Viewpoint& Viewpoint::pos(Vec3f v) {
+    mPose->pos(v);
+    return *this;
+}
+
+Viewpoint& Viewpoint::faceToward(Vec3f point, Vec3f upvec) {
+    mPose-> faceToward(point, upvec);
+    return *this;
+}
+
+
+Viewpoint& Viewpoint::viewport(int left, int bottom, int width, int height) {
+    mViewport.set(left, bottom, width, height);
+    return *this;
+}
+
+
+Matrix4f Viewpoint::viewMatrix() {
+    Vec3f ux, uy, uz;
+    mPose->unitVectors(ux, uy, uz);
+    return Matrix4f::lookAt(ux, uy, uz, mPose->pos());
+}
+
+Matrix4f Viewpoint::projMatrix() {
+    return Matrix4f::perspective(
+      mLens.fovy(), mViewport.aspect(), mLens.near(), mLens.far()
+    );
+}
 
 Frustumd Viewpoint::frustum() const {
-	Frustumd fr;
-	lens().frustum(fr, mPose->worldTransform(), viewport().aspect());
-	return fr;
+    Frustumd fr;
+    lens().frustum(fr, mPose->worldTransform(), viewport().aspect());
+    return fr;
 }
-
-// void Viewpoint::onParentResize(int w, int h){
-// 	mViewport.l = w * anchorX();
-// 	mViewport.b = h * anchorY();
-// 	mViewport.w = w * stretchX();
-// 	mViewport.h = h * stretchY();
-// }

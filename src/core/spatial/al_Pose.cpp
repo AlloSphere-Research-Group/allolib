@@ -41,12 +41,7 @@ void Pose::faceToward(const Vec3d& point, const Vec3d& up, double amt){
   // target.normalize();
   // Quatd rot = Quatd::getBillboardRotation(-target, up);
   quat().slerpTo(
-    Quatd::getBillboardRotation(
-      -(point - pos()).normalize(),
-      // -target,
-      up
-    ),
-    // rot,
+    Quatd::getBillboardRotation((pos() - point).normalize(), up),
     amt
   );
 }
