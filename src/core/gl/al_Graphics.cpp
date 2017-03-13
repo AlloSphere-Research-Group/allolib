@@ -37,16 +37,6 @@ bool Graphics::error(const char * msg, int ID){
   return false;
 }
 
-void Graphics::viewport(int x, int y, int width, int height) {
-  glViewport(x, y, width, height);
-}
-
-Viewport Graphics::viewport() const {
-  GLint vp[4];
-  glGetIntegerv(GL_VIEWPORT, vp);
-  return Viewport(vp[0], vp[1], vp[2], vp[3]);
-}
-
 void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq){
   glBlendEquation(eq);
   glBlendFunc(src, dst);
@@ -136,6 +126,24 @@ void Graphics::clearDepth(float d) {
     clearDepth();
 }
 
+void Graphics::viewport(const Viewport& v){
+  viewport_.set(v);
+  gl_viewport();
+}
+
+void Graphics::viewport(int x, int y, int width, int height) {
+  viewport_.set(x, y, width, height);
+  gl_viewport();
+}
+
+void Graphics::gl_viewport() {
+  glViewport(viewport_.l, viewport_.b, viewport_.w, viewport_.h);
+}
+
+Viewport Graphics::viewport() const {
+  return viewport_;
+}
+
 void Graphics::shader(ShaderProgram& s) {
   if (shader_ != nullptr && s.id() == shader_->id()) {
     // same shader
@@ -155,7 +163,7 @@ void Graphics::camera(Viewpoint& v) {
   view_mat_ = v.viewMatrix();
   proj_mat_ = v.projMatrix();
   if (!viewport_.isEqual(v.viewport())) {
-    
+    viewport(v.viewport());
   }
 }
 

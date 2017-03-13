@@ -67,6 +67,7 @@ struct Viewport {
 
   /// Set dimensions
   void set(int l_, int b_, int w_, int h_){ l=l_; b=b_; w=w_; h=h_; }
+  void set(const Viewport& cpy){ l=cpy.l; b=cpy.b; w=cpy.w; h=cpy.h; }
 
   bool isEqual(Viewport const& v) {
     return (l == v.l) && (b ==  v.b) && (w == v.w) && (h == v.h);

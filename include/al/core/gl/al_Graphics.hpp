@@ -250,17 +250,6 @@ public:
   /// Turn blending states off (opaque rendering)
   void blendOff(){ depthMask(true); blending(false); }
 
-
-  /// Set viewport
-  void viewport(int left, int bottom, int width, int height);
-
-  /// Set viewport
-  void viewport(const Viewport& v){ viewport(v.l,v.b,v.w,v.h); }
-
-  /// Get current viewport
-  Viewport viewport() const;
-
-
   /// Push current matrix stack
   void pushMatrix();
 
@@ -347,6 +336,14 @@ public:
   void setClearDepth(float d);
   void clearDepth();
   void clearDepth(float d);
+
+  /// Set viewport
+  void viewport(int left, int bottom, int width, int height);
+  /// Set viewport
+  void viewport(const Viewport& v);
+  void gl_viewport();
+  /// Get current viewport
+  Viewport viewport() const;
 
   void shader(ShaderProgram& s);
   ShaderProgram& shader();
