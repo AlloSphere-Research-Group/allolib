@@ -75,9 +75,9 @@ struct Viewport {
 /// with a pointer to the pose (3D pos and orientation) that it is attached to
 ///
 /// @ingroup allocore
-class Viewpoint {
+class Viewpoint : public Pose {
 public:
-  Viewpoint(Pose& pose, Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
+  Viewpoint(Pose const& pose = Pose(), Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
 
   const Lens& lens() const { return mLens; }
   Lens& lens() { return mLens; }
@@ -86,11 +86,11 @@ public:
   Viewpoint& near(float n);
   Viewpoint& far(float f);
 
-  const Pose& pose() const { return *mPose; }
-  Pose& pose(){ return *mPose; }
-  Viewpoint& pose(Pose& v){ mPose = &v; return *this; }
-  Viewpoint& pos(Vec3f v);
-  Viewpoint& faceToward(Vec3f point, Vec3f upvec);
+  // const Pose& pose() const { return *mPose; }
+  // Pose& pose(){ return *mPose; }
+  // Viewpoint& pose(Pose& v){ mPose = &v; return *this; }
+  // Viewpoint& pos(Vec3f v);
+  // Viewpoint& faceToward(Vec3f point, Vec3f upvec);
 
   const Viewport& viewport() const { return mViewport; }
   Viewport& viewport(){ return mViewport; }
@@ -99,12 +99,12 @@ public:
 
   Matrix4f viewMatrix();
   Matrix4f projMatrix();
-  
+
   /// Get calculated viewing frustum
   Frustumd frustum() const;
 
 private:
-  Pose* mPose; // local transform
+  // Pose* mPose; // local transform
   Lens mLens;
   Viewport mViewport; // screen display region
 };

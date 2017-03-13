@@ -3,12 +3,13 @@
 using namespace al;
 
 Viewpoint::Viewpoint(
-    Pose& pose, Viewport const& vp, Lens const& lens
+    Pose const& pose, Viewport const& vp, Lens const& lens
 ):
+    Pose(pose),
     mLens(lens),
     mViewport(vp)
 {
-    mPose = &pose;
+
 }
 
 Viewpoint& Viewpoint::fovy(float deg) {
@@ -25,15 +26,15 @@ Viewpoint& Viewpoint::far(float f) {
     return *this;
 }
 
-Viewpoint& Viewpoint::pos(Vec3f v) {
-    mPose->pos(v);
-    return *this;
-}
+// Viewpoint& Viewpoint::pos(Vec3f v) {
+//     mPose->pos(v);
+//     return *this;
+// }
 
-Viewpoint& Viewpoint::faceToward(Vec3f point, Vec3f upvec) {
-    mPose-> faceToward(point, upvec);
-    return *this;
-}
+// Viewpoint& Viewpoint::faceToward(Vec3f point, Vec3f upvec) {
+//     mPose-> faceToward(point, upvec);
+//     return *this;
+// }
 
 
 Viewpoint& Viewpoint::viewport(int left, int bottom, int width, int height) {
@@ -44,8 +45,8 @@ Viewpoint& Viewpoint::viewport(int left, int bottom, int width, int height) {
 
 Matrix4f Viewpoint::viewMatrix() {
     Vec3f ux, uy, uz;
-    mPose->unitVectors(ux, uy, uz);
-    return Matrix4f::lookAt(ux, uy, uz, mPose->pos());
+    unitVectors(ux, uy, uz);
+    return Matrix4f::lookAt(ux, uy, uz, pos());
 }
 
 Matrix4f Viewpoint::projMatrix() {
@@ -56,6 +57,6 @@ Matrix4f Viewpoint::projMatrix() {
 
 Frustumd Viewpoint::frustum() const {
     Frustumd fr;
-    lens().frustum(fr, mPose->worldTransform(), viewport().aspect());
+    lens().frustum(fr, worldTransform(), viewport().aspect());
     return fr;
 }

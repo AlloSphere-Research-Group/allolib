@@ -48,14 +48,181 @@
 
 namespace al {
 
+///	This manipulates a Pose with smooth angular and positional velocities.
+/// The smoothing is done using a one-pole low-pass filter which
+/// produces an exponential ease-out type of transition.
+///
+/// @ingroup allocore
+
+class Nav {
+public:
+
+  /// @param[in] pos    Initial position
+  /// @param[in] smooth  Motion smoothing amount in [0,1)
+  Nav(double smooth=0);
+  Nav(Pose& pose, double smooth=0);
+
+  /// Copy constructor
+  Nav(const Nav& nav);
+
+
+  /// Get smoothing amount
+  double smooth() const { return mSmooth; }
+
+  /// Get right unit vector
+  const Vec3d& ur() const { return mUR; }
+
+  /// Get up unit vector
+  const Vec3d& uu() const { return mUU; }
+
+  /// Get forward unit vector
+  const Vec3d& uf() const { return mUF; }
+
+  /// Get current linear and angular velocities as a Pose
+  Pose vel() const {
+    return Pose(mMove1, Quatd().fromEuler(mSpin1));
+  }
+
+  double velScale() const { return mVelScale; }
+
+
+  /// Set smoothing amount in [0,1)
+  Nav& smooth(double v){ mSmooth=v; return *this; }
+
+  Nav& view(double azimuth, double elevation, double bank);
+
+  Nav& view(const Quatd& v);
+
+  /// Turn to face a given world-coordinate point
+  void faceToward(const Vec3d& p, double amt=1.);
+
+  /// Turn to face a given world-coordinate point, while maintaining an up vector
+  void faceToward(const Vec3d& point, const Vec3d& up, double amt=1.);
+
+  /// Move toward a given world-coordinate point
+  void nudgeToward(const Vec3d& p, double amt=1.);
+
+
+  /// Set linear velocity
+  void move(double dr, double du, double df){ moveR(dr); moveU(du); moveF(df); }
+  template <class T>
+  void move(const Vec<3,T>& dp){ move(dp[0],dp[1],dp[2]); }
+
+  /// Set linear velocity along right vector
+  void moveR(double v){ mMove0[0] = v; }
+
+  /// Set linear velocity long up vector
+  void moveU(double v){ mMove0[1] = v; }
+
+  /// Set linear velocity long forward vector
+  void moveF(double v){ mMove0[2] = v; }
+
+  Vec3d& move(){ return mMove0; }
+
+  /// Move by a single increment
+  void nudge(double dr, double du, double df){ nudgeR(dr); nudgeU(du); nudgeF(df); }
+  template <class T>
+  void nudge(const Vec<3,T>& dp){ nudge(dp[0],dp[1],dp[2]); }
+
+  void nudgeR(double amount){ mNudge[0] += amount; }
+  void nudgeU(double amount){ mNudge[1] += amount; }
+  void nudgeF(double amount){ mNudge[2] += amount; }
+
+
+  /// Set angular velocity from azimuth, elevation, and bank differentials, in radians
+  void spin(double da, double de, double db){ spinR(de); spinU(da); spinF(db); }
+  template <class T>
+  void spin(const Vec<3,T>& daeb){ spin(daeb[0],daeb[1],daeb[2]); }
+
+  /// Set angular velocity from a unit quaternion (versor)
+  void spin(const Quatd& v){ v.toEuler(mSpin1); }
+
+  /// Set angular velocity around right vector (elevation), in radians
+  void spinR(double v){ mSpin0[1] = v; }
+
+  /// Set angular velocity around up vector (azimuth), in radians
+  void spinU(double v){ mSpin0[0] = v; }
+
+  /// Set angular velocity around forward vector (bank), in radians
+  void spinF(double v){ mSpin0[2] = v; }
+
+  /// Set angular velocity directly
+  Vec3d& spin(){ return mSpin0; }
+
+
+  /// Turn by a single increment for one step, in radians
+  void turn(double az, double el, double ba){ turnR(el); turnU(az); turnF(ba); }
+  template <class T>
+  void turn(const Vec<3,T>& daeb){ turn(daeb[0],daeb[1],daeb[2]); }
+
+  /// Turn by a single increment, in radians, around the right vector (elevation)
+  void turnR(double v){ mTurn[1] = v;  }
+
+  /// Turn by a single increment, in radians, around the up vector (azimuth)
+  void turnU(double v){ mTurn[0] = v; }
+
+  /// Turn by a single increment, in radians, around the forward vector (bank)
+  void turnF(double v){ mTurn[2] = v; }
+
+
+  /// Stop moving and spinning
+  Nav& halt();
+
+  /// Go to origin, reset orientation
+  Nav& home();
+
+  /// Update coordinate frame basis vectors based on internal quaternion
+  void updateDirectionVectors(){
+    pose_->quat().normalize();
+    pose_->directionVectors(mUR, mUU, mUF);
+  }
+
+  Nav& set(const Pose& v);
+
+  Nav& set(const Nav& v);
+
+  /// Accumulate pose based on velocity
+  void step(double dt=1);
+
+
+  /// Get pull-back amount
+  double pullBack() const { return mPullBack0; }
+
+  /// Set pull-back amount
+  Nav& pullBack(double v){ mPullBack0 = v>0. ? v : 0.; return *this; }
+
+  /// Get transformed pose
+  Pose& transformed(){ return mTransformed; }
+  
+  Pose& pose() {
+  	return *pose_;
+  }
+
+  Pose const& pose() const {
+  	return *pose_;
+  }
+
+protected:
+	Pose* pose_;
+  Vec3d mMove0, mMove1;  // linear velocities (raw, smoothed)
+  Vec3d mSpin0, mSpin1;  // angular velocities (raw, smoothed)
+  Vec3d mTurn;      // orientation increment for one step
+  Vec3d mNudge;      // position increment for one step
+  Vec3d mUR, mUU, mUF;  // basis vectors of local coordinate frame
+  double mSmooth;
+  double mVelScale;    // velocity scaling factor
+  double mPullBack0, mPullBack1;
+  Pose mTransformed;
+};
+
 /// Mapping from keyboard and mouse controls to a Nav object
 ///
 /// @ingroup allocore
 class NavInputControl : public WindowEventHandler {
 public:
+  NavInputControl(double vscale = 0.125, double tscale = 2.);
+  NavInputControl(Pose& pose, double vscale = 0.125, double tscale = 2.);
 	NavInputControl(const NavInputControl& v);
-
-	NavInputControl(Nav& nav, double vscale = 0.125, double tscale = 2.);
 
 	virtual ~NavInputControl(){}
 
@@ -63,9 +230,13 @@ public:
 	virtual bool keyUp(const Keyboard& k);
 	virtual bool mouseDrag(const Mouse& m);
 
-	Nav& nav(){ return *mNav; }
-	const Nav& nav() const { return *mNav; }
-	NavInputControl& nav(Nav& v){ mNav=&v; return *this; }
+	Nav& nav(){ return mNav; }
+	const Nav& nav() const { return mNav; }
+	// NavInputControl& nav(Nav& v){ mNav=v; return *this; }
+
+	NavInputControl& target(Pose const& pose) {
+		mNav.set(pose);
+	}
 
 	double vscale() const { return mVScale; }
 	NavInputControl& vscale(double v) { mVScale=v; return *this; }
@@ -75,8 +246,11 @@ public:
 
 	void useMouse(bool use){ mUseMouse = use; }
 
+	void step(double dt=1) {
+		mNav.step(dt);
+	}
 protected:
-	Nav * mNav;
+	Nav mNav;
 	double mVScale, mTScale;
 	bool mUseMouse;
 };

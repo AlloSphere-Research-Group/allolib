@@ -10,11 +10,9 @@
 
 namespace al {
 
-// Unified app class: single window, audioIO,
-//   single port osc recv and single port osc send, and al::Graphics
-//   Also has a default nav and viewpoint for camera functionality
-
-// TODO: better osc interface, add console app and graphics
+// Unified app class: single window, audioIO, and
+//   single port osc recv & single port osc send
+// TODO: better osc interface
 class App: public WindowApp, public AudioApp, public osc::PacketHandler {
 public:
 
@@ -23,14 +21,14 @@ public:
 
   // overrides WindowApp's start to also initiate AudioApp and etc.
   virtual void start() override {
-    open(); // WindowApp (calls glfw::init(); onInit(); create(); onCreate(); )
+    open(); // WindowApp (glfw::init(), onInit(), create(), onCreate())
     startFPS(); // WindowApp (FPS)
-    begin(); // AudioApp (only actually begins of `initAudio` was called before)
+    begin(); // AudioApp (only begins if `initAudio` was called before)
     while (!shouldQuit()) {
       // user can quit this loop with WindowApp::quit() or clicking close button
       // or with stdctrl class input (ctrl+q)
       onAnimate(dt());
-      loop(); // WindowApp (onDraw)
+      loop(); // WindowApp (onDraw, refresh)
       tickFPS(); // WindowApp (FPS)
     }
     onExit(); // user defined

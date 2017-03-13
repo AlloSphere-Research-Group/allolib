@@ -3,17 +3,157 @@
 
 namespace al {
 
+Nav::Nav(double smooth)
+:  pose_(nullptr), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
+{
+  updateDirectionVectors();
+}
+
+Nav::Nav(Pose& pose, double smooth)
+:  pose_(&pose), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
+{
+  updateDirectionVectors();
+}
+
+Nav::Nav(const Nav& nav)
+:  pose_(nav.pose_),
+  mMove0(nav.mMove0), mMove1(nav.mMove1),  // linear velocities (raw, smoothed)
+  mSpin0(nav.mSpin0), mSpin1(nav.mSpin1),  // angular velocities (raw, smoothed)
+  mTurn(nav.mTurn), mNudge(nav.mNudge),      //
+  mSmooth(nav.smooth()), mVelScale(nav.mVelScale),
+  mPullBack0(nav.mPullBack0), mPullBack1(nav.mPullBack1)
+{
+  updateDirectionVectors();
+}
+
+void Nav::faceToward(const Vec3d& point, double amt){
+
+  /*Vec3d target(p - pos());
+  target.normalize();
+  Quatd rot = Quatd::getRotationTo(uf(), target);
+
+  // We must pre-multiply the Pose quaternion with our rotation since
+  // it was computed in world space.
+  if(amt == 1.)  quat() = rot * quat();
+  else      quat() = rot.pow(amt) * quat();*/
+
+  pose_->faceToward(point, amt);
+  updateDirectionVectors();
+}
+
+void Nav::faceToward(const Vec3d& point, const Vec3d& up, double amt){
+  pose_->faceToward(point, up, amt);
+  updateDirectionVectors();
+}
+
+void Nav::nudgeToward(const Vec3d& p, double amt){
+  Vec3d rotEuler;
+  Vec3d target(p - pose_->pos());
+  target.normalize();  // unit vector of direction to move (in world frame)
+  // rotate target into local frame:
+  target = pose_->quat().rotate(target);
+  // push ourselves in that particular direction:
+  nudge(target * amt);
+}
+
+Nav& Nav::halt(){
+  mMove0.set(0);
+  mMove1.set(0);
+  mSpin0.set(0);
+  mSpin1.set(0);
+  mTurn.set(0);
+  mNudge.set(0);
+  updateDirectionVectors();
+  return *this;
+}
+
+Nav& Nav::home(){
+  pose_->quat().identity();
+  view(0, 0, 0);
+  turn(0, 0, 0);
+  spin(0, 0, 0);
+  pose_->vec().set(0);
+  updateDirectionVectors();
+  return *this;
+}
+
+Nav& Nav::view(double azimuth, double elevation, double bank) {
+  return view(Quatd().fromEuler(azimuth, elevation, bank));
+}
+
+Nav& Nav::view(const Quatd& v) {
+  pose_->quat(v);
+  updateDirectionVectors();
+  return *this;
+}
+
+Nav& Nav::set(const Pose& v){
+  pose_->set(v);
+  updateDirectionVectors();
+  return *this;
+}
+
+Nav& Nav::set(const Nav& v){
+  set(v.pose());
+  mMove0 = v.mMove0;
+  mMove1 = v.mMove1;
+  mSpin0 = v.mSpin0;
+  mSpin1 = v.mSpin1;
+  mTurn = v.mTurn;
+  mUR = v.mUR;
+  mUU = v.mUU;
+  mUF = v.mUF;
+  mSmooth = v.mSmooth;
+  updateDirectionVectors();
+  return *this;
+}
+
+void Nav::step(double dt){
+  mVelScale = dt;
+
+  double amt = 1.-smooth();  // TODO: adjust for dt
+
+  // Low-pass filter velocities
+  mMove1.lerp(mMove0*dt + mNudge, amt);
+  mSpin1.lerp(mSpin0*dt + mTurn , amt);
+
+  // Turn and nudge are a one-shot increments, so clear each step
+  mTurn.set(0);
+  mNudge.set(0);
+
+  // Update orientation from smoothed orientation differential
+  // Note that vel() returns a smoothed Pose diff from mMove1 and mSpin1.
+  // mQuat *= vel().quat();
+  pose_->quat() *= vel().quat();
+  updateDirectionVectors();
+
+  // Move according to smoothed position differential (mMove1)
+  for(int i=0; i<pose_->pos().size(); ++i){
+    pose_->pos()[i] += mMove1.dot(Vec3d(ur()[i], uu()[i], uf()[i]));
+  }
+
+  mPullBack1 = mPullBack1 + (mPullBack0-mPullBack1)*amt;
+
+  mTransformed = *pose_;
+  if(mPullBack1 > 1e-16){
+    mTransformed.pos() -= uf() * mPullBack1;
+  }
+}
+
+
+NavInputControl::NavInputControl(double vscale, double tscale)
+: mVScale(vscale), mTScale(tscale), mUseMouse(true)
+{}
+
+NavInputControl::NavInputControl(Pose& pose, double vscale, double tscale)
+:	mNav(pose), mVScale(vscale), mTScale(tscale), mUseMouse(true)
+{}
+
 NavInputControl::NavInputControl(const NavInputControl& v)
-:	mNav(v.mNav), mVScale(v.vscale()), mTScale(v.tscale()), mUseMouse(true)
+: mNav(v.mNav), mVScale(v.vscale()), mTScale(v.tscale()), mUseMouse(true)
 {}
-
-NavInputControl::NavInputControl(Nav& nav, double vscale, double tscale)
-:	mNav(&nav), mVScale(vscale), mTScale(tscale), mUseMouse(true)
-{}
-
 
 bool NavInputControl::keyDown(const Keyboard& k){
-	
 	if(k.ctrl()) return true;
 
 	double a = mTScale * M_DEG2RAD;	// rotational speed: rad/sec
