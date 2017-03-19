@@ -37,6 +37,8 @@
 
   File description:
   A general high-level interface to graphics rendering
+  [!] is SINGLETON,
+  [!] only call from main (graphics) thread
 
   File author(s):
   Wesley Smith, 2010, wesley.hoke@gmail.com
@@ -57,6 +59,7 @@
 #include "al/core/gl/al_Viewpoint.hpp"
 
 #include <iostream>
+#include <map>
 
 /*!
   \def AL_GRAPHICS_ERROR(msg, ID)
@@ -108,7 +111,12 @@ public:
     }
 };
 
-enum BlendFunc {
+/// Interface for setting graphics state and rendering Mesh
+/// @ingroup allocore
+class Graphics {
+public:
+
+  enum BlendFunc {
     SRC_ALPHA       = GL_SRC_ALPHA,       /**< */
     ONE_MINUS_SRC_ALPHA   = GL_ONE_MINUS_SRC_ALPHA, /**< */
     SRC_COLOR       = GL_SRC_COLOR,       /**< */
@@ -153,11 +161,6 @@ enum BlendFunc {
     LINE          = GL_LINE,          /**< Render only lines along vertex path */
     FILL          = GL_FILL         /**< Render vertices normally according to primitive */
   };
-
-/// Interface for setting graphics state and rendering Mesh
-/// @ingroup allocore
-class Graphics {
-public:
 
   /// Enable a capability
   void enable(Capability v){ glEnable(v); }
@@ -350,6 +353,9 @@ public:
   void camera(Viewpoint& v);
   void draw(VAOMesh& mesh);
 
+  void texture(Texture& t, int binding_point = 0);
+  Texture& texture(int binding_point = 0);
+
 protected:
   bool shader_changed_ {false};
   bool mat_changed_ {false};
@@ -360,8 +366,11 @@ protected:
   Color mClearColor {0, 0, 0, 1};
   float mClearDepth {1};
   MatrixStack model_stack;
-
+  std::map<int, Texture*> textures_;
 };
+
+// SINGLETON!
+Graphics& graphics();
 
 }
 #endif

@@ -167,6 +167,24 @@ void Graphics::camera(Viewpoint& v) {
   }
 }
 
+void Graphics::texture(Texture& t, int binding_point) {
+  auto search = textures_.find(binding_point);
+  if(search != textures_.end()) { // previous binding exists
+    if (search->second->id() == t.id()) { // and it was same texture
+      // so do nothing and return
+      // std::cout << "same texture" << std::endl;
+      return;
+    }
+  }
+
+  textures_[binding_point] = &t;
+  textures_[binding_point]->bind(binding_point);
+}
+
+Texture& Graphics::texture(int binding_point) {
+  return *(textures_[binding_point]);
+}
+
 void Graphics::draw(VAOMesh& mesh) {
   if (shader_ == nullptr) {
     AL_WARN_ONCE("shader not bound: bind shader by \"g.shader(myshader_);\"");
@@ -179,6 +197,12 @@ void Graphics::draw(VAOMesh& mesh) {
   }
   mesh.draw();
 }
+
+Graphics& graphics() {
+  static Graphics g;
+  return g;
+}
+
 
 
 } // al::

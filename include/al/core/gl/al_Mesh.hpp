@@ -53,19 +53,7 @@
 
 namespace al{
 
-enum Primitive : unsigned int {
-  POINTS=0,
-  LINES,
-  LINE_STRIP,
-  LINE_LOOP,
-  TRIANGLES,
-  TRIANGLE_STRIP,
-  TRIANGLE_FAN,
-  LINES_ADJACENCY,
-  LINE_STRIP_ADJACENCY,
-  TRIANGLES_ADJACENCY,
-  TRIANGLE_STRIP_ADJACENCY
-};
+
 
 /// Stores buffers related to rendering graphical objects
 
@@ -74,6 +62,19 @@ enum Primitive : unsigned int {
 /// @ingroup allocore
 class Mesh {
 public:
+  enum Primitive : unsigned int {
+    POINTS=0,
+    LINES,
+    LINE_STRIP,
+    LINE_LOOP,
+    TRIANGLES,
+    TRIANGLE_STRIP,
+    TRIANGLE_FAN,
+    LINES_ADJACENCY,
+    LINE_STRIP_ADJACENCY,
+    TRIANGLES_ADJACENCY,
+    TRIANGLE_STRIP_ADJACENCY
+  };
 
   typedef Vec4f      Vertex;
   typedef Vec3f      Normal;
