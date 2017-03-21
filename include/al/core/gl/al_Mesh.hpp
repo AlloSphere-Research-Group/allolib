@@ -76,7 +76,7 @@ public:
     TRIANGLE_STRIP_ADJACENCY
   };
 
-  typedef Vec4f      Vertex;
+  typedef Vec3f      Vertex;
   typedef Vec3f      Normal;
   typedef float      TexCoord1;
   typedef Vec2f      TexCoord2;
@@ -306,7 +306,7 @@ public:
 
 
   /// Append vertex to vertex buffer
-  void vertex(float x, float y, float z=0){ vertex(Vertex(x,y,z, 1.0)); }
+  void vertex(float x, float y, float z=0){ vertex(Vertex(x,y,z)); }
 
   /// Append vertex to vertex buffer
   void vertex(const Vertex& v){ vertices().push_back(v); }

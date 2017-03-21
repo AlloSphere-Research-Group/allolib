@@ -118,7 +118,7 @@ void Graphics::setClearDepth(float d) {
 }
 
 void Graphics::clearDepth() {
-    glClearBufferfv(GL_COLOR, 0, &mClearDepth);
+    glClearBufferfv(GL_DEPTH, 0, &mClearDepth);
 }
 
 void Graphics::clearDepth(float d) {
@@ -159,7 +159,7 @@ ShaderProgram& Graphics::shader() {
 }
 
 void Graphics::camera(Viewpoint& v) {
-  mat_changed_ = true;
+  camera_changed_ = true;
   view_mat_ = v.viewMatrix();
   proj_mat_ = v.projMatrix();
   if (!viewport_.isEqual(v.viewport())) {
@@ -190,11 +190,20 @@ void Graphics::draw(VAOMesh& mesh) {
     AL_WARN_ONCE("shader not bound: bind shader by \"g.shader(myshader_);\"");
     return;
   }
-  if (shader_changed_ || mat_changed_) {
-    shader().uniform("MVP", proj_mat_ * view_mat_ * modelMatrix());
-    shader_changed_ = false;
-    mat_changed_ = false;
+  if (shader_changed_ || mat_changed_ || camera_changed_) {
+    // 3rd parameter: "don't warn even if there's no such uniform"
+    shader().uniform("MVP", proj_mat_ * view_mat_ * modelMatrix(), false);
   }
+  if (shader_changed_ || mat_changed_) {
+    shader().uniform("M", modelMatrix(), false);
+  }
+  if (shader_changed_ || camera_changed_) {
+    shader().uniform("V", viewMatrix(), false);
+    shader().uniform("P", projMatrix(), false);
+  }
+  shader_changed_ = false;
+  mat_changed_ = false;
+  camera_changed_ = false;
   mesh.draw();
 }
 

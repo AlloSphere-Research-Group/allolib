@@ -181,7 +181,7 @@ public:
     unsigned int attach=GL_COLOR_ATTACHMENT0,
     int level=0
   );
-
+  
   /// Detach texture at a specified attachment point and mipmap level
   FBO& detachTexture2D(unsigned int attachment, int level=0);
 

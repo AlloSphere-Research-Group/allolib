@@ -308,9 +308,9 @@ bool ShaderProgram::linked() const {
     map[name] = loc;\
   }
 
-int ShaderProgram::uniform(const char * name) const {
+int ShaderProgram::uniform(const char * name, bool warn) const {
   GET_LOC(mUniformLocs, glGetUniformLocation);
-  if(-1 == loc)
+  if(-1 == loc && warn)
     AL_WARN_ONCE("No such uniform named \"%s\"", name);
   return loc;
 }
@@ -343,38 +343,38 @@ const ShaderProgram& ShaderProgram::uniformMatrix3(int loc, const float * v, boo
 const ShaderProgram& ShaderProgram::uniformMatrix4(int loc, const float * v, bool transpose) const {
   glUniformMatrix4fv(loc, 1, transpose, v); return *this;
 }
-const ShaderProgram& ShaderProgram::uniform1(const char * name, const float * v, int count) const{
-  glUniform1fv(uniform(name), count, v); return *this;
+const ShaderProgram& ShaderProgram::uniform1(const char * name, const float * v, int count, bool warn) const{
+  glUniform1fv(uniform(name, warn), count, v); return *this;
 }
-const ShaderProgram& ShaderProgram::uniform2(const char * name, const float * v, int count) const{
-  glUniform2fv(uniform(name), count, v); return *this;
+const ShaderProgram& ShaderProgram::uniform2(const char * name, const float * v, int count, bool warn) const{
+  glUniform2fv(uniform(name, warn), count, v); return *this;
 }
-const ShaderProgram& ShaderProgram::uniform3(const char * name, const float * v, int count) const{
-  glUniform3fv(uniform(name), count, v); return *this;
+const ShaderProgram& ShaderProgram::uniform3(const char * name, const float * v, int count, bool warn) const{
+  glUniform3fv(uniform(name, warn), count, v); return *this;
 }
-const ShaderProgram& ShaderProgram::uniform4(const char * name, const float * v, int count) const{
-  glUniform4fv(uniform(name), count, v); return *this;
+const ShaderProgram& ShaderProgram::uniform4(const char * name, const float * v, int count, bool warn) const{
+  glUniform4fv(uniform(name, warn), count, v); return *this;
 }
-const ShaderProgram& ShaderProgram::uniform(const char * name, int v) const{
-  return uniform(uniform(name), v);
+const ShaderProgram& ShaderProgram::uniform(const char * name, int v, bool warn) const{
+  return uniform(uniform(name, warn), v);
 }
-const ShaderProgram& ShaderProgram::uniform(const char * name, float v) const{
-  return uniform(uniform(name), v);
+const ShaderProgram& ShaderProgram::uniform(const char * name, float v, bool warn) const{
+  return uniform(uniform(name, warn), v);
 }
-const ShaderProgram& ShaderProgram::uniform(const char * name, float v0, float v1) const{
-  return uniform(uniform(name), v0,v1);
+const ShaderProgram& ShaderProgram::uniform(const char * name, float v0, float v1, bool warn) const{
+  return uniform(uniform(name, warn), v0,v1);
 }
-const ShaderProgram& ShaderProgram::uniform(const char * name, float v0, float v1, float v2) const{
-  return uniform(uniform(name), v0,v1,v2);
+const ShaderProgram& ShaderProgram::uniform(const char * name, float v0, float v1, float v2, bool warn) const{
+  return uniform(uniform(name, warn), v0,v1,v2);
 }
-const ShaderProgram& ShaderProgram::uniform(const char * name, float v0, float v1, float v2, float v3) const{
-  return uniform(uniform(name), v0,v1,v2,v3);
+const ShaderProgram& ShaderProgram::uniform(const char * name, float v0, float v1, float v2, float v3, bool warn) const{
+  return uniform(uniform(name, warn), v0,v1,v2,v3);
 }
-const ShaderProgram& ShaderProgram::uniformMatrix3(const char * name, const float * v, bool transpose) const{
-  return uniformMatrix3(uniform(name), v, transpose);
+const ShaderProgram& ShaderProgram::uniformMatrix3(const char * name, const float * v, bool transpose, bool warn) const{
+  return uniformMatrix3(uniform(name, warn), v, transpose);
 }
-const ShaderProgram& ShaderProgram::uniformMatrix4(const char * name, const float * v, bool transpose) const{
-  return uniformMatrix4(uniform(name), v, transpose);
+const ShaderProgram& ShaderProgram::uniformMatrix4(const char * name, const float * v, bool transpose, bool warn) const{
+  return uniformMatrix4(uniform(name, warn), v, transpose);
 }
 
 const ShaderProgram& ShaderProgram::attribute(int loc, float v) const{

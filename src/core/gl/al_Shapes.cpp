@@ -46,7 +46,7 @@ static void scaleVerts(Mesh& m, float radius, int N){
 
 int addCube(Mesh& m, bool withNormalsAndTexcoords, float l){
 
-  m.primitive(Graphics::TRIANGLES);
+  m.primitive(Mesh::TRIANGLES);
 
   // This generates a cube with face-oriented normals and unit texture
   // coordinates per face. It should be rendered using a quad primitive.
@@ -133,7 +133,9 @@ int addCube(Mesh& m, bool withNormalsAndTexcoords, float l){
       4,1,0, 4,5,1, 2,3,6, 3,7,6
     };
 
-    m.index(indices, sizeof(indices)/sizeof(*indices), m.vertices().size()-Nv);
+    int offset = m.vertices().size()-Nv;
+    int num = sizeof(indices)/sizeof(*indices);
+    m.index(indices, num, offset);
 
     return Nv;
   }
@@ -142,7 +144,7 @@ int addCube(Mesh& m, bool withNormalsAndTexcoords, float l){
 
 int addTetrahedron(Mesh& m, float radius){
 
-  m.primitive(Graphics::TRIANGLES);
+  m.primitive(Mesh::TRIANGLES);
 
   static const float l = sqrt(1./3);
   static const float vertices[] = {
@@ -157,7 +159,9 @@ int addTetrahedron(Mesh& m, float radius){
   int Nv = sizeof(vertices)/sizeof(*vertices)/3;
 
   m.vertex(vertices, Nv);
-  m.index(indices, sizeof(indices)/sizeof(*indices), m.vertices().size()-Nv);
+  int offset = m.vertices().size()-Nv;
+  int num = sizeof(indices)/sizeof(*indices);
+  m.index(indices, num, offset);
 
   scaleVerts(m, radius, Nv);
 
@@ -167,7 +171,7 @@ int addTetrahedron(Mesh& m, float radius){
 
 int addOctahedron(Mesh& m, float radius){
 
-  m.primitive(Graphics::TRIANGLES);
+  m.primitive(Mesh::TRIANGLES);
 
   static const float vertices[] = {
      1,0,0, 0, 1,0, 0,0, 1,  // 0 1 2
@@ -182,7 +186,9 @@ int addOctahedron(Mesh& m, float radius){
   int Nv = sizeof(vertices)/sizeof(*vertices)/3;
 
   m.vertex(vertices, Nv);
-  m.index(indices, sizeof(indices)/sizeof(*indices), m.vertices().size()-Nv);
+  int offset = m.vertices().size()-Nv;
+  int num = sizeof(indices)/sizeof(*indices);
+  m.index(indices, num, offset);
 
   scaleVerts(m, radius, Nv);
 
@@ -192,7 +198,7 @@ int addOctahedron(Mesh& m, float radius){
 
 int addDodecahedron(Mesh& m, float radius){
 
-  m.primitive(Graphics::TRIANGLES);
+  m.primitive(Mesh::TRIANGLES);
 
   static const float b = sqrt(1./3);
   static const float a = (phi-1)*b;
@@ -223,7 +229,9 @@ int addDodecahedron(Mesh& m, float radius){
   int Nv = sizeof(vertices)/sizeof(*vertices)/3;
 
   m.vertex(vertices, Nv);
-  m.index(indices, sizeof(indices)/sizeof(*indices), m.vertices().size()-Nv);
+  int offset = m.vertices().size()-Nv;
+  int num = sizeof(indices)/sizeof(*indices);
+  m.index(indices, num, offset);
 
   scaleVerts(m, radius, Nv);
 
@@ -233,7 +241,7 @@ int addDodecahedron(Mesh& m, float radius){
 
 int addIcosahedron(Mesh& m, float radius){
 
-  m.primitive(Graphics::TRIANGLES);
+  m.primitive(Mesh::TRIANGLES);
 
   static const float a = (0.5) / 0.587785;
   static const float b = (1. / (2 * phi)) / 0.587785;
@@ -257,7 +265,9 @@ int addIcosahedron(Mesh& m, float radius){
   int Nv = sizeof(vertices)/sizeof(*vertices)/3;
 
   m.vertex(vertices, Nv);
-  m.index(indices, sizeof(indices)/sizeof(*indices), m.vertices().size()-Nv);
+  int offset = m.vertices().size()-Nv;
+  int num = sizeof(indices)/sizeof(*indices);
+  m.index(indices, num, offset);
 
   scaleVerts(m, radius, Nv);
 
@@ -274,7 +284,7 @@ void subdivide(Mesh& m, unsigned iterations, bool normalize){
 
   typedef std::map<uint64_t, unsigned> PointToIndex;
 
-  if(m.primitive() != Graphics::TRIANGLES) return;
+  if(m.primitive() != Mesh::TRIANGLES) return;
 
   for(unsigned k=0; k<iterations; ++k){
 
@@ -282,7 +292,7 @@ void subdivide(Mesh& m, unsigned iterations, bool normalize){
 
     Mesh::Index newIndex = m.vertices().size();
     Mesh::Indices oldIndices(m.indices());
-    m.indices().reset();
+    m.indices().clear();
 
     // Iterate through triangles
     for(unsigned j=0; j<(unsigned)oldIndices.size(); j+=3){
@@ -347,7 +357,7 @@ int addIcosphere(Mesh& m, double radius, int divisions){
 // The top is (0,0,radius) and the bottom is (0,0,-radius).
 int addSphere(Mesh& m, double radius, int slices, int stacks){
 
-  m.primitive(Graphics::TRIANGLES);
+  m.primitive(Mesh::TRIANGLES);
 
   int Nv = m.vertices().size();
 
@@ -405,7 +415,7 @@ int addSphere(Mesh& m, double radius, int slices, int stacks){
 
 int addSphereWithTexcoords(Mesh& m, double radius, int bands ){
 
-  m.primitive(Graphics::TRIANGLES);
+  m.primitive(Mesh::TRIANGLES);
 
   double r = radius;
 
@@ -450,7 +460,7 @@ int addSphereWithTexcoords(Mesh& m, double radius, int bands ){
 
 int addWireBox(Mesh& m, float w, float h, float d){
 
-  m.primitive(Graphics::LINES);
+  m.primitive(Mesh::LINES);
 
   int Nv = m.vertices().size();
 
@@ -479,7 +489,7 @@ int addWireBox(Mesh& m, float w, float h, float d){
 
 int addCone(Mesh& m, float radius, const Vec3f& apex, unsigned slices, unsigned cycles){
 
-  m.primitive(Graphics::TRIANGLES);
+  m.primitive(Mesh::TRIANGLES);
 
   unsigned Nv = m.vertices().size();
 
@@ -497,7 +507,7 @@ int addCone(Mesh& m, float radius, const Vec3f& apex, unsigned slices, unsigned 
     m.index(i+1);
   }
 
-  m.indices().last() = Nv+1;
+  m.indices().back() = Nv+1;
 
   return 1 + slices;
 }
@@ -510,7 +520,7 @@ int addDisc(Mesh& m, float radius, unsigned slices){
 
 int addPrism(Mesh& m, float btmRadius, float topRadius, float height, unsigned slices, float twist){
 
-  m.primitive(Graphics::TRIANGLE_STRIP);
+  m.primitive(Mesh::TRIANGLE_STRIP);
   unsigned Nv = m.vertices().size();
   float height_2 = height/2;
 
@@ -560,7 +570,7 @@ int addSurface(
   Mesh& m, int Nx, int Ny,
   double width, double height, double x, double y
 ){
-  m.primitive(Graphics::TRIANGLE_STRIP);
+  m.primitive(Mesh::TRIANGLE_STRIP);
 
   int Nv = m.vertices().size();
 
@@ -588,7 +598,7 @@ int addSurface(
       m.index(idx);
       m.index(idx+Nx);
     }
-    int idx = m.indices().last();
+    int idx = m.indices().back();
     m.index(idx);
   }
 
@@ -600,7 +610,7 @@ int addSurfaceLoop(
   Mesh& m, int Nx, int Ny, int loopMode,
   double width, double height, double x, double y
 ){
-  m.primitive(Graphics::TRIANGLE_STRIP);
+  m.primitive(Mesh::TRIANGLE_STRIP);
 
   int Nv = m.vertices().size();
 
@@ -636,7 +646,7 @@ int addSurfaceLoop(
     m.index(j2);
   }
 
-  m.index(m.indices().last());
+  m.index(m.indices().back());
 
   return Nx*Ny;
 }

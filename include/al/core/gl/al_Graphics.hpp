@@ -274,6 +274,13 @@ public:
       return model_stack.get();
   }
 
+  Matrix4f viewMatrix() {
+    return view_mat_;
+  }
+  Matrix4f projMatrix() {
+    return proj_mat_;
+  }
+
   /// Rotate current matrix
 
   /// \param[in] angle  angle, in degrees
@@ -358,6 +365,7 @@ public:
 
 protected:
   bool shader_changed_ {false};
+  bool camera_changed_ {false};
   bool mat_changed_ {false};
   ShaderProgram* shader_ {nullptr};
   Viewport viewport_;

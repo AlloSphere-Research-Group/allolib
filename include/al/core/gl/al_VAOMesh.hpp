@@ -32,7 +32,7 @@ public:
     unsigned int mGLPrimMode = GL_TRIANGLES;
     VAO vao;
     MeshAttrib
-        position_att {ATTRIB_POSITION, 4},
+        position_att {ATTRIB_POSITION, 3},
         color_att {ATTRIB_COLOR, 4},
         texcoord2d_att {ATTRIB_TEXCOORD_2D, 2},
         normal_att {ATTRIB_NORMAL, 3},

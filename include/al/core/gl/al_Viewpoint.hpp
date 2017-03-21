@@ -93,8 +93,8 @@ public:
 
   // const Pose& pose() const { return *mPose; }
   // Pose& pose(){ return *mPose; }
-  // Viewpoint& pose(Pose& v){ mPose = &v; return *this; }
-  // Viewpoint& pos(Vec3f v);
+  Viewpoint& pose(Pose& v){ set(v); return *this; }
+  Viewpoint& pose(Pose const& v){ set(v); return *this; }
   // Viewpoint& faceToward(Vec3f point, Vec3f upvec);
 
   const Viewport& viewport() const { return mViewport; }

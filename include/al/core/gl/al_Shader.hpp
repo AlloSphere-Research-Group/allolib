@@ -226,13 +226,13 @@ public:
   void listParams() const;
 
   /// Get location of uniform
-  int uniform(const char * name) const;
+  int uniform(const char * name, bool warn = true) const;
 
   /// Get location of attribute
   int attribute(const char * name) const;
 
-  const ShaderProgram& uniform(const char * name, Color v) const {
-    return uniform(name, v[0], v[1], v[2], v[3]);
+  const ShaderProgram& uniform(const char * name, Color v, bool warn = true) const {
+    return uniform(name, v[0], v[1], v[2], v[3], warn);
   }
 
   const ShaderProgram& uniform(int loc, int v) const;
@@ -263,51 +263,51 @@ public:
     return uniform(loc, Mat4f(m));
   }
 
-  const ShaderProgram& uniform(const char * name, int v) const;
-  const ShaderProgram& uniform(const char * name, float v) const;
-  const ShaderProgram& uniform(const char * name, double v) const { return uniform(name, float(v)); }
-  const ShaderProgram& uniform(const char * name, float v0, float v1) const;
-  const ShaderProgram& uniform(const char * name, float v0, float v1, float v2) const;
-  const ShaderProgram& uniform(const char * name, float v0, float v1, float v2, float v3) const;
+  const ShaderProgram& uniform(const char * name, int v, bool warn = true) const;
+  const ShaderProgram& uniform(const char * name, float v, bool warn = true) const;
+  const ShaderProgram& uniform(const char * name, double v, bool warn = true) const { return uniform(name, float(v)); }
+  const ShaderProgram& uniform(const char * name, float v0, float v1, bool warn = true) const;
+  const ShaderProgram& uniform(const char * name, float v0, float v1, float v2, bool warn = true) const;
+  const ShaderProgram& uniform(const char * name, float v0, float v1, float v2, float v3, bool warn = true) const;
 
   template <typename T>
-  const ShaderProgram& uniform(const char * name, const Vec<2,T>& v) const {
-    return uniform(name, v.x, v.y);
+  const ShaderProgram& uniform(const char * name, const Vec<2,T>& v, bool warn = true) const {
+    return uniform(name, v.x, v.y, warn);
   }
 
   template <typename T>
-  const ShaderProgram& uniform(const char * name, const Vec<3,T>& v) const {
-    return uniform(name, v.x, v.y, v.z);
+  const ShaderProgram& uniform(const char * name, const Vec<3,T>& v, bool warn = true) const {
+    return uniform(name, v.x, v.y, v.z, warn);
   }
 
   template <typename T>
-  const ShaderProgram& uniform(const char * name, const Vec<4,T>& v) const {
-    return uniform(name, v.x, v.y, v.z, v.w);
+  const ShaderProgram& uniform(const char * name, const Vec<4,T>& v, bool warn = true) const {
+    return uniform(name, v.x, v.y, v.z, v.w, warn);
   }
 
-  const ShaderProgram& uniform(const char * name, const Mat<4,float>& m) const{
-    return uniformMatrix4(name, m.elems());
+  const ShaderProgram& uniform(const char * name, const Mat<4,float>& m, bool warn = true, bool transpose=false) const{
+    return uniformMatrix4(name, m.elems(), transpose, warn);
   }
 
   template<typename T>
-  const ShaderProgram& uniform(const char * name, const Mat<4,T>& m) const{
-    return uniform(name, Mat4f(m));
+  const ShaderProgram& uniform(const char * name, const Mat<4,T>& m, bool warn = true, bool transpose=false) const{
+    return uniform(name, Mat4f(m), transpose, warn);
   }
 
   template <typename T>
-  const ShaderProgram& uniform(const char * name, const Quat<T>& q) const {
+  const ShaderProgram& uniform(const char * name, const Quat<T>& q, bool warn = true) const {
     // note wxyz => xyzw for GLSL vec4:
-    return uniform(name, q.x, q.y, q.z, q.w);
+    return uniform(name, q.x, q.y, q.z, q.w, warn);
   }
 
 
-  const ShaderProgram& uniform1(const char * name, const float * v, int count=1) const;
-  const ShaderProgram& uniform2(const char * name, const float * v, int count=1) const;
-  const ShaderProgram& uniform3(const char * name, const float * v, int count=1) const;
-  const ShaderProgram& uniform4(const char * name, const float * v, int count=1) const;
+  const ShaderProgram& uniform1(const char * name, const float * v, int count=1, bool warn = true) const;
+  const ShaderProgram& uniform2(const char * name, const float * v, int count=1, bool warn = true) const;
+  const ShaderProgram& uniform3(const char * name, const float * v, int count=1, bool warn = true) const;
+  const ShaderProgram& uniform4(const char * name, const float * v, int count=1, bool warn = true) const;
 
-  const ShaderProgram& uniformMatrix3(const char * name, const float * v, bool transpose=false) const;
-  const ShaderProgram& uniformMatrix4(const char * name, const float * v, bool transpose=false) const;
+  const ShaderProgram& uniformMatrix3(const char * name, const float * v, bool transpose=false, bool warn = true) const;
+  const ShaderProgram& uniformMatrix4(const char * name, const float * v, bool transpose=false, bool warn = true) const;
 
 
   const ShaderProgram& attribute(int loc, float v) const;
