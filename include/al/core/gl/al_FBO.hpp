@@ -185,6 +185,10 @@ public:
   /// Detach texture at a specified attachment point and mipmap level
   FBO& detachTexture2D(unsigned int attachment, int level=0);
 
+  FBO& attachCubemapFace(Texture const& tex, unsigned int target_face, unsigned int attachment=GL_COLOR_ATTACHMENT0, int level=0);
+
+  FBO& detachCubemapFace(unsigned int target_face, unsigned int attachment, int level=0);
+
   /// Bind object (start rendering to attached objects)
   void bind();
 
@@ -209,6 +213,7 @@ public:
     unsigned int attachment=GL_COLOR_ATTACHMENT0,
     int level=0
   );
+  static void textureCubemapFace(unsigned int texID, unsigned int target_face, unsigned int attachment=GL_COLOR_ATTACHMENT0, int level=0);
 
 protected:
   virtual void onCreate();

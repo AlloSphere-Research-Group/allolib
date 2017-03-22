@@ -58,30 +58,40 @@ void FBO::onDestroy() {
 }
 
 FBO& FBO::attachRBO(const RBO& rbo, unsigned int attachment) {
-  bind();
+  // bind();
   renderBuffer(rbo.id(), attachment);
-  unbind();
+  // unbind();
   return *this;
 }
 
 FBO& FBO::detachRBO(unsigned int attachment){
-  bind();
+  // bind();
   renderBuffer(0, attachment);
-  unbind();
+  // unbind();
   return *this;
 }
 
 FBO& FBO::attachTexture2D(Texture const& tex, unsigned int attachment, int level){
-  bind();
+  // bind();
   texture2D(tex.id(), attachment, level);
-  unbind();
+  // unbind();
   return *this;
 }
 
 FBO& FBO::detachTexture2D(unsigned int attachment, int level){
-  bind();
+  // bind();
   texture2D(0, attachment, level);
-  unbind();
+  // unbind();
+  return *this;
+}
+
+FBO& FBO::attachCubemapFace(Texture const& tex, unsigned int target_face, unsigned int attachment, int level) {
+  textureCubemapFace(tex.id(), target_face, attachment, level);
+  return *this;
+}
+
+FBO& FBO::detachCubemapFace(unsigned int target_face, unsigned int attachment, int level) {
+  textureCubemapFace(0, target_face, attachment, level);
   return *this;
 }
 
@@ -124,6 +134,14 @@ void FBO::renderBuffer(unsigned int rboID, unsigned int attachment){
 
 void FBO::texture2D(unsigned int texID, unsigned int attachment, int level){
   glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texID, level);
+}
+
+void FBO::textureCubemapFace(unsigned int texID, unsigned int target_face, unsigned int attachment, int level) {
+  glFramebufferTexture2D(
+    GL_FRAMEBUFFER, attachment,
+    target_face,
+    texID, 0
+  );
 }
 
 } // al::

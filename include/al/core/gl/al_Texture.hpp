@@ -83,6 +83,46 @@ public:
   // TODO
   // void create3D();
 
+  void createCubemap(
+    unsigned int size,
+    int internal = GL_RGBA8,
+    unsigned int format = GL_RGBA,
+    unsigned int type = GL_UNSIGNED_BYTE
+  ) {
+    mTarget = GL_TEXTURE_CUBE_MAP;
+    mInternalFormat = internal;
+    mWidth = size;
+    mHeight = size;
+    mDepth = 1;
+    mFormat = format;
+    mType = type;
+
+    // AL_GRAPHICS_ERROR("before creating 2D texture", id());
+    create();
+    bind();
+    for (int i = 0; i < 6; i++) {
+      glTexImage2D(
+        GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, //< target
+        0,                                //< lod
+        mInternalFormat,                  //< internal format
+        mWidth, mWidth, 0,                //< equal throughout the faces
+        mFormat,                          //< format of data
+        mType,                            //< data type (e.g. GL_UNSIGNED_BYTE)
+        NULL
+      ); //< no actual data yet
+    }
+
+    wrapS(GL_CLAMP_TO_EDGE);
+    wrapT(GL_CLAMP_TO_EDGE);
+    wrapR(GL_CLAMP_TO_EDGE);
+    // by default no mipmap
+    filterMin(GL_LINEAR);
+    filterMag(GL_LINEAR);
+    mipmap(false);
+    update(true); // true: force update
+    unbind();
+  }
+
   /// Bind the texture (to a multitexture unit)
   void bind(int unit = 0);
 

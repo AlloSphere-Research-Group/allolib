@@ -53,6 +53,44 @@
 
 namespace al{
 
+inline std::string al_default_vert_shader() { return R"(
+#version 330
+uniform mat4 MVP;
+
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec4 color;
+layout (location = 2) in vec2 texcoord;
+layout (location = 3) in vec3 normal;
+
+out vec4 color_;
+out vec2 texcoord_;
+out vec3 normal_;
+
+void main() {
+  gl_Position = MVP * vec4(position, 1.0);
+  color_ = color;
+  texcoord_ = texcoord;
+  normal_ = normal;
+}
+)";}
+
+inline std::string al_default_frag_shader() { return R"(
+#version 330
+uniform sampler2D tex0;
+uniform float tex0_mix;
+uniform float light_mix;
+in vec4 color_;
+in vec2 texcoord_;
+in vec3 normal_;
+out vec4 frag_color;
+void main() {
+  vec4 tex_color0 = texture(tex0, texcoord_);
+  vec4 light_color = vec4(normal_, 1.0); // TODO
+  vec4 final_color = mix(mix(color_, tex_color0, tex0_mix), light_color, light_mix);
+  frag_color = final_color;
+}
+)";}
+
 /// Shader abstract base class
 /// @ingroup allocore
 class ShaderBase : public GPUObject{
