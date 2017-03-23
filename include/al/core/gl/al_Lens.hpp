@@ -120,11 +120,6 @@ protected:
 //  Vec3d mStereoOffset;    // eye offset vector (right eye; left eye is inverse), usually (1, 0, 0)
 };
 
-
-/// Typedef for backwards compatability
-typedef Lens Camera;
-
-
 } // al::
 
 #endif

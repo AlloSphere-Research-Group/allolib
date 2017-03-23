@@ -340,9 +340,9 @@ public:
   static const char * errorString(bool verbose=false);
 
   void setClearColor(float r, float g, float b, float a = 1);
-  void clear(int drawbuffer=0);
-  void clear(float r, float g, float b, float a = 1, int drawbuffer = 0);
-  void clear(Color const& c, int drawbuffer = 0);
+  void clearColor(int drawbuffer=0);
+  void clearColor(float r, float g, float b, float a = 1, int drawbuffer = 0);
+  void clearColor(Color const& c, int drawbuffer = 0);
   void setClearDepth(float d);
   void clearDepth();
   void clearDepth(float d);
