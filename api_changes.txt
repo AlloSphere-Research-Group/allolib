@@ -1,0 +1,80 @@
+differences from AlloSystem
+
+MOST OF THE APU CHANGES ARE:
+1. DUE TO GL3 WAY OF DOING THINGS
+2. APP INTERFACE MODULARIZATION AND SIMPLIFICATION
+
+
+Mesh
+- you should use use VAOMesh to draw.
+- you have to call .update() on VAOMesh after changing vertices, color, etc.
+ex)
+mesh.reset();
+mesh.primitive(Mesh::TRIANGLES);
+mesh.vertex(-0.5, -0.5, 0);
+mesh.vertex(0.5, -0.5, 0);
+mesh.vertex(-0.5, 0.5, 0);
+mesh.update(); // send to gpu buffers
+
+
+App
+- doing things in constructor is not recommended
+- init things in main function before .start()
+ex)
+int main() {
+  MyApp app;
+  app.initAudio();
+  app.dimensions(640, 480);
+  app.title("app test");
+  app.fps(60);
+  app.decorated(true);
+  app.displayMode(Window::DEFAULT_BUF);
+  app.start();
+  return 0;
+}
+- ondraw does not have (Graphics& g) as parameter
+
+
+Shader
+- now has .compile(std::string vertcode, std::string fragcode) method
+- al::Graphics handles shaders, notice the needlessness of .end()
+ex)
+g.shader(shader1);
+// draw things
+g.shader(shader2);
+// draw other things
+g.shader(shader2);
+// calling same shader one more time will do nothing
+// since Graphics keeps track of active shader
+
+
+Texture
+- now has .create2D(...) & .createCubemap(...) method. (create1D and 3D yet)
+- internal .bind()/.unbind() were erased. currently manual binding needed. researching a better way to handle this
+ex)
+texture.bind();
+texture.submit(arr.data()); // give raw pointer
+texture.mipmap(false); // false by default. turn on only if needed
+texture.update();
+texture.unbind();
+- for drawing, al::Graphics handles textures
+ex)
+g.texture(my_tex1);
+// draw things
+g.texture(my_tex2); // note no need for .unbind()
+
+
+Viewpoint
+- is more used and more exposed (position, lens, and viewport)
+- al::Graphics receives Viewpoint as input
+ex)
+viewpoint.pos(Vec3f(0, 0, 10)).faceToward(Vec3f(0, 0, 0), Vec3f(0, 1, 0));
+viewpoint.fovy(30).near(0.1).far(100);
+viewpoint.viewport(0, 0, fbWidth(), fbHeight());
+...
+g.camera(viewpoint); // send camera matrices to shader, and set viewport
+
+
+Graphics
+- keeps track of bound shader, texture, and camera(viewpoint). fbo will be tracked too, but not implemented yet
+- currently testing if using this class as singleton would be a good idea
