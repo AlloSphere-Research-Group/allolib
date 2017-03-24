@@ -50,7 +50,7 @@ Matrix4f Viewpoint::viewMatrix() {
 }
 
 Matrix4f Viewpoint::projMatrix() {
-    if (!isOrtho_) return Matrix4f::perspective(
+    if (!mIsOrtho) return Matrix4f::perspective(
       mLens.fovy(), mViewport.aspect(), mLens.near(), mLens.far()
     );
     else return Matrix4f::ortho(

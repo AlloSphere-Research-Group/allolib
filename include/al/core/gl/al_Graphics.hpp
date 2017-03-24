@@ -271,14 +271,14 @@ public:
   void multMatrix(const Matrix4f &m) {/* !!!!!!!!!!!!! */}
 
   Matrix4f modelMatrix() {
-      return model_stack.get();
+      return mModelStack.get();
   }
 
   Matrix4f viewMatrix() {
-    return view_mat_;
+    return mViewMat;
   }
   Matrix4f projMatrix() {
-    return proj_mat_;
+    return mProjMat;
   }
 
   /// Rotate current matrix
@@ -364,17 +364,17 @@ public:
   Texture& texture(int binding_point = 0);
 
 protected:
-  bool shader_changed_ {false};
-  bool camera_changed_ {false};
-  bool mat_changed_ {false};
-  ShaderProgram* shader_ {nullptr};
-  Viewport viewport_;
-  Matrix4f view_mat_;
-  Matrix4f proj_mat_;
+  bool mShaderChanged {false};
+  bool mCameraChanged {false};
+  bool mMatChanged {false};
+  ShaderProgram* mShaderPtr {nullptr};
+  Viewport mViewport;
+  Matrix4f mViewMat;
+  Matrix4f mProjMat;
   Color mClearColor {0, 0, 0, 1};
   float mClearDepth {1};
-  MatrixStack model_stack;
-  std::map<int, Texture*> textures_;
+  MatrixStack mModelStack;
+  std::map<int, Texture*> mTextures;
 };
 
 // SINGLETON!

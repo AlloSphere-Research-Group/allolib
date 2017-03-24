@@ -18,35 +18,35 @@ std::unordered_map<unsigned int, unsigned int> VAOMesh::mPrimMap = {
 };
 
 void VAOMesh::bind() {
-  vao.bind();
+  mVao.bind();
 }
 
 void VAOMesh::unbind() {
-  vao.unbind();
+  mVao.unbind();
 }
 
 void VAOMesh::update() {
   mGLPrimMode = mPrimMap[mPrimitive];
-  vao.validate();
-  vao.bind();
-  updateAttrib(vertices(), position_att);
-  updateAttrib(colors(), color_att);
-  updateAttrib(texCoord2s(), texcoord2d_att);
-  updateAttrib(normals(), normal_att);
-  updateAttrib(texCoord3s(), texcoord3d_att);
-  updateAttrib(texCoord1s(), texcoord1d_att);
-  vao.unbind();
+  mVao.validate();
+  mVao.bind();
+  updateAttrib(vertices(), mPositionAtt);
+  updateAttrib(colors(), mColorAtt);
+  updateAttrib(texCoord2s(), mTexcoord2dAtt);
+  updateAttrib(normals(), mNormalAtt);
+  updateAttrib(texCoord3s(), mTexcoord3dAtt);
+  updateAttrib(texCoord1s(), mTexcoord1dAtt);
+  mVao.unbind();
   if (indices().size() > 0) {
-    if (!index_buffer.created()) {
-      index_buffer.create();
-      index_buffer.bufferType(GL_ELEMENT_ARRAY_BUFFER);
+    if (!mIndexBuffer.created()) {
+      mIndexBuffer.create();
+      mIndexBuffer.bufferType(GL_ELEMENT_ARRAY_BUFFER);
     }
-    index_buffer.bind();
-    index_buffer.data(
+    mIndexBuffer.bind();
+    mIndexBuffer.data(
       sizeof(unsigned int) * indices().size(),
       indices().data()
     );
-    index_buffer.unbind();
+    mIndexBuffer.unbind();
   }
 }
 
@@ -56,17 +56,17 @@ void VAOMesh::updateAttrib(
 ) {
   // only enable attribs with content
   if (data.size() > 0) {
-    vao.enableAttrib(att.index);
+    mVao.enableAttrib(att.index);
   }
   else {
-    vao.disableAttrib(att.index);
+    mVao.disableAttrib(att.index);
     return;
   }
 
   // buffer yet created, make it and set vao to point to it
   if (!att.buffer.created()) {
     att.buffer.create();
-    vao.attribPointer(att.index, att.buffer, att.size);
+    mVao.attribPointer(att.index, att.buffer, att.size);
   }
 
   // upload CPU size data to buffer in GPU
@@ -93,14 +93,14 @@ template void VAOMesh::updateAttrib<Vec4f>(
 );
 
 void VAOMesh::draw() {
-  vao.bind();
+  mVao.bind();
   if (indices().size() > 0) {
-    index_buffer.bind();
+    mIndexBuffer.bind();
     glDrawElements(mGLPrimMode, indices().size(), GL_UNSIGNED_INT, NULL);
-    index_buffer.unbind();
+    mIndexBuffer.unbind();
   }
   else {
     glDrawArrays(mGLPrimMode, 0, vertices().size());
   }
-  vao.unbind();
+  mVao.unbind();
 }

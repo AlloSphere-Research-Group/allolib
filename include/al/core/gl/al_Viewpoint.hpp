@@ -109,14 +109,14 @@ public:
   Frustumd frustum() const;
 
   Viewpoint& ortho(bool b = true) {
-    isOrtho_ = b;
+    mIsOrtho = b;
     return *this;
   }
 private:
   // Pose* mPose; // local transform
   Lens mLens;
   Viewport mViewport; // screen display region
-  bool isOrtho_ {false};
+  bool mIsOrtho {false};
 };
 
 } // al::

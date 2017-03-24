@@ -30,16 +30,16 @@ public:
     };
 
     unsigned int mGLPrimMode = GL_TRIANGLES;
-    VAO vao;
+    VAO mVao;
     MeshAttrib
-        position_att {ATTRIB_POSITION, 3},
-        color_att {ATTRIB_COLOR, 4},
-        texcoord2d_att {ATTRIB_TEXCOORD_2D, 2},
-        normal_att {ATTRIB_NORMAL, 3},
-        texcoord3d_att {ATTRIB_TEXCOORD_3D, 3},
-        texcoord1d_att {ATTRIB_TEXCOORD_1D, 1}
+        mPositionAtt {ATTRIB_POSITION, 3},
+        mColorAtt {ATTRIB_COLOR, 4},
+        mTexcoord2dAtt {ATTRIB_TEXCOORD_2D, 2},
+        mNormalAtt {ATTRIB_NORMAL, 3},
+        mTexcoord3dAtt {ATTRIB_TEXCOORD_3D, 3},
+        mTexcoord1dAtt {ATTRIB_TEXCOORD_1D, 1}
     ;
-    BufferObject index_buffer;
+    BufferObject mIndexBuffer;
 
     void update();
 

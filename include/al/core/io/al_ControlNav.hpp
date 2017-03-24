@@ -173,8 +173,8 @@ public:
 
   /// Update coordinate frame basis vectors based on internal quaternion
   void updateDirectionVectors(){
-    pose_->quat().normalize();
-    pose_->directionVectors(mUR, mUU, mUF);
+    mPosePtr->quat().normalize();
+    mPosePtr->directionVectors(mUR, mUU, mUF);
   }
 
   Nav& set(const Pose& v);
@@ -195,21 +195,21 @@ public:
   Pose& transformed(){ return mTransformed; }
   
   Pose& pose() {
-  	return *pose_;
+  	return *mPosePtr;
   }
 
   Pose const& pose() const {
-  	return *pose_;
+  	return *mPosePtr;
   }
 
   Nav& target(Pose& pose) {
-    pose_ = &pose;
+    mPosePtr = &pose;
     updateDirectionVectors();
     return *this;
   }
 
 protected:
-	Pose* pose_;
+	Pose* mPosePtr;
   Vec3d mMove0, mMove1;  // linear velocities (raw, smoothed)
   Vec3d mSpin0, mSpin1;  // angular velocities (raw, smoothed)
   Vec3d mTurn;      // orientation increment for one step

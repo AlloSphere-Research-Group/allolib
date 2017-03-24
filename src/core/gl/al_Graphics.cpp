@@ -65,31 +65,31 @@ void Graphics::cullFace(bool b, Face face) {
   glCullFace(face);
 }
 void Graphics::pushMatrix(){
-    model_stack.push();
+    mModelStack.push();
 }
 void Graphics::popMatrix(){
-    model_stack.pop();
+    mModelStack.pop();
 }
 void Graphics::translate(double x, double y, double z){
-    model_stack.mult(Matrix4f::translation(x, y, z));
-    mat_changed_ = true;
+    mModelStack.mult(Matrix4f::translation(x, y, z));
+    mMatChanged = true;
 }
 void Graphics::rotate(double angle, double x, double y, double z){
-    model_stack.mult(Matrix4f::rotate(angle, x, y, z));
-    mat_changed_ = true;
+    mModelStack.mult(Matrix4f::rotate(angle, x, y, z));
+    mMatChanged = true;
 }
 void Graphics::rotate(const Quatf& q) {
   Matrix4f m;
   q.toMatrix(m.elems());
-  model_stack.mult(m);
-  mat_changed_ = true;
+  mModelStack.mult(m);
+  mMatChanged = true;
 }
 void Graphics::scale(double s){
   scale(s, s, s);
 }
 void Graphics::scale(double x, double y, double z){
-  model_stack.mult(Matrix4f::scaling(x, y, z));
-  mat_changed_ = true;
+  mModelStack.mult(Matrix4f::scaling(x, y, z));
+  mMatChanged = true;
 }
 void Graphics::lineWidth(float v) { glLineWidth(v); }
 void Graphics::pointSize(float v) { glPointSize(v); }
@@ -127,49 +127,49 @@ void Graphics::clearDepth(float d) {
 }
 
 void Graphics::viewport(const Viewport& v){
-  viewport_.set(v);
+  mViewport.set(v);
   gl_viewport();
 }
 
 void Graphics::viewport(int x, int y, int width, int height) {
-  viewport_.set(x, y, width, height);
+  mViewport.set(x, y, width, height);
   gl_viewport();
 }
 
 void Graphics::gl_viewport() {
-  glViewport(viewport_.l, viewport_.b, viewport_.w, viewport_.h);
+  glViewport(mViewport.l, mViewport.b, mViewport.w, mViewport.h);
 }
 
 Viewport Graphics::viewport() const {
-  return viewport_;
+  return mViewport;
 }
 
 void Graphics::shader(ShaderProgram& s) {
-  if (shader_ != nullptr && s.id() == shader_->id()) {
+  if (mShaderPtr != nullptr && s.id() == mShaderPtr->id()) {
     // same shader
     return;
   }
-  shader_changed_ = true;
-  shader_ = &s;
-  shader_->use();
+  mShaderChanged = true;
+  mShaderPtr = &s;
+  mShaderPtr->use();
 }
 
 ShaderProgram& Graphics::shader() {
-  return *shader_;
+  return *mShaderPtr;
 }
 
 void Graphics::camera(Viewpoint& v) {
-  camera_changed_ = true;
-  view_mat_ = v.viewMatrix();
-  proj_mat_ = v.projMatrix();
-  if (!viewport_.isEqual(v.viewport())) {
+  mCameraChanged = true;
+  mViewMat = v.viewMatrix();
+  mProjMat = v.projMatrix();
+  if (!mViewport.isEqual(v.viewport())) {
     viewport(v.viewport());
   }
 }
 
 void Graphics::texture(Texture& t, int binding_point) {
-  auto search = textures_.find(binding_point);
-  if(search != textures_.end()) { // previous binding exists
+  auto search = mTextures.find(binding_point);
+  if(search != mTextures.end()) { // previous binding exists
     if (search->second->id() == t.id()) { // and it was same texture
       // so do nothing and return
       // std::cout << "same texture" << std::endl;
@@ -177,33 +177,33 @@ void Graphics::texture(Texture& t, int binding_point) {
     }
   }
 
-  textures_[binding_point] = &t;
-  textures_[binding_point]->bind(binding_point);
+  mTextures[binding_point] = &t;
+  mTextures[binding_point]->bind(binding_point);
 }
 
 Texture& Graphics::texture(int binding_point) {
-  return *(textures_[binding_point]);
+  return *(mTextures[binding_point]);
 }
 
 void Graphics::draw(VAOMesh& mesh) {
-  if (shader_ == nullptr) {
-    AL_WARN_ONCE("shader not bound: bind shader by \"g.shader(myshader_);\"");
+  if (mShaderPtr == nullptr) {
+    AL_WARN_ONCE("shader not bound: bind shader by \"g.shader(mymShaderPtr);\"");
     return;
   }
-  if (shader_changed_ || mat_changed_ || camera_changed_) {
+  if (mShaderChanged || mMatChanged || mCameraChanged) {
     // 3rd parameter: "don't warn even if there's no such uniform"
-    shader().uniform("MVP", proj_mat_ * view_mat_ * modelMatrix(), false);
+    shader().uniform("MVP", mProjMat * mViewMat * modelMatrix(), false);
   }
-  if (shader_changed_ || mat_changed_) {
+  if (mShaderChanged || mMatChanged) {
     shader().uniform("M", modelMatrix(), false);
   }
-  if (shader_changed_ || camera_changed_) {
+  if (mShaderChanged || mCameraChanged) {
     shader().uniform("V", viewMatrix(), false);
     shader().uniform("P", projMatrix(), false);
   }
-  shader_changed_ = false;
-  mat_changed_ = false;
-  camera_changed_ = false;
+  mShaderChanged = false;
+  mMatChanged = false;
+  mCameraChanged = false;
   mesh.draw();
 }
 

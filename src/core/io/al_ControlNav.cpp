@@ -4,19 +4,19 @@
 namespace al {
 
 Nav::Nav(double smooth)
-:  pose_(nullptr), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
+:  mPosePtr(nullptr), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
 {
   // updateDirectionVectors();
 }
 
 Nav::Nav(Pose& pose, double smooth)
-:  pose_(&pose), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
+:  mPosePtr(&pose), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
 {
   updateDirectionVectors();
 }
 
 Nav::Nav(const Nav& nav)
-:  pose_(nav.pose_),
+:  mPosePtr(nav.mPosePtr),
   mMove0(nav.mMove0), mMove1(nav.mMove1),  // linear velocities (raw, smoothed)
   mSpin0(nav.mSpin0), mSpin1(nav.mSpin1),  // angular velocities (raw, smoothed)
   mTurn(nav.mTurn), mNudge(nav.mNudge),      //
@@ -37,21 +37,21 @@ void Nav::faceToward(const Vec3d& point, double amt){
   if(amt == 1.)  quat() = rot * quat();
   else      quat() = rot.pow(amt) * quat();*/
 
-  pose_->faceToward(point, amt);
+  mPosePtr->faceToward(point, amt);
   updateDirectionVectors();
 }
 
 void Nav::faceToward(const Vec3d& point, const Vec3d& up, double amt){
-  pose_->faceToward(point, up, amt);
+  mPosePtr->faceToward(point, up, amt);
   updateDirectionVectors();
 }
 
 void Nav::nudgeToward(const Vec3d& p, double amt){
   Vec3d rotEuler;
-  Vec3d target(p - pose_->pos());
+  Vec3d target(p - mPosePtr->pos());
   target.normalize();  // unit vector of direction to move (in world frame)
   // rotate target into local frame:
-  target = pose_->quat().rotate(target);
+  target = mPosePtr->quat().rotate(target);
   // push ourselves in that particular direction:
   nudge(target * amt);
 }
@@ -68,11 +68,11 @@ Nav& Nav::halt(){
 }
 
 Nav& Nav::home(){
-  pose_->quat().identity();
+  mPosePtr->quat().identity();
   view(0, 0, 0);
   turn(0, 0, 0);
   spin(0, 0, 0);
-  pose_->vec().set(0);
+  mPosePtr->vec().set(0);
   updateDirectionVectors();
   return *this;
 }
@@ -82,13 +82,13 @@ Nav& Nav::view(double azimuth, double elevation, double bank) {
 }
 
 Nav& Nav::view(const Quatd& v) {
-  pose_->quat(v);
+  mPosePtr->quat(v);
   updateDirectionVectors();
   return *this;
 }
 
 Nav& Nav::set(const Pose& v){
-  pose_->set(v);
+  mPosePtr->set(v);
   updateDirectionVectors();
   return *this;
 }
@@ -124,17 +124,17 @@ void Nav::step(double dt){
   // Update orientation from smoothed orientation differential
   // Note that vel() returns a smoothed Pose diff from mMove1 and mSpin1.
   // mQuat *= vel().quat();
-  pose_->quat() *= vel().quat();
+  mPosePtr->quat() *= vel().quat();
   updateDirectionVectors();
 
   // Move according to smoothed position differential (mMove1)
-  for(int i=0; i<pose_->pos().size(); ++i){
-    pose_->pos()[i] += mMove1.dot(Vec3d(ur()[i], uu()[i], uf()[i]));
+  for(int i=0; i<mPosePtr->pos().size(); ++i){
+    mPosePtr->pos()[i] += mMove1.dot(Vec3d(ur()[i], uu()[i], uf()[i]));
   }
 
   mPullBack1 = mPullBack1 + (mPullBack0-mPullBack1)*amt;
 
-  mTransformed = *pose_;
+  mTransformed = *mPosePtr;
   if(mPullBack1 > 1e-16){
     mTransformed.pos() -= uf() * mPullBack1;
   }
