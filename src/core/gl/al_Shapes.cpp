@@ -673,4 +673,22 @@ int addTorus(
   return Nv;
 }
 
+int addTexQuad(Mesh& m, float half_width, float half_height) {
+  m.reset();
+  m.primitive(Mesh::TRIANGLES);
+  m.vertex(-half_width, -half_height, 0);
+  m.texCoord(0.0, 0.0);
+  m.vertex(half_width, -half_height, 0);
+  m.texCoord(1.0, 0.0);
+  m.vertex(-half_width, half_height, 0);
+  m.texCoord(0.0, 1.0);
+  m.vertex(-half_width, half_height, 0);
+  m.texCoord(0.0, 1.0);
+  m.vertex(half_width, -half_height, 0);
+  m.texCoord(1.0, 0.0);
+  m.vertex(half_width, half_height, 0);
+  m.texCoord(1.0, 1.0);
+  return 6;
+}
+
 }

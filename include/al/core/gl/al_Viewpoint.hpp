@@ -117,6 +117,11 @@ private:
   Lens mLens;
   Viewport mViewport; // screen display region
   bool mIsOrtho {false};
+
+public:
+  enum SpecialType {
+    IDENTITY
+  };
 };
 
 } // al::

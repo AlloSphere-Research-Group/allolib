@@ -127,13 +127,14 @@ void Graphics::clearDepth(float d) {
 }
 
 void Graphics::viewport(const Viewport& v){
-  mViewport.set(v);
-  gl_viewport();
+  if (!mViewport.isEqual(v)) {
+    mViewport.set(v);
+    gl_viewport();
+  }
 }
 
 void Graphics::viewport(int x, int y, int width, int height) {
-  mViewport.set(x, y, width, height);
-  gl_viewport();
+  viewport(Viewport(x, y, width, height));
 }
 
 void Graphics::gl_viewport() {
@@ -162,8 +163,17 @@ void Graphics::camera(Viewpoint& v) {
   mCameraChanged = true;
   mViewMat = v.viewMatrix();
   mProjMat = v.projMatrix();
-  if (!mViewport.isEqual(v.viewport())) {
-    viewport(v.viewport());
+  viewport(v.viewport());
+}
+
+void Graphics::camera(Viewpoint::SpecialType v) {
+  switch (v) {
+  case Viewpoint::IDENTITY:
+    mViewMat = Matrix4f::identity();
+    mProjMat = Matrix4f::identity();
+    viewport(0, 0, mWindow.fbWidth(), mWindow.fbHeight());
+    mCameraChanged = true;
+    break;
   }
 }
 
@@ -206,12 +216,5 @@ void Graphics::draw(VAOMesh& mesh) {
   mCameraChanged = false;
   mesh.draw();
 }
-
-Graphics& graphics() {
-  static Graphics g;
-  return g;
-}
-
-
 
 } // al::

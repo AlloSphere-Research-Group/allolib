@@ -57,6 +57,7 @@
 #include "al/core/gl/al_Shader.hpp"
 #include "al/core/gl/al_Texture.hpp"
 #include "al/core/gl/al_Viewpoint.hpp"
+#include "al/core/io/al_Window.hpp"
 
 #include <iostream>
 #include <map>
@@ -161,6 +162,8 @@ public:
     LINE          = GL_LINE,          /**< Render only lines along vertex path */
     FILL          = GL_FILL         /**< Render vertices normally according to primitive */
   };
+
+  Graphics(Window& window): mWindow(window) {}
 
   /// Enable a capability
   void enable(Capability v){ glEnable(v); }
@@ -358,12 +361,14 @@ public:
   void shader(ShaderProgram& s);
   ShaderProgram& shader();
   void camera(Viewpoint& v);
+  void camera(Viewpoint::SpecialType v);
   void draw(VAOMesh& mesh);
 
   void texture(Texture& t, int binding_point = 0);
   Texture& texture(int binding_point = 0);
 
 protected:
+  Window& mWindow;
   bool mShaderChanged {false};
   bool mCameraChanged {false};
   bool mMatChanged {false};
@@ -376,9 +381,6 @@ protected:
   MatrixStack mModelStack;
   std::map<int, Texture*> mTextures;
 };
-
-// SINGLETON!
-Graphics& graphics();
 
 }
 #endif

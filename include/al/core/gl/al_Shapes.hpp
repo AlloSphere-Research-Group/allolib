@@ -289,6 +289,7 @@ int addTorus(
   int Nmin=16, int Nmaj=16, double minPhase=0
 );
 
+int addTexQuad(Mesh& m, float half_width=1, float half_height=1);
 
 } // al::
 
