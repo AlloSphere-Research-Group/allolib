@@ -167,15 +167,20 @@ void Graphics::camera(Viewpoint& v) {
 }
 
 void Graphics::camera(Viewpoint::SpecialType v) {
+  camera(v, 0, 0, mWindow.fbWidth(), mWindow.fbHeight());
+}
+
+void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
   switch (v) {
   case Viewpoint::IDENTITY:
     mViewMat = Matrix4f::identity();
     mProjMat = Matrix4f::identity();
-    viewport(0, 0, mWindow.fbWidth(), mWindow.fbHeight());
+    viewport(x, y, w, h);
     mCameraChanged = true;
     break;
   }
 }
+
 
 void Graphics::texture(Texture& t, int binding_point) {
   auto search = mTextures.find(binding_point);
