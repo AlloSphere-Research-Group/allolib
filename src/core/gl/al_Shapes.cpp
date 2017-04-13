@@ -691,4 +691,28 @@ int addTexQuad(Mesh& m, float half_width, float half_height) {
   return 6;
 }
 
+int addQuad(Mesh& m, float half_width, float half_height) {
+  m.reset();
+  m.primitive(Mesh::TRIANGLES);
+  m.vertex(-half_width, -half_height, 0);
+  m.vertex(half_width, -half_height, 0);
+  m.vertex(-half_width, half_height, 0);
+  m.vertex(-half_width, half_height, 0);
+  m.vertex(half_width, -half_height, 0);
+  m.vertex(half_width, half_height, 0);
+  return 6;
+}
+
+int addRect(Mesh& m, float x, float y, float w, float h) {
+  m.reset();
+  m.primitive(Mesh::TRIANGLES);
+  m.vertex(x, y, 0);
+  m.vertex(x + w, y, 0);
+  m.vertex(x, y + h, 0);
+  m.vertex(x, y + h, 0);
+  m.vertex(x + w, y, 0);
+  m.vertex(x + w, y + h, 0);
+  return 6;
+}
+
 }

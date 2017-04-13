@@ -263,7 +263,7 @@ public:
   void popMatrix();
 
   /// Set current matrix to identity
-  void loadIdentity() {/* !!!!!!!!!!!!! */}
+  void loadIdentity() { mModelStack.setIdentity(); }
 
   /// Set current matrix
   void loadMatrix(const Matrix4d &m) {/* !!!!!!!!!!!!! */}
