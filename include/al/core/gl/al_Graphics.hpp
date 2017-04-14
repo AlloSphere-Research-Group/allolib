@@ -350,6 +350,13 @@ public:
   void clearDepth();
   void clearDepth(float d);
 
+  void uniformColor(float r, float g, float b, float a = 1.0f);
+  void uniformColor(Color const& c);
+  Color uniformColor();
+
+  void uniformColorMix(float m);
+  float uniformColorMix();
+
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
   /// Set viewport
@@ -376,9 +383,9 @@ public:
 
 protected:
   Window& mWindow;
-  bool mShaderChanged {false};
-  bool mCameraChanged {false};
-  bool mMatChanged {false};
+  bool mShaderChanged {true};
+  bool mCameraChanged {true};
+  bool mMatChanged {true};
   ShaderProgram* mShaderPtr {nullptr};
   Viewport mViewport;
   Viewport mScissor;
@@ -388,6 +395,9 @@ protected:
   float mClearDepth {1};
   MatrixStack mModelStack;
   std::map<int, Texture*> mTextures;
+  Color mUniformColor;
+  float mUniformColorMix = 0;
+  bool mUniformColorChanged {true};
 };
 
 }

@@ -126,6 +126,26 @@ void Graphics::clearDepth(float d) {
     clearDepth();
 }
 
+void Graphics::uniformColor(float r, float g, float b, float a) {
+  mUniformColor.set(r, g, b, a);
+  mUniformColorChanged = true;
+}
+void Graphics::uniformColor(Color const& c) {
+  mUniformColor = c;
+  mUniformColorChanged = true;
+}
+Color Graphics::uniformColor() {
+  return mUniformColor;
+}
+
+void Graphics::uniformColorMix(float m) {
+  mUniformColorMix = m;
+  mUniformColorChanged = true;
+}
+float Graphics::uniformColorMix() {
+  return mUniformColorMix;
+}
+
 void Graphics::viewport(const Viewport& v){
   if (!mViewport.isEqual(v)) {
     mViewport.set(v);
@@ -261,6 +281,13 @@ void Graphics::draw(VAOMesh& mesh) {
     shader().uniform("V", viewMatrix(), false);
     shader().uniform("P", projMatrix(), false);
   }
+  if (mShaderChanged || mUniformColorChanged) {
+    // shader().uniform("mUniformColor", mUniformColor, false);
+    shader().uniform("uniformColor", mUniformColor);
+    // shader().uniform("mUniformColorMix", mUniformColorMix, false);
+    shader().uniform("uniformColorMix", mUniformColorMix);
+  }
+  mUniformColorChanged = false;
   mShaderChanged = false;
   mMatChanged = false;
   mCameraChanged = false;
