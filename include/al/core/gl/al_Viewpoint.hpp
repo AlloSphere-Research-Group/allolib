@@ -120,7 +120,8 @@ private:
 
 public:
   enum SpecialType {
-    IDENTITY
+    IDENTITY,
+    ORTHO_FOR_2D
   };
 };
 

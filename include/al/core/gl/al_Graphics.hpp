@@ -358,6 +358,12 @@ public:
   /// Get current viewport
   Viewport viewport() const;
 
+  // scissor area is represented with Viewport class
+  void scissor(int left, int bottom, int width, int height);
+  void scissor(const Viewport& v);
+  void gl_scissor();
+  Viewport scissor() const;
+
   void shader(ShaderProgram& s);
   ShaderProgram& shader();
   void camera(Viewpoint& v);
@@ -375,6 +381,7 @@ protected:
   bool mMatChanged {false};
   ShaderProgram* mShaderPtr {nullptr};
   Viewport mViewport;
+  Viewport mScissor;
   Matrix4f mViewMat;
   Matrix4f mProjMat;
   Color mClearColor {0, 0, 0, 1};

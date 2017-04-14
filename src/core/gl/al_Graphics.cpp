@@ -145,6 +145,25 @@ Viewport Graphics::viewport() const {
   return mViewport;
 }
 
+void Graphics::scissor(int left, int bottom, int width, int height) {
+  scissor(Viewport(left, bottom, width, height));
+}
+
+void Graphics::scissor(const Viewport& v) {
+  if (!mScissor.isEqual(v)) {
+    mScissor.set(v);
+    gl_scissor();
+  }
+}
+
+void Graphics::gl_scissor() {
+  glScissor(mScissor.l, mScissor.b, mScissor.w, mScissor.h);
+}
+
+Viewport Graphics::scissor() const {
+  return mScissor;
+}
+
 void Graphics::shader(ShaderProgram& s) {
   if (mShaderPtr != nullptr && s.id() == mShaderPtr->id()) {
     // same shader
@@ -172,13 +191,39 @@ void Graphics::camera(Viewpoint::SpecialType v) {
 
 void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
   switch (v) {
+
   case Viewpoint::IDENTITY:
     mViewMat = Matrix4f::identity();
     mProjMat = Matrix4f::identity();
     viewport(x, y, w, h);
     mCameraChanged = true;
     break;
+
+  case Viewpoint::ORTHO_FOR_2D:
+    // 1. place eye so that bottom left is (0, 0), top right is (width, height)
+    // 2. set lens to be ortho, with given (width and height)
+
+    // viewport is in framebuffer unit, so get values in window pixel unit
+    float half_w = (w - x) * 0.5f / mWindow.x_highres();
+    float half_h = (h - y) * 0.5f / mWindow.y_highres();
+
+    // z = 1 because 2D things will be drawn at z = 0
+    // because of that we set near to 0.5 and far to 1.5
+    mViewMat = Matrix4f::lookAt(
+      Vec3f(half_w, half_h, 1), // eye
+      Vec3f(half_w, half_h, 0), // at
+      Vec3f(0, 1, 0) // up
+    );
+    mProjMat = Matrix4f::ortho(
+      -half_w, half_w, // left, right
+      -half_h, half_h, // bottom, top
+      0.5f, 1.5f // near, far
+    );
+    viewport(x, y, w, h);
+    mCameraChanged = true;
+    break;
   }
+
 }
 
 

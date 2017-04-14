@@ -290,6 +290,9 @@ public:
   // if the display is a high resolution one (ex: RETINA display)
   int fbHeight() const;
   int fbWidth() const;
+  
+  float x_highres() { return highres_factor_w; }
+  float y_highres() { return highres_factor_h; }
 
   bool decorated() const;
 

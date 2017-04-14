@@ -77,4 +77,4 @@ g.camera(viewpoint); // send camera matrices to shader, and set viewport
 
 Graphics
 - keeps track of bound shader, texture, and camera(viewpoint). fbo will be tracked too, but not implemented yet
-- currently testing if using this class as singleton would be a good idea
+- constructor takes reference of Window (or WindowApp, App ...)
