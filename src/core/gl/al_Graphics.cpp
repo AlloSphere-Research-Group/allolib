@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-#include "al/core/system/al_Printing.hpp"
 #include "al/core/gl/al_Graphics.hpp"
 
 namespace al {
@@ -253,7 +252,7 @@ void Graphics::texture(Texture& t, int binding_point) {
     if (search->second->id() == t.id()) { // and it was same texture
       // so do nothing and return
       // std::cout << "same texture" << std::endl;
-      return;
+      // return;
     }
   }
 
@@ -292,6 +291,25 @@ void Graphics::draw(VAOMesh& mesh) {
   mMatChanged = false;
   mCameraChanged = false;
   mesh.draw();
+}
+
+void Graphics::framebuffer(FBO& fbo) {
+  mFBOID = fbo.id();
+  FBO::bind(mFBOID);
+}
+
+void Graphics::framebuffer(FBO::SpecialType fbo) {
+  switch (fbo) {
+    case FBO::DEFAULT: {
+      // default window framebuffer
+      mFBOID = 0;
+      FBO::bind(0);
+      break;
+    }
+  }
+}
+unsigned int Graphics::framebufferID() {
+  return mFBOID;
 }
 
 } // al::

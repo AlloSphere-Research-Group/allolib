@@ -2,7 +2,6 @@
 #include <math.h>
 #include "al/core/math/al_Constants.hpp"
 #include "al/core/gl/al_Shapes.hpp"
-#include "al/core/gl/al_Graphics.hpp"
 
 /*
 Platonic solids code derived from:
@@ -712,6 +711,25 @@ int addRect(Mesh& m, float x, float y, float w, float h) {
   m.vertex(x, y + h, 0);
   m.vertex(x + w, y, 0);
   m.vertex(x + w, y + h, 0);
+  return 6;
+}
+
+int addTexRect(Mesh& m, float x, float y, float w, float h) {
+  m.reset();
+  m.primitive(Mesh::TRIANGLES);
+  m.vertex(x, y, 0);
+  m.vertex(x + w, y, 0);
+  m.vertex(x, y + h, 0);
+  m.vertex(x, y + h, 0);
+  m.vertex(x + w, y, 0);
+  m.vertex(x + w, y + h, 0);
+  m.texCoord(0.0, 0.0);
+  m.texCoord(1.0, 0.0);
+  m.texCoord(0.0, 1.0);
+  m.texCoord(0.0, 1.0);
+  m.texCoord(1.0, 0.0);
+  m.texCoord(1.0, 1.0);
+  
   return 6;
 }
 

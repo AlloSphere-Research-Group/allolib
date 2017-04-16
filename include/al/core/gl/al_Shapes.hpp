@@ -292,6 +292,7 @@ int addTorus(
 int addTexQuad(Mesh& m, float half_width=1, float half_height=1);
 int addQuad(Mesh& m, float half_width=1, float half_height=1);
 int addRect(Mesh& m, float x, float y, float w, float h);
+int addTexRect(Mesh& m, float x, float y, float w, float h);
 
 } // al::
 

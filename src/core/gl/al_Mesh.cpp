@@ -8,7 +8,6 @@
 #include <cstdint>
 #include "al/core/gl/al_Mesh.hpp"
 #include "al/core/system/al_Printing.hpp"
-#include "al/core/gl/al_Graphics.hpp"
 
 namespace al{
 

@@ -57,6 +57,7 @@
 #include "al/core/gl/al_Shader.hpp"
 #include "al/core/gl/al_Texture.hpp"
 #include "al/core/gl/al_Viewpoint.hpp"
+#include "al/core/gl/al_FBO.hpp"
 #include "al/core/io/al_Window.hpp"
 
 #include <iostream>
@@ -381,6 +382,10 @@ public:
   void texture(Texture& t, int binding_point = 0);
   Texture& texture(int binding_point = 0);
 
+  void framebuffer(FBO& fbo);
+  void framebuffer(FBO::SpecialType fbo);
+  unsigned int framebufferID();
+
 protected:
   Window& mWindow;
   bool mShaderChanged {true};
@@ -398,6 +403,7 @@ protected:
   Color mUniformColor;
   float mUniformColorMix = 0;
   bool mUniformColorChanged {true};
+  unsigned int mFBOID = 0;
 };
 
 }

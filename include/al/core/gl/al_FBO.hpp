@@ -42,7 +42,7 @@
   Lance Putnam, 2012, putnam.lance@gmail.com
 */
 
-#include "al/core/gl/al_Graphics.hpp"
+#include "al/core/gl/al_GLEW.hpp"
 #include "al/core/gl/al_GPUObject.hpp"
 
 namespace al{
@@ -218,6 +218,12 @@ public:
 protected:
   virtual void onCreate();
   virtual void onDestroy();
+
+public:
+  enum SpecialType {
+    DEFAULT
+  };
+
 };
 
 } // al::

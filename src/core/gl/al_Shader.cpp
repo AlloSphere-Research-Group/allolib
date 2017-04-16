@@ -1,5 +1,6 @@
-#include "al/core/gl/al_Graphics.hpp"
 #include "al/core/gl/al_Shader.hpp"
+#include "al/core/gl/al_GLEW.hpp"
+#include "al/core/gl/al_Graphics.hpp" // AL_GRAPHICS_ERROR
 
 #include <stdio.h>
 #include <map>

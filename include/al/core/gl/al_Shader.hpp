@@ -47,7 +47,10 @@
 #include <string>
 #include <unordered_map>
 #include "al/core/gl/al_GPUObject.hpp"
-#include "al/core/gl/al_Graphics.hpp"
+#include "al/core/math/al_Mat.hpp"
+#include "al/core/math/al_Vec.hpp"
+#include "al/core/types/al_Color.hpp"
+#include "al/core/math/al_Quat.hpp"
 
 #define AL_SHADER_MAX_LOG_SIZE  4096
 
