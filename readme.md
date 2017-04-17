@@ -14,3 +14,12 @@ TODO
 - al::Graphics
 - al::Image -> combine them to be ImageTexture
 
+DEPENDENCIES
+
+- GLFW3
+- GLEW
+- PORTAUDIO
+- APR
+
+[!] WINDOWS
+* for portaudio binaries, check: https://github.com/spatialaudio/portaudio-binaries
