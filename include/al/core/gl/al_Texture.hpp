@@ -108,7 +108,7 @@ public:
         mWidth, mWidth, 0,                //< equal throughout the faces
         mFormat,                          //< format of data
         mType,                            //< data type (e.g. GL_UNSIGNED_BYTE)
-        NULL
+        nullptr
       ); //< no actual data yet
     }
 
