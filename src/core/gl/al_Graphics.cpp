@@ -65,9 +65,11 @@ void Graphics::cullFace(bool b, Face face) {
 }
 void Graphics::pushMatrix(){
     mModelStack.push();
+    mMatChanged = true;
 }
 void Graphics::popMatrix(){
     mModelStack.pop();
+    mMatChanged = true;
 }
 void Graphics::translate(double x, double y, double z){
     mModelStack.mult(Matrix4f::translation(x, y, z));
@@ -281,16 +283,18 @@ void Graphics::draw(VAOMesh& mesh) {
     shader().uniform("P", projMatrix(), false);
   }
   if (mShaderChanged || mUniformColorChanged) {
-    // shader().uniform("mUniformColor", mUniformColor, false);
-    shader().uniform("uniformColor", mUniformColor);
-    // shader().uniform("mUniformColorMix", mUniformColorMix, false);
-    shader().uniform("uniformColorMix", mUniformColorMix);
+    shader().uniform("uniformColor", mUniformColor, false);
+    shader().uniform("uniformColorMix", mUniformColorMix, false);
   }
   mUniformColorChanged = false;
   mShaderChanged = false;
   mMatChanged = false;
   mCameraChanged = false;
   mesh.draw();
+}
+
+void Graphics::draw(VAOMesh&& mesh) {
+  draw(mesh);
 }
 
 void Graphics::framebuffer(FBO& fbo) {

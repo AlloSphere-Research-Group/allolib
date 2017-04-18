@@ -82,6 +82,8 @@ inline std::string al_default_frag_shader() { return R"(
 uniform sampler2D tex0;
 uniform float tex0_mix;
 uniform float light_mix;
+uniform vec4 uniformColor;
+uniform float uniformColorMix;
 in vec4 color_;
 in vec2 texcoord_;
 in vec3 normal_;
@@ -89,7 +91,8 @@ out vec4 frag_color;
 void main() {
   vec4 tex_color0 = texture(tex0, texcoord_);
   vec4 light_color = vec4(normal_, 1.0); // TODO
-  vec4 final_color = mix(mix(color_, tex_color0, tex0_mix), light_color, light_mix);
+  vec4 color_val = mix(color_, uniformColor, uniformColorMix);
+  vec4 final_color = mix(mix(color_val, tex_color0, tex0_mix), light_color, light_mix);
   frag_color = final_color;
 }
 )";}

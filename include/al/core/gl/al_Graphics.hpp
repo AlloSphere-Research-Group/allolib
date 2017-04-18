@@ -378,6 +378,7 @@ public:
   void camera(Viewpoint::SpecialType v);
   void camera(Viewpoint::SpecialType v, int x, int y, int w, int h);
   void draw(VAOMesh& mesh);
+  void draw(VAOMesh&& mesh);
 
   void texture(Texture& t, int binding_point = 0);
   Texture& texture(int binding_point = 0);
