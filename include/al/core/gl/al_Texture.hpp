@@ -47,6 +47,18 @@
 #include "al/core/gl/al_GPUObject.hpp"
 #include "al/core/gl/al_GLEW.hpp"
 
+/*
+https://www.khronos.org/opengl/wiki/Shader#Resource_limitations
+GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS
+The total number of texture units that can be used from all active programs.
+This is the limit on glActiveTexture(GL_TEXTURE0 + i) and glBindSampler.
+In GL 3.3, this was 48; in 4.3, it is 96.
+
+Use last unit as a temp point so
+it doesn't overwrite binding that were done for rendering
+*/
+#define AL_TEX_TEMP_BINDING_UNIT 47
+
 namespace al {
 
 /// A simple wrapper around an OpenGL Texture
@@ -59,12 +71,12 @@ protected:
   unsigned int mFormat;
   unsigned int mType;
 
-  int mWrapS, mWrapT, mWrapR;
-  int mFilterMin, mFilterMag;
-  bool mUseMipmap;
+  int mWrapS = GL_CLAMP_TO_EDGE, mWrapT = GL_CLAMP_TO_EDGE, mWrapR = GL_CLAMP_TO_EDGE;
+  int mFilterMin = GL_LINEAR, mFilterMag = GL_LINEAR;
+  bool mUseMipmap = false; // by default no mipmap
 
-  bool mParamsUpdated; // Flags change in texture params (wrap, filter)
-  bool mUseMipmapUpdated;
+  bool mParamsUpdated = true; // Flags change in texture params (wrap, filter)
+  bool mUseMipmapUpdated = true;;
 
 public:
   Texture();

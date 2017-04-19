@@ -29,7 +29,7 @@ set(core_headers
   include/al/core/app/al_FPS.hpp
   include/al/core/app/al_WindowApp.hpp
   include/al/core/gl/al_BufferObject.hpp
-  # include/al/core/gl/al_CubeMapFBO.hpp
+  include/al/core/gl/al_EasyFBO.hpp
   include/al/core/gl/al_FBO.hpp
   include/al/core/gl/al_GLEW.hpp
   include/al/core/gl/al_GLFW.hpp
@@ -88,6 +88,7 @@ set(core_sources
   src/core/app/al_FPS.cpp
   src/core/app/al_WindowApp.cpp
   src/core/gl/al_BufferObject.cpp
+  src/core/gl/al_EasyFBO.cpp
   src/core/gl/al_FBO.cpp
   src/core/gl/al_GLEW.cpp
   src/core/gl/al_GLFW.cpp

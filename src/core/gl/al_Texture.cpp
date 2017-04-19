@@ -17,8 +17,8 @@ void Texture::create2D(
   unsigned int width, unsigned int height,
   int internal,
   unsigned int format,
-  unsigned int type
-) {
+  unsigned int type)
+{
   mTarget = GL_TEXTURE_2D;
   mInternalFormat = internal;
   mWidth = width;
@@ -40,13 +40,6 @@ void Texture::create2D(
   );
   // AL_GRAPHICS_ERROR("creating 2D texture", id());
 
-  wrapS(GL_CLAMP_TO_EDGE);
-  wrapT(GL_CLAMP_TO_EDGE);
-  wrapR(GL_CLAMP_TO_EDGE);
-  // by default no mipmap
-  filterMin(GL_LINEAR);
-  filterMag(GL_LINEAR);
-  mipmap(false);
   update(true); // true: force update
   unbind();
 }
