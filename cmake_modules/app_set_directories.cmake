@@ -4,4 +4,4 @@ if(MACOS OR LINUX)
 # on LINUX
 # make install from source-compiled glfw puts lib in /usr/local/lib
     link_directories(/usr/local/lib)
-endif (MACOS)
+endif (MACOS OR LINUX)
