@@ -1,4 +1,8 @@
-#pragma once
+#ifndef INCLUDE_AL_VAO_HPP
+#define INCLUDE_AL_VAO_HPP
+
+/*  Keehong Youn, 2017, younkeehong@gmail.com
+*/
 
 #include "al/core/gl/al_GLEW.hpp"
 #include "al/core/gl/al_BufferObject.hpp"
@@ -30,3 +34,5 @@ public:
 };
 
 }
+
+#endif

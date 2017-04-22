@@ -36,6 +36,7 @@
   
   viewpoint: Pose(view matrix) + Lens(projection matrix) + viewport
 
+  Keehong Youn, 2017, younkeehong@gmail.com
 */
 
 #include "al/core/spatial/al_Pose.hpp"

@@ -1,4 +1,8 @@
-#pragma once
+#ifndef INCLUDE_AL_AUDIOAPP_HPP
+#define INCLUDE_AL_AUDIOAPP_HPP
+
+/*  Keehong Youn, 2017, younkeehong@gmail.com
+*/
 
 #include "al/core/io/al_AudioIO.hpp"
 
@@ -29,4 +33,6 @@ public:
 };
 
 }
+
+#endif // !INCLUDE_AL_AUDIOAPP_HPP
 

@@ -1,4 +1,8 @@
-#pragma once
+#ifndef INCLUDE_AL_GLFW_HPP
+#define INCLUDE_AL_GLFW_HPP
+
+/*  Keehong Youn, 2017, younkeehong@gmail.com
+*/
 
 #include "al/core/gl/al_GLEW.hpp"
 #define GLFW_INCLUDE_NONE
@@ -12,3 +16,5 @@ namespace glfw {
 }
 
 }
+
+#endif

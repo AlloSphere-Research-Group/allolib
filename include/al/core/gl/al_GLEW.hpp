@@ -1,4 +1,8 @@
-#pragma once
+#ifndef INCLUDE_AL_GLEW_HPP
+#define INCLUDE_AL_GLEW_HPP
+
+/*  Keehong Youn, 2017, younkeehong@gmail.com
+*/
 
 #include "GL/glew.h"
 
@@ -13,3 +17,5 @@ void init();
 }
 
 }
+
+#endif

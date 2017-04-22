@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INCLUDE_AL_WINDOWAPP_HPP
+#define INCLUDE_AL_WINDOWAPP_HPP
 
 // SINGLE-WINDOW app
 
@@ -72,3 +73,5 @@ public:
 };
 
 }
+
+#endif

@@ -45,10 +45,6 @@
   Keehong Youn, 2016, younkeehong@gmail.com
 */
 
-/*
-
-*/
-
 #include <string>
 #include <limits.h>
 #include <math.h>

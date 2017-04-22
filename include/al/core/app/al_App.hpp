@@ -1,4 +1,8 @@
-#pragma once
+#ifndef INCLUDE_AL_APP_HPP
+#define INCLUDE_AL_APP_HPP
+
+/*  Keehong Youn, 2017, younkeehong@gmail.com
+*/
 
 #include "al/core/app/al_WindowApp.hpp"
 #include "al/core/app/al_AudioApp.hpp"
@@ -41,3 +45,5 @@ public:
 };
 
 }
+
+#endif

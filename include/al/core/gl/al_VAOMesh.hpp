@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INCLUDE_AL_VAOMESH_HPP
+#define INCLUDE_AL_VAOMESH_HPP
 
 #include "al/core/gl/al_BufferObject.hpp"
 #include "al/core/gl/al_Mesh.hpp"
@@ -55,3 +56,5 @@ public:
 };
 
 }
+
+#endif

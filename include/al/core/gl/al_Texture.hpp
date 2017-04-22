@@ -42,6 +42,7 @@
   Lance Putnam, 2015, putnam.lance@gmail.com
   Graham Wakefield, 2010, grrrwaaa@gmail.com
   Wesley Smith, 2010, wesley.hoke@gmail.com
+  Keehong Youn, 2017, younkeehong@gmail.com
 */
 
 #include "al/core/gl/al_GPUObject.hpp"

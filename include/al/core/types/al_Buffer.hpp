@@ -40,6 +40,8 @@
 
   File author(s):
   Lance Putnam, 2010, putnam.lance@gmail.com
+  Keehong Youn, 2017, younkeehong@gmail.com
+
 */
 
 #include <algorithm>
