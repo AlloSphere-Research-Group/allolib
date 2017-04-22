@@ -293,10 +293,6 @@ void Graphics::draw(VAOMesh& mesh) {
   mesh.draw();
 }
 
-void Graphics::draw(VAOMesh&& mesh) {
-  draw(mesh);
-}
-
 void Graphics::framebuffer(FBO& fbo) {
   mFBOID = fbo.id();
   FBO::bind(mFBOID);

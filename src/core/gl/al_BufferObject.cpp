@@ -62,6 +62,7 @@ void BufferObject::onDestroy() {
 
 void BufferObject::data(int size, void const* src) {
   glBufferData(mType, size, src, mUsage);
+  mSize = size;
   // GLint s {0};
   // glGetBufferParameteriv(mType, GL_BUFFER_SIZE, &s);
   // if (s == size) {

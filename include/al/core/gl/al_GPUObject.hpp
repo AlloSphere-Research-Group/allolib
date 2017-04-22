@@ -102,13 +102,15 @@ protected:
 /// @ingroup allocore
 class GPUObject{
 public:
-    GPUObject();
+  GPUObject();
 
-  /// @param[in] ctx  a GPU context ID to attach to
-  //GPUObject(int ctx = GPUContext::defaultContextID());
+  // disable copy/move construction
+  GPUObject(GPUObject const&) = delete;
+  GPUObject(GPUObject&&) = delete;
 
-  /// @param[in] ctx  a GPU context to attach to
-  // GPUObject(GPUContext& ctx);
+  // disable copy/move assignment
+  GPUObject& operator=(GPUObject const&) = delete;
+  GPUObject& operator=(GPUObject&&) = delete;
 
   virtual ~GPUObject();
 
