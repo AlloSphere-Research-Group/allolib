@@ -122,9 +122,6 @@ set(core_sources
   src/core/types/al_Color.cpp
 )
 
-# sphere
-# util
-
 list(APPEND headers
   ${core_headers}
 )

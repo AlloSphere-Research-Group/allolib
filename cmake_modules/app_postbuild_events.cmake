@@ -1,4 +1,6 @@
 # copy dlls
+# APP_OUTPUT_PATH needs to be set before this script
+
 if (WINDOWS)
   set(post_build_command
     robocopy ${lib_path}/apr/ ${APP_OUTPUT_PATH} libapr-1.dll &

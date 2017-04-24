@@ -1,3 +1,5 @@
+# al_path needs to be set prior to calling this script
+
 find_package(OpenGL REQUIRED)
 if (WINDOWS)
   set(lib_path ${al_path}/dependencies)

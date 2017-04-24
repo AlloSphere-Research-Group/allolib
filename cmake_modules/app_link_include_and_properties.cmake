@@ -1,3 +1,5 @@
+# app_name and al_path needs to be set before calling this script
+
 set_target_properties(${app_name} PROPERTIES DEBUG_POSTFIX _debug)
 
 if (WINDOWS)

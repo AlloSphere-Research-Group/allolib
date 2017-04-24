@@ -3,7 +3,7 @@ TODO
 - stereo window
 - connect omnirender
 - ui: preset / parameter / glv
-- audio with Gamma
+- include GLV/Gamma as part of al_lib
 
 BIG TODO
 
