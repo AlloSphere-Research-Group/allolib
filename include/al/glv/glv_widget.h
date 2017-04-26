@@ -7,6 +7,10 @@
 #include "al/glv/glv_core.h"
 #include "al/glv/glv_model.h"
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 namespace glv {
 
 typedef ChangedValue<Data> ModelChange;
@@ -143,7 +147,8 @@ public:
 	// assigned.
 	void assignData(const Data& d, int ind1, int ind2){
 		if(data().inBounds(ind1, ind2)){
-			Data t=d; t.clone();
+			Data t = d;
+			t.clone();
 			if(onAssignData(t, ind1, ind2)){
 				//model().assign(t, ind1, ind2);
 			}

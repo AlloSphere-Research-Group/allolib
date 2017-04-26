@@ -2,6 +2,7 @@
 #include <stdio.h>	// sscanf, FILE
 #include <cctype>	// isalnum, isblank
 #include <cstring>	// strchr, strpbrk
+#include <iostream>
 
 //#ifndef WIN32
 //#define	sprintf_s(buffer, buffer_size, stringbuffer, ...) (snprintf(buffer, buffer_size, stringbuffer, __VA_ARGS__))
@@ -326,7 +327,7 @@ Data& Data::operator+=(const Data& v){
 
 Data& Data::assign(const Data& v, int idx){
 	if(hasData() && v.hasData()){
-		int nd= size()-idx;				// number of destination elements to assign
+		int nd= size()-idx;	// number of destination elements to assign
 		int n = nd < v.size() ? nd : v.size();
 
 		#define OP(t1, t2)\
@@ -343,24 +344,25 @@ Data& Data::assign(const Data& v, int idx){
 			} break
 
 		switch(type()){
-		case Data::BOOL:	OPALL(bool);
-		case Data::INT:		OPALL(int);
-		case Data::FLOAT:	OPALL(float);
-		case Data::DOUBLE:	OPALL(double);
-		case Data::STRING: //printf("copy strings: %p -> %p\n", &v, this);
-			switch(v.type()){
-//			case Data::BOOL:	v.toString(data<std::string>());
-//			case Data::FLOAT:	OP(t, float);
-//			case Data::DOUBLE:	OP(t, double);
-			case Data::STRING:	OP(std::string, std::string);
+			case Data::BOOL:	OPALL(bool);
+			case Data::INT:		OPALL(int);
+			case Data::FLOAT:	OPALL(float);
+			case Data::DOUBLE:	OPALL(double);
+			case Data::STRING: //printf("copy strings: %p -> %p\n", &v, this);
+				switch(v.type()){
+	//			case Data::BOOL:	v.toString(data<std::string>());
+	//			case Data::FLOAT:	OP(t, float);
+	//			case Data::DOUBLE:	OP(t, double);
+				case Data::STRING:	OP(std::string, std::string);
+				default:;
+				} break;
 			default:;
-			} break;
-		default:;
 		}
+
+		#undef OP
+		#undef OPALL
 	}
 	return *this;
-	#undef OP
-	#undef OPALL
 }
 
 

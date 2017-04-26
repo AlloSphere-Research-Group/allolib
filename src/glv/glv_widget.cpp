@@ -78,7 +78,6 @@ void Widget::onDataModelSync(){
 
 // note: indices passed in are always valid
 bool Widget::onAssignData(Data& d, int ind1, int ind2){
-
 	if(data().isNumerical()){
 		if(enabled(MutualExc)){
 			double v = 0;
@@ -99,12 +98,11 @@ bool Widget::onAssignData(Data& d, int ind1, int ind2){
 
 	// Update any attached variables containing this index
 	if(hasVariables()){
-		IndexDataMap::iterator it = variables().begin();
-		for(; it != variables().end(); ++it){
-			Data& v = it->second;
-			
-			// get destination/source intervals in terms of model indices
-			int id0 = it->first;
+		for (auto& p : variables()) {
+			auto& i = p.first;
+			auto& v = p.second;
+
+			int id0 = i;
 			int id1 = id0 + v.size();
 			int is0 = idx;
 			int is1 = is0 + d.size();
@@ -114,7 +112,6 @@ bool Widget::onAssignData(Data& d, int ind1, int ind2){
 			int i1 = glv::min(id1, is1);
 			
 			if(i0 < i1){
-//printf("[%d, %d), [%d, %d), [%d, %d)\n", id0, id1, is0, is1, i0, i1);
 				v.slice(i0-id0, i1-i0).assign(
 					d.slice(i0-is0, i1-i0)
 				);
@@ -122,13 +119,6 @@ bool Widget::onAssignData(Data& d, int ind1, int ind2){
 		}
 	}
 	
-//	if(variables().count(idx)){
-//		Data& v = variables()[idx];
-//		printf("1: %s %s\n", v.toToken().c_str(), d.toToken().c_str());
-//		v.assign(d);
-//		printf("2: %s %s\n", v.toToken().c_str(), d.toToken().c_str());
-//	}
-
 	Data modelOffset = data().slice(idx, data().size()-idx);
 
 	if(d != modelOffset){
