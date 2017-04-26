@@ -122,12 +122,50 @@ set(core_sources
   src/core/types/al_Color.cpp
 )
 
+set(glv_headers
+  include/al/glv/glv.h
+  include/al/glv/glv_behavior.h
+  include/al/glv/glv_buttons.h
+  include/al/glv/glv_color.h
+  include/al/glv/glv_conf.h
+  include/al/glv/glv_core.h
+  include/al/glv/glv_draw.h
+  include/al/glv/glv_font.h
+  include/al/glv/glv_icon.h
+  include/al/glv/glv_layout.h
+  include/al/glv/glv_model.h
+  include/al/glv/glv_notification.h
+  include/al/glv/glv_rect.h
+  include/al/glv/glv_sliders.h
+  include/al/glv/glv_textview.h
+  include/al/glv/glv_util.h
+  include/al/glv/glv_widget.h
+)
+
+set(glv_sources
+  src/glv/glv_buttons.cpp
+  src/glv/glv_color.cpp
+  src/glv/glv_core.cpp
+  src/glv/glv_font.cpp
+  src/glv/glv_glv.cpp
+  src/glv/glv_inputdevice.cpp
+  src/glv/glv_layout.cpp
+  src/glv/glv_model.cpp
+  src/glv/glv_notification.cpp
+  src/glv/glv_sliders.cpp
+  src/glv/glv_textview.cpp
+  src/glv/glv_view.cpp
+  src/glv/glv_widget.cpp
+)
+
 list(APPEND headers
   ${core_headers}
+  ${glv_headers}
 )
 
 list(APPEND sources
   ${core_sources}
+  ${glv_sources}
   ${EXTERNAL_SRC}
 )
 

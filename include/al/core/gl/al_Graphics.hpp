@@ -283,6 +283,7 @@ public:
   Matrix4f viewMatrix() {
     return mViewMat;
   }
+  
   Matrix4f projMatrix() {
     return mProjMat;
   }
@@ -387,6 +388,8 @@ public:
   void framebuffer(FBO& fbo);
   void framebuffer(FBO::SpecialType fbo);
   unsigned int framebufferID();
+
+  Window& window() { return mWindow; }
 
 protected:
   Window& mWindow;
