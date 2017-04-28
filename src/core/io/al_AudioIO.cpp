@@ -325,7 +325,7 @@ public:
 
   virtual bool isOpen() const { return audio.isStreamOpen();}
   virtual bool isRunning() const { return audio.isStreamRunning();}
-  //	virtual bool error() const { return mErrNum != paNoError; }
+  	virtual bool error() const { return false; } // FIXME return error
 
   virtual void printError(const char * text = "") const {
 //    if(error()){
@@ -654,6 +654,11 @@ AudioIO::AudioIO(int framesPerBuf, double framesPerSec, void (* callbackA)(Audio
 		mImpl = new PortAudioBackend;
 		mInDevice = AudioDevice::defaultInput();
 		mOutDevice = AudioDevice::defaultOutput();
+		break;
+    case RTAUDIO:
+		mImpl = new RtAudioBackend;
+//		mInDevice = AudioDevice::defaultInput();
+//		mOutDevice = AudioDevice::defaultOutput();
 		break;
 	case DUMMY:
 		mImpl = new DummyAudioBackend;

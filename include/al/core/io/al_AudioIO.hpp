@@ -116,7 +116,7 @@ public:
 	AudioIO(int framesPerBuf=64, double framesPerSec=44100.0,
 			void (* callback)(AudioIOData &) = 0, void * userData = 0,
 			int outChans = 2, int inChans = 0,
-			AudioIO::Backend backend = PORTAUDIO
+			AudioIO::Backend backend = RTAUDIO
 			);
 
 	virtual ~AudioIO();

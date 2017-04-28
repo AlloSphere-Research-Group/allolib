@@ -202,10 +202,11 @@ public:
 
 	virtual ~AudioIOData();
 
-	typedef enum {
-		PORTAUDIO,
-		DUMMY
-	} Backend;
+    typedef enum {
+      PORTAUDIO,
+      RTAUDIO,
+      DUMMY
+    } Backend;
 
 	/// Iterate frame counter, returning true while more frames
 	bool operator()() const { return (++mFrame)<framesPerBuffer(); }
