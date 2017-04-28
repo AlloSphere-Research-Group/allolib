@@ -187,8 +187,6 @@ public:
 	virtual double cpu() = 0;
 
 protected:
-	bool mIsOpen;						// An audio device is open
-	bool mIsRunning;					// An audio stream is running
 };
 
 

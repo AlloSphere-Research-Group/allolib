@@ -23,6 +23,15 @@ list(APPEND EXTERNAL_SRC
   ${OSCPACK_SRC}
 )
 
+if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/rtaudio")
+  message("Using RtAudio")
+  set(BUILD_TESTING 0)
+  add_subdirectory("${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/rtaudio")
+  list(APPEND EXTERNAL_LIBRARIES
+      rtaudio_static
+  )
+endif()
+
 set(core_headers
   include/al/core/app/al_App.hpp
   include/al/core/app/al_AudioApp.hpp
@@ -159,3 +168,4 @@ target_link_libraries(al ${GLEW_LIBRARIES})
 target_link_libraries(al ${GLFW_LIBRARIES})
 target_link_libraries(al ${PORTAUDIO_LIBRARIES})
 target_link_libraries(al ${APR_LIBRARIES})
+target_link_libraries(al ${EXTERNAL_LIBRARIES})

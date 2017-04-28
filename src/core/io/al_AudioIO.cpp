@@ -5,7 +5,9 @@
 #include <cmath>
 #include <cassert>
 #include <cstdint>
+#include <string>
 
+#include "rtaudio/RtAudio.h"
 #include "portaudio.h"
 // #include "al/core/system/al_Config.h"
 #include "al/core/io/al_AudioIO.hpp"
@@ -16,8 +18,8 @@ class DummyAudioBackend : public AudioBackend{
 public:
 	DummyAudioBackend(): AudioBackend(), mNumOutChans(64), mNumInChans(64){}
 
-	virtual bool isOpen() const {return mIsOpen;}
-	virtual bool isRunning() const {return mIsRunning;}
+	virtual bool isOpen() const {return true;}
+	virtual bool isRunning() const {return true;}
 	virtual bool error() const {return false;}
 
 	virtual void printError(const char * text = "") const {
@@ -54,13 +56,13 @@ public:
 
 	virtual double time() {return 0.0;}
 
-	virtual bool open(int framesPerSecond, int framesPerBuffer, void *userdata) { mIsOpen = true; return true; }
+	virtual bool open(int framesPerSecond, int framesPerBuffer, void *userdata) { return true; }
 
-	virtual bool close() { mIsOpen = false; return true; }
+	virtual bool close() { return true; }
 
-	virtual bool start(int framesPerSecond, int framesPerBuffer, void *userdata) { mIsRunning = true; return true; }
+	virtual bool start(int framesPerSecond, int framesPerBuffer, void *userdata) { return true; }
 
-	virtual bool stop() { mIsRunning = false; return true;}
+	virtual bool stop() { return true;}
 	virtual double cpu() {return 0.0;}
 
 protected:
@@ -309,9 +311,232 @@ protected:
 
 private:
 
+    bool mIsOpen;						// An audio device is open
+	bool mIsRunning;					// An audio stream is running
 	PaStreamParameters mInParams, mOutParams;	// Input and output stream parameters
 	PaStream * mStream;					// i/o stream
 	mutable PaError mErrNum;			// Most recent error number
+};
+
+class RtAudioBackend : public AudioBackend{
+public:
+  RtAudioBackend(): AudioBackend(){
+  }
+
+  virtual bool isOpen() const { return audio.isStreamOpen();}
+  virtual bool isRunning() const { return audio.isStreamRunning();}
+  //	virtual bool error() const { return mErrNum != paNoError; }
+
+  virtual void printError(const char * text = "") const {
+//    if(error()){
+//      fprintf(stderr, "%s: %s\n", text, Pa_GetErrorText(mErrNum));
+//    }
+  }
+
+  virtual void printInfo() const {
+//    audio.getVersion()
+//    const PaStreamInfo * sInfo = Pa_GetStreamInfo(mStream);
+//    if(sInfo){
+//      printf("In Latency:  %.0f ms\nOut Latency: %0.f ms\nSample Rate: %0.f Hz\n",
+//             sInfo->inputLatency * 1000., sInfo->outputLatency * 1000., sInfo->sampleRate);
+//    }
+  }
+
+  virtual bool supportsFPS(double fps) const {
+    const RtAudio::StreamParameters * pi = iParams.nChannels  == 0 ? nullptr : &iParams;
+    const RtAudio::StreamParameters * po = oParams.nChannels == 0 ? nullptr : &oParams;
+
+
+//    mErrNum = Pa_IsFormatSupported(pi, po, fps);
+//    printError("AudioIO::Impl::supportsFPS");
+//    return paFormatIsSupported == mErrNum;
+    return true; // FIXME return correct value...
+  }
+
+  virtual void inDevice(int index){
+    iParams.deviceId = index;
+  }
+
+  virtual void outDevice(int index){
+    oParams.deviceId = index;
+  }
+
+  virtual void channels(int num, bool forOutput) {
+    if(isOpen()){
+      warn("the number of channels cannnot be set with the stream open", "AudioIO");
+      return;
+    }
+
+    RtAudio::StreamParameters * params = forOutput ? &oParams : &iParams;
+
+    if(num == 0){
+      //params->device = paNoDevice;
+      params->nChannels = 0;
+      return;
+    }
+
+    RtAudio::DeviceInfo info = audio.getDeviceInfo(params->deviceId);
+    if(info.probed){
+      if(forOutput)	warn("attempt to set number of channels on invalid output device", "AudioIO");
+      else			warn("attempt to set number of channels on invalid input device", "AudioIO");
+      return;	// this particular device is not open, so return
+    }
+
+    // compute number of channels to give PortAudio
+    int maxChans =
+        (int)(forOutput ? info.outputChannels : info.inputChannels);
+
+    // -1 means open all channels
+    if(-1 == num){
+      num = maxChans;
+#ifdef AL_LINUX
+      /* The default device can report an insane number of max channels,
+            presumably because it's being remapped through a software mixer;
+            Opening all of them can cause an assertion dump in snd_pcm_area_copy
+            so we limit "all channels" to a reasonable number.*/
+      if(num >= 128) num = 2;
+#endif
+    }
+    else{
+      num = min(num, maxChans);
+    }
+
+    params->nChannels = num;
+  }
+
+  virtual int inDeviceChans() { return (int) iParams.nChannels; }
+  virtual int outDeviceChans() { return (int) oParams.nChannels; }
+  virtual void setInDeviceChans(int num){ iParams.nChannels = num; }
+  virtual void setOutDeviceChans(int num){ oParams.nChannels = num; }
+
+  virtual double time() {return audio.getStreamTime(); }
+
+  virtual bool open(int framesPerSecond, int framesPerBuffer, void *userdata) {
+    assert(framesPerBuffer != 0 && framesPerSecond != 0 && userdata != NULL);
+    // Set the same number of channels for both input and output.
+//    unsigned int bufferBytes, bufferFrames = 512;
+    unsigned int deviceBufferSize = framesPerBuffer;
+    try {
+      audio.openStream( &oParams, &iParams, RTAUDIO_FLOAT32,
+                        framesPerSecond, &deviceBufferSize,
+                        rtaudioCallback);
+    }
+    catch ( RtAudioError& e ) {
+      e.printMessage();
+      exit( 0 );
+    }
+
+    if(deviceBufferSize != framesPerBuffer) {
+      printf("WARNING: Device opened with buffer size: %d", deviceBufferSize);
+    }
+  }
+
+  virtual bool close(){
+
+    if ( audio.isStreamOpen() ) {
+      audio.closeStream();
+    }
+
+    return true;
+  }
+
+  virtual bool start(int framesPerSecond, int framesPerBuffer, void *userdata){
+
+    try {
+      audio.startStream();
+    }
+    catch ( RtAudioError& e ) {
+      //          e.printMessage();
+      //          goto cleanup;
+    }
+
+  }
+
+  virtual bool stop(){
+
+    try {
+      audio.stopStream();
+    }
+    catch ( RtAudioError& e ) {
+      //        e.printMessage();
+      //        goto cleanup;
+    }
+  }
+
+  virtual double cpu() {
+    return -1.0;
+  }
+
+  static AudioDevice defaultInput() { RtAudio audio_; return AudioDevice(audio_.getDefaultInputDevice()); }
+  static AudioDevice defaultOutput() { RtAudio audio_; return AudioDevice(audio_.getDefaultOutputDevice()); }
+  static int numDevices() { RtAudio audio_; return audio_.getDeviceCount();  }
+
+protected:
+  static int rtaudioCallback(void *output, void *input,
+                             unsigned int frameCount,
+                             double streamTime,
+                             RtAudioStreamStatus status,
+                             void *userData)
+  {
+    AudioIO& io = *(AudioIO *)userData;
+
+    assert(frameCount == (unsigned)io.framesPerBuffer());
+    const float **inBuffers = (const float **) input;
+    for (int i = 0; i < io.channelsInDevice(); i++) {
+      memcpy(const_cast<float *>(&io.in(i,0)),  inBuffers[i], frameCount * sizeof(float));
+    }
+
+    if(io.autoZeroOut()) io.zeroOut();
+
+    io.processAudio();	// call callback
+
+
+    // apply smoothly-ramped gain to all output channels
+    if(io.usingGain()){
+
+      float dgain = (io.mGain-io.mGainPrev) / frameCount;
+
+      for(int j=0; j<io.channelsOutDevice(); ++j){
+        float * out = io.outBuffer(j);
+        float gain = io.mGainPrev;
+
+        for(unsigned i=0; i<frameCount; ++i){
+          out[i] *= gain;
+          gain += dgain;
+        }
+      }
+
+      io.mGainPrev = io.mGain;
+    }
+
+    // kill pesky nans so we don't hurt anyone's ears
+    if(io.zeroNANs()){
+      for(unsigned i=0; i<unsigned(frameCount*io.channelsOutDevice()); ++i){
+        float& s = (&io.out(0,0))[i];
+        //if(isnan(s)) s = 0.f;
+        if(s != s) s = 0.f; // portable isnan; only nans do not equal themselves
+      }
+    }
+
+    if(io.clipOut()){
+      for(unsigned i=0; i<unsigned(frameCount*io.channelsOutDevice()); ++i){
+        float& s = (&io.out(0,0))[i];
+        if		(s<-1.f) s =-1.f;
+        else if	(s> 1.f) s = 1.f;
+      }
+    }
+
+    float **outBuffers = (float **) output;
+    for (int i = 0; i < io.channelsOutDevice(); i++) {
+      memcpy(outBuffers[i], const_cast<float *>(&io.out(i,0)), frameCount * sizeof(float));
+    }
+
+    return 0;
+  }
+
+private:
+  RtAudio audio;
+  RtAudio::StreamParameters iParams, oParams;
 };
 
 //==============================================================================

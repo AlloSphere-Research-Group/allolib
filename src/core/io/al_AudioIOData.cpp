@@ -10,7 +10,6 @@
 namespace al{
 
 AudioBackend::AudioBackend()
-:	mIsOpen(false), mIsRunning(false)
 {}
 
 //==============================================================================
