@@ -374,8 +374,13 @@ public:
       params->nChannels = 0;
       return;
     }
-
-    RtAudio::DeviceInfo info = audio.getDeviceInfo(params->deviceId);
+    RtAudio::DeviceInfo info;
+    try {
+        info = audio.getDeviceInfo(params->deviceId);
+    }
+    catch( RtAudioError& e ) {
+        e.printMessage();
+    }
     if(info.probed){
       if(forOutput)	warn("attempt to set number of channels on invalid output device", "AudioIO");
       else			warn("attempt to set number of channels on invalid input device", "AudioIO");
@@ -446,7 +451,7 @@ public:
       audio.startStream();
     }
     catch ( RtAudioError& e ) {
-      //          e.printMessage();
+          e.printMessage();
       //          goto cleanup;
     }
 
@@ -640,6 +645,9 @@ void AudioDevice::printAll(){
 		//print(i);
 	}
 }
+
+
+
 
 //==============================================================================
 
