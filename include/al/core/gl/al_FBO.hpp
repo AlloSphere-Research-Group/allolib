@@ -222,9 +222,8 @@ protected:
   virtual void onDestroy();
 
 public:
-  enum SpecialType {
-    DEFAULT
-  };
+
+  static unsigned int const DEFAULT {0};
 
 };
 

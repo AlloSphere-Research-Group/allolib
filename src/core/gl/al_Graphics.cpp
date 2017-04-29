@@ -143,23 +143,18 @@ void Graphics::uniformColorMix(float m) {
   mUniformColorMix = m;
   mUniformColorChanged = true;
 }
+
 float Graphics::uniformColorMix() {
   return mUniformColorMix;
 }
 
 void Graphics::viewport(const Viewport& v){
-  if (!mViewport.isEqual(v)) {
-    mViewport.set(v);
-    gl_viewport();
-  }
+  mViewport.set(v);
+  glViewport(mViewport.l, mViewport.b, mViewport.w, mViewport.h);
 }
 
 void Graphics::viewport(int x, int y, int width, int height) {
   viewport(Viewport(x, y, width, height));
-}
-
-void Graphics::gl_viewport() {
-  glViewport(mViewport.l, mViewport.b, mViewport.w, mViewport.h);
 }
 
 Viewport Graphics::viewport() const {
@@ -171,13 +166,7 @@ void Graphics::scissor(int left, int bottom, int width, int height) {
 }
 
 void Graphics::scissor(const Viewport& v) {
-  if (!mScissor.isEqual(v)) {
-    mScissor.set(v);
-    gl_scissor();
-  }
-}
-
-void Graphics::gl_scissor() {
+  mScissor.set(v);
   glScissor(mScissor.l, mScissor.b, mScissor.w, mScissor.h);
 }
 
@@ -186,13 +175,9 @@ Viewport Graphics::scissor() const {
 }
 
 void Graphics::shader(ShaderProgram& s) {
-  if (mShaderPtr != nullptr && s.id() == mShaderPtr->id()) {
-    // same shader
-    return;
-  }
-  mShaderChanged = true;
   mShaderPtr = &s;
   mShaderPtr->use();
+  mShaderChanged = true;
 }
 
 ShaderProgram& Graphics::shader() {
@@ -200,10 +185,10 @@ ShaderProgram& Graphics::shader() {
 }
 
 void Graphics::camera(Viewpoint& v) {
-  mCameraChanged = true;
   mViewMat = v.viewMatrix();
   mProjMat = v.projMatrix();
   viewport(v.viewport());
+  mMatChanged = true;
 }
 
 void Graphics::camera(Viewpoint::SpecialType v) {
@@ -217,7 +202,6 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
     mViewMat = Matrix4f::identity();
     mProjMat = Matrix4f::identity();
     viewport(x, y, w, h);
-    mCameraChanged = true;
     break;
 
   case Viewpoint::ORTHO_FOR_2D:
@@ -241,75 +225,53 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
       0.5f, 1.5f // near, far
     );
     viewport(x, y, w, h);
-    mCameraChanged = true;
     break;
   }
 
+  mMatChanged = true;
 }
-
 
 void Graphics::texture(Texture& t, int binding_point) {
-  auto search = mTextures.find(binding_point);
-  if(search != mTextures.end()) { // previous binding exists
-    if (search->second->id() == t.id()) { // and it was same texture
-      // so do nothing and return
-      // std::cout << "same texture" << std::endl;
-      // return;
-    }
-  }
-
-  mTextures[binding_point] = &t;
-  mTextures[binding_point]->bind(binding_point);
-}
-
-Texture& Graphics::texture(int binding_point) {
-  return *(mTextures[binding_point]);
+  t.bind(binding_point);
 }
 
 void Graphics::draw(VAOMesh& mesh) {
   if (mShaderPtr == nullptr) {
-    AL_WARN_ONCE("shader not bound: bind shader by \"g.shader(mymShaderPtr);\"");
+    AL_WARN_ONCE("shader not bound: bind shader by g.shader(myShader)");
     return;
   }
-  if (mShaderChanged || mMatChanged || mCameraChanged) {
-    // 3rd parameter: "don't warn even if there's no such uniform"
-    shader().uniform("MVP", mProjMat * mViewMat * modelMatrix(), false);
-  }
+
   if (mShaderChanged || mMatChanged) {
-    shader().uniform("M", modelMatrix(), false);
+    shader().uniform("MVP", mProjMat * mViewMat * modelMatrix());
+
+    if (mSendIndividualMatrices) {
+        shader().uniform("M", modelMatrix());
+        shader().uniform("V", viewMatrix());
+        shader().uniform("P", projMatrix());
+    }
   }
-  if (mShaderChanged || mCameraChanged) {
-    shader().uniform("V", viewMatrix(), false);
-    shader().uniform("P", projMatrix(), false);
-  }
+
   if (mShaderChanged || mUniformColorChanged) {
-    shader().uniform("uniformColor", mUniformColor, false);
-    shader().uniform("uniformColorMix", mUniformColorMix, false);
+    shader().uniform("uniformColor", mUniformColor);
+    shader().uniform("uniformColorMix", mUniformColorMix);
   }
+
+  mesh.draw();
+
   mUniformColorChanged = false;
   mShaderChanged = false;
   mMatChanged = false;
-  mCameraChanged = false;
-  mesh.draw();
 }
 
 void Graphics::framebuffer(FBO& fbo) {
-  mFBOID = fbo.id();
-  FBO::bind(mFBOID);
+    fbo.bind();
 }
 
-void Graphics::framebuffer(FBO::SpecialType fbo) {
-  switch (fbo) {
-    case FBO::DEFAULT: {
-      // default window framebuffer
-      mFBOID = 0;
-      FBO::bind(0);
-      break;
-    }
-  }
-}
-unsigned int Graphics::framebufferID() {
-  return mFBOID;
+void Graphics::framebuffer(unsigned int fboID) {
+    // pass 0 to this function and  default window framebuffer will be bound.
+    // FBO class has static const member FBO::DEFAULT = 0
+    // so one can use this for better readability
+    FBO::bind(fboID);
 }
 
 } // al::
