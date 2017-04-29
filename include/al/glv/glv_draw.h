@@ -8,8 +8,6 @@
 #include <stdio.h>
 #include "al/glv/glv_color.h"
 
-#define GLV_ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
-
 namespace glv {
 
 typedef unsigned int index_t;

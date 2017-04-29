@@ -5,7 +5,6 @@
 	See COPYRIGHT file for authors and license information */
 
 #include "al/glv/glv_core.h"
-#include "al/glv/glv_icon.h"
 #include "al/glv/glv_widget.h"
 
 namespace glv {
@@ -19,8 +18,6 @@ public:
 	/// @param[in] ny			number along y
 	/// @param[in] momentary	whether the button state matches button press state
 	/// @param[in] mutExc		whether multiple buttons can be on
-	/// @param[in] on			the on state symbol
-	/// @param[in] off			the off state symbol
 	Buttons(
 		const Rect& r=Rect(), int nx=1, int ny=1,
 		bool momentary=false, bool mutExc=false

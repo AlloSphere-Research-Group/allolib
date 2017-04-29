@@ -209,7 +209,7 @@ protected:
 	virtual void onDraw(GLV& g);
 	virtual bool onEvent(Event::t e, GLV& g);
 
-	void drawGrid(GraphicsData& g);
+	void drawGrid();
 	void drawSelectionBox();	
 	void selectFromMousePos(GLV& g);
 	

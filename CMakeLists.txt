@@ -8,7 +8,7 @@ include(cmake_modules/find_core_dependencies.cmake)
 if (WINDOWS)
   # set(CMAKE_CXX_FLAGS "/W1")
 else ()
-  set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wno-unused")
+  set(CMAKE_CXX_FLAGS "-std=c++14 -Wall")
 endif (WINDOWS)
 
 set(OSCPACK_SRC
@@ -131,7 +131,7 @@ set(glv_headers
   include/al/glv/glv_core.h
   include/al/glv/glv_draw.h
   include/al/glv/glv_font.h
-  include/al/glv/glv_icon.h
+  # include/al/glv/glv_icon.h
   include/al/glv/glv_layout.h
   include/al/glv/glv_model.h
   include/al/glv/glv_notification.h
