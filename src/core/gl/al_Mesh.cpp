@@ -197,7 +197,7 @@ void Mesh::compress() {
   reset();
 
   // walk forward, inserting if
-  for (int i=0; i<old.vertices().size(); i++) {
+  for (size_t i=0; i<old.vertices().size(); i++) {
     Vertex& v = old.vertices()[i];
     int idx = xmap[v.x][v.y][v.z];
     Imap::iterator it = imap.find(idx);
@@ -531,8 +531,8 @@ void Mesh::merge(const Mesh& src){
 
   // Source doesn't have indices, but I do
   else if(indices().size()){
-    int Nv = vertices().size();
-    for(int i=Nv; i<Nv+src.vertices().size(); ++i) index(i);
+    size_t Nv = vertices().size();
+    for(size_t i=Nv; i<Nv+src.vertices().size(); ++i) index(i);
   }
 
   // From here, the game is indice invariant
@@ -558,7 +558,7 @@ void Mesh::getBounds(Vec3f& min, Vec3f& max) const {
   if(vertices().size()){
     min.set(vertices()[0]);
     max.set(min);
-    for(int v=1; v<vertices().size(); ++v){
+    for(size_t v=1; v<vertices().size(); ++v){
       const Vertex& vt = vertices()[v];
       for(int i=0; i<3; ++i){
         min[i] = std::min(min[i], vt[i]);
@@ -590,7 +590,7 @@ void Mesh::unitize(bool proportional) {
     scale.x = scale.y = scale.z = s;
   }
 
-  for (int v=0; v<mVertices.size(); v++) {
+  for (size_t v=0; v<mVertices.size(); v++) {
     Vertex& vt = mVertices[v];
     vt = (vt-mid)*scale;
   }
@@ -598,14 +598,14 @@ void Mesh::unitize(bool proportional) {
 
 Mesh& Mesh::translate(float x, float y, float z){
   const Vertex xfm(x,y,z);
-  for(int i=0; i<vertices().size(); ++i)
+  for(size_t i=0; i<vertices().size(); ++i)
     mVertices[i] += xfm;
   return *this;
 }
 
 Mesh& Mesh::scale(float x, float y, float z){
   const Vertex xfm(x,y,z);
-  for(int i=0; i<vertices().size(); ++i)
+  for(size_t i=0; i<vertices().size(); ++i)
     mVertices[i] *= xfm;
   return *this;
 }
@@ -614,7 +614,7 @@ Mesh& Mesh::scale(float x, float y, float z){
 // removes triplets with two matching values
 template <class T>
 static void removeDegenerates(std::vector<T>& buf){
-  unsigned N = buf.size();
+  size_t N = buf.size();
   unsigned j=0;
   for(unsigned i=0; i<N; i+=3){
     T v1 = buf[i  ];
@@ -632,7 +632,7 @@ static void removeDegenerates(std::vector<T>& buf){
 
 template <class T>
 static void stripToTri(std::vector<T>& buf){
-  int N = buf.size();
+  size_t N = buf.size();
   int Ntri = N-2;
   buf.reserve(Ntri*3);
 
@@ -658,8 +658,8 @@ void Mesh::toTriangles(){
 
   if(TRIANGLE_STRIP == primitive()){
     primitive(TRIANGLES);
-    int Nv = vertices().size();
-    int Ni = indices().size();
+    size_t Nv = vertices().size();
+    size_t Ni = indices().size();
 
     // indexed:
     if(Ni > 3){
@@ -670,7 +670,7 @@ void Mesh::toTriangles(){
     // TODO: remove degenerate triangles
     else if(Ni == 0 && Nv > 3){
       stripToTri(vertices());
-      for (unsigned int i = 0; i < vertices().size() - 2; i+=2){
+      for (size_t i = 0; i < vertices().size() - 2; i+=2){
         index(i); index(i+1); index(i+2);
         index(i+2); index(i+1); index(i+3);
       }
@@ -708,7 +708,7 @@ bool Mesh::saveSTL(const std::string& filePath, const std::string& solidName) co
   s.flags(std::ios::scientific);
 
   s << "solid " << solidName << "\n";
-  for(int i=0; i<m.vertices().size(); i+=3){
+  for(size_t i=0; i<m.vertices().size(); i+=3){
     s << "facet normal";
     for(int j=0; j<3; j++) s << " " << m.normals()[i][j];
     s << "\n";
