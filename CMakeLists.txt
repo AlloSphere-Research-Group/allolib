@@ -159,3 +159,6 @@ target_link_libraries(al ${GLEW_LIBRARIES})
 target_link_libraries(al ${GLFW_LIBRARIES})
 target_link_libraries(al ${PORTAUDIO_LIBRARIES})
 target_link_libraries(al ${APR_LIBRARIES})
+
+# Testing
+add_subdirectory(test)
