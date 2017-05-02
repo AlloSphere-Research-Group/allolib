@@ -1,0 +1,379 @@
+#include <ctype.h>		// isgraph
+#include <string.h>		// strlen
+#include "al/glv/glv_font.h"
+
+namespace glv{
+
+
+
+// graphical ASCII characters lie in decimal range [33, 126]
+static Glyph glyphs[94] = {
+	{Glyph::Once | Glyph::Dot1 | 2, {3,4,4}, {7,0,5}},		// !
+	{Glyph::Once | 4, {3,3,5,5}, {0,3,0,3}},				// "
+//	{Glyph::Once | 8, {1,7,1,7,3,3,5,5}, {3,3,5,5,1,7,1,7}},// #
+	{Glyph::Once | 8, {1,7,1,7,3,3,5,5}, {3,3,5,5,1,7,1,7}},// #
+	{0},/* composite of S and | */							// $
+	{Glyph::Once | Glyph::Dot2 | 2, {1,6,7,1}, {0,7,0,8}},	// %
+	{7, {7,3,4,5,1,4,7}, {8,1,0,1,6,8,5}},					// &
+	{Glyph::Once | 2, {5,3}, {0,3}},						// '
+	{4, {5,3,3,5}, {0,2,7,9}},								// (
+	{4, {3,5,5,3}, {0,2,7,9}},								// )
+	{Glyph::Once | 6, {1,7,4,4,7,1}, {2,5,0,7,2,5}},		// *
+	{Glyph::Once | 4, {1,7,4,4},{4,4,1,7}},					// +
+	{Glyph::Once | 2, {4,2}, {7,10}},						// ,
+	{2, {1,7}, {5,5}},										// -	
+	{Glyph::Dot1, {3}, {7}},								// .
+	{Glyph::Once | 2, {6,2}, {0,8.5}},						// /
+	{6, {6,1,1,6,6,1}, {0,0,8,8,0,6}},						// 0
+	{3, {2,4,4}, {1,0,8.5}},								// 1
+	{6, {1,2,5,6,1,6}, {2,0,0,2,8,8}},						// 2
+	{7, {1,6,6,2,6,6,1}, {0,0,2,3,4,7,8}},					// 3
+	{4, {6,1,5,5}, {6,6,0,8.5}},							// 4
+	{6, {6,1,1,6,6,1}, {0,0,2,3,7,8}},						// 5
+	{6, {6,1,1,6,6,1}, {0,0,8,8,4,4}},						// 6
+	{3, {1,6,3}, {0,0,8.5}},								// 7
+	{7, {6,1,1,6,6,1,1}, {4,4,0,0,8,8,4}},					// 8
+	{6, {6,1,1,6,6,1}, {4,4,0,0,8,8}},						// 9
+	{Glyph::Dot2, {3,3}, {3,7}},							// :
+	{Glyph::Once | Glyph::Dot1 | 2, {3,4,2}, {3,7,10}},		// ;
+	{3, {7,1,7}, {0,4,8.5}},								// <
+	{Glyph::Once | 4, {1,7,1,7}, {3,3,6,6}},				// =
+	{3, {1,7,1}, {0,4,8.5}},								// >
+	{Glyph::Dot1 | 5, {3,1,6,6,3,3}, {7,0,0,3,4,5}},		// ?
+	{8, {7,3,3,7,7,1,1,7}, {2,3,6,6,0,0,8,8}},				// @
+	{Glyph::Once | 6, {1,4,4,7,2,6}, {8.5,0,0,8.5,5,5}},	// A
+	{8, {1,1,5,5,1,6,6,1}, {8,0,0.5,4,4,4,8,8}},			// B
+	{4, {6,1,1,6}, {0,0.5,7.5,8}},							// C
+	{5, {1,6,6,1,1}, {0,1,7,8,0}},							// D
+	{Glyph::Once | 8, {1,1,1,6,1,5,1,6}, {0,8,0,0,4,4,8,8}},// E
+	{Glyph::Once | 6, {1,1,1,6,1,5}, {0,8,0,0,4,4}},		// F
+	{6, {6,1,1,6,6,4}, {0,0.5,7.5,8,4,4}},					// G
+	{Glyph::Once | 6, {1,1,1,6,6,6}, {0,8.5,4,4,0,8.5}},	// H
+	{Glyph::Once | 6, {2,6,4,4,2,6}, {0,0,0,8,8,8}},		// I
+	{4, {1,1,6,6}, {6,8,8,-0.5}},							// J
+	{Glyph::Once | 6, {1,1,6,1,1,6}, {-0.5,8.5,-0.5,4,4,8.5}}, // K
+	{3, {1,1,6}, {-0.5,8,8}},								// L
+	{5, {1,1,4,7,7}, {8.5,0,5,0,8.5}},						// M
+	{4, {1,1,6,6}, {8.5,0,8,0}},							// N
+	{5, {1,6,6,1,1}, {0,0,8,8,0}},							// O
+	{5, {1,1,6,6,1}, {8.5,0,0.5,4,4.5}},					// P
+	{6, {5,1,1,5.5,5,7}, {7,7,0,0,7,9}},					// Q
+	{6, {1,1,6,6,1,6}, {8.5,0,0.5,4,4,8}},					// R
+	{6, {6,1,1,6,6,1}, {0,0,3,5,8,8}},						// S
+	{Glyph::Once | 4, {1,7,4,4}, {0,0,0,8.5}},				// T
+	{4, {1,1,6,6}, {0,8,8,0}},								// U
+	{3, {1,4,7}, {0,8,0}},									// V
+	{5, {1,2,4,6,7}, {0,8,4,8,0}},							// W
+	{Glyph::Once | 4, {1,6,6,1}, {0,8,0,8}},				// X
+	{Glyph::Once | 6, {1,4,4,7,4,4}, {0,4,4,0,4,8.5}},		// Y
+	{4, {1,6,1,6}, {0,0,8,8}},								// Z
+	{4, {5,3,3,5}, {0,0,9,9}},								// [
+	{Glyph::Once | 2, {2,6}, {0,8.5}},						/* \ */
+	{4, {3,5,5,3}, {0,0,9,9}},								// ]
+	{3, {1,4,7}, {4,0,4}},									// ^
+	{Glyph::Once | 2, {0,8}, {9,9}},						// _
+	{Glyph::Once | 2, {3,5}, {0,3}},						// `
+	{6, {2,6,6,1,1,6}, {3,3,8,8,5,4}},						// a
+	{5, {1,1,6,6,1}, {-0.5,8,8,4,3}},						// b
+	{4, {6,1,1,6}, {3,3.5,8,8}},							// c
+	{5, {6,6,1,1,6}, {-0.5,8,8,4,3}},						// d
+	{6, {1,6,6,1,1,6}, {5.5,5,3,3,8,8}},					// e
+	{Glyph::Once | 6, {7,3,3,3,5.5,1.5}, {0,0,0,8.5,3,3}},	// f
+	{6, {6,1,1,6,6,2}, {8,8,3,3,11,11}},					// g
+	{Glyph::Once | 6, {1,1,1,6,6,6}, {-0.5,8.5,3,4,4,8.5}},	// h
+	{Glyph::Dot1 | 3, {3,3,4,4}, {0,3,3,8.5}},				// i
+	{Glyph::Dot1 | 4, {4,4,5,5,1}, {0,3,3,10,10}},			// j
+	{Glyph::Once | 6, {1,1,5,1,1,6}, {-0.5,8.5,3,5,5,8,5}},	// k
+	{3, {3,3,5}, {0,8,8}},									// l
+	{7, {1,1,3,4,4,6,7}, {8.5,3,3,7,3,3,8.5}},				// m
+	{4, {1,1,5,6}, {8.5,3,3,8.5}},							// n
+	{5, {1,6,6,1,1}, {3,3,8,8,3}},							// o
+	{5, {1,1,6,6,1}, {11,3,3,7,8}},							// p
+	{5, {6,1,1,6,6}, {8,7,3,3,11}},							// q
+	{4, {1,1,3,6}, {8.5,4,3,3}},							// r
+	{6, {6.6,1,1,6,6,0.5f}, {3,3,5,6,8,8}},					// s
+	{Glyph::Once | 4, {1,6,3,3}, {3,3,-0.5,8.5}},			// t
+	{4, {1,1.5,5.5,6}, {2.5,8,8,2.5}},						// u
+	{3, {1,4,7}, {2.5,8,2.5}},								// v
+	{5, {1,2,4,6,7}, {2.5,8,5,8,2.5}},						// w
+	{Glyph::Once | 4, {1,6,1,6}, {8.5,2.5,2.5,8.5}},		// x
+	{Glyph::Once | 4, {1,4,6,3}, {2.5,8,2.5,11}},			// y
+	{4, {1,6,1,6.5}, {3,3,8,8}},							// z
+	{7, {5,3,3,1,3,3,5}, {0,0,3,4,5,9,9}},					// {
+	{Glyph::Once | 2, {4,4}, {-1,10}},						// |
+	{7, {3,5,5,7,5,5,3}, {0,0,3,4,5,9,9}},					// }
+	{4, {1,3,5,7}, {2,0,2,0}}								// ~
+};
+
+bool TextIterator::operator()(){
+	if(*s){
+		char c = *s++;
+		l = x;
+		t = y;
+//			w = f.advance(c);	// varies per character if proportional
+//			h = 1 * f.cap() * f.lineSpacing();
+//			float tabUnits = f.advance('M') * f.tabSpaces();
+		w = Glyph::width(); // varies per character if proportional
+		h = (Glyph::descent() - Glyph::cap());
+		float dx = w * (1+f.letterSpacing());
+		float dy = h * f.lineSpacing();
+
+		switch(c){
+			case '\t':{
+				float tabUnits = Glyph::width() * f.tabSpaces() * (1+f.letterSpacing());
+				x = (int(x/tabUnits) + 1) * tabUnits;
+				w = x-l;
+				}
+				break;
+			case '\r':
+			case '\n': x = 0; y += dy; break;
+			case '\b': x -= w; break;
+			default:   if(onPrintable(c)) x += dx;
+		}
+		return true;
+	}
+	return false;
+}	
+
+//static float round(float v, float r, float rInv, float offset){
+//	return int(v*rInv) * r + offset;
+//}
+
+//static bool character(int c, float dx, float dy, float ps){
+//
+//	// composite character
+//	if(c == '$'){ character('S',dx,dy,ps); return character('|',dx,dy,ps); }
+//
+//	if(isgraph(c)){	// is graphical character?
+//
+//		// align points so that lines start in center of pixels
+////		float po = ps/2;
+////		float psInv = 1./ps;
+////		#define ALIGN(x) round(x,ps,psInv,po)
+//		#define ALIGN(x) (x)
+//		#define MUL(x) (x)/ps
+//	
+//		Point2 xy[32];
+//		int ind=-1;
+//	
+//		c -= 33;
+//		
+//		float * x = glyphs[c].x;
+//		float * y = glyphs[c].y;
+//		int n     = glyphs[c].size();
+//		int dots  = glyphs[c].dots();
+//
+//		if(dots){
+//			// 8*2 = 16
+//			for(int j=0; j<dots; ++j){
+//				float l = x[j] + dx;	float t = y[j] + dy;
+//				float r = l + 1;		float b = t + 1;
+//				
+//				l = ALIGN(l);
+//				t = ALIGN(t);
+//				r = ALIGN(r);
+//				b = ALIGN(b);
+//				
+//				xy[++ind](l,t);
+//				xy[++ind](r,t); xy[++ind](r,t);
+//				xy[++ind](r,b); xy[++ind](r,b);
+//				xy[++ind](l,b); xy[++ind](l,b);
+//				xy[++ind](l,t);
+//				
+////				vertex(l, t); vertex(r, t); vertex(r, t); vertex(r, b);
+////				vertex(r, b); vertex(l, b);	vertex(l, b); vertex(l, t);
+//			}
+//			if(n == 0) goto render;
+//			x += dots; y += dots;
+//		}
+//
+//		--n;
+//		// 16 + 1 = 17
+//		//vertex(x[0] + dx, y[0] + dy);
+//		xy[++ind](ALIGN(x[0]+dx), ALIGN(y[0]+dy));
+//		
+//		// 17 + 7*2 = 31
+//		if(glyphs[c].once() == 0){	// line strip
+//			for(int i=1; i<n; ++i){
+//				
+//				float px = ALIGN(x[i]+dx);
+//				float py = ALIGN(y[i]+dy);
+//				xy[++ind](px, py);
+//				xy[++ind](px, py);
+//				
+//				//vertex(x[i] + dx, y[i] + dy);
+//				//vertex(x[i] + dx, y[i] + dy);
+//			}
+//		}
+//		else{		// normal lines
+//			for(int i=1; i<n; ++i) xy[++ind](ALIGN(x[i]+dx), ALIGN(y[i]+dy)); //vertex(x[i] + dx, y[i] + dy);
+//		}
+//		
+//		// 31 + 1 = 32
+//		xy[++ind](ALIGN(x[n]+dx), ALIGN(y[n]+dy));
+//		//vertex(x[n] + dx, y[n] + dy);
+//		
+//		render:
+//		draw::paint(draw::Lines, xy, ind+1);
+//		return true;
+//	}
+//	
+//	return c == ' ';
+//}
+
+
+bool addCharacter(GraphicsData& g, int c, float dx, float dy, float sx, float sy){
+
+	// composite character
+	if(c == '$'){ addCharacter(g, 'S',dx,dy,sx,sy); return addCharacter(g, '|',dx,dy,sx,sy); }
+
+	if(isgraph(c)){	// is graphical character?
+		#define GETX(x) ((x*sx+dx))
+		#define GETY(y) ((y*sy+dy))
+
+		c -= 33;
+		
+		float * x = glyphs[c].x;
+		float * y = glyphs[c].y;
+		int n     = glyphs[c].size();
+		int dots  = glyphs[c].dots();
+
+		if(dots){
+			// 8*2 = 16
+			for(int j=0; j<dots; ++j){
+				float l = GETX(x[j]);	float t = GETY(y[j]);
+				float r = l + sx;		float b = t + sy;
+				g.addVertex2(l,t,r,t);
+				g.addVertex2(r,t,r,b);
+				g.addVertex2(r,b,l,b);
+				g.addVertex2(l,b,l,t);
+			}
+			if(n == 0) goto render;
+			x += dots; y += dots;
+		}
+
+		--n;
+		// 16 + 1 = 17
+		g.addVertex2(GETX(x[0]), GETY(y[0]));
+		
+		// 17 + 7*2 = 31
+		if(glyphs[c].once() == 0){	// line strip
+			for(int i=1; i<n; ++i){
+				
+				float px = GETX(x[i]);
+				float py = GETY(y[i]);
+				g.addVertex2(px, py);
+				g.addVertex2(px, py);
+			}
+		}
+		else{		// normal lines
+			for(int i=1; i<n; ++i) g.addVertex2(GETX(x[i]), GETY(y[i]));
+		}
+		
+		// 31 + 1 = 32
+		g.addVertex2(GETX(x[n]), GETY(y[n]));
+		
+		render:
+		//draw::paint(draw::Lines, xy, ind+1);
+		return true;
+	}
+	
+	return c == ' ';
+}
+
+Font::Font(float size_)
+:	mLetterSpacing(0), mLineSpacing(1.25), mTabSpaces(4)
+{
+	size(size_);
+}
+
+Font::~Font(){}
+
+void Font::render(const char * v, float x, float y, float z) const{
+	GraphicsData gd;
+	render(gd, v,x,y,z);
+}
+
+//void Font::render(const char * v, float x, float y, float z) const{
+//	using namespace glv::draw;
+//	draw::push(ModelView);
+////	identity();
+////	translate(int(x), int(y), int(z));
+//
+//	float sx = mScaleX;
+//	float sy = mScaleY;
+//	float tx = x;
+//	float ty = y;
+//	float tz = z;
+//	//float sh = -0.5*sy; // TODO: shear needs to be done an a per-line basis
+//	float sh = 0;
+//	
+//	//tx=ty=tz=0;
+//
+//	float m[16] = {
+//		sx, 0, 0, 0,
+//		sh,sy, 0, 0,
+//		 0, 0,sy, 0,
+//		tx,ty,tz, 1
+//	};
+//	glMultMatrixf(m);
+//
+//	struct RenderText : public TextIterator{
+//		RenderText(const Font& f_, const char *& s_, float muly_): TextIterator(f_,s_), muly(muly_){}
+//		bool onPrintable(char c){
+//			return character(c, pixc(x), pixc(y), muly);
+//		}
+//		float muly;
+//	} renderText(*this, v, 1.f/mScaleY);
+//
+//	renderText.run();
+//
+////	glv::text(v, 0,0, lineSpacing(), tabSpaces(), mScaleY);
+//	draw::pop(); // ModelView
+//}
+
+Font& Font::letterSpacing(float v){ mLetterSpacing=v; return *this; }
+
+Font& Font::lineSpacing(float v){ mLineSpacing=v; return *this; }
+
+Font& Font::size(float v){
+	mSize = v;
+	mScaleY = v/Glyph::baseline();
+	mScaleX = mScaleY;
+	
+	//mScaleX = v/Glyph::width();
+	//mScaleY = v/Glyph::width();
+	return *this;
+}
+
+Font& Font::tabSpaces(unsigned v){ mTabSpaces=v; return *this; }
+
+float Font::advance(const char *text) const {
+	return advance(' ') * strlen(text);
+	//return Glyph::width() * mScaleX * strlen(text);
+}
+
+float Font::advance(char c) const { return Glyph::width() * mScaleX * (1.f + letterSpacing()); }
+
+void Font::getBounds(float& w, float& h, const char * text) const {
+	w=h=0;
+	if(!text) return;
+
+	TextIterator ti(*this, text);
+	while(ti()){
+		if(ti.x > w) w = ti.x;
+	}
+
+	h = (ti.y + ti.h) * mScaleY;
+	//h = ti.y*mScaleY + cap();
+
+	w *= mScaleX;
+}
+
+float Font::cap() const { return (Glyph::baseline() - Glyph::cap()) * mScaleY; }
+float Font::xheight() const { return (Glyph::baseline() - Glyph::median()) * mScaleY; }
+float Font::baseline() const { return Glyph::baseline() * mScaleY; }
+float Font::descent() const { return (Glyph::descent() - Glyph::baseline()) * mScaleY; }
+
+
+} // glv::

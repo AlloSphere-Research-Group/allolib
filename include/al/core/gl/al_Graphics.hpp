@@ -283,6 +283,7 @@ public:
   Matrix4f viewMatrix() {
     return mViewMat;
   }
+  
   Matrix4f projMatrix() {
     return mProjMat;
   }
@@ -364,14 +365,12 @@ public:
   void viewport(int left, int bottom, int width, int height);
   /// Set viewport
   void viewport(const Viewport& v);
-  void gl_viewport();
   /// Get current viewport
   Viewport viewport() const;
 
   // scissor area is represented with Viewport class
   void scissor(int left, int bottom, int width, int height);
   void scissor(const Viewport& v);
-  void gl_scissor();
   Viewport scissor() const;
 
   void shader(ShaderProgram& s);
@@ -379,33 +378,42 @@ public:
   void camera(Viewpoint& v);
   void camera(Viewpoint::SpecialType v);
   void camera(Viewpoint::SpecialType v, int x, int y, int w, int h);
+
+  void update();
   void draw(VAOMesh& mesh);
 
   void texture(Texture& t, int binding_point = 0);
-  Texture& texture(int binding_point = 0);
 
   void framebuffer(FBO& fbo);
-  void framebuffer(FBO::SpecialType fbo);
-  unsigned int framebufferID();
+  void framebuffer(unsigned int fboID);
+
+  Window& window() { return mWindow; }
+
+  // make M, V, P matrices individually sent as uniform
+  void sendIndividualMatrices(bool b) { mSendIndividualMatrices = b; }
 
 protected:
   Window& mWindow;
-  bool mShaderChanged {true};
-  bool mCameraChanged {true};
-  bool mMatChanged {true};
-  ShaderProgram* mShaderPtr {nullptr};
+
   Viewport mViewport;
   Viewport mScissor;
+
+  ShaderProgram* mShaderPtr{ nullptr };
+  bool mShaderChanged {true};
+
   Matrix4f mViewMat;
   Matrix4f mProjMat;
+  MatrixStack mModelStack;
+  bool mMatChanged {true};
+
   Color mClearColor {0, 0, 0, 1};
   float mClearDepth {1};
-  MatrixStack mModelStack;
-  std::map<int, Texture*> mTextures;
+
   Color mUniformColor;
   float mUniformColorMix = 0;
   bool mUniformColorChanged {true};
-  unsigned int mFBOID = 0;
+
+  bool mSendIndividualMatrices {false};
 };
 
 }

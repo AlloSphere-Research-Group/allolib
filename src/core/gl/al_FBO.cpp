@@ -128,11 +128,11 @@ void FBO::bind(unsigned fboID){
   // AL_GRAPHICS_ERROR("binding FBO", fboID);
 }
 
-void FBO::renderBuffer(unsigned int rboID, unsigned int attachment){
+void FBO::renderBuffer(unsigned rboID, unsigned int attachment){
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, rboID);
 }
 
-void FBO::texture2D(unsigned int texID, unsigned int attachment, int level){
+void FBO::texture2D(unsigned texID, unsigned int attachment, int level){
   glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texID, level);
 }
 

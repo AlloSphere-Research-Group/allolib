@@ -1,0 +1,5 @@
+if (WINDOWS)
+  # set(CMAKE_CXX_FLAGS "/W2")
+else ()
+  set(CMAKE_CXX_FLAGS "-std=c++14 -Wall ${CMAKE_CXX_FLAGS}")
+endif (WINDOWS)

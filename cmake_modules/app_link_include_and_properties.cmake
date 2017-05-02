@@ -2,6 +2,12 @@
 
 set_target_properties(${app_name} PROPERTIES DEBUG_POSTFIX _debug)
 
+# when run from Visual Studio, working directory is where the solution is.
+# set it to app output directory
+if (WINDOWS)
+  set_target_properties(${app_name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${app_path}/bin)
+endif (WINDOWS)
+
 if (WINDOWS)
   target_link_libraries(${app_name} debug ${al_path}/al_debug.lib optimized ${al_path}/al.lib)
 else()
