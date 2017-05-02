@@ -7,6 +7,7 @@
 
 #include "al/core/gl/al_BufferObject.hpp"
 #include "al/core/gl/al_EasyFBO.hpp"
+#include "al/core/gl/al_EasyVAO.hpp"
 #include "al/core/gl/al_FBO.hpp"
 #include "al/core/gl/al_GLEW.hpp"
 #include "al/core/gl/al_GLFW.hpp"

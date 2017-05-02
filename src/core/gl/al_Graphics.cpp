@@ -235,32 +235,35 @@ void Graphics::texture(Texture& t, int binding_point) {
   t.bind(binding_point);
 }
 
-void Graphics::draw(VAOMesh& mesh) {
-  if (mShaderPtr == nullptr) {
-    AL_WARN_ONCE("shader not bound: bind shader by g.shader(myShader)");
-    return;
-  }
-
-  if (mShaderChanged || mMatChanged) {
-    shader().uniform("MVP", mProjMat * mViewMat * modelMatrix());
-
-    if (mSendIndividualMatrices) {
-        shader().uniform("M", modelMatrix());
-        shader().uniform("V", viewMatrix());
-        shader().uniform("P", projMatrix());
+void Graphics::update() {
+    if (mShaderPtr == nullptr) {
+        AL_WARN_ONCE("shader not bound: bind shader by g.shader(myShader)");
+        return;
     }
-  }
 
-  if (mShaderChanged || mUniformColorChanged) {
-    shader().uniform("uniformColor", mUniformColor);
-    shader().uniform("uniformColorMix", mUniformColorMix);
-  }
+    if (mShaderChanged || mMatChanged) {
+        shader().uniform("MVP", mProjMat * mViewMat * modelMatrix());
 
+        if (mSendIndividualMatrices) {
+            shader().uniform("M", modelMatrix());
+            shader().uniform("V", viewMatrix());
+            shader().uniform("P", projMatrix());
+        }
+    }
+
+    if (mShaderChanged || mUniformColorChanged) {
+        shader().uniform("uniformColor", mUniformColor);
+        shader().uniform("uniformColorMix", mUniformColorMix);
+    }
+
+    mUniformColorChanged = false;
+    mShaderChanged = false;
+    mMatChanged = false;
+}
+
+void Graphics::draw(VAOMesh& mesh) {
+  update();
   mesh.draw();
-
-  mUniformColorChanged = false;
-  mShaderChanged = false;
-  mMatChanged = false;
 }
 
 void Graphics::framebuffer(FBO& fbo) {
