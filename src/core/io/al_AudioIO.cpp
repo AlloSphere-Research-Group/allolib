@@ -6,6 +6,8 @@
 #include <cassert>
 #include <cstdint>
 #include <string>
+#include <cstring>
+#include <algorithm>
 
 #include "rtaudio/RtAudio.h"
 #include "portaudio.h"
@@ -155,7 +157,7 @@ public:
 			#endif
 		}
 		else{
-			num = min(num, maxChans);
+			num = std::min(num, maxChans);
 		}
 
 		params->channelCount = num;
@@ -241,8 +243,8 @@ public:
 		};
 		static InitSingleton dummy;
 	}
-	static AudioDevice defaultInput() { initialize(); return AudioDevice(Pa_GetDefaultInputDevice()); }
-	static AudioDevice defaultOutput() { initialize(); return AudioDevice(Pa_GetDefaultOutputDevice()); }
+    static AudioDevice defaultInput() { initialize(); return AudioDevice(Pa_GetDefaultInputDevice(), AudioIO::PORTAUDIO); }
+	static AudioDevice defaultOutput() { initialize(); return AudioDevice(Pa_GetDefaultOutputDevice(), AudioIO::PORTAUDIO); }
 	static int numDevices() { initialize(); return Pa_GetDeviceCount(); }
 
 protected:
@@ -311,14 +313,15 @@ protected:
 
 private:
 
-    bool mIsOpen;						// An audio device is open
-	bool mIsRunning;					// An audio stream is running
+    bool mIsOpen {false};						// An audio device is open
+    bool mIsRunning {false};					// An audio stream is running
 	PaStreamParameters mInParams, mOutParams;	// Input and output stream parameters
 	PaStream * mStream;					// i/o stream
 	mutable PaError mErrNum;			// Most recent error number
 };
 
 class RtAudioBackend : public AudioBackend{
+
 public:
   RtAudioBackend(): AudioBackend(){
   }
@@ -355,10 +358,18 @@ public:
 
   virtual void inDevice(int index){
     iParams.deviceId = index;
+    iParams.firstChannel = 0;
+    if (iParams.nChannels < 1) {
+      iParams.nChannels = AudioDevice(index, AudioIO::RTAUDIO).channelsInMax();
+    }
   }
 
   virtual void outDevice(int index){
     oParams.deviceId = index;
+    oParams.firstChannel = 0;
+    if (oParams.nChannels < 1) {
+      oParams.nChannels = AudioDevice(index,AudioIO::RTAUDIO).channelsOutMax();
+    }
   }
 
   virtual void channels(int num, bool forOutput) {
@@ -403,7 +414,7 @@ public:
 #endif
     }
     else{
-      num = min(num, maxChans);
+      num = std::min(num, maxChans);
     }
 
     params->nChannels = num;
@@ -420,20 +431,22 @@ public:
     assert(framesPerBuffer != 0 && framesPerSecond != 0 && userdata != NULL);
     // Set the same number of channels for both input and output.
 //    unsigned int bufferBytes, bufferFrames = 512;
+
     unsigned int deviceBufferSize = framesPerBuffer;
     try {
       audio.openStream( &oParams, &iParams, RTAUDIO_FLOAT32,
                         framesPerSecond, &deviceBufferSize,
-                        rtaudioCallback);
+                        rtaudioCallback, userdata);
     }
     catch ( RtAudioError& e ) {
       e.printMessage();
-      exit( 0 );
+      return false;
     }
 
     if(deviceBufferSize != framesPerBuffer) {
       printf("WARNING: Device opened with buffer size: %d", deviceBufferSize);
     }
+    return true;
   }
 
   virtual bool close(){
@@ -451,10 +464,11 @@ public:
       audio.startStream();
     }
     catch ( RtAudioError& e ) {
-          e.printMessage();
+      e.printMessage();
       //          goto cleanup;
+      return false;
     }
-
+    return true;
   }
 
   virtual bool stop(){
@@ -463,9 +477,11 @@ public:
       audio.stopStream();
     }
     catch ( RtAudioError& e ) {
+      return false;
       //        e.printMessage();
       //        goto cleanup;
     }
+    return true;
   }
 
   virtual double cpu() {
@@ -486,11 +502,12 @@ protected:
     AudioIO& io = *(AudioIO *)userData;
 
     assert(frameCount == (unsigned)io.framesPerBuffer());
-    const float **inBuffers = (const float **) input;
-    for (int i = 0; i < io.channelsInDevice(); i++) {
-      memcpy(const_cast<float *>(&io.in(i,0)),  inBuffers[i], frameCount * sizeof(float));
+    const float *inBuffers = (const float *) input;
+    for (int frame = 0; frame < io.framesPerBuffer(); frame++) {
+      for (int i = 0; i < io.channelsInDevice(); i++) {
+        io.mBufI[i*frameCount + frame]= *inBuffers++;
+      }
     }
-
     if(io.autoZeroOut()) io.zeroOut();
 
     io.processAudio();	// call callback
@@ -531,10 +548,15 @@ protected:
       }
     }
 
-    float **outBuffers = (float **) output;
-    for (int i = 0; i < io.channelsOutDevice(); i++) {
-      memcpy(outBuffers[i], const_cast<float *>(&io.out(i,0)), frameCount * sizeof(float));
+    float *outBuffers = (float *) output;
+    for (int frame = 0; frame < io.framesPerBuffer(); frame++) {
+      for (int i = 0; i < io.channelsInDevice(); i++) {
+        io.mBufO[i*frameCount + frame]= *outBuffers++;
+      }
     }
+//    for (int i = 0; i < io.channelsOutDevice(); i++) {
+//      memcpy(outBuffers[i], const_cast<float *>(&io.out(i,0)), frameCount * sizeof(float));
+//    }
 
     return 0;
   }
@@ -546,107 +568,143 @@ private:
 
 //==============================================================================
 
-AudioDevice::AudioDevice(int deviceNum)
-:    AudioDeviceInfo(deviceNum), mImpl(0)
+
+AudioDevice::AudioDevice(int deviceNum, AudioIOData::Backend backend)
+    : AudioDeviceInfo(deviceNum), mImpl(nullptr)
 {
-	if (deviceNum < 0) {
-		deviceNum = defaultOutput().id();
-	}
-	setImpl(deviceNum);
-}
+      if (deviceNum < 0) {
+          deviceNum = defaultOutput().id();
+      }
+      setImpl(deviceNum, backend);
+  }
 
-AudioDevice::AudioDevice(const std::string& nameKeyword, StreamMode stream)
-:	AudioDeviceInfo(0), mImpl(0)
-{
-	for(int i=0; i<numDevices(); ++i){
-		AudioDevice d(i);
-		bool bi = (stream &  INPUT) && d.hasInput();
-		bool bo = (stream & OUTPUT) && d.hasOutput();
-		std::string n = d.name();
+  AudioDevice::AudioDevice(const std::string& nameKeyword, StreamMode stream)
+  :	AudioDeviceInfo(0), mImpl(0)
+  {
+      for(int i=0; i<numDevices(); ++i){
+          AudioDevice d(i);
+          bool bi = (stream &  INPUT) && d.hasInput();
+          bool bo = (stream & OUTPUT) && d.hasOutput();
+          std::string n = d.name();
 
-		if(	(bi || bo) && n.find(nameKeyword) != std::string::npos){
-			setImpl(i);
-			break;
-		}
-	}
-}
-
-bool AudioDevice::valid() const
-{
-	return 0!=mImpl;
-}
-
-void AudioDevice::setImpl(int deviceNum){
-	if (deviceNum >= 0) {
-		initDevices();
-		mImpl = Pa_GetDeviceInfo(deviceNum);
-		mID = deviceNum;
-		strncpy(mName, ((const PaDeviceInfo*)mImpl)->name, 127);
-		mName[127] = '\0';
-		mChannelsInMax = ((const PaDeviceInfo*)mImpl)->maxInputChannels;
-		mChannelsOutMax = ((const PaDeviceInfo*)mImpl)->maxOutputChannels;
-		mDefaultSampleRate = ((const PaDeviceInfo*)mImpl)->defaultSampleRate;
-	}
-}
-AudioDevice AudioDevice::defaultInput(){ return PortAudioBackend::defaultInput(); }
-AudioDevice AudioDevice::defaultOutput(){ return PortAudioBackend::defaultOutput(); }
-
-void AudioDevice::initDevices(){
-	PortAudioBackend::initialize();
-}
-
-bool AudioDevice::hasInput() const { return channelsInMax()>0; }
-bool AudioDevice::hasOutput() const { return channelsOutMax()>0; }
-
-int AudioDevice::numDevices(){ return PortAudioBackend::numDevices(); }
-
-void AudioDevice::print() const{
-
-	if(!valid()){ printf("Invalid device\n"); return; }
-
-	printf("[%2d] %s, ", id(), name());
-
-	int chans = channelsInMax();
-	if(chans > 0) printf("%2i in, ", chans);
-	chans = channelsOutMax();
-	if(chans > 0) printf("%2i out, ", chans);
-
-	printf("%.0f Hz\n", defaultSampleRate());
-
-//	PaSampleFormat sampleFormats = info->nativeSampleFormats;
-
-//	printf("[ ");
-//	if(0 != sampleFormats & paFloat32)		printf("f32 ");
-//	if(0 != sampleFormats & paInt32)		printf("i32 ");
-//	if(0 != sampleFormats & paInt24)		printf("i24 ");
-//	if(0 != sampleFormats & paInt16)		printf("i16 ");
-//	if(0 != sampleFormats & paInt8)			printf("i8 ");
-//	if(0 != sampleFormats & paUInt8)		printf("ui8 ");
-//	printf("], ");
-
-//	if(info->numSampleRates != -1){
-//		printf("[");
-//		for(int i=0; i<info->numSampleRates; i++){
-//			printf("%f ", info->sampleRates[i]);
-//		}
-//		printf("] Hz");
-//	}
-//	else{
-//		printf("[%.0f <-> %.0f] Hz", info->sampleRates[0], info->sampleRates[1]);
-//	}
-//	printf("\n");
-}
-
-void AudioDevice::printAll(){
-	for(int i=0; i<numDevices(); i++){
-		printf("[%2d] ", i);
-		AudioDevice dev(i);
-		dev.print();
-		//print(i);
-	}
-}
+          if ( (bi || bo) && n.find(nameKeyword) != std::string::npos){
+              setImpl(i);
+              break;
+          }
+      }
+  }
 
 
+  AudioDevice AudioDevice::defaultInput(AudioIOData::Backend backend)
+  {
+    if (backend == AudioIOData::RTAUDIO) {
+      return RtAudioBackend::defaultInput();
+    } else if (backend == AudioIOData::PORTAUDIO) {
+      return PortAudioBackend::defaultInput();
+    } else if (backend == AudioIOData::PORTAUDIO)  {
+      return AudioDevice(0, AudioIOData::DUMMY);
+    }
+    return AudioDevice(0, AudioIOData::DUMMY);
+  }
+
+  AudioDevice AudioDevice::defaultOutput(AudioIOData::Backend backend)
+  {
+    if (backend == AudioIOData::RTAUDIO) {
+      return RtAudioBackend::defaultOutput();
+    } else if (backend == AudioIOData::PORTAUDIO) {
+      return PortAudioBackend::defaultOutput();
+    } else if (backend == AudioIOData::DUMMY)  {
+      return AudioDevice(0, AudioIOData::DUMMY);
+    }
+    return AudioDevice(0, AudioIOData::DUMMY);
+  }
+
+  void AudioDevice::initDevices(){
+      PortAudioBackend::initialize();
+  }
+
+  int AudioDevice::numDevices(AudioIOData::Backend backend){
+    if (backend == AudioIOData::RTAUDIO) {
+      return RtAudioBackend::numDevices();
+    } else if (backend == AudioIOData::PORTAUDIO) {
+       return PortAudioBackend::numDevices();
+    } else if (backend == AudioIOData::DUMMY)  {
+      return 1;
+    }
+    return 0;
+  }
+
+  void AudioDevice::print() const{
+
+      if(!valid()){ printf("Invalid device\n"); return; }
+
+      printf("[%2d] %s, ", id(), name());
+
+      int chans = channelsInMax();
+      if(chans > 0) printf("%2i in, ", chans);
+      chans = channelsOutMax();
+      if(chans > 0) printf("%2i out, ", chans);
+
+      printf("%.0f Hz\n", defaultSampleRate());
+
+  //	PaSampleFormat sampleFormats = info->nativeSampleFormats;
+
+  //	printf("[ ");
+  //	if(0 != sampleFormats & paFloat32)		printf("f32 ");
+  //	if(0 != sampleFormats & paInt32)		printf("i32 ");
+  //	if(0 != sampleFormats & paInt24)		printf("i24 ");
+  //	if(0 != sampleFormats & paInt16)		printf("i16 ");
+  //	if(0 != sampleFormats & paInt8)			printf("i8 ");
+  //	if(0 != sampleFormats & paUInt8)		printf("ui8 ");
+  //	printf("], ");
+
+  //	if(info->numSampleRates != -1){
+  //		printf("[");
+  //		for(int i=0; i<info->numSampleRates; i++){
+  //			printf("%f ", info->sampleRates[i]);
+  //		}
+  //		printf("] Hz");
+  //	}
+  //	else{
+  //		printf("[%.0f <-> %.0f] Hz", info->sampleRates[0], info->sampleRates[1]);
+  //	}
+  //	printf("\n");
+  }
+
+  void AudioDevice::printAll(AudioIOData::Backend backend){
+      for(int i=0; i<numDevices(); i++){
+          printf("[%2d] ", i);
+          AudioDevice dev(i, backend);
+          dev.print();
+      }
+  }
+
+  void AudioDevice::setImpl(int deviceNum, AudioIOData::Backend backend){
+      if (deviceNum >= 0) {
+          initDevices();
+          mID = deviceNum;
+          if (backend == AudioIOData::RTAUDIO) {
+            RtAudio rt;
+            RtAudio::DeviceInfo info = rt.getDeviceInfo(deviceNum);
+            mImpl = new RtAudio::DeviceInfo;
+            memcpy(mImpl, &info, sizeof(RtAudio::DeviceInfo));
+            strncpy(mName, info.name.c_str(), 127);
+            mName[127] = '\0';
+            mChannelsInMax = info.inputChannels;
+            mChannelsOutMax = info.outputChannels;
+            mDefaultSampleRate = info.preferredSampleRate;
+          } else if (backend == AudioIOData::PORTAUDIO) {
+            mImpl = (void *)Pa_GetDeviceInfo(deviceNum);
+            strncpy(mName, ((const PaDeviceInfo*)mImpl)->name, 127);
+            mName[127] = '\0';
+            mChannelsInMax = ((const PaDeviceInfo*)mImpl)->maxInputChannels;
+            mChannelsOutMax = ((const PaDeviceInfo*)mImpl)->maxOutputChannels;
+            mDefaultSampleRate = ((const PaDeviceInfo*)mImpl)->defaultSampleRate;
+          } else if (backend == AudioIOData::DUMMY)  {
+
+          }
+      }
+  }
 
 
 //==============================================================================
@@ -660,22 +718,20 @@ AudioIO::AudioIO(int framesPerBuf, double framesPerSec, void (* callbackA)(Audio
 	switch(backend) {
 	case PORTAUDIO:
 		mImpl = new PortAudioBackend;
-		mInDevice = AudioDevice::defaultInput();
-		mOutDevice = AudioDevice::defaultOutput();
 		break;
     case RTAUDIO:
 		mImpl = new RtAudioBackend;
-//		mInDevice = AudioDevice::defaultInput();
-//		mOutDevice = AudioDevice::defaultOutput();
 		break;
 	case DUMMY:
 		mImpl = new DummyAudioBackend;
 		break;
 	}
-	init(outChansA, inChansA);
-	this->framesPerBuffer(framesPerBuf);
+    deviceIn(AudioDevice::defaultInput(backend));
+    deviceOut(AudioDevice::defaultOutput(backend));
+//	init(outChansA, inChansA);
 	channels(inChansA, false);
 	channels(outChansA, true);
+    this->framesPerBuffer(framesPerBuf);
 	this->framesPerSecond(framesPerSec);
 }
 
@@ -686,14 +742,14 @@ AudioIO::~AudioIO(){
 }
 
 
-void AudioIO::init(int outChannels, int inChannels){
+//void AudioIO::init(int outChannels, int inChannels){
 	// Choose default devices for now...
-	deviceIn(AudioDevice::defaultInput());
-	deviceOut(AudioDevice::defaultOutput());
+//	deviceIn(AudioDevice::defaultInput());
+//	deviceOut(AudioDevice::defaultOutput());
 
-	mImpl->setInDeviceChans(0);
-	mImpl->setOutDeviceChans(0);
-}
+//	mImpl->setInDeviceChans(0);
+//	mImpl->setOutDeviceChans(0);
+//}
 
 AudioIO& AudioIO::append(AudioCallback& v){
 	mAudioCallbacks.push_back(&v);

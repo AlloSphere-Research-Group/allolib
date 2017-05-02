@@ -30,12 +30,14 @@ if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/rtaudio")
     ${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/rtaudio/RtAudio.cpp
   )
 if(LINUX)
-  add_definitions(-D__LINUX_ALSA__)
+  add_definitions(-D__LINUX_PULSE__)
   list(APPEND EXTERNAL_LIBRARIES
-    asound pthread
+    pulse pulse-simple
   )
-#  g++ -Wall -D__LINUX_ALSA__ -o audioprobe audioprobe.cpp RtAudio.cpp -lasound -lpthread
-#  g++ -Wall -D__LINUX_PULSE__ -o audioprobe audioprobe.cpp RtAudio.cpp -lpthread -lpulse-simple -lpulse
+#  add_definitions(-D__LINUX_ALSA__)
+#  list(APPEND EXTERNAL_LIBRARIES
+#    asound pthread
+#  )
 #  g++ -Wall -D__LINUX_OSS__ -o audioprobe audioprobe.cpp RtAudio.cpp -lpthread
 #  g++ -Wall -D__UNIX_JACK__ -o audioprobe audioprobe.cpp RtAudio.cpp $(pkg-config –cflags –libs jack) -lpthread
 endif()
