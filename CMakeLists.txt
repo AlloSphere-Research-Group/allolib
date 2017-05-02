@@ -11,22 +11,20 @@ else ()
   set(CMAKE_CXX_FLAGS "-std=c++14 -Wall")
 endif (WINDOWS)
 
-set(OSCPACK_SRC
-  external/oscpack/osc/OscOutboundPacketStream.cpp
-  external/oscpack/osc/OscPrintReceivedElements.cpp
-  external/oscpack/osc/OscReceivedElements.cpp
-  external/oscpack/osc/OscTypes.cpp
-)
-
 set(EXTERNAL_INCLUDE_DIR external) # oscpack, etc.
-list(APPEND EXTERNAL_SRC
-  ${OSCPACK_SRC}
+
+# OSCPACK
+set(OSCPACK_SRC
+  ${EXTERNAL_INCLUDE_DIR}/oscpack/osc/OscOutboundPacketStream.cpp
+  ${EXTERNAL_INCLUDE_DIR}/oscpack/osc/OscPrintReceivedElements.cpp
+  ${EXTERNAL_INCLUDE_DIR}/oscpack/osc/OscReceivedElements.cpp
+  ${EXTERNAL_INCLUDE_DIR}/oscpack/osc/OscTypes.cpp
 )
 
 # RtAudio
 if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/rtaudio")
   message("Using RtAudio")
-  list(APPEND EXTERNAL_SRC
+  set(RTAUDIO_SRC
     ${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/rtaudio/RtAudio.cpp
   )
 if(LINUX)
@@ -40,16 +38,21 @@ if(LINUX)
 #  )
 #  g++ -Wall -D__LINUX_OSS__ -o audioprobe audioprobe.cpp RtAudio.cpp -lpthread
 #  g++ -Wall -D__UNIX_JACK__ -o audioprobe audioprobe.cpp RtAudio.cpp $(pkg-config –cflags –libs jack) -lpthread
-endif()
+endif(LINUX)
 
 if(MACOS)
+  find_library(COREAUDIO_LIB CoreAudio)
+  find_library(COREFOUNDATION_LIB CoreFoundation)
   add_definitions(-D__MACOSX_CORE__)
   list(APPEND EXTERNAL_LIBRARIES
-    -framework CoreAudio
+    # -framework CoreAudio
+    ${COREAUDIO_LIB}
+    ${COREFOUNDATION_LIB}
     pthread
   )
 #  g++ -Wall -D__MACOSX_CORE__ -o audioprobe audioprobe.cpp RtAudio.cpp -framework CoreAudio -lpthread
-endif()
+endif(MACOS)
+
 if(WINDOWS)
   add_definitions(-D__WINDOWS_WASAPI__)
   list(APPEND EXTERNAL_LIBRARIES
@@ -61,8 +64,13 @@ if(WINDOWS)
 #  g++ -Wall -D__WINDOWS_DS__ -o audioprobe audioprobe.cpp RtAudio.cpp -lole32 -lwinmm -ldsound
 #  g++ -Wall -D__WINDOWS_ASIO__ -Iinclude -o audioprobe audioprobe.cpp RtAudio.cpp asio.cpp asiolist.cpp asiodrivers.cpp iasiothiscallresolver.cpp -lole32
 #  g++ -Wall -D__WINDOWS_WASAPI__ -Iinclude -o audioprobe audioprobe.cpp RtAudio.cpp -lole32 -lwinmm -lksuser -luuid
-endif()
-endif()
+endif(WINDOWS)
+endif() # RTAUDIO
+
+set(EXTERNAL_SRC
+  ${OSCPACK_SRC}
+  ${RTAUDIO_SRC}
+)
 
 # Main Library
 set(core_headers
@@ -246,4 +254,3 @@ target_link_libraries(al ${EXTERNAL_LIBRARIES})
 
 # Testing
 add_subdirectory(test)
-
