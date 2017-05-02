@@ -202,3 +202,7 @@ target_link_libraries(al ${GLFW_LIBRARIES})
 target_link_libraries(al ${PORTAUDIO_LIBRARIES})
 target_link_libraries(al ${APR_LIBRARIES})
 target_link_libraries(al ${EXTERNAL_LIBRARIES})
+
+
+# Testing
+add_subdirectory(test)
