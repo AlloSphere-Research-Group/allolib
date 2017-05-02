@@ -10,7 +10,6 @@
 namespace al{
 
 AudioBackend::AudioBackend()
-:	mIsOpen(false), mIsRunning(false)
 {}
 
 //==============================================================================
@@ -35,9 +34,9 @@ void AudioDeviceInfo::setDefaultSampleRate(double rate) { mDefaultSampleRate = r
 //==============================================================================
 
 AudioIOData::AudioIOData(void * userData)
-:	mImpl(NULL), mUser(userData), mFrame(0),
+:	mImpl(nullptr), mUser(userData), mFrame(0),
 	mFramesPerBuffer(0), mFramesPerSecond(0),
-	mBufI(0), mBufO(0), mBufB(0), mBufT(0), mNumI(0), mNumO(0), mNumB(0),
+	mBufI(nullptr), mBufO(nullptr), mBufB(nullptr), mBufT(nullptr), mNumI(0), mNumO(0), mNumB(0),
 	mGain(1), mGainPrev(1)
 {
 }

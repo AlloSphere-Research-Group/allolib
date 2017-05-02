@@ -47,16 +47,6 @@
 
 namespace al{
 
-
-static int min(int x, int y){ return x<y?x:y; }
-
-/*
-static void err(const char * msg, const char * src, bool exits){
-	fprintf(stderr, "%s%serror: %s\n", src, src[0]?" ":"", msg);
-	if(exits) exit(EXIT_FAILURE);
-}
-*/
-
 static void warn(const char * msg, const char * src){
 	fprintf(stderr, "%s%swarning: %s\n", src, src[0]?" ":"", msg);
 }
@@ -187,8 +177,6 @@ public:
 	virtual double cpu() = 0;
 
 protected:
-	bool mIsOpen;						// An audio device is open
-	bool mIsRunning;					// An audio stream is running
 };
 
 
@@ -198,16 +186,18 @@ protected:
 ///
 /// @ingroup allocore
 class AudioIOData {
+  friend class RtAudioBackend;
 public:
 	/// Constructor
 	AudioIOData(void * user);
 
 	virtual ~AudioIOData();
 
-	typedef enum {
-		PORTAUDIO,
-		DUMMY
-	} Backend;
+    typedef enum {
+      PORTAUDIO,
+      RTAUDIO,
+      DUMMY
+    } Backend;
 
 	/// Iterate frame counter, returning true while more frames
 	bool operator()() const { return (++mFrame)<framesPerBuffer(); }

@@ -23,6 +23,48 @@ list(APPEND EXTERNAL_SRC
   ${OSCPACK_SRC}
 )
 
+# RtAudio
+if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/rtaudio")
+  message("Using RtAudio")
+  list(APPEND EXTERNAL_SRC
+    ${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/rtaudio/RtAudio.cpp
+  )
+if(LINUX)
+  add_definitions(-D__LINUX_PULSE__)
+  list(APPEND EXTERNAL_LIBRARIES
+    pulse pulse-simple
+  )
+#  add_definitions(-D__LINUX_ALSA__)
+#  list(APPEND EXTERNAL_LIBRARIES
+#    asound pthread
+#  )
+#  g++ -Wall -D__LINUX_OSS__ -o audioprobe audioprobe.cpp RtAudio.cpp -lpthread
+#  g++ -Wall -D__UNIX_JACK__ -o audioprobe audioprobe.cpp RtAudio.cpp $(pkg-config –cflags –libs jack) -lpthread
+endif()
+
+if(MACOS)
+  add_definitions(-D__MACOSX_CORE__)
+  list(APPEND EXTERNAL_LIBRARIES
+    -framework CoreAudio
+    pthread
+  )
+#  g++ -Wall -D__MACOSX_CORE__ -o audioprobe audioprobe.cpp RtAudio.cpp -framework CoreAudio -lpthread
+endif()
+if(WINDOWS)
+  add_definitions(-D__WINDOWS_WASAPI__)
+  list(APPEND EXTERNAL_LIBRARIES
+    ole32
+    winmm
+    ksuser
+    uuid
+  )
+#  g++ -Wall -D__WINDOWS_DS__ -o audioprobe audioprobe.cpp RtAudio.cpp -lole32 -lwinmm -ldsound
+#  g++ -Wall -D__WINDOWS_ASIO__ -Iinclude -o audioprobe audioprobe.cpp RtAudio.cpp asio.cpp asiolist.cpp asiodrivers.cpp iasiothiscallresolver.cpp -lole32
+#  g++ -Wall -D__WINDOWS_WASAPI__ -Iinclude -o audioprobe audioprobe.cpp RtAudio.cpp -lole32 -lwinmm -lksuser -luuid
+endif()
+endif()
+
+# Main Library
 set(core_headers
   include/al/core.hpp
   include/al/core/app/al_App.hpp
@@ -200,6 +242,8 @@ target_link_libraries(al ${GLEW_LIBRARIES})
 target_link_libraries(al ${GLFW_LIBRARIES})
 target_link_libraries(al ${PORTAUDIO_LIBRARIES})
 target_link_libraries(al ${APR_LIBRARIES})
+target_link_libraries(al ${EXTERNAL_LIBRARIES})
 
 # Testing
 add_subdirectory(test)
+

@@ -58,37 +58,36 @@ typedef void (* audioCallback)(AudioIOData& io);
 /// @ingroup allocore
 class AudioDevice: public AudioDeviceInfo {
 public:
+  
+  /// Stream mode
+  enum StreamMode{
+    INPUT	= 1,	/**< Input stream */
+    OUTPUT	= 2		/**< Output stream */
+  };
 
-	/// Stream mode
-	enum StreamMode{
-		INPUT	= 1,	/**< Input stream */
-		OUTPUT	= 2		/**< Output stream */
-	};
-
-
-	/// @param[in] deviceNum	Device enumeration number
-	AudioDevice(int deviceNum = -1);
-
-	/// @param[in] nameKeyword	Keyword to search for in device name
-	/// @param[in] stream		Whether to search for input and/or output devices
-	AudioDevice(const std::string& nameKeyword, StreamMode stream = StreamMode(INPUT | OUTPUT));
-
-	virtual bool valid() const;
-	virtual bool hasInput() const;					///< Returns whether device has input
-	virtual bool hasOutput() const;					///< Returns whether device has output
-
-	virtual void print() const;						///< Prints info about specific i/o device to stdout
-
-	// TODO: these should be removed from here and moved to AudioBackend
-	static AudioDevice defaultInput();		///< Get system's default input device
-	static AudioDevice defaultOutput();		///< Get system's default output device
-	static int numDevices();				///< Returns number of audio i/o devices available
-	static void printAll();					///< Prints info about all available i/o devices to stdout
-
+  /// @param[in] deviceNum	Device enumeration number
+  AudioDevice(int deviceNum = -1, AudioIOData::Backend backend = AudioIOData::RTAUDIO);
+  
+  /// @param[in] nameKeyword	Keyword to search for in device name
+  /// @param[in] stream		Whether to search for input and/or output devices
+  AudioDevice(const std::string& nameKeyword, StreamMode stream = StreamMode(INPUT | OUTPUT));
+  
+  virtual bool valid() const {return nullptr!=mImpl; }
+  virtual bool hasInput() const { return channelsInMax()>0; }					///< Returns whether device has input
+  virtual bool hasOutput() const { return channelsOutMax()>0; }					///< Returns whether device has output
+  
+  virtual void print() const;						///< Prints info about specific i/o device to stdout
+  
+  static AudioDevice defaultInput(AudioIOData::Backend backend = AudioIOData::RTAUDIO);		///< Get system's default input device
+  static AudioDevice defaultOutput(AudioIOData::Backend backend = AudioIOData::RTAUDIO);		///< Get system's default output device
+  static int numDevices(AudioIOData::Backend backend = AudioIOData::RTAUDIO);				///< Returns number of audio i/o devices available
+  static void printAll(AudioIOData::Backend backend = AudioIOData::RTAUDIO);					///< Prints info about all available i/o devices to stdout
+  
 protected:
-	void setImpl(int deviceNum);
-	static void initDevices();
-	const void * mImpl;
+  AudioIOData::Backend mBackend;
+  void setImpl(int deviceNum, AudioIOData::Backend backend = AudioIOData::RTAUDIO);
+  static void initDevices();
+  void * mImpl;
 };
 
 inline AudioDevice::StreamMode operator| (const AudioDevice::StreamMode& a, const AudioDevice::StreamMode& b){
@@ -114,9 +113,9 @@ public:
 	/// If the number of input or output channels is greater than the device
 	/// supports, virtual buffers will be created.
 	AudioIO(int framesPerBuf=64, double framesPerSec=44100.0,
-			void (* callback)(AudioIOData &) = 0, void * userData = 0,
+			void (* callback)(AudioIOData &) = nullptr, void * userData = nullptr,
 			int outChans = 2, int inChans = 0,
-			AudioIO::Backend backend = PORTAUDIO
+			AudioIO::Backend backend = RTAUDIO
 			);
 
 	virtual ~AudioIO();
@@ -184,7 +183,7 @@ private:
 	bool mAutoZeroOut;		// whether to automatically zero output buffers each block
 	std::vector<AudioCallback *> mAudioCallbacks;
 
-	void init(int outChannels, int inChannels);			//
+//	void init(int outChannels, int inChannels);			//
 	void reopen();			// reopen stream (restarts stream if needed)
 	void resizeBuffer(bool forOutput);
 };
