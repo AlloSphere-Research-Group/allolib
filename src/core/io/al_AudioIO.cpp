@@ -551,12 +551,9 @@ protected:
     float *outBuffers = (float *) output;
     for (int frame = 0; frame < io.framesPerBuffer(); frame++) {
       for (int i = 0; i < io.channelsInDevice(); i++) {
-        io.mBufO[i*frameCount + frame]= *outBuffers++;
+         *outBuffers++ = io.mBufO[i*frameCount + frame];
       }
     }
-//    for (int i = 0; i < io.channelsOutDevice(); i++) {
-//      memcpy(outBuffers[i], const_cast<float *>(&io.out(i,0)), frameCount * sizeof(float));
-//    }
 
     return 0;
   }
