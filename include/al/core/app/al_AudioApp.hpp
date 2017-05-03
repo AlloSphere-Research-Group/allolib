@@ -25,8 +25,8 @@ public:
   );
   
   bool usingAudio() const;
-  void begin();
-  void end();
+  void beginAudio();
+  void endAudio();
 
   virtual void onSound(AudioIOData& io) {}
     

@@ -24,10 +24,12 @@ bool AudioApp::usingAudio() const {
   return audioIO().callback == AppAudioCB;
 }
 
-void AudioApp::begin() {
-	if(usingAudio()) mAudioIO.start();
+void AudioApp::beginAudio() {
+	if(usingAudio()) {
+        mAudioIO.start();
+    }
 }
 
-void AudioApp::end(){
+void AudioApp::endAudio(){
 	audioIO().close();
 }

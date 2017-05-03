@@ -27,7 +27,7 @@ public:
   virtual void start() override {
     open(); // WindowApp (glfw::init(), onInit(), create(), onCreate())
     startFPS(); // WindowApp (FPS)
-    begin(); // AudioApp (only begins if `initAudio` was called before)
+    beginAudio(); // AudioApp (only begins if `initAudio` was called before)
     while (!shouldQuit()) {
       // user can quit this loop with WindowApp::quit() or clicking close button
       // or with stdctrl class input (ctrl+q)
@@ -36,7 +36,7 @@ public:
       tickFPS(); // WindowApp (FPS)
     }
     onExit(); // user defined
-    end(); // AudioApp
+    endAudio(); // AudioApp
     close(); // WindowApp (calls onExit)
   }
 
