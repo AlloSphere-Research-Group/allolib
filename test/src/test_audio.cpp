@@ -24,7 +24,8 @@ static void callback(AudioIOData &io) {
 TEST_CASE( "Audio IO Object" ) {
     int userData = 5;
     std::cout << "RtAudio --------------------------" << std::endl;
-    AudioIO audioIO(64, 44100.0, callback, &userData, 2, 2, AudioIO::RTAUDIO);
+    AudioIO audioIO;
+    audioIO.init(callback, &userData, 64, 44100.0, 2, 2, AudioIO::RTAUDIO);
     audioIO.print();
     REQUIRE(audioIO.user<int>() == 5);
     REQUIRE(audioIO.open());
@@ -35,7 +36,8 @@ TEST_CASE( "Audio IO Object" ) {
     REQUIRE(audioIO.user<int>() == 5);
 
     std::cout << "Portaudio --------------------------" << std::endl;
-    AudioIO audioIO2(64, 44100.0, callback, &userData, 2, 2, AudioIOData::PORTAUDIO);
+    AudioIO audioIO2;
+    audioIO2.init(callback, &userData, 64, 44100.0, 2, 2, AudioIOData::PORTAUDIO);
     audioIO2.print();
     REQUIRE(audioIO2.user<int>() == 5);
     REQUIRE(audioIO2.open());

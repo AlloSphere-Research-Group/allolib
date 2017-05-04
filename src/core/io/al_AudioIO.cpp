@@ -392,7 +392,7 @@ public:
     catch( RtAudioError& e ) {
         e.printMessage();
     }
-    if(info.probed){
+    if(!info.probed){
       if(forOutput)	warn("attempt to set number of channels on invalid output device", "AudioIO");
       else			warn("attempt to set number of channels on invalid input device", "AudioIO");
       return;	// this particular device is not open, so return
@@ -706,12 +706,23 @@ AudioDevice::AudioDevice(int deviceNum, AudioIOData::Backend backend)
 
 //==============================================================================
 
-AudioIO::AudioIO(int framesPerBuf, double framesPerSec, void (* callbackA)(AudioIOData &), void * userData,
-	int outChansA, int inChansA, AudioIO::Backend backend)
-:	AudioIOData(userData),
-	callback(callbackA),
+AudioIO::AudioIO()
+	: AudioIOData(nullptr), callback(nullptr),
 	mZeroNANs(true), mClipOut(true), mAutoZeroOut(true)
 {
+	
+}
+
+AudioIO::~AudioIO(){
+	close();
+	delete mImpl;
+}
+
+bool AudioIO::init(
+	void (* callbackA)(AudioIOData &), void * userData,
+	int framesPerBuf, double framesPerSec,
+	int outChansA, int inChansA, AudioIO::Backend backend
+) {
 	switch(backend) {
 	case PORTAUDIO:
 		mImpl = new PortAudioBackend;
@@ -723,6 +734,8 @@ AudioIO::AudioIO(int framesPerBuf, double framesPerSec, void (* callbackA)(Audio
 		mImpl = new DummyAudioBackend;
 		break;
 	}
+	callback = callbackA;
+	user(userData);
     deviceIn(AudioDevice::defaultInput(backend));
     deviceOut(AudioDevice::defaultOutput(backend));
 //	init(outChansA, inChansA);
@@ -730,12 +743,6 @@ AudioIO::AudioIO(int framesPerBuf, double framesPerSec, void (* callbackA)(Audio
 	channels(outChansA, true);
     this->framesPerBuffer(framesPerBuf);
 	this->framesPerSecond(framesPerSec);
-}
-
-
-AudioIO::~AudioIO(){
-	close();
-	delete mImpl;
 }
 
 

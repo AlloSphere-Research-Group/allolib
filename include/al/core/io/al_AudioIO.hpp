@@ -101,23 +101,7 @@ class AudioIO : public AudioIOData {
 public:
 
 	/// Creates AudioIO using default I/O devices.
-
-	/// @param[in] framesPerBuf		Number of sample frames to process per callback
-	/// @param[in] framesPerSec		Frame rate.  Unsupported values will use default rate of device.
-	/// @param[in] callback			Audio processing callback (optional)
-	/// @param[in] userData			Pointer to user data accessible within callback (optional)
-	/// @param[in] outChans			Number of output channels to open
-	/// @param[in] inChans			Number of input channels to open
-	/// @param[in] devNum			ID of the device to open. -1 Uses default device.
-	/// @param[in] backend			Audio backend to use
-	/// If the number of input or output channels is greater than the device
-	/// supports, virtual buffers will be created.
-	AudioIO(int framesPerBuf=64, double framesPerSec=44100.0,
-			void (* callback)(AudioIOData &) = nullptr, void * userData = nullptr,
-			int outChans = 2, int inChans = 0,
-			AudioIO::Backend backend = RTAUDIO
-			);
-
+	AudioIO();
 	virtual ~AudioIO();
 
 	audioCallback callback;						///< User specified callback function.
@@ -141,6 +125,20 @@ public:
 	bool zeroNANs() const;						///< Returns whether to zero NANs in output buffer going to DAC
 
 	void processAudio();						///< Call callback manually
+	/// @param[in] framesPerBuf		Number of sample frames to process per callback
+	/// @param[in] framesPerSec		Frame rate.  Unsupported values will use default rate of device.
+	/// @param[in] callback			Audio processing callback (optional)
+	/// @param[in] userData			Pointer to user data accessible within callback (optional)
+	/// @param[in] outChans			Number of output channels to open
+	/// @param[in] inChans			Number of input channels to open
+	/// @param[in] devNum			ID of the device to open. -1 Uses default device.
+	/// @param[in] backend			Audio backend to use
+	/// If the number of input or output channels is greater than the device
+	/// supports, virtual buffers will be created.
+	bool init(void (* callback)(AudioIOData &), void * userData,
+		int framesPerBuf=64, double framesPerSec=44100.0,
+		int outChans = 2, int inChans = 0,
+		AudioIO::Backend backend = RTAUDIO);
 	bool open();								///< Opens audio device.
 	bool close();								///< Closes audio device. Will stop active IO.
 	bool start();								///< Starts the audio IO.  Will open audio device if necessary.
