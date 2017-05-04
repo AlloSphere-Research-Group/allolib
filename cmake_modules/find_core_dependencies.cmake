@@ -17,4 +17,11 @@ else ()
   pkg_search_module(GLFW REQUIRED glfw3)
   pkg_search_module(PORTAUDIO REQUIRED portaudio-2.0)
   pkg_search_module(APR REQUIRED apr-1)
+
+  if(MACOS)
+    # for rtaudio
+    find_library(COREAUDIO_LIB CoreAudio)
+    find_library(COREFOUNDATION_LIB CoreFoundation)
+    # also pthread
+  endif(MACOS)
 endif (WINDOWS)
