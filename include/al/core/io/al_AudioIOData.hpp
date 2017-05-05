@@ -269,7 +269,7 @@ public:
 	bool usingGain() const { return mGain != 1.f || mGainPrev != 1.f; }
 
 protected:
-	AudioBackend * mImpl;
+    AudioBackend * mImpl {nullptr};
 	void * mUser;					// User specified data
 	mutable int mFrame;
 	int mFramesPerBuffer;
@@ -277,6 +277,8 @@ protected:
 	float *mBufI, *mBufO, *mBufB;	// input, output, and aux buffers
 	float * mBufT;					// temporary one channel buffer
 	int mNumI, mNumO, mNumB;		// input, output, and aux channels
+private:
+    void operator=(const AudioIOData&); // Disallow copy
 public:
 	float mGain, mGainPrev;
 };

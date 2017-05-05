@@ -18,10 +18,10 @@ namespace al{
 
 class DummyAudioBackend : public AudioBackend{
 public:
-	DummyAudioBackend(): AudioBackend(), mNumOutChans(64), mNumInChans(64){}
+	DummyAudioBackend(): AudioBackend(), mNumOutChans(2), mNumInChans(2){}
 
-	virtual bool isOpen() const {return true;}
-	virtual bool isRunning() const {return true;}
+	virtual bool isOpen() const {return mOpen;}
+	virtual bool isRunning() const {return mRunning;}
 	virtual bool error() const {return false;}
 
 	virtual void printError(const char * text = "") const {
@@ -46,8 +46,8 @@ public:
 		}
 	}
 
-	virtual int inDeviceChans() {return mNumInChans;}
-	virtual int outDeviceChans() {return mNumOutChans;}
+	virtual int inDeviceChans() {return 2;}
+	virtual int outDeviceChans() {return 2;}
 	virtual void setInDeviceChans(int num) {
 		mNumInChans = num;
 	}
@@ -58,16 +58,18 @@ public:
 
 	virtual double time() {return 0.0;}
 
-	virtual bool open(int framesPerSecond, int framesPerBuffer, void *userdata) { return true; }
+	virtual bool open(int framesPerSecond, int framesPerBuffer, void *userdata) { mOpen = true; return true; }
 
-	virtual bool close() { return true; }
+	virtual bool close() { mOpen = false; return true; }
 
-	virtual bool start(int framesPerSecond, int framesPerBuffer, void *userdata) { return true; }
+	virtual bool start(int framesPerSecond, int framesPerBuffer, void *userdata) { mRunning = true; return true; }
 
-	virtual bool stop() { return true;}
+	virtual bool stop() {mRunning = false; return true;}
 	virtual double cpu() {return 0.0;}
 
 protected:
+    int mOpen = false;
+    int mRunning = false;
 	int mNumOutChans;
 	int mNumInChans;
 };
@@ -698,7 +700,10 @@ AudioDevice::AudioDevice(int deviceNum, AudioIOData::Backend backend)
             mChannelsOutMax = ((const PaDeviceInfo*)mImpl)->maxOutputChannels;
             mDefaultSampleRate = ((const PaDeviceInfo*)mImpl)->defaultSampleRate;
           } else if (backend == AudioIOData::DUMMY)  {
-
+            strncpy(mName, "default\0", 8);
+            mChannelsInMax = 2;
+            mChannelsOutMax = 2;
+            mDefaultSampleRate = 44100;
           }
       }
   }
@@ -892,7 +897,6 @@ void AudioIO::resizeBuffer(bool forOutput){
 		deleteBuf(buffer);
 	}
 }
-
 
 void AudioIO::framesPerSecond(double v){	//printf("AudioIO::fps(%f)\n", v);
 	if(framesPerSecond() != v){
