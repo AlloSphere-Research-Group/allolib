@@ -6,4 +6,5 @@
 #include <cmath>
 
 #include "test_math.cpp"
+#include "test_mathSpherical.cpp"
 #include "test_audio.cpp"
