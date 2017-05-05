@@ -47,6 +47,7 @@
 
 namespace al{
 
+// FIXME move this warn function. Perhaps replace use with a function from the core/system/al_Printing.hpp file
 static void warn(const char * msg, const char * src){
 	fprintf(stderr, "%s%swarning: %s\n", src, src[0]?" ":"", msg);
 }
