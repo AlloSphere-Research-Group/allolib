@@ -864,7 +864,14 @@ int AudioIO::channelsInDevice() const { return (int)mImpl->inDeviceChans(); }
 int AudioIO::channelsOutDevice() const { return (int)mImpl->outDeviceChans(); }
 
 
-bool AudioIO::close(){ return mImpl->close(); }
+bool AudioIO::close(){
+	if (mImpl != nullptr) {
+		return mImpl->close();
+	}
+	else {
+		return true;
+	}
+}
 
 bool AudioIO::open(){ return mImpl->open(mFramesPerSecond, mFramesPerBuffer, this); }
 
