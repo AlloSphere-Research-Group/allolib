@@ -49,7 +49,8 @@ TEST_CASE( "Audio IO Object" ) {
 }
 
 TEST_CASE("Audio Channels/Virtual Channels") {
-    AudioIO audioIO(256, 44100, nullptr, nullptr, 1, 1, AudioIOData::DUMMY);
+    AudioIO audioIO;
+    audioIO.init(nullptr, nullptr, 256, 44100, 1, 1, AudioIOData::DUMMY);
 
     // Make sure parameters match those passed to constructor
     audioIO.open();
@@ -72,7 +73,8 @@ TEST_CASE("Audio Channels/Virtual Channels") {
     audioIO.close();
 
     // Now RTAUDIO
-    AudioIO audioIO1(256, 44100, nullptr, nullptr, 1, 1, AudioIOData::RTAUDIO);
+    AudioIO audioIO1;
+    audioIO1.init(nullptr, nullptr,256, 44100,  1, 1, AudioIOData::RTAUDIO);
 
     // Make sure parameters match those passed to constructor
     audioIO1.open();
@@ -95,7 +97,8 @@ TEST_CASE("Audio Channels/Virtual Channels") {
     audioIO1.close();
 
     // Now PORTAUDIO
-    AudioIO audioIO2(256, 44100, nullptr, nullptr, 1, 1, AudioIOData::PORTAUDIO);
+    AudioIO audioIO2;
+    audioIO2.init(nullptr, nullptr, 256, 44100, 1, 1, AudioIOData::PORTAUDIO);
 
     // Make sure parameters match those passed to constructor
     audioIO2.open();
