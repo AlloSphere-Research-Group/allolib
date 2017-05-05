@@ -67,6 +67,13 @@ if(WINDOWS)
 endif(WINDOWS)
 endif() # RTAUDIO
 
+# Gamma
+if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/Gamma")
+  add_subdirectory("${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/Gamma")
+  list(APPEND EXTERNAL_LIBRARIES Gamma)
+  message("Using Gamma:${Gamma}" )
+endif()
+
 set(EXTERNAL_SRC
   ${OSCPACK_SRC}
   ${RTAUDIO_SRC}

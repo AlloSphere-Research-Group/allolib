@@ -1,5 +1,9 @@
 #include "al/core/io/al_AudioIO.hpp"
 
+#include "Gamma/Oscillator.h"
+#include "Gamma/Domain.h"
+
+gam::Sine<> s(440);
 using namespace al;
 
 TEST_CASE( "Audio Device Enum" ) {
@@ -10,18 +14,13 @@ TEST_CASE( "Audio Device Enum" ) {
 }
 
 static void callback(AudioIOData &io) {
-    static double phase = 0.0;
-    static double phaseInc = M_2PI * 440.0 / io.framesPerSecond();
     while(io()) {
-        io.out(0) = std::sin(phase)* 0.2;
-        phase += phaseInc;
-        if (phase > M_2PI) {
-            phase -= M_2PI;
-        }
+        io.out(0) = s();
     }
 }
 
 TEST_CASE( "Audio IO Object" ) {
+    gam::sampleRate(44100);
     int userData = 5;
     std::cout << "RtAudio --------------------------" << std::endl;
     AudioIO audioIO;
@@ -120,3 +119,4 @@ TEST_CASE("Audio Channels/Virtual Channels") {
     REQUIRE(audioIO2.channelsIn() == (maxChansIn+1)); // got our extra virtual channel?
     audioIO.close();
 }
+
