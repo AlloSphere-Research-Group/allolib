@@ -45,7 +45,7 @@ TEST_CASE( "Audio IO Object" ) {
     al_sleep(0.5);
     REQUIRE(audioIO2.stop());
     REQUIRE(audioIO2.close());
-    REQUIRE(audioIO.user<int>() == 5);
+    REQUIRE(audioIO2.user<int>() == 5);
 }
 
 TEST_CASE("Audio Channels/Virtual Channels") {

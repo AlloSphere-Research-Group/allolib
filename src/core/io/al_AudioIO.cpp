@@ -33,7 +33,7 @@ public:
 		printf("Using dummy backend (no audio).\n");
 	}
 
-	virtual bool supportsFPS(double fps) const {return true;}
+	virtual bool supportsFPS(double fps) {return true;}
 
 	virtual void inDevice(int index) {return;}
 	virtual void outDevice(int index) {return;}
@@ -98,7 +98,7 @@ public:
 		}
 	}
 
-	virtual bool supportsFPS(double fps) const {
+	virtual bool supportsFPS(double fps) {
 		const PaStreamParameters * pi = mInParams.channelCount  == 0 ? 0 : &mInParams;
 		const PaStreamParameters * po = mOutParams.channelCount == 0 ? 0 : &mOutParams;	
 		mErrNum = Pa_IsFormatSupported(pi, po, fps);
@@ -723,7 +723,7 @@ AudioIO::~AudioIO(){
 	delete mImpl;
 }
 
-bool AudioIO::init(
+void AudioIO::init(
 	void (* callbackA)(AudioIOData &), void * userData,
 	int framesPerBuf, double framesPerSec,
 	int outChansA, int inChansA, AudioIO::Backend backend
@@ -927,7 +927,7 @@ bool AudioIO::start(){ return mImpl->start(mFramesPerSecond, mFramesPerBuffer, t
 
 bool AudioIO::stop(){ return mImpl->stop(); }
 
-bool AudioIO::supportsFPS(double fps) const { return mImpl->supportsFPS(fps); }
+bool AudioIO::supportsFPS(double fps) { return mImpl->supportsFPS(fps); }
 
 void AudioIO::print() const {
 	if(mInDevice.id() == mOutDevice.id()){

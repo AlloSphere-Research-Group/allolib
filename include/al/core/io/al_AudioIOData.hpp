@@ -156,7 +156,7 @@ public:
 	virtual void printError(const char * text = "") const = 0;
 	virtual void printInfo() const = 0;
 
-	virtual bool supportsFPS(double fps) const = 0;
+	virtual bool supportsFPS(double fps) = 0;
 
 	virtual void inDevice(int index) = 0;
 	virtual void outDevice(int index) = 0;

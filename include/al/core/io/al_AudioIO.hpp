@@ -121,7 +121,7 @@ public:
 	int channelsOutDevice() const;				///< Get number of channels opened on output device
 	bool clipOut() const { return mClipOut; }	///< Returns clipOut setting
 	double cpu() const;							///< Returns current CPU usage of audio thread
-	bool supportsFPS(double fps) const;			///< Return true if fps supported, otherwise false
+	bool supportsFPS(double fps);			///< Return true if fps supported, otherwise false
 	bool zeroNANs() const;						///< Returns whether to zero NANs in output buffer going to DAC
 
 	void processAudio();						///< Call callback manually
@@ -135,7 +135,7 @@ public:
 	/// @param[in] backend			Audio backend to use
 	/// If the number of input or output channels is greater than the device
 	/// supports, virtual buffers will be created.
-	bool init(void (* callback)(AudioIOData &), void * userData,
+	void init(void (* callback)(AudioIOData &), void * userData,
 		int framesPerBuf=64, double framesPerSec=44100.0,
 		int outChans = 2, int inChans = 0,
 		AudioIO::Backend backend = RTAUDIO);
