@@ -8,6 +8,7 @@
 #include <string>
 #include <cstring>
 #include <algorithm>
+#include <iostream>
 
 #include "rtaudio/RtAudio.h"
 #include "portaudio.h"
@@ -348,14 +349,27 @@ public:
   }
 
   virtual bool supportsFPS(double fps) {
-    const RtAudio::StreamParameters * pi = iParams.nChannels  == 0 ? nullptr : &iParams;
+    //const RtAudio::StreamParameters * pi = iParams.nChannels  == 0 ? nullptr : &iParams;
     const RtAudio::StreamParameters * po = oParams.nChannels == 0 ? nullptr : &oParams;
+    
+    if (!po) return false;
 
+    unsigned int f = fps;
+    auto const& supported = audio.getDeviceInfo(po->deviceId).sampleRates;
+    for (auto const& r: supported) {
+        if (r == f) {
+            //std::cout << "RtAudioBackend::supportsFPS, rate " << f << " supported" << std::endl;
+            return true;
+        }
+    }
+
+    //std::cout << "rate " << f << " not supported" << std::endl;
+    return false;
 
 //    mErrNum = Pa_IsFormatSupported(pi, po, fps);
 //    printError("AudioIO::Impl::supportsFPS");
 //    return paFormatIsSupported == mErrNum;
-    return true; // FIXME return correct value...
+    //return true; // FIXME return correct value...
   }
 
   virtual void inDevice(int index){
