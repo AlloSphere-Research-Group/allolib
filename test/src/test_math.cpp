@@ -11,37 +11,36 @@
 using namespace al;
 
 template <class T>
-inline bool eq(T x, T y, T eps=0.000001){
+inline bool eqVal(T x, T y, T eps=0.000001){
 	return abs(x-y) < eps;
 }
 
 template <class T>
-inline bool eq(const T* x, const T* y, int n, T eps=0.0000001){
+inline bool eqPtr(const T* x, const T* y, int n, T eps=0.0000001){
 	for(int i=0; i<n; ++i){
-		if(!eq(x[i], y[i], eps)) return false;
+		if(!eqVal(x[i], y[i], eps)) return false;
 	}
 	return true;
 }
 
 template <class T>
 inline bool eq(const Quat<T>& a, const Quat<T>& b, T eps=0.000001){
-	return eq(&a[0], &b[0], 4, eps);
+	return eqPtr(&a[0], &b[0], 4, eps);
 }
 
 template <int N, class T>
 inline bool eq(const Vec<N,T>& a, const Vec<N,T>& b, T eps=0.000001){
-	return eq(&a[0], &b[0], N, eps);
+	return eqPtr(&a[0], &b[0], N, eps);
 }
 
 template <int N, class T>
 inline bool eq(const Mat<N,T>& a, const Mat<N,T>& b, T eps=0.000001){
-	return eq(&a[0], &b[0], N*N, eps);
+	return eqPtr(&a[0], &b[0], N*N, eps);
 }
 
 // TODO break test into sections or separate tests as needed. Look at:
 // https://github.com/philsquared/Catch/blob/master/docs/tutorial.md
 TEST_CASE("Math"){
-
 	// Vec
 	{
 		const int N = 4;
@@ -159,17 +158,17 @@ TEST_CASE("Math"){
 		t = a.sub<2>(2);		REQUIRE(t[0] == 2); REQUIRE(t[1] == 3);
 		}
 
-		REQUIRE(eq(angle(Vec3d(1,0,0), Vec3d(1, 0, 0)), 0.));
-		REQUIRE(eq(angle(Vec3d(1,0,0), Vec3d(0, 1, 0)), M_PI_2));
-		REQUIRE(eq(angle(Vec3d(1,0,0), Vec3d(0,-1, 0)), M_PI_2));
+		REQUIRE(eqVal(angle(Vec3d(1,0,0), Vec3d(1, 0, 0)), 0.));
+		REQUIRE(eqVal(angle(Vec3d(1,0,0), Vec3d(0, 1, 0)), M_PI_2));
+		REQUIRE(eqVal(angle(Vec3d(1,0,0), Vec3d(0,-1, 0)), M_PI_2));
 
 		{
 		Vec3d r;
 		centroid3(r, Vec3d(1,0,0), Vec3d(0,1,0), Vec3d(0,0,1));
-		REQUIRE(eq(r, Vec3d(1/3.)));
+		REQUIRE( eq(r, Vec3d(1/3.)) );
 
 		normal(r, Vec3d(1,0,0), Vec3d(0,1,0), Vec3d(-1,0,0));
-		REQUIRE(eq(r, Vec3d(0,0,1)));
+		REQUIRE( eq(r, Vec3d(0,0,1)) );
 
 		Vec3d pos(1,2,3);
 		Vec3d to(4,5,6);
@@ -272,7 +271,7 @@ TEST_CASE("Math"){
 				0,3
 			);
 
-			REQUIRE(eq(determinant(m), 6.));
+			REQUIRE(eqVal(determinant(m), 6.));
 
 			Mat<2,double> inv = m;
 			REQUIRE(invert(inv));
@@ -286,7 +285,7 @@ TEST_CASE("Math"){
 				0,0,4
 			);
 
-			REQUIRE(eq(determinant(m), 24.));
+			REQUIRE(eqVal(determinant(m), 24.));
 
 			Mat<3,double> inv = m;
 			REQUIRE(invert(inv));
@@ -483,9 +482,9 @@ TEST_CASE("Math"){
 	const double pinf = INFINITY;		// + infinity
 	const double ninf =-INFINITY;		// - infinity
 
-	#define T(x) REQUIRE(al::abs(x) == (x<0?-x:x));
-	T(0.) T(1.) T(-1.)
-	T(0) T(1) T(-1)
+	#define T(x) REQUIRE(al::abs(x) == ( x < 0 ? -x : x));
+	T(0.) T(1.) T((-1.))
+	T(0) T(1) T((-1))
 	#undef T
 
 	#define T(x,y, r) REQUIRE(al::atLeast(x,y) == r);
@@ -545,7 +544,7 @@ TEST_CASE("Math"){
 	T(513, 512) T(1090, 1024)
 	#undef T
 
-	#define T(x, y) REQUIRE(eq(al::fold(x), y));
+	#define T(x, y) REQUIRE(eqVal(al::fold(x), y));
 	T(0., 0.) T(0.5, 0.5) T(1., 1.) T(1.2, 0.8) T(-0.2, 0.2)
 	T(2.2, 0.2) T(3.2, 0.8) T(4.2, 0.2) T(5.2, 0.8)
 	#undef T
@@ -620,7 +619,7 @@ TEST_CASE("Math"){
 	T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 	#undef T
 
-	#define T(x) REQUIRE(eq(al::pow64(x), x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x));
+	#define T(x) REQUIRE(eqVal(al::pow64(x), x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x*x));
 	T(0.) T(1.) T(1.01) T(1.02) T(-1.) T(-1.01) T(-1.02)
 	#undef T
 
@@ -679,13 +678,13 @@ TEST_CASE("Math"){
 //	printf("%.20g\n", wrap<double>(-64.0, 32.0, 0.));  // should be 0.0
 //	printf("%.20g\n", wrap<double>(-1e-16, 32., 0.));  // should be 31.999999999999996447
 
-	#define T(x, y) REQUIRE(eq(al::wrap(x, 1., -1.), y));
+	#define T(x, y) REQUIRE(eqVal(al::wrap(x, 1., -1.), y));
 	T(0., 0.)	T( 0.5, 0.5) T( 1.,-1.) T( 1.2,-0.8) T( 2.2, 0.2)
 				T(-0.5,-0.5) T(-1.,-1.) T(-1.2, 0.8) T(-2.2,-0.2)
 	#undef T
 	}
 
-	#define T(x, y) REQUIRE(eq(al::wrapPhase(x), y));
+	#define T(x, y) REQUIRE(eqVal(al::wrapPhase(x), y));
 	T(0., 0.)	T( 1., 1.) T( M_PI,-M_PI) T( M_PI+1, -M_PI+1) T( 7*M_PI+1, -M_PI+1)
 				T(-1.,-1.) T(-M_PI,-M_PI) T(-M_PI-1,  M_PI-1) T(-7*M_PI+1, -M_PI+1)
 	#undef T

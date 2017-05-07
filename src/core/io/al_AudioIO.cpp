@@ -347,7 +347,7 @@ public:
 //    }
   }
 
-  virtual bool supportsFPS(double fps) const {
+  virtual bool supportsFPS(double fps) {
     const RtAudio::StreamParameters * pi = iParams.nChannels  == 0 ? nullptr : &iParams;
     const RtAudio::StreamParameters * po = oParams.nChannels == 0 ? nullptr : &oParams;
 

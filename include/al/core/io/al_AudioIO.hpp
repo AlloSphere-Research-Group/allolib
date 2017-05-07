@@ -183,8 +183,8 @@ private:
 
 //	void init(int outChannels, int inChannels);			//
 	void reopen();			// reopen stream (restarts stream if needed)
-	void resizeBuffer(bool forOutput);private:
-    void operator=(const AudioIO&); // Disallow copy
+	void resizeBuffer(bool forOutput);
+    void operator=(const AudioIO&) = delete; // Disallow copy
 };
 
 } // al::
