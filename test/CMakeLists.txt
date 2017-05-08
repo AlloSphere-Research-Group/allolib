@@ -3,6 +3,7 @@ set (test_src
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/external/catch)
+include_directories(${CMAKE_SOURCE_DIR}/external/Gamma)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 if (WINDOWS)
