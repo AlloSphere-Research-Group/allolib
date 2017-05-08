@@ -83,6 +83,10 @@ public:
   /// @param[in] format  internal format of buffer
   RBO(unsigned int format = GL_DEPTH_COMPONENT16);
 
+  ~RBO() {
+      destroy();
+  }
+
   /// Get internal pixel format
   unsigned int format() const;
 
@@ -163,6 +167,10 @@ public:
     DEPTH_ATTACHMENT      = GL_DEPTH_ATTACHMENT_EXT,
     STENCIL_ATTACHMENT      = GL_STENCIL_ATTACHMENT_EXT
   };
+
+  ~FBO() {
+      destroy();
+  }
 
   /// Attach RBO at specified attachment point
   FBO& attachRBO(

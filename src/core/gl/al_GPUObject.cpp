@@ -181,6 +181,7 @@ GPUObject::GPUObject()
 
 GPUObject::~GPUObject(){
   /*contextUnregister();*/
+  // should call destroy() in child's dtor, since we need the virtual one to be called
 }
 
 void GPUObject::validate(){
