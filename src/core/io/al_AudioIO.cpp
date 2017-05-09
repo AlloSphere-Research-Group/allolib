@@ -449,10 +449,12 @@ public:
 //    unsigned int bufferBytes, bufferFrames = 512;
 
     unsigned int deviceBufferSize = framesPerBuffer;
+    auto* ip = iParams.nChannels > 0 ? &iParams : nullptr;
+    auto* op = oParams.nChannels > 0 ? &oParams : nullptr;
     try {
-      audio.openStream( &oParams, &iParams, RTAUDIO_FLOAT32,
-                        framesPerSecond, &deviceBufferSize,
-                        rtaudioCallback, userdata);
+      audio.openStream(op, ip, RTAUDIO_FLOAT32,
+                       framesPerSecond, &deviceBufferSize,
+                       rtaudioCallback, userdata);
     }
     catch ( RtAudioError& e ) {
       e.printMessage();
@@ -566,7 +568,7 @@ protected:
 
     float *outBuffers = (float *) output;
     for (int frame = 0; frame < io.framesPerBuffer(); frame++) {
-      for (int i = 0; i < io.channelsInDevice(); i++) {
+      for (int i = 0; i < io.channelsOutDevice(); i++) {
          *outBuffers++ = io.mBufO[i*frameCount + frame];
       }
     }
