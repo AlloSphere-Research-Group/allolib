@@ -517,6 +517,11 @@ protected:
                              RtAudioStreamStatus status,
                              void *userData)
   {
+
+    if (status) {
+        std::cout << "Stream underflow detected!" << std::endl;
+    }
+
     AudioIO& io = *(AudioIO *)userData;
 
     assert(frameCount == (unsigned)io.framesPerBuffer());
