@@ -139,6 +139,12 @@ public:
 		int framesPerBuf=64, double framesPerSec=44100.0,
 		int outChans = 2, int inChans = 0,
 		AudioIO::Backend backend = RTAUDIO);
+    void initWithDefaults(
+        void(*callback)(AudioIOData &), void * userData,
+        bool use_in, bool use_out,
+        int framesPerBuffer = 256,
+        AudioIO::Backend backend = RTAUDIO
+    );
 	bool open();								///< Opens audio device.
 	bool close();								///< Closes audio device. Will stop active IO.
 	bool start();								///< Starts the audio IO.  Will open audio device if necessary.

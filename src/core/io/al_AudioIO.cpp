@@ -771,15 +771,26 @@ void AudioIO::init(
 	this->framesPerSecond(framesPerSec);
 }
 
-
-//void AudioIO::init(int outChannels, int inChannels){
-	// Choose default devices for now...
-//	deviceIn(AudioDevice::defaultInput());
-//	deviceOut(AudioDevice::defaultOutput());
-
-//	mImpl->setInDeviceChans(0);
-//	mImpl->setOutDeviceChans(0);
-//}
+void AudioIO::initWithDefaults(
+    void(*callback)(AudioIOData &), void * userData,
+    bool use_in, bool use_out,
+    int framesPerBuffer, // default 256
+    AudioIO::Backend backend // default RTAUDIO
+) {
+    auto default_in = AudioDevice::defaultInput(backend);
+    auto default_out = AudioDevice::defaultOutput(backend);
+    int in_channels = use_in? default_in.channelsInMax() : 0;
+    int out_channels = use_out? default_out.channelsOutMax() : 0;
+    // [?] which device to use? for now takes sampling rate from out device if out is used
+    // else use one from in device
+    // (assumes if use_out == false, use_in == true, otherwise why call this function?)
+    double sampling_rate = use_out? default_out.defaultSampleRate() : default_in.defaultSampleRate();
+    std::cout << "AudioIO: using default with\n"
+        << "in : [" << default_in.id()  << "] " << in_channels  << " channels \n"
+        << "out: [" << default_out.id() << "] " << out_channels << " channels \n"
+        << "buffer size: " << framesPerBuffer << ", sampling rate: " << sampling_rate << std::endl;
+    init(callback, userData, framesPerBuffer, sampling_rate, out_channels, in_channels, backend);
+}
 
 AudioIO& AudioIO::append(AudioCallback& v){
 	mAudioCallbacks.push_back(&v);
