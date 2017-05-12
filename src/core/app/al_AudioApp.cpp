@@ -14,12 +14,13 @@ void AudioApp::initAudio(
 ) {
   mAudioIO.init(AppAudioCB, this, audioBlockSize, audioRate, audioOutputs, audioInputs);
   mAudioIO.open();
-  // mAudioIO.callback = AppAudioCB;
-  // mAudioIO.user(this);
-  // mAudioIO.framesPerSecond(audioRate);
-  // mAudioIO.framesPerBuffer(audioBlockSize);
-  // mAudioIO.channelsOut(audioOutputs);
-  // mAudioIO.channelsIn(audioInputs);
+}
+
+void AudioApp::initAudio(AudioIOConfig config) {
+    bool use_in = (config & IN_ONLY) ? true : false;
+    bool use_out = (config & OUT_ONLY) ? true : false;
+    mAudioIO.initWithDefaults(AppAudioCB, this, use_out, use_in);
+    mAudioIO.open();
 }
 
 bool AudioApp::usingAudio() const {

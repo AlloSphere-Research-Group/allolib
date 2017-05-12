@@ -773,18 +773,39 @@ void AudioIO::init(
 
 void AudioIO::initWithDefaults(
     void(*callback)(AudioIOData &), void * userData,
-    bool use_in, bool use_out,
+    bool use_out, bool use_in,
     int framesPerBuffer, // default 256
     AudioIO::Backend backend // default RTAUDIO
 ) {
+    bool use_both = use_out & use_in;
+    bool use_either = use_out | use_in;
+
     auto default_in = AudioDevice::defaultInput(backend);
     auto default_out = AudioDevice::defaultOutput(backend);
+
     int in_channels = use_in? default_in.channelsInMax() : 0;
     int out_channels = use_out? default_out.channelsOutMax() : 0;
-    // [?] which device to use? for now takes sampling rate from out device if out is used
-    // else use one from in device
-    // (assumes if use_out == false, use_in == true, otherwise why call this function?)
-    double sampling_rate = use_out? default_out.defaultSampleRate() : default_in.defaultSampleRate();
+
+    double out_sampling_rate = default_out.defaultSampleRate();
+    double in_sampling_rate = default_in.defaultSampleRate();
+    double sampling_rate = 0;
+    if (use_both) {
+        if (out_sampling_rate != in_sampling_rate) {
+            std::cout
+                << "default sampling rate different for in device and out device\n"
+                << "using only out device" << std::endl;
+            in_channels = 0;
+        }
+        sampling_rate = out_sampling_rate;
+    }
+    else if (use_either) {
+        sampling_rate = use_out ? out_sampling_rate : in_sampling_rate;
+    }
+    else {
+        std::cout << "not initializing any audio device" << std::endl;
+        return;
+    }
+
     std::cout << "AudioIO: using default with\n"
         << "in : [" << default_in.id()  << "] " << in_channels  << " channels \n"
         << "out: [" << default_out.id() << "] " << out_channels << " channels \n"

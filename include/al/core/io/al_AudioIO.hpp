@@ -141,7 +141,7 @@ public:
 		AudioIO::Backend backend = RTAUDIO);
     void initWithDefaults(
         void(*callback)(AudioIOData &), void * userData,
-        bool use_in, bool use_out,
+        bool use_out, bool use_in,
         int framesPerBuffer = 256,
         AudioIO::Backend backend = RTAUDIO
     );

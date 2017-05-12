@@ -20,10 +20,19 @@ public:
   /// @param[in] outputChannels. Number of output channels to open. -1 for all
   /// @param[in] inputChannels. Number of input channels to open. -1 for all
   void initAudio(
-    double audioRate=44100, int audioBlockSize=128,
-    int audioOutputs=-1, int audioInputs=-1
+    double audioRate, int audioBlockSize,
+    int audioOutputs, int audioInputs
   );
-  
+
+  // initialize audio with default values from default device
+  enum AudioIOConfig : unsigned int {
+      // binary literal supported since c++14
+      IN_ONLY = 0b1,
+      OUT_ONLY = 0b10,
+      IN_AND_OUT = 0b11
+  };
+  void initAudio(AudioIOConfig config = OUT_ONLY);
+
   bool usingAudio() const;
   void beginAudio();
   void endAudio();
