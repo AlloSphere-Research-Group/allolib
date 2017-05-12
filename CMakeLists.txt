@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.0)
 project(allo)
 set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
+
+include(cmake_modules/options.cmake)
 include(cmake_modules/configure_platform.cmake)
 include(cmake_modules/find_core_dependencies.cmake)
 
-# options
+# flags
 if (WINDOWS)
   # set(CMAKE_CXX_FLAGS "/W1")
 else ()
@@ -41,11 +43,8 @@ if(LINUX)
 endif(LINUX)
 
 if(MACOS)
-  find_library(COREAUDIO_LIB CoreAudio)
-  find_library(COREFOUNDATION_LIB CoreFoundation)
   add_definitions(-D__MACOSX_CORE__)
   list(APPEND EXTERNAL_LIBRARIES
-    # -framework CoreAudio
     ${COREAUDIO_LIB}
     ${COREFOUNDATION_LIB}
     pthread
@@ -236,19 +235,27 @@ else ()
   add_library(al STATIC ${headers} ${sources})
 endif (WINDOWS)
 
+if (USE_PORTAUDIO)
+  add_definitions(-DAL_USE_PORTAUDIO)
+endif (USE_PORTAUDIO)
+
 set_target_properties(al PROPERTIES DEBUG_POSTFIX _debug)
 
 target_include_directories(al PRIVATE include)
 target_include_directories(al PRIVATE ${GLFW_INCLUDE_DIRS})
 target_include_directories(al PRIVATE ${GLEW_INCLUDE_DIRS})
-target_include_directories(al PRIVATE ${PORTAUDIO_INCLUDE_DIRS})
+if (USE_PORTAUDIO)
+  target_include_directories(al PRIVATE ${PORTAUDIO_INCLUDE_DIRS})
+endif (USE_PORTAUDIO)
 target_include_directories(al PRIVATE ${APR_INCLUDE_DIRS})
 target_include_directories(al PRIVATE ${EXTERNAL_INCLUDE_DIR})
 
 target_link_libraries(al ${OPENGL_LIBRARY})
 target_link_libraries(al ${GLEW_LIBRARIES})
 target_link_libraries(al ${GLFW_LIBRARIES})
-target_link_libraries(al ${PORTAUDIO_LIBRARIES})
+if (USE_PORTAUDIO)
+  target_link_libraries(al ${PORTAUDIO_LIBRARIES})
+endif (USE_PORTAUDIO)
 target_link_libraries(al ${APR_LIBRARIES})
 target_link_libraries(al ${EXTERNAL_LIBRARIES})
 

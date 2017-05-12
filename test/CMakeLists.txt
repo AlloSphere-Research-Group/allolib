@@ -22,8 +22,16 @@ if (WINDOWS)
     robocopy ${lib_path}/apr/ ${TEST_OUTPUT_PATH} libapr-1.dll &
     robocopy ${lib_path}/glew/ ${TEST_OUTPUT_PATH} glew32.dll &
     robocopy ${lib_path}/glfw/ ${TEST_OUTPUT_PATH} glfw3.dll &
-    robocopy ${lib_path}/portaudio/ ${TEST_OUTPUT_PATH} portaudio_x64.dll &
-    IF %ERRORLEVEL% LEQ 1 exit 0
+  )
+
+  if (USE_PORTAUDIO)
+  	list(APPEND post_build_command
+  	  robocopy ${lib_path}/portaudio/ ${TEST_OUTPUT_PATH} portaudio_x64.dll &
+  	)
+  endif (USE_PORTAUDIO)
+
+  list(APPEND post_build_command
+  	IF %ERRORLEVEL% LEQ 1 exit 0
   )
 
   add_custom_command(

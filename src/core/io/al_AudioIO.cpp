@@ -11,7 +11,9 @@
 #include <iostream>
 
 #include "rtaudio/RtAudio.h"
+#ifdef AL_USE_PORTAUDIO
 #include "portaudio.h"
+#endif
 // #include "al/core/system/al_Config.h"
 #include "al/core/io/al_AudioIO.hpp"
 
@@ -77,6 +79,7 @@ protected:
 
 
 //==============================================================================
+#ifdef AL_USE_PORTAUDIO
 
 class PortAudioBackend : public AudioBackend{
 public:
@@ -322,6 +325,8 @@ private:
 	PaStream * mStream;					// i/o stream
 	mutable PaError mErrNum;			// Most recent error number
 };
+
+#endif // AL_USE_PORTAUDIO
 
 class RtAudioBackend : public AudioBackend{
 
@@ -620,7 +625,9 @@ AudioDevice::AudioDevice(int deviceNum, AudioIOData::Backend backend)
     if (backend == AudioIOData::RTAUDIO) {
       return RtAudioBackend::defaultInput();
     } else if (backend == AudioIOData::PORTAUDIO) {
+#ifdef AL_USE_PORTAUDIO
       return PortAudioBackend::defaultInput();
+#endif
     } else if (backend == AudioIOData::PORTAUDIO)  {
       return AudioDevice(0, AudioIOData::DUMMY);
     }
@@ -632,7 +639,9 @@ AudioDevice::AudioDevice(int deviceNum, AudioIOData::Backend backend)
     if (backend == AudioIOData::RTAUDIO) {
       return RtAudioBackend::defaultOutput();
     } else if (backend == AudioIOData::PORTAUDIO) {
+#ifdef AL_USE_PORTAUDIO
       return PortAudioBackend::defaultOutput();
+#endif
     } else if (backend == AudioIOData::DUMMY)  {
       return AudioDevice(0, AudioIOData::DUMMY);
     }
@@ -640,14 +649,18 @@ AudioDevice::AudioDevice(int deviceNum, AudioIOData::Backend backend)
   }
 
   void AudioDevice::initDevices(){
+#ifdef AL_USE_PORTAUDIO
       PortAudioBackend::initialize();
+#endif
   }
 
   int AudioDevice::numDevices(AudioIOData::Backend backend){
     if (backend == AudioIOData::RTAUDIO) {
       return RtAudioBackend::numDevices();
     } else if (backend == AudioIOData::PORTAUDIO) {
+#ifdef AL_USE_PORTAUDIO
        return PortAudioBackend::numDevices();
+#endif
     } else if (backend == AudioIOData::DUMMY)  {
       return 1;
     }
@@ -714,12 +727,14 @@ AudioDevice::AudioDevice(int deviceNum, AudioIOData::Backend backend)
             mChannelsOutMax = info.outputChannels;
             mDefaultSampleRate = info.preferredSampleRate;
           } else if (backend == AudioIOData::PORTAUDIO) {
+#ifdef AL_USE_PORTAUDIO
             mImpl = (void *)Pa_GetDeviceInfo(deviceNum);
             strncpy(mName, ((const PaDeviceInfo*)mImpl)->name, 127);
             mName[127] = '\0';
             mChannelsInMax = ((const PaDeviceInfo*)mImpl)->maxInputChannels;
             mChannelsOutMax = ((const PaDeviceInfo*)mImpl)->maxOutputChannels;
             mDefaultSampleRate = ((const PaDeviceInfo*)mImpl)->defaultSampleRate;
+#endif
           } else if (backend == AudioIOData::DUMMY)  {
             strncpy(mName, "default\0", 8);
             mChannelsInMax = 2;
@@ -750,12 +765,14 @@ void AudioIO::init(
 	int outChansA, int inChansA, AudioIO::Backend backend
 ) {
 	switch(backend) {
-	case PORTAUDIO:
-		mImpl = new PortAudioBackend;
-		break;
     case RTAUDIO:
 		mImpl = new RtAudioBackend;
 		break;
+	case PORTAUDIO:
+#ifdef USE_PORTAUDIO
+		mImpl = new PortAudioBackend;
+		break;
+#endif
 	case DUMMY:
 		mImpl = new DummyAudioBackend;
 		break;
