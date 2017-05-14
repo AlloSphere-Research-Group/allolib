@@ -122,7 +122,7 @@ public:
 	void addVertex2(const VEC2& v){ addVertex2(v[0], v[1]); }
 
 	/// Append 3D vertex
-	void addVertex3(float x, float y, float z){ vertices3().append(Point3(x,y,z)); }
+	void addVertex3(float x, float y, float z=0){ vertices3().append(Point3(x,y,z)); }
 
 	/// Append 3D vertex
 	template <class VEC3>

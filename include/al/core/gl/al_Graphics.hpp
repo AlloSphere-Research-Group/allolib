@@ -55,6 +55,7 @@
 #include "al/core/system/al_Printing.hpp"
 
 #include "al/core/gl/al_VAOMesh.hpp"
+#include "al/core/gl/al_EasyVAO.hpp"
 #include "al/core/gl/al_GLEW.hpp"
 #include "al/core/gl/al_Shader.hpp"
 #include "al/core/gl/al_Texture.hpp"
@@ -381,6 +382,7 @@ public:
 
   void update();
   void draw(VAOMesh& mesh);
+  void draw(EasyVAO& vao);
 
   void texture(Texture& t, int binding_point = 0);
 

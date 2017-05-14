@@ -266,6 +266,11 @@ void Graphics::draw(VAOMesh& mesh) {
   mesh.draw();
 }
 
+void Graphics::draw(EasyVAO& vao) {
+  update();
+  vao.draw();
+}
+
 void Graphics::framebuffer(FBO& fbo) {
     fbo.bind();
 }

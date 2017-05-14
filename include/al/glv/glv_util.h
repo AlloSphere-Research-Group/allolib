@@ -231,6 +231,10 @@ public:
 		++mSize;
 	}
 
+	T* data() {
+		return mElems.data();
+	}
+
 private:
 	int mSize;
 	std::vector<T, Alloc> mElems;
