@@ -100,7 +100,15 @@ public:
     }
 
     void pop() {
-        stack.pop_back();
+        if (stack.size() > 1) { // why 1? don't pop all
+            stack.pop_back();
+        }
+        else if (stack.size() == 1) {
+            setIdentity();
+        }
+        else {
+            stack.emplace_back();
+        }
     }
 
     void mult(Matrix4f const& m) {
@@ -114,6 +122,7 @@ public:
     void setIdentity() {
         stack.back().setIdentity();
     }
+
 };
 
 /// Interface for setting graphics state and rendering Mesh
