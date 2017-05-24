@@ -148,6 +148,25 @@ float Graphics::uniformColorMix() {
   return mUniformColorMix;
 }
 
+void Graphics::textureMix(int i, float m) {
+    mTexMix[i] = m;
+    mTexMixChanged = true;
+}
+void Graphics::textureMix(float m) {
+    mTexMix[0] = m;
+    mTexMixChanged = true;
+}
+void Graphics::textureMix(float m0, float m1, float m2, float m3) {
+    mTexMix[0] = m0;
+    mTexMix[1] = m1;
+    mTexMix[2] = m2;
+    mTexMix[3] = m3;
+    mTexMixChanged = true;
+}
+float* Graphics::textureMix() {
+    return mTexMix;
+}
+
 void Graphics::viewport(const Viewport& v){
   mViewport.set(v);
   glViewport(mViewport.l, mViewport.b, mViewport.w, mViewport.h);
@@ -256,9 +275,22 @@ void Graphics::update() {
         shader().uniform("uniformColorMix", mUniformColorMix);
     }
 
+    if (mShaderChanged || mTexMixChanged) {
+        shader().uniform("tex0_mix", mTexMix[0]);
+        shader().uniform("tex1_mix", mTexMix[1]);
+        shader().uniform("tex2_mix", mTexMix[2]);
+        shader().uniform("tex3_mix", mTexMix[3]);
+    }
+
+    if (mShaderChanged || mLightingChanged) {
+        shader().uniform("light_mix", mLightMix0);
+    }
+
     mUniformColorChanged = false;
     mShaderChanged = false;
     mMatChanged = false;
+    mTexMixChanged = false;
+    mLightingChanged = false;
 }
 
 void Graphics::draw(VAOMesh& mesh) {

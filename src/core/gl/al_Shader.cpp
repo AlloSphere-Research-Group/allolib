@@ -212,7 +212,7 @@ bool ShaderProgram::compile(
   const std::string& vertSource,
   const std::string& fragSource,
   const std::string& geomSource
-){
+) {
   create(); // will destroy and recreate if already created
 
   mVertSource = vertSource;
@@ -247,7 +247,22 @@ bool ShaderProgram::compile(
   detach(mShaderF);
   if (bGeom) detach(mShaderG);
 
-  return linked();
+  if (linked()) {
+      set_al_default_uniforms();
+      return true;
+  }
+  else return false;
+}
+
+void ShaderProgram::set_al_default_uniforms() {
+    use();
+
+    uniform("tex0", 0);
+    uniform("tex1", 1);
+    uniform("tex2", 2);
+    uniform("tex3", 3);
+
+    use(0);
 }
 
 void ShaderProgram::onCreate(){
@@ -271,7 +286,7 @@ void ShaderProgram::use(unsigned programID){
 
 const ShaderProgram& ShaderProgram::use(){
   //if(active()){
-    validate();
+    //validate();
     use(id());
   //}
   //glUseProgramObjectARB((GLhandleARB)handle());

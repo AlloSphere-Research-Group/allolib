@@ -81,20 +81,48 @@ void main() {
 
 inline std::string al_default_frag_shader() { return R"(
 #version 330
-uniform sampler2D tex0;
-uniform float tex0_mix;
-uniform float light_mix;
+
 uniform vec4 uniformColor;
 uniform float uniformColorMix;
+
+uniform sampler2D tex0;
+uniform sampler2D tex1;
+uniform sampler2D tex2;
+uniform sampler2D tex3;
+uniform float tex0_mix;
+uniform float tex1_mix;
+uniform float tex2_mix;
+uniform float tex3_mix;
+
+uniform float light_mix;
+
 in vec4 color_;
 in vec2 texcoord_;
 in vec3 normal_;
+
 out vec4 frag_color;
+
 void main() {
-  vec4 tex_color0 = texture(tex0, texcoord_);
-  vec4 light_color = vec4(normal_, 1.0); // TODO
   vec4 color_val = mix(color_, uniformColor, uniformColorMix);
-  vec4 final_color = mix(mix(color_val, tex_color0, tex0_mix), light_color, light_mix);
+
+  float overall_tex_mix = max(tex0_mix, max(tex1_mix, max(tex2_mix, tex3_mix)));
+  float sum_tex_mix = tex0_mix + tex1_mix + tex2_mix + tex3_mix;
+  sum_tex_mix = max(sum_tex_mix, 0.0001); // prevent divide by 0
+  float inter_tex_mix0 = tex0_mix / sum_tex_mix;
+  float inter_tex_mix1 = tex1_mix / sum_tex_mix;
+  float inter_tex_mix2 = tex2_mix / sum_tex_mix;
+  float inter_tex_mix3 = tex3_mix / sum_tex_mix;
+  vec4 tex_color0 = texture(tex0, texcoord_) * tex0_mix;
+  vec4 tex_color1 = texture(tex1, texcoord_) * tex1_mix;
+  vec4 tex_color2 = texture(tex2, texcoord_) * tex2_mix;
+  vec4 tex_color3 = texture(tex3, texcoord_) * tex3_mix;
+  vec4 final_tex_color = tex_color0 + tex_color1 + tex_color2 + tex_color3;
+  vec4 color_with_tex = mix(color_val, final_tex_color, overall_tex_mix);
+  
+  // TODO: LIGHTING
+  vec4 light_color = vec4(normal_, 1.0);
+  vec4 final_color = mix(color_with_tex, light_color, light_mix);
+
   frag_color = final_color;
 }
 )";}
@@ -270,6 +298,8 @@ public:
 
   /// Print out all the input parameters to the shader
   void listParams() const;
+
+  void set_al_default_uniforms();
 
   /// Get location of uniform
   int uniform(const char * name) const;

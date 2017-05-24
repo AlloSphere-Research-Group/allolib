@@ -371,6 +371,11 @@ public:
   void uniformColorMix(float m);
   float uniformColorMix();
 
+  void textureMix(int i, float m);
+  void textureMix(float m);
+  void textureMix(float m0, float m1, float m2, float m3);
+  float* textureMix();
+
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
   /// Set viewport
@@ -409,22 +414,28 @@ protected:
   Viewport mViewport;
   Viewport mScissor;
 
-  ShaderProgram* mShaderPtr{ nullptr };
-  bool mShaderChanged {true};
+  ShaderProgram* mShaderPtr = nullptr;
+  bool mShaderChanged = false;
 
   Matrix4f mViewMat;
   Matrix4f mProjMat;
   MatrixStack mModelStack;
-  bool mMatChanged {true};
+  bool mMatChanged = false;
+  bool mSendIndividualMatrices = false;
 
   Color mClearColor {0, 0, 0, 1};
-  float mClearDepth {1};
+  float mClearDepth = 1;
 
-  Color mUniformColor;
-  float mUniformColorMix = 0;
-  bool mUniformColorChanged {true};
+  Color mUniformColor {1, 1, 1, 1};
+  float mUniformColorMix = 1;
+  bool mUniformColorChanged = false; // false because: default uniform values are set when shader is compiled
 
-  bool mSendIndividualMatrices {false};
+  float mTexMix[4] = {0, 0, 0, 0};
+  bool mTexMixChanged = false;
+
+  // TODO,lighting, light position, color, ...
+  float mLightMix0 = 0;
+  bool mLightingChanged = false;
 };
 
 }
