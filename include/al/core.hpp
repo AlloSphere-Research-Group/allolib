@@ -27,6 +27,7 @@
 #include "al/core/io/al_AudioIO.hpp"
 #include "al/core/io/al_AudioIOData.hpp"
 #include "al/core/io/al_ControlNav.hpp"
+#include "al/core/io/al_CSVReader.hpp"
 #include "al/core/io/al_Socket.hpp"
 #include "al/core/io/al_Window.hpp"
 

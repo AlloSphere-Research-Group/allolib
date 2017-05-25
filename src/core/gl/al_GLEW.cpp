@@ -16,10 +16,9 @@ void glew::init() {
 #endif
   GLenum err = glewInit();
   if (GLEW_OK != err) {
-    std::cout << "Error: " << glewGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
+    std::cout << "Glew Error: " << glewGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE); // FIXME? is this recommended way of terminating?
   }
-  std::cout << "Status: Using GLEW "
-    << glewGetString(GLEW_VERSION) << std::endl;
+  std::cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
   inited = true;
 }
