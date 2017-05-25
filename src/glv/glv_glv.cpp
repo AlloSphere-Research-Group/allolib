@@ -8,7 +8,7 @@ namespace glv{
 GLV::GLV(space_t width, space_t height)
 :	View(Rect(width, height)), mFocusedView(this)
 {
-	disable(DrawBorder | FocusHighlight);
+	disable(DrawBorder | FocusHighlight | DrawBack);
 //	cloneStyle();
 	instances().push_back(this);
 }
