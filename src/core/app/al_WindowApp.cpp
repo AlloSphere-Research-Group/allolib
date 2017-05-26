@@ -35,6 +35,7 @@ void WindowApp::open() {
   glfw::init();
   onInit();
   create();
+  gl::default_gl_settings();
   onCreate();
 }
 

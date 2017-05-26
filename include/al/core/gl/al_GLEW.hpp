@@ -16,6 +16,17 @@ void init();
 
 }
 
+namespace gl
+{
+
+inline void default_gl_settings() {
+	glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
+	glEnable(GL_LINE_SMOOTH);
+	glLineWidth(1);
+}
+
+}
+
 }
 
 #endif
