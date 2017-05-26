@@ -3,8 +3,9 @@ TODO
 - stereo window
 - fullscreen with specific monitor
 - connect omnirender
-- remove apr dependency (using oscpack's minial socket?
-
+- remove apr dependency (using oscpack's minial socket?)
+- stl thread
+- stl random
 
 DEPENDENCIES
 

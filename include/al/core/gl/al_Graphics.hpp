@@ -154,14 +154,9 @@ public:
 
   enum Capability {
     BLEND         = GL_BLEND,         /**< Blend rather than replace existing colors with new colors */
-    COLOR_MATERIAL      = GL_COLOR_MATERIAL,    /**< Use vertex colors with materials */
     DEPTH_TEST        = GL_DEPTH_TEST,      /**< Test depth of incoming fragments */
-    FOG           = GL_FOG,         /**< Apply fog effect */
-    LIGHTING        = GL_LIGHTING,        /**< Use lighting */
     SCISSOR_TEST      = GL_SCISSOR_TEST,      /**< Crop fragments according to scissor region */
     CULL_FACE       = GL_CULL_FACE,       /**< Cull faces */
-    RESCALE_NORMAL      = GL_RESCALE_NORMAL,    /**< Rescale normals to counteract an isotropic modelview scaling */
-    NORMALIZE       = GL_NORMALIZE        /**< Rescale normals to counteract non-isotropic modelview scaling */
   };
 
   enum Face {
