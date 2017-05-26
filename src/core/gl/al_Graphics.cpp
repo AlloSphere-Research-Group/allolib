@@ -92,7 +92,7 @@ void Graphics::scale(double x, double y, double z){
   mModelStack.mult(Matrix4f::scaling(x, y, z));
   mMatChanged = true;
 }
-void Graphics::lineWidth(float v) { glLineWidth(v); }
+// void Graphics::lineWidth(float v) { glLineWidth(v); }
 void Graphics::pointSize(float v) { glPointSize(v); }
 void Graphics::polygonMode(PolygonMode m, Face f){ glPolygonMode(f,m); }
 
