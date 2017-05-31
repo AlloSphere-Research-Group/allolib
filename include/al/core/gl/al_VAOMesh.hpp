@@ -14,9 +14,9 @@ enum AttribLayout: unsigned int {
   ATTRIB_POSITION = 0,
   ATTRIB_COLOR = 1,
   ATTRIB_TEXCOORD_2D = 2,
-  ATTRIB_NORMAL = 3,
-  ATTRIB_TEXCOORD_3D = 4, // also could be used for other purposes
-  ATTRIB_TEXCOORD_1D = 5, //
+  ATTRIB_NORMAL = 3
+  // ATTRIB_TEXCOORD_3D = 4, // also could be used for other purposes
+  // ATTRIB_TEXCOORD_1D = 5, //
 };
 
 class VAOMesh : public Mesh {
@@ -36,9 +36,9 @@ public:
         mPositionAtt {ATTRIB_POSITION, 3},
         mColorAtt {ATTRIB_COLOR, 4},
         mTexcoord2dAtt {ATTRIB_TEXCOORD_2D, 2},
-        mNormalAtt {ATTRIB_NORMAL, 3},
-        mTexcoord3dAtt {ATTRIB_TEXCOORD_3D, 3},
-        mTexcoord1dAtt {ATTRIB_TEXCOORD_1D, 1}
+        mNormalAtt {ATTRIB_NORMAL, 3}
+        // mTexcoord3dAtt {ATTRIB_TEXCOORD_3D, 3},
+        // mTexcoord1dAtt {ATTRIB_TEXCOORD_1D, 1}
     ;
     BufferObject mIndexBuffer;
 

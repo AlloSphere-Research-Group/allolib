@@ -248,7 +248,11 @@ void Mesh::generateNormals(bool normalize, bool equalWeightPerFace) {
   if(Nv < 3) return;
 
   // make same number of normals as vertices
+  normals().clear();
   normals().reserve(Nv);
+  for (int i = 0; i < Nv; i += 1) {
+    normals().emplace_back();
+  }
 
   // compute vertex based normals
   if(indices().size()){

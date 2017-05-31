@@ -440,7 +440,12 @@ public:
   /// Get trace (sum of diagonal elements)
   T trace() const { return diagonal().sum(); }
 
-
+  Mat<N,T> inversed() const {
+    Mat<N,T> res(*this);
+    invert(res);
+    return res;
+  }
+  
   // Affine transformations
 
   /// Rotate transformation matrix on a local plane (A' = AR)

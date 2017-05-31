@@ -33,8 +33,8 @@ void VAOMesh::update() {
   updateAttrib(colors(), mColorAtt);
   updateAttrib(texCoord2s(), mTexcoord2dAtt);
   updateAttrib(normals(), mNormalAtt);
-  updateAttrib(texCoord3s(), mTexcoord3dAtt);
-  updateAttrib(texCoord1s(), mTexcoord1dAtt);
+  // updateAttrib(texCoord3s(), mTexcoord3dAtt);
+  // updateAttrib(texCoord1s(), mTexcoord1dAtt);
   mVao.unbind();
   if (indices().size() > 0) {
     if (!mIndexBuffer.created()) {

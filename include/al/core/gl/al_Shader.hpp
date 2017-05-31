@@ -60,7 +60,13 @@ namespace al{
 
 inline std::string al_default_vert_shader() { return R"(
 #version 330
-uniform mat4 MVP;
+uniform mat4 MV;
+uniform mat4 P;
+uniform mat4 N; // normal matrix: transpose of inverse of MV
+uniform vec3 light0_eye;
+uniform vec3 light1_eye;
+uniform vec3 light2_eye;
+uniform vec3 light3_eye;
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec4 color;
@@ -69,13 +75,25 @@ layout (location = 3) in vec3 normal;
 
 out vec4 color_;
 out vec2 texcoord_;
-out vec3 normal_;
+out vec3 normal_eye;
+out vec3 light0_dir;
+out vec3 light1_dir;
+out vec3 light2_dir;
+out vec3 light3_dir;
 
 void main() {
-  gl_Position = MVP * vec4(position, 1.0);
+  vec4 vert_eye = MV * vec4(position, 1.0);
+  gl_Position = P * vert_eye;
+
   color_ = color;
   texcoord_ = texcoord;
-  normal_ = normal;
+
+  normal_eye = (N * vec4(normal, 0.0)).xyz;
+
+  light0_dir = light0_eye - vert_eye.xyz;
+  light1_dir = light1_eye - vert_eye.xyz;
+  light2_dir = light2_eye - vert_eye.xyz;
+  light3_dir = light3_eye - vert_eye.xyz;
 }
 )";}
 
@@ -89,41 +107,76 @@ uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 uniform sampler2D tex3;
+
 uniform float tex0_mix;
 uniform float tex1_mix;
 uniform float tex2_mix;
 uniform float tex3_mix;
 
 uniform float light_mix;
+uniform float ambient_brightness;
+uniform float light0_intensity;
+uniform float light1_intensity;
+uniform float light2_intensity;
+uniform float light3_intensity;
+
 
 in vec4 color_;
 in vec2 texcoord_;
-in vec3 normal_;
+in vec3 normal_eye;
+in vec3 light0_dir;
+in vec3 light1_dir;
+in vec3 light2_dir;
+in vec3 light3_dir;
 
 out vec4 frag_color;
 
+vec3 normalized(vec3 v) {
+  vec3 res = vec3(0.0);
+  if (length(v) > 0.0) {
+    res = normalize(v);
+  }
+  return res;
+}
+
 void main() {
-  vec4 color_val = mix(color_, uniformColor, uniformColorMix);
+  vec4 plain_color = mix(color_, uniformColor, uniformColorMix);
 
   float overall_tex_mix = max(tex0_mix, max(tex1_mix, max(tex2_mix, tex3_mix)));
   float sum_tex_mix = tex0_mix + tex1_mix + tex2_mix + tex3_mix;
   sum_tex_mix = max(sum_tex_mix, 0.0001); // prevent divide by 0
-  float inter_tex_mix0 = tex0_mix / sum_tex_mix;
-  float inter_tex_mix1 = tex1_mix / sum_tex_mix;
-  float inter_tex_mix2 = tex2_mix / sum_tex_mix;
-  float inter_tex_mix3 = tex3_mix / sum_tex_mix;
-  vec4 tex_color0 = texture(tex0, texcoord_) * tex0_mix;
-  vec4 tex_color1 = texture(tex1, texcoord_) * tex1_mix;
-  vec4 tex_color2 = texture(tex2, texcoord_) * tex2_mix;
-  vec4 tex_color3 = texture(tex3, texcoord_) * tex3_mix;
+  float inter_tex0_mix = tex0_mix / sum_tex_mix;
+  float inter_tex1_mix = tex1_mix / sum_tex_mix;
+  float inter_tex2_mix = tex2_mix / sum_tex_mix;
+  float inter_tex3_mix = tex3_mix / sum_tex_mix;
+  vec4 tex_color0 = texture(tex0, texcoord_) * inter_tex0_mix;
+  vec4 tex_color1 = texture(tex1, texcoord_) * inter_tex1_mix;
+  vec4 tex_color2 = texture(tex2, texcoord_) * inter_tex2_mix;
+  vec4 tex_color3 = texture(tex3, texcoord_) * inter_tex3_mix;
   vec4 final_tex_color = tex_color0 + tex_color1 + tex_color2 + tex_color3;
-  vec4 color_with_tex = mix(color_val, final_tex_color, overall_tex_mix);
   
-  // TODO: LIGHTING
-  vec4 light_color = vec4(normal_, 1.0);
-  vec4 final_color = mix(color_with_tex, light_color, light_mix);
+  // function 'normalized' only normalize when size greater than 0
+  // other wise returns zero vector
+  vec3 normalized_normal = normalized(normal_eye);
+  vec3 normalized_light0_dir = normalized(light0_dir);
+  vec3 normalized_light1_dir = normalized(light1_dir);
+  vec3 normalized_light2_dir = normalized(light2_dir);
+  vec3 normalized_light3_dir = normalized(light3_dir);
 
-  frag_color = final_color;
+  // simplified diffuse and ambient approximation
+  vec4 diffuse = mix(plain_color, vec4(0.0, 0.0, 0.0, plain_color.a), ambient_brightness);
+  vec4 ambient = mix(plain_color, vec4(0.0, 0.0, 0.0, plain_color.a), 1.0 - ambient_brightness);
+  float lambert0 = dot(normalized_normal, normalized_light0_dir);
+  float lambert1 = dot(normalized_normal, normalized_light1_dir);
+  float lambert2 = dot(normalized_normal, normalized_light2_dir);
+  float lambert3 = dot(normalized_normal, normalized_light3_dir);
+  vec4 light0_color = max(lambert0, 0.0) * diffuse * light0_intensity;
+  vec4 light1_color = max(lambert1, 0.0) * diffuse * light1_intensity;
+  vec4 light2_color = max(lambert2, 0.0) * diffuse * light2_intensity;
+  vec4 light3_color = max(lambert3, 0.0) * diffuse * light3_intensity;
+  vec4 final_light_color = ambient + light0_color + light1_color + light2_color + light3_color;
+
+  frag_color = mix(mix(plain_color, final_tex_color, overall_tex_mix), final_light_color, light_mix);
 }
 )";}
 

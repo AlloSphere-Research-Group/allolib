@@ -372,6 +372,21 @@ public:
   void textureMix(float m0, float m1, float m2, float m3);
   float* textureMix();
 
+  void lightMix(float m);
+  float lightMix();
+
+  void lightIntensity(int i, float m);
+  void lightIntensity(float m);
+  void lightIntensity(float m0, float m1, float m2, float m3);
+  float* lightIntensity();
+
+  void lightPos(Vec3f p);
+  void lightPos(float x, float y, float z) { lightPos(Vec3f{x, y, z}); }
+  void lightPos(int i, Vec3f p);
+  void lightPos(Vec3f p0, Vec3f p1, Vec3f p2, Vec3f p3);
+
+  void ambientBrightness(float b);
+
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
   /// Set viewport
@@ -401,9 +416,6 @@ public:
 
   Window& window() { return mWindow; }
 
-  // make M, V, P matrices individually sent as uniform
-  void sendIndividualMatrices(bool b) { mSendIndividualMatrices = b; }
-
 protected:
   Window& mWindow;
 
@@ -417,21 +429,28 @@ protected:
   Matrix4f mProjMat;
   MatrixStack mModelStack;
   bool mMatChanged = false;
-  bool mSendIndividualMatrices = false;
 
   Color mClearColor {0, 0, 0, 1};
   float mClearDepth = 1;
 
   Color mUniformColor {1, 1, 1, 1};
   float mUniformColorMix = 1;
-  bool mUniformColorChanged = false; // false because: default uniform values are set when shader is compiled
+  bool mUniformColorChanged = false;
 
   float mTexMix[4] = {0, 0, 0, 0};
   bool mTexMixChanged = false;
 
-  // TODO,lighting, light position, color, ...
-  float mLightMix0 = 0;
+  float mLightMix = 0;
+  float mLightIntensity[4] = {0, 0, 0, 0};
+  Vec3f mLightPos[4] = {
+    Vec3f{0.0f, 1000.0f, 0.0f},
+    Vec3f{0.0f, 1000.0f, 0.0f},
+    Vec3f{0.0f, 1000.0f, 0.0f},
+    Vec3f{0.0f, 1000.0f, 0.0f}
+  };
+  float mAmbientBrightness = 0.2; // a picked value that looks good by default
   bool mLightingChanged = false;
+
 };
 
 }

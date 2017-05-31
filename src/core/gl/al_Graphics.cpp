@@ -1,6 +1,7 @@
-#include <stdio.h>
-
 #include "al/core/gl/al_Graphics.hpp"
+
+#include <stdio.h>
+#include <iostream>
 
 namespace al {
 
@@ -167,6 +168,56 @@ float* Graphics::textureMix() {
     return mTexMix;
 }
 
+void Graphics::lightMix(float m) {
+    mLightMix = m;
+    mLightingChanged = true;
+}
+float Graphics::lightMix() {
+    return mLightMix;
+}
+
+void Graphics::lightIntensity(int i, float m) {
+    mLightIntensity[i] = m;
+    mLightingChanged = true;
+}
+void Graphics::lightIntensity(float m) {
+    mLightIntensity[0] = m;
+    mLightingChanged = true;
+}
+void Graphics::lightIntensity(float m0, float m1, float m2, float m3) {
+    mLightIntensity[0] = m0;
+    mLightIntensity[1] = m1;
+    mLightIntensity[2] = m2;
+    mLightIntensity[3] = m3;
+    mLightingChanged = true;
+}
+float* Graphics::lightIntensity() {
+    return mLightIntensity;
+}
+
+void Graphics::lightPos(Vec3f p) {
+  mLightPos[0] = p;
+  mLightingChanged = true;
+}
+
+void Graphics::lightPos(int i, Vec3f p) {
+  mLightPos[i] = p;
+  mLightingChanged = true;
+}
+
+void Graphics::lightPos(Vec3f p0, Vec3f p1, Vec3f p2, Vec3f p3) {
+    mLightPos[0] = p0;
+    mLightPos[1] = p1;
+    mLightPos[2] = p2;
+    mLightPos[3] = p3;
+    mLightingChanged = true;
+}
+
+void Graphics::ambientBrightness(float b) {
+  mAmbientBrightness = b;
+  mLightingChanged = true;
+}
+
 void Graphics::viewport(const Viewport& v){
   mViewport.set(v);
   glViewport(mViewport.l, mViewport.b, mViewport.w, mViewport.h);
@@ -261,13 +312,10 @@ void Graphics::update() {
     }
 
     if (mShaderChanged || mMatChanged) {
-        shader().uniform("MVP", mProjMat * mViewMat * modelMatrix());
-
-        if (mSendIndividualMatrices) {
-            shader().uniform("M", modelMatrix());
-            shader().uniform("V", viewMatrix());
-            shader().uniform("P", projMatrix());
-        }
+        auto MV = viewMatrix() * modelMatrix();
+        shader().uniform("MV", MV);
+        shader().uniform("P", projMatrix());
+        shader().uniform("N", MV.inversed().transpose());
     }
 
     if (mShaderChanged || mUniformColorChanged) {
@@ -283,12 +331,28 @@ void Graphics::update() {
     }
 
     if (mShaderChanged || mLightingChanged) {
-        shader().uniform("light_mix", mLightMix0);
+        shader().uniform("light_mix", mLightMix);
+        shader().uniform("ambient_brightness", mAmbientBrightness);
+        shader().uniform("light0_intensity", mLightIntensity[0]);
+        shader().uniform("light1_intensity", mLightIntensity[1]);
+        shader().uniform("light2_intensity", mLightIntensity[2]);
+        shader().uniform("light3_intensity", mLightIntensity[3]);
+        auto mult43 = [](Mat4f const& m, Vec3f const& v) {
+          return Vec3f {
+            m(0, 0) * v[0] + m(0, 1) * v[1] + m(0, 2) * v[2] + m(0, 3),
+            m(1, 0) * v[0] + m(1, 1) * v[1] + m(1, 2) * v[2] + m(1, 3),
+            m(2, 0) * v[0] + m(2, 1) * v[1] + m(2, 2) * v[2] + m(2, 3)
+          };
+        };
+        shader().uniform("light0_eye", mult43(viewMatrix(), mLightPos[0]));
+        shader().uniform("light1_eye", mult43(viewMatrix(), mLightPos[1]));
+        shader().uniform("light2_eye", mult43(viewMatrix(), mLightPos[2]));
+        shader().uniform("light3_eye", mult43(viewMatrix(), mLightPos[3]));
     }
 
-    mUniformColorChanged = false;
     mShaderChanged = false;
     mMatChanged = false;
+    mUniformColorChanged = false;
     mTexMixChanged = false;
     mLightingChanged = false;
 }
