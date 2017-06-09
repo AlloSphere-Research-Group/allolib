@@ -383,6 +383,7 @@ public:
   void lightPos(Vec3f p);
   void lightPos(float x, float y, float z) { lightPos(Vec3f{x, y, z}); }
   void lightPos(int i, Vec3f p);
+  void lightPos(int i, float x, float y, float z) { lightPos(i, Vec3f{x, y, z}); }
   void lightPos(Vec3f p0, Vec3f p1, Vec3f p2, Vec3f p3);
 
   void ambientBrightness(float b);
@@ -448,7 +449,7 @@ protected:
     Vec3f{0.0f, 1000.0f, 0.0f},
     Vec3f{0.0f, 1000.0f, 0.0f}
   };
-  float mAmbientBrightness = 0.2; // a picked value that looks good by default
+  float mAmbientBrightness = 0.2; // 0.2: a picked value that looks good by default
   bool mLightingChanged = false;
 
 };

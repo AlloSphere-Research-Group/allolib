@@ -63,6 +63,7 @@ inline std::string al_default_vert_shader() { return R"(
 uniform mat4 MV;
 uniform mat4 P;
 uniform mat4 N; // normal matrix: transpose of inverse of MV
+
 uniform vec3 light0_eye;
 uniform vec3 light1_eye;
 uniform vec3 light2_eye;
@@ -120,7 +121,6 @@ uniform float light1_intensity;
 uniform float light2_intensity;
 uniform float light3_intensity;
 
-
 in vec4 color_;
 in vec2 texcoord_;
 in vec3 normal_eye;
@@ -153,6 +153,7 @@ void main() {
   vec4 tex_color1 = texture(tex1, texcoord_) * inter_tex1_mix;
   vec4 tex_color2 = texture(tex2, texcoord_) * inter_tex2_mix;
   vec4 tex_color3 = texture(tex3, texcoord_) * inter_tex3_mix;
+
   vec4 final_tex_color = tex_color0 + tex_color1 + tex_color2 + tex_color3;
   
   // function 'normalized' only normalize when size greater than 0
@@ -166,6 +167,7 @@ void main() {
   // simplified diffuse and ambient approximation
   vec4 diffuse = mix(plain_color, vec4(0.0, 0.0, 0.0, plain_color.a), ambient_brightness);
   vec4 ambient = mix(plain_color, vec4(0.0, 0.0, 0.0, plain_color.a), 1.0 - ambient_brightness);
+
   float lambert0 = dot(normalized_normal, normalized_light0_dir);
   float lambert1 = dot(normalized_normal, normalized_light1_dir);
   float lambert2 = dot(normalized_normal, normalized_light2_dir);
@@ -174,6 +176,7 @@ void main() {
   vec4 light1_color = max(lambert1, 0.0) * diffuse * light1_intensity;
   vec4 light2_color = max(lambert2, 0.0) * diffuse * light2_intensity;
   vec4 light3_color = max(lambert3, 0.0) * diffuse * light3_intensity;
+  
   vec4 final_light_color = ambient + light0_color + light1_color + light2_color + light3_color;
 
   frag_color = mix(mix(plain_color, final_tex_color, overall_tex_mix), final_light_color, light_mix);
