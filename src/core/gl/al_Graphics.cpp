@@ -168,11 +168,11 @@ float* Graphics::textureMix() {
     return mTexMix;
 }
 
-void Graphics::lightMix(float m) {
+void Graphics::lightingMix(float m) {
     mLightMix = m;
     mLightingChanged = true;
 }
-float Graphics::lightMix() {
+float Graphics::lightingMix() {
     return mLightMix;
 }
 

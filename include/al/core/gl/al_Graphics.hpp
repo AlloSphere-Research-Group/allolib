@@ -372,8 +372,8 @@ public:
   void textureMix(float m0, float m1, float m2, float m3);
   float* textureMix();
 
-  void lightMix(float m);
-  float lightMix();
+  void lightingMix(float m);
+  float lightingMix();
 
   void lightIntensity(int i, float m);
   void lightIntensity(float m);
