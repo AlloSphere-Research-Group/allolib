@@ -297,7 +297,7 @@ void Window::implSetCursor() {
 }
 
 void Window::implSetCursorHide() {
-
+  glfwSetInputMode(mImpl->mGLFWwindow, GLFW_CURSOR, mCursorHide? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
 }
 
 void Window::implSetDimensions() {
