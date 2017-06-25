@@ -367,26 +367,10 @@ public:
   void uniformColorMix(float m);
   float uniformColorMix();
 
-  void textureMix(int i, float m);
   void textureMix(float m);
-  void textureMix(float m0, float m1, float m2, float m3);
-  float* textureMix();
-
-  void lightingMix(float m);
-  float lightingMix();
-
-  void lightIntensity(int i, float m);
-  void lightIntensity(float m);
-  void lightIntensity(float m0, float m1, float m2, float m3);
-  float* lightIntensity();
-
-  void lightPos(Vec3f p);
-  void lightPos(float x, float y, float z) { lightPos(Vec3f{x, y, z}); }
-  void lightPos(int i, Vec3f p);
-  void lightPos(int i, float x, float y, float z) { lightPos(i, Vec3f{x, y, z}); }
-  void lightPos(Vec3f p0, Vec3f p1, Vec3f p2, Vec3f p3);
-
-  void ambientBrightness(float b);
+  float textureMix();
+  void texture(int binding_point); // user can bind textures outside this class and only inform the binding point
+  void texture(Texture& t, int binding_point = 0);
 
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
@@ -409,8 +393,6 @@ public:
   void update();
   void draw(VAOMesh& mesh);
   void draw(EasyVAO& vao);
-
-  void texture(Texture& t, int binding_point = 0);
 
   void framebuffer(FBO& fbo);
   void framebuffer(unsigned int fboID);
@@ -438,20 +420,9 @@ protected:
   float mUniformColorMix = 1;
   bool mUniformColorChanged = false;
 
-  float mTexMix[4] = {0, 0, 0, 0};
-  bool mTexMixChanged = false;
-
-  float mLightMix = 0;
-  float mLightIntensity[4] = {0, 0, 0, 0};
-  Vec3f mLightPos[4] = {
-    Vec3f{0.0f, 1000.0f, 0.0f},
-    Vec3f{0.0f, 1000.0f, 0.0f},
-    Vec3f{0.0f, 1000.0f, 0.0f},
-    Vec3f{0.0f, 1000.0f, 0.0f}
-  };
-  float mAmbientBrightness = 0.2; // 0.2: a picked value that looks good by default
-  bool mLightingChanged = false;
-
+  int mTexBindingPoint = 0;
+  float mTexMix = 0;
+  bool mTexChanged = false;
 };
 
 }

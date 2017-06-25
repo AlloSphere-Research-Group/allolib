@@ -149,73 +149,23 @@ float Graphics::uniformColorMix() {
   return mUniformColorMix;
 }
 
-void Graphics::textureMix(int i, float m) {
-    mTexMix[i] = m;
-    mTexMixChanged = true;
-}
 void Graphics::textureMix(float m) {
-    mTexMix[0] = m;
-    mTexMixChanged = true;
+    mTexMix = m;
+    mTexChanged = true;
 }
-void Graphics::textureMix(float m0, float m1, float m2, float m3) {
-    mTexMix[0] = m0;
-    mTexMix[1] = m1;
-    mTexMix[2] = m2;
-    mTexMix[3] = m3;
-    mTexMixChanged = true;
-}
-float* Graphics::textureMix() {
+
+float Graphics::textureMix() {
     return mTexMix;
 }
 
-void Graphics::lightingMix(float m) {
-    mLightMix = m;
-    mLightingChanged = true;
-}
-float Graphics::lightingMix() {
-    return mLightMix;
+void Graphics::texture(int binding_point) {
+  mTexBindingPoint = binding_point;
+  mTexChanged = true;
 }
 
-void Graphics::lightIntensity(int i, float m) {
-    mLightIntensity[i] = m;
-    mLightingChanged = true;
-}
-void Graphics::lightIntensity(float m) {
-    mLightIntensity[0] = m;
-    mLightingChanged = true;
-}
-void Graphics::lightIntensity(float m0, float m1, float m2, float m3) {
-    mLightIntensity[0] = m0;
-    mLightIntensity[1] = m1;
-    mLightIntensity[2] = m2;
-    mLightIntensity[3] = m3;
-    mLightingChanged = true;
-}
-float* Graphics::lightIntensity() {
-    return mLightIntensity;
-}
-
-void Graphics::lightPos(Vec3f p) {
-  mLightPos[0] = p;
-  mLightingChanged = true;
-}
-
-void Graphics::lightPos(int i, Vec3f p) {
-  mLightPos[i] = p;
-  mLightingChanged = true;
-}
-
-void Graphics::lightPos(Vec3f p0, Vec3f p1, Vec3f p2, Vec3f p3) {
-    mLightPos[0] = p0;
-    mLightPos[1] = p1;
-    mLightPos[2] = p2;
-    mLightPos[3] = p3;
-    mLightingChanged = true;
-}
-
-void Graphics::ambientBrightness(float b) {
-  mAmbientBrightness = b;
-  mLightingChanged = true;
+void Graphics::texture(Texture& t, int binding_point) {
+  t.bind(binding_point);
+  texture(binding_point);
 }
 
 void Graphics::viewport(const Viewport& v){
@@ -274,6 +224,7 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
     viewport(x, y, w, h);
     break;
 
+    // [!] TODO: move this to Viewpoint class
   case Viewpoint::ORTHO_FOR_2D:
     // 1. place eye so that bottom left is (0, 0), top right is (width, height)
     // 2. set lens to be ortho, with given (width and height)
@@ -301,10 +252,6 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
   mMatChanged = true;
 }
 
-void Graphics::texture(Texture& t, int binding_point) {
-  t.bind(binding_point);
-}
-
 void Graphics::update() {
     if (mShaderPtr == nullptr) {
         AL_WARN_ONCE("shader not bound: bind shader by g.shader(myShader)");
@@ -315,7 +262,6 @@ void Graphics::update() {
         auto MV = viewMatrix() * modelMatrix();
         shader().uniform("MV", MV);
         shader().uniform("P", projMatrix());
-        shader().uniform("N", MV.inversed().transpose());
     }
 
     if (mShaderChanged || mUniformColorChanged) {
@@ -323,38 +269,15 @@ void Graphics::update() {
         shader().uniform("uniformColorMix", mUniformColorMix);
     }
 
-    if (mShaderChanged || mTexMixChanged) {
-        shader().uniform("tex0_mix", mTexMix[0]);
-        shader().uniform("tex1_mix", mTexMix[1]);
-        shader().uniform("tex2_mix", mTexMix[2]);
-        shader().uniform("tex3_mix", mTexMix[3]);
-    }
-
-    if (mShaderChanged || mLightingChanged) {
-        shader().uniform("light_mix", mLightMix);
-        shader().uniform("ambient_brightness", mAmbientBrightness);
-        shader().uniform("light0_intensity", mLightIntensity[0]);
-        shader().uniform("light1_intensity", mLightIntensity[1]);
-        shader().uniform("light2_intensity", mLightIntensity[2]);
-        shader().uniform("light3_intensity", mLightIntensity[3]);
-        auto mult43 = [](Mat4f const& m, Vec3f const& v) {
-          return Vec3f {
-            m(0, 0) * v[0] + m(0, 1) * v[1] + m(0, 2) * v[2] + m(0, 3),
-            m(1, 0) * v[0] + m(1, 1) * v[1] + m(1, 2) * v[2] + m(1, 3),
-            m(2, 0) * v[0] + m(2, 1) * v[1] + m(2, 2) * v[2] + m(2, 3)
-          };
-        };
-        shader().uniform("light0_eye", mult43(viewMatrix(), mLightPos[0]));
-        shader().uniform("light1_eye", mult43(viewMatrix(), mLightPos[1]));
-        shader().uniform("light2_eye", mult43(viewMatrix(), mLightPos[2]));
-        shader().uniform("light3_eye", mult43(viewMatrix(), mLightPos[3]));
+    if (mShaderChanged || mTexChanged) {
+        shader().uniform("tex0", mTexBindingPoint);
+        shader().uniform("tex0_mix", mTexMix);
     }
 
     mShaderChanged = false;
     mMatChanged = false;
     mUniformColorChanged = false;
-    mTexMixChanged = false;
-    mLightingChanged = false;
+    mTexChanged = false;
 }
 
 void Graphics::draw(VAOMesh& mesh) {

@@ -230,7 +230,7 @@ bool ShaderProgram::compile(
   mShaderF.printLog();
   attach(mShaderF);
 
-  bool bGeom = geomSource[0];
+  bool bGeom = geomSource[0]; // because geomSrouce's default value is ""
   if(bGeom){
     mShaderG.source(geomSource, al::Shader::GEOMETRY);
     mShaderG.compile();
@@ -247,22 +247,11 @@ bool ShaderProgram::compile(
   detach(mShaderF);
   if (bGeom) detach(mShaderG);
 
-  if (linked()) {
-      set_al_default_uniforms();
-      return true;
+  if (!linked()) {
+      return false;
   }
-  else return false;
-}
-
-void ShaderProgram::set_al_default_uniforms() {
-    use();
-
-    uniform("tex0", 0);
-    uniform("tex1", 1);
-    uniform("tex2", 2);
-    uniform("tex3", 3);
-
-    use(0);
+  
+  return true;
 }
 
 void ShaderProgram::onCreate(){
@@ -326,15 +315,17 @@ bool ShaderProgram::linked() const {
 
 int ShaderProgram::uniform(const char * name) const {
   GET_LOC(mUniformLocs, glGetUniformLocation);
-  if(-1 == loc)
+  if(-1 == loc) {
     AL_WARN_ONCE("No such uniform named \"%s\"", name);
+  }
   return loc;
 }
 
 int ShaderProgram::attribute(const char * name) const {
   GET_LOC(mAttribLocs, glGetAttribLocation);
-  if(-1 == loc)
-        AL_WARN_ONCE("No such attribute named \"%s\"", name);
+  if(-1 == loc) {
+    AL_WARN_ONCE("No such attribute named \"%s\"", name);
+  }
   return loc;
 }
 
