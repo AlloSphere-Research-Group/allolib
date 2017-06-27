@@ -136,36 +136,20 @@ void Graphics::uniformColor(Color const& c) {
   mUniformColor = c;
   mUniformColorChanged = true;
 }
-Color Graphics::uniformColor() {
-  return mUniformColor;
-}
 
 void Graphics::uniformColorMix(float m) {
   mUniformColorMix = m;
   mUniformColorChanged = true;
 }
 
-float Graphics::uniformColorMix() {
-  return mUniformColorMix;
-}
-
-void Graphics::textureMix(float m) {
-    mTexMix = m;
+void Graphics::textureMix(float m, int tex_num) {
+    mTexMix[tex_num] = m;
     mTexChanged = true;
 }
 
-float Graphics::textureMix() {
-    return mTexMix;
-}
-
-void Graphics::texture(int binding_point) {
-  mTexBindingPoint = binding_point;
+void Graphics::texture(Texture& t, int tex_num) {
+  mTexBindingPoint[tex_num] = t.bindingPoint();
   mTexChanged = true;
-}
-
-void Graphics::texture(Texture& t, int binding_point) {
-  t.bind(binding_point);
-  texture(binding_point);
 }
 
 void Graphics::viewport(const Viewport& v){
@@ -259,8 +243,7 @@ void Graphics::update() {
     }
 
     if (mShaderChanged || mMatChanged) {
-        auto MV = viewMatrix() * modelMatrix();
-        shader().uniform("MV", MV);
+        shader().uniform("MV", viewMatrix() * modelMatrix());
         shader().uniform("P", projMatrix());
     }
 
@@ -270,8 +253,12 @@ void Graphics::update() {
     }
 
     if (mShaderChanged || mTexChanged) {
-        shader().uniform("tex0", mTexBindingPoint);
-        shader().uniform("tex0_mix", mTexMix);
+        shader().uniform("tex0", mTexBindingPoint[0]);
+        shader().uniform("tex1", mTexBindingPoint[1]);
+        shader().uniform("tex2", mTexBindingPoint[2]);
+        shader().uniform("tex0_mix", mTexMix[0]);
+        shader().uniform("tex1_mix", mTexMix[1]);
+        shader().uniform("tex2_mix", mTexMix[2]);
     }
 
     mShaderChanged = false;

@@ -6,6 +6,8 @@
 #include "al/core/gl/al_VAO.hpp"
 
 #include <unordered_map>
+#include <memory>
+#include <iostream>
 
 namespace al {
 
@@ -19,6 +21,8 @@ enum AttribLayout: unsigned int {
   // ATTRIB_TEXCOORD_1D = 5, //
 };
 
+// stores gpu objects as shared pointer to that this class can be copied for moved
+// this is usefule for storing this class in std::vector, etc.
 class VAOMesh : public Mesh {
 public:
     static std::unordered_map<unsigned int, unsigned int> mPrimMap;
@@ -30,17 +34,34 @@ public:
         MeshAttrib(unsigned int i, int s): index(i), size(s) {}
     };
 
-    unsigned int mGLPrimMode = GL_TRIANGLES;
-    VAO mVao;
-    MeshAttrib
-        mPositionAtt {ATTRIB_POSITION, 3},
-        mColorAtt {ATTRIB_COLOR, 4},
-        mTexcoord2dAtt {ATTRIB_TEXCOORD_2D, 2},
-        mNormalAtt {ATTRIB_NORMAL, 3}
-        // mTexcoord3dAtt {ATTRIB_TEXCOORD_3D, 3},
-        // mTexcoord1dAtt {ATTRIB_TEXCOORD_1D, 1}
-    ;
-    BufferObject mIndexBuffer;
+    struct VAOWrapper {
+        unsigned int GLPrimMode = GL_TRIANGLES;
+        VAO vao;
+        MeshAttrib
+            positionAtt {ATTRIB_POSITION, 3},
+            colorAtt {ATTRIB_COLOR, 4},
+            texcoord2dAtt {ATTRIB_TEXCOORD_2D, 2},
+            normalAtt {ATTRIB_NORMAL, 3}
+            // mTexcoord3dAtt {ATTRIB_TEXCOORD_3D, 3},
+            // mTexcoord1dAtt {ATTRIB_TEXCOORD_1D, 1}
+        ;
+        BufferObject indexBuffer;
+    };
+
+    std::shared_ptr<VAOWrapper> vaoWrapper;
+
+    VAOMesh();
+    VAOMesh(VAOMesh const& other);
+    VAOMesh(VAOMesh&& other);
+    VAOMesh& operator = (VAOMesh const& other);
+    VAOMesh& operator = (VAOMesh&& other);
+
+    VAO& vao() { return vaoWrapper->vao; }
+    MeshAttrib& positionAtt() { return vaoWrapper->positionAtt; }
+    MeshAttrib& colorAtt() { return vaoWrapper->colorAtt; }
+    MeshAttrib& texcoord2dAtt() { return vaoWrapper->texcoord2dAtt; }
+    MeshAttrib& normalAtt() { return vaoWrapper->normalAtt; }
+    BufferObject& indexBuffer() { return vaoWrapper->indexBuffer; }
 
     void update();
 

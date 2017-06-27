@@ -26,6 +26,17 @@ Mesh::Mesh(const Mesh& cpy)
   mPrimitive(cpy.mPrimitive)
 {}
 
+void Mesh::copy(Mesh const& m) {
+  mVertices = m.mVertices;
+  mNormals = m.mNormals;
+  mColors = m.mColors;
+  mTexCoord1s = m.mTexCoord1s;
+  mTexCoord2s = m.mTexCoord2s;
+  mTexCoord3s = m.mTexCoord3s;
+  mIndices = m.mIndices;
+  mPrimitive = m.mPrimitive;
+}
+
 Mesh& Mesh::reset() {
   vertices().clear();
   normals().clear();

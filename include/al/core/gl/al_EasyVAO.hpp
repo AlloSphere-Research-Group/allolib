@@ -6,9 +6,6 @@
         - This class does not store cpu side data
         - Any user data format could be used (custom vector4, custom color class, etc)
       as long as they are stored as contiguous memory
-    
-    TODO
-        - VAOMesh could use this class for VAO part
 
     Keehong Youn, 2017, younkeehong@gmail.com
 */
@@ -117,9 +114,9 @@ public:
     void draw();
 
 private:
-    unsigned int mGLPrimMode {GL_TRIANGLES};
-    unsigned int mNumVertices {0};
-    unsigned int mNumIndices {0};
+    unsigned int mGLPrimMode = GL_TRIANGLES;
+    unsigned int mNumVertices = 0;
+    unsigned int mNumIndices = 0;
     MeshAttrib
         mPositionAtt {LAYOUT_POSITION, DIMENSION_POSITION},
         mColorAtt {LAYOUT_COLOR, DIMENSION_COLOR},

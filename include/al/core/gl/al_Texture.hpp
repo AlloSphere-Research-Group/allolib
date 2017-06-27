@@ -55,7 +55,7 @@ The total number of texture units that can be used from all active programs.
 This is the limit on glActiveTexture(GL_TEXTURE0 + i) and glBindSampler.
 In GL 3.3, this was 48; in 4.3, it is 96.
 
-Use last unit as a temp point so
+Use last unit (47) as a temp point so
 it doesn't overwrite binding that were done for rendering
 */
 #define AL_TEX_TEMP_BINDING_UNIT 47
@@ -76,8 +76,11 @@ protected:
   int mFilterMin = GL_LINEAR, mFilterMag = GL_LINEAR;
   bool mUseMipmap = false; // by default no mipmap
 
-  bool mParamsUpdated = true; // Flags change in texture params (wrap, filter)
-  bool mUseMipmapUpdated = true;;
+  bool mFilterUpdated = true; // Flags change in texture params (wrap, filter)
+  bool mWrapUpdated = true; // Flags change in texture params (wrap, filter)
+  bool mUsingMipmapUpdated = true;;
+
+  int mBindingPoint = -1;
 
 public:
   Texture();
@@ -101,46 +104,19 @@ public:
     int internal = GL_RGBA8,
     unsigned int format = GL_RGBA,
     unsigned int type = GL_UNSIGNED_BYTE
-  ) {
-    mTarget = GL_TEXTURE_CUBE_MAP;
-    mInternalFormat = internal;
-    mWidth = size;
-    mHeight = size;
-    mDepth = 1;
-    mFormat = format;
-    mType = type;
+  );
 
-    // AL_GRAPHICS_ERROR("before creating 2D texture", id());
-    create();
-    bind();
-    for (int i = 0; i < 6; i++) {
-      glTexImage2D(
-        GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, //< target
-        0,                                //< lod
-        mInternalFormat,                  //< internal format
-        mWidth, mWidth, 0,                //< equal throughout the faces
-        mFormat,                          //< format of data
-        mType,                            //< data type (e.g. GL_UNSIGNED_BYTE)
-        nullptr
-      ); //< no actual data yet
-    }
-
-    wrapS(GL_CLAMP_TO_EDGE);
-    wrapT(GL_CLAMP_TO_EDGE);
-    wrapR(GL_CLAMP_TO_EDGE);
-    // by default no mipmap
-    filterMin(GL_LINEAR);
-    filterMag(GL_LINEAR);
-    mipmap(false);
-    update(true); // true: force update
-    unbind();
-  }
+  void makeActiveTexture();
 
   /// Bind the texture (to a multitexture unit)
-  void bind(int unit = 0);
+  void bind();
+  void bind(int unit);
 
   /// Unbind the texture (from a multitexture unit)
-  void unbind(int unit = 0);
+  // usually won't be needed... (bind them and leave it there)
+  void unbind();
+
+  int bindingPoint();
 
   /// Get target type (e.g., TEXTURE_2D)
   unsigned int target() const { return mTarget; }
@@ -180,8 +156,8 @@ public:
 
   bool mipmap() const { return mUseMipmap; }
 
-  /// Set minification and magnification filter types
-  void filter(int v){ filterMin(v); filterMag(v); }
+  /// Set minification and magnification filter types all at once
+  void filter(int v);
 
   /// Set minification filter type
   void filterMin(int v);
@@ -190,7 +166,7 @@ public:
   void filterMag(int v);
 
   /// Set wrapping mode for all dimensions
-  void wrap(int v){ return wrap(v,v,v); }
+  void wrap(int v);
 
   void wrapS(int v);
   void wrapT(int v);
@@ -216,6 +192,10 @@ public:
 
   // update the changes in params or settings
   void update(bool force=false);
+  // should call makeActiveTexture before calling these
+  void update_filter();
+  void update_wrap();
+  void update_mipmap();
 
 protected:
   virtual void onCreate() override;
@@ -227,6 +207,7 @@ protected:
   void update_param(const T& v, T& var, bool& flag){
     if(v!=var){ var=v; flag=true; }
   }
+
 };
 
 } // al::

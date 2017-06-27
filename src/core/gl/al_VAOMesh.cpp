@@ -1,3 +1,4 @@
+#include "al/core/gl/al_GLEW.hpp"
 #include "al/core/gl/al_VAOMesh.hpp"
 #include <iostream>
 
@@ -17,36 +18,70 @@ std::unordered_map<unsigned int, unsigned int> VAOMesh::mPrimMap = {
   { Mesh::TRIANGLE_STRIP_ADJACENCY, GL_TRIANGLE_STRIP_ADJACENCY }
 };
 
+VAOMesh::VAOMesh() {
+    vaoWrapper = std::make_shared<VAOWrapper>();
+}
+
+// when copying, make new vao
+VAOMesh::VAOMesh(VAOMesh const& other): Mesh(other) {
+    vaoWrapper = std::make_shared<VAOWrapper>();
+    if (gl::loaded()) update();
+    // std::cout << "copy ctor" << std::endl;
+}
+
+// when moving, move vao
+VAOMesh::VAOMesh(VAOMesh&& other): Mesh(other) {
+    vaoWrapper = other.vaoWrapper;
+    // std::cout << "move ctor" << std::endl;
+}
+
+// when copying, make new vao
+VAOMesh& VAOMesh::operator = (VAOMesh const& other) {
+    copy(other);
+    vaoWrapper = std::make_shared<VAOWrapper>();
+    if (gl::loaded()) update();
+    // std::cout << "copy assignment" << std::endl;
+}
+
+// when moving, move vao
+VAOMesh& VAOMesh::operator = (VAOMesh&& other) {
+    copy(other);
+    vaoWrapper = other.vaoWrapper;
+    // std::cout << "move assignment" << std::endl;
+}
+
 void VAOMesh::bind() {
-  mVao.bind();
+  vao().bind();
 }
 
 void VAOMesh::unbind() {
-  mVao.unbind();
+  vao().unbind();
 }
 
 void VAOMesh::update() {
-  mGLPrimMode = mPrimMap[mPrimitive];
-  mVao.validate();
-  mVao.bind();
-  updateAttrib(vertices(), mPositionAtt);
-  updateAttrib(colors(), mColorAtt);
-  updateAttrib(texCoord2s(), mTexcoord2dAtt);
-  updateAttrib(normals(), mNormalAtt);
+  vaoWrapper->GLPrimMode = mPrimMap[mPrimitive];
+  vao().validate();
+  vao().bind();
+  updateAttrib(vertices(), positionAtt());
+  updateAttrib(colors(), colorAtt());
+  updateAttrib(texCoord2s(), texcoord2dAtt());
+  updateAttrib(normals(), normalAtt());
   // updateAttrib(texCoord3s(), mTexcoord3dAtt);
   // updateAttrib(texCoord1s(), mTexcoord1dAtt);
-  mVao.unbind();
+  vao().unbind();
   if (indices().size() > 0) {
-    if (!mIndexBuffer.created()) {
-      mIndexBuffer.create();
-      mIndexBuffer.bufferType(GL_ELEMENT_ARRAY_BUFFER);
+    if (!indexBuffer().created()) {
+      // mIndexBuffer.create();
+      // mIndexBuffer.bufferType(GL_ELEMENT_ARRAY_BUFFER);
+      indexBuffer().create();
+      indexBuffer().bufferType(GL_ELEMENT_ARRAY_BUFFER);
     }
-    mIndexBuffer.bind();
-    mIndexBuffer.data(
+    indexBuffer().bind();
+    indexBuffer().data(
       sizeof(unsigned int) * indices().size(),
       indices().data()
     );
-    mIndexBuffer.unbind();
+    indexBuffer().unbind();
   }
 }
 
@@ -56,17 +91,17 @@ void VAOMesh::updateAttrib(
 ) {
   // only enable attribs with content
   if (data.size() > 0) {
-    mVao.enableAttrib(att.index);
+    vao().enableAttrib(att.index);
   }
   else {
-    mVao.disableAttrib(att.index);
+    vao().disableAttrib(att.index);
     return;
   }
 
   // buffer yet created, make it and set vao to point to it
   if (!att.buffer.created()) {
     att.buffer.create();
-    mVao.attribPointer(att.index, att.buffer, att.size);
+    vao().attribPointer(att.index, att.buffer, att.size);
   }
 
   // upload CPU size data to buffer in GPU
@@ -93,14 +128,14 @@ template void VAOMesh::updateAttrib<Vec4f>(
 );
 
 void VAOMesh::draw() {
-  mVao.bind();
+  vao().bind();
   if (indices().size() > 0) {
-    mIndexBuffer.bind();
-    glDrawElements(mGLPrimMode, indices().size(), GL_UNSIGNED_INT, NULL);
-    mIndexBuffer.unbind();
+    indexBuffer().bind();
+    glDrawElements(vaoWrapper->GLPrimMode, indices().size(), GL_UNSIGNED_INT, NULL);
+    indexBuffer().unbind();
   }
   else {
-    glDrawArrays(mGLPrimMode, 0, vertices().size());
+    glDrawArrays(vaoWrapper->GLPrimMode, 0, vertices().size());
   }
-  mVao.unbind();
+  vao().unbind();
 }

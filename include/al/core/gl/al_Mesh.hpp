@@ -98,6 +98,7 @@ public:
 
   Mesh(const Mesh& cpy);
 
+  void copy(Mesh const& m);
 
   /// Get corners of bounding box of vertices
 

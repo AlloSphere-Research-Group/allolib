@@ -362,15 +362,12 @@ public:
 
   void uniformColor(float r, float g, float b, float a = 1.0f);
   void uniformColor(Color const& c);
-  Color uniformColor();
 
   void uniformColorMix(float m);
-  float uniformColorMix();
 
-  void textureMix(float m);
-  float textureMix();
-  void texture(int binding_point); // user can bind textures outside this class and only inform the binding point
-  void texture(Texture& t, int binding_point = 0);
+  void textureMix(float m, int tex_num = 0);
+  // user can bind textures outside this class and only inform the binding point
+  void texture(Texture& t, int tex_num = 0);
 
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
@@ -420,8 +417,9 @@ protected:
   float mUniformColorMix = 1;
   bool mUniformColorChanged = false;
 
-  int mTexBindingPoint = 0;
-  float mTexMix = 0;
+  // 3 textures supported
+  int mTexBindingPoint[3] = {0, 1, 2};
+  float mTexMix[3] = {0, 0, 0};
   bool mTexChanged = false;
 };
 
