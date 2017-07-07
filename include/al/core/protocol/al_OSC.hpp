@@ -44,10 +44,14 @@
 
 */
 
+
+// #include "al/core/io/al_Socket.hpp"
+#include "al/core/system/al_Thread.hpp"
+#include "al/core/system/al_Time.hpp"
+
+#include <memory>
 #include <string>
 #include <vector>
-#include "al/core/io/al_Socket.hpp"
-#include "al/core/system/al_Thread.hpp"
 
 namespace al{
 
@@ -268,15 +272,21 @@ public:
 /// Socket for sending OSC packets
 ///
 /// @ingroup allocore
-class Send : public SocketClient, public Packet{
+// class Send : public SocketClient, public Packet{
+class Send : public Packet{
+	class SocketSender;
+	std::unique_ptr<SocketSender> const sockerSender;
 public:
-	Send(){}
+	// Send(){}
 
 	/// @param[in] port		Port number (valid range is 0-65535)
 	/// @param[in] address	IP address
 	/// @param[in] timeout	< 0: block forever; = 0: no blocking; > 0 block with timeout
 	/// @param[in] size 	Packet buffer size
-	Send(uint16_t port, const char * address = "localhost", al_sec timeout=0, int size=1024);
+	// Send(uint16_t port, const char * address = "localhost", al_sec timeout=0, int size=1024);
+	Send(uint16_t port, const char * address = "localhost", int size=1024);
+
+	~Send();
 
 	/// Send and clear current packet contents
 	int send();
@@ -339,16 +349,20 @@ public:
 /// Supports explicit polling or implicit background thread polling
 ///
 /// @ingroup allocore
-class Recv : public SocketServer{
+// class Recv : public SocketServer{
+class Recv {
+	class SocketReceiver;
+	std::unique_ptr<SocketReceiver> const socketReceiver;
 public:
-	Recv();
+	// Recv();
 
 	/// @param[in] port		Port number (valid range is 0-65535)
 	/// @param[in] address	IP address. If empty, will bind all network interfaces to socket.
 	/// @param[in] timeout	< 0: block forever; = 0: no blocking; > 0 block with timeout
-	Recv(uint16_t port, const char * address = "", al_sec timeout=0);
+	Recv(uint16_t port, const char * address, al_sec timeout=0);
+	Recv(uint16_t port, al_sec timeout=0);
 
-	virtual ~Recv() { stop(); }
+	virtual ~Recv();
 
 	/// Whether background polling is activated
 	bool background() const { return mBackground; }
@@ -365,13 +379,17 @@ public:
 	/// Check for an OSC packet and call handler
 	/// returns bytes read
 	/// note: use while(recv()){} to ensure queue is fully flushed.
-	int recv();
+	// int recv();
+
+	void parse(const char *packet, int size, const char *senderAddr);
 
 	/// Begin a background thread to poll the socket.
 
 	/// The socket timeout controls the polling period.
 	/// Returns whether the thread was started successfully.
 	bool start();
+
+	void loop();
 
 	/// Stop the background polling
 	void stop();

@@ -13,8 +13,10 @@ if (WINDOWS)
     set(PORTAUDIO_LIBRARIES ${lib_path}/portaudio/portaudio_x64.lib)
   endif (USE_PORTAUDIO)
 
-  set(APR_INCLUDE_DIRS ${lib_path}/apr/include)
-  set(APR_LIBRARIES ${lib_path}/apr/libapr-1.lib)
+  if (USE_APR_SOCKET)
+    set(APR_INCLUDE_DIRS ${lib_path}/apr/include)
+    set(APR_LIBRARIES ${lib_path}/apr/libapr-1.lib)
+  endif (USE_APR_SOCKET)
 else ()
   find_package(GLEW REQUIRED)
   find_package(PkgConfig REQUIRED)
@@ -24,8 +26,10 @@ else ()
     pkg_search_module(PORTAUDIO REQUIRED portaudio-2.0)
   endif (USE_PORTAUDIO)
 
-  pkg_search_module(APR REQUIRED apr-1)
-
+  if (USE_APR_SOCKET)
+    pkg_search_module(APR REQUIRED apr-1)
+  endif (USE_APR_SOCKET)
+  
   if(MACOS)
     # for rtaudio
     find_library(COREAUDIO_LIB CoreAudio)

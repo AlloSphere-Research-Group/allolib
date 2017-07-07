@@ -10,6 +10,10 @@
 #include "oscpack/osc/OscTypes.h"
 #include "oscpack/osc/OscException.h"
 
+#include "oscpack/ip/UdpSocket.h"
+
+#include <iostream>
+
 /*
 Summary of OSC 1.0 spec from http://opensoundcontrol.org
 
@@ -325,15 +329,30 @@ OSCTRY("PacketHandler::parse",
 ) // OSCTRY
 }
 
+class Send::SocketSender {
+public:
+	UdpTransmitSocket transmitSocket;
+	SocketSender(uint16_t port, const char * address)
+	: transmitSocket{IpEndpointName{address, port}}
+	{
 
+	}
 
-Send::Send(uint16_t port, const char * address, al_sec timeout, int size)
-:	SocketClient(port, address, timeout, Socket::UDP),
-	Packet(size)
+	void send(const char *data, std::size_t size) {
+		transmitSocket.Send(data, size);
+	}
+};
+
+// Send::Send(uint16_t port, const char * address, al_sec timeout, int size)
+Send::Send(uint16_t port, const char * address, int size)
+:	/*SocketClient(port, address, timeout, Socket::UDP),*/
+	Packet(size),
+	sockerSender{std::make_unique<SocketSender>(port, address)}
 {}
 
+Send::~Send() = default; // put this here so the impl of the dtor sees the dtor of pimpl class
+
 int Send::send(){
-	//int r = Socket::send(Packet::data(), Packet::size());
 	int r = send(*this);
 	OSCTRY("Packet::endMessage", Packet::clear();)
 	return r;
@@ -341,72 +360,141 @@ int Send::send(){
 
 int Send::send(const Packet& p){
 	int r = 0;
-	OSCTRY("Packet::endMessage", r = Socket::send(p.data(), p.size());)
+	OSCTRY("Packet::endMessage", sockerSender->send(p.data(), p.size());)
+	// OSCTRY("Packet::endMessage", r = sockerSender->send(p.data(), p.size());)
 	return r;
 }
 
 
-
 static void * recvThreadFunc(void * user){
 	Recv * r = static_cast<Recv *>(user);
-	while(r->background()){
-		r->recv();
-	}
+	// while(r->background()){
+	// 	r->recv();
+	// }
+	r->loop();
+
 //	printf("thread done\n");
 	return NULL;
 }
 
-Recv::Recv()
-:	mHandler(0), mBuffer(1024), mBackground(false)
-{
+class Recv::SocketReceiver : public ::osc::OscPacketListener {
+public:
+    UdpListeningReceiveSocket receiveSocket;
+	Recv* recv;
+
+    SocketReceiver(uint16_t port, Recv* r):
+    	::osc::OscPacketListener{},
+    	receiveSocket{IpEndpointName{IpEndpointName::ANY_ADDRESS, port}, this},
+    	recv{r}
+	{
+
+    }
+
+    SocketReceiver(uint16_t port, const char * address, Recv* r):
+    	::osc::OscPacketListener{},
+    	receiveSocket{IpEndpointName{IpEndpointName{address, port}}, this},
+    	recv{r}
+	{
+
+    }
+
+    virtual void ProcessMessage(
+    	const ::osc::ReceivedMessage& m, 
+		const IpEndpointName& remoteEndpoint) override {}
+
+	virtual void ProcessPacket(
+		const char *data, int size, 
+		const IpEndpointName& remoteEndpoint) override
+	{
+		char addr[ IpEndpointName::ADDRESS_STRING_LENGTH ];
+		remoteEndpoint.AddressAsString(addr);
+		recv->parse(data, size, addr);
+	}
+
+	void loop() {
+		receiveSocket.RunUntilSigInt();
+	}
+
+	void stop() {
+		receiveSocket.AsynchronousBreak();
+	}
+};
+
+// Recv::Recv()
+// :	mHandler(0), mBuffer(1024), mBackground(false)
+// {
 	//printf("Entering Recv::Recv()\n");
-}
+// }
 
-
-Recv::Recv(uint16_t port, const char * address, al_sec timeout)
-:	SocketServer(port, address, timeout, Socket::UDP),
+Recv::Recv(uint16_t port, al_sec timeout)
+:	/*SocketServer(port, address, timeout, Socket::UDP),*/
+	socketReceiver{std::make_unique<SocketReceiver>(port, this)},
 	mHandler(0), mBuffer(1024), mBackground(false)
 {
 	//printf("Entering Recv::Recv(port=%d, addr=%s)\n", port, address);
 }
 
-int Recv::recv(){
-	int r = 0;
-	DPRINTF("Entering Recv::recv() - mBuffer = %p and mBuffer.size() = %d\n", &mBuffer[0], mBuffer.size());
+Recv::Recv(uint16_t port, const char * address, al_sec timeout)
+:	/*SocketServer(port, address, timeout, Socket::UDP),*/
+	socketReceiver{std::make_unique<SocketReceiver>(port, address, this)},
+	mHandler(0), mBuffer(1024), mBackground(false)
+{
+	//printf("Entering Recv::Recv(port=%d, addr=%s)\n", port, address);
+}
 
-	/*	printf("Here's what's in my buffer before recv...\n");
-	for (int i = 0; i < mBuffer.size(); ++i) {
-	  if (mBuffer[i] != 0)  printf("Byte %d: %d (%c)\n", i, mBuffer[i], mBuffer[i]);
-	}
-	*/
+Recv::~Recv() {
+	stop();
+}
 
-	OSCTRY("Packet::endMessage",
-		char sender[16] = "";
-		r = Socket::recv(&mBuffer[0], mBuffer.size(), sender);
-		if(r && mHandler){
-			DPRINTF("Recv:recv() Received %d bytes from %s; parsing...\n", r, sender);
-			mHandler->parse(&mBuffer[0], r, 1, sender);
-		}
-	)
+// int Recv::recv(){
+// 	int r = 0;
+// 	DPRINTF("Entering Recv::recv() - mBuffer = %p and mBuffer.size() = %d\n", &mBuffer[0], mBuffer.size());
 
-	DPRINTF("Exiting Recv::recv() - mBuffer = %p and mBuffer.size() = %d\n", &mBuffer[0], mBuffer.size());
-	return r;
+// 	/*	printf("Here's what's in my buffer before recv...\n");
+// 	for (int i = 0; i < mBuffer.size(); ++i) {
+// 	  if (mBuffer[i] != 0)  printf("Byte %d: %d (%c)\n", i, mBuffer[i], mBuffer[i]);
+// 	}
+// 	*/
+
+// 	OSCTRY("Packet::endMessage",
+// 		char sender[16] = "";
+// 		// char * buffer, size_t maxlen, char *from
+// 		// r = Socket::recv(&mBuffer[0], mBuffer.size(), sender);
+// 		if(r && mHandler){
+// 			DPRINTF("Recv:recv() Received %d bytes from %s; parsing...\n", r, sender);
+// 			mHandler->parse(&mBuffer[0], r, 1, sender);
+// 		}
+// 	)
+
+// 	DPRINTF("Exiting Recv::recv() - mBuffer = %p and mBuffer.size() = %d\n", &mBuffer[0], mBuffer.size());
+// 	return r;
+// }
+
+void Recv::parse(const char *packet, int size, const char *senderAddr) {
+	std::memcpy(&mBuffer[0], packet, size);
+	mHandler->parse(&mBuffer[0], size, 1, senderAddr);
 }
 
 bool Recv::start(){
   //  printf("Entering Recv::start()\n");
 	mBackground = true;
-	if (timeout() <= 0) {
-		printf("warning (osc::Recv): timeout <= 0 and background polling may eat up your CPU! Set timeout(seconds) to avoid this.\n");
-	}
+	// if (timeout() <= 0) {
+	// 	printf("warning (osc::Recv): timeout <= 0 and background polling may eat up your CPU! Set timeout(seconds) to avoid this.\n");
+	// }
 	return mThread.start(recvThreadFunc, this);
 }
 
+void Recv::loop() {
+	socketReceiver->loop();
+}
+
 void Recv::stop(){
-	if(mBackground){
-		mBackground = false;
-		mThread.join();
-	}
+	// if(mBackground){
+	// 	mBackground = false;
+	// 	mThread.join();
+	// }
+	socketReceiver->stop();
+	mThread.join();
 }
 
 } // osc::

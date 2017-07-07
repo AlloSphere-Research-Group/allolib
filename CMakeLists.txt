@@ -117,7 +117,6 @@ set(core_headers
   include/al/core/io/al_AudioIOData.hpp
   include/al/core/io/al_ControlNav.hpp
   include/al/core/io/al_CSVReader.hpp
-  include/al/core/io/al_Socket.hpp
   include/al/core/io/al_Window.hpp
   include/al/core/math/al_Analysis.hpp
   include/al/core/math/al_Complex.hpp
@@ -176,7 +175,6 @@ set(core_sources
   src/core/gl/al_Viewpoint.cpp
   src/core/io/al_AudioIO.cpp
   src/core/io/al_AudioIOData.cpp
-  src/core/io/al_SocketAPR.cpp
   src/core/io/al_ControlNav.cpp
   src/core/io/al_CSVReader.cpp
   src/core/io/al_Window.cpp
@@ -228,6 +226,16 @@ set(glv_sources
   src/glv/glv_view.cpp
   src/glv/glv_widget.cpp
 )
+
+if (USE_APR_SOCKET)
+  list(APPEND core_headers
+    include/al/core/io/al_Socket.hpp
+  )
+  list(APPEND core_sources
+    src/core/io/al_SocketAPR.cpp
+  )
+  message("including apr socket")
+endif(USE_APR_SOCKET)
 
 list(APPEND headers
   ${core_headers}
