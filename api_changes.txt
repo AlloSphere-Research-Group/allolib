@@ -5,8 +5,7 @@ MOST OF THE APU CHANGES ARE:
 2. APP INTERFACE MODULARIZATION AND SIMPLIFICATION
 
 
-Mesh
-- you should use use VAOMesh to draw.
+VAOMesh (new)
 - you have to call .update() on VAOMesh after changing vertices, color, etc.
 ex)
 mesh.reset();
@@ -50,13 +49,6 @@ g.shader(shader2);
 
 Texture
 - now has .create2D(...) & .createCubemap(...) method. (create1D and 3D yet)
-- internal .bind()/.unbind() were erased. currently manual binding needed. researching a better way to handle this
-ex)
-texture.bind();
-texture.submit(arr.data()); // give raw pointer
-texture.mipmap(false); // false by default. turn on only if needed
-texture.update();
-texture.unbind();
 - for drawing, al::Graphics handles textures
 ex)
 g.texture(my_tex1);
@@ -65,7 +57,7 @@ g.texture(my_tex2); // note no need for .unbind()
 
 
 Viewpoint
-- is more used and more exposed (position, lens, and viewport)
+- is more used and more exposed in the drawing pipeline (position, lens, and viewport)
 - al::Graphics receives Viewpoint as input
 ex)
 viewpoint.pos(Vec3f(0, 0, 10)).faceToward(Vec3f(0, 0, 0), Vec3f(0, 1, 0));
@@ -76,5 +68,5 @@ g.camera(viewpoint); // send camera matrices to shader, and set viewport
 
 
 Graphics
-- keeps track of bound shader, texture, and camera(viewpoint). fbo will be tracked too, but not implemented yet
+- keeps track of bound shader, texture, and camera(viewpoint), and fbo
 - constructor takes reference of Window (or WindowApp, App ...)
