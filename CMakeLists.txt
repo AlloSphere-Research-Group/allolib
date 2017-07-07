@@ -13,21 +13,37 @@ else ()
   set(CMAKE_CXX_FLAGS "-std=c++14 -Wall")
 endif (WINDOWS)
 
-set(EXTERNAL_INCLUDE_DIR external) # oscpack, etc.
+set(EXTERNAL_INCLUDE_DIR external)
 
 # OSCPACK
+list(APPEND EXTERNAL_INCLUDE_DIR
+  external/oscpack
+)
 set(OSCPACK_SRC
-  ${EXTERNAL_INCLUDE_DIR}/oscpack/osc/OscOutboundPacketStream.cpp
-  ${EXTERNAL_INCLUDE_DIR}/oscpack/osc/OscPrintReceivedElements.cpp
-  ${EXTERNAL_INCLUDE_DIR}/oscpack/osc/OscReceivedElements.cpp
-  ${EXTERNAL_INCLUDE_DIR}/oscpack/osc/OscTypes.cpp
+  external/oscpack/osc/OscOutboundPacketStream.cpp
+  external/oscpack/osc/OscPrintReceivedElements.cpp
+  external/oscpack/osc/OscReceivedElements.cpp
+  external/oscpack/osc/OscTypes.cpp
+  external/oscpack/ip/IpEndPointName.cpp
 )
 
+if (WINDOWS)
+  list(APPEND OSCPACK_SRC
+    external/oscpack/ip/win32/NetworkingUtils.cpp
+    external/oscpack/ip/win32/UdpSocket.cpp
+  )
+else ()
+  list(APPEND OSCPACK_SRC
+    external/oscpack/ip/posix/NetworkingUtils.cpp
+    external/oscpack/ip/posix/UdpSocket.cpp
+  )
+endif (WINDOWS)
+
 # RtAudio
-if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/rtaudio")
+if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/external/rtaudio")
   message("Using RtAudio")
   set(RTAUDIO_SRC
-    ${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/rtaudio/RtAudio.cpp
+    ${CMAKE_SOURCE_DIR}/external/rtaudio/RtAudio.cpp
   )
   if(LINUX)
     add_definitions(-D__LINUX_PULSE__)

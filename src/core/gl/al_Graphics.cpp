@@ -147,8 +147,14 @@ void Graphics::textureMix(float m, int tex_num) {
     mTexChanged = true;
 }
 
+void Graphics::texture(int binding_point, int tex_num) {
+  mTexBindingPoint[tex_num] = binding_point;
+  mTexChanged = true;
+}
+
 void Graphics::texture(Texture& t, int tex_num) {
-  mTexBindingPoint[tex_num] = t.bindingPoint();
+  t.bind(tex_num);
+  mTexBindingPoint[tex_num] = tex_num;
   mTexChanged = true;
 }
 

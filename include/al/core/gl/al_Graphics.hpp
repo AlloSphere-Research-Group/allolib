@@ -366,7 +366,7 @@ public:
   void uniformColorMix(float m);
 
   void textureMix(float m, int tex_num = 0);
-  // user can bind textures outside this class and only inform the binding point
+  void texture(int binding_point, int tex_num = 0);
   void texture(Texture& t, int tex_num = 0);
 
   /// Set viewport
@@ -390,6 +390,18 @@ public:
   void update();
   void draw(VAOMesh& mesh);
   void draw(EasyVAO& vao);
+  void draw(Mesh& mesh) {
+    // uses internal vao object. 
+  }
+  void draw(Texture& tex, float x, float y, float w, float h) {
+    // for 2D, (x, y) becomes bottom-left, then width and height spans
+  }
+  void draw(Texture& tex, Vec3f pos, float w, float h, Vec3f normal) {
+    // center, width, height, and normal direction
+  }
+  void draw(Texture& tex, Vec3f pos, float w, float h) {
+    // normal not given, billboards toward camera
+  }
 
   void framebuffer(FBO& fbo);
   void framebuffer(unsigned int fboID);

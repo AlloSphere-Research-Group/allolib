@@ -3,28 +3,8 @@
 
 // #include <stdlib.h>
 #include <iostream>
-#include <unordered_map>
 
 namespace al{
-
-// keep track of textures bound 
-std::unordered_map<int, Texture*>& boundTextures() {
-  static std::unordered_map<int, Texture*> sBoundTextures;
-  return sBoundTextures;
-}
-
-int get_empty_binding_point() {
-  auto& t = boundTextures();
-  for (int i = 0; i < AL_TEX_TEMP_BINDING_UNIT; i += 1) {
-    auto search = t.find(i);
-    if (search == t.end()) {
-      // std::cout << "found empty binding point at " << i << std::endl;
-      return i;
-    }
-  }
-  // std::cout << "no more empty binding point" << std::endl;
-  return -1;
-}
 
 Texture::Texture() {
 }
@@ -49,7 +29,7 @@ void Texture::create2D(
 
   // AL_GRAPHICS_ERROR("before creating 2D texture", id());
   create();
-  bind();
+  bind_temp();
   glTexImage2D(
     mTarget,
     0, // level
@@ -59,8 +39,9 @@ void Texture::create2D(
     mFormat, mType, NULL
   );
   // AL_GRAPHICS_ERROR("creating 2D texture", id());
-
-  // bind above should have called makeActiveTexture
+  mFilterUpdated = true;
+  mWrapUpdated = true;
+  mUsingMipmapUpdated = true;
   update_filter();
   update_wrap();
   update_mipmap();
@@ -82,7 +63,7 @@ void Texture::createCubemap(
 
     // AL_GRAPHICS_ERROR("before creating 2D texture", id());
     create();
-    bind(); 
+    bind_temp();
     for (int i = 0; i < 6; i++) {
       glTexImage2D(
         GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, //< target
@@ -94,8 +75,9 @@ void Texture::createCubemap(
         nullptr
       ); //< no actual data yet
     }
-
-    // bind above should have called makeActiveTexture
+    mFilterUpdated = true;
+    mWrapUpdated = true;
+    mUsingMipmapUpdated = true;
     update_filter();
     update_wrap();
     update_mipmap();
@@ -109,40 +91,20 @@ void Texture::onDestroy() {
   glDeleteTextures(1, (GLuint *)&mID);
 }
 
-void Texture::makeActiveTexture() {
-  glActiveTexture(GL_TEXTURE0 + mBindingPoint);
-}
-
-void Texture::bind() {
-  int unit = get_empty_binding_point();
-  bind(unit);
-}
-
-void Texture::bind(int unit) {
+void Texture::bind(int binding_point) {
   // AL_GRAPHICS_ERROR("(before Texture::bind)", id());
-  glActiveTexture(GL_TEXTURE0 + unit);
-  auto& t = boundTextures();
-  // unbind previously bound texture at this unit
-  auto search = t.find(unit);
-  if (search != t.end()) {
-    (search->second)->mBindingPoint = -1;
-    // std::cout << "unregistered texture at " << unit << std::endl;
-  }
+  glActiveTexture(GL_TEXTURE0 + binding_point);
   glBindTexture(target(), id());
-  t[unit] = this;
-  mBindingPoint = unit;
-  // std::cout << "bound texture at " << unit << std::endl;
   // AL_GRAPHICS_ERROR("binding texture", id());
 }
 
-void Texture::unbind() {
-  makeActiveTexture();
-  glBindTexture(target(), 0);
-  mBindingPoint = -1;
+void Texture::bind_temp() {
+  bind(AL_TEX_MAX_BINDING_UNIT - 1);
 }
 
-int Texture::bindingPoint() {
-  return mBindingPoint;
+void Texture::unbind(int binding_point, unsigned int target) {
+  glActiveTexture(GL_TEXTURE0 + binding_point);
+  glBindTexture(target, 0);
 }
 
 void Texture::filterMin(int v) {
@@ -222,7 +184,7 @@ void Texture::submit(const void * pixels) {
   if (!pixels) {
     return;
   }
-  makeActiveTexture();
+  bind_temp();
   // AL_GRAPHICS_ERROR("before Texture::submit (glTexSubImage)", id());
   switch (target()) {
     case GL_TEXTURE_1D:
@@ -290,12 +252,12 @@ void Texture::update_mipmap() {
 }
 
 void Texture::update(bool force) {
+  bind_temp();
   if (force) {
     mFilterUpdated = true;
     mWrapUpdated = true;
     mUsingMipmapUpdated = true;
   }
-  makeActiveTexture();
   update_filter();
   update_wrap();
   update_mipmap();

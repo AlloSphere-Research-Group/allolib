@@ -54,11 +54,25 @@ GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS
 The total number of texture units that can be used from all active programs.
 This is the limit on glActiveTexture(GL_TEXTURE0 + i) and glBindSampler.
 In GL 3.3, this was 48; in 4.3, it is 96.
-
-Use last unit (47) as a temp point so
-it doesn't overwrite binding that were done for rendering
 */
-#define AL_TEX_TEMP_BINDING_UNIT 47
+#define AL_TEX_MAX_BINDING_UNIT 48
+
+/*
+
+usage:
+Texture myTex;
+myTex.filter(GL_LINEAR);
+myTex.wrap(GL_CLAMP_TO_EDGE);
+myTex.mipmap(false);
+myTex.create2D(width, height, GL_RGB8, GL_RGBA, GL_FLOAT);
+myTex.submit(pointer_to_data); // you can skip this if using the texture for render target
+
+to update  params:
+myTex.filter(GL_LINEAR);
+myTex.wrap(GL_CLAMP_TO_EDGE);
+myTex.update(); // remember to call update, this is not needed when calling create2D (internally called)
+
+*/
 
 namespace al {
 
@@ -79,8 +93,6 @@ protected:
   bool mFilterUpdated = true; // Flags change in texture params (wrap, filter)
   bool mWrapUpdated = true; // Flags change in texture params (wrap, filter)
   bool mUsingMipmapUpdated = true;;
-
-  int mBindingPoint = -1;
 
 public:
   Texture();
@@ -106,17 +118,16 @@ public:
     unsigned int type = GL_UNSIGNED_BYTE
   );
 
-  void makeActiveTexture();
 
   /// Bind the texture (to a multitexture unit)
-  void bind();
-  void bind(int unit);
+  void bind(int binding_point = 0);
+  /// use lasts binding point for temporary binding
+  /// so doesn't (most of the time) collide with user's binding
+  void bind_temp();
 
   /// Unbind the texture (from a multitexture unit)
-  // usually won't be needed... (bind them and leave it there)
-  void unbind();
-
-  int bindingPoint();
+  // usually won't be needed... (you can just bind them and leave it there)
+  static void unbind(int binding_point = 0, unsigned int target = GL_TEXTURE_2D);
 
   /// Get target type (e.g., TEXTURE_2D)
   unsigned int target() const { return mTarget; }

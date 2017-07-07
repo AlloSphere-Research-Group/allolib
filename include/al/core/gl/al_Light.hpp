@@ -41,9 +41,10 @@
   File author(s):
   Lance Putnam, 2010, putnam.lance@gmail.com
   Graham Wakefield, 2010, grrrwaaa@gmail.com
+  Keehong Youn, 2017, younkeehong@gmail.com
 */
 
-#include <string>
+// #include <string>
 
 #include "al/core/gl/al_Graphics.hpp"
 #include "al/core/types/al_Color.hpp"
@@ -58,56 +59,33 @@ namespace al{
 class Material {
 public:
 
-  Material(Graphics::Face f=Graphics::FRONT);
+  Material() {}
 
-  /// Send current material settings to GPU
-  void operator()() const;
+  Material& ambient(const Color& v) {}
+  Material& diffuse(const Color& v) {}
+  Material& specular(const Color& v) {}
+  Material& shininess(float v) {}
 
-  /// Set the polygon face that material will be applied to
-  Material& face(Graphics::Face f);
+  // Material& illumination(float v) { mIllumination=v; return *this; }
+  // Material& opticalDensity(float v) { mOpticalDensity=v; return *this; }
+  // Material& emission(const Color& v) {}
 
-  /// Set specular exponent [0, 128]
-  Material& shininess(float v);
-  Material& opticalDensity(float v) { mOpticalDensity=v; return *this; }
-  Material& illumination(float v) { mIllumination=v; return *this; }
-
-  Material& ambientAndDiffuse(const Color& v);
-  Material& ambient(const Color& v);
-  Material& diffuse(const Color& v);
-  Material& emission(const Color& v);
-  Material& specular(const Color& v);
-
-  Material& ambientMap(const std::string& map) { mMapKa = map; return *this; }
-  Material& specularMap(const std::string& map) { mMapKs = map; return *this; }
-  Material& diffuseMap(const std::string& map) { mMapKd = map; return *this; }
-  Material& bumpMap(const std::string& map) { mMapBump = map; return *this; }
-  Material& useColorMaterial(bool v) { mUseColorMaterial = v; return *this; }
-
-  Graphics::Face face() const { return mFace; }
-
-  float shininess() const { return mShine; }
-  float opticalDensity() const { return mOpticalDensity; }
-  float illumination() const { return mIllumination; }
   const Color& ambient() const { return mAmbient; }
   const Color& diffuse() const  { return mDiffuse; }
-  const Color& emission() const { return mEmission; }
   const Color& specular() const { return mSpecular; }
+  float shininess() const { return mShine; }
 
-  const std::string& ambientMap() const { return mMapKa; }
-  const std::string& specularMap() const { return mMapKs; }
-  const std::string& diffuseMap() const { return mMapKd; }
-  const std::string& bumpMap() const { return mMapBump; }
-  bool useColorMaterial() const { return mUseColorMaterial; }
+  // float opticalDensity() const { return mOpticalDensity; }
+  // float illumination() const { return mIllumination; }
+  // const Color& emission() const { return mEmission; }
 
 protected:
   Color mAmbient;
   Color mDiffuse;
-  Color mEmission;
   Color mSpecular;
-  float mShine, mOpticalDensity, mIllumination;
-  Graphics::Face mFace;
-  std::string mMapKa, mMapKs, mMapKd, mMapBump;
-  bool mUseColorMaterial;
+  float mShine;
+  // Color mEmission;
+  // float mOpticalDensity, mIllumination;
 };
 
 
@@ -115,48 +93,57 @@ protected:
 /// @ingroup allocore
 class Light{
 public:
-  Light(float x=0, float y=0, float z=1);
-  ~Light();
-
-  /// Send current light settings to GPU
-  void operator()() const;
-
   /// Attenuation factor = 1/(c0 + c1*d + c2*d*d)
-  Light& attenuation(float c0, float c1=0, float c2=0);
-  Light& ambient(const Color& v);
-  Light& diffuse(const Color& v);
-  Light& specular(const Color& v);
+  Light& attenuation(float c0, float c1=0, float c2=0) {
+    mAtten[0]=c0; mAtten[1]=c1; mAtten[2]=c2; return *this;
+  }
 
+  Light& ambient(const Color& v) { mAmbient=v; return *this; }
+  Light& diffuse(const Color& v) { mDiffuse=v; return *this; }
+  Light& specular(const Color& v) { mSpecular=v; return *this; }
+  Light& color(const Color& v) {
+    mAmbient= v;
+    mDiffuse= v;
+    mSpecular= v;
+    return *this;
+  }
+  
   /// Set directional light direction
-  Light& dir(float x, float y, float z);
+  Light& dir(float x, float y, float z) {
+    mDir[0]=x; mDir[1]=y; mDir[2]=z;
+    return *this;
+  }
 
   /// Set directional light direction
   template <class VEC3>
   Light& dir(const VEC3& v){ return dir(v[0],v[1],v[2]); }
 
   /// Set positional light position
-  Light& pos(float x, float y, float z);
+  Light& pos(float x, float y, float z) {
+    mPos[0]=x; mPos[1]=y; mPos[2]=z;
+    return *this;
+  }
 
   /// Set positional light position
   template <class VEC3>
   Light& pos(const VEC3& v){ return pos(v[0],v[1],v[2]); }
 
   /// Set spotlight parameters
-
-  /// @param[in] xDir    x direction
-  /// @param[in] yDir    y direction
-  /// @param[in] zDir    z direction
   /// @param[in] cutoff  angle of the cone light emitted by the spot; [0, 90], 180 (uniform)
   /// @param[in] expo    the intensity distribution of the light; [0, 128]
-  Light& spot(float xDir, float yDir, float zDir, float cutoff, float expo=15);
-
-  template <class VEC3>
-  Light& spot(const VEC3& v, float cutoff, float expo=15){ return spot(v[0],v[1],v[2],cutoff,expo); }
-
+  Light& spot(float cutoff, float exponent=1) {
+    mSpotCutOff = cutoff;
+    mSpotExponent = exponent;
+    return *this;
+  }
 
   /// Get position array
   const float * pos() const { return mPos; }
   float * pos(){ return mPos; }
+
+  /// Get direction array
+  const float * dir() const { return mDir; }
+  float * dir(){ return mDir; }
 
   /// Get attenuation array
   const float * attenuation() const { return mAtten; }
@@ -174,26 +161,30 @@ public:
   const Color& specular() const { return mSpecular; }
   Color& specular(){ return mSpecular; }
 
-
   /// Set global ambient light intensity (default is {0.2, 0.2, 0.2, 1})
-  static void globalAmbient(const Color& v);
-
-  /// Determines how global specular reflection angles are computed
-  static void localViewer(bool v);
-
-  /// Determines whether global lighting is two-sided
+  static void globalAmbient(const Color& v) { mGlobalAmbient = v; }
 
   /// Setting this to true effectively reverses normals of back-facing
   /// polygons.
-  static void twoSided(bool v);
+  // static void twoSided(bool v);
 
 protected:
-  int mID;
-  Color mAmbient;
-  Color mDiffuse;
-  Color mSpecular;
-  float mPos[4];
-  float mAtten[3];
+  // default values: white point light at (0, 1000, 0)
+  // with no global light
+  
+  float mIntensity = 1.0f; // also indicates enabled/disabled
+  float mIsPointLight = 1.0f;
+
+  Color mAmbient = Color{1.0f, 1.0f, 1.0f};
+  Color mDiffuse = Color{1.0f, 1.0f, 1.0f};;
+  Color mSpecular = Color{1.0f, 1.0f, 1.0f};;
+  float mPos[4] = {0.0f, 1000.0f, 0.0f, 1.0f};
+  float mDir[4] = {0.0f, -1.0f, 0.0f, 0,0f};
+  float mAtten[3] = {1.0f, 0.0f, 0.0f};
+  float mSpotCutOff = 180.0f;
+  float mSpotExponent = 1.0f;
+
+  static Color mGlobalAmbient = Color{0.0f, 0.0f, 0.0f};
 };
 
 } // ::al
