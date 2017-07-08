@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include "rtaudio/RtAudio.h"
+#include "RtAudio.h"
 #ifdef AL_USE_PORTAUDIO
 #include "portaudio.h"
 #endif

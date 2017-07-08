@@ -1,39 +1,33 @@
+# sets:
+#   CORE_INCLUDE_DIRS
+#   CORE_LIBRARIES
+
 # al_path needs to be set prior to calling this script
 
 find_package(OpenGL REQUIRED)
+
 if (WINDOWS)
-  set(lib_path ${al_path}/dependencies)
-  set(GLFW_INCLUDE_DIRS ${lib_path}/glfw/include)
-  set(GLFW_LIBRARIES ${lib_path}/glfw/glfw3dll.lib)
-  set(GLEW_INCLUDE_DIRS ${lib_path}/glew/include)
-  set(GLEW_LIBRARIES ${lib_path}/glew/glew32.lib)
 
-  if (USE_PORTAUDIO)
-    set(PORTAUDIO_INCLUDE_DIRS ${lib_path}/portaudio/include)
-    set(PORTAUDIO_LIBRARIES ${lib_path}/portaudio/portaudio_x64.lib)
-  endif (USE_PORTAUDIO)
+  set(GLFW_INCLUDE_DIRS ${al_path}/dependencies/glfw/include)
+  set(GLFW_LIBRARIES ${al_path}/dependencies/glfw/glfw3dll.lib)
+  set(GLEW_INCLUDE_DIRS ${al_path}/dependencies/glew/include)
+  set(GLEW_LIBRARIES ${al_path}/dependencies/glew/glew32.lib)
 
-  if (USE_APR_SOCKET)
-    set(APR_INCLUDE_DIRS ${lib_path}/apr/include)
-    set(APR_LIBRARIES ${lib_path}/apr/libapr-1.lib)
-  endif (USE_APR_SOCKET)
 else ()
+
   find_package(GLEW REQUIRED)
   find_package(PkgConfig REQUIRED)
   pkg_search_module(GLFW REQUIRED glfw3)
 
-  if (USE_PORTAUDIO)
-    pkg_search_module(PORTAUDIO REQUIRED portaudio-2.0)
-  endif (USE_PORTAUDIO)
-
-  if (USE_APR_SOCKET)
-    pkg_search_module(APR REQUIRED apr-1)
-  endif (USE_APR_SOCKET)
-  
-  if(MACOS)
-    # for rtaudio
-    find_library(COREAUDIO_LIB CoreAudio)
-    find_library(COREFOUNDATION_LIB CoreFoundation)
-    # also pthread will be added
-  endif(MACOS)
 endif (WINDOWS)
+
+set(CORE_INCLUDE_DIRS
+  ${GLFW_INCLUDE_DIRS}
+  ${GLEW_INCLUDE_DIRS}
+)
+
+set(CORE_LIBRARIES
+  ${OPENGL_LIBRARY}
+  ${GLEW_LIBRARIES}
+  ${GLFW_LIBRARIES}
+)

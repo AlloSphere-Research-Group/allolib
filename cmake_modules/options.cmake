@@ -1,2 +1,0 @@
-option(USE_PORTAUDIO "" OFF)
-option(USE_APR_SOCKET "" OFF)

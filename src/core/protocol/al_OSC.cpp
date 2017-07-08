@@ -4,13 +4,13 @@
 #include "al/core/system/al_Printing.hpp"
 #include "al/core/protocol/al_OSC.hpp"
 
-#include "oscpack/osc/OscOutboundPacketStream.h"
-#include "oscpack/osc/OscPacketListener.h"
-#include "oscpack/osc/OscReceivedElements.h"
-#include "oscpack/osc/OscTypes.h"
-#include "oscpack/osc/OscException.h"
+#include "osc/OscOutboundPacketStream.h"
+#include "osc/OscPacketListener.h"
+#include "osc/OscReceivedElements.h"
+#include "osc/OscTypes.h"
+#include "osc/OscException.h"
 
-#include "oscpack/ip/UdpSocket.h"
+#include "ip/UdpSocket.h"
 
 #include <iostream>
 
