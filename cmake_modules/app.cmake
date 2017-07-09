@@ -73,11 +73,11 @@ target_link_libraries(${app_name} debug ${al_lib_debug} optimized ${al_lib_relea
 target_link_libraries(${app_name} ${libs_to_link})
 
 # post build events for windows
-# copy dlls
 if (WINDOWS)
+  message("setting script for copying dlls")
   set(post_build_command
-    robocopy ${al_path}/dependencies/glew/ ${APP_OUTPUT_PATH} glew32.dll &
-    robocopy ${al_path}/dependencies/glfw/ ${APP_OUTPUT_PATH} glfw3.dll &
+    robocopy ${al_path}/dependencies/glew/bin/Release/x64 ${APP_OUTPUT_PATH} glew32.dll &
+    robocopy ${al_path}/dependencies/glfw/lib-vc2015 ${APP_OUTPUT_PATH} glfw3.dll &
   )
 
   if (USE_PORTAUDIO)

@@ -9,7 +9,7 @@
 	#define USE_PTHREAD
 #endif
 
-namespace al {
+
 
 #ifdef USE_PTHREAD
 #include <pthread.h>
@@ -17,81 +17,81 @@ namespace al {
 //typedef pthread_t ThreadHandle;
 //typedef void * (*ThreadFunction)(void *);
 //#define THREAD_FUNCTION(name) void * name(void * user)
+namespace al {
+	struct Thread::Impl {
+		Impl()
+			: mHandle(0)
+		{ //printf("Thread::Impl(): %p\n", this);
+			pthread_attr_init(&mAttr);
 
-struct Thread::Impl{
-	Impl()
-	:	mHandle(0)
-	{ //printf("Thread::Impl(): %p\n", this);
-		pthread_attr_init(&mAttr);
-
-		// threads are not required to be joinable by default, so make it so
-		pthread_attr_setdetachstate(&mAttr, PTHREAD_CREATE_JOINABLE);
-	}
-
-	~Impl(){ //printf("Thread::~Impl(): %p\n", this);
-		pthread_attr_destroy(&mAttr);
-	}
-
-
-	bool start(ThreadFunction& func){
-		if(mHandle) return false;
-		//return 0 == pthread_create(&mHandle, NULL, cThreadFunc, &func);
-		return 0 == pthread_create(&mHandle, &mAttr, cThreadFunc, &func);
-	}
-
-	bool join(){
-		if(pthread_join(mHandle, NULL) == 0){
-			mHandle = 0;
-			return true;
+			// threads are not required to be joinable by default, so make it so
+			pthread_attr_setdetachstate(&mAttr, PTHREAD_CREATE_JOINABLE);
 		}
-		return false;
-	}
 
-	void priority(int v){
-		struct sched_param param;
-		if(v >= 1 && v <= 99){
-			param.sched_priority = v;
-			//pthread_setschedparam(mHandle, SCHED_FIFO, &param);
-			// FIFO and RR (round-robin) are for real-time scheduling
-			pthread_attr_setschedpolicy(&mAttr, SCHED_FIFO);
-			//pthread_attr_setschedpolicy(&mAttr, SCHED_RR);
-			pthread_attr_setschedparam(&mAttr, &param);
+		~Impl() { //printf("Thread::~Impl(): %p\n", this);
+			pthread_attr_destroy(&mAttr);
 		}
-		else{
-			param.sched_priority = 0;
-			//pthread_setschedparam(mHandle, SCHED_OTHER, &param);
-			pthread_attr_setschedpolicy(&mAttr, SCHED_OTHER);
-			pthread_attr_setschedparam(&mAttr, &param);
+
+
+		bool start(ThreadFunction& func) {
+			if (mHandle) return false;
+			//return 0 == pthread_create(&mHandle, NULL, cThreadFunc, &func);
+			return 0 == pthread_create(&mHandle, &mAttr, cThreadFunc, &func);
 		}
+
+		bool join() {
+			if (pthread_join(mHandle, NULL) == 0) {
+				mHandle = 0;
+				return true;
+			}
+			return false;
+		}
+
+		void priority(int v) {
+			struct sched_param param;
+			if (v >= 1 && v <= 99) {
+				param.sched_priority = v;
+				//pthread_setschedparam(mHandle, SCHED_FIFO, &param);
+				// FIFO and RR (round-robin) are for real-time scheduling
+				pthread_attr_setschedpolicy(&mAttr, SCHED_FIFO);
+				//pthread_attr_setschedpolicy(&mAttr, SCHED_RR);
+				pthread_attr_setschedparam(&mAttr, &param);
+			}
+			else {
+				param.sched_priority = 0;
+				//pthread_setschedparam(mHandle, SCHED_OTHER, &param);
+				pthread_attr_setschedpolicy(&mAttr, SCHED_OTHER);
+				pthread_attr_setschedparam(&mAttr, &param);
+			}
+		}
+
+		//	bool cancel(){
+		//		return 0 == pthread_cancel(mHandle);
+		//	}
+		//
+		//	void testCancel(){
+		//		pthread_testcancel();
+		//	}
+
+		pthread_t mHandle;
+		pthread_attr_t mAttr;
+
+		static void * cThreadFunc(void * user) {
+			ThreadFunction& tfunc = *((ThreadFunction*)user);
+			tfunc();
+			return NULL;
+		}
+	};
+
+
+	void * Thread::current() {
+		// pthread_t pthread_self(void);
+		static pthread_t r;
+		r = pthread_self();
+		return (void*)(&r);
 	}
 
-//	bool cancel(){
-//		return 0 == pthread_cancel(mHandle);
-//	}
-//
-//	void testCancel(){
-//		pthread_testcancel();
-//	}
-
-	pthread_t mHandle;
-	pthread_attr_t mAttr;
-
-	static void * cThreadFunc(void * user){
-		ThreadFunction& tfunc = *((ThreadFunction*)user);
-		tfunc();
-		return NULL;
-	}
-};
-
-
-void * Thread::current(){
-	// pthread_t pthread_self(void);
-	static pthread_t r;
-	r = pthread_self();
-	return (void*)(&r);
 }
-
-
 #elif defined(USE_THREADEX)
 
 #define WIN32_MEAN_AND_LEAN
@@ -101,56 +101,56 @@ void * Thread::current(){
 //typedef unsigned long ThreadHandle;
 //typedef unsigned (__stdcall *ThreadFunction)(void *);
 //#define THREAD_FUNCTION(name) unsigned _stdcall * name(void * user)
+namespace al {
+	class Thread::Impl {
+	public:
+		Impl() : mHandle(0) {}
 
-class Thread::Impl{
-public:
-	Impl(): mHandle(0){}
-
-	bool start(ThreadFunction& func){
-		if(mHandle) return false;
-		unsigned thread_id;
-		mHandle = _beginthreadex(NULL, 0, cThreadFunc, &func, 0, &thread_id);
-		if(mHandle) return true;
-		return false;
-	}
-
-	bool join(){
-		long retval = WaitForSingleObject((HANDLE)mHandle, INFINITE);
-		if(retval == WAIT_OBJECT_0){
-			CloseHandle((HANDLE)mHandle);
-			mHandle = 0;
-			return true;
+		bool start(ThreadFunction& func) {
+			if (mHandle) return false;
+			unsigned thread_id;
+			mHandle = _beginthreadex(NULL, 0, (_beginthreadex_proc_type)cThreadFunc, &func, 0, &thread_id);
+			if (mHandle) return true;
+			return false;
 		}
-		return false;
-	}
 
-	// TODO: Threadx priority
-	void priority(int v){
-	}
+		bool join() {
+			long retval = WaitForSingleObject((HANDLE)mHandle, INFINITE);
+			if (retval == WAIT_OBJECT_0) {
+				CloseHandle((HANDLE)mHandle);
+				mHandle = 0;
+				return true;
+			}
+			return false;
+		}
 
-//	bool cancel(){
-//		TerminateThread((HANDLE)mHandle, 0);
-//		return true;
-//	}
-//
-//	void testCancel(){
-//	}
+		// TODO: Threadx priority
+		void priority(int v) {
+		}
 
-	unsigned long mHandle;
-//	ThreadFunction mRoutine;
+		//	bool cancel(){
+		//		TerminateThread((HANDLE)mHandle, 0);
+		//		return true;
+		//	}
+		//
+		//	void testCancel(){
+		//	}
 
-	static unsigned cThreadFunc(void * user){
-	// static unsigned _stdcall cThreadFunc(void * user){
-		ThreadFunction& tfunc = *((ThreadFunction*)user);
-		tfunc();
-		return 0;
-	}
-};
+		unsigned long mHandle;
+		//	ThreadFunction mRoutine;
 
+		static unsigned cThreadFunc(void * user) {
+			// static unsigned _stdcall cThreadFunc(void * user){
+			ThreadFunction& tfunc = *((ThreadFunction*)user);
+			tfunc();
+			return 0;
+		}
+	};
+}
 #endif
 
 
-
+namespace al {
 Thread::Thread()
 :	mImpl(new Impl), mJoinOnDestroy(false)
 {}

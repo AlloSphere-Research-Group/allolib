@@ -9,9 +9,9 @@ find_package(OpenGL REQUIRED)
 if (WINDOWS)
 
   set(GLFW_INCLUDE_DIRS ${al_path}/dependencies/glfw/include)
-  set(GLFW_LIBRARIES ${al_path}/dependencies/glfw/glfw3dll.lib)
+  set(GLFW_LIBRARIES ${al_path}/dependencies/glfw/lib-vc2015/glfw3dll.lib)
   set(GLEW_INCLUDE_DIRS ${al_path}/dependencies/glew/include)
-  set(GLEW_LIBRARIES ${al_path}/dependencies/glew/glew32.lib)
+  set(GLEW_LIBRARIES ${al_path}/dependencies/glew/lib/Release/x64/glew32.lib)
 
 else ()
 

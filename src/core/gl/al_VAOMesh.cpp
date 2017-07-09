@@ -41,6 +41,7 @@ VAOMesh& VAOMesh::operator = (VAOMesh const& other) {
     vaoWrapper = std::make_shared<VAOWrapper>();
     if (gl::loaded()) update();
     // std::cout << "copy assignment" << std::endl;
+	return *this;
 }
 
 // when moving, move vao
@@ -48,6 +49,7 @@ VAOMesh& VAOMesh::operator = (VAOMesh&& other) {
     copy(other);
     vaoWrapper = other.vaoWrapper;
     // std::cout << "move assignment" << std::endl;
+	return *this;
 }
 
 void VAOMesh::bind() {
