@@ -65,6 +65,7 @@ if (WINDOWS)
   # when run from Visual Studio, working directory is where the solution is by default
   # set it to app output directory
   set_target_properties(${app_name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${app_path}/bin)
+  set_directory_properties(PROPERTIES VS_STARTUP_PROJECT ${app_name})
 endif (WINDOWS)
 
 target_include_directories(${app_name} PRIVATE ${dirs_to_include})
