@@ -211,7 +211,6 @@ public:
   // void stroke(float v){ lineWidth(v); pointSize(v); }
 
   /// Set width, in pixels, of lines
-  /// since only 1 is guaranteed to be supported, we disable this function
   // void lineWidth(float v);
 
   /// Set diameter, in pixels, of points

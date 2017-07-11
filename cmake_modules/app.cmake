@@ -1,3 +1,4 @@
+
 include(${al_path}/cmake_modules/configure_platform.cmake)
 # sets: MACOS || LINUX || WINDOWS_MINGW || WINDOWS, and PLATFORM_DEFINITION
 include(${al_path}/cmake_modules/find_core_dependencies.cmake)
@@ -7,6 +8,8 @@ include(${al_path}/cmake_modules/find_additional_dependencies.cmake)
 #       ADDITIONAL_SOURCES, ADDITIONAL_DEFINITIONS
 include(${al_path}/cmake_modules/external.cmake)
 # sets: EXTERNAL_LIBRARIES, EXTERNAL_DEFINITIONS
+include(${al_path}/cmake_modules/basic_flags.cmake)
+# sets: basic_flags
 
 set(headers
   ${ADDITIONAL_HEADERS}
@@ -34,62 +37,62 @@ set(definitions
   ${EXTERNAL_DEFINITIONS}
 )
 
-# for linking different libs for debug/release target
-if (WINDOWS)
-  set(al_lib_debug ${al_path}/al_debug.lib)
-  set(al_lib_release ${al_path}/al.lib)
-else()
-  set(al_lib_debug ${al_path}/libal_debug.a)
-  set(al_lib_release ${al_path}/libal.a)
-endif (WINDOWS)
+set(flags
+  ${basic_flags}
+)
 
-set(APP_OUTPUT_PATH ${app_path}/bin)
-if (WINDOWS)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${APP_OUTPUT_PATH})
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${APP_OUTPUT_PATH})
-else ()
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${APP_OUTPUT_PATH})
-endif (WINDOWS)
-
-if (WINDOWS)
-  # set(CMAKE_CXX_FLAGS "/W2")
-else ()
-  set(CMAKE_CXX_FLAGS "-std=c++14 -Wall ${CMAKE_CXX_FLAGS}")
-endif (WINDOWS)
-
+# --- setup app target --------------------------------------------------------
 add_executable(${app_name} ${app_files_list})
 
 set_target_properties(${app_name} PROPERTIES DEBUG_POSTFIX _debug)
+
+#paths
+set_target_properties(${app_name}
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${app_path}/bin
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${app_path}/bin
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${app_path}/bin
+)
+
+# flags
+target_compile_options(${app_name} PUBLIC ${flags}) # public because of headers
+
+# definitions
+target_compile_definitions(${app_name} PRIVATE ${definitions})
+
+# include dirs
+target_include_directories(${app_name} PRIVATE ${dirs_to_include})
+
+# libs
+if (WINDOWS)
+  target_link_libraries(${app_name} debug ${al_path}/al_debug.lib optimized ${al_path}/al.lib)
+else()
+  target_link_libraries(${app_name} debug ${al_path}/libal_debug.a optimized ${al_path}/libal.a)
+endif (WINDOWS)
+target_link_libraries(${app_name} ${libs_to_link})
+
 
 if (WINDOWS)
   # when run from Visual Studio, working directory is where the solution is by default
   # set it to app output directory
   set_target_properties(${app_name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${app_path}/bin)
   set_directory_properties(PROPERTIES VS_STARTUP_PROJECT ${app_name})
-endif (WINDOWS)
 
-target_include_directories(${app_name} PRIVATE ${dirs_to_include})
-
-target_link_libraries(${app_name} debug ${al_lib_debug} optimized ${al_lib_release})
-target_link_libraries(${app_name} ${libs_to_link})
-
-# post build events for windows
-if (WINDOWS)
-  message("setting script for copying dlls")
+  # post build events for copying dlls
   set(post_build_command
-    robocopy ${al_path}/dependencies/glew/bin/Release/x64 ${APP_OUTPUT_PATH} glew32.dll &
-    robocopy ${al_path}/dependencies/glfw/lib-vc2015 ${APP_OUTPUT_PATH} glfw3.dll &
+    robocopy ${al_path}/dependencies/glew/bin/Release/x64 ${app_path}/bin glew32.dll &
+    robocopy ${al_path}/dependencies/glfw/lib-vc2015 ${app_path}/bin glfw3.dll &
   )
 
   if (USE_PORTAUDIO)
   	list(APPEND post_build_command
-  	  robocopy ${al_path}/dependencies/portaudio/ ${APP_OUTPUT_PATH} portaudio_x64.dll &
+  	  robocopy ${al_path}/dependencies/portaudio/ ${app_path}/bin portaudio_x64.dll &
   	)
   endif (USE_PORTAUDIO)
 
   if (USE_APR)
   	list(APPEND post_build_command
-	  robocopy ${al_path}/dependencies/apr/ ${APP_OUTPUT_PATH} libapr-1.dll &
+	  robocopy ${al_path}/dependencies/apr/ ${app_path}/bin libapr-1.dll &
   	)
   endif (USE_APR)
 
