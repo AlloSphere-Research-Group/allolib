@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INCLUDE_AL_CORE_HPP
+#define INCLUDE_AL_CORE_HPP
 
 #include "al/core/app/al_App.hpp"
 #include "al/core/app/al_AudioApp.hpp"
@@ -64,3 +65,5 @@
 #include "al/core/types/al_Color.hpp"
 #include "al/core/types/al_Conversion.hpp"
 #include "al/core/types/al_SingleRWRingBuffer.hpp"
+
+#endif

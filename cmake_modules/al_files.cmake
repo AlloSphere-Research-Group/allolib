@@ -102,6 +102,7 @@ set(core_sources
 )
 
 set(glv_headers
+  include/al/glv/al_GLV.hpp
   include/al/glv/glv.h
   include/al/glv/glv_behavior.h
   include/al/glv/glv_buttons.h
@@ -122,6 +123,8 @@ set(glv_headers
 )
 
 set(glv_sources
+  src/glv/al_GLV_draw.cpp
+  src/glv/al_GLV_wrapper.cpp
   src/glv/glv_buttons.cpp
   src/glv/glv_color.cpp
   src/glv/glv_core.cpp
