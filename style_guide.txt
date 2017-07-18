@@ -1,2 +1,10 @@
-2 spaces
-`mCarmelCase` for member variables
+- spaces, not tabs
+- let's not skip curly braces
+- use smart pointers instead of new/delete
+- stay away from macros
+- C++ style rather than C style
+
+[!] other things to remember
+    - let'stry to keep functions pure
+    - single responsiblity principle is important
+    - hacks are OK, just remember to comment the explanation
