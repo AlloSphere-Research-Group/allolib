@@ -1,7 +1,7 @@
 #!/bin/bash
 
 INITIALDIR=${PWD}
-echo "Script executed from: ${INITIALDIR}"
+# echo "Script executed from: ${INITIALDIR}"
 
 # BASH_SOURCE has the script's path
 # could be absolute, could be relative
