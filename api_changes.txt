@@ -42,13 +42,10 @@ g.shader(shader1);
 // draw things
 g.shader(shader2);
 // draw other things
-g.shader(shader2);
-// calling same shader one more time will do nothing
-// since Graphics keeps track of active shader
 
 
 Texture
-- now has .create2D(...) & .createCubemap(...) method. (create1D and 3D yet)
+- now has .create2D(...) & .createCubemap(...) method. (create1D and 3D also coming)
 - for drawing, al::Graphics handles textures
 ex)
 g.texture(my_tex1);

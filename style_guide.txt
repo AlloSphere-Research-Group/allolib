@@ -3,8 +3,9 @@
 - use smart pointers instead of new/delete
 - stay away from macros
 - C++ style rather than C style
+- less templates
 
 [!] other things to remember
-    - let'stry to keep functions pure
+    - let's try to keep functions pure
     - single responsiblity principle is important
-    - hacks are OK, just remember to comment the explanation
+    - hacks are OK, just remember to comment with explanation

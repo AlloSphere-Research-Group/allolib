@@ -3,12 +3,13 @@ TODO
 - stereo window
 - fullscreen with specific monitor
 - connect omnirender
-- use stl thread
-- use stl random
+- use std::thread
+- use std::random
+- img, font, mesh loading
 
 DEPENDENCIES
 
-- GLFW3
+- GLFW
 - GLEW
 
 NOTE
