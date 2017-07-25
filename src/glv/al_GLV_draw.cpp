@@ -1,4 +1,4 @@
-#include "al/GLV/al_GLV.hpp"
+#include "al/glv/al_GLV.hpp"
 
 #include "al/core/gl/al_Shapes.hpp"
 

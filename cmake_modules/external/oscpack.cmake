@@ -9,7 +9,7 @@ set(OSCPACK_SRC
   external/oscpack/osc/OscPrintReceivedElements.cpp
   external/oscpack/osc/OscReceivedElements.cpp
   external/oscpack/osc/OscTypes.cpp
-  external/oscpack/ip/IpEndPointName.cpp
+  external/oscpack/ip/IpEndpointName.cpp
 )
 
 if (WINDOWS)

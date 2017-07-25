@@ -1,4 +1,4 @@
-#include "al/GLV/al_GLV.hpp"
+#include "al/glv/al_GLV.hpp"
 
 al::GLVEventHandler::GLVEventHandler(glv::GLV& g) : mGlvPtr{ &g } {}
 
