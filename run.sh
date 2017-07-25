@@ -30,9 +30,9 @@ while getopts ":d" opt; do
 done
 echo "BUILD TYPE: ${BUILD_TYPE}"
 
-# first build al_lib ###########################################################
+# first build allolib ###########################################################
 echo " "
-echo "___ building al_lib __________"
+echo "___ building allolib __________"
 echo " "
 cd ${AL_LIB_PATH}
 mkdir -p build
