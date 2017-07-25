@@ -7,6 +7,7 @@
 
 if(IS_DIRECTORY "${al_path}/external/rtaudio")
   message("Using RtAudio")
+  add_definitions(-DAL_AUDIO_RTAUDIO)
 
   set(RTAUDIO_INCLUDE_DIR ${al_path}/external/rtaudio)
   set(RTAUDIO_SRC external/rtaudio/RtAudio.cpp)
@@ -15,7 +16,7 @@ if(IS_DIRECTORY "${al_path}/external/rtaudio")
     # add_definitions(-D__LINUX_PULSE__)
     set(RTAUDIO_DEFINITIONS -D__LINUX_PULSE__)
     list(APPEND RTAUDIO_LIBRARIES
-      pulse pulse-simple
+      pulse pulse-simple pthread
     )
   #  add_definitions(-D__LINUX_ALSA__)
   #  list(APPEND RTAUDIO_LIBRARIES
