@@ -399,9 +399,9 @@ inline Quat<T> Quat<T> :: reverseMultiply(const Quat<T> & q) const {
 namespace{
   // Values determined with help from:
   // http://babbage.cs.qc.cuny.edu/IEEE-754.old/Decimal.html
-  template<class T> T justUnder1();
-  template<> float  justUnder1(){ return 0.9999999f; }
-  template<> double justUnder1(){ return 0.999999999999999; }
+  template<class T> inline T justUnder1();
+  template<> float  inline justUnder1(){ return 0.9999999f; }
+  template<> double inline justUnder1(){ return 0.999999999999999; }
 }
 
 template<typename T>
