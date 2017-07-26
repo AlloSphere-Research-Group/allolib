@@ -1,5 +1,8 @@
 #!/bin/bash
 
+git submodule init
+git submodule update
+
 INITIALDIR=${PWD}
 # echo "Script executed from: ${INITIALDIR}"
 
