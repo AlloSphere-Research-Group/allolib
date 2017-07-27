@@ -7,7 +7,6 @@
 set(AudioAPI "rtaudio" CACHE STRING "Library for Audio IO")
 set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
 
-message(STATUS "AudioAPI=’${AudioAPI}'")
 
 include(${al_path}/cmake_modules/external/oscpack.cmake)
 include(${al_path}/cmake_modules/external/gamma.cmake)

@@ -4,26 +4,36 @@
 #   RTAUDIO_LIBRARIES
 #   RTAUDIO_DEFINITIONS
 
+set(RtAudioLinuxAPI "alsa" CACHE STRING "API For Linux when using RtAudio")
+set_property(CACHE RtAudioLinuxAPI PROPERTY STRINGS alsa pulse jack)
+
 
 if(IS_DIRECTORY "${al_path}/external/rtaudio")
   message("Using RtAudio")
+
   add_definitions(-DAL_AUDIO_RTAUDIO)
 
   set(RTAUDIO_INCLUDE_DIR ${al_path}/external/rtaudio)
   set(RTAUDIO_SRC external/rtaudio/RtAudio.cpp)
 
   if(LINUX)
-    # add_definitions(-D__LINUX_PULSE__)
-    set(RTAUDIO_DEFINITIONS -D__LINUX_PULSE__)
-    list(APPEND RTAUDIO_LIBRARIES
-      pulse pulse-simple pthread
-    )
-  #  add_definitions(-D__LINUX_ALSA__)
-  #  list(APPEND RTAUDIO_LIBRARIES
-  #    asound pthread
-  #  )
-  #  g++ -Wall -D__LINUX_OSS__ -o audioprobe audioprobe.cpp RtAudio.cpp -lpthread
-  #  g++ -Wall -D__UNIX_JACK__ -o audioprobe audioprobe.cpp RtAudio.cpp $(pkg-config –cflags –libs jack) -lpthread
+    if(RtAudioLinuxAPI STREQUAL "pulse")
+      set(RTAUDIO_DEFINITIONS -D__LINUX_PULSE__)
+      list(APPEND RTAUDIO_LIBRARIES
+        pulse pulse-simple pthread
+        )
+    elseif(RtAudioLinuxAPI STREQUAL "alsa")
+      set(RTAUDIO_DEFINITIONS -D__LINUX_ALSA__)
+      list(APPEND RTAUDIO_LIBRARIES
+        asound pthread
+        )
+    elseif(RtAudioLinuxAPI STREQUAL "jack")
+      set(RTAUDIO_DEFINITIONS -D__UNIX_JACK__)
+      list(APPEND RTAUDIO_LIBRARIES
+        jack pthread
+        )
+      #  g++ -Wall -D__UNIX_JACK__ -o audioprobe audioprobe.cpp RtAudio.cpp $(pkg-config –cflags –libs jack) -lpthread
+    endif(RtAudioLinuxAPI STREQUAL)
   endif(LINUX)
 
   if(MACOS)
