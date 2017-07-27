@@ -584,7 +584,7 @@ bool AudioBackend::open(int framesPerSecond, int framesPerBuffer,
   //    unsigned int bufferBytes, bufferFrames = 512;
 
   AudioBackendData *data = static_cast<AudioBackendData *>(mBackendData.get());
-  unsigned int deviceBufferSize = framesPerBuffer;
+  unsigned int deviceBufferSize = static_cast<unsigned int>(framesPerBuffer);
   auto *ip = data->iParams.nChannels > 0 ? &data->iParams : nullptr;
   auto *op = data->oParams.nChannels > 0 ? &data->oParams : nullptr;
   try {
@@ -595,7 +595,7 @@ bool AudioBackend::open(int framesPerSecond, int framesPerBuffer,
     return false;
   }
 
-  if (deviceBufferSize != framesPerBuffer) {
+  if (deviceBufferSize != static_cast<unsigned int>(framesPerBuffer)) {
     printf("WARNING: Device opened with buffer size: %d", deviceBufferSize);
   }
   return true;

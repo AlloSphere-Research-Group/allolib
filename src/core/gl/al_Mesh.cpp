@@ -253,7 +253,7 @@ void Mesh::generateNormals(bool normalize, bool equalWeightPerFace) {
     }
   };
 
-  unsigned Nv = vertices().size();
+  size_t Nv = vertices().size();
 
   // need at least one triangle
   if(Nv < 3) return;
@@ -261,7 +261,7 @@ void Mesh::generateNormals(bool normalize, bool equalWeightPerFace) {
   // make same number of normals as vertices
   normals().clear();
   normals().reserve(Nv);
-  for (int i = 0; i < Nv; i += 1) {
+  for (size_t i = 0; i < Nv; i += 1) {
     normals().emplace_back();
   }
 
@@ -270,7 +270,7 @@ void Mesh::generateNormals(bool normalize, bool equalWeightPerFace) {
 
     for(unsigned i=0; i<Nv; ++i) normals()[i].set(0,0,0);
 
-    unsigned Ni = indices().size();
+    size_t Ni = indices().size();
 
     if(primitive() == TRIANGLES){
       Ni = Ni - (Ni%3); // must be multiple of 3
