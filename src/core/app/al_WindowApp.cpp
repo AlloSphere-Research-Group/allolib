@@ -36,12 +36,15 @@ void WindowApp::open() {
   onInit();
   create();
   gl::default_gl_settings();
+  preOnCreate();
   onCreate();
+  postOnCreate();
 }
 
 void WindowApp::loop() {
-  // onAnimate(al_time_ns2s * deltaTime);
+  preOnDraw();
   onDraw();
+  postOnDraw();
   refresh();
 }
 

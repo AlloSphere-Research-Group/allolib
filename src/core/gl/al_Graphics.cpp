@@ -64,6 +64,21 @@ void Graphics::cullFace(bool b, Face face) {
   capability(CULL_FACE, b);
   glCullFace(face);
 }
+
+Matrix4f Graphics::modelMatrix() {
+    return mModelStack.get();
+}
+
+Matrix4f Graphics::viewMatrix() {
+  return mViewMat;
+}
+
+Matrix4f Graphics::projMatrix() {
+  return mProjMat;
+}
+
+void Graphics::loadIdentity() { mModelStack.setIdentity(); }
+
 void Graphics::pushMatrix(){
     mModelStack.push();
     mMatChanged = true;
@@ -281,6 +296,13 @@ void Graphics::draw(VAOMesh& mesh) {
 void Graphics::draw(EasyVAO& vao) {
   update();
   vao.draw();
+}
+
+void Graphics::draw(Mesh& mesh) {
+  // uses internal vao object.
+  mInternalVAO.update(mesh);
+  update();
+  mInternalVAO.draw();
 }
 
 void Graphics::framebuffer(FBO& fbo) {

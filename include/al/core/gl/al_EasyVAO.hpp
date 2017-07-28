@@ -5,13 +5,17 @@
 
         - This class does not store cpu side data
         - Any user data format could be used (custom vector4, custom color class, etc)
-      as long as they are stored as contiguous memory
+          as long as they are stored as contiguous memory
 
     Keehong Youn, 2017, younkeehong@gmail.com
 */
 
 #include "al/core/gl/al_VAO.hpp"
 #include "al/core/gl/al_BufferObject.hpp"
+#include "al/core/gl/al_Mesh.hpp"
+
+// #include <iostream>
+#include <unordered_map>
 
 namespace al
 {
@@ -19,6 +23,8 @@ namespace al
 class EasyVAO : public VAO
 {
 public:
+    static std::unordered_map<unsigned int, unsigned int> mPrimMap;
+
     // layout (attribute location) for (GL) <-> (glsl shader)
     enum AttribLayout: unsigned int
     {
@@ -108,10 +114,15 @@ public:
         update(data, typeSize, arraySize, mExtra4dAtt, dataType);
     }
 
+    // indices should be unsigned int
     void updateIndices(unsigned int* data, int size);
     void update(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
+    void updateWithoutBinding(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
     void primitive(unsigned int prim);
     void draw();
+
+    // also recceives al::Mesh
+    void update(Mesh& m);
 
 private:
     unsigned int mGLPrimMode = GL_TRIANGLES;

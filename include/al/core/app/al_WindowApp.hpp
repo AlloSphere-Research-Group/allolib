@@ -60,6 +60,12 @@ public:
   virtual void onResize(int w, int h) {}
   virtual void onVisibility(bool v) {}
 
+  // for child classes to override
+  virtual void preOnCreate() {}
+  virtual void postOnCreate() {}
+  virtual void preOnDraw() {}
+  virtual void postOnDraw() {}
+
   // call user event functions using WindowEventHandler class
   virtual bool keyDown(const Keyboard& k) override;
   virtual bool keyUp(const Keyboard& k) override;

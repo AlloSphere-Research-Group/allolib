@@ -271,27 +271,19 @@ public:
   void popMatrix();
 
   /// Set current matrix to identity
-  void loadIdentity() { mModelStack.setIdentity(); }
+  void loadIdentity();
 
   /// Set current matrix
-  void loadMatrix(const Matrix4d &m) {/* !!!!!!!!!!!!! */}
-  void loadMatrix(const Matrix4f &m) {/* !!!!!!!!!!!!! */}
+  //void loadMatrix(const Matrix4d &m) {/* !!!!!!!!!!!!! */}
+  //void loadMatrix(const Matrix4f &m) {/* !!!!!!!!!!!!! */}
 
   /// Multiply current matrix
-  void multMatrix(const Matrix4d &m) {/* !!!!!!!!!!!!! */}
-  void multMatrix(const Matrix4f &m) {/* !!!!!!!!!!!!! */}
+  //void multMatrix(const Matrix4d &m) {/* !!!!!!!!!!!!! */}
+  //void multMatrix(const Matrix4f &m) {/* !!!!!!!!!!!!! */}
 
-  Matrix4f modelMatrix() {
-      return mModelStack.get();
-  }
-
-  Matrix4f viewMatrix() {
-    return mViewMat;
-  }
-  
-  Matrix4f projMatrix() {
-    return mProjMat;
-  }
+  Matrix4f modelMatrix();
+  Matrix4f viewMatrix();
+  Matrix4f projMatrix();
 
   /// Rotate current matrix
 
@@ -389,16 +381,18 @@ public:
   void update();
   void draw(VAOMesh& mesh);
   void draw(EasyVAO& vao);
-  void draw(Mesh& mesh) {
-    // uses internal vao object. 
-  }
+  void draw(Mesh& mesh);
+
   void draw(Texture& tex, float x, float y, float w, float h) {
-    // for 2D, (x, y) becomes bottom-left, then width and height spans
+    // TODO
+    // for 2D. (x, y) becomes bottom-left, then width and height spans
   }
   void draw(Texture& tex, Vec3f pos, float w, float h, Vec3f normal) {
+    // TODO
     // center, width, height, and normal direction
   }
   void draw(Texture& tex, Vec3f pos, float w, float h) {
+    // TODO
     // normal not given, billboards toward camera
   }
 
@@ -432,6 +426,8 @@ protected:
   int mTexBindingPoint[3] = {0, 1, 2};
   float mTexMix[3] = {0, 0, 0};
   bool mTexChanged = false;
+
+  EasyVAO mInternalVAO;
 };
 
 }

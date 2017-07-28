@@ -31,6 +31,9 @@ public:
     double minimum, maximum;
     SliderMinMax(double min, double max, double v);
     double getCalcedValue();
+    void setCalcedValue(double val) {
+        setValue((val - minimum) / (maximum - minimum));
+    }
 };
 
 class SliderWithLabel {
@@ -84,6 +87,14 @@ public:
     void removeSlider(SliderWithLabel& slider);
     void removeSlider(std::string name);
     double sliderValue(std::string name);
+    void setSliderValue(std::string name, double val) {
+        auto search = sliders.find(name);
+        if (search == sliders.end()) {
+            std::cout << "no slider with name \"" << name << "\" exists" << std::endl;
+            return;
+        }
+        search->second->slider.setCalcedValue(val);
+    }
 
     void addButton(ButtonWithLabel& buttons);
     void addButton(std::string name);

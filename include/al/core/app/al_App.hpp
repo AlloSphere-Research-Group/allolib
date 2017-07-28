@@ -8,9 +8,12 @@
 #include "al/core/app/al_AudioApp.hpp"
 #include "al/core/protocol/al_OSC.hpp"
 
+#include "al/core/gl/al_Graphics.hpp"
 #include "al/core/gl/al_Viewpoint.hpp"
 #include "al/core/spatial/al_Pose.hpp"
 #include "al/core/io/al_ControlNav.hpp"
+
+#include <iostream>
 
 namespace al {
 
@@ -23,6 +26,8 @@ public:
   virtual void onAnimate(double dt) {}
   virtual void onExit() {}
 
+  virtual void preOnAnimate(double dt) {}
+
   // overrides WindowApp's start to also initiate AudioApp and etc.
   virtual void start() override {
     open(); // WindowApp (glfw::init(), onInit(), create(), onCreate())
@@ -31,6 +36,7 @@ public:
     while (!shouldQuit()) {
       // user can quit this loop with WindowApp::quit() or clicking close button
       // or with stdctrl class input (ctrl+q)
+      preOnAnimate(dt());
       onAnimate(dt());
       loop(); // WindowApp (onDraw, refresh)
       tickFPS(); // WindowApp (FPS)
@@ -42,6 +48,45 @@ public:
 
   // PacketHandler
   virtual void onMessage(osc::Message& m) override {}
+};
+
+class EasyApp : public App {
+public:
+  Graphics g {*this};
+  Viewpoint view;
+  NavInputControl nav;
+  ShaderProgram shader;
+
+  class EasyAppEventHandler : public WindowEventHandler {
+  public:
+    EasyApp* app;
+    EasyAppEventHandler(EasyApp& a): app(&a) {}
+    virtual bool resize(int dw, int dh) override {
+      app->view.viewport(0, 0, app->fbWidth(), app->fbHeight());
+      return true;
+    }
+  };
+  EasyAppEventHandler eventHandler {*this};
+
+  virtual void preOnCreate() override {
+    append(eventHandler);
+    append(nav);
+    nav.target(view);
+    shader.compile(al_default_vert_shader(), al_default_frag_shader());
+    view.pos(Vec3f(0, 0, 20)).faceToward(Vec3f(0, 0, 0), Vec3f(0, 1, 0));
+    view.fovy(45).near(0.1).far(1000);
+    view.viewport(0, 0, fbWidth(), fbHeight());
+  }
+
+  virtual void preOnAnimate(double dt) override {
+      nav.step();
+  }
+
+  virtual void preOnDraw() override {
+      g.shader(shader);
+      g.camera(view);
+  }
+
 };
 
 }
