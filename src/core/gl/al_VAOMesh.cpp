@@ -20,6 +20,7 @@ std::unordered_map<unsigned int, unsigned int> VAOMesh::mPrimMap = {
 
 VAOMesh::VAOMesh() {
     vaoWrapper = std::make_shared<VAOWrapper>();
+    // std::cout << "empty ctor" << std::endl;
 }
 
 // when copying, make new vao

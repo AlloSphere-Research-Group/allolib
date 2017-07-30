@@ -389,27 +389,9 @@ public:
   void draw(EasyVAO& vao);
   void draw(Mesh& mesh);
 
-  void draw(Texture& tex, float x, float y, float w, float h) {
-    // TODO
-    // for 2D. (x, y) becomes bottom-left, then width and height spans
-    auto& v = mTexMesh.vertices();
-    v[0] = Vec3f{x, y, 0.0f};
-    v[1] = Vec3f{x + w, y, 0.0f};
-    v[2] = Vec3f{x, y + h, 0.0f};
-    v[3] = Vec3f{x, y + h, 0.0f};
-    v[4] = Vec3f{x + w, y, 0.0f};
-    v[5] = Vec3f{x + w, y + h, 0.0f};
-    uniformColorMix(0); // no color
-    // AL_TEX_QUAD_DRAW_BINDING_UNIT = 46 and is defined in al_Texture.hpp
-    // binding to this point aims no collision with user's binding
-    tex.bind(AL_TEX_QUAD_DRAW_BINDING_UNIT); 
-    texture(AL_TEX_QUAD_DRAW_BINDING_UNIT, 0);
-    textureMix(1, 0, 0); // use tex0 only
-    draw(mTexMesh);
-  }
-  void draw(EasyFBO& fbo, float x, float y, float w, float h) {
-    draw(fbo.tex(), x, y, w, h);
-  }
+  void draw(Texture& tex, float x, float y, float w, float h);
+  void draw(EasyFBO& fbo, float x, float y, float w, float h);
+
   void draw(Texture& tex, Vec3f pos, float w, float h, Vec3f normal) {
     // TODO
     // center, width, height, and normal direction
