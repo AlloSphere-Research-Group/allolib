@@ -99,7 +99,7 @@ void Texture::bind(int binding_point) {
 }
 
 void Texture::bind_temp() {
-  bind(AL_TEX_MAX_BINDING_UNIT - 1);
+  bind(AL_TEX_TEMP_BINDING_UNIT);
 }
 
 void Texture::unbind(int binding_point, unsigned int target) {
@@ -240,12 +240,16 @@ void Texture::update_wrap() {
 void Texture::update_mipmap() {
   if (mUsingMipmapUpdated) {
     if (mUseMipmap) {
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1000);
+      // base level is 0 if untouched so no need to call
+      // glTexParameteri(target(), GL_TEXTURE_BASE_LEVEL, 0);
+      // 1000 is default value of OpenGL
+      glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 1000);
       glGenerateMipmap(target());
     }
     else {
       // base level is 0 if untouched
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+      // glTexParameteri(target(), GL_TEXTURE_BASE_LEVEL, 0);
+      glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 0);
     }
     mUsingMipmapUpdated = false;
   }

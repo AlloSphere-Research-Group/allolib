@@ -351,6 +351,10 @@ public:
   void setClearDepth(float d);
   void clearDepth();
   void clearDepth(float d);
+  void clear(float r, float g, float b, float a = 1, float d = 1, int drawbuffer = 0) {
+    clearColor(r, g, b, a, drawbuffer);
+    clearDepth(d);
+  }
 
   void uniformColor(float r, float g, float b, float a = 1.0f);
   void uniformColor(Color const& c);
@@ -358,10 +362,9 @@ public:
   void uniformColorMix(float m);
 
   void textureMix(float m, int tex_num = 0);
+  void textureMix(float m0, float m1, float m2);
   void texture(int binding_point, int tex_num = 0);
   void texture(Texture& t, int tex_num = 0);
-  void pushTexture() {}
-  void popTexture() {}
 
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
@@ -390,18 +393,22 @@ public:
     // TODO
     // for 2D. (x, y) becomes bottom-left, then width and height spans
     auto& v = mTexMesh.vertices();
+    v[0] = Vec3f{x, y, 0.0f};
     v[1] = Vec3f{x + w, y, 0.0f};
     v[2] = Vec3f{x, y + h, 0.0f};
     v[3] = Vec3f{x, y + h, 0.0f};
     v[4] = Vec3f{x + w, y, 0.0f};
     v[5] = Vec3f{x + w, y + h, 0.0f};
-    pushTexture();
-    texture(tex, 0);
-    textureMix(1, 0);
-    textureMix(0, 1);
-    textureMix(0, 2);
+    uniformColorMix(0); // no color
+    // AL_TEX_QUAD_DRAW_BINDING_UNIT = 46 and is defined in al_Texture.hpp
+    // binding to this point aims no collision with user's binding
+    tex.bind(AL_TEX_QUAD_DRAW_BINDING_UNIT); 
+    texture(AL_TEX_QUAD_DRAW_BINDING_UNIT, 0);
+    textureMix(1, 0, 0); // use tex0 only
     draw(mTexMesh);
-    popTexture();
+  }
+  void draw(EasyFBO& fbo, float x, float y, float w, float h) {
+    draw(fbo.tex(), x, y, w, h);
   }
   void draw(Texture& tex, Vec3f pos, float w, float h, Vec3f normal) {
     // TODO

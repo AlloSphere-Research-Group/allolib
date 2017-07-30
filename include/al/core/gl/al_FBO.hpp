@@ -81,7 +81,7 @@ class RBO : public GPUObject{
 public:
 
   /// @param[in] format  internal format of buffer
-  RBO(unsigned int format = GL_DEPTH_COMPONENT16);
+  RBO(unsigned int format = GL_DEPTH_COMPONENT32F);
 
   ~RBO() {
       destroy();
@@ -108,7 +108,7 @@ public:
 
   void create(
     unsigned int width, unsigned int height,
-    unsigned int format=GL_DEPTH_COMPONENT16
+    unsigned int format=GL_DEPTH_COMPONENT32F
   ) {
     mFormat = format;
     resize(width, height);

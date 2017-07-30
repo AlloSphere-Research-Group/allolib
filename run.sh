@@ -1,8 +1,5 @@
 #!/bin/bash
 
-git submodule init
-git submodule update
-
 INITIALDIR=${PWD}
 # echo "Script executed from: ${INITIALDIR}"
 
@@ -38,6 +35,8 @@ echo " "
 echo "___ building allolib __________"
 echo " "
 cd ${AL_LIB_PATH}
+git submodule init
+git submodule update
 mkdir -p build
 cd build
 mkdir -p "${BUILD_TYPE}"

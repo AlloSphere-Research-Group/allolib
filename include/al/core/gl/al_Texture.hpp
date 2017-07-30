@@ -56,6 +56,10 @@ This is the limit on glActiveTexture(GL_TEXTURE0 + i) and glBindSampler.
 In GL 3.3, this was 48; in 4.3, it is 96.
 */
 #define AL_TEX_MAX_BINDING_UNIT 48
+// for temporary internal binding such as creating a texture
+#define AL_TEX_TEMP_BINDING_UNIT 47
+// for drawing quad slabs with texture in al::Graphics
+#define AL_TEX_QUAD_DRAW_BINDING_UNIT 46
 
 /*
 
@@ -65,6 +69,7 @@ myTex.filter(GL_LINEAR);
 myTex.wrap(GL_CLAMP_TO_EDGE);
 myTex.mipmap(false);
 myTex.create2D(width, height, GL_RGB8, GL_RGBA, GL_FLOAT);
+
 myTex.submit(pointer_to_data); // you can skip this if using the texture for render target
 
 to update  params:
@@ -103,9 +108,9 @@ public:
 
   void create2D(
     unsigned int width, unsigned int height,
-    int internal = GL_RGBA8,
+    int internal = GL_RGBA32F,
     unsigned int format = GL_RGBA,
-    unsigned int type = GL_UNSIGNED_BYTE
+    unsigned int type = GL_FLOAT
   );
 
   // TODO
@@ -113,9 +118,9 @@ public:
 
   void createCubemap(
     unsigned int size,
-    int internal = GL_RGBA8,
+    int internal = GL_RGBA32F,
     unsigned int format = GL_RGBA,
-    unsigned int type = GL_UNSIGNED_BYTE
+    unsigned int type = GL_FLOAT
   );
 
 

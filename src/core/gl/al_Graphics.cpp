@@ -168,6 +168,13 @@ void Graphics::textureMix(float m, int tex_num) {
     mTexChanged = true;
 }
 
+void Graphics::textureMix(float m0, float m1, float m2) {
+    mTexMix[0] = m0;
+    mTexMix[1] = m1;
+    mTexMix[2] = m2;
+    mTexChanged = true;
+}
+
 void Graphics::texture(int binding_point, int tex_num) {
   mTexBindingPoint[tex_num] = binding_point;
   mTexChanged = true;
