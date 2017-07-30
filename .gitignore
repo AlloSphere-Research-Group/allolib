@@ -29,3 +29,5 @@ dependencies/portaudio
 *.lib
 *.sln
 *.db
+*/bin/
+bin/
