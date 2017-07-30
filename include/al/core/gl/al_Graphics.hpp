@@ -61,6 +61,7 @@
 #include "al/core/gl/al_Texture.hpp"
 #include "al/core/gl/al_Viewpoint.hpp"
 #include "al/core/gl/al_FBO.hpp"
+#include "al/core/gl/al_EasyFBO.hpp"
 #include "al/core/io/al_Window.hpp"
 
 #include <iostream>
@@ -171,7 +172,7 @@ public:
     FILL          = GL_FILL         /**< Render vertices normally according to primitive */
   };
 
-  Graphics(Window& window): mWindow(window) {}
+  Graphics(Window& window);
 
   /// Enable a capability
   void enable(Capability v){ glEnable(v); }
@@ -359,6 +360,8 @@ public:
   void textureMix(float m, int tex_num = 0);
   void texture(int binding_point, int tex_num = 0);
   void texture(Texture& t, int tex_num = 0);
+  void pushTexture() {}
+  void popTexture() {}
 
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
@@ -386,6 +389,19 @@ public:
   void draw(Texture& tex, float x, float y, float w, float h) {
     // TODO
     // for 2D. (x, y) becomes bottom-left, then width and height spans
+    auto& v = mTexMesh.vertices();
+    v[1] = Vec3f{x + w, y, 0.0f};
+    v[2] = Vec3f{x, y + h, 0.0f};
+    v[3] = Vec3f{x, y + h, 0.0f};
+    v[4] = Vec3f{x + w, y, 0.0f};
+    v[5] = Vec3f{x + w, y + h, 0.0f};
+    pushTexture();
+    texture(tex, 0);
+    textureMix(1, 0);
+    textureMix(0, 1);
+    textureMix(0, 2);
+    draw(mTexMesh);
+    popTexture();
   }
   void draw(Texture& tex, Vec3f pos, float w, float h, Vec3f normal) {
     // TODO
@@ -397,6 +413,7 @@ public:
   }
 
   void framebuffer(FBO& fbo);
+  void framebuffer(EasyFBO& easyFbo);
   void framebuffer(unsigned int fboID);
 
   Window& window() { return mWindow; }
@@ -428,6 +445,7 @@ protected:
   bool mTexChanged = false;
 
   EasyVAO mInternalVAO;
+  Mesh mTexMesh;
 };
 
 }

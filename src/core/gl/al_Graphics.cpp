@@ -1,4 +1,5 @@
 #include "al/core/gl/al_Graphics.hpp"
+#include "al/core/gl/al_Shapes.hpp"
 
 #include <stdio.h>
 #include <iostream>
@@ -35,6 +36,11 @@ bool Graphics::error(const char * msg, int ID){
     return true;
   }
   return false;
+}
+
+Graphics::Graphics(Window& window): mWindow(window) {
+  // allocate mesh's vertex and texcoord array for tex rect
+  addTexRect(mTexMesh, 0, 0, 0, 0);
 }
 
 void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq){
@@ -307,6 +313,9 @@ void Graphics::draw(Mesh& mesh) {
 
 void Graphics::framebuffer(FBO& fbo) {
     fbo.bind();
+}
+void Graphics::framebuffer(EasyFBO& easyFbo) {
+  easyFbo.fbo().bind();
 }
 
 void Graphics::framebuffer(unsigned int fboID) {
