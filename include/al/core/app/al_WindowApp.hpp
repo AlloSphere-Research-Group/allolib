@@ -28,6 +28,7 @@ public:
   };
   StandardWindowAppKeyControls stdControls;
   std::atomic<bool> mShouldQuitApp {false};
+  int mFrameCount = 0;
 
   WindowApp();
   // virtual ~WindowApp();
@@ -76,6 +77,7 @@ public:
   virtual bool resize(int dw, int dh) override;
   virtual bool visibility(bool v) override;
 
+  int frameCount();
 };
 
 }

@@ -46,6 +46,7 @@ void WindowApp::loop() {
   onDraw();
   postOnDraw();
   refresh();
+  mFrameCount += 1;
 }
 
 void WindowApp::close() {
@@ -114,4 +115,8 @@ bool WindowApp::resize(int dw, int dh) {
 bool WindowApp::visibility(bool v) {
   onVisibility(v);
   return true;
+}
+
+int WindowApp::frameCount() {
+  return mFrameCount;
 }
