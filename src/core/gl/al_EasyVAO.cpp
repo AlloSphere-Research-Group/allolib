@@ -26,7 +26,7 @@ void EasyVAO::updateIndices(unsigned int* data, int size)
     }
     mIndexBuffer.bind();
     mIndexBuffer.data(sizeof(unsigned int) * mNumIndices, data);
-    mIndexBuffer.unbind();
+    // mIndexBuffer.unbind();
 }
 
 void EasyVAO::update(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType)
@@ -34,7 +34,7 @@ void EasyVAO::update(void* data, int typeSize, int arraySize, MeshAttrib& attrib
     validate();
     bind();
     updateWithoutBinding(data, typeSize, arraySize, attrib, dataType);
-    unbind();
+    // unbind();
 }
 
 void EasyVAO::updateWithoutBinding(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType) {
@@ -57,7 +57,7 @@ void EasyVAO::updateWithoutBinding(void* data, int typeSize, int arraySize, Mesh
     // upload CPU size data to buffer in GPU
     attrib.buffer.bind();
     attrib.buffer.data(typeSize * arraySize, data);
-    attrib.buffer.unbind();
+    // attrib.buffer.unbind();
 }
 
 void EasyVAO::update(Mesh& m) {
@@ -69,7 +69,7 @@ void EasyVAO::update(Mesh& m) {
     updateWithoutBinding(m.colors().data(), sizeof(Vec4f), m.colors().size(), mColorAtt);
     updateWithoutBinding(m.texCoord2s().data(), sizeof(Vec2f), m.texCoord2s().size(), mTexcoord2dAtt);
     updateWithoutBinding(m.normals().data(), sizeof(Vec3f), m.normals().size(), mNormalAtt);
-    unbind();
+    // unbind();
     updateIndices(m.indices().data(), m.indices().size());
 }
 
@@ -85,11 +85,11 @@ void EasyVAO::draw()
     {
         mIndexBuffer.bind();
         glDrawElements(mGLPrimMode, mNumIndices, GL_UNSIGNED_INT, NULL);
-        mIndexBuffer.unbind();
+        // mIndexBuffer.unbind();
     }
     else
     {
         glDrawArrays(mGLPrimMode, 0, mNumVertices);
     }
-    unbind();
+    // unbind();
 }

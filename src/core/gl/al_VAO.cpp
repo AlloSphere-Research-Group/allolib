@@ -49,5 +49,5 @@ void VAO::attribPointer(
     glVertexAttribPointer(
         index, size, type, normalized, stride, offset
     );
-    buffer.unbind();
+    // buffer.unbind();
 }

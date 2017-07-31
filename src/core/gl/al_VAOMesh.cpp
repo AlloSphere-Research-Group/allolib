@@ -71,7 +71,7 @@ void VAOMesh::update() {
   updateAttrib(normals(), normalAtt());
   // updateAttrib(texCoord3s(), mTexcoord3dAtt);
   // updateAttrib(texCoord1s(), mTexcoord1dAtt);
-  vao().unbind();
+  // vao().unbind();
   if (indices().size() > 0) {
     if (!indexBuffer().created()) {
       // mIndexBuffer.create();
@@ -84,7 +84,7 @@ void VAOMesh::update() {
       sizeof(unsigned int) * indices().size(),
       indices().data()
     );
-    indexBuffer().unbind();
+    // indexBuffer().unbind();
   }
 }
 
@@ -111,7 +111,7 @@ void VAOMesh::updateAttrib(
   auto s = sizeof(T);
   att.buffer.bind();
   att.buffer.data(s * data.size(), data.data());
-  att.buffer.unbind(); 
+  // att.buffer.unbind(); 
 }
 
 template void VAOMesh::updateAttrib<float>(
@@ -135,10 +135,10 @@ void VAOMesh::draw() {
   if (indices().size() > 0) {
     indexBuffer().bind();
     glDrawElements(vaoWrapper->GLPrimMode, indices().size(), GL_UNSIGNED_INT, NULL);
-    indexBuffer().unbind();
+    // indexBuffer().unbind();
   }
   else {
     glDrawArrays(vaoWrapper->GLPrimMode, 0, vertices().size());
   }
-  vao().unbind();
+  // vao().unbind();
 }
