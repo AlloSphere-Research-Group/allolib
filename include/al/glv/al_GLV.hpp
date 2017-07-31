@@ -105,6 +105,14 @@ public:
     bool buttonValue(std::string name);
     bool buttonValue(std::string name, int idx);
     bool buttonValue(std::string name, int colIdx, int rowIdx);
+    void setButtonValue(std::string name, bool val) {
+        auto search = buttons.find(name);
+        if (search == buttons.end()) {
+            std::cout << "no button with name \"" << name << "\" exists" << std::endl;
+            return;
+        }
+        search->second->buttons.setValue(val);
+    }
 
     void addNumberDialer(NumberDialerWithLabel& dialer);
     void addNumberDialer(std::string name);

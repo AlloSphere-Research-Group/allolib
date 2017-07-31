@@ -51,7 +51,7 @@
 #endif
 
 // #define AL_STRINGIFY(...) #__VA_ARGS__
-#define AL_DEBUGLN printf("In %s: line %d\n", __FILE__, __LINE__);
+// #define AL_DEBUGLN printf("In %s: line %d\n", __FILE__, __LINE__);
 
 namespace al{
 

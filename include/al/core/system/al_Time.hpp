@@ -48,20 +48,9 @@
 #include <string>
 #include <limits.h>
 #include <math.h>
-#include "al/core/system/al_Config.h" // al_nsec & al_sec
 
-// typedef long long int al_nsec;        /**< nanoseconds type (accurate to +/- 292.5 years) */
-// typedef double al_sec;            /**< seconds type */
-// #define AL_TIME_NSEC_NEVER (ULLONG_MAX)
-
-// #ifdef AL_WINDOWS
-// /**! print format for al_nsec */
-// #define AL_NSEC_FMT "I64d"
-// #else
-// /**! print format for al_nsec */
-// #define AL_NSEC_FMT "lld"
-// #endif
-
+typedef long long int al_nsec; /**< nanoseconds type (accurate to +/- 292.5 years) */
+typedef double al_sec;         /**< seconds type */
 
 /**! conversion factors for nanoseconds/seconds */
 #define al_time_ns2s    1.0e-9

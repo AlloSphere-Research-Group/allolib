@@ -1,6 +1,9 @@
 #ifndef INCLUDE_AL_VAOMESH_HPP
 #define INCLUDE_AL_VAOMESH_HPP
 
+/*    Keehong Youn, 2017, younkeehong@gmail.com
+*/
+
 #include "al/core/gl/al_BufferObject.hpp"
 #include "al/core/gl/al_Mesh.hpp"
 #include "al/core/gl/al_VAO.hpp"

@@ -39,6 +39,7 @@
 
   File author(s):
   Tim Wood, 2015, fishuyo@gmail.com
+  Keehong Youn, 2017, younkeehong@gmail.com
 */
 
 #include "al/core/gl/al_FBO.hpp"

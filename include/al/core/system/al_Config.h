@@ -45,6 +45,7 @@
 
 */
 
+/*
 #ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
 #endif
@@ -66,23 +67,6 @@
 #else
 	#define AL_API extern
 #endif
-
-/*
-	primitive typedefs
 */
-#ifdef AL_WINDOWS
-	// #include <stdint.h>
-	#define AL_PRINTF_LL "I64"
-#else
-	// #include "allocore/system/pstdint.h"
-	#define AL_PRINTF_LL "ll"
-#endif
-
-
-typedef long long int al_nsec;				/**< nanoseconds type (accurate to +/- 292.5 years) */
-typedef double al_sec;						/**< seconds type */
-
-#define AL_STRINGIFY(...) #__VA_ARGS__
-#define AL_DEBUGLN printf("In %s: line %d\n", __FILE__, __LINE__);
 
 #endif /* INCLUDE_AL_SYSTEM_CONFIG_H */
