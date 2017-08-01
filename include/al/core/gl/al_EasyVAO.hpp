@@ -23,8 +23,6 @@ namespace al
 class EasyVAO : public VAO
 {
 public:
-    static std::unordered_map<unsigned int, unsigned int> mPrimMap;
-
     // layout (attribute location) for (GL) <-> (glsl shader)
     enum AttribLayout: unsigned int
     {
@@ -117,7 +115,6 @@ public:
     // indices should be unsigned int
     void updateIndices(unsigned int* data, int size);
     void update(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
-    void updateWithoutBinding(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
     void primitive(unsigned int prim);
     void draw();
 
@@ -125,6 +122,8 @@ public:
     void update(Mesh& m);
 
 private:
+    void updateWithoutBinding(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
+    
     unsigned int mGLPrimMode = GL_TRIANGLES;
     unsigned int mNumVertices = 0;
     unsigned int mNumIndices = 0;

@@ -28,8 +28,6 @@ enum AttribLayout: unsigned int {
 // this is usefule for storing this class in std::vector, etc.
 class VAOMesh : public Mesh {
 public:
-    static std::unordered_map<unsigned int, unsigned int> mPrimMap;
-
     struct MeshAttrib {
         unsigned int index;
         int size;

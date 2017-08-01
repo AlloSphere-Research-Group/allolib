@@ -1,22 +1,7 @@
-#include "al/core/gl/al_GLEW.hpp"
 #include "al/core/gl/al_VAOMesh.hpp"
 #include <iostream>
 
 using namespace al;
-
-std::unordered_map<unsigned int, unsigned int> VAOMesh::mPrimMap = {
-  { Mesh::POINTS, GL_POINTS },
-  { Mesh::LINES, GL_LINES },
-  { Mesh::LINE_STRIP, GL_LINE_STRIP },
-  { Mesh::LINE_LOOP, GL_LINE_LOOP },
-  { Mesh::TRIANGLES, GL_TRIANGLES },
-  { Mesh::TRIANGLE_STRIP, GL_TRIANGLE_STRIP },
-  { Mesh::TRIANGLE_FAN, GL_TRIANGLE_FAN },
-  { Mesh::LINES_ADJACENCY, GL_LINES_ADJACENCY },
-  { Mesh::LINE_STRIP_ADJACENCY, GL_LINE_STRIP_ADJACENCY },
-  { Mesh::TRIANGLES_ADJACENCY, GL_TRIANGLES_ADJACENCY },
-  { Mesh::TRIANGLE_STRIP_ADJACENCY, GL_TRIANGLE_STRIP_ADJACENCY }
-};
 
 VAOMesh::VAOMesh() {
     vaoWrapper = std::make_shared<VAOWrapper>();
@@ -62,7 +47,7 @@ void VAOMesh::unbind() {
 }
 
 void VAOMesh::update() {
-  vaoWrapper->GLPrimMode = mPrimMap[mPrimitive];
+  vaoWrapper->GLPrimMode = mPrimitive;
   vao().validate();
   vao().bind();
   updateAttrib(vertices(), positionAtt());

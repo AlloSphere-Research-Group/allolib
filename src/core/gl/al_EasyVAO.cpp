@@ -2,20 +2,6 @@
 
 using namespace al;
 
-std::unordered_map<unsigned int, unsigned int> EasyVAO::mPrimMap = {
-  { Mesh::POINTS, GL_POINTS },
-  { Mesh::LINES, GL_LINES },
-  { Mesh::LINE_STRIP, GL_LINE_STRIP },
-  { Mesh::LINE_LOOP, GL_LINE_LOOP },
-  { Mesh::TRIANGLES, GL_TRIANGLES },
-  { Mesh::TRIANGLE_STRIP, GL_TRIANGLE_STRIP },
-  { Mesh::TRIANGLE_FAN, GL_TRIANGLE_FAN },
-  { Mesh::LINES_ADJACENCY, GL_LINES_ADJACENCY },
-  { Mesh::LINE_STRIP_ADJACENCY, GL_LINE_STRIP_ADJACENCY },
-  { Mesh::TRIANGLES_ADJACENCY, GL_TRIANGLES_ADJACENCY },
-  { Mesh::TRIANGLE_STRIP_ADJACENCY, GL_TRIANGLE_STRIP_ADJACENCY }
-};
-
 void EasyVAO::updateIndices(unsigned int* data, int size)
 {
     mNumIndices = size;
@@ -61,7 +47,7 @@ void EasyVAO::updateWithoutBinding(void* data, int typeSize, int arraySize, Mesh
 }
 
 void EasyVAO::update(Mesh& m) {
-    primitive(mPrimMap[m.primitive()]);
+    primitive(m.primitive());
     validate();
     bind();
     mNumVertices = m.vertices().size();

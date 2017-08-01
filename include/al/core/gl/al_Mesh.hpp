@@ -52,6 +52,7 @@
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/math/al_Mat.hpp"
 #include "al/core/types/al_Color.hpp"
+#include "al/core/gl/al_GLEW.hpp"
 
 namespace al{
 
@@ -65,17 +66,17 @@ namespace al{
 class Mesh {
 public:
   enum Primitive : unsigned int {
-    POINTS=0,
-    LINES,
-    LINE_STRIP,
-    LINE_LOOP,
-    TRIANGLES,
-    TRIANGLE_STRIP,
-    TRIANGLE_FAN,
-    LINES_ADJACENCY,
-    LINE_STRIP_ADJACENCY,
-    TRIANGLES_ADJACENCY,
-    TRIANGLE_STRIP_ADJACENCY
+    POINTS = GL_POINTS,
+    LINES = GL_LINES,
+    LINE_STRIP = GL_LINE_STRIP,
+    LINE_LOOP = GL_LINE_LOOP,
+    TRIANGLES = GL_TRIANGLES,
+    TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
+    TRIANGLE_FAN = GL_TRIANGLE_FAN,
+    LINES_ADJACENCY = GL_LINES_ADJACENCY,
+    LINE_STRIP_ADJACENCY = GL_LINE_STRIP_ADJACENCY,
+    TRIANGLES_ADJACENCY = GL_TRIANGLES_ADJACENCY,
+    TRIANGLE_STRIP_ADJACENCY = GL_TRIANGLE_STRIP_ADJACENCY
   };
 
   typedef Vec3f      Vertex;
