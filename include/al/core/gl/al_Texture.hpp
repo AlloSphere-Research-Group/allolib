@@ -92,7 +92,7 @@ protected:
   unsigned int mType;
 
   int mWrapS = GL_CLAMP_TO_EDGE, mWrapT = GL_CLAMP_TO_EDGE, mWrapR = GL_CLAMP_TO_EDGE;
-  int mFilterMin = GL_LINEAR, mFilterMag = GL_LINEAR;
+  int mFilterMin = GL_NEAREST, mFilterMag = GL_NEAREST;
   bool mUseMipmap = false; // by default no mipmap
 
   bool mFilterUpdated = true; // Flags change in texture params (wrap, filter)
@@ -131,7 +131,6 @@ public:
   void bind_temp();
 
   /// Unbind the texture (from a multitexture unit)
-  // usually won't be needed... (you can just bind them and leave it there)
   static void unbind(int binding_point = 0, unsigned int target = GL_TEXTURE_2D);
 
   /// Get target type (e.g., TEXTURE_2D)

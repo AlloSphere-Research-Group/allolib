@@ -331,10 +331,11 @@ void Graphics::draw(Texture& tex, float x0, float y0, float x1, float y1) {
     uniformColorMix(0); // no color
     // AL_TEX_QUAD_DRAW_BINDING_UNIT = 46 is defined in al_Texture.hpp
     // binding to this point aims no collision with user's binding
-    tex.bind(AL_TEX_QUAD_DRAW_BINDING_UNIT); 
+    tex.bind(AL_TEX_QUAD_DRAW_BINDING_UNIT);
     texture(AL_TEX_QUAD_DRAW_BINDING_UNIT, 0);
     textureMix(1, 0, 0); // use tex0 only
     draw(mTexMesh);
+    Texture::unbind(AL_TEX_QUAD_DRAW_BINDING_UNIT, GL_TEXTURE_2D);
   }
 
 void Graphics::draw(EasyFBO& fbo, float x0, float y0, float x1, float y1) {
