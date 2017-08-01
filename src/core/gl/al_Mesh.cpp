@@ -82,26 +82,31 @@ void Mesh::equalizeBuffers() {
   const int Nt3= texCoord3s().size();
 
   if(Nn){
+    normals().reserve(Nv);
     for(int i=Nn; i<Nv; ++i){
       normals().push_back(normals()[Nn-1]);
     }
   }
   if(Nc){
+    colors().reserve(Nv);
     for(int i=Nc; i<Nv; ++i){
       colors().push_back(colors()[Nc-1]);
     }
   }
   if(Nt1){
+    texCoord1s().reserve(Nv);
     for(int i=Nt1; i<Nv; ++i){
       texCoord1s().push_back(texCoord1s()[Nt1-1]);
     }
   }
   if(Nt2){
+    texCoord2s().reserve(Nv);
     for(int i=Nt2; i<Nv; ++i){
       texCoord2s().push_back(texCoord2s()[Nt2-1]);
     }
   }
   if(Nt3){
+    texCoord3s().reserve(Nv);
     for(int i=Nt3; i<Nv; ++i){
       texCoord3s().push_back(texCoord3s()[Nt3-1]);
     }

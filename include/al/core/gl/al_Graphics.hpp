@@ -389,8 +389,8 @@ public:
   void draw(EasyVAO& vao);
   void draw(Mesh& mesh);
 
-  void draw(Texture& tex, float x, float y, float w, float h);
-  void draw(EasyFBO& fbo, float x, float y, float w, float h);
+  void draw(Texture& tex, float x0, float y0, float x1, float y1);
+  void draw(EasyFBO& fbo, float x0, float y0, float x1, float y1);
 
   void draw(Texture& tex, Vec3f pos, float w, float h, Vec3f normal) {
     // TODO

@@ -318,16 +318,16 @@ void Graphics::draw(Mesh& mesh) {
   mInternalVAO.draw();
 }
 
-void Graphics::draw(Texture& tex, float x, float y, float w, float h) {
-    // TODO
-    // for 2D. (x, y) becomes bottom-left, then width and height spans
+void Graphics::draw(Texture& tex, float x0, float y0, float x1, float y1) {
+    // for 2D. (x, y) becomes center, then width and height spans
     auto& v = mTexMesh.vertices();
-    v[0].set(x, y, 0);
-    v[1].set(x + w, y, 0);
-    v[2].set(x, y + h, 0);
-    v[3].set(x, y + h, 0);
-    v[4].set(x + w, y, 0);
-    v[5].set(x + w, y + h, 0);
+    // only cahnge vertex position since texcoord is already there
+    v[0].set(x0, y0, 0);
+    v[1].set(x1, y0, 0);
+    v[2].set(x0, y1, 0);
+    v[3].set(x0, y1, 0);
+    v[4].set(x1, y0, 0);
+    v[5].set(x1, y1, 0);
     uniformColorMix(0); // no color
     // AL_TEX_QUAD_DRAW_BINDING_UNIT = 46 is defined in al_Texture.hpp
     // binding to this point aims no collision with user's binding
@@ -337,8 +337,8 @@ void Graphics::draw(Texture& tex, float x, float y, float w, float h) {
     draw(mTexMesh);
   }
 
-void Graphics::draw(EasyFBO& fbo, float x, float y, float w, float h) {
-  draw(fbo.tex(), x, y, w, h);
+void Graphics::draw(EasyFBO& fbo, float x0, float y0, float x1, float y1) {
+  draw(fbo.tex(), x0, y0, x1, y1);
 }
 
 void Graphics::framebuffer(FBO& fbo) {
