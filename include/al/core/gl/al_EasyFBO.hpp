@@ -76,6 +76,8 @@ public:
   FBO& fbo() { return mFbo; }
   Texture& tex() { return mTex; }
   RBO& rbo() { return mRbo; }
+  void begin() { mFbo.bind(); }
+  void end() { mFbo.unbind(); }
 };
 
 } // al::

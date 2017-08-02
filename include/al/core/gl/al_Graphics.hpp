@@ -63,6 +63,7 @@
 #include "al/core/gl/al_FBO.hpp"
 #include "al/core/gl/al_EasyFBO.hpp"
 #include "al/core/io/al_Window.hpp"
+#include "al/core/gl/al_DefaultShaders.hpp"
 
 #include <iostream>
 #include <map>
@@ -351,10 +352,7 @@ public:
   void setClearDepth(float d);
   void clearDepth();
   void clearDepth(float d);
-  void clear(float r, float g, float b, float a = 1, float d = 1, int drawbuffer = 0) {
-    clearColor(r, g, b, a, drawbuffer);
-    clearDepth(d);
-  }
+  void clear(float r, float g, float b, float a=1, float d=1, int drawbuffer = 0);
 
   void uniformColor(float r, float g, float b, float a = 1.0f);
   void uniformColor(Color const& c);
@@ -380,6 +378,7 @@ public:
 
   void shader(ShaderProgram& s);
   ShaderProgram& shader();
+
   void camera(Viewpoint& v);
   void camera(Viewpoint::SpecialType v);
   void camera(Viewpoint::SpecialType v, int x, int y, int w, int h);
@@ -389,29 +388,10 @@ public:
   void draw(EasyVAO& vao);
   void draw(Mesh& mesh);
 
-  void draw(Texture& tex, float x0, float y0, float x1, float y1);
-  void draw(EasyFBO& fbo, float x0, float y0, float x1, float y1);
-
-  void draw(Texture& tex, Vec3f pos, float w, float h, Vec3f normal) {
-    // TODO
-    // center, width, height, and normal direction
-  }
-  void draw(Texture& tex, Vec3f pos, float w, float h) {
-    // TODO
-    // normal not given, billboards toward camera
-  }
-
-  void framebuffer(FBO& fbo);
-  void framebuffer(EasyFBO& easyFbo);
-  void framebuffer(unsigned int fboID);
-
   Window& window() { return mWindow; }
 
 protected:
   Window& mWindow;
-
-  Viewport mViewport;
-  Viewport mScissor;
 
   ShaderProgram* mShaderPtr = nullptr;
   bool mShaderChanged = false;
@@ -424,17 +404,7 @@ protected:
   Color mClearColor {0, 0, 0, 1};
   float mClearDepth = 1;
 
-  Color mUniformColor {1, 1, 1, 1};
-  float mUniformColorMix = 1;
-  bool mUniformColorChanged = false;
-
-  // 3 textures supported
-  int mTexBindingPoint[3] = {0, 1, 2};
-  float mTexMix[3] = {0, 0, 0};
-  bool mTexChanged = false;
-
   EasyVAO mInternalVAO;
-  Mesh mTexMesh;
 };
 
 }

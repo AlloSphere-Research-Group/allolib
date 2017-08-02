@@ -46,11 +46,7 @@ g.shader(shader2);
 
 Texture
 - now has .create2D(...) & .createCubemap(...) method. (create1D and 3D also coming)
-- for drawing, al::Graphics handles textures
-ex)
-g.texture(my_tex1);
-// draw things
-g.texture(my_tex2); // note no need for .unbind()
+
 
 
 Viewpoint
@@ -65,5 +61,5 @@ g.camera(viewpoint); // send camera matrices to shader, and set viewport
 
 
 Graphics
-- keeps track of bound shader, texture, and camera(viewpoint), and fbo
+- keeps track of bound shader and camera(viewpoint)
 - constructor takes reference of Window (or WindowApp, App ...)

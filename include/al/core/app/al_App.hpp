@@ -55,7 +55,10 @@ public:
   Graphics g {*this};
   Viewpoint view;
   NavInputControl nav;
-  ShaderProgram shader;
+
+  ShaderProgram mesh_shader;
+  ShaderProgram color_shader;
+  ShaderProgram tex_shader;
 
   class EasyAppEventHandler : public WindowEventHandler {
   public:
@@ -72,7 +75,9 @@ public:
     append(eventHandler);
     append(nav);
     nav.target(view);
-    shader.compile(al_default_vert_shader(), al_default_frag_shader());
+    mesh_shader.compile(al_mesh_vert_shader(), al_mesh_frag_shader());
+    color_shader.compile(al_color_vert_shader(), al_color_frag_shader());
+    tex_shader.compile(al_tex_vert_shader(), al_tex_frag_shader());
     view.pos(Vec3f(0, 0, 20)).faceToward(Vec3f(0, 0, 0), Vec3f(0, 1, 0));
     view.fovy(45).near(0.1).far(1000);
     view.viewport(0, 0, fbWidth(), fbHeight());
@@ -83,8 +88,7 @@ public:
   }
 
   virtual void preOnDraw() override {
-      g.shader(shader);
-      g.camera(view);
+
   }
 
 };

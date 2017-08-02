@@ -38,10 +38,7 @@ bool Graphics::error(const char * msg, int ID){
   return false;
 }
 
-Graphics::Graphics(Window& window): mWindow(window) {
-  // allocate mesh's vertex and texcoord array for tex rect
-  addTexRect(mTexMesh, 0, 0, 0, 0);
-}
+Graphics::Graphics(Window& window): mWindow(window) {}
 
 void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq){
   glBlendEquation(eq);
@@ -149,67 +146,25 @@ void Graphics::clearDepth(float d) {
     clearDepth();
 }
 
-void Graphics::uniformColor(float r, float g, float b, float a) {
-  mUniformColor.set(r, g, b, a);
-  mUniformColorChanged = true;
-}
-void Graphics::uniformColor(Color const& c) {
-  mUniformColor = c;
-  mUniformColorChanged = true;
-}
-
-void Graphics::uniformColorMix(float m) {
-  mUniformColorMix = m;
-  mUniformColorChanged = true;
-}
-
-void Graphics::textureMix(float m, int tex_num) {
-    mTexMix[tex_num] = m;
-    mTexChanged = true;
-}
-
-void Graphics::textureMix(float m0, float m1, float m2) {
-    mTexMix[0] = m0;
-    mTexMix[1] = m1;
-    mTexMix[2] = m2;
-    mTexChanged = true;
-}
-
-void Graphics::texture(int binding_point, int tex_num) {
-  mTexBindingPoint[tex_num] = binding_point;
-  mTexChanged = true;
-}
-
-void Graphics::texture(Texture& t, int tex_num) {
-  t.bind(tex_num);
-  mTexBindingPoint[tex_num] = tex_num;
-  mTexChanged = true;
+void Graphics::clear(float r, float g, float b, float a, float d, int drawbuffer) {
+    clearColor(r, g, b, a, drawbuffer);
+    clearDepth(d);
 }
 
 void Graphics::viewport(const Viewport& v){
-  mViewport.set(v);
-  glViewport(mViewport.l, mViewport.b, mViewport.w, mViewport.h);
+  glViewport(v.l, v.b, v.w, v.h);
 }
 
-void Graphics::viewport(int x, int y, int width, int height) {
-  viewport(Viewport(x, y, width, height));
-}
-
-Viewport Graphics::viewport() const {
-  return mViewport;
+void Graphics::viewport(int left, int bottom, int width, int height) {
+  glViewport(left, bottom, width, height);
 }
 
 void Graphics::scissor(int left, int bottom, int width, int height) {
-  scissor(Viewport(left, bottom, width, height));
+  glScissor(left, bottom, width, height);
 }
 
 void Graphics::scissor(const Viewport& v) {
-  mScissor.set(v);
-  glScissor(mScissor.l, mScissor.b, mScissor.w, mScissor.h);
-}
-
-Viewport Graphics::scissor() const {
-  return mScissor;
+  glScissor(v.l, v.b, v.w, v.h);
 }
 
 void Graphics::shader(ShaderProgram& s) {
@@ -242,7 +197,6 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
     viewport(x, y, w, h);
     break;
 
-    // [!] TODO: move this to Viewpoint class
   case Viewpoint::ORTHO_FOR_2D:
     // 1. place eye so that bottom left is (0, 0), top right is (width, height)
     // 2. set lens to be ortho, with given (width and height)
@@ -281,24 +235,8 @@ void Graphics::update() {
         shader().uniform("P", projMatrix());
     }
 
-    if (mShaderChanged || mUniformColorChanged) {
-        shader().uniform("uniformColor", mUniformColor);
-        shader().uniform("uniformColorMix", mUniformColorMix);
-    }
-
-    if (mShaderChanged || mTexChanged) {
-        shader().uniform("tex0", mTexBindingPoint[0]);
-        shader().uniform("tex1", mTexBindingPoint[1]);
-        shader().uniform("tex2", mTexBindingPoint[2]);
-        shader().uniform("tex0_mix", mTexMix[0]);
-        shader().uniform("tex1_mix", mTexMix[1]);
-        shader().uniform("tex2_mix", mTexMix[2]);
-    }
-
     mShaderChanged = false;
     mMatChanged = false;
-    mUniformColorChanged = false;
-    mTexChanged = false;
 }
 
 void Graphics::draw(VAOMesh& mesh) {
@@ -316,44 +254,6 @@ void Graphics::draw(Mesh& mesh) {
   mInternalVAO.update(mesh);
   update();
   mInternalVAO.draw();
-}
-
-void Graphics::draw(Texture& tex, float x0, float y0, float x1, float y1) {
-    // for 2D. (x, y) becomes center, then width and height spans
-    auto& v = mTexMesh.vertices();
-    // only cahnge vertex position since texcoord is already there
-    v[0].set(x0, y0, 0);
-    v[1].set(x1, y0, 0);
-    v[2].set(x0, y1, 0);
-    v[3].set(x0, y1, 0);
-    v[4].set(x1, y0, 0);
-    v[5].set(x1, y1, 0);
-    uniformColorMix(0); // no color
-    // AL_TEX_QUAD_DRAW_BINDING_UNIT = 46 is defined in al_Texture.hpp
-    // binding to this point aims no collision with user's binding
-    tex.bind(AL_TEX_QUAD_DRAW_BINDING_UNIT);
-    texture(AL_TEX_QUAD_DRAW_BINDING_UNIT, 0);
-    textureMix(1, 0, 0); // use tex0 only
-    draw(mTexMesh);
-    Texture::unbind(AL_TEX_QUAD_DRAW_BINDING_UNIT, GL_TEXTURE_2D);
-  }
-
-void Graphics::draw(EasyFBO& fbo, float x0, float y0, float x1, float y1) {
-  draw(fbo.tex(), x0, y0, x1, y1);
-}
-
-void Graphics::framebuffer(FBO& fbo) {
-    fbo.bind();
-}
-void Graphics::framebuffer(EasyFBO& easyFbo) {
-  easyFbo.fbo().bind();
-}
-
-void Graphics::framebuffer(unsigned int fboID) {
-    // pass 0 to this function and  default window framebuffer will be bound.
-    // FBO class has static const member FBO::DEFAULT = 0
-    // so one can use this for better readability
-    FBO::bind(fboID);
 }
 
 } // al::

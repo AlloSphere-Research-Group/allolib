@@ -6,6 +6,7 @@ set(core_headers
   include/al/core/app/al_FPS.hpp
   include/al/core/app/al_WindowApp.hpp
   include/al/core/gl/al_BufferObject.hpp
+  include/al/core/gl/al_DefaultShaders.hpp
   include/al/core/gl/al_EasyFBO.hpp
   include/al/core/gl/al_EasyVAO.hpp
   include/al/core/gl/al_FBO.hpp

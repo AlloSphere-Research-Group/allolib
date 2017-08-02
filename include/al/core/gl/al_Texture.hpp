@@ -131,7 +131,8 @@ public:
   void bind_temp();
 
   /// Unbind the texture (from a multitexture unit)
-  static void unbind(int binding_point = 0, unsigned int target = GL_TEXTURE_2D);
+  void unbind(int binding_point = 0);
+  static void unbind(int binding_point, unsigned int target);
 
   /// Get target type (e.g., TEXTURE_2D)
   unsigned int target() const { return mTarget; }

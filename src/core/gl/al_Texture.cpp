@@ -102,6 +102,10 @@ void Texture::bind_temp() {
   bind(AL_TEX_TEMP_BINDING_UNIT);
 }
 
+void Texture::unbind(int binding_point) {
+  unbind(binding_point, target());
+}
+
 void Texture::unbind(int binding_point, unsigned int target) {
   glActiveTexture(GL_TEXTURE0 + binding_point);
   glBindTexture(target, 0);

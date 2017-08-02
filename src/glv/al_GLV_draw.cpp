@@ -6,6 +6,8 @@
 
 #include <cmath>
 #include <iostream>
+#include <memory>
+#include <iostream>
 
 namespace glv {
 
@@ -13,11 +15,19 @@ namespace glv {
 
 struct GraphicsHolder {
     al::Graphics* mGraphics;
+    std::unique_ptr<al::ShaderProgram> mShaderPtr;
     void set(al::Graphics& g) {
         mGraphics = &g;
     }
     al::Graphics& get() {
         return *mGraphics;
+    }
+    al::ShaderProgram& shader() {
+        if (!mShaderPtr) {
+            mShaderPtr = std::make_unique<al::ShaderProgram>();
+            mShaderPtr->compile(al_color_vert_shader(), al_color_frag_shader());
+        }
+        return *mShaderPtr;
     }
 };
 
@@ -36,17 +46,6 @@ float pixc(float v) {
 }
 
 void rectangle(float l, float t, float r, float b) {
-    // static al::VAOMesh mesh;
-    // static bool firstCall = [&](){
-    //     mesh.primitive(al::Mesh::TRIANGLES);
-    //     // reserve 6 vertices
-    //     mesh.vertices().reserve(6);
-    //     for (int i = 0; i < 6; i += 1) {
-    //         mesh.vertices().emplace_back();
-    //     }
-    //     return true;
-    // }();
-
     static al::VAOMesh mesh = [&](){
         al::VAOMesh mesh;
         mesh.primitive(al::Mesh::TRIANGLES);
@@ -62,10 +61,7 @@ void rectangle(float l, float t, float r, float b) {
     float y = t;
     float w = r - l;
     float h = b - t;
-    // mesh.reset();
-    // addRect(mesh, l, t, r - l, b - t);
-    // m.reset();
-    // m.primitive(Mesh::TRIANGLES);
+
     mesh.vertices()[0].set(x, y, 0);
     mesh.vertices()[1].set(x + w, y, 0);
     mesh.vertices()[2].set(x, y + h, 0);
@@ -78,18 +74,6 @@ void rectangle(float l, float t, float r, float b) {
 }
 
 void frame(float l, float t, float r, float b) {
-    // static al::VAOMesh mesh;
-    // static bool firstCall = [&](){
-    //     mesh.primitive(al::Mesh::LINE_STRIP);
-    //     // reserve 5 vertices
-    //     mesh.vertices().reserve(5);
-    //     for (int i = 0; i < 5; i += 1) {
-    //         mesh.vertices().emplace_back();
-    //     }
-    //     return true;
-    // }();
-
-
     static al::VAOMesh mesh = [&](){
         al::VAOMesh mesh;
         mesh.primitive(al::Mesh::LINE_STRIP);
@@ -118,12 +102,20 @@ void frame(float l, float t, float r, float b) {
 }
 
 void line(float x0, float y0, float x1, float y1) {
-    static al::VAOMesh mesh;
+    static al::VAOMesh mesh = [&](){
+        al::VAOMesh mesh;
+        mesh.primitive(al::Mesh::LINES);
+        // reserve 5 vertices
+        mesh.vertices().reserve(2);
+        for (int i = 0; i < 2; i += 1) {
+            mesh.vertices().emplace_back();
+        }
+        return mesh;
+    }();
 
-    mesh.reset();
     mesh.primitive(al::Mesh::LINES);
-    mesh.vertex(x0, y0);
-    mesh.vertex(x1, y1);
+    mesh.vertices()[0].set(x0, y0, 0);
+    mesh.vertices()[1].set(x1, y1, 0);
     mesh.update();
 
     graphicsHolder().get().draw(mesh);
@@ -214,7 +206,7 @@ float windowHighresFactorY() {
 }
 
 void color(float r, float g, float b, float a) {
-    graphicsHolder().get().uniformColor(r, g, b, a);
+    graphicsHolder().get().shader().uniform("col0", al::Color(r, g, b, a));
 }
 
 void color(Color const& c) {
@@ -741,14 +733,13 @@ void al::al_draw_glv(
     glv::GLV& glv, al::Graphics& g,
     unsigned x, unsigned y, unsigned w, unsigned h
 ) {
-    // g.lighting(false);
     g.depthTesting(false);
     g.blending(true);
     g.blendModeTrans();
-    g.uniformColorMix(1);
-    g.textureMix(0);
     g.polygonMode(al::Graphics::FILL);
     g.cullFace(false);
+
+    g.shader(glv::graphicsHolder().shader());
     g.camera(
         al::Viewpoint::ORTHO_FOR_2D,
         x * g.window().x_highres(),
@@ -758,7 +749,6 @@ void al::al_draw_glv(
     );
 
     glv::graphicsHolder().set(g);
-    //glv::graphicsHolder().size(w, h);
 
     g.pushMatrix();
     g.loadIdentity();
