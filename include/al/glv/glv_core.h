@@ -10,7 +10,8 @@
 #include <vector>
 #include "al/glv/glv_rect.h"
 #include "al/glv/glv_notification.h"
-#include "al/glv/glv_color.h"
+// #include "al/glv/glv_color.h"
+#include "al/core/types/al_Color.hpp"
 #include "al/glv/glv_font.h"
 #include "al/glv/glv_model.h"
 #include "al/glv/glv_util.h"
@@ -324,17 +325,17 @@ public:
 		WhiteOnBlack		/**< */
 	};
 
-	Color back;			///< Background
-	Color border;		///< Border outline
-	Color fore;			///< Foreground
-	Color selection;	///< Selection
-	Color text;			///< Text
+	al::Color back;			///< Background
+	al::Color border;		///< Border outline
+	al::Color fore;			///< Foreground
+	al::Color selection;	///< Selection
+	al::Color text;			///< Text
 
 	/// Set style based on preset
 	void set(Preset preset);
 	
 	/// Set style based on a single color
-	void set(const Color& c, float contrast=0.7);
+	void set(const al::Color& c, float contrast=0.7);
 };
 
 //class StyleShape{
@@ -577,7 +578,7 @@ public:
 	void rectifyGeometry();						///< Correct geometry for proper display 
 
 	/// Add models of all named child Views to model manager
-	void addModels(ModelManager& m);
+	// void addModels(ModelManager& m);
 
 
 	/// Should return a message if an error/warning, otherwise, empty string
@@ -747,10 +748,10 @@ public:
 	static bool valid(const GLV * g);
 
 	/// Get model manager
-	ModelManager& modelManager(){ return mMM; }
+	// ModelManager& modelManager(){ return mMM; }
 
 	/// Add models of named children to model manager
-	void refreshModels(bool clearExistingModels=false);
+	// void refreshModels(bool clearExistingModels=false);
 
 	virtual const char * className() const { return "GLV"; }
 
@@ -760,7 +761,7 @@ protected:
 
 	View * mFocusedView;	// current focused widget
 	Event::t mEventType;	// current event type
-	ModelManager mMM;
+	// ModelManager mMM;
 	GraphicsData mGraphicsData[2];
 
 	// Returns whether the event should be bubbled to parent

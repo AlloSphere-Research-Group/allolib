@@ -52,15 +52,15 @@ void StyleColor::set(Preset preset){
 		case Gray:			back.set(0.6); border.set(0.1); fore.set(0.8);
 							selection.set(0.8); text.set(0);
 							break;
-		case SmokyGray:		set(Color(0.6, 0.7), 0.4); break;
+		case SmokyGray:		set(al::Color(0.6, 0.7), 0.4); break;
 
 		default:;
 	}
 }
 
 
-void StyleColor::set(const Color& c, float contrast){
-	HSV hsv = c;
+void StyleColor::set(const al::Color& c, float contrast){
+	al::HSV hsv = c;
 	float h = hsv.h;
 	float s = hsv.s;
 	float v = hsv.v;
@@ -69,10 +69,10 @@ void StyleColor::set(const Color& c, float contrast){
 
 	float vt;
 	vt = v + (v < 0.5 ? contrast : -contrast);
-	back = Color(HSV(h,s,vt), c.a);
+	back = al::Color(al::HSV(h,s,vt), c.a);
 
 	vt = v + (v < 0.5 ? contrast/2 : -contrast/2);
-	selection = Color(HSV(h,s,vt), c.a);
+	selection = al::Color(al::HSV(h,s,vt), c.a);
 	
 	//text = c.inverse().blackAndWhite();
 	text = back.inverse().blackAndWhite();

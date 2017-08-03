@@ -1,6 +1,10 @@
 #ifndef INCLUDE_GLV_AL_GLV_HPP
 #define INCLUDE_GLV_AL_GLV_HPP
 
+/*  GLV wrapper for allolib.
+    Keehong Youn, 2017, younkeehong@gmail.com
+*/
+
 #include "al/core/gl/al_Graphics.hpp"
 
 #include "al/glv/glv_core.h" // GLV, View

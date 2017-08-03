@@ -780,6 +780,9 @@ public:
 /// identical identifier of an attached model is loaded. If an attached model 
 /// variable exists, but does not have a corresponding variable in a snapshot,
 /// then the model data will not be modified when the snapshot is loaded.
+
+/*
+
 class ModelManager{
 public:
 
@@ -935,7 +938,7 @@ protected:
 //	template <int N> bool loadSnapshot(const Snapshot ** snapshots, const double * c);
 };
 
-
+*/
 
 // Implementation ______________________________________________________________
 

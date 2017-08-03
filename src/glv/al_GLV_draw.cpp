@@ -209,7 +209,7 @@ void color(float r, float g, float b, float a) {
     graphicsHolder().get().shader().uniform("col0", al::Color(r, g, b, a));
 }
 
-void color(Color const& c) {
+void color(al::Color const& c) {
     color(c.r, c.g, c.b, c.a);
 }
 

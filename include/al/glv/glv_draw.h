@@ -6,7 +6,9 @@
 
 #include <cmath>
 #include <stdio.h>
-#include "al/glv/glv_color.h"
+// #include "al/glv/glv_color.h"
+#include "al/core/types/al_Color.hpp"
+#include "al/glv/glv_util.h"
 
 namespace glv {
 
@@ -42,7 +44,7 @@ public:
 	GraphicsData(): mColors(1){}
 
 	/// Get color buffer
-	const Buffer<Color>& colors() const { return mColors; }
+	const Buffer<al::Color>& colors() const { return mColors; }
 	
 	/// Get index buffer
 	const Buffer<index_t>& indices() const { return mIndices; }
@@ -61,22 +63,22 @@ public:
 
 	/// Append color
 	void addColor(float r, float g, float b, float a=1){
-		addColor(Color(r,g,b,a)); }
+		addColor(al::Color(r,g,b,a)); }
 
 	/// Append color
-	void addColor(const Color& c){
+	void addColor(const al::Color& c){
 		colors().append(c); }
 
 	/// Append colors
-	void addColor(const Color& c1, const Color& c2){
+	void addColor(const al::Color& c1, const al::Color& c2){
 		addColor(c1); addColor(c2); }
 
 	/// Append colors
-	void addColor(const Color& c1, const Color& c2, const Color& c3){
+	void addColor(const al::Color& c1, const al::Color& c2, const al::Color& c3){
 		addColor(c1,c2); addColor(c3); }
 
 	/// Append colors
-	void addColor(const Color& c1, const Color& c2, const Color& c3, const Color& c4){
+	void addColor(const al::Color& c1, const al::Color& c2, const al::Color& c3, const al::Color& c4){
 		addColor(c1,c2,c3); addColor(c4); }
 
 	/// Append index
@@ -129,7 +131,7 @@ public:
 	void addVertex3(const VEC3& v){ addVertex3(v[0], v[1], v[2]); }
 
 	/// Get mutable color buffer
-	Buffer<Color>& colors(){ return mColors; }
+	Buffer<al::Color>& colors(){ return mColors; }
 
 	/// Get mutable index buffer
 	Buffer<index_t>& indices(){ return mIndices; }
@@ -143,7 +145,7 @@ public:
 protected:
 	Buffer<Point2> mVertices2;
 	Buffer<Point3> mVertices3;
-	Buffer<Color> mColors;
+	Buffer<al::Color> mColors;
 	Buffer<index_t> mIndices;
 };
 

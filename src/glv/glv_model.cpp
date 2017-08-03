@@ -664,6 +664,8 @@ std::string Data::typeToString(Type t){
 //	if(isIdentifier(name)) mNameVal[name] = new Model(v);
 //}
 
+#if 0
+
 void ModelManager::add(const std::string& name, Model& v){
 	if(isIdentifier(name)) mState[name] = &v;
 }
@@ -772,7 +774,6 @@ void ModelManager::printSnapshots() const {
 //
 //};
 
-
 int ModelManager::snapshotsToFile(const std::string& path_in) const {
 	std::string s;
 	if(!snapshotsToString(s)) return 0;
@@ -817,6 +818,7 @@ int ModelManager::snapshotsFromFile(const std::string& path_in, bool add){
 	return r;
 }
 
+
 #define GLV_ENDL "\n"
 //#define GLV_ENDL "\r\n"
 
@@ -849,6 +851,7 @@ static std::string namedDataToString(const std::string& s, const Data& d){
 //	return true;
 //}
 
+
 int ModelManager::snapshotsToString(std::string& dst) const {
 	if(mSnapshots.empty()) return 0;
 
@@ -868,6 +871,7 @@ int ModelManager::snapshotsToString(std::string& dst) const {
 	dst += "}" GLV_ENDL;
 	return dst.size();
 }
+
 
 
 struct KeyValueParser{
@@ -987,6 +991,7 @@ static bool goToNextPrintablePast(unsigned& p, char c, const std::string& str){
 ////	
 ////	}
 //}
+
 
 int ModelManager::snapshotFromString(const std::string& src){
 	//printf("%s\n", src.c_str());
@@ -1234,6 +1239,7 @@ bool ModelManager::loadSnapshot(
 }
 
 
+
 // to header...
 //template <int N>
 //bool ModelManager::loadSnapshot(const std::string ** names, const double * c){
@@ -1295,5 +1301,6 @@ void ModelManager::zeroSmallValues(double eps){
 	}
 }
 
+#endif
 
 } // glv::

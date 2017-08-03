@@ -240,6 +240,8 @@ struct Color{
   /// Returns luminance value
   float luminance() const;
 
+  Color blackAndWhite() const;          ///< Returns nearest black or white color
+
   /// Returns self linearly mixed with another color (0 = none)
   Color mix(const Color& c, float amt=0.5f) const {
     return (c-*this)*amt + *this;
@@ -1085,6 +1087,7 @@ inline Color& Color::invert(){ rgb().invert(); return *this; }
 
 inline float Color::luminance() const { return rgb().luminance(); }
 
+inline Color Color::blackAndWhite() const { return Color(luminance()>0.5f?1.f:0.f); }
 
 inline Colori& Colori::operator= (const HSV& v){
   return *this = RGB(v);

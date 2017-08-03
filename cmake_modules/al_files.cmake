@@ -39,7 +39,6 @@ set(core_headers
   include/al/core/system/al_Printing.hpp
   include/al/core/system/al_Thread.hpp
   include/al/core/system/al_Time.hpp
-  include/al/core/system/al_Watcher.hpp
   include/al/core/types/al_Color.hpp
 )
 
@@ -76,7 +75,6 @@ set(core_sources
   src/core/system/al_Printing.cpp
   src/core/system/al_ThreadNative.cpp
   src/core/system/al_Time.cpp
-  src/core/system/al_Watcher.cpp
   src/core/types/al_Color.cpp
 )
 
@@ -85,7 +83,6 @@ set(glv_headers
   include/al/glv/glv.h
   include/al/glv/glv_behavior.h
   include/al/glv/glv_buttons.h
-  include/al/glv/glv_color.h
   include/al/glv/glv_conf.h
   include/al/glv/glv_core.h
   include/al/glv/glv_draw.h
@@ -105,7 +102,6 @@ set(glv_sources
   src/glv/al_GLV_draw.cpp
   src/glv/al_GLV_wrapper.cpp
   src/glv/glv_buttons.cpp
-  src/glv/glv_color.cpp
   src/glv/glv_core.cpp
   src/glv/glv_font.cpp
   src/glv/glv_glv.cpp

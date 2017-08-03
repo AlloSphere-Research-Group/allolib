@@ -284,18 +284,18 @@ int View::numEventHandlers(Event::t e) const {
 }
 
 
-void View::addModels(ModelManager& mm){
-	struct Add : TraversalAction{
-		Add(ModelManager& v): m(v){}
-		bool operator()(View * v, int depth){
-			if(v->hasName()) m.add(v->name(), *v);
-			return true;
-		}
-		ModelManager& m;	
-	} add(mm);
+// void View::addModels(ModelManager& mm){
+// 	struct Add : TraversalAction{
+// 		Add(ModelManager& v): m(v){}
+// 		bool operator()(View * v, int depth){
+// 			if(v->hasName()) m.add(v->name(), *v);
+// 			return true;
+// 		}
+// 		ModelManager& m;	
+// 	} add(mm);
 
-	traverseDepth(add);
-}
+// 	traverseDepth(add);
+// }
 
 
 View& View::anchor(space_t mx, space_t my){

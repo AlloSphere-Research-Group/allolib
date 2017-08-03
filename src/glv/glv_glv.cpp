@@ -137,10 +137,10 @@ bool GLV::propagateEvent(){ //printf("GLV::propagateEvent(): %s\n", Event::getNa
 	return v != 0;
 }
 
-void GLV::refreshModels(bool clearExistingModels){
-	if(clearExistingModels) mMM.clearModels();
-	addModels(mMM);
-}
+// void GLV::refreshModels(bool clearExistingModels){
+// 	if(clearExistingModels) mMM.clearModels();
+// 	addModels(mMM);
+// }
 
 void GLV::setFocus(View * v){
 
