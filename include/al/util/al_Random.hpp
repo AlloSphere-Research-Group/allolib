@@ -1,5 +1,5 @@
-#ifndef INCLUDE_AL_MATH_RANDOM_HPP
-#define INCLUDE_AL_MATH_RANDOM_HPP
+#ifndef INCLUDE_AL_UTIL_MATH_RANDOM_HPP
+#define INCLUDE_AL_UTIL_MATH_RANDOM_HPP
 
 /*  Allocore --
   Multimedia / virtual environment application class library
@@ -43,7 +43,7 @@
 */
 
 /* req'd for int to float conversion */
-#include "al/core/types/al_Conversion.hpp"
+#include "al/util/al_Conversion.hpp"
 #include "al/core/math/al_Constants.hpp"
 
 #include <time.h> /* req'd for time() */

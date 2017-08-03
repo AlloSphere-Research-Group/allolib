@@ -1,6 +1,5 @@
 # Main Library
 set(core_headers
-  include/al/core.hpp
   include/al/core/app/al_App.hpp
   include/al/core/app/al_AudioApp.hpp
   include/al/core/app/al_FPS.hpp
@@ -29,37 +28,19 @@ set(core_headers
   include/al/core/io/al_ControlNav.hpp
   include/al/core/io/al_CSVReader.hpp
   include/al/core/io/al_Window.hpp
-  include/al/core/math/al_Analysis.hpp
-  include/al/core/math/al_Complex.hpp
   include/al/core/math/al_Constants.hpp
-  include/al/core/math/al_Frustum.hpp
-  include/al/core/math/al_Functions.hpp
-  include/al/core/math/al_Interpolation.hpp
-  include/al/core/math/al_Interval.hpp
   include/al/core/math/al_Mat.hpp
   include/al/core/math/al_Matrix4.hpp
-  include/al/core/math/al_Plane.hpp
   include/al/core/math/al_Quat.hpp
-  include/al/core/math/al_Random.hpp
-  include/al/core/math/al_Ray.hpp
-  include/al/core/math/al_Spherical.hpp
+  # include/al/core/math/al_Random.hpp
   include/al/core/math/al_Vec.hpp
   include/al/core/protocol/al_OSC.hpp
-  include/al/core/protocol/al_Serialize.h
-  include/al/core/protocol/al_Serialize.hpp
-  include/al/core/spatial/al_Curve.hpp
-  include/al/core/spatial/al_DistAtten.hpp
-  include/al/core/spatial/al_HashSpace.hpp
   include/al/core/spatial/al_Pose.hpp
-  include/al/core/system/al_Config.h
   include/al/core/system/al_Printing.hpp
   include/al/core/system/al_Thread.hpp
   include/al/core/system/al_Time.hpp
   include/al/core/system/al_Watcher.hpp
-  include/al/core/types/al_Buffer.hpp
   include/al/core/types/al_Color.hpp
-  include/al/core/types/al_Conversion.hpp
-  include/al/core/types/al_SingleRWRingBuffer.hpp
 )
 
 set(core_sources
@@ -90,10 +71,7 @@ set(core_sources
   src/core/io/al_CSVReader.cpp
   src/core/io/al_Window.cpp
   src/core/io/al_WindowGLFW.cpp
-  src/core/private/al_ImplAPR.h
   src/core/protocol/al_OSC.cpp
-  src/core/protocol/al_Serialize.cpp
-  src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
   src/core/system/al_Printing.cpp
   src/core/system/al_ThreadNative.cpp

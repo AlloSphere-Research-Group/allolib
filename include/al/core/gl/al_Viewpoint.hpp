@@ -41,7 +41,6 @@
 
 #include "al/core/spatial/al_Pose.hpp"
 #include "al/core/gl/al_Lens.hpp"
-#include "al/core/math/al_Frustum.hpp"
 
 namespace al {
 
@@ -105,9 +104,6 @@ public:
 
   Matrix4f viewMatrix();
   Matrix4f projMatrix();
-
-  /// Get calculated viewing frustum
-  Frustumd frustum() const;
 
   Viewpoint& ortho(bool b = true) {
     mIsOrtho = b;

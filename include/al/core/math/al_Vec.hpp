@@ -48,7 +48,6 @@
 #include <stdio.h>
 #include <ostream>
 #include "al/core/math/al_Constants.hpp"
-#include "al/core/math/al_Functions.hpp"
 
 namespace al {
 
@@ -298,41 +297,6 @@ public:
   /// Set all elements to zero
   Vec& zero(){ return set(T(0)); }
 
-
-  /// Clip to range:
-  /// NOTE argument order (max,min)
-  Vec& clip(T max=T(1), T min=T(0)) {
-    IT(N) (*this)[i] = al::clip((*this)[i], max, min);
-    return *this;
-  }
-  Vec& clip(Vec max, Vec min) {
-    IT(N) (*this)[i] = al::clip((*this)[i], max[i], min[i]);
-    return *this;
-  }
-
-  /// Wrap in range:
-  /// NOTE argument order (max,min)
-  Vec& wrap(T max=T(1), T min=T(0)) {
-    IT(N) (*this)[i] = al::wrap((*this)[i], max, min);
-    return *this;
-  }
-  Vec& wrap(Vec max, Vec min) {
-    IT(N) (*this)[i] = al::wrap((*this)[i], max[i], min[i]);
-    return *this;
-  }
-
-  /// Fold in range:
-  /// NOTE argument order (max,min)
-  Vec& fold(T max=T(1), T min=T(0)) {
-    IT(N) (*this)[i] = al::fold((*this)[i], max, min);
-    return *this;
-  }
-  Vec& fold(Vec max, Vec min) {
-    IT(N) (*this)[i] = al::fold((*this)[i], max[i], min[i]);
-    return *this;
-  }
-
-
   //--------------------------------------------------------------------------
   // Linear Operations
 
@@ -403,8 +367,8 @@ public:
 
   /// Returns sum of absolute value of elements
   T sumAbs() const {
-    T r = abs((*this)[0]);
-    for(int i=1; i<N; ++i){ r += abs((*this)[i]); }
+    T r = std::abs((*this)[0]);
+    for(int i=1; i<N; ++i){ r += std::abs((*this)[i]); }
     return r;
   }
 

@@ -45,7 +45,6 @@
 
 
 #include <string>
-#include "al/core/system/al_Config.h"
 
 namespace al{
 

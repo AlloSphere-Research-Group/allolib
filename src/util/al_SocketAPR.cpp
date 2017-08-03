@@ -21,11 +21,10 @@ You can actually use connect() on UDP socket as an option. In that case, you can
 */
 
 #include <cstring>
-#include "al/core/io/al_Socket.hpp"
-#include "al/core/system/al_Config.h"
+#include "al/util/al_Socket.hpp"
 #include "al/core/system/al_Printing.hpp"
 
-#include "../private/al_ImplAPR.h"
+#include "al_ImplAPR.h"
 #if defined(AL_LINUX)
 #include "apr-1.0/apr_network_io.h"
 #elif  defined(AL_OSX)

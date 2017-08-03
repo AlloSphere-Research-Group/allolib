@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <algorithm> // for std::swap
-#include "al/core/system/al_Config.h"
 #include "al/core/system/al_Thread.hpp"
 
 #ifdef AL_WINDOWS

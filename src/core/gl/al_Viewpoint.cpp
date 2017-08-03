@@ -62,9 +62,3 @@ Matrix4f Viewpoint::projMatrix() {
         mLens.far()
     );
 }
-
-Frustumd Viewpoint::frustum() const {
-    Frustumd fr;
-    lens().frustum(fr, worldTransform(), viewport().aspect());
-    return fr;
-}

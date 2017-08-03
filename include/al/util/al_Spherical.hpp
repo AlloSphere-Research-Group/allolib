@@ -43,8 +43,8 @@
 */
 
 
-#include "al/core/math/al_Complex.hpp"
-#include "al/core/math/al_Functions.hpp"
+#include "al/util/al_Complex.hpp"
+#include "al/util/al_Functions.hpp"
 #include "al/core/math/al_Vec.hpp"
 
 namespace al{
@@ -177,12 +177,12 @@ public:
   /// @param[in] cphi    unit magnitude complex number describing latitudinal angle in [0, pi]
   template <class T>
   Complex<T> operator()(int l, int m, const Complex<T>& ctheta, const Complex<T>& cphi) const {
-    return coef(l,m) * al::legendreP(l, al::abs(m), cphi.r, cphi.i) * expim(m, ctheta);
+    return coef(l,m) * al::legendreP(l, std::abs(m), cphi.r, cphi.i) * expim(m, ctheta);
   }
 
   template <class T>
   static Complex<T> expim(int m, const Complex<T>& ctheta){
-    Complex<T> res = al::powN(ctheta, al::abs(m));
+    Complex<T> res = al::powN(ctheta, std::abs(m));
     if(m < 0) res.i = -res.i;
     return res;
   }
@@ -195,7 +195,7 @@ public:
 
   /// Get normalization coefficient (calculated)
   static double coefCalc(int l, int m){
-    int M = al::abs(m);
+    int M = std::abs(m);
     double res = ::sqrt((2*l + 1) / M_4PI) * al::factorialSqrt(l-M) / al::factorialSqrt(l+M);
     return (m<0 && al::odd(M)) ? -res : res;
   }
@@ -215,7 +215,7 @@ private:
         for(int m=-L_MAX; m<=L_MAX; ++m){
           double c=0;
            // m must be in [-l,l]
-          if(al::abs(m) <= l)  c = coefCalc(l,m);
+          if(std::abs(m) <= l)  c = coefCalc(l,m);
           LUT(l, m) = c;
         }
       }

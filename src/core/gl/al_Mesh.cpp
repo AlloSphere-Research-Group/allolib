@@ -153,7 +153,7 @@ void Mesh::createNormalsMesh(Mesh& mesh, float length, bool perFace){
       AL_WARN_ONCE("createNormalsMesh only valid for indexed meshes");
     }
   } else {
-    int Ni = al::min(vertices().size(), normals().size());
+    int Ni = std::min(vertices().size(), normals().size());
     F::initMesh(mesh, Ni*2);
 
     for(int i=0; i<Ni; ++i){
@@ -606,7 +606,7 @@ void Mesh::unitize(bool proportional) {
 
   // adjust to use scale of largest axis:
   if (proportional) {
-    float s = al::min(scale.x, al::min(scale.y, scale.z));
+    float s = std::min(scale.x, std::min(scale.y, scale.z));
     scale.x = scale.y = scale.z = s;
   }
 

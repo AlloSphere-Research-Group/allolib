@@ -25,10 +25,10 @@ endif (WINDOWS)
 
 if (USE_APR)
   set(APR_HEADERS
-    ${al_path}/include/al/core/io/al_Socket.hpp
+    ${al_path}/include/al/util/al_Socket.hpp
   )
   set(APR_SOURCES
-    src/core/io/al_SocketAPR.cpp
+    src/util/al_SocketAPR.cpp
   )
 endif(USE_APR)
 

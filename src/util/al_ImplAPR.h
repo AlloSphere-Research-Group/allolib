@@ -29,7 +29,6 @@
 
 #include <stdio.h>
 #include <stdlib.h> // atexit
-#include "al/core/system/al_Config.h"
 
 #if defined AL_WINDOWS
 	#define WIN32_LEAN_AND_MEAN

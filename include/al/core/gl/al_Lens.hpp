@@ -46,7 +46,6 @@
 
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/math/al_Matrix4.hpp"
-#include "al/core/math/al_Frustum.hpp"
 #include "al/core/spatial/al_Pose.hpp"
 
 namespace al {
@@ -83,13 +82,6 @@ public:
   double focalLength() const { return mFocalLength; }    ///< Get focal length
   double eyeSep() const { return mEyeSep; }        ///< Get eye separation
   double eyeSepAuto() const { return focalLength()/30.0; }///< Get automatic inter-ocular distance
-
-  /// Get test frustum
-
-  /// @param[in] f      The resulting test frustum
-  /// @param[in] p      A position and orientation in world coordinates
-  /// @param[in] aspect    Aspect ratio (width/height) of viewport
-  void frustum(Frustumd& f, const Pose& p, double aspect) const;
 
   /// Returns half the height of the frustum at a given depth
 

@@ -31,43 +31,6 @@ Lens& Lens::fovx(double v, double aspect) {
   return *this;
 }
 
-// @param[in] isStereo    Whether scene is in stereo (widens near/far planes to fit both eyes)
-void Lens::frustum(Frustumd& f, const Pose& p, double aspect) const {//, bool isStereo) const {
-
-  Vec3d ur, uu, uf;
-  p.directionVectors(ur, uu, uf);
-  const Vec3d& pos = p.pos();
-
-  double nh = heightAtDepth(near());
-  double fh = heightAtDepth(far());
-
-  double nw = nh * aspect;
-  double fw = fh * aspect;
-
-//  // This effectively creates a union between the near/far planes of the
-//  // left and right eyes. The offsets are computed by using the law
-//  // of similar triangles.
-//  if(isStereo){
-//    nw += fabs(0.5*eyeSep()*(focalLength()-near())/focalLength());
-//    fw += fabs(0.5*eyeSep()*(focalLength()- far())/focalLength());
-//  }
-
-  Vec3d nc = pos + uf * near();  // center point of near plane
-  Vec3d fc = pos + uf * far();  // center point of far plane
-
-  f.ntl = nc + uu * nh - ur * nw;
-  f.ntr = nc + uu * nh + ur * nw;
-  f.nbl = nc - uu * nh - ur * nw;
-  f.nbr = nc - uu * nh + ur * nw;
-
-  f.ftl = fc + uu * fh - ur * fw;
-  f.ftr = fc + uu * fh + ur * fw;
-  f.fbl = fc - uu * fh - ur * fw;
-  f.fbr = fc - uu * fh + ur * fw;
-
-  f.computePlanes();
-}
-
 double Lens::getFovyForHeight(double height, double depth) {
   return 2.*M_RAD2DEG*atan(height/depth);
 }

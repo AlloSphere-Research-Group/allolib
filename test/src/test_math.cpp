@@ -3,16 +3,17 @@
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/math/al_Quat.hpp"
 #include "al/core/math/al_Mat.hpp"
-#include "al/core/math/al_Frustum.hpp"
-#include "al/core/math/al_Complex.hpp"
-#include "al/core/math/al_Interval.hpp"
-#include "al/core/math/al_Random.hpp"
+#include "al/util/al_Functions.hpp"
+#include "al/util/al_Frustum.hpp"
+#include "al/util/al_Complex.hpp"
+#include "al/util/al_Interval.hpp"
+#include "al/util/al_Random.hpp"
 
 using namespace al;
 
 template <class T>
 inline bool eqVal(T x, T y, T eps=0.000001){
-	return abs(x-y) < eps;
+	return std::abs(x-y) < eps;
 }
 
 template <class T>
@@ -482,7 +483,7 @@ TEST_CASE("Math"){
 	const double pinf = INFINITY;		// + infinity
 	const double ninf =-INFINITY;		// - infinity
 
-	#define T(x) REQUIRE(al::abs(x) == ( x < 0 ? -x : x));
+	#define T(x) REQUIRE(std::abs(x) == ( x < 0 ? -x : x));
 	T(0.) T(1.) T((-1.))
 	T(0) T(1) T((-1))
 	#undef T
@@ -491,11 +492,11 @@ TEST_CASE("Math"){
 	T(0.,1., 1.) T(+0.1,1., 1.) T(-0.1,1., -1.)
 	#undef T
 
-	#define T(x,y) REQUIRE(al::abs(al::atan2Fast(x,y) - std::atan2(x,y)) < 1e-5);
+	#define T(x,y) REQUIRE(std::abs(al::atan2Fast(x,y) - std::atan2(x,y)) < 1e-5);
 	T(1.,0.) T(1.,1.) T(0.,1.) T(-1.,1.) T(-1.,0.) T(-1.,-1.) T(0.,-1.) T(1.,-1.)
 	#undef T
 
-	#define T(x, y) REQUIRE(al::ceil(x) == y);
+	#define T(x, y) REQUIRE(std::ceil(x) == y);
 	T(0., 0.)	T( 1., 1.) T( 1.2, 2.) T( 1.8, 2.) T( 1000.1, 1001.)
 				T(-1.,-1.) T(-1.2,-1.) T(-1.8,-1.) T(-1000.1,-1000.)
 	#undef T
@@ -534,7 +535,7 @@ TEST_CASE("Math"){
 		);
 	}
 
-	#define T(x, y) REQUIRE(al::floor(x) == y);
+	#define T(x, y) REQUIRE(std::floor(x) == y);
 	T(0., 0.)	T( 1., 1.) T( 1.2, 1.) T( 1.8, 1.) T( 1000.1, 1000.)
 				T(-1.,-1.) T(-1.2,-2.) T(-1.8,-2.) T(-1000.1,-1001.)
 	#undef T
@@ -561,21 +562,15 @@ TEST_CASE("Math"){
 	T(0.1,1., true) T(-0.1,1., true) T(1.,1., false) T(-1.,1., false)
 	#undef T
 
-	#define T(x) REQUIRE(al::log2(1<<x) == x);
+	#define T(x) REQUIRE(std::log2(1<<x) == x);
 	T(0) T(1) T(2) T(3) T(4) T(29) T(30) T(31)
 	#undef T
 
-	#define T(x,y,r) REQUIRE(al::max(x,y)==r);
+	#define T(x,y,r) REQUIRE(std::max(x,y)==r);
 	T(0,0,0) T(0,1,1) T(1,0,1) T(-1,1,1)
 	#undef T
 
-	#define T(x,y,z,r) REQUIRE(al::max(x,y,z)==r);
-	T(0,0,0, 0) T(0,1,2, 2) T(1,2,0, 2) T(2,1,0, 2)
-	#undef T
-
-	REQUIRE(al::mean(-1., 1.) == 0.);
-
-	#define T(x,y,r) REQUIRE(al::min(x,y)==r);
+	#define T(x,y,r) REQUIRE(std::min(x,y)==r);
 	T(0,0,0) T(0,1,0) T(1,0,0) T(-1,1,-1)
 	#undef T
 
@@ -587,7 +582,7 @@ TEST_CASE("Math"){
 	T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 	#undef T
 
-	#define T(x) REQUIRE(al::pow2S(x) == x*al::abs(x));
+	#define T(x) REQUIRE(al::pow2S(x) == x*std::abs(x));
 	T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 	#undef T
 
@@ -595,7 +590,7 @@ TEST_CASE("Math"){
 	T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 	#undef T
 
-	#define T(x) REQUIRE(al::pow3Abs(x) == al::abs(x*x*x));
+	#define T(x) REQUIRE(al::pow3Abs(x) == std::abs(x*x*x));
 	T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 	#undef T
 
@@ -627,11 +622,11 @@ TEST_CASE("Math"){
 //	T(0, false) T(1, true) T(2, true) T(3, false) T(4, true)
 //	#undef T
 
-	#define T(x,y,r) REQUIRE(al::remainder(x,y) == r);
+	#define T(x,y,r) REQUIRE(std::remainder(x,y) == r);
 	T(7,7,0) T(7,1,0) T(7,4,3) T(7,3,1) T(14,3,2)
 	#undef T
 
-	#define T(x,y) REQUIRE(al::round(x) == y);
+	#define T(x,y) REQUIRE(std::round(x) == y);
 	T(0.f, 0.f) T(0.2f, 0.f) T(0.8f, 1.f) T(-0.2f, 0.f) T(-0.8f,-1.f) T(0.5f, 0.f) T(-0.5f, 0.f)
 	T(0.0, 0.0) T(0.20, 0.0) T(0.80, 1.0) T(-0.20, 0.0) T(-0.80,-1.0) T(0.50, 0.0) T(-0.50, 0.0)
 	#undef T
@@ -665,7 +660,7 @@ TEST_CASE("Math"){
 	T(0, 0) T(1, 0) T(2, 1) T(3, 0) T(4, 2) T(8, 3) T(9, 0)
 	#undef T
 
-	#define T(x,y) REQUIRE(al::trunc(x) == y);
+	#define T(x,y) REQUIRE(std::trunc(x) == y);
 	T(0.f, 0.f) T(0.2f, 0.f) T(0.8f, 0.f) T(-0.2f, 0.f) T(-0.8f, 0.f) T(0.5f, 0.f) T(-0.5f, 0.f)
 	T(0.0, 0.0) T(0.20, 0.0) T(0.80, 0.0) T(-0.20, 0.0) T(-0.80, 0.0) T(0.50, 0.0) T(-0.50, 0.0)
 	#undef T
@@ -750,7 +745,7 @@ TEST_CASE("Math"){
 			double a = al::legendreP(l, m, theta);
 			double b = F::testLegendreP(l, m, cos(theta));
 	//		if(!al::aeq(a, b, 1<<16)){
-			if(!(al::abs(a - b)<1e-10)){
+			if(!(std::abs(a - b)<1e-10)){
 				printf("\nP(%d, %d, %g) = %.16g (actual = %.16g)\n", l,m, cos(theta), a,b);
 				REQUIRE(false);
 			}
@@ -763,7 +758,7 @@ TEST_CASE("Math"){
 			double a = al::laguerreL(n,1, x);
 			double b = F::testLaguerre(n,1, x);
 
-			if(!(al::abs(a - b)<1e-10)){
+			if(!(std::abs(a - b)<1e-10)){
 				printf("\nL(%d, %g) = %.16g (actual = %.16g)\n", n, x, a,b);
 				REQUIRE(false);
 			}

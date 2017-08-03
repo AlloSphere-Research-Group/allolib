@@ -1,6 +1,6 @@
 #include <math.h>
 
-#include "al/core/math/al_Spherical.hpp"
+#include "al/util/al_Spherical.hpp"
 
 using namespace al;
 
