@@ -85,9 +85,7 @@ set(glv_headers
   include/al/glv/glv_buttons.h
   include/al/glv/glv_conf.h
   include/al/glv/glv_core.h
-  include/al/glv/glv_draw.h
   include/al/glv/glv_font.h
-  # include/al/glv/glv_icon.h
   include/al/glv/glv_layout.h
   include/al/glv/glv_model.h
   include/al/glv/glv_notification.h

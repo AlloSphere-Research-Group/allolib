@@ -1,8 +1,8 @@
 #include "al/glv/al_GLV.hpp"
 
+#include "al/core/gl/al_Mesh.hpp" // GraphicsData
 #include "al/core/gl/al_Shapes.hpp"
 
-#include "al/glv/glv_draw.h" // GraphicsData
 
 #include <cmath>
 #include <iostream>
@@ -10,8 +10,6 @@
 #include <iostream>
 
 namespace glv {
-
-#define GLV_INDEX GL_UNSIGNED_INT
 
 struct GraphicsHolder {
     al::Graphics* mGraphics;
@@ -121,10 +119,10 @@ void line(float x0, float y0, float x1, float y1) {
     graphicsHolder().get().draw(mesh);
 }
 
-void lines(GraphicsData& gd) {
+void lines(al::Mesh& gd) {
     static al::EasyVAO vao;
     vao.primitive(GL_LINES);
-    vao.updatePosition(gd.vertices3().data(), gd.vertices3().size());
+    vao.updatePosition(gd.vertices().data(), gd.vertices().size());
     graphicsHolder().get().draw(vao);
 }
 
@@ -491,7 +489,7 @@ void Sliders::onDraw(GLV& glv) {
     }
 }
 
-void Font::render(GraphicsData& gd, const char * v, float x, float y, float z) const {
+void Font::render(al::Mesh& gd, const char * v, float x, float y, float z) const {
     //static bool print_once = [](){ std::cout << "Font::render" << std::endl; return true; }();
 
     gd.reset();
@@ -507,12 +505,12 @@ void Font::render(GraphicsData& gd, const char * v, float x, float y, float z) c
     //tx=ty=tz=0;
 
     struct RenderText : public TextIterator{
-        RenderText(const Font& f_, const char *& s_, GraphicsData& g_, float tx_, float ty_, float sx_, float sy_)
+        RenderText(const Font& f_, const char *& s_, al::Mesh& g_, float tx_, float ty_, float sx_, float sy_)
         : TextIterator(f_,s_), g(g_), tx(tx_), ty(ty_), sx(sx_), sy(sy_){}
         bool onPrintable(char c){
             return addCharacter(g, c, pixc(tx+x*sx), pixc(ty+y*sy), sx, sy);
         }
-        GraphicsData& g;
+        al::Mesh    & g;
         float tx,ty,sx,sy;
     } renderText(*this, v, gd, tx,ty,sx,sy);
 

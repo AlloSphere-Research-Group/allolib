@@ -2,7 +2,7 @@
 	See COPYRIGHT file for authors and license information */
 
 #include "al/glv/glv_sliders.h"
-#include "al/glv/glv_draw.h"
+#include "al/core/gl/al_Mesh.hpp"
 
 namespace glv{
 
@@ -268,7 +268,7 @@ bool SliderRange::onEvent(Event::t e, GLV& g){
 
 
 
-#ifdef DONT_COMMENT_OUT_FG
+#if 0
 
 
 FunctionGraph::FunctionGraph(const Rect& r, int nKnots, int res)

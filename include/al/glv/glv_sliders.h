@@ -113,7 +113,7 @@ private:
 	double mJump;
 };
 
-#ifdef DONT_COMMENT_OUT_SG
+#if 0
 
 /// A multi-parameter slider grid
 
@@ -211,7 +211,7 @@ public:
 };
 
 
-#ifdef DONT_COMMENT_OUT_FG
+#if 0
 
 //there must be at least 3 points
 class FunctionGraph : public View{

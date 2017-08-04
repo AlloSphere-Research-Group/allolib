@@ -4,7 +4,7 @@
 /*	Graphics Library of Views (GLV) - GUI Building Toolkit
 	See COPYRIGHT file for authors and license information */
 
-#include "al/glv/glv_draw.h"
+#include "al/core/gl/al_Mesh.hpp"
 
 namespace glv{
 
@@ -27,7 +27,7 @@ public:
 	/// Render text string
 	virtual void render(const char * text, float x=0, float y=0, float z=0) const;
 
-	virtual void render(GraphicsData& g, const char * text, float x=0, float y=0, float z=0) const;
+	virtual void render(al::Mesh& g, const char * text, float x=0, float y=0, float z=0) const;
 
 	/// Set spacing, in ems, between the left and right edges of successive letters
 	Font& letterSpacing(float v);
@@ -106,7 +106,7 @@ struct TextIterator{
 	const Font& f;
 };
 
-bool addCharacter(GraphicsData& g, int c, float dx, float dy, float sx, float sy);
+bool addCharacter(al::Mesh& g, int c, float dx, float dy, float sx, float sy);
 
 // font rendering styles
 //enum

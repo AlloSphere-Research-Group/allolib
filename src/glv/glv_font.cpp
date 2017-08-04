@@ -222,7 +222,7 @@ bool TextIterator::operator()(){
 //}
 
 
-bool addCharacter(GraphicsData& g, int c, float dx, float dy, float sx, float sy){
+bool addCharacter(al::Mesh& g, int c, float dx, float dy, float sx, float sy){
 
 	// composite character
 	if(c == '$'){ addCharacter(g, 'S',dx,dy,sx,sy); return addCharacter(g, '|',dx,dy,sx,sy); }
@@ -248,14 +248,14 @@ bool addCharacter(GraphicsData& g, int c, float dx, float dy, float sx, float sy
 				// g.addVertex3(r,b,l,b);
 				// g.addVertex3(l,b,l,t);
 
-				g.addVertex3(l,t);
-				g.addVertex3(r,t);
-				g.addVertex3(r,t);
-				g.addVertex3(r,b);
-				g.addVertex3(r,b);
-				g.addVertex3(l,b);
-				g.addVertex3(l,b);
-				g.addVertex3(l,t);
+				g.vertex(l,t);
+				g.vertex(r,t);
+				g.vertex(r,t);
+				g.vertex(r,b);
+				g.vertex(r,b);
+				g.vertex(l,b);
+				g.vertex(l,b);
+				g.vertex(l,t);
 			}
 			if(n == 0) goto render;
 			x += dots; y += dots;
@@ -263,7 +263,7 @@ bool addCharacter(GraphicsData& g, int c, float dx, float dy, float sx, float sy
 
 		--n;
 		// 16 + 1 = 17
-		g.addVertex3(GETX(x[0]), GETY(y[0]));
+		g.vertex(GETX(x[0]), GETY(y[0]));
 		
 		// 17 + 7*2 = 31
 		if(glyphs[c].once() == 0){	// line strip
@@ -271,16 +271,16 @@ bool addCharacter(GraphicsData& g, int c, float dx, float dy, float sx, float sy
 				
 				float px = GETX(x[i]);
 				float py = GETY(y[i]);
-				g.addVertex3(px, py);
-				g.addVertex3(px, py);
+				g.vertex(px, py);
+				g.vertex(px, py);
 			}
 		}
 		else{		// normal lines
-			for(int i=1; i<n; ++i) g.addVertex3(GETX(x[i]), GETY(y[i]));
+			for(int i=1; i<n; ++i) g.vertex(GETX(x[i]), GETY(y[i]));
 		}
 		
 		// 31 + 1 = 32
-		g.addVertex3(GETX(x[n]), GETY(y[n]));
+		g.vertex(GETX(x[n]), GETY(y[n]));
 		
 		render:
 		//draw::paint(draw::Lines, xy, ind+1);
@@ -299,7 +299,7 @@ Font::Font(float size_)
 Font::~Font(){}
 
 void Font::render(const char * v, float x, float y, float z) const{
-	GraphicsData gd;
+	al::Mesh gd;
 	render(gd, v,x,y,z);
 }
 
