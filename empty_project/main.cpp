@@ -16,7 +16,10 @@ public:
   }
 
   void onDraw() {
-    g.clearColor(0, 0, 0);
+    g.clear(0, 0, 0);
+    g.shader(color_shader);
+    g.shader().uniform("col0", Color(1, 0, 0));
+    g.camera(view);
     g.polygonMode(Graphics::LINE);
     g.draw(mesh);
   }

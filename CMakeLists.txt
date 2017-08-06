@@ -6,7 +6,7 @@ set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
 include(cmake_modules/configure_platform.cmake)
 # sets: MACOS || LINUX || WINDOWS_MINGW || WINDOWS, and PLATFORM_DEFINITION
 include(cmake_modules/find_core_dependencies.cmake)
-# sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES
+# sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES, CORE_LIBRARY_DIRS
 include(cmake_modules/find_additional_dependencies.cmake)
 # sets: ADDITIONAL_INCLUDE_DIRS, ADDITIONAL_LIBRARIES, ADDITIONAL_HEADERS,
 #       ADDITIONAL_SOURCES, ADDITIONAL_DEFINITIONS
@@ -42,8 +42,10 @@ set(flags
   ${basic_flags}
 )
 
+link_directories(${CORE_LIBRARY_DIRS})
 
 # --- NOW WE ARE READY TO SETUP THE LIBRARY TARGET ---------------------
+
 add_library(al STATIC ${headers} ${sources})
 
 #paths

@@ -2,7 +2,7 @@
 include(${al_path}/cmake_modules/configure_platform.cmake)
 # sets: MACOS || LINUX || WINDOWS_MINGW || WINDOWS, and PLATFORM_DEFINITION
 include(${al_path}/cmake_modules/find_core_dependencies.cmake)
-# sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES
+# sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES, CORE_LIBRARY_DIRS
 include(${al_path}/cmake_modules/find_additional_dependencies.cmake)
 # sets: ADDITIONAL_INCLUDE_DIRS, ADDITIONAL_LIBRARIES, ADDITIONAL_HEADERS,
 #       ADDITIONAL_SOURCES, ADDITIONAL_DEFINITIONS
@@ -40,6 +40,8 @@ set(definitions
 set(flags
   ${basic_flags}
 )
+
+link_directories(${CORE_LIBRARY_DIRS})
 
 # --- setup app target ------------------------------------
 add_executable(${app_name} ${app_files_list})
