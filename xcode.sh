@@ -16,20 +16,6 @@ else
   AL_LIB_PATH=${INITIALDIR}/${SCRIPT_PATH}
 fi
 
-
-# check if we want debug build
-BUILD_TYPE=Release
-while getopts ":d" opt; do
-  case $opt in
-  d)
-  BUILD_TYPE=Debug
-  POSTFIX=_debug
-  shift # consume option
-    ;;
-  esac
-done
-echo "BUILD TYPE: ${BUILD_TYPE}"
-
 # first build allolib ###########################################################
 echo " "
 echo "___ building allolib __________"
@@ -39,15 +25,27 @@ git submodule init
 git submodule update
 mkdir -p build
 cd build
-mkdir -p "${BUILD_TYPE}"
-cd "${BUILD_TYPE}"
-cmake ../.. -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+mkdir -p Debug
+cd Debug
+cmake ../.. -DCMAKE_BUILD_TYPE=Debug
 make
-LIB_BUILD_RESULT=$?
+LIB_DEBUG_BUILD_RESULT=$?
 # if lib failed to build, exit
-if [ ${LIB_BUILD_RESULT} != 0 ]; then
+if [ ${LIB_DEBUG_BUILD_RESULT} != 0 ]; then
 	exit 1
 fi
+
+cd ..
+mkdir -p Release
+cd Release
+cmake ../.. -DCMAKE_BUILD_TYPE=Release
+make
+LIB_RELEASE_BUILD_RESULT=$?
+# if lib failed to build, exit
+if [ ${LIB_RELEASE_BUILD_RESULT} != 0 ]; then
+  exit 1
+fi
+
 
 # then build the app ###########################################################
 APP_NAME="$1" # first argument (assumming we consumed all the options above)
@@ -75,13 +73,13 @@ fi
 APP_NAME=$(basename ${APP_NAME})
 
 echo " "
-echo "___ building ${APP_NAME} __________"
+echo "___ generating ${APP_NAME} xCode project __________"
 echo " "
 
 echo "app path: ${APP_PATH}"
 cd ${APP_PATH}
-mkdir -p build
-cd build
+mkdir -p xcode
+cd xcode
 # if app is run with this script, al_path is set here
 # if this script was not used, cmake will set it to value user provided
-cmake ${APP_PATH}/ -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Dal_path=${AL_LIB_PATH} -G Xcode
+cmake ${APP_PATH}/ -Dal_path=${AL_LIB_PATH} -G Xcode
