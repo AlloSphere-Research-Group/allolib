@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(allo)
+project(allolib)
 set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
 
 

@@ -4,10 +4,6 @@
 #   EXTERNAL_LIBRARIES
 #   EXTERNAL_DEFINITIONS
 
-set(AudioAPI "rtaudio" CACHE STRING "Library for Audio IO")
-set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
-
-
 include(${al_path}/cmake_modules/external/oscpack.cmake)
 include(${al_path}/cmake_modules/external/gamma.cmake)
 
@@ -31,6 +27,10 @@ set(EXTERNAL_DEFINITIONS
 
 # Real time audio
 # Use rtaudio by default
+
+set(AudioAPI "rtaudio" CACHE STRING "Library for Audio IO")
+set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
+
 if(AudioAPI STREQUAL "rtaudio")
   include(${al_path}/cmake_modules/external/rtaudio.cmake)
 
