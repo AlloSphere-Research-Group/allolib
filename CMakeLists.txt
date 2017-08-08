@@ -41,6 +41,7 @@ if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/Gamma")
   message("Using Gamma:${Gamma}" )
 endif()
 
+
 set(definitions
   ${PLATFORM_DEFINITION} ${EXTERNAL_DEFINITIONS} ${ADDITIONAL_DEFINITIONS}
 )
