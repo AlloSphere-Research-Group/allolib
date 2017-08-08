@@ -4,32 +4,37 @@
 #   EXTERNAL_LIBRARIES
 #   EXTERNAL_DEFINITIONS
 
+set(AudioAPI "rtaudio" CACHE STRING "Library for Audio IO")
+set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
+
 include(${al_path}/cmake_modules/external/oscpack.cmake)
 include(${al_path}/cmake_modules/external/gamma.cmake)
+include(${al_path}/cmake_modules/external/rtmidi.cmake)
 
 set(EXTERNAL_INCLUDE_DIR
   ${OSCPACK_INCLUDE_DIR}
   ${GAMMA_INCLUDE_DIR}
+  ${RTMIDI_INCLUDE_DIR}
 )
 
 set(EXTERNAL_SRC
   ${OSCPACK_SRC}
+  ${RTMIDI_SRC}
 )
 
 set(EXTERNAL_LIBRARIES
 
   ${GAMMA_LIBRARY}
+  ${RTMIDI_LIBRARIES}
 )
 
 set(EXTERNAL_DEFINITIONS
 
+  ${RTMIDI_DEFINITIONS}
 )
 
 # Real time audio
 # Use rtaudio by default
-
-set(AudioAPI "rtaudio" CACHE STRING "Library for Audio IO")
-set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
 
 if(AudioAPI STREQUAL "rtaudio")
   include(${al_path}/cmake_modules/external/rtaudio.cmake)

@@ -3,8 +3,11 @@ set (test_src
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/external/catch)
-include_directories(${CMAKE_SOURCE_DIR}/external/Gamma)
 include_directories(${CMAKE_SOURCE_DIR}/include)
+
+#These should be provided by the CMakeFile for the library
+include_directories(${CMAKE_SOURCE_DIR}/external/Gamma)
+include_directories(${CMAKE_SOURCE_DIR}/external/rtmidi)
 
 if (WINDOWS)
   # CMAKE_BINARY_DIR: contains the driectory where cmake is run

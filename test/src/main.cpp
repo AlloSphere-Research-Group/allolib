@@ -7,5 +7,6 @@
 #include <iostream>
 
 #include "test_audio.cpp"
+#include "test_midi.cpp"
 #include "test_math.cpp"
 #include "test_mathSpherical.cpp"
