@@ -33,7 +33,7 @@ if(IS_DIRECTORY "${al_path}/external/rtaudio")
         jack pthread
         )
       #  g++ -Wall -D__UNIX_JACK__ -o audioprobe audioprobe.cpp RtAudio.cpp $(pkg-config –cflags –libs jack) -lpthread
-    endif(RtAudioLinuxAPI STREQUAL)
+    endif()
   endif(LINUX)
 
   if(MACOS)
