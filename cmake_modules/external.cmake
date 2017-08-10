@@ -11,7 +11,7 @@ include(${al_path}/cmake_modules/external/oscpack.cmake)
 include(${al_path}/cmake_modules/external/gamma.cmake)
 include(${al_path}/cmake_modules/external/rtmidi.cmake)
 
-set(EXTERNAL_INCLUDE_DIR
+set(EXTERNAL_INCLUDE_DIRS
   ${OSCPACK_INCLUDE_DIR}
   ${GAMMA_INCLUDE_DIR}
   ${RTMIDI_INCLUDE_DIR}

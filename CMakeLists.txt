@@ -11,7 +11,7 @@ include(cmake_modules/find_additional_dependencies.cmake)
 # sets: ADDITIONAL_INCLUDE_DIRS, ADDITIONAL_LIBRARIES, ADDITIONAL_HEADERS,
 #       ADDITIONAL_SOURCES, ADDITIONAL_DEFINITIONS
 include(cmake_modules/external.cmake)
-# sets: EXTERNAL_INCLUDE_DIR, EXTERNAL_SRC, EXTERNAL_LIBRARIES, EXTERNAL_DEFINITIONS
+# sets: EXTERNAL_INCLUDE_DIRS, EXTERNAL_SRC, EXTERNAL_LIBRARIES, EXTERNAL_DEFINITIONS
 include(cmake_modules/al_files.cmake)
 # sets: al_headers, al_sources
 include(cmake_modules/basic_flags.cmake)
@@ -27,20 +27,12 @@ set(sources
 )
 
 set(dirs_to_include
-  ${CORE_INCLUDE_DIRS} ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIR}
+  ${CORE_INCLUDE_DIRS} ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
 )
 
 set(libs_to_link
   ${CORE_LIBRARIES} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
 )
-
-# Gamma
-if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/Gamma")
-  add_subdirectory("${CMAKE_SOURCE_DIR}/${EXTERNAL_INCLUDE_DIR}/Gamma")
-  list(APPEND EXTERNAL_LIBRARIES Gamma)
-  message("Using Gamma:${Gamma}" )
-endif()
-
 
 set(definitions
   ${PLATFORM_DEFINITION} ${EXTERNAL_DEFINITIONS} ${ADDITIONAL_DEFINITIONS}

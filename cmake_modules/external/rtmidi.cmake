@@ -34,7 +34,7 @@ if(IS_DIRECTORY "${al_path}/external/rtmidi")
     list(APPEND RTMIDI_LIBRARIES
       ${COREAUDIO_LIB}
       ${COREFOUNDATION_LIB}
-      ${COREFOUNDATION_LIB}
+      ${COREMIDI_LIB}
       pthread
     )
   endif(MACOS)
