@@ -1,6 +1,7 @@
 # sets:
 #   CORE_INCLUDE_DIRS
 #   CORE_LIBRARIES
+#   CORE_LIBRARY_DIRS
 
 # al_path needs to be set prior to calling this script
 
