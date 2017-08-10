@@ -57,7 +57,7 @@ set_target_properties(${app_name}
 )
 
 # flags
-target_compile_options(${app_name} PUBLIC ${flags}) # public because of headers
+target_compile_options(${app_name} PRIVATE ${flags})
 
 # definitions
 target_compile_definitions(${app_name} PRIVATE ${definitions})
