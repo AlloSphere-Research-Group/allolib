@@ -59,6 +59,11 @@ set_target_properties(al
 #flags
 target_compile_options(al PUBLIC ${flags}) # public because of headers
 
+# c++14
+set_target_properties(al PROPERTIES CXX_STANDARD 14)
+set_target_properties(al PROPERTIES CXX_STANDARD_REQUIRED ON)
+
+
 # definitions
 target_compile_definitions(al PRIVATE ${definitions})
 

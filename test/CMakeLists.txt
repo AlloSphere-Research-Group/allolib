@@ -17,6 +17,8 @@ if (WINDOWS)
 endif (WINDOWS)
 
 add_executable(al_tests ${test_src})
+set_target_properties(al_tests PROPERTIES CXX_STANDARD 14)
+set_target_properties(al_tests PROPERTIES CXX_STANDARD_REQUIRED ON)
 target_link_libraries(al_tests al)
 
 if (WINDOWS)

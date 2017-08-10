@@ -59,6 +59,10 @@ set_target_properties(${app_name}
 # flags
 target_compile_options(${app_name} PUBLIC ${flags}) # public because of headers
 
+# c++14
+set_target_properties(${app_name} PROPERTIES CXX_STANDARD 14)
+set_target_properties(${app_name} PROPERTIES CXX_STANDARD_REQUIRED ON)
+
 # definitions
 target_compile_definitions(${app_name} PRIVATE ${definitions})
 
