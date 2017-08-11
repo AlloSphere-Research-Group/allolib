@@ -163,6 +163,7 @@ void al::GlvGui::addSlider(std::string name, double min, double max, double val)
     addSlider(*sliders[name]);
 }
 void al::GlvGui::addSlider(std::string name) { addSlider(name, 0, 1, 0.5); }
+void al::GlvGui::addSlider(std::string name, double val) { addSlider(name, 0, 1, val); }
 void al::GlvGui::addSlider(std::string name, double min, double max) { addSlider(name, min, max, 0.5 * (min + max)); }
 
 void al::GlvGui::removeSlider(SliderWithLabel& slider) {
@@ -193,6 +194,15 @@ double al::GlvGui::sliderValue(std::string name) {
     return search->second->value();
 }
 
+void al::GlvGui::setSliderValue(std::string name, double val) {
+    auto search = sliders.find(name);
+    if (search == sliders.end()) {
+        std::cout << "no slider with name \"" << name << "\" exists" << std::endl;
+        return;
+    }
+    search->second->slider.setCalcedValue(val);
+}
+
 void al::GlvGui::addButton(ButtonWithLabel& buttons) {
     mTable << buttons.buttons;
     mTable << buttons.label;
@@ -201,6 +211,12 @@ void al::GlvGui::addButton(ButtonWithLabel& buttons) {
 void al::GlvGui::addButton(std::string name) {
     addButton(name, 1, 1);
 }
+
+void al::GlvGui::addButton(std::string name, bool onoff) {
+    addButton(name, 1, 1);
+    setButtonValue(name, onoff);
+}
+
 void al::GlvGui::addButton(std::string name, int numButtons) {
     addButton(name, std::min(numButtons, 5), (4 + numButtons) / 5);
 }
@@ -246,6 +262,16 @@ bool al::GlvGui::buttonValue(std::string name, int colIdx, int rowIdx) {
     }
     return search->second->buttons.getValue(colIdx, rowIdx);
 }
+
+void al::GlvGui::setButtonValue(std::string name, bool val) {
+    auto search = buttons.find(name);
+    if (search == buttons.end()) {
+        std::cout << "no button with name \"" << name << "\" exists" << std::endl;
+        return;
+    }
+    search->second->buttons.setValue(val);
+}
+
 
 void al::GlvGui::addNumberDialer(NumberDialerWithLabel& dialer) {
     mTable << dialer.dialer;

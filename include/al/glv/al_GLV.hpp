@@ -85,23 +85,18 @@ public:
     GlvGui(Window& window, bool blackLetters = false);
 
     void addSlider(SliderWithLabel& slider);
-    void addSlider(std::string name, double min, double max, double val);
     void addSlider(std::string name);
+    void addSlider(std::string name, double val);
     void addSlider(std::string name, double min, double max);
+    void addSlider(std::string name, double min, double max, double val);
     void removeSlider(SliderWithLabel& slider);
     void removeSlider(std::string name);
     double sliderValue(std::string name);
-    void setSliderValue(std::string name, double val) {
-        auto search = sliders.find(name);
-        if (search == sliders.end()) {
-            std::cout << "no slider with name \"" << name << "\" exists" << std::endl;
-            return;
-        }
-        search->second->slider.setCalcedValue(val);
-    }
+    void setSliderValue(std::string name, double val);
 
     void addButton(ButtonWithLabel& buttons);
     void addButton(std::string name);
+    void addButton(std::string name, bool onoff); // single button with initial value
     void addButton(std::string name, int numButtons);
     void addButton(std::string name, int numCol, int numRow);
     void removeButton(ButtonWithLabel& buttons);
@@ -109,14 +104,7 @@ public:
     bool buttonValue(std::string name);
     bool buttonValue(std::string name, int idx);
     bool buttonValue(std::string name, int colIdx, int rowIdx);
-    void setButtonValue(std::string name, bool val) {
-        auto search = buttons.find(name);
-        if (search == buttons.end()) {
-            std::cout << "no button with name \"" << name << "\" exists" << std::endl;
-            return;
-        }
-        search->second->buttons.setValue(val);
-    }
+    void setButtonValue(std::string name, bool val);
 
     void addNumberDialer(NumberDialerWithLabel& dialer);
     void addNumberDialer(std::string name);
