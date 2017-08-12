@@ -39,7 +39,7 @@ set(EXTERNAL_DEFINITIONS
 if(AudioAPI STREQUAL "rtaudio")
   include(${al_path}/cmake_modules/external/rtaudio.cmake)
 
-  list(APPEND EXTERNAL_INCLUDE_DIR
+  list(APPEND EXTERNAL_INCLUDE_DIRS
     ${RTAUDIO_INCLUDE_DIR}
     )
 

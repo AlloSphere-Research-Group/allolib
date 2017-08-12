@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(allolib)
 set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
-
+set(BUILDING_ALLOLIB 1)
 
 include(cmake_modules/configure_platform.cmake)
 # sets: MACOS || LINUX || WINDOWS_MINGW || WINDOWS, and PLATFORM_DEFINITION

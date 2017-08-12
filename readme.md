@@ -3,9 +3,15 @@ TODO
 - stereo window
 - fullscreen with specific monitor
 - connect omnirender
-- use std::thread
+- al::File
+
+- use std::thread (?)
 - use std::random
 - img, font, mesh loading
+- Parameter
+- al::Socket
+- alloAudio
+- build n deploy
 
 DEPENDENCIES
 
