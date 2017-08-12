@@ -21,6 +21,7 @@ set(sources
 
 set(dirs_to_include
   ${al_path}/include
+  ${app_include_dirs}
   ${CORE_INCLUDE_DIRS}
   ${ADDITIONAL_INCLUDE_DIRS}
 )

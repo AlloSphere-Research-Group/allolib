@@ -13,19 +13,25 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   # add_definitions(-DAL_LINUX)
   set(PLATFORM_DEFINITION -DAL_LINUX)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  if (MSYS)
-    set(WINDOWS_MINGW 1)
-    message("WINDOWS_MINGW")
+  # if (MSYS)
+    # set(WINDOWS_MINGW 1)
+    # message("WINDOWS_MINGW")
     # add_definitions(-DAL_WINDOWS_MSYS)
-    set(PLATFORM_DEFINITION -DAL_WINDOWS_MSYS)
-  elseif (MSVC) # Visual Studio
+    # set(PLATFORM_DEFINITION -DAL_WINDOWS_MSYS)
+  # elseif (MSVC) # Visual Studio
     set(WINDOWS 1)
     message("WINDOWS")
     # add_definitions(-DAL_WINDOWS)
     set(PLATFORM_DEFINITION -DAL_WINDOWS)
-  else ()
+  # else ()
     #
-  endif()
+  # endif()
 else ()
-  #
+  # ???
+endif ()
+
+if (WINDOWS)
+  set(al_homepath $ENV{HOMEPATH})
+else ()
+  set(al_homepath $ENV{HOME})
 endif ()
