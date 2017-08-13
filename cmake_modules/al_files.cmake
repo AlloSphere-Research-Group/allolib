@@ -27,6 +27,7 @@ set(core_headers
   include/al/core/io/al_AudioIOData.hpp
   include/al/core/io/al_ControlNav.hpp
   include/al/core/io/al_CSVReader.hpp
+  include/al/core/io/al_File.hpp
   include/al/core/io/al_MIDI.hpp
   include/al/core/io/al_Window.hpp
   include/al/core/math/al_Constants.hpp
@@ -69,6 +70,7 @@ set(core_sources
   src/core/io/al_AudioIOData.cpp
   src/core/io/al_ControlNav.cpp
   src/core/io/al_CSVReader.cpp
+  src/core/io/al_File.cpp
   src/core/io/al_MIDI.cpp
   src/core/io/al_Window.cpp
   src/core/io/al_WindowGLFW.cpp
