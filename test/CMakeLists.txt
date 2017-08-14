@@ -21,11 +21,19 @@ set_target_properties(al_tests PROPERTIES DEBUG_POSTFIX _debug)
 set_target_properties(al_tests PROPERTIES CXX_STANDARD 14)
 set_target_properties(al_tests PROPERTIES CXX_STANDARD_REQUIRED ON)
 target_link_libraries(al_tests al)
+if (WINDOWS)
 target_link_libraries(
   al_tests
   debug ${al_path}/external/Gamma/lib/Gamma_debug.lib
   optimized ${al_path}/external/Gamma/lib/Gamma.lib
 )
+else ()
+target_link_libraries(
+  al_tests
+  debug ${al_path}/external/Gamma/lib/libGamma_debug.a
+  optimized ${al_path}/external/Gamma/lib/libGamma.a
+)   
+endif ()
 target_compile_definitions(al_tests PRIVATE ${definitions})
 
 # if (WINDOWS)

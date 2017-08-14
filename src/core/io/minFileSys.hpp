@@ -19,8 +19,9 @@ void readDir(const std::string& name, std::vector<std::string>& v);
 bool pathExists(std::string const& path);
 bool isPathDir(std::string const& path);
 void copyFile(std::string const& orig, std::string const& cpyd);
-void deleteFile(std::string const& f);
+bool deleteFile(std::string const& f);
 } // namespace minFileSys
+
 
 // IMPLEMENTATION ------------------------------------------
 
@@ -139,17 +140,21 @@ void copyFile(std::string const& orig, std::string const& cpyd)
 	cpydStream.close();
 }
 
-void deleteFile(std::string const& f)
+bool deleteFile(std::string const& f)
 {
 #ifdef ITS_WINDOWS
 	// unicode
 	// DeleteFile(f.c_str());
 
-	DeleteFileA(f.c_str());
+	// If the function succeeds, the return value is nonzero.
+	auto result = DeleteFileA(f.c_str());
+	return !(result == 0);
 #endif
 
 #ifdef ITS_POSIX
-	std::remove(f.c_str());
+	// 0​ upon success or non-zero value on error.
+	auto result = std::remove(f.c_str());
+	return (result == 0);
 #endif
 }
 

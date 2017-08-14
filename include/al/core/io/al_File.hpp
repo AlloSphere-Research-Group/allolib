@@ -393,7 +393,7 @@ public:
 	const std::string& path() const { return mPath; }
 
 	/// Get file with directory
-	std::string filepath() const { return path()+file(); }
+	std::string filepath() const { return path() + file(); }
 
 	/// Returns whether file part is valid
 	bool valid() const { return file()!=""; }
@@ -441,8 +441,8 @@ public:
 
 	void add(FilePath& fp){ mFiles.push_back(fp); }
 	void add(FilePath&& fp){ mFiles.push_back(fp); }
-	void add(FileList& fl){
-		mFiles.insert(mFiles.end(),fl.begin(), fl.end());
+	void add(FileList const& fl){
+		mFiles.insert(mFiles.end(),fl.mFiles.begin(), fl.mFiles.end());
 	}
 	void sort(bool (*f)(FilePath,FilePath)){ std::sort(begin(),end(),f); }
 
@@ -450,8 +450,6 @@ protected:
 	int indx;
 	std::vector<FilePath> mFiles;
 };
-
-
 
 /// A handy way to manage several possible search paths
 ///
@@ -470,6 +468,7 @@ public:
 	/// find a file in the searchpaths
 	FilePath find(const std::string& filename);
 	// FileList glob(const std::string& regex);
+	// FileList match(const std::string& regex);
 	FileList listAll();
 
 	/// add a path to search in; recursive searching is optional
@@ -496,6 +495,10 @@ protected:
 	std::list<searchpath> mSearchPaths;
 	std::string mAppPath;
 };
+
+FileList fileListFromDir(std::string const& dir);
+FilePath searchFileFromDir(std::string const& filename, std::string const& dir);
+
 
 } // al::
 
