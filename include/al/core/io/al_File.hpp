@@ -403,7 +403,7 @@ public:
 	FilePath& file(const std::string& v) { mFile=v; return *this; }
 
 	/// Set path (directory) of file
-	FilePath& path(const std::string& v) { mPath=v; return *this; }
+FilePath& path(const std::string& v) { mPath = v; return *this; }
 
 protected:
 	std::string mPath;
@@ -419,32 +419,32 @@ class FileList {
 public:
 	typedef std::vector<FilePath>::iterator iterator;
 
-	FileList():indx(0){}
+	FileList() :indx(0) {}
 
 	/// return currently selected file in list
-	FilePath& operator()(){ return mFiles[indx]; }
+	FilePath& operator()() { return mFiles[indx]; }
 
 	/// find a file in list
 	// FilePath& select(const std::string& filename);
 
-	FilePath& select(int i){ indx=i%count(); return (*this)(); }
-	FilePath& next(){ ++indx %= count(); return (*this)(); }
-	FilePath& prev(){ --indx; if(indx < 0) indx = count()-1; return (*this)(); }
+	FilePath& select(int i) { indx = i%count(); return (*this)(); }
+	FilePath& next() { ++indx %= count(); return (*this)(); }
+	FilePath& prev() { --indx; if (indx < 0) indx = count() - 1; return (*this)(); }
 
-	int count(){ return mFiles.size(); }
+	int count() { return mFiles.size(); }
 
 	void print() const;
 
-	FilePath& operator[](int i){ return mFiles[i]; }
+	FilePath& operator[](int i) { return mFiles[i]; }
 	iterator begin() { return mFiles.begin(); }
 	iterator end() { return mFiles.end(); }
 
-	void add(FilePath& fp){ mFiles.push_back(fp); }
-	void add(FilePath&& fp){ mFiles.push_back(fp); }
-	void add(FileList const& fl){
-		mFiles.insert(mFiles.end(),fl.mFiles.begin(), fl.mFiles.end());
+	void add(FilePath& fp) { mFiles.push_back(fp); }
+	void add(FilePath&& fp) { mFiles.push_back(fp); }
+	void add(FileList const& fl) {
+		mFiles.insert(mFiles.end(), fl.mFiles.begin(), fl.mFiles.end());
 	}
-	void sort(bool (*f)(FilePath,FilePath)){ std::sort(begin(),end(),f); }
+	void sort(bool(*f)(FilePath, FilePath)) { std::sort(begin(), end(), f); }
 
 protected:
 	int indx;
@@ -460,20 +460,20 @@ public:
 	typedef std::list<searchpath> searchpathlist;
 	typedef std::list<searchpath>::iterator iterator;
 
-	SearchPaths(){}
+	SearchPaths() {}
 	SearchPaths(const std::string& file);
-	SearchPaths(int argc, char * const argv[], bool recursive=true);
+	SearchPaths(int argc, char * const argv[], bool recursive = true);
 	SearchPaths(const SearchPaths& cpy);
 
 	/// find a file in the searchpaths
 	FilePath find(const std::string& filename);
 	// FileList glob(const std::string& regex);
-	// FileList match(const std::string& regex);
+	FileList filter(bool(*f)(FilePath const&));
 	FileList listAll();
 
 	/// add a path to search in; recursive searching is optional
 	void addSearchPath(const std::string& path, bool recursive = true);
-	void addRelativePath(std::string rel, bool recursive=true) {
+	void addRelativePath(std::string rel, bool recursive = true) {
 		addSearchPath(appPath() + rel, recursive);
 	}
 
@@ -498,8 +498,21 @@ protected:
 
 FileList fileListFromDir(std::string const& dir);
 FilePath searchFileFromDir(std::string const& filename, std::string const& dir);
-
-
+FileList filterInDir(std::string const& dir, bool(*f)(FilePath const&));
+inline bool checkExtension(std::string const& filename, std::string const& extension) {
+	int filelen = filename.size();
+	int extlen = extension.size();
+	if (filelen <= extlen) {
+		return false;
+	}
+	if (filename.substr(filelen - extlen) == extension) {
+		return true;
+	}
+	return false;
+}
+inline bool checkExtension(FilePath const& filepath, std::string const& extension) {
+	return checkExtension(filepath.file(), extension);
+}
 } // al::
 
 #endif

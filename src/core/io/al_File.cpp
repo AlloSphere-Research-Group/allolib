@@ -396,6 +396,21 @@ FilePath SearchPaths::find(const std::string& filename) {
   return FilePath();
 }
 
+FileList SearchPaths::filter(bool(*f)(FilePath const&)) {
+	FileList filtered;
+	for (auto const& s : mSearchPaths) {
+		auto const path = s.first;
+		if (!minFileSys::pathExists(path)) {
+			continue;
+		}
+		if (!minFileSys::isPathDir(path)) {
+			continue;
+		}
+		filtered.add(filterInDir(path, f));
+	}
+	return filtered;
+}
+
 FileList SearchPaths::listAll() {
   FileList fileList;
   for (auto const& s : mSearchPaths) {
@@ -452,6 +467,27 @@ FilePath searchFileFromDir(std::string const& filename, std::string const& dir) 
     }
   }
   return FilePath();
+}
+
+FileList filterInDir(std::string const& dir, bool(*f)(FilePath const&)) {
+	FileList filtered;
+	auto dir_ = File::conformDirectory(dir);
+	std::vector<std::string> children;
+	minFileSys::readDir(dir_, children);
+	for (auto const& c : children) {
+		if (c == "." || c == "..") {
+			continue;
+		}
+		if (minFileSys::isPathDir(dir_ + c)) {
+			filtered.add(filterInDir(dir_ + c, f));
+			continue;
+		}
+		auto fp = FilePath{c, dir_};
+		if (f(fp)) {
+			filtered.add(fp);
+		}
+	}
+	return filtered;
 }
 
 } // al::
