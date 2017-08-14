@@ -11,38 +11,49 @@ include_directories(${CMAKE_SOURCE_DIR}/external/rtmidi)
 
 if (WINDOWS)
   # CMAKE_BINARY_DIR: contains the driectory where cmake is run
-  set(TEST_OUTPUT_PATH ${CMAKE_BINARY_DIR}/test/)
+  set(TEST_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_OUTPUT_PATH})
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_OUTPUT_PATH})
 endif (WINDOWS)
 
 add_executable(al_tests ${test_src})
+set_target_properties(al_tests PROPERTIES DEBUG_POSTFIX _debug)
 set_target_properties(al_tests PROPERTIES CXX_STANDARD 14)
 set_target_properties(al_tests PROPERTIES CXX_STANDARD_REQUIRED ON)
 target_link_libraries(al_tests al)
+target_link_libraries(
+  al_tests
+  debug ${al_path}/external/Gamma/lib/Gamma_debug.lib
+  optimized ${al_path}/external/Gamma/lib/Gamma.lib
+)
+target_compile_definitions(al_tests PRIVATE ${definitions})
 
-if (WINDOWS)
-	set(lib_path ${CMAKE_SOURCE_DIR}/dependencies)
-
-  set(post_build_command
-    robocopy ${lib_path}/apr/ ${TEST_OUTPUT_PATH} libapr-1.dll &
-    robocopy ${lib_path}/glew/ ${TEST_OUTPUT_PATH} glew32.dll &
-    robocopy ${lib_path}/glfw/ ${TEST_OUTPUT_PATH} glfw3.dll &
-  )
-
-  if (USE_PORTAUDIO)
-  	list(APPEND post_build_command
-  	  robocopy ${lib_path}/portaudio/ ${TEST_OUTPUT_PATH} portaudio_x64.dll &
-  	)
-  endif (USE_PORTAUDIO)
-
-  list(APPEND post_build_command
-  	IF %ERRORLEVEL% LEQ 1 exit 0
-  )
-
-  add_custom_command(
-    TARGET al_tests
-    POST_BUILD
-    COMMAND ${post_build_command}
-  )
-endif (WINDOWS)
+# if (WINDOWS)
+# 
+#   set(post_build_command
+#     robocopy ${al_path}/dependencies/glew/bin/Release/x64 ${TEST_OUTPUT_PATH} glew32.dll &
+#     robocopy ${al_path}/dependencies/glfw/lib-vc2015 ${TEST_OUTPUT_PATH} glfw3.dll &
+#   )
+# 
+#   if (USE_APR)
+#   	list(APPEND post_build_command
+#   	  robocopy ${al_path}/dependencies/apr/ ${TEST_OUTPUT_PATH} libapr-1.dll &
+#   	)
+#   endif (USE_APR)
+# 
+#   if (USE_PORTAUDIO)
+#   	list(APPEND post_build_command
+#   	  robocopy ${al_path}/dependencies/portaudio/ ${TEST_OUTPUT_PATH} portaudio_x64.dll &
+#   	)
+#   endif (USE_PORTAUDIO)
+# 
+#   list(APPEND post_build_command
+#   	IF %ERRORLEVEL% LEQ 1 exit 0
+#   )
+# 
+#   add_custom_command(
+#     TARGET al_tests
+#     POST_BUILD
+#     COMMAND ${post_build_command}
+#   )
+# endif (WINDOWS)

@@ -662,13 +662,17 @@ static int rtaudioCallback(void *output, void *input, unsigned int frameCount,
   AudioIO &io = *(AudioIO *)userData;
 
   assert(frameCount == (unsigned)io.framesPerBuffer());
-  const float *inBuffers = (const float *)input;
-  float *hwInBuffer = const_cast<float *>(io.inBuffer(0));
-  for (int frame = 0; frame < io.framesPerBuffer(); frame++) {
-    for (int i = 0; i < io.channelsInDevice(); i++) {
-      hwInBuffer[i * frameCount + frame] = *inBuffers++;
-    }
+
+  if (input != NULL) {
+	  const float *inBuffers = (const float *)input;
+	  float *hwInBuffer = const_cast<float *>(io.inBuffer(0));
+	  for (int frame = 0; frame < io.framesPerBuffer(); frame++) {
+		  for (int i = 0; i < io.channelsInDevice(); i++) {
+			  hwInBuffer[i * frameCount + frame] = *inBuffers++;
+		  }
+	  }
   }
+
   if (io.autoZeroOut()) io.zeroOut();
 
   io.processAudio();  // call callback

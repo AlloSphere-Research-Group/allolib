@@ -7,7 +7,8 @@ include(${al_path}/cmake_modules/find_additional_dependencies.cmake)
 # sets: ADDITIONAL_INCLUDE_DIRS, ADDITIONAL_LIBRARIES, ADDITIONAL_HEADERS,
 #       ADDITIONAL_SOURCES, ADDITIONAL_DEFINITIONS
 include(${al_path}/cmake_modules/external.cmake)
-# sets: EXTERNAL_LIBRARIES, EXTERNAL_DEFINITIONS
+# sets: EXTERNAL_INCLUDE_DIRS, EXTERNAL_DEFINITIONS
+#       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
 include(${al_path}/cmake_modules/basic_flags.cmake)
 # sets: basic_flags
 
@@ -24,12 +25,21 @@ set(dirs_to_include
   ${app_include_dirs}
   ${CORE_INCLUDE_DIRS}
   ${ADDITIONAL_INCLUDE_DIRS}
+  ${EXTERNAL_INCLUDE_DIRS}
 )
 
 set(libs_to_link
   ${CORE_LIBRARIES}
   ${ADDITIONAL_LIBRARIES}
   ${EXTERNAL_LIBRARIES}
+)
+
+set(debug_libs_to_link
+  ${EXTERNAL_DEBUG_LIBRARIES}
+)
+
+set(release_libs_to_link
+  ${EXTERNAL_RELEASE_LIBRARIES}
 )
 
 set(definitions
@@ -77,7 +87,11 @@ else()
   target_link_libraries(${app_name} debug ${al_path}/libal_debug.a optimized ${al_path}/libal.a)
 endif (WINDOWS)
 target_link_libraries(${app_name} ${libs_to_link})
-
+target_link_libraries(
+  ${app_name}
+  debug ${debug_libs_to_link}
+  optimized ${release_libs_to_link}
+)
 
 if (WINDOWS)
   # when run from Visual Studio, working directory is where the solution is by default
@@ -92,19 +106,19 @@ if (WINDOWS)
   )
 
   if (USE_PORTAUDIO)
-  	list(APPEND post_build_command
-  	  robocopy ${al_path}/dependencies/portaudio/ ${app_path}/bin portaudio_x64.dll &
-  	)
+    list(APPEND post_build_command
+      robocopy ${al_path}/dependencies/portaudio/ ${app_path}/bin portaudio_x64.dll &
+    )
   endif (USE_PORTAUDIO)
 
   if (USE_APR)
-  	list(APPEND post_build_command
-	  robocopy ${al_path}/dependencies/apr/ ${app_path}/bin libapr-1.dll &
-  	)
+    list(APPEND post_build_command
+      robocopy ${al_path}/dependencies/apr/ ${app_path}/bin libapr-1.dll &
+    )
   endif (USE_APR)
 
   list(APPEND post_build_command
-  	IF %ERRORLEVEL% LEQ 1 exit 0
+    IF %ERRORLEVEL% LEQ 1 exit 0
   )
 
   add_custom_command(

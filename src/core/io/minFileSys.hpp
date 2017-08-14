@@ -37,7 +37,8 @@ void deleteFile(std::string const& f);
 #endif
 
 #ifdef ITS_WINDOWS
-#include <fileapi.h>
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 /*
 // for unicode
 #include <locale>

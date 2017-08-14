@@ -31,3 +31,6 @@ dependencies/portaudio
 *.db
 */bin/
 bin/
+al.dir/
+x64
+CmakeSettings.json

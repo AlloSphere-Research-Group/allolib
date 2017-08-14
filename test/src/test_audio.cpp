@@ -20,7 +20,13 @@ TEST_CASE( "Audio IO Object" ) {
     gam::sampleRate(44100);
     int userData = 5;
     AudioIO audioIO;
-    audioIO.init(callback, &userData, 64, 44100.0, 2, 2);
+#ifdef AL_WINDOWS
+	bool use_out = true;
+	bool use_in = false;
+	audioIO.initWithDefaults(callback, &userData, use_out, use_in);
+#else
+	audioIO.init(callback, &userData, 64, 44100.0, 2, 2);
+#endif
     audioIO.print();
     REQUIRE(audioIO.user<int>() == 5);
     REQUIRE(audioIO.open());

@@ -11,7 +11,8 @@ include(cmake_modules/find_additional_dependencies.cmake)
 # sets: ADDITIONAL_INCLUDE_DIRS, ADDITIONAL_LIBRARIES, ADDITIONAL_HEADERS,
 #       ADDITIONAL_SOURCES, ADDITIONAL_DEFINITIONS
 include(cmake_modules/external.cmake)
-# sets: EXTERNAL_INCLUDE_DIRS, EXTERNAL_SRC, EXTERNAL_LIBRARIES, EXTERNAL_DEFINITIONS
+# sets: EXTERNAL_INCLUDE_DIRS, EXTERNAL_SRC, EXTERNAL_DEFINITIONS
+#       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
 include(cmake_modules/al_files.cmake)
 # sets: al_headers, al_sources
 include(cmake_modules/basic_flags.cmake)
@@ -32,6 +33,14 @@ set(dirs_to_include
 
 set(libs_to_link
   ${CORE_LIBRARIES} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
+)
+
+set(debug_libs_to_link
+  ${EXTERNAL_DEBUG_LIBRARIES}
+)
+
+set(release_libs_to_link
+  ${EXTERNAL_RELEASE_LIBRARIES}
 )
 
 set(definitions
@@ -76,9 +85,11 @@ target_include_directories(al PRIVATE ${dirs_to_include})
 
 # libs
 target_link_libraries(al ${libs_to_link})
+target_link_libraries(
+  al
+  debug ${debug_libs_to_link}
+  optimized ${release_libs_to_link}
+)
 
-
-# --- Make Sure Library is Healthy -----------------------------------------
-
-# Testing
+# --- Testing -----------------------------------------
 add_subdirectory(test)
