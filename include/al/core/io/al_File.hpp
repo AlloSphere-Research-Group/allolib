@@ -41,6 +41,7 @@
 	File author(s):
 	Graham Wakefield, 2010, grrrwaaa@gmail.com
 	Lance Putnam, 2010, putnam.lance@gmail.com
+	Keehong Youn, 2017, younkeehong@gmail.com
 */
 
 #include <stdio.h>
@@ -68,9 +69,48 @@ typedef double al_sec;         /**< seconds type */
 namespace al{
 
 
-class FilePath;
+/// A pair of path (folder/directory) and file name
+///
+/// @ingroup allocore
+class FilePath {
+public:
+	FilePath(){}
+
+	/// @param[in] file			File name without directory
+	/// @param[in] path			Directory of file
+	FilePath(const std::string& file, const std::string& path)
+	:	mPath(path), mFile(file) {}
+
+	/// @param[in] fullpath		Full path to file (directory + file name)
+	explicit FilePath(const std::string& fullpath);
 
 
+	/// Get file name without directory
+	const std::string& file() const { return mFile; }
+
+	/// Get path (directory) of file
+	const std::string& path() const { return mPath; }
+
+	/// Get file with directory
+	std::string filepath() const { return path() + file(); }
+
+	/// Returns whether file part is valid
+	bool valid() const { return file()!=""; }
+
+
+	/// Set file name without directory
+	FilePath& file(const std::string& v) { mFile=v; return *this; }
+
+	/// Set path (directory) of file
+	FilePath& path(const std::string& v) { mPath=v; return *this; }
+
+protected:
+	std::string mPath;
+	std::string mFile;
+};
+
+
+#if 0 /* commenting out FileInfo */
 /// File information
 ///
 /// @ingroup allocore
@@ -106,7 +146,7 @@ private:
 	Type mType;
 	std::string mName;
 };
-
+#endif /* commenting out FileInfo */
 
 /// File
 
@@ -369,49 +409,6 @@ private:
 
 #endif /* commenting out Dir */
 
-
-/// A pair of path (folder/directory) and file name
-///
-/// @ingroup allocore
-class FilePath {
-public:
-	FilePath(){}
-
-	/// @param[in] file			File name without directory
-	/// @param[in] path			Directory of file
-	FilePath(const std::string& file, const std::string& path)
-	:	mPath(path), mFile(file) {}
-
-	/// @param[in] fullpath		Full path to file (directory + file name)
-	explicit FilePath(const std::string& fullpath);
-
-
-	/// Get file name without directory
-	const std::string& file() const { return mFile; }
-
-	/// Get path (directory) of file
-	const std::string& path() const { return mPath; }
-
-	/// Get file with directory
-	std::string filepath() const { return path() + file(); }
-
-	/// Returns whether file part is valid
-	bool valid() const { return file()!=""; }
-
-
-	/// Set file name without directory
-	FilePath& file(const std::string& v) { mFile=v; return *this; }
-
-	/// Set path (directory) of file
-FilePath& path(const std::string& v) { mPath = v; return *this; }
-
-protected:
-	std::string mPath;
-	std::string mFile;
-};
-
-
-
 /// Keeps a list of files
 ///
 /// @ingroup allocore
@@ -499,20 +496,9 @@ protected:
 FileList fileListFromDir(std::string const& dir);
 FilePath searchFileFromDir(std::string const& filename, std::string const& dir);
 FileList filterInDir(std::string const& dir, bool(*f)(FilePath const&));
-inline bool checkExtension(std::string const& filename, std::string const& extension) {
-	int filelen = filename.size();
-	int extlen = extension.size();
-	if (filelen <= extlen) {
-		return false;
-	}
-	if (filename.substr(filelen - extlen) == extension) {
-		return true;
-	}
-	return false;
-}
-inline bool checkExtension(FilePath const& filepath, std::string const& extension) {
-	return checkExtension(filepath.file(), extension);
-}
+bool checkExtension(std::string const& filename, std::string const& extension);
+bool checkExtension(FilePath const& filepath, std::string const& extension);
+
 } // al::
 
 #endif

@@ -490,5 +490,21 @@ FileList filterInDir(std::string const& dir, bool(*f)(FilePath const&)) {
 	return filtered;
 }
 
+bool checkExtension(std::string const& filename, std::string const& extension) {
+  int filelen = filename.size();
+  int extlen = extension.size();
+  if (filelen <= extlen) {
+    return false;
+  }
+  if (filename.substr(filelen - extlen) == extension) {
+    return true;
+  }
+  return false;
+}
+
+bool checkExtension(FilePath const& filepath, std::string const& extension) {
+  return checkExtension(filepath.file(), extension);
+}
+
 } // al::
 
