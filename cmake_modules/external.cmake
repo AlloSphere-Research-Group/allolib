@@ -62,13 +62,13 @@ if(AudioAPI STREQUAL "rtaudio")
     -DAL_AUDIO_RTAUDIO
     )
 
-elseif(AudioAPI STREQUAL "portaudio") # Dummy audio backend
-  if (WINDOWS)
+elseif(AudioAPI STREQUAL "portaudio")
+  if (AL_WINDOWS)
       set(PORTAUDIO_INCLUDE_DIRS ${al_path}/dependencies/portaudio/include)
       set(PORTAUDIO_LIBRARIES ${al_path}/dependencies/portaudio/portaudio_x64.lib)
   else ()
       pkg_search_module(PORTAUDIO REQUIRED portaudio-2.0)
-  endif (WINDOWS)
+  endif (AL_WINDOWS)
 
   list(APPEND EXTERNAL_LIBRARIES
     ${PORTAUDIO_LIBRARIES}

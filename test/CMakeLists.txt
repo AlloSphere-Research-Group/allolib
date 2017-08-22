@@ -9,19 +9,19 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/external/Gamma)
 include_directories(${CMAKE_SOURCE_DIR}/external/rtmidi)
 
-if (WINDOWS)
+if (AL_WINDOWS)
   # CMAKE_BINARY_DIR: contains the driectory where cmake is run
   set(TEST_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_OUTPUT_PATH})
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_OUTPUT_PATH})
-endif (WINDOWS)
+endif (AL_WINDOWS)
 
 add_executable(al_tests ${test_src})
 set_target_properties(al_tests PROPERTIES DEBUG_POSTFIX _debug)
 set_target_properties(al_tests PROPERTIES CXX_STANDARD 14)
 set_target_properties(al_tests PROPERTIES CXX_STANDARD_REQUIRED ON)
 target_link_libraries(al_tests al)
-if (WINDOWS)
+if (AL_WINDOWS)
 target_link_libraries(
   al_tests
   debug ${al_path}/external/Gamma/lib/Gamma_debug.lib

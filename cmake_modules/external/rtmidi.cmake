@@ -10,7 +10,7 @@ if(IS_DIRECTORY "${al_path}/external/rtmidi")
   set(RTMIDI_INCLUDE_DIR ${al_path}/external/rtmidi)
   set(RTMIDI_SRC external/rtmidi/RtMidi.cpp)
 
-  if(LINUX)
+  if(AL_LINUX)
     # Use settings from RtAudio as they might conflict if different
     if(RtAudioLinuxAPI STREQUAL "jack")
       set(RTMIDI_DEFINITIONS -D__UNIX_JACK__)
@@ -23,9 +23,9 @@ if(IS_DIRECTORY "${al_path}/external/rtmidi")
           asound pthread
           )
     endif()
-  endif(LINUX)
+  endif(AL_LINUX)
 
-  if(MACOS)
+  if(AL_MACOS)
     # add_definitions(-D__MACOSX_CORE__)
     set(RTMIDI_DEFINITIONS -D__MACOSX_CORE__)
     find_library(COREAUDIO_LIB CoreAudio)
@@ -37,9 +37,9 @@ if(IS_DIRECTORY "${al_path}/external/rtmidi")
       ${COREMIDI_LIB}
       pthread
     )
-  endif(MACOS)
+  endif(AL_MACOS)
 
-  if(WINDOWS)
+  if(AL_WINDOWS)
     set(RTMIDI_DEFINITIONS -D__WINDOWS_WASAPI__)
     list(APPEND RTMIDI_LIBRARIES
       ole32
@@ -47,5 +47,5 @@ if(IS_DIRECTORY "${al_path}/external/rtmidi")
       ksuser
       uuid
     )
-  endif(WINDOWS)
+  endif(AL_WINDOWS)
 endif() # RTMIDI

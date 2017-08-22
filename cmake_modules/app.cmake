@@ -1,6 +1,6 @@
 
 include(${al_path}/cmake_modules/configure_platform.cmake)
-# sets: MACOS || LINUX || WINDOWS_MINGW || WINDOWS, and PLATFORM_DEFINITION
+# sets: AL_MACOS || AL_LINUX || AL_WINDOWS, and PLATFORM_DEFINITION
 include(${al_path}/cmake_modules/find_core_dependencies.cmake)
 # sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES, CORE_LIBRARY_DIRS
 include(${al_path}/cmake_modules/find_additional_dependencies.cmake)
@@ -81,11 +81,11 @@ target_compile_definitions(${app_name} PRIVATE ${definitions})
 target_include_directories(${app_name} PRIVATE ${dirs_to_include})
 
 # libs
-if (WINDOWS)
+if (AL_WINDOWS)
   target_link_libraries(${app_name} debug ${al_path}/al_debug.lib optimized ${al_path}/al.lib)
 else()
   target_link_libraries(${app_name} debug ${al_path}/libal_debug.a optimized ${al_path}/libal.a)
-endif (WINDOWS)
+endif (AL_WINDOWS)
 target_link_libraries(${app_name} ${libs_to_link})
 target_link_libraries(
   ${app_name}
@@ -93,7 +93,7 @@ target_link_libraries(
   optimized ${release_libs_to_link}
 )
 
-if (WINDOWS)
+if (AL_WINDOWS)
   # when run from Visual Studio, working directory is where the solution is by default
   # set it to app output directory
   set_target_properties(${app_name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${app_path}/bin)
@@ -126,4 +126,4 @@ if (WINDOWS)
     POST_BUILD
     COMMAND ${post_build_command}
   )
-endif (WINDOWS)
+endif (AL_WINDOWS)

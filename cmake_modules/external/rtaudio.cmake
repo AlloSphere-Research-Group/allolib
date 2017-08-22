@@ -16,7 +16,7 @@ if(IS_DIRECTORY "${al_path}/external/rtaudio")
   set(RTAUDIO_INCLUDE_DIR ${al_path}/external/rtaudio)
   set(RTAUDIO_SRC external/rtaudio/RtAudio.cpp)
 
-  if(LINUX)
+  if(AL_LINUX)
     if(RtAudioLinuxAPI STREQUAL "pulse")
       set(RTAUDIO_DEFINITIONS -D__LINUX_PULSE__)
       list(APPEND RTAUDIO_LIBRARIES
@@ -34,9 +34,9 @@ if(IS_DIRECTORY "${al_path}/external/rtaudio")
         )
       #  g++ -Wall -D__UNIX_JACK__ -o audioprobe audioprobe.cpp RtAudio.cpp $(pkg-config –cflags –libs jack) -lpthread
     endif()
-  endif(LINUX)
+  endif(AL_LINUX)
 
-  if(MACOS)
+  if(AL_MACOS)
     # add_definitions(-D__MACOSX_CORE__)
     set(RTAUDIO_DEFINITIONS -D__MACOSX_CORE__)
     find_library(COREAUDIO_LIB CoreAudio)
@@ -47,9 +47,9 @@ if(IS_DIRECTORY "${al_path}/external/rtaudio")
       pthread
     )
   #  g++ -Wall -D__MACOSX_CORE__ -o audioprobe audioprobe.cpp RtAudio.cpp -framework CoreAudio -lpthread
-  endif(MACOS)
+  endif(AL_MACOS)
 
-  if(WINDOWS)
+  if(AL_WINDOWS)
     # add_definitions(-D__WINDOWS_WASAPI__)
     set(RTAUDIO_DEFINITIONS -D__WINDOWS_WASAPI__)
     list(APPEND RTAUDIO_LIBRARIES
@@ -61,5 +61,5 @@ if(IS_DIRECTORY "${al_path}/external/rtaudio")
   #  g++ -Wall -D__WINDOWS_DS__ -o audioprobe audioprobe.cpp RtAudio.cpp -lole32 -lwinmm -ldsound
   #  g++ -Wall -D__WINDOWS_ASIO__ -Iinclude -o audioprobe audioprobe.cpp RtAudio.cpp asio.cpp asiolist.cpp asiodrivers.cpp iasiothiscallresolver.cpp -lole32
   #  g++ -Wall -D__WINDOWS_WASAPI__ -Iinclude -o audioprobe audioprobe.cpp RtAudio.cpp -lole32 -lwinmm -lksuser -luuid
-  endif(WINDOWS)
+  endif(AL_WINDOWS)
 endif() # RTAUDIO

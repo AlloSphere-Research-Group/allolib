@@ -12,7 +12,7 @@ set(OSCPACK_SRC
   external/oscpack/ip/IpEndpointName.cpp
 )
 
-if (WINDOWS)
+if (AL_WINDOWS)
   list(APPEND OSCPACK_SRC
     external/oscpack/ip/win32/NetworkingUtils.cpp
     external/oscpack/ip/win32/UdpSocket.cpp
@@ -22,4 +22,4 @@ else ()
     external/oscpack/ip/posix/NetworkingUtils.cpp
     external/oscpack/ip/posix/UdpSocket.cpp
   )
-endif (WINDOWS)
+endif (AL_WINDOWS)

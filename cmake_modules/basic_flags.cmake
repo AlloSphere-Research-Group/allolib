@@ -1,6 +1,7 @@
-if (WINDOWS)
+if (AL_WINDOWS)
+
 else ()
   set(basic_flags
   	-Wall
   )
-endif (WINDOWS)
+endif (AL_WINDOWS)

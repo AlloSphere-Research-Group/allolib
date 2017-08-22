@@ -4,7 +4,7 @@ set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
 set(BUILDING_ALLOLIB 1)
 
 include(cmake_modules/configure_platform.cmake)
-# sets: MACOS || LINUX || WINDOWS_MINGW || WINDOWS, and PLATFORM_DEFINITION
+# sets: AL_MACOS || AL_LINUX || AL_WINDOWS, and PLATFORM_DEFINITION
 include(cmake_modules/find_core_dependencies.cmake)
 # sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES, CORE_LIBRARY_DIRS
 include(cmake_modules/find_additional_dependencies.cmake)

@@ -9,7 +9,7 @@ option(USE_APR "" OFF)
 
 # al_path needs to be set prior to calling this script
 
-if (WINDOWS)
+if (AL_WINDOWS)
   if (USE_APR)
     set(APR_INCLUDE_DIRS ${al_path}/dependencies/apr/include)
     set(APR_LIBRARIES ${al_path}/dependencies/apr/libapr-1.lib)
@@ -21,7 +21,7 @@ else ()
     pkg_search_module(APR REQUIRED apr-1)
   endif (USE_APR)
   
-endif (WINDOWS)
+endif (AL_WINDOWS)
 
 if (USE_APR)
   set(APR_HEADERS

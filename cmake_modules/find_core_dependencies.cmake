@@ -7,7 +7,7 @@
 
 find_package(OpenGL REQUIRED)
 
-if (WINDOWS)
+if (AL_WINDOWS)
 
   set(GLFW_INCLUDE_DIRS ${al_path}/dependencies/glfw/include)
   set(GLFW_LIBRARIES ${al_path}/dependencies/glfw/lib-vc2015/glfw3dll.lib)
@@ -20,7 +20,7 @@ else ()
   find_package(PkgConfig REQUIRED)
   pkg_search_module(GLFW REQUIRED glfw3)
 
-endif (WINDOWS)
+endif (AL_WINDOWS)
 
 set(CORE_INCLUDE_DIRS
   ${GLFW_INCLUDE_DIRS}
