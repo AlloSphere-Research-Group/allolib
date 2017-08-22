@@ -353,6 +353,7 @@ public:
   void clearDepth();
   void clearDepth(float d);
   void clear(float r, float g, float b, float a=1, float d=1, int drawbuffer = 0);
+  void clear(float blackAndWhite);
 
   void uniformColor(float r, float g, float b, float a = 1.0f);
   void uniformColor(Color const& c);

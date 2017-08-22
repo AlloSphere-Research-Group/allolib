@@ -150,6 +150,9 @@ void Graphics::clear(float r, float g, float b, float a, float d, int drawbuffer
     clearColor(r, g, b, a, drawbuffer);
     clearDepth(d);
 }
+void Graphics::clear(float blackAndWhite) {
+  clear(blackAndWhite, blackAndWhite, blackAndWhite);
+}
 
 void Graphics::viewport(const Viewport& v){
   glViewport(v.l, v.b, v.w, v.h);
