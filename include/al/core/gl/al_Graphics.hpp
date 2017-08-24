@@ -388,6 +388,7 @@ public:
   void draw(VAOMesh& mesh);
   void draw(EasyVAO& vao);
   void draw(Mesh& mesh);
+  void draw(Mesh&& mesh);
 
   Window& window() { return mWindow; }
 

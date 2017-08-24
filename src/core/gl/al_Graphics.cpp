@@ -259,4 +259,11 @@ void Graphics::draw(Mesh& mesh) {
   mInternalVAO.draw();
 }
 
+void Graphics::draw(Mesh&& mesh) {
+  // uses internal vao object.
+  mInternalVAO.update(mesh);
+  update();
+  mInternalVAO.draw();
+}
+
 } // al::
