@@ -7,7 +7,7 @@
 #include "al/util/al_Frustum.hpp"
 #include "al/util/al_Complex.hpp"
 #include "al/util/al_Interval.hpp"
-#include "al/util/al_Random.hpp"
+// #include "al/util/al_Random.hpp"
 
 using namespace al;
 
@@ -825,6 +825,7 @@ TEST_CASE("Math"){
 
 
 	// Random
+	#if 0
 	{
 		using namespace al::rnd;
 
@@ -886,6 +887,7 @@ TEST_CASE("Math"){
 			}
 		}
 	}
+	#endif
 
 
 	{
