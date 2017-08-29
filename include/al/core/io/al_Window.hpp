@@ -345,7 +345,7 @@ protected:
   Dim mDim {50, 50, 640, 480};
   Dim mFullScreenDim {0};
   DisplayMode mDisplayMode = DEFAULT_BUF;
-  std::string mTitle = "AlloSystem";
+  std::string mTitle = "allolib";
   Cursor mCursor = POINTER;
   bool mCursorHide = false;
   bool mFullScreen = false;
