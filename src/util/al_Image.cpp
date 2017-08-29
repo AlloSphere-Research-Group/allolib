@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <cstring> // memcpy
 
 #include "FreeImage.h"
 /*
@@ -152,7 +153,7 @@ public:
                 int rowstride = arr.stride(1);
                 for(unsigned j = 0; j < arr.dim(1); ++j) {
                     char *pix = (char *)FreeImage_GetScanLine(mImage, j);
-                    memcpy(o_pix, pix, rowstride);
+                    std::memcpy(o_pix, pix, rowstride);
                     o_pix += rowstride;
                 }
                 break;
