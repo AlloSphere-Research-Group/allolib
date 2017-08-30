@@ -1,5 +1,5 @@
 #include "al/glv/glv_model.h"
-#include <stdio.h>	// sscanf, FILE
+#include <cstdio>	// sscanf
 #include <cctype>	// isalnum, isblank
 #include <cstring>	// strchr, strpbrk
 #include <iostream>
@@ -49,21 +49,21 @@ int toString(std::string& dst, const char * src){ return toString(dst, std::stri
 template<>
 int fromToken<bool>(bool& dst, const char * src){
 	int v = dst;
-	int r = sscanf_s(src, "%i", &v) > 0;
+	int r = std::sscanf(src, "%i", &v) > 0;
 	if(r) dst = v;
 	return r;
 }
 template<>
 int fromToken<int>(int& dst, const char * src){
-	return sscanf_s(src, "%i", &dst) > 0;
+	return std::sscanf(src, "%i", &dst) > 0;
 }
 template<>
 int fromToken<float>(float& dst, const char * src){
-	return sscanf_s(src, "%g", &dst) > 0;
+	return std::sscanf(src, "%g", &dst) > 0;
 }
 template<>
 int fromToken<double>(double& dst, const char * src){
-	return sscanf_s(src, "%lg", &dst) > 0; // l specifier only needed for scanf
+	return std::sscanf(src, "%lg", &dst) > 0; // l specifier only needed for scanf
 }
 template<>
 int fromToken<std::string>(std::string& dst, const char * src){
