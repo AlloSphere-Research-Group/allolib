@@ -49,21 +49,21 @@ int toString(std::string& dst, const char * src){ return toString(dst, std::stri
 template<>
 int fromToken<bool>(bool& dst, const char * src){
 	int v = dst;
-	int r = sscanf(src, "%i", &v) > 0;
+	int r = sscanf_s(src, "%i", &v) > 0;
 	if(r) dst = v;
 	return r;
 }
 template<>
 int fromToken<int>(int& dst, const char * src){
-	return sscanf(src, "%i", &dst) > 0;
+	return sscanf_s(src, "%i", &dst) > 0;
 }
 template<>
 int fromToken<float>(float& dst, const char * src){
-	return sscanf(src, "%g", &dst) > 0;
+	return sscanf_s(src, "%g", &dst) > 0;
 }
 template<>
 int fromToken<double>(double& dst, const char * src){
-	return sscanf(src, "%lg", &dst) > 0; // l specifier only needed for scanf
+	return sscanf_s(src, "%lg", &dst) > 0; // l specifier only needed for scanf
 }
 template<>
 int fromToken<std::string>(std::string& dst, const char * src){
@@ -266,7 +266,7 @@ bool Data::operator==(const Data& v) const {
 
 		#define OP(t1, t2)\
 			for(int i=0; i<count(*this,v); ++i){\
-				if(elem<t1>(i) != v.elem<t2>(i)) return false;\
+				if(elem<t1>(i) != static_cast<t1>(v.elem<t2>(i))) return false;\
 			} return true
 
 		#define OPALL(t)\
@@ -295,7 +295,7 @@ bool Data::operator==(const Data& v) const {
 Data& Data::operator+=(const Data& v){
 
 	#define OP(t1, t2)\
-	for(int i=0; i<count(*this,v); ++i){ elem<t1>(i) += v.elem<t2>(i); } break
+	for(int i=0; i<count(*this,v); ++i){ elem<t1>(i) += static_cast<t1>(v.elem<t2>(i)); } break
 
 	#define OPALL(t)\
 		switch(v.type()){\
@@ -331,7 +331,7 @@ Data& Data::assign(const Data& v, int idx){
 		int n = nd < v.size() ? nd : v.size();
 
 		#define OP(t1, t2)\
-		for(int i=0; i<n; ++i){ elem<t1>(i+idx) = v.elem<t2>(i); } break
+		for(int i=0; i<n; ++i){ elem<t1>(i+idx) = static_cast<t1>(v.elem<t2>(i)); } break
 
 		#define OPALL(t)\
 			switch(v.type()){\
@@ -371,7 +371,7 @@ int Data::indexOf(const Data& v) const {
 
 		#define OP(t1, t2)\
 			for(int i=0; i<size(); ++i){\
-				if(elem<t1>(i) == v.elem<t2>(0)) return i;\
+				if(elem<t1>(i) == static_cast<t1>(v.elem<t2>(0))) return i;\
 			} break
 
 		#define OPALL(t)\

@@ -106,7 +106,7 @@ public:
 
     // indices should be unsigned int
     void updateIndices(unsigned int* data, size_t size);
-    void update(void* data, size_t typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
+    void update(void* data, size_t typeSize, size_t arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
     void primitive(unsigned int prim);
     void draw();
 

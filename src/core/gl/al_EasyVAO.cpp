@@ -15,7 +15,7 @@ void EasyVAO::updateIndices(unsigned int* data, size_t size)
     // mIndexBuffer.unbind();
 }
 
-void EasyVAO::update(void* data, size_t typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType)
+void EasyVAO::update(void* data, size_t typeSize, size_t arraySize, MeshAttrib& attrib, unsigned int dataType)
 {
     validate();
     bind();

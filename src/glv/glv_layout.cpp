@@ -187,7 +187,7 @@ Table& Table::arrange(){
 		if(mRepeatRow < 0){
 			std::string a = mAlign;
 			//int sizeCells = mCells.size();
-			int numCopies = (numChildren-1)/mCells.size();
+			int numCopies = (numChildren-1)/ int(mCells.size());
 			for(int i=0; i<numCopies; ++i){ a+=","; a+=mAlign; }
 			arrangement(a.c_str());
 		}
@@ -279,8 +279,8 @@ Table& Table::arrange(){
 
 		space_t pl,pt,pr,pb;
 		getCellDim(i,pl,pt,pr,pb);
-		space_t cx = (pr-pl)*0.5;
-		space_t cy = (pb-pt)*0.5;
+		space_t cx = (pr-pl)*0.5f;
+		space_t cy = (pb-pt)*0.5f;
 
 		// Fit in cell if view stretches. We subtract off dimensions exterior
 		// to the cell, including padding.

@@ -63,7 +63,7 @@ void Sliders::selectSlider(GLV& g, bool click){
 	int idx = selected();
 	
 	float val = vertOri() ? (1-(m.yRel()/h*sizeY() - selectedY())) : (m.xRel()/w*sizeX() - selectedX());
-	val = toInterval(val);
+	val = float(toInterval(val));
 	
 	// if left-button, set value
 	if(m.left() && !m.right()){
@@ -182,8 +182,8 @@ SliderRange& SliderRange::jumpBy(float v){
 
 bool SliderRange::onEvent(Event::t e, GLV& g){
 
-	float value0 = to01(getValue(0));
-	float value1 = to01(getValue(1));
+	float value0 = float(to01(getValue(0)));
+	float value1 = float(to01(getValue(1)));
 	
 	//printf("%f %f\n", value0, value1);
 
@@ -193,8 +193,8 @@ bool SliderRange::onEvent(Event::t e, GLV& g){
 	float mp = (w>h) ? g.mouse().xRel()/w : 1.f - g.mouse().yRel()/h; // REV: flip y
 	float d1 = mp-value0; if(d1<0) d1=-d1;
 	float d2 = mp-value1; if(d2<0) d2=-d2;
-	float rg = range();
-	float endRegion = 4./(w>h ? w:h);
+	float rg = float(range());
+	float endRegion = 4.0f/(w>h ? w:h);
 
 	switch(e){
 	case Event::MouseDown:
@@ -206,7 +206,7 @@ bool SliderRange::onEvent(Event::t e, GLV& g){
 		if(g.mouse().left()){
 			float v1 = value0;
 			float v2 = value1;
-			float center_ = to01(center());
+			float center_ = float(to01(center()));
 			
 			// click outside of range
 			if(mp<(v1-endRegion) || mp>(v2+endRegion)){
@@ -218,7 +218,7 @@ bool SliderRange::onEvent(Event::t e, GLV& g){
 //				else{
 //					center(toInterval(center_ + (dc<0 ? -jump() : jump())));
 //				}
-				jumpBy(dc<0 ? -1 : 1);
+				jumpBy(dc<0 ? -1.0f : 1.0f);
 				mDragMode=0;
 			}
 			
@@ -241,7 +241,7 @@ bool SliderRange::onEvent(Event::t e, GLV& g){
 		return false;
 	
 	case Event::MouseDrag:
-		dv *= diam() * g.mouse().sens();
+		dv *= float(diam() * g.mouse().sens());
 		if(3==mDragMode){	// clicked on edge of bar
 			valueAdd(dv, 0, min(), max()-rg);
 			valueAdd(dv, 1, min()+rg, max());

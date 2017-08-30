@@ -1,0 +1,770 @@
+1>------ Build started: Project: ZERO_CHECK, Configuration: Debug x64 ------
+1>Checking Build System
+1>CMake does not need to re-run because C:/Users/younk/Desktop/allotemplate/allolib/build/CMakeFiles/generate.stamp is up-to-date.
+1>CMake does not need to re-run because C:/Users/younk/Desktop/allotemplate/allolib/build/external/Gamma/CMakeFiles/generate.stamp is up-to-date.
+1>CMake does not need to re-run because C:/Users/younk/Desktop/allotemplate/allolib/build/test/CMakeFiles/generate.stamp is up-to-date.
+2>------ Build started: Project: Gamma, Configuration: Debug x64 ------
+3>------ Build started: Project: al, Configuration: Debug x64 ------
+2>Building Custom Rule C:/Users/younk/Desktop/allotemplate/allolib/external/Gamma/CMakeLists.txt
+2>CMake does not need to re-run because C:/Users/younk/Desktop/allotemplate/allolib/build/external/Gamma/CMakeFiles/generate.stamp is up-to-date.
+2>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX86\x64\CL.exe /c /IC:\Users\younk\Desktop\allotemplate\allolib\external\Gamma /IC:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\external\include /Zi /nologo /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"Gamma.dir\Debug\\" /Fd"Gamma.dir\Debug\Gamma.pdb" /Gd /TP /errorReport:prompt C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\arr.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Conversion.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\DFT.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Domain.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\FFT_fftpack.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\fftpack++1.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\fftpack++2.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Print.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\scl.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Recorder.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Scheduler.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\SoundFile.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Timer.cpp
+3>Building Custom Rule C:/Users/younk/Desktop/allotemplate/allolib/CMakeLists.txt
+3>CMake does not need to re-run because C:/Users/younk/Desktop/allotemplate/allolib/build/CMakeFiles/generate.stamp is up-to-date.
+3>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX86\x64\CL.exe /c /IC:\Users\younk\Desktop\allotemplate\allolib\include /IC:\Users\younk\Desktop\allotemplate\allolib\dependencies\glfw\include /IC:\Users\younk\Desktop\allotemplate\allolib\dependencies\glew\include /IC:\Users\younk\Desktop\allotemplate\allolib\external\oscpack /IC:\Users\younk\Desktop\allotemplate\allolib\external\Gamma /IC:\Users\younk\Desktop\allotemplate\allolib\external\rtmidi /IC:\Users\younk\Desktop\allotemplate\allolib\external\rtaudio /Zi /nologo /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D AL_WINDOWS /D __WINDOWS_WASAPI__ /D AL_AUDIO_RTAUDIO /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"al.dir\Debug\\" /Fd"al.dir\Debug\al.pdb" /Gd /TP /errorReport:prompt C:\Users\younk\Desktop\allotemplate\allolib\src\core\app\al_AudioApp.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\app\al_FPS.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\app\al_WindowApp.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_BufferObject.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_EasyFBO.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_EasyVAO.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_FBO.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_GLEW.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_GLFW.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_GPUObject.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Graphics.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Lens.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shader.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Texture.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_VAO.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_VAOMesh.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Viewpoint.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_AudioIO.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_AudioIOData.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_ControlNav.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_CSVReader.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_File.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_MIDI.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_Window.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_WindowGLFW.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\protocol\al_OSC.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\spatial\al_Pose.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_Printing.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_ThreadNative.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_Time.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\al_GLV_draw.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\al_GLV_wrapper.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_buttons.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_core.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_font.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_glv.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_inputdevice.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_layout.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_model.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_notification.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_sliders.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_view.cpp C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_widget.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\osc\OscOutboundPacketStream.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\osc\OscPrintReceivedElements.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\osc\OscReceivedElements.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\osc\OscTypes.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\ip\IpEndpointName.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\ip\win32\NetworkingUtils.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\ip\win32\UdpSocket.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\rtmidi\RtMidi.cpp C:\Users\younk\Desktop\allotemplate\allolib\external\rtaudio\RtAudio.cpp
+3>al_AudioApp.cpp
+3>al_FPS.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\app\al_FPS.cpp(9): warning C4244: '=': conversion from 'double' to 'al_nsec', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\app\al_FPS.cpp(29): warning C4244: 'return': conversion from 'al_nsec' to 'double', possible loss of data
+3>al_WindowApp.cpp
+2>arr.cpp
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Access.h(29): warning C4244: 'return': conversion from 'float' to 'gam::index_t', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(245): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
+2>Conversion.cpp
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Conversion.cpp(10): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+2>DFT.cpp
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Access.h(29): warning C4244: 'return': conversion from 'float' to 'gam::index_t', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(245): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/tbl.h(685): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/tbl.h(709): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/DFT.h(579): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\DFT.cpp(298): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\DFT.cpp(306): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\DFT.cpp(336): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\DFT.cpp(346): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\DFT.cpp(370): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(1008): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\DFT.cpp(120): note: see reference to function template instantiation 'T gam::scl::wrapPhase<T>(T)' being compiled
+2>        with
+2>        [
+2>            T=float
+2>        ]
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(1013): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+2>Domain.cpp
+2>FFT_fftpack.cpp
+2>fftpack++1.cpp
+2>c:\users\younk\desktop\allotemplate\allolib\external\gamma\src\fftpack++.inc(1046): warning C4244: '=': conversion from 'double' to 'real_t', possible loss of data
+2>c:\users\younk\desktop\allotemplate\allolib\external\gamma\src\fftpack++.inc(1048): warning C4244: '=': conversion from 'double' to 'real_t', possible loss of data
+2>c:\users\younk\desktop\allotemplate\allolib\external\gamma\src\fftpack++.inc(1060): warning C4244: '=': conversion from 'double' to 'real_t', possible loss of data
+2>fftpack++2.cpp
+2>Print.cpp
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(245): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Print.cpp(24): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+3>al_BufferObject.cpp
+2>scl.cpp
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(245): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
+3>al_EasyFBO.cpp
+2>Recorder.cpp
+3>al_EasyVAO.cpp
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Recorder.h(29): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Recorder.cpp(21): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+2>Scheduler.cpp
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(245): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
+3>al_FBO.cpp
+3>al_GLEW.cpp
+3>al_GLFW.cpp
+3>al_GPUObject.cpp
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Access.h(29): warning C4244: 'return': conversion from 'float' to 'gam::index_t', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Scheduler.cpp(124): warning C4244: '=': conversion from 'double' to 'unsigned int', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\Scheduler.cpp(146): warning C4305: 'initializing': truncation from 'double' to 'float'
+2>SoundFile.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_GPUObject.cpp(221): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>al_Graphics.cpp
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Access.h(29): warning C4244: 'return': conversion from 'float' to 'gam::index_t', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\SoundFile.cpp(192): warning C4244: 'return': conversion from 'sf_count_t' to 'int', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\SoundFile.cpp(193): warning C4244: 'return': conversion from 'sf_count_t' to 'int', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\SoundFile.cpp(194): warning C4244: 'return': conversion from 'sf_count_t' to 'int', possible loss of data
+2>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\src\SoundFile.cpp(195): warning C4244: 'return': conversion from 'sf_count_t' to 'int', possible loss of data
+2>Timer.cpp
+2>Generating Code...
+3>al_Lens.cpp
+2>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX86\x64\Lib.exe /OUT:"C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\lib\Gamma_debug.lib" /NOLOGO /MACHINE:X64  /machine:x64 Gamma.dir\Debug\arr.obj
+2>Gamma.dir\Debug\Conversion.obj
+2>Gamma.dir\Debug\DFT.obj
+2>Gamma.dir\Debug\Domain.obj
+2>Gamma.dir\Debug\FFT_fftpack.obj
+2>Gamma.dir\Debug\fftpack++1.obj
+2>Gamma.dir\Debug\fftpack++2.obj
+2>Gamma.dir\Debug\Print.obj
+2>Gamma.dir\Debug\scl.obj
+2>Gamma.dir\Debug\Recorder.obj
+2>Gamma.dir\Debug\Scheduler.obj
+2>Gamma.dir\Debug\SoundFile.obj
+2>Gamma.dir\Debug\Timer.obj
+2>Gamma.vcxproj -> C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\lib\Gamma_debug.lib
+2>Done building project "Gamma.vcxproj".
+4>------ Build started: Project: gammaUnitTests, Configuration: Debug x64 ------
+3>al_Mesh.cpp
+4>Building Custom Rule C:/Users/younk/Desktop/allotemplate/allolib/external/Gamma/CMakeLists.txt
+4>CMake does not need to re-run because C:/Users/younk/Desktop/allotemplate/allolib/build/external/Gamma/CMakeFiles/generate.stamp is up-to-date.
+4>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX86\x64\CL.exe /c /IC:\Users\younk\Desktop\allotemplate\allolib\external\Gamma /Zi /nologo /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"gammaUnitTests.dir\Debug\\" /Fd"gammaUnitTests.dir\Debug\vc141.pdb" /Gd /TP /errorReport:prompt C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\tests\unitTests.cpp
+4>unitTests.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(52): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(64): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(65): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(66): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(67): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(68): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Access.h(29): warning C4244: 'return': conversion from 'float' to 'gam::index_t', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(69): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(77): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(77): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(78): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(78): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(79): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(79): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(80): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(80): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(81): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(81): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(82): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(82): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(130): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(156): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(168): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(174): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(175): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(185): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(186): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(187): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(188): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(189): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(202): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(225): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(327): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(404): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(404): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(463): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(475): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(501): warning C4244: 'argument': conversion from 'unsigned __int64' to 'const float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(510): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(542): warning C4267: 'initializing': conversion from 'size_t' to 'al::Mesh::Index', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(543): warning C4267: 'initializing': conversion from 'size_t' to 'al::Mesh::Index', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(549): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(555): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(605): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(694): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(695): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(759): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(772): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(773): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(773): warning C4267: 'initializing': conversion from 'size_t' to 'const unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(774): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(774): warning C4267: 'initializing': conversion from 'size_t' to 'const unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(917): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(901): warning C4477: 'fprintf' : format string '%8lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'unsigned __int64'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(901): note: consider using '%zu' in the format string
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(902): warning C4477: 'fprintf' : format string '%8lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'unsigned __int64'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(902): note: consider using '%zu' in the format string
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(903): warning C4477: 'fprintf' : format string '%8lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'unsigned __int64'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(903): note: consider using '%zu' in the format string
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(904): warning C4477: 'fprintf' : format string '%8lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'unsigned __int64'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(904): note: consider using '%zu' in the format string
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(905): warning C4477: 'fprintf' : format string '%8lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'unsigned __int64'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(905): note: consider using '%zu' in the format string
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(906): warning C4477: 'fprintf' : format string '%8lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'unsigned __int64'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(906): note: consider using '%zu' in the format string
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(907): warning C4477: 'fprintf' : format string '%8lu' requires an argument of type 'unsigned long', but variadic argument 1 has type 'unsigned __int64'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(907): note: consider using '%zu' in the format string
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(245): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Strategy.h(681): warning C4267: '=': conversion from 'size_t' to 'uint8_t', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/tbl.h(685): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/tbl.h(709): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/rnd.h(26): warning C4244: '=': conversion from 'time_t' to 'uint32_t', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/DFT.h(579): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(656): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(686): note: see reference to function template instantiation 'void al::stripToTri<al::Mesh::Index>(std::vector<al::Mesh::Index,std::allocator<_Ty>> &)' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/FormantData.h(47): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Recorder.h(29): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Effects.h(396): warning C4305: 'argument': truncation from 'double' to 'float'
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Effects.h(396): warning C4244: 'argument': conversion from 'double' to 'const gam::real', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Effects.h(396): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utConversion.cpp(38): warning C4305: 'argument': truncation from 'double' to 'float'
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utConversion.cpp(48): warning C4305: 'argument': truncation from 'double' to 'float'
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utConversion.cpp(49): warning C4305: 'argument': truncation from 'double' to 'float'
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utConversion.cpp(53): warning C4305: 'argument': truncation from 'double' to 'float'
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utConversion.cpp(54): warning C4305: 'argument': truncation from 'double' to 'float'
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utFFT.cpp(92): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/ut_scl.cpp(57): warning C4305: 'argument': truncation from 'double' to 'float'
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utEnvelope.cpp(34): warning C4305: 'initializing': truncation from 'double' to 'float'
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utEnvelope.cpp(39): warning C4244: 'argument': conversion from 'const int' to 'gam::real', possible loss of data
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utEnvelope.cpp(61): warning C4305: 'argument': truncation from 'double' to 'gam::real'
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(551): warning C4244: 'return': conversion from 'double' to 'gam::real', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(549): note: while compiling class template member function 'gam::real gam::MovingAvg<gam::real>::operator ()(Tv)'
+4>        with
+4>        [
+4>            Tv=gam::real
+4>        ]
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utFilter.cpp(9): note: see reference to function template instantiation 'gam::real gam::MovingAvg<gam::real>::operator ()(Tv)' being compiled
+4>        with
+4>        [
+4>            Tv=gam::real
+4>        ]
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utFilter.cpp(8): note: see reference to class template instantiation 'gam::MovingAvg<gam::real>' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(689): warning C4244: '=': conversion from 'double' to 'gam::real', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(688): note: while compiling class template member function 'void gam::Biquad<gam::real,gam::real,gam::DomainObserver>::onDomainChange(double)'
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(683): note: see reference to function template instantiation 'void gam::Biquad<gam::real,gam::real,gam::DomainObserver>::onDomainChange(double)' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Effects.h(64): note: see reference to class template instantiation 'gam::Biquad<gam::real,gam::real,gam::DomainObserver>' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Envelope.h(930): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Envelope.h(928): note: while compiling class template member function 'void gam::Decay<float,gam::DomainObserver>::decay(T)'
+4>        with
+4>        [
+4>            T=float
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Effects.h(82): note: see reference to function template instantiation 'void gam::Decay<float,gam::DomainObserver>::decay(T)' being compiled
+4>        with
+4>        [
+4>            T=float
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Effects.h(90): note: see reference to class template instantiation 'gam::Decay<float,gam::DomainObserver>' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(406): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(404): note: while compiling class template member function 'void gam::Delay<Tv,Si,Td>::onDomainChange(double)'
+4>        with
+4>        [
+4>            Tv=gam::real,
+4>            Si=gam::ipl::Linear,
+4>            Td=gam::DomainObserver
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(401): note: see reference to function template instantiation 'void gam::Delay<Tv,Si,Td>::onDomainChange(double)' being compiled
+4>        with
+4>        [
+4>            Tv=gam::real,
+4>            Si=gam::ipl::Linear,
+4>            Td=gam::DomainObserver
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(261): note: see reference to class template instantiation 'gam::Delay<Tv,Si,Td>' being compiled
+4>        with
+4>        [
+4>            Tv=gam::real,
+4>            Si=gam::ipl::Linear,
+4>            Td=gam::DomainObserver
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Effects.h(407): note: see reference to class template instantiation 'gam::Comb<gam::real,gam::ipl::Linear,gam::real,gam::DomainObserver>' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(632): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/ut_scl.cpp(65): note: see reference to function template instantiation 'T gam::scl::mapLin<double>(T,T,T,T,T)' being compiled
+4>        with
+4>        [
+4>            T=double
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(680): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/ut_scl.cpp(81): note: see reference to function template instantiation 'T gam::scl::round<float>(T)' being compiled
+4>        with
+4>        [
+4>            T=float
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Envelope.h(762): warning C4305: '=': truncation from 'double' to 'gam::real'
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Envelope.h(760): note: while compiling class template member function 'gam::Env<3,gam::real,gam::real,gam::DomainObserver>::Env(void)'
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utEnvelope.cpp(56): note: see reference to function template instantiation 'gam::Env<3,gam::real,gam::real,gam::DomainObserver>::Env(void)' being compiled
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utEnvelope.cpp(56): note: see reference to class template instantiation 'gam::Env<3,gam::real,gam::real,gam::DomainObserver>' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Oscillator.h(1656): warning C4305: 'initializing': truncation from 'double' to 'gam::real'
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Oscillator.h(1653): note: while compiling class template member function 'void gam::DSF<gam::real,gam::DomainObserver>::ampRatio(Tv)'
+4>        with
+4>        [
+4>            Tv=gam::real
+4>        ]
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utGenerators.cpp(55): note: see reference to function template instantiation 'void gam::DSF<gam::real,gam::DomainObserver>::ampRatio(Tv)' being compiled
+4>        with
+4>        [
+4>            Tv=gam::real
+4>        ]
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utGenerators.cpp(52): note: see reference to class template instantiation 'gam::DSF<gam::real,gam::DomainObserver>' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(913): warning C4244: 'initializing': conversion from 'double' to 'gam::real', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(903): note: while compiling class template member function 'void gam::OnePole<float,gam::real,gam::DomainObserver>::freq(Tp)'
+4>        with
+4>        [
+4>            Tp=gam::real
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(884): note: see reference to function template instantiation 'void gam::OnePole<float,gam::real,gam::DomainObserver>::freq(Tp)' being compiled
+4>        with
+4>        [
+4>            Tp=gam::real
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(878): note: while compiling class template member function 'gam::OnePole<float,gam::real,gam::DomainObserver>::OnePole(Tp,const Tv &)'
+4>        with
+4>        [
+4>            Tp=gam::real,
+4>            Tv=float
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Effects.h(284): note: see reference to function template instantiation 'gam::OnePole<float,gam::real,gam::DomainObserver>::OnePole(Tp,const Tv &)' being compiled
+4>        with
+4>        [
+4>            Tp=gam::real,
+4>            Tv=float
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Effects.h(303): note: see reference to class template instantiation 'gam::OnePole<float,gam::real,gam::DomainObserver>' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(923): warning C4244: 'initializing': conversion from 'double' to 'gam::real', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(431): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(431): note: while compiling class template member function 'void gam::Delay<Tv,Si,Td>::refreshDelayFactor(void)'
+4>        with
+4>        [
+4>            Tv=gam::real,
+4>            Si=gam::ipl::Linear,
+4>            Td=gam::DomainObserver
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(413): note: see reference to function template instantiation 'void gam::Delay<Tv,Si,Td>::refreshDelayFactor(void)' being compiled
+4>        with
+4>        [
+4>            Tv=gam::real,
+4>            Si=gam::ipl::Linear,
+4>            Td=gam::DomainObserver
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(512): note: while compiling class template member function 'gam::Comb<gam::real,gam::ipl::Linear,gam::real,gam::DomainObserver>::Comb(float,float,const Tp &,const Tp &)'
+4>        with
+4>        [
+4>            Tp=gam::real
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Effects.h(395): note: see reference to function template instantiation 'gam::Comb<gam::real,gam::ipl::Linear,gam::real,gam::DomainObserver>::Comb(float,float,const Tp &,const Tp &)' being compiled
+4>        with
+4>        [
+4>            Tp=gam::real
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(689): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(688): note: while compiling class template member function 'void gam::Biquad<float,float,gam::Domain1>::onDomainChange(double)'
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(683): note: see reference to function template instantiation 'void gam::Biquad<float,float,gam::Domain1>::onDomainChange(double)' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Filter.h(681): note: while compiling class template member function 'gam::Biquad<float,float,gam::Domain1>::Biquad(Tp,Tp,gam::FilterType)'
+4>        with
+4>        [
+4>            Tp=float
+4>        ]
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utFilter.cpp(3): note: see reference to function template instantiation 'gam::Biquad<float,float,gam::Domain1>::Biquad(Tp,Tp,gam::FilterType)' being compiled
+4>        with
+4>        [
+4>            Tp=float
+4>        ]
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utFilter.cpp(3): note: see reference to class template instantiation 'gam::Biquad<float,float,gam::Domain1>' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(1008): warning C4244: 'return': conversion from 'double' to 'gam::real', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Oscillator.h(1717): note: see reference to function template instantiation 'T gam::scl::wrapPhase<Tv>(T)' being compiled
+4>        with
+4>        [
+4>            T=gam::real,
+4>            Tv=gam::real
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Oscillator.h(1715): note: while compiling class template member function 'gam::real gam::DSF<gam::real,gam::DomainObserver>::operator ()(void)'
+4>c:\users\younk\desktop\allotemplate\allolib\external\gamma\tests\ut/utGenerators.cpp(57): note: see reference to function template instantiation 'gam::real gam::DSF<gam::real,gam::DomainObserver>::operator ()(void)' being compiled
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(1013): warning C4244: 'return': conversion from 'double' to 'gam::real', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(481): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(481): note: while compiling class template member function 'float gam::Delay<Tv,Si,Td>::maxDelay(void) const'
+4>        with
+4>        [
+4>            Tv=gam::real,
+4>            Si=gam::ipl::Linear,
+4>            Td=gam::DomainObserver
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(431): note: see reference to function template instantiation 'float gam::Delay<Tv,Si,Td>::maxDelay(void) const' being compiled
+4>        with
+4>        [
+4>            Tv=gam::real,
+4>            Si=gam::ipl::Linear,
+4>            Td=gam::DomainObserver
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(522): note: while compiling class template member function 'gam::real gam::Comb<gam::real,gam::ipl::Linear,gam::real,gam::DomainObserver>::operator ()(const Tv &,const Tv &)'
+4>        with
+4>        [
+4>            Tv=gam::real
+4>        ]
+4>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Delay.h(520): note: see reference to function template instantiation 'gam::real gam::Comb<gam::real,gam::ipl::Linear,gam::real,gam::DomainObserver>::operator ()(const Tv &,const Tv &)' being compiled
+4>        with
+4>        [
+4>            Tv=gam::real
+4>        ]
+3>        with
+3>        [
+3>            _Ty=al::Mesh::Index
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Mesh.cpp(662): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>al_Shader.cpp
+4>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX86\x64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\bin\Debug\gammaUnitTests.exe" /INCREMENTAL /NOLOGO ..\..\..\external\Gamma\lib\Gamma_debug.lib "..\..\..\external\Gamma\external\lib_win32\libsndfile-1.lib" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/younk/Desktop/allotemplate/allolib/external/Gamma/bin/Debug/gammaUnitTests.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/younk/Desktop/allotemplate/allolib/external/Gamma/bin/Debug/gammaUnitTests.lib" /MACHINE:X64  /machine:x64 gammaUnitTests.dir\Debug\unitTests.obj
+3>al_Shapes.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(37): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(135): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(148): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(148): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(161): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(188): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(202): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(202): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(203): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(203): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(231): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(245): warning C4305: 'initializing': truncation from 'double' to 'float'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(246): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(246): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(267): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(292): warning C4267: 'initializing': conversion from 'size_t' to 'al::Mesh::Index', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(322): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(347): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(348): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(350): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(361): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(369): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(388): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(401): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(403): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(409): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(411): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(436): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(437): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(438): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(456): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(464): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(485): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(493): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(500): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(501): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(523): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(529): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(530): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(542): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(544): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(574): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(584): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(614): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(627): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(658): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Shapes.cpp(669): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+3>al_Texture.cpp
+3>al_VAO.cpp
+3>al_VAOMesh.cpp
+4>gammaUnitTests.vcxproj -> C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\bin\Debug\gammaUnitTests.exe
+4>Done building project "gammaUnitTests.vcxproj".
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_VAOMesh.cpp(122): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_VAOMesh.cpp(126): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+3>al_Viewpoint.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Viewpoint.cpp(55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Viewpoint.cpp(63): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Viewpoint.cpp(63): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Matrix4.hpp(233): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Matrix4.hpp(225): note: while compiling class template member function 'al::Matrix4<float> al::Matrix4<float>::perspective(T,T,T,T)'
+3>        with
+3>        [
+3>            T=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Viewpoint.cpp(53): note: see reference to function template instantiation 'al::Matrix4<float> al::Matrix4<float>::perspective(T,T,T,T)' being compiled
+3>        with
+3>        [
+3>            T=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Viewpoint.cpp(46): note: see reference to class template instantiation 'al::Matrix4<float>' being compiled
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(719): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(311): note: see reference to function template instantiation 'void al::Quat<double>::toVectorX<T>(T2 &,T2 &,T2 &) const' being compiled
+3>        with
+3>        [
+3>            T=float,
+3>            T2=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(311): note: see reference to function template instantiation 'void al::Quat<double>::toVectorX<T>(T2 &,T2 &,T2 &) const' being compiled
+3>        with
+3>        [
+3>            T=float,
+3>            T2=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/spatial/al_Pose.hpp(137): note: see reference to function template instantiation 'void al::Quat<double>::toVectorX<T>(al::Vec<3,T> &) const' being compiled
+3>        with
+3>        [
+3>            T=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/spatial/al_Pose.hpp(137): note: see reference to function template instantiation 'void al::Quat<double>::toVectorX<T>(al::Vec<3,T> &) const' being compiled
+3>        with
+3>        [
+3>            T=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\gl\al_Viewpoint.cpp(48): note: see reference to function template instantiation 'void al::Pose::unitVectors<float>(al::Vec<3,float> &,al::Vec<3,float> &,al::Vec<3,float> &) const' being compiled
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(720): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(721): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(727): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(319): note: see reference to function template instantiation 'void al::Quat<double>::toVectorY<T>(T2 &,T2 &,T2 &) const' being compiled
+3>        with
+3>        [
+3>            T=float,
+3>            T2=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(319): note: see reference to function template instantiation 'void al::Quat<double>::toVectorY<T>(T2 &,T2 &,T2 &) const' being compiled
+3>        with
+3>        [
+3>            T=float,
+3>            T2=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/spatial/al_Pose.hpp(138): note: see reference to function template instantiation 'void al::Quat<double>::toVectorY<T>(al::Vec<3,T> &) const' being compiled
+3>        with
+3>        [
+3>            T=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/spatial/al_Pose.hpp(138): note: see reference to function template instantiation 'void al::Quat<double>::toVectorY<T>(al::Vec<3,T> &) const' being compiled
+3>        with
+3>        [
+3>            T=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(728): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(729): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(735): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(327): note: see reference to function template instantiation 'void al::Quat<double>::toVectorZ<T>(T2 &,T2 &,T2 &) const' being compiled
+3>        with
+3>        [
+3>            T=float,
+3>            T2=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(327): note: see reference to function template instantiation 'void al::Quat<double>::toVectorZ<T>(T2 &,T2 &,T2 &) const' being compiled
+3>        with
+3>        [
+3>            T=float,
+3>            T2=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/spatial/al_Pose.hpp(139): note: see reference to function template instantiation 'void al::Quat<double>::toVectorZ<T>(al::Vec<3,T> &) const' being compiled
+3>        with
+3>        [
+3>            T=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/spatial/al_Pose.hpp(139): note: see reference to function template instantiation 'void al::Quat<double>::toVectorZ<T>(al::Vec<3,T> &) const' being compiled
+3>        with
+3>        [
+3>            T=float
+3>        ]
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(736): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(737): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>al_AudioIO.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_AudioIO.cpp(514): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_AudioIO.cpp(630): warning C4101: 'e': unreferenced local variable
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_AudioIO.cpp(786): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\string.h(343): note: see declaration of 'strncpy'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_AudioIO.cpp(900): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\string.h(343): note: see declaration of 'strncpy'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_AudioIO.cpp(1090): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_AudioIO.cpp(1140): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+3>Generating Code...
+3>Compiling...
+3>al_AudioIOData.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_AudioIOData.cpp(26): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\string.h(343): note: see declaration of 'strncpy'
+3>al_ControlNav.cpp
+3>al_CSVReader.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_CSVReader.cpp(43): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_CSVReader.cpp(77): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+3>al_File.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_File.cpp(84): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_File.cpp(104): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_File.cpp(130): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_File.cpp(495): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_File.cpp(496): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>al_MIDI.cpp
+3>al_Window.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\io\al_Window.cpp(214): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+3>al_WindowGLFW.cpp
+3>al_OSC.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\protocol\al_OSC.cpp(177): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\protocol\al_OSC.cpp(204): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\string.h(343): note: see declaration of 'strncpy'
+3>al_Pose.cpp
+3>al_Printing.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_Printing.cpp(18): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_Printing.cpp(76): warning C4996: 'vsprintf': This function or variable may be unsafe. Consider using vsprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\stdio.h(1467): note: see declaration of 'vsprintf'
+3>al_ThreadNative.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_ThreadNative.cpp(104): warning C4099: 'al::Thread::Impl': type name first seen using 'struct' now seen using 'class'
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/system/al_Thread.hpp(134): note: see declaration of 'al::Thread::Impl'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_ThreadNative.cpp(111): warning C4244: '=': conversion from 'uintptr_t' to 'unsigned long', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_ThreadNative.cpp(117): warning C4312: 'type cast': conversion from 'unsigned long' to 'HANDLE' of greater size
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_ThreadNative.cpp(119): warning C4312: 'type cast': conversion from 'unsigned long' to 'HANDLE' of greater size
+3>al_Time.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_Time.cpp(55): warning C4244: 'argument': conversion from 'al_sec' to 'al_nsec', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\system\al_Time.cpp(70): warning C4244: 'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
+3>al_Color.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(79): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(80): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(81): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(102): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(103): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(104): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(128): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(129): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(130): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(153): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(174): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(175): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(176): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(187): warning C4305: 'initializing': truncation from 'double' to 'float'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(198): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(223): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(232): warning C4305: 'initializing': truncation from 'double' to 'float'
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\core\types\al_Color.cpp(243): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+3>al_GLV_draw.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>al_GLV_wrapper.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>glv_buttons.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>glv_core.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>glv_font.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_font.cpp(106): warning C4838: conversion from 'double' to 'float' requires a narrowing conversion
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_font.cpp(106): warning C4305: 'initializing': truncation from 'double' to 'float'
+3>glv_glv.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>glv_inputdevice.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>Generating Code...
+3>Compiling...
+3>glv_layout.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>glv_model.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_model.cpp(311): warning C4804: '+=': unsafe use of type 'bool' in operation
+3>glv_notification.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_notification.cpp(40): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_notification.cpp(48): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+3>glv_sliders.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>glv_textview.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(61): warning C4244: '=': conversion from 'float' to 'unsigned short', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(153): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(227): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(277): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(288): warning C4146: unary minus operator applied to unsigned type, result still unsigned
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(288): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(302): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(303): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(420): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(688): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(689): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(758): warning C4244: 'argument': conversion from 'int' to 'glv::space_t', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(826): warning C4244: 'initializing': conversion from 'glv::space_t' to 'int', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(852): warning C4244: 'initializing': conversion from '__int64' to 'long', possible loss of data
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_textview.cpp(854): warning C4244: 'initializing': conversion from 'double' to 'unsigned long', possible loss of data
+3>glv_view.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_view.cpp(281): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+3>glv_widget.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\include\al/glv/glv_model.h(619): warning C4521: 'glv::Data': multiple copy constructors specified
+3>C:\Users\younk\Desktop\allotemplate\allolib\src\glv\glv_widget.cpp(138): warning C4244: 'argument': conversion from 'glv::space_t' to 'int', possible loss of data
+3>OscOutboundPacketStream.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\osc\OscOutboundPacketStream.cpp(363): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\string.h(136): note: see declaration of 'strcpy'
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\osc\OscOutboundPacketStream.cpp(605): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\string.h(136): note: see declaration of 'strcpy'
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\osc\OscOutboundPacketStream.cpp(625): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\string.h(136): note: see declaration of 'strcpy'
+3>OscPrintReceivedElements.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\osc\OscPrintReceivedElements.cpp(129): warning C4996: 'ctime': This function or variable may be unsafe. Consider using ctime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\time.h(475): note: see declaration of 'ctime'
+3>OscReceivedElements.cpp
+3>OscTypes.cpp
+3>IpEndpointName.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\ip\IpEndpointName.cpp(53): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\stdio.h(1772): note: see declaration of 'sprintf'
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\ip\IpEndpointName.cpp(55): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\stdio.h(1772): note: see declaration of 'sprintf'
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\ip\IpEndpointName.cpp(68): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\stdio.h(1772): note: see declaration of 'sprintf'
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\ip\IpEndpointName.cpp(70): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\stdio.h(1772): note: see declaration of 'sprintf'
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\ip\IpEndpointName.cpp(78): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\stdio.h(1772): note: see declaration of 'sprintf'
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\ip\IpEndpointName.cpp(80): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\ucrt\stdio.h(1772): note: see declaration of 'sprintf'
+3>NetworkingUtils.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\oscpack\ip\win32\NetworkingUtils.cpp(87): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+3>C:\Program Files (x86)\Windows Kits\10\Include\10.0.15063.0\um\winsock2.h(2218): note: see declaration of 'gethostbyname'
+3>UdpSocket.cpp
+3>RtMidi.cpp
+3>RtAudio.cpp
+3>C:\Users\younk\Desktop\allotemplate\allolib\external\rtaudio\RtAudio.cpp(4890): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
+3>Generating Code...
+3>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX86\x64\Lib.exe /OUT:"C:\Users\younk\Desktop\allotemplate\allolib\al_debug.lib" /NOLOGO /MACHINE:X64  /machine:x64 al.dir\Debug\al_AudioApp.obj
+3>al.dir\Debug\al_FPS.obj
+3>al.dir\Debug\al_WindowApp.obj
+3>al.dir\Debug\al_BufferObject.obj
+3>al.dir\Debug\al_EasyFBO.obj
+3>al.dir\Debug\al_EasyVAO.obj
+3>al.dir\Debug\al_FBO.obj
+3>al.dir\Debug\al_GLEW.obj
+3>al.dir\Debug\al_GLFW.obj
+3>al.dir\Debug\al_GPUObject.obj
+3>al.dir\Debug\al_Graphics.obj
+3>al.dir\Debug\al_Lens.obj
+3>al.dir\Debug\al_Mesh.obj
+3>al.dir\Debug\al_Shader.obj
+3>al.dir\Debug\al_Shapes.obj
+3>al.dir\Debug\al_Texture.obj
+3>al.dir\Debug\al_VAO.obj
+3>al.dir\Debug\al_VAOMesh.obj
+3>al.dir\Debug\al_Viewpoint.obj
+3>al.dir\Debug\al_AudioIO.obj
+3>al.dir\Debug\al_AudioIOData.obj
+3>al.dir\Debug\al_ControlNav.obj
+3>al.dir\Debug\al_CSVReader.obj
+3>al.dir\Debug\al_File.obj
+3>al.dir\Debug\al_MIDI.obj
+3>al.dir\Debug\al_Window.obj
+3>al.dir\Debug\al_WindowGLFW.obj
+3>al.dir\Debug\al_OSC.obj
+3>al.dir\Debug\al_Pose.obj
+3>al.dir\Debug\al_Printing.obj
+3>al.dir\Debug\al_ThreadNative.obj
+3>al.dir\Debug\al_Time.obj
+3>al.dir\Debug\al_Color.obj
+3>al.dir\Debug\al_GLV_draw.obj
+3>al.dir\Debug\al_GLV_wrapper.obj
+3>al.dir\Debug\glv_buttons.obj
+3>al.dir\Debug\glv_core.obj
+3>al.dir\Debug\glv_font.obj
+3>al.dir\Debug\glv_glv.obj
+3>al.dir\Debug\glv_inputdevice.obj
+3>al.dir\Debug\glv_layout.obj
+3>al.dir\Debug\glv_model.obj
+3>al.dir\Debug\glv_notification.obj
+3>al.dir\Debug\glv_sliders.obj
+3>al.dir\Debug\glv_textview.obj
+3>al.dir\Debug\glv_view.obj
+3>al.dir\Debug\glv_widget.obj
+3>al.dir\Debug\OscOutboundPacketStream.obj
+3>al.dir\Debug\OscPrintReceivedElements.obj
+3>al.dir\Debug\OscReceivedElements.obj
+3>al.dir\Debug\OscTypes.obj
+3>al.dir\Debug\IpEndpointName.obj
+3>al.dir\Debug\NetworkingUtils.obj
+3>al.dir\Debug\UdpSocket.obj
+3>al.dir\Debug\RtMidi.obj
+3>al.dir\Debug\RtAudio.obj
+3>al.vcxproj -> C:\Users\younk\Desktop\allotemplate\allolib\al_debug.lib
+3>Done building project "al.vcxproj".
+5>------ Build started: Project: al_tests, Configuration: Debug x64 ------
+5>Building Custom Rule C:/Users/younk/Desktop/allotemplate/allolib/test/CMakeLists.txt
+5>CMake does not need to re-run because C:/Users/younk/Desktop/allotemplate/allolib/build/test/CMakeFiles/generate.stamp is up-to-date.
+5>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX86\x64\CL.exe /c /IC:\Users\younk\Desktop\allotemplate\allolib\external\catch /IC:\Users\younk\Desktop\allotemplate\allolib\include /IC:\Users\younk\Desktop\allotemplate\allolib\external\Gamma /IC:\Users\younk\Desktop\allotemplate\allolib\external\rtmidi /Zi /nologo /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D AL_WINDOWS /D __WINDOWS_WASAPI__ /D AL_AUDIO_RTAUDIO /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"al_tests.dir\Debug\\" /Fd"al_tests.dir\Debug\vc141.pdb" /Gd /TP /errorReport:prompt C:\Users\younk\Desktop\allotemplate\allolib\test\src\main.cpp
+5>main.cpp
+5>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/scl.h(245): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
+5>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Access.h(29): warning C4244: 'return': conversion from 'float' to 'gam::index_t', possible loss of data
+5>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/tbl.h(685): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+5>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/tbl.h(709): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+5>C:\Users\younk\Desktop\allotemplate\allolib\external\Gamma\Gamma/Strategy.h(681): warning C4267: '=': conversion from 'size_t' to 'uint8_t', possible loss of data
+5>C:\Users\younk\Desktop\allotemplate\allolib\include\al/util/al_Functions.hpp(795): warning C4146: unary minus operator applied to unsigned type, result still unsigned
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(400): warning C4305: 'initializing': truncation from 'double' to 'float'
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(405): warning C4305: 'initializing': truncation from 'double' to 'float'
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(406): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(407): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(408): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(927): warning C4305: 'argument': truncation from 'double' to 'float'
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(928): warning C4305: 'argument': truncation from 'double' to 'float'
+5>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(621): warning C4305: '=': truncation from 'double' to 'float'
+5>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(605): note: while compiling class template member function 'void al::Quat<float>::toEuler(T &,T &,T &) const'
+5>        with
+5>        [
+5>            T=float
+5>        ]
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(412): note: see reference to function template instantiation 'void al::Quat<float>::toEuler(T &,T &,T &) const' being compiled
+5>        with
+5>        [
+5>            T=float
+5>        ]
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(410): note: see reference to class template instantiation 'al::Quat<float>' being compiled
+5>C:\Users\younk\Desktop\allotemplate\allolib\include\al/core/math/al_Quat.hpp(627): warning C4305: '=': truncation from 'double' to 'float'
+5>C:\Users\younk\Desktop\allotemplate\allolib\include\al/util/al_Frustum.hpp(178): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+5>C:\Users\younk\Desktop\allotemplate\allolib\include\al/util/al_Frustum.hpp(175): note: while compiling class template member function 'int al::Frustum<double>::testSphere(const al::Vec<3,double> &,float) const'
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(927): note: see reference to function template instantiation 'int al::Frustum<double>::testSphere(const al::Vec<3,double> &,float) const' being compiled
+5>c:\users\younk\desktop\allotemplate\allolib\test\src\test_math.cpp(904): note: see reference to class template instantiation 'al::Frustum<double>' being compiled
+5>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX86\x64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\younk\Desktop\allotemplate\allolib\test\bin\al_tests_debug.exe" /INCREMENTAL /NOLOGO ..\..\al_debug.lib ..\..\external\Gamma\lib\Gamma_debug.lib glu32.lib opengl32.lib ..\..\dependencies\glew\lib\Release\x64\glew32.lib "..\..\dependencies\glfw\lib-vc2015\glfw3dll.lib" ole32.lib winmm.lib ksuser.lib uuid.lib ole32.lib winmm.lib ksuser.lib uuid.lib ..\..\external\Gamma\lib\Gamma_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/younk/Desktop/allotemplate/allolib/test/bin/al_tests_debug.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/younk/Desktop/allotemplate/allolib/build/test/Debug/al_tests_debug.lib" /MACHINE:X64  /machine:x64 al_tests.dir\Debug\main.obj
+5>al_tests.vcxproj -> C:\Users\younk\Desktop\allotemplate\allolib\test\bin\al_tests_debug.exe
+5>Done building project "al_tests.vcxproj".
+6>------ Skipped Build: Project: ALL_BUILD, Configuration: Debug x64 ------
+6>Project not selected to build for this solution configuration 
+========== Build: 5 succeeded, 0 failed, 0 up-to-date, 1 skipped ==========

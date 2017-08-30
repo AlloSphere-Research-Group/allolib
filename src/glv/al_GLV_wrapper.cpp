@@ -3,8 +3,8 @@
 al::GLVEventHandler::GLVEventHandler(glv::GLV& g) : mGlvPtr{ &g } {}
 
 bool al::GLVEventHandler::mouseDown(const Mouse& m) {
-    float relx = m.x();
-    float rely = m.y();
+    float relx = float(m.x());
+    float rely = float(m.y());
     auto btn = glv::Mouse::Left;
     switch (m.button()) {
         case al::Mouse::MIDDLE: btn = glv::Mouse::Middle; break;
@@ -17,8 +17,8 @@ bool al::GLVEventHandler::mouseDown(const Mouse& m) {
 }
 
 bool al::GLVEventHandler::mouseDrag(const Mouse& m) {
-    float x = m.x();
-    float y = m.y();
+    float x = float(m.x());
+    float y = float(m.y());
     float relx = x;
     float rely = y;
     mGlvPtr->setMouseMotion(relx, rely, glv::Event::MouseDrag);
@@ -28,8 +28,8 @@ bool al::GLVEventHandler::mouseDrag(const Mouse& m) {
 }
 
 bool al::GLVEventHandler::mouseUp(const Mouse& m) {
-    float relx = m.x();
-    float rely = m.y();
+    float relx = float(m.x());
+    float rely = float(m.y());
     auto btn = glv::Mouse::Left;
     switch (m.button()) {
         case al::Mouse::MIDDLE: btn = glv::Mouse::Middle; break;
@@ -42,7 +42,7 @@ bool al::GLVEventHandler::mouseUp(const Mouse& m) {
 }
 
 bool al::GLVEventHandler::resize(int dw, int dh) {
-    mGlvPtr->extent(dw, dh);
+    mGlvPtr->extent(float(dw), float(dh));
     mGlvPtr->broadcastEvent(glv::Event::WindowResize);
     return true;
 }
@@ -116,7 +116,7 @@ al::ButtonWithLabel::ButtonWithLabel(std::string groupName, int numCol, int numR
 al::NumberDialerWithLabel::NumberDialerWithLabel(std::string name)
     : NumberDialerWithLabel(name, 4, 3) {}
 al::NumberDialerWithLabel::NumberDialerWithLabel(std::string name, int numInt, int numFrac)
-    : NumberDialerWithLabel(name, numInt, numFrac, -std::pow(10, numInt), std::pow(10, numInt)) {}
+    : NumberDialerWithLabel(name, numInt, numFrac, float(-std::pow(10, numInt)), float(std::pow(10, numInt))) {}
 al::NumberDialerWithLabel::NumberDialerWithLabel(std::string name, int numInt, int numFrac, float min, float max)
     : dialer{numInt,numFrac,max,min},
     label {name}
@@ -133,7 +133,7 @@ al::NumberDialerWithLabel::NumberDialerWithLabel(std::string name, int numInt, i
 
 
 al::GlvGui::GlvGui(Window& window, bool blackLetters) : mWindowPtr{ &window } {
-    mGlv.extent(mWindowPtr->width(), mWindowPtr->height());
+    mGlv.extent(float(mWindowPtr->width()), float(mWindowPtr->height()));
     mGlv.broadcastEvent(glv::Event::WindowResize);
     if (blackLetters) {
         mGlv.colors().set(glv::StyleColor::Gray);
@@ -282,7 +282,7 @@ void al::GlvGui::addNumberDialer(std::string name) {
     addNumberDialer(name, 4, 3);
 }
 void al::GlvGui::addNumberDialer(std::string name, int numInt, int numFrac) {
-    addNumberDialer(name, numInt, numFrac, -std::pow(10, numInt), std::pow(10, numInt));
+    addNumberDialer(name, numInt, numFrac, float(-std::pow(10, numInt)), float(std::pow(10, numInt)));
 }
 void al::GlvGui::addNumberDialer(std::string name, int numInt, int numFrac, float min, float max) {
     auto search = dialers.find(name);
@@ -318,7 +318,7 @@ float al::GlvGui::numberDialerValue(std::string name) {
         std::cout << "no dialer with name \"" << name << "\" exists" << std::endl;
         return 0;
     }
-    return search->second->dialer.getValue();
+    return float(search->second->dialer.getValue());
 }
 
 void al::GlvGui::draw(Graphics& g) {

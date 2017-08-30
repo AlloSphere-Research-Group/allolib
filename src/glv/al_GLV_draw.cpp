@@ -135,12 +135,12 @@ void grid (
 
     mesh.reset();
     mesh.primitive(al::Mesh::LINES);
-    double inc, r=l+w, b=t+h;
+    float inc, r=l+w, b=t+h;
 
     if(divy > 0 && h>0){
-        inc = (double)h/(double)divy;
-        double i = incEnds ? t-0.0001 : t-0.0001+inc;
-        double e = incEnds ? b : b-inc;
+        inc = (float)h/(float)divy;
+        float i = incEnds ? t-0.0001f : t-0.0001f+inc;
+        float e = incEnds ? b : b-inc;
         for(; i<e; i+=inc) {
             mesh.vertex(l, i);
             mesh.vertex(r, i);
@@ -148,9 +148,9 @@ void grid (
     }
 
     if(divx > 0 && w>0){
-        inc = (double)w/(double)divx;
-        double i = incEnds ? l-0.0001 : l-0.0001+inc;
-        double e = incEnds ? r : r-inc;
+        inc = (float)w/(float)divx;
+        float i = incEnds ? l-0.0001f : l-0.0001f+inc;
+        float e = incEnds ? r : r-inc;
         for(; i<e; i+=inc) {
             mesh.vertex(i, t);
             mesh.vertex(i, b);
@@ -217,7 +217,7 @@ void text(
     unsigned fontSize=8, float lineSpacing=1.5, unsigned tabSpaces=4
 ) {
     Font f;
-    f.size(fontSize);
+    f.size(float(fontSize));
     f.lineSpacing(lineSpacing);
     f.tabSpaces(tabSpaces);
     f.render(s, l, t, 0);
@@ -233,7 +233,7 @@ void drawContext (float tx, float ty, View * v, float& cx, float& cy, View *& c)
     pushMatrix();
 
     // pix: round position to nearest pixel coordinates
-    translate(pix(cx), pix(cy));
+    translate(float(pix(cx)), float(pix(cy)));
     c = v;
 }
 
@@ -271,7 +271,7 @@ void GLV::drawWidgets(unsigned int ww, unsigned int wh, double dsec) {
 
     // The crop region is the intersection of all parent rects up to the top 
     // view. The intersections also need to be done in absolute coordinates.    
-    std::vector<Rect> cropRects(16, Rect(ww, wh));  // index is hierarchy level
+    std::vector<Rect> cropRects(16, Rect(float(ww), float(wh)));  // index is hierarchy level
     int lvl = 0;    // start at root = 0
 
     /* animation disabled */
@@ -395,7 +395,7 @@ void View::doDraw(GLV& glv){
         // lineWidth(borderWidth); // disabled in >gl3
 
         color(colors().border);
-        frame(0.5, 0.5, pix(w)-0.5, pix(h)-0.5);
+        frame(0.5f, 0.5f, float(pix(w))-0.5f, float(pix(h))-0.5f);
         // frame(1.5, 1.5, pix(w)-1.0, pix(h)-1.0);
         // const float ds = 0.5; // OpenGL suggests 0.375, but smears with AA enabled
         // frame(ds, ds, pix(w)-ds, pix(h)-ds);
@@ -407,7 +407,7 @@ void View::doDraw(GLV& glv){
 void Widget::drawGrid(){
     if(enabled(DrawGrid) && size()>1){
         color(colors().border);
-        grid(0, 0, w, h, sizeX(), sizeY(), false);
+        grid(0.0f, 0.0f, w, h, float(sizeX()), float(sizeY()), false);
     }
 }
 
@@ -441,11 +441,11 @@ void Sliders::onDraw(GLV& glv) {
                 int ind = index(i,j);
                 auto const& cf = colors().fore;
                 if(isSelected(i,j)) color(cf.r, cf.g, cf.b, cf.a);
-                else                color(cf.r, cf.g, cf.b, cf.a * 0.5);
+                else                color(cf.r, cf.g, cf.b, cf.a * 0.5f);
 
-                float v01 = to01(getValue(ind));
+                float v01 = float(to01(getValue(ind)));
                 //float y0 = to01(0)*(yd - paddingY()*2);
-                float y0 = to01(0)*yd;
+                float y0 = float(to01(0)*yd);
                 //rect(x + x0, y, f*xd+x, y+yd-padding());
                 
                 rectangle(x, y + (yd-v01*(yd-paddingY()*2)), x+xd-paddingX()*2, y + (yd-y0));
@@ -470,10 +470,10 @@ void Sliders::onDraw(GLV& glv) {
                 int ind = index(i,j);
                 auto const& cf = colors().fore;
                 if(isSelected(i,j)) color(cf.r, cf.g, cf.b, cf.a);
-                else                color(cf.r, cf.g, cf.b, cf.a * 0.5);
+                else                color(cf.r, cf.g, cf.b, cf.a * 0.5f);
 
-                float v01 = to01(getValue(ind));
-                float x0 = to01(0)*xd;
+                float v01 = float(to01(getValue(ind)));
+                float x0 = float(to01(0))*xd;
                 rectangle(x + x0, y, v01*(xd-paddingX()*2)+x, y+yd-paddingY()*2);
 
                 // if zero line showing
@@ -552,10 +552,10 @@ void Label::onDraw(GLV& g){
 
 void NumberDialers::fitExtent() {
     //static bool print_once = [](){ std::cout << "NumberDialers::fitExtent" << std::endl; return true; }();
-    extent(
-        // pix(sizeX() * (paddingX()*2 + (numDigits() * font().advance('M'))) + 1),
-        pix(sizeX() * (paddingX() + (numDigits() * font().advance('M')))),
-        pix(sizeY() * (paddingY()*2 + font().cap()))
+	extent(
+		// pix(sizeX() * (paddingX()*2 + (numDigits() * font().advance('M'))) + 1),
+		float(pix(sizeX() * (paddingX() + (numDigits() * font().advance('M'))))),
+		float(pix(sizeY() * (paddingY() * 2 + font().cap())))
     );
 }
 
@@ -578,8 +578,8 @@ void NumberDialers::onDraw(GLV& g) {
 
         float x = dxCell*selectedX() + paddingX()/1 - 1;
         //float y = dyCell*selectedY() + paddingY()/2;
-        float y = dyCell*(selectedY()+0.5);
-        float ty= font().cap()/2. + 3;
+        float y = dyCell*(float(selectedY())+0.5f);
+        float ty= font().cap()/2.0f + 3.0f;
 
 //      color(colors().fore, colors().fore.a*0.4);
         color(colors().selection);
@@ -606,7 +606,7 @@ void NumberDialers::onDraw(GLV& g) {
 
             // draw number
             long long vali = valInt(i,j);
-            unsigned long absVal = vali < 0 ? -vali : vali;
+            unsigned long absVal = static_cast<unsigned long>(vali < 0 ? -vali : vali);
             int msd = mNF;  // position from right of most significant digit
 
             if(absVal > 0){
@@ -629,7 +629,7 @@ void NumberDialers::onDraw(GLV& g) {
             bool drawChar = false; // don't draw until non-zero or past decimal point
 
             for(int i=0; i<=msd; ++i){
-                char c = '0' + (absVal % (power*10))/power;
+                char c = '0' + static_cast<char>((absVal % (power*10))/power);
                 power *= 10;
                 if(c!='0' || i>=mNF) drawChar = true;
                 --ic;
@@ -637,13 +637,13 @@ void NumberDialers::onDraw(GLV& g) {
             }
 
             // Draw the digit string
-            float tx = int(cx + paddingX());
-            float ty = int(cy + paddingY());
+            float tx = float(int(cx + paddingX()));
+            float ty = float(int(cy + paddingY()));
 
             if(vali || !dimZero()){
                 color(colors().text);
             } else {
-                color(colors().text.mix(colors().back, 0.8));
+                color(colors().text.mix(colors().back, 0.8f));
             }
         //  printf("%s\n", str);
 //          font().render(g.graphicsData(), str, pixc(tx), pixc(ty));
@@ -740,17 +740,17 @@ void al::al_draw_glv(
     g.shader(glv::graphicsHolder().shader());
     g.camera(
         al::Viewpoint::ORTHO_FOR_2D,
-        x * g.window().x_highres(),
-        y * g.window().y_highres(),
-        w * g.window().x_highres(),
-        h * g.window().y_highres()
+        int(x * g.window().x_highres()),
+		int(y * g.window().y_highres()),
+		int(w * g.window().x_highres()),
+		int(h * g.window().y_highres())
     );
 
     glv::graphicsHolder().set(g);
 
     g.pushMatrix();
     g.loadIdentity();
-    g.translate(0, g.window().height()); // move to top-right
+    g.translate(0.0f, float(g.window().height())); // move to top-right
     g.scale(1, -1); // flip y
     glv.drawWidgets(w, h, 0); // 0 for dsec: animation disabled...
     g.popMatrix();
