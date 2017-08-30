@@ -362,7 +362,7 @@ public:
 	static int maxDim(){ return DATA_MAXDIM; }
 
 	/// Get element offset into source array
-	int offset() const { return (mElems-mData)/sizeType(); }
+	int offset() const { return static_cast<int>(mElems-mData) / sizeType(); }
 	
 	/// Get number of dimensions sized larger than 1
 	int order() const;

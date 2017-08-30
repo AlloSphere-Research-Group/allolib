@@ -171,7 +171,7 @@ struct Color{
 
   /// Set from gray value
   Color& operator= (float v){ return set(v); }
-  Color& operator= (double v){ return set(v); }
+  Color& operator= (double v){ return set(static_cast<float>(v)); }
 
   /// Set components from integer color
   Color& operator= (const Colori& v);
@@ -308,31 +308,31 @@ struct Colori {
   /// @param[in] xyz      CIEXYZ color
   /// @param[in] a      alpha component
   Colori(const CIEXYZ& xyz, float a =1.f)
-  :  a(a)
+  :  a(static_cast<uint8_t>(a*255))
   {  *this = xyz; }
 
   /// @param[in] lab      Lab color
   /// @param[in] a      alpha component
   Colori(const Lab& lab, float a =1.f)
-  :  a(a)
+  :  a(static_cast<uint8_t>(a * 255))
   {  *this = lab; }
 
   /// @param[in] hclab    HCLab value
   /// @param[in] a      alpha component
   Colori(const HCLab& hclab, float a =1.f)
-  :  a(a)
+  :  a(static_cast<uint8_t>(a * 255))
   {  *this = hclab; }
 
   /// @param[in] luv      Luv value
   /// @param[in] a      alpha component
   Colori(const Luv& luv, float a =1.f)
-  :  a(a)
+  :  a(static_cast<uint8_t>(a * 255))
   {  *this = luv; }
 
   /// @param[in] hcluv    HCLuv value
   /// @param[in] a      alpha component
   Colori(const HCLuv& hcluv, float a =1.f)
-  :  a(a)
+  :  a(static_cast<uint8_t>(a * 255))
   {  *this = hcluv; }
 
   /// Set color component at index with no bounds checking
@@ -573,7 +573,7 @@ struct RGB{
 
   /// Set from gray value
   RGB& operator= (float v){ return set(v); }
-  RGB& operator= (double v){ return set(v); }
+  RGB& operator= (double v){ return set(static_cast<float>(v)); }
 
   /// Set RGB components from HSV
   RGB& operator= (const HSV& v);

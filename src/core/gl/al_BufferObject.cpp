@@ -19,7 +19,7 @@ BufferObject::~BufferObject(){
 }
 
 int BufferObject::size() const {
-  return mSize;
+  return static_cast<int>(mSize);
 }
 
 void BufferObject::bufferType(unsigned int v){
@@ -60,7 +60,7 @@ void BufferObject::onDestroy() {
   glDeleteBuffers(1, &mID);
 }
 
-void BufferObject::data(int size, void const* src) {
+void BufferObject::data(size_t size, void const* src) {
   glBufferData(mType, size, src, mUsage);
   mSize = size;
   // GLint s {0};

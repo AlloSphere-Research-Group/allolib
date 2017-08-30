@@ -79,7 +79,7 @@ public:
     color_shader.compile(al_color_vert_shader(), al_color_frag_shader());
     tex_shader.compile(al_tex_vert_shader(), al_tex_frag_shader());
     view.pos(Vec3f(0, 0, 20)).faceToward(Vec3f(0, 0, 0), Vec3f(0, 1, 0));
-    view.fovy(45).near(0.1).far(1000);
+    view.fovy(45.0f).near(0.1f).far(1000.0f);
     view.viewport(0, 0, fbWidth(), fbHeight());
   }
 

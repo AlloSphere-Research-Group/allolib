@@ -247,7 +247,7 @@ public:
     Dim(int l_, int t_, int w_, int h_): l(l_), t(t_), w(w_), h(h_){}
     void set(int l_, int t_, int w_, int h_){l=l_;t=t_;w=w_;h=h_;}
 
-    float aspect() const { return (w!=0 && h!=0) ? double(w)/h : 1; }
+    float aspect() const { return (w!=0 && h!=0) ? float(w)/h : 1; }
     void print() const {printf("Dim: %4d x %4d @ (%4d, %4d)\n", w,h, l,t); }
   };
 

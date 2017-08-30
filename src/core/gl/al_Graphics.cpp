@@ -90,11 +90,11 @@ void Graphics::popMatrix(){
     mModelStack.pop();
     mMatChanged = true;
 }
-void Graphics::translate(double x, double y, double z){
+void Graphics::translate(float x, float y, float z){
     mModelStack.mult(Matrix4f::translation(x, y, z));
     mMatChanged = true;
 }
-void Graphics::rotate(double angle, double x, double y, double z){
+void Graphics::rotate(float angle, float x, float y, float z){
     mModelStack.mult(Matrix4f::rotate(angle, x, y, z));
     mMatChanged = true;
 }
@@ -104,10 +104,10 @@ void Graphics::rotate(const Quatf& q) {
   mModelStack.mult(m);
   mMatChanged = true;
 }
-void Graphics::scale(double s){
+void Graphics::scale(float s){
   scale(s, s, s);
 }
-void Graphics::scale(double x, double y, double z){
+void Graphics::scale(float x, float y, float z){
   mModelStack.mult(Matrix4f::scaling(x, y, z));
   mMatChanged = true;
 }

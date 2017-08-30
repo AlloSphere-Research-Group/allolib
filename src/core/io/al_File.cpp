@@ -252,8 +252,9 @@ static std::string stripEndSlash(const std::string& path){
 }
 
 bool File::exists(const std::string& path){
-  struct stat s;
-  return ::stat(stripEndSlash(path).c_str(), &s) == 0;
+  // struct stat s;
+  // return ::stat(stripEndSlash(path).c_str(), &s) == 0;
+  return minFileSys::pathExists(path);
 }
 
 bool File::isDirectory(const std::string& path){

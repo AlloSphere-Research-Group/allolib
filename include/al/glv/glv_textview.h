@@ -60,7 +60,7 @@ public:
 	/// @param[in] vert		Whether to draw label vertically
 	Label(const std::string& text, Place::t posAnch, space_t px, space_t py, bool vert=false);
 
-	float stroke() const { return mStroke/256.; }
+	float stroke() const { return mStroke/256.0f; }
 
 	Label& align(float vx, float vy);		///< Set alignment factors for label area
 	Label& size(float pixels);				///< Set label size
@@ -135,7 +135,7 @@ public:
 	void cursorPos(int v);
 	
 	/// Put cursor past end of text
-	void cursorEnd(){ cursorPos(mText.size()); }
+	void cursorEnd(){ cursorPos(static_cast<int>(mText.size())); }
 
 	/// Set the character input filter
 	TextView& filter(CharacterInputFilter v){ mFilter=v; return *this; }
@@ -390,7 +390,7 @@ public:
 	NumberDialers& interval(double max, double min=0);
 
 	/// Set padding amount
-	NumberDialers& padding(double v){ Widget::padding(v); fitExtent(); return *this; }
+	NumberDialers& padding(double v){ Widget::padding(static_cast<float>(v)); fitExtent(); return *this; }
 
 	/// Set number of digits in integer and fraction parts
 	NumberDialers& resize(int numInt, int numFrac);

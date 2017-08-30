@@ -293,7 +293,7 @@ public:
   /// \param[in] x    x component of rotation axis
   /// \param[in] y    y component of rotation axis
   /// \param[in] z    z component of rotation axis
-  void rotate(double angle, double x=0., double y=0., double z=1.);
+  void rotate(float angle, float x=0., float y=0., float z=1.);
 
   /// Rotate current matrix
   void rotate(const Quatf& q);
@@ -303,15 +303,15 @@ public:
   /// \param[in] angle  angle, in degrees
   /// \param[in] axis   rotation axis
   template <class T>
-  void rotate(double angle, const Vec<3,T>& axis){
+  void rotate(float angle, const Vec<3,T>& axis){
     rotate(angle, axis[0],axis[1],axis[2]);
   }
 
   /// Scale current matrix uniformly
-  void scale(double s);
+  void scale(float s);
 
   /// Scale current matrix along each dimension
-  void scale(double x, double y, double z=1.);
+  void scale(float x, float y, float z=1.);
 
   /// Scale current matrix along each dimension
   template <class T>
@@ -322,7 +322,7 @@ public:
   void scale(const Vec<2,T>& v){ scale(v[0],v[1]); }
 
   /// Translate current matrix
-  void translate(double x, double y, double z=0.);
+  void translate(float x, float y, float z=0.);
 
   /// Translate current matrix
   template <class T>

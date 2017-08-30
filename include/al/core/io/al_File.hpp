@@ -193,17 +193,17 @@ public:
 	File& path(const std::string& v){ mPath=v; return *this; }
 
 	/// Write string to file
-	int write(const std::string& v){ return write(v.data(), 1, v.length()); }
+	int write(const std::string& v){ return write(v.data(), 1, static_cast<int>(v.length())); }
 
 	/// Write memory elements to file
 	int write(const void * v, int itemSizeInBytes, int items=1){
-		int itemsWritten = fwrite(v, itemSizeInBytes, items, mFP);
+		int itemsWritten = static_cast<int>(fwrite(v, itemSizeInBytes, items, mFP));
 		mSizeBytes += itemsWritten * itemSizeInBytes;
 		return itemsWritten;
 	}
 
 	/// Read memory elements from file
-	int read(void * v, int size, int items=1){ return fread(v, size, items, mFP); }
+	int read(void * v, int size, int items=1){ return static_cast<int>(fread(v, size, items, mFP)); }
 
 	/// Returns character string of file contents (read mode only)
 	const char * readAll();
@@ -428,7 +428,7 @@ public:
 	FilePath& next() { ++indx %= count(); return (*this)(); }
 	FilePath& prev() { --indx; if (indx < 0) indx = count() - 1; return (*this)(); }
 
-	int count() { return mFiles.size(); }
+	int count() { return static_cast<int>(mFiles.size()); }
 
 	void print() const;
 

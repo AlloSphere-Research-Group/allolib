@@ -2,9 +2,9 @@
 
 using namespace al;
 
-void EasyVAO::updateIndices(unsigned int* data, int size)
+void EasyVAO::updateIndices(unsigned int* data, size_t size)
 {
-    mNumIndices = size;
+    mNumIndices = static_cast<int>(size);
     if (!mIndexBuffer.created())
     {
         mIndexBuffer.create();
@@ -15,7 +15,7 @@ void EasyVAO::updateIndices(unsigned int* data, int size)
     // mIndexBuffer.unbind();
 }
 
-void EasyVAO::update(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType)
+void EasyVAO::update(void* data, size_t typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType)
 {
     validate();
     bind();
@@ -23,7 +23,7 @@ void EasyVAO::update(void* data, int typeSize, int arraySize, MeshAttrib& attrib
     // unbind();
 }
 
-void EasyVAO::updateWithoutBinding(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType) {
+void EasyVAO::updateWithoutBinding(void* data, size_t typeSize, size_t arraySize, MeshAttrib& attrib, unsigned int dataType) {
     // only enable attribs with content
     if (arraySize > 0) {
         enableAttrib(attrib.layoutIndex);
@@ -50,7 +50,7 @@ void EasyVAO::update(Mesh& m) {
     primitive(m.primitive());
     validate();
     bind();
-    mNumVertices = m.vertices().size();
+    mNumVertices = static_cast<unsigned int>(m.vertices().size());
     updateWithoutBinding(m.vertices().data(), sizeof(Vec3f), m.vertices().size(), mPositionAtt);
     updateWithoutBinding(m.colors().data(), sizeof(Vec4f), m.colors().size(), mColorAtt);
     updateWithoutBinding(m.texCoord2s().data(), sizeof(Vec2f), m.texCoord2s().size(), mTexcoord2dAtt);

@@ -57,64 +57,56 @@ public:
     };
 
     template <typename T>
-    void updatePosition(T* data, int arraySize, unsigned int dataType = GL_FLOAT)
+    void updatePosition(T* data, size_t arraySize, unsigned int dataType = GL_FLOAT)
     {
-        mNumVertices = arraySize;
-        int typeSize = sizeof(T);
-        update(data, typeSize, arraySize, mPositionAtt, dataType);
+        mNumVertices = static_cast<int>(arraySize);
+        update(data, sizeof(T), arraySize, mPositionAtt, dataType);
     }
 
     template <typename T>
-    void updateColor(T* data, int arraySize, unsigned int dataType=GL_FLOAT)
+    void updateColor(T* data, size_t arraySize, unsigned int dataType=GL_FLOAT)
     {
-        int typeSize = sizeof(T);
-        update(data, typeSize, arraySize, mColorAtt, dataType);
+        update(data, sizeof(T), arraySize, mColorAtt, dataType);
     }
     template <typename T>
-    void updateTexcoord(T* data, int arraySize, unsigned int dataType = GL_FLOAT)
+    void updateTexcoord(T* data, size_t arraySize, unsigned int dataType = GL_FLOAT)
     {
-        int typeSize = sizeof(T);
-        update(data, typeSize, arraySize, mTexcoord2dAtt, dataType);
+        update(data, sizeof(T), arraySize, mTexcoord2dAtt, dataType);
     }
 
     template <typename T>
-    void updateNormal(T* data, int arraySize, unsigned int dataType = GL_FLOAT)
+    void updateNormal(T* data, size_t arraySize, unsigned int dataType = GL_FLOAT)
     {
-        int typeSize = sizeof(T);
-        update(data, typeSize, arraySize, mNormalAtt, dataType);
+        update(data, sizeof(T), arraySize, mNormalAtt, dataType);
     }
 
     template <typename T>
-    void updateExtra1D(T* data, int arraySize, unsigned int dataType = GL_FLOAT)
+    void updateExtra1D(T* data, size_t arraySize, unsigned int dataType = GL_FLOAT)
     {
-        int typeSize = sizeof(T);
-        update(data, typeSize, arraySize, mExtra1dAtt, dataType);
+        update(data, sizeof(T), arraySize, mExtra1dAtt, dataType);
     }
 
     template <typename T>
-    void updateExtra2D(T* data, int arraySize, unsigned int dataType = GL_FLOAT)
+    void updateExtra2D(T* data, size_t arraySize, unsigned int dataType = GL_FLOAT)
     {
-        int typeSize = sizeof(T);
-        update(data, typeSize, arraySize, mExtra2dAtt, dataType);
+        update(data, sizeof(T), arraySize, mExtra2dAtt, dataType);
     }
 
     template <typename T>
-    void updateExtra3D(T* data, int arraySize, unsigned int dataType = GL_FLOAT)
+    void updateExtra3D(T* data, size_t arraySize, unsigned int dataType = GL_FLOAT)
     {
-        int typeSize = sizeof(T);
-        update(data, typeSize, arraySize, mExtra3dAtt, dataType);
+        update(data, sizeof(T), arraySize, mExtra3dAtt, dataType);
     }
 
     template <typename T>
-    void updateExtra4D(T* data, int arraySize, unsigned int dataType = GL_FLOAT)
+    void updateExtra4D(T* data, size_t arraySize, unsigned int dataType = GL_FLOAT)
     {
-        int typeSize = sizeof(T);
-        update(data, typeSize, arraySize, mExtra4dAtt, dataType);
+        update(data, sizeof(T), arraySize, mExtra4dAtt, dataType);
     }
 
     // indices should be unsigned int
-    void updateIndices(unsigned int* data, int size);
-    void update(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
+    void updateIndices(unsigned int* data, size_t size);
+    void update(void* data, size_t typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
     void primitive(unsigned int prim);
     void draw();
 
@@ -122,11 +114,11 @@ public:
     void update(Mesh& m);
 
 private:
-    void updateWithoutBinding(void* data, int typeSize, int arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
+    void updateWithoutBinding(void* data, size_t typeSize, size_t arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
     
     unsigned int mGLPrimMode = GL_TRIANGLES;
-    unsigned int mNumVertices = 0;
-    unsigned int mNumIndices = 0;
+	int mNumVertices = 0;
+	int mNumIndices = 0;
     MeshAttrib
         mPositionAtt {LAYOUT_POSITION, DIMENSION_POSITION},
         mColorAtt {LAYOUT_COLOR, DIMENSION_COLOR},

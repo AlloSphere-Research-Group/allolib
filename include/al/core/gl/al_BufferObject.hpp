@@ -89,7 +89,7 @@ public:
   /// Unbind buffer
   void unbind() const;
 
-  void data(int size, void const* src=NULL);
+  void data(size_t size, void const* src=NULL);
   void subdata(int offset, int size, void const* src);
 
   // #ifdef AL_GRAPHICS_USE_OPENGL
@@ -121,7 +121,7 @@ protected:
   unsigned int mType;
   unsigned int mUsage;
   // unsigned int mMapMode;
-  int mSize;
+  size_t mSize;
   virtual void onCreate();
   virtual void onDestroy();
 };
