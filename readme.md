@@ -15,10 +15,11 @@ DEPENDENCIES
 
 - GLFW
 - GLEW
+- pkg-config (ubuntu and macos)
 
 NOTE
 
-For visual studio, cmake with version at least 3.8 is recommended. Version 3.8 has a feature for setting the working directory of Visual Studio project within cmake script. Otherwise, user will have to set it manually at
+For visual studio, cmake with version at least 3.8 is required. Version 3.8 has a feature for setting the working directory of Visual Studio project within cmake script. Otherwise, user will have to set it manually at
 
 `project -> properties -> debugging -> working directory`
 
