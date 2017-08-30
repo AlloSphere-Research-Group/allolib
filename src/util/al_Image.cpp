@@ -288,7 +288,6 @@ public:
         int components, int width, int height,
         int compressFlags)
     {
-
         // check existing image type
         FREE_IMAGE_FORMAT fileType = FreeImage_GetFIFFromFilename(filename.c_str());
 
@@ -302,7 +301,6 @@ public:
         }
 
         // Image::Format format = Image::getFormat(arr.components);
-        // Image::Format format = Image::getFormat(components);
 
         // if(FIF_JPEG == fileType && (Image::RGBA == format || Image::LUMALPHA == format)){
         if(FIF_JPEG == fileType && (components == 4 || components == 2)){
@@ -329,9 +327,10 @@ public:
 
         //printf("w=%d, h=%d, bpp=%d, stride=%d\n", w,h,bpp,rowstride);
 
-        switch(components) {
+        Image::Format format = Image::getFormat(components);
+        switch (format) {
 
-            case 1: { // Image::LUMINANCE
+            case Image::LUMINANCE: {
                 for(unsigned j = 0; j < height; ++j) {
                     memcpy(
                         FreeImage_GetScanLine(mImage, j),
@@ -343,7 +342,7 @@ public:
             break;
 
             // TODO: must save as RGBA
-            case 2: //Image::LUMALPHA:
+            case Image::LUMALPHA:
                 AL_WARN("input Array component type not supported");
             break;
 
@@ -352,7 +351,7 @@ public:
             DIB, you should always use FreeImage macros or RGBTRIPLE / RGBQUAD
             structures in order to write OS independent code.
             */
-            case 3: { //Image::RGB
+            case Image::RGB: {
                 // char *bp = (char *)(arr.data());
                 // char *bp = (char *)(dataPtr);
 
@@ -368,7 +367,7 @@ public:
             }
             break;
 
-            case 4: { // Image::RGBA
+            case Image::RGBA: {
                 // char *bp = (char *)(arr.data());
                 // char *bp = (char *)(dataPtr);
 
