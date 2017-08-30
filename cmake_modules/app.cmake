@@ -117,6 +117,12 @@ if (AL_WINDOWS)
     )
   endif (USE_APR)
 
+  if (FREEIMAGE_FOUND)
+    list(APPEND post_build_command
+      robocopy ${al_path}/dependencies/FreeImage/Dist/x64 ${app_path}/bin FreeImage.dll &
+    )
+  endif (FREEIMAGE_FOUND)
+  
   list(APPEND post_build_command
     IF %ERRORLEVEL% LEQ 1 exit 0
   )

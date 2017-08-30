@@ -9,6 +9,8 @@ option(USE_APR "" OFF)
 
 # al_path needs to be set prior to calling this script
 
+
+
 if (AL_WINDOWS)
 
   if (USE_APR)
@@ -16,24 +18,37 @@ if (AL_WINDOWS)
     set(APR_LIBRARIES ${al_path}/dependencies/apr/libapr-1.lib)
   endif (USE_APR)
 
+  FIND_PATH(FREEIMAGE_INCLUDE_PATH FreeImage.h
+    ${al_path}/dependencies/FreeImage/Dist/x64
+    DOC "The directory where FreeImage.h resides")
+  FIND_LIBRARY(FREEIMAGE_LIBRARY
+    NAMES FreeImage freeimage
+    PATHS ${al_path}/dependencies/FreeImage/Dist/x64
+    DOC "The FreeImage library")
+
+  IF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
+    SET( FREEIMAGE_FOUND TRUE)
+  ELSE (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
+    SET( FREEIMAGE_FOUND FALSE)
+  ENDIF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
+
 else ()
+
+  find_package(PkgConfig REQUIRED)
+  if (USE_APR)
+    pkg_search_module(APR REQUIRED apr-1)
+  endif (USE_APR)
 
   list(APPEND CMAKE_MODULE_PATH
     ${al_path}/cmake_modules/find_scripts
   )
-
-  find_package(PkgConfig REQUIRED)
-
-  if (USE_APR)
-    pkg_search_module(APR REQUIRED apr-1)
-  endif (USE_APR)
 
   find_package(FreeImage) # uses cmake_modules/find_scripts/FindFreeImage.cmake
                           # and sets:
                           #     FREEIMAGE_FOUND
                           #     FREEIMAGE_INCLUDE_PATH
                           #     FREEIMAGE_LIBRARY
-  
+
 endif (AL_WINDOWS)
 
 if (USE_APR)
@@ -46,6 +61,7 @@ if (USE_APR)
 endif(USE_APR)
 
 if (FREEIMAGE_FOUND)
+  message("found freeimage")
   set(FREEIMAGE_HEADERS
     ${al_path}/include/al/util/al_Image.hpp
   )

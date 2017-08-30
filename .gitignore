@@ -15,6 +15,7 @@ dependencies/glew/
 dependencies/cuttlebone/
 dependencies/glv/
 dependencies/gamma/
+dependencies/FreeImage/
 build/
 */build/
 */build2/
