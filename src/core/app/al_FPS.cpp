@@ -6,7 +6,7 @@ using namespace al;
 
 void FPS::fps(double f) {
   mFPSWanted = f;
-  interval = al_time_s2ns / f;
+  interval = static_cast<al_nsec>(al_time_s2ns / f);
 }
 
 double FPS::fpsWanted() {
@@ -26,7 +26,7 @@ double FPS::msec() {
 }
 
 double FPS::dt() {
-  return deltaTime;
+  return static_cast<double>(deltaTime);
 }
 
 void FPS::startFPS() {
