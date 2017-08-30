@@ -36,8 +36,8 @@ public:
     while (!shouldQuit()) {
       // user can quit this loop with WindowApp::quit() or clicking close button
       // or with stdctrl class input (ctrl+q)
-      preOnAnimate(dt() / 1000000);
-      onAnimate(dt() / 1000000); // millis for dt
+      preOnAnimate(dt());
+      onAnimate(dt());
       loop(); // WindowApp (onDraw, refresh)
       tickFPS(); // WindowApp (FPS)
     }
