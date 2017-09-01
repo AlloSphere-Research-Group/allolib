@@ -29,6 +29,7 @@ set(dirs_to_include
 )
 
 set(libs_to_link
+  ${app_link_libs}
   ${CORE_LIBRARIES}
   ${ADDITIONAL_LIBRARIES}
   ${EXTERNAL_LIBRARIES}

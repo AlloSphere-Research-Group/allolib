@@ -5,7 +5,9 @@ using namespace al;
 
 VAOMesh::VAOMesh() {
     vaoWrapper = std::make_shared<VAOWrapper>();
-    // std::cout << "empty ctor" << std::endl;
+}
+VAOMesh::VAOMesh(Mesh::Primitive p): Mesh(p) {
+    vaoWrapper = std::make_shared<VAOWrapper>();
 }
 
 // when copying, make new vao
