@@ -52,7 +52,7 @@ public:
 
 class EasyApp : public App {
 public:
-  Graphics g {*this};
+  Graphics g {this};
   Viewpoint view;
   NavInputControl nav;
 
@@ -63,13 +63,13 @@ public:
   class EasyAppEventHandler : public WindowEventHandler {
   public:
     EasyApp* app;
-    EasyAppEventHandler(EasyApp& a): app(&a) {}
+    EasyAppEventHandler(EasyApp* a): app(a) {}
     virtual bool resize(int dw, int dh) override {
       app->view.viewport(0, 0, app->fbWidth(), app->fbHeight());
       return true;
     }
   };
-  EasyAppEventHandler eventHandler {*this};
+  EasyAppEventHandler eventHandler {this};
 
   virtual void preOnCreate() override {
     append(eventHandler);

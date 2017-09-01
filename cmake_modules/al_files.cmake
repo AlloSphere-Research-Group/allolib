@@ -49,6 +49,7 @@ set(core_sources
   src/core/app/al_FPS.cpp
   src/core/app/al_WindowApp.cpp
   src/core/gl/al_BufferObject.cpp
+  src/core/gl/al_DefaultShaders.cpp
   src/core/gl/al_EasyFBO.cpp
   src/core/gl/al_EasyVAO.cpp
   src/core/gl/al_FBO.cpp

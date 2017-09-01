@@ -18,12 +18,13 @@
 
 namespace al {
 
-class WindowApp : public Window, public WindowEventHandler, public FPS {
+class WindowApp : public Window, public WindowEventHandler,
+  public FPS
+{
 public:
   // basic window app keyboard actions: fullscreen, quit, ...
   struct StandardWindowAppKeyControls : WindowEventHandler {
-    WindowApp* app_;
-    void app(WindowApp* const a) { app_ = a; }
+    WindowApp* app;
     bool keyDown(const Keyboard& k);
   };
   StandardWindowAppKeyControls stdControls;
@@ -33,8 +34,12 @@ public:
   WindowApp();
   // virtual ~WindowApp();
 
-  void quit();
-  bool shouldQuit();
+  void quit() {
+    mShouldQuitApp = true;
+  }
+  bool shouldQuit() {
+    return mShouldQuitApp || shouldClose();
+  }
 
   // could and should be overrided
   // when subclass inherits from other app classes (AudioApp, etc.)
@@ -77,7 +82,9 @@ public:
   virtual bool resize(int dw, int dh) override;
   virtual bool visibility(bool v) override;
 
-  int frameCount();
+  int frameCount() {
+    return mFrameCount;
+  }
 };
 
 }

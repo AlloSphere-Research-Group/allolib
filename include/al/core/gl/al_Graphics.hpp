@@ -173,7 +173,7 @@ public:
     FILL          = GL_FILL         /**< Render vertices normally according to primitive */
   };
 
-  Graphics(Window& window);
+  Graphics(Window* window);
 
   /// Enable a capability
   void enable(Capability v){ glEnable(v); }
@@ -353,7 +353,7 @@ public:
   void clearDepth();
   void clearDepth(float d);
   void clear(float r, float g, float b, float a=1, float d=1, int drawbuffer = 0);
-  void clear(float blackAndWhite);
+  void clear(float grayscale);
 
   void uniformColor(float r, float g, float b, float a = 1.0f);
   void uniformColor(Color const& c);

@@ -4,6 +4,7 @@
 /*  Keehong Youn, 2017, younkeehong@gmail.com
 */
 
+#include "al/core/gl/al_Shader.hpp"
 #include <string>
 
 inline std::string al_mesh_vert_shader() { return R"(
@@ -93,5 +94,18 @@ void main() {
 )";}
 
 // ----------------------------------------------------------------------------
+
+namespace al {
+
+enum class ShaderType : unsigned char {
+	COLOR,
+	MESH,
+	TEXTURE,
+	LIGHTING
+};
+
+void compile(ShaderProgram& s, ShaderType type);
+
+}
 
 #endif

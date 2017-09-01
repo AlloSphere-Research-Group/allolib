@@ -38,7 +38,7 @@ bool Graphics::error(const char * msg, int ID){
   return false;
 }
 
-Graphics::Graphics(Window& window): mWindow(window) {}
+Graphics::Graphics(Window* window): mWindow(*window) {}
 
 void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq){
   glBlendEquation(eq);
@@ -150,8 +150,8 @@ void Graphics::clear(float r, float g, float b, float a, float d, int drawbuffer
     clearColor(r, g, b, a, drawbuffer);
     clearDepth(d);
 }
-void Graphics::clear(float blackAndWhite) {
-  clear(blackAndWhite, blackAndWhite, blackAndWhite);
+void Graphics::clear(float grayscale) {
+  clear(grayscale, grayscale, grayscale);
 }
 
 void Graphics::viewport(const Viewport& v){
