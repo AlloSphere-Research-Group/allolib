@@ -2,7 +2,7 @@
 
 namespace al {
 
-void compile(ShaderProgram& s, ShaderType type)
+void compileDefaultShader(ShaderProgram& s, ShaderType type)
 {
 	switch (type) {
 		case ShaderType::COLOR:

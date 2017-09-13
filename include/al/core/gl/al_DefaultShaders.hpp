@@ -104,7 +104,7 @@ enum class ShaderType : unsigned char {
 	LIGHTING
 };
 
-void compile(ShaderProgram& s, ShaderType type);
+void compileDefaultShader(ShaderProgram& s, ShaderType type);
 
 }
 
