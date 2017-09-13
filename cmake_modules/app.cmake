@@ -1,3 +1,13 @@
+# project's CMakeLists.txt file includes this script
+
+# this script needs following to be predefined:
+#         app_name
+#         app_path
+#         app_files_list
+#         app_include_dirs (can be skipped)
+#         app_link_libs (can be skipped)
+#         al_path
+
 
 include(${al_path}/cmake_modules/configure_platform.cmake)
 # sets: AL_MACOS || AL_LINUX || AL_WINDOWS, and PLATFORM_DEFINITION
@@ -11,14 +21,6 @@ include(${al_path}/cmake_modules/external.cmake)
 #       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
 include(${al_path}/cmake_modules/basic_flags.cmake)
 # sets: basic_flags
-
-set(headers
-  ${ADDITIONAL_HEADERS}
-)
-
-set(sources
-  ${ADDITIONAL_SOURCES}
-)
 
 set(dirs_to_include
   ${al_path}/include
