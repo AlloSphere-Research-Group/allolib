@@ -52,18 +52,19 @@ if [ ${LIB_BUILD_RESULT} != 0 ]; then
 fi
 
 # then build the app ###########################################################
-echo " "
-echo "___ building ${APP_NAME} __________"
-echo " "
 
 APP_FILE_INPUT="$1" # first argument (assumming we consumed all the options above)
 APP_PATH=$(dirname ${APP_FILE_INPUT})
 APP_FILE=$(basename ${APP_FILE_INPUT})
 APP_NAME=${APP_FILE%.*} # remove extension (once, assuming .cpp)
 
-echo "app path: ${APP_PATH}"
-echo "app file: ${APP_FILE}"
-echo "app name: ${APP_NAME}"
+echo " "
+echo "___ building ${APP_NAME} __________"
+echo " "
+
+# echo "app path: ${APP_PATH}"
+# echo "app file: ${APP_FILE}"
+# echo "app name: ${APP_NAME}"
 
 cd ${INITIALDIR}
 cd ${APP_PATH}
@@ -84,8 +85,8 @@ fi
 # go to where the binary is so we have cwd there
 # (app's cmake is set to put binary in 'bin')
 cd ${INITIALDIR}
-cd ${APP_PATH}/bin
+cd ${APP_PATH}
 echo " "
 echo "___ running ${APP_NAME} __________"
 echo " "
-./"${APP_NAME}${POSTFIX}"
+./bin/"${APP_NAME}${POSTFIX}"

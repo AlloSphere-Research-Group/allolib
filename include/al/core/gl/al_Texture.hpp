@@ -79,6 +79,15 @@ myTex.update(); // remember to call update, this is not needed when calling crea
 
 */
 
+/*
+  
+  frequently used internal format
+  
+  GL_RGBA32F 32bit float * 4
+  GL_RGBA8 8bit int * 4
+
+*/
+
 namespace al {
 
 /// A simple wrapper around an OpenGL Texture
@@ -108,9 +117,9 @@ public:
 
   void create2D(
     unsigned int width, unsigned int height,
-    int internal = GL_RGBA32F,
+    int internal = GL_RGBA8,
     unsigned int format = GL_RGBA,
-    unsigned int type = GL_FLOAT
+    unsigned int type = GL_UNSIGNED_BYTE // or GL_FLOAT is used
   );
 
   // TODO
@@ -118,9 +127,9 @@ public:
 
   void createCubemap(
     unsigned int size,
-    int internal = GL_RGBA32F,
+    int internal = GL_RGBA8,
     unsigned int format = GL_RGBA,
-    unsigned int type = GL_FLOAT
+    unsigned int type = GL_UNSIGNED_BYTE // or GL_FLOAT is used
   );
 
 
