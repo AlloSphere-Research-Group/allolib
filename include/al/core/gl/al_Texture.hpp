@@ -83,8 +83,11 @@ myTex.update(); // remember to call update, this is not needed when calling crea
   
   frequently used internal format
   
-  GL_RGBA32F 32bit float * 4
-  GL_RGBA8 8bit int * 4
+  GL_RGBA32F
+  GL_RGBA8
+
+  GL_DEPTH_COMPONENT32F
+  GL_DEPTH_COMPONENT16
 
 */
 

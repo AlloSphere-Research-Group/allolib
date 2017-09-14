@@ -77,11 +77,12 @@ GL_RGBA32UI, GL_RG32UI, GL_RED32UI
 GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32F
 GL_DEPTH24_STENCIL8, GL_DEPTH32F_STENCIL8
 */
+
 class RBO : public GPUObject{
 public:
 
   /// @param[in] format  internal format of buffer
-  RBO(unsigned int format = GL_DEPTH_COMPONENT32F);
+  RBO(unsigned int format = GL_DEPTH_COMPONENT16);
 
   ~RBO() {
       destroy();
@@ -108,7 +109,7 @@ public:
 
   void create(
     unsigned int width, unsigned int height,
-    unsigned int format=GL_DEPTH_COMPONENT32F
+    unsigned int format=GL_DEPTH_COMPONENT16
   ) {
     mFormat = format;
     resize(width, height);
@@ -160,7 +161,7 @@ public:
   //   DEPTH_ATTACHMENT      = GL_DEPTH_ATTACHMENT_EXT,
   //   STENCIL_ATTACHMENT      = GL_STENCIL_ATTACHMENT_EXT
   // };
-  
+
   /*
     GL_COLOR_ATTACHMENTi
     GL_DEPTH_ATTACHMENT

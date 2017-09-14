@@ -48,10 +48,10 @@
 namespace al {
 
 struct EasyFBOSetting {
-    int internal = GL_RGBA32F;
+    int internal = GL_RGBA8;
     unsigned int format = GL_RGBA;
-    unsigned int type = GL_FLOAT;
-    unsigned int depth_format = GL_DEPTH_COMPONENT32F;
+    unsigned int type = GL_UNSIGNED_BYTE;
+    unsigned int depth_format = GL_DEPTH_COMPONENT16;
     int wrapS = GL_CLAMP_TO_EDGE;
     int wrapT = GL_CLAMP_TO_EDGE;
     int wrapR = GL_CLAMP_TO_EDGE;
