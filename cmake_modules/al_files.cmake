@@ -34,7 +34,7 @@ set(core_headers
   include/al/core/math/al_Mat.hpp
   include/al/core/math/al_Matrix4.hpp
   include/al/core/math/al_Quat.hpp
-  # include/al/core/math/al_Random.hpp
+  include/al/core/math/al_StdRandom.hpp
   include/al/core/math/al_Vec.hpp
   include/al/core/protocol/al_OSC.hpp
   include/al/core/spatial/al_Pose.hpp
@@ -75,6 +75,7 @@ set(core_sources
   src/core/io/al_MIDI.cpp
   src/core/io/al_Window.cpp
   src/core/io/al_WindowGLFW.cpp
+  src/core/math/al_StdRandom.cpp
   src/core/protocol/al_OSC.cpp
   src/core/spatial/al_Pose.cpp
   src/core/system/al_Printing.cpp

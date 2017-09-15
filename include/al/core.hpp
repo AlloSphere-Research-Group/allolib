@@ -37,7 +37,7 @@
 #include "al/core/math/al_Mat.hpp"
 #include "al/core/math/al_Matrix4.hpp"
 #include "al/core/math/al_Quat.hpp"
-// #include "al/core/math/al_Random.hpp"
+#include "al/core/math/al_StdRandom.hpp"
 #include "al/core/math/al_Vec.hpp"
 
 #include "al/core/protocol/al_OSC.hpp"

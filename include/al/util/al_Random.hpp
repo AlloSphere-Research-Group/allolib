@@ -42,6 +42,8 @@
   Lance Putnam, 2006, putnam.lance@gmail.com
 */
 
+#include "al/core/math/al_StdRandom.hpp"
+
 /* req'd for int to float conversion */
 #include "al/util/al_Conversion.hpp"
 #include "al/core/math/al_Constants.hpp"
@@ -58,7 +60,6 @@ namespace rnd{
 class LinCon;
 class MulLinCon;
 class Tausworthe;
-class MersenneTwister;
 template<class RNG> class Random;
 
 
@@ -158,7 +159,6 @@ public:
 protected:
   RNG mRNG;
 };
-
 
 
 /// Linear congruential uniform pseudo-random number generator.
@@ -299,85 +299,6 @@ private:
   void iterate();
 };
 
-class MersenneTwister {
-public:
-  MersenneTwister() {
-    std::random_device rd;
-    mt.seed(rd());
-  }
-
-  MersenneTwister(uint32_t seed) {
-    mt.seed(seed);
-  }
-
-  uint32_t operator()() {
-    return mt();
-  }
-
-  void seed(uint32_t v) {
-    mt.seed(v);
-  }
-  
-private:
-  std::mt19937 mt;
-};
-
-
-/// Get global random number generator
-inline Random<>& global(){ static Random<> r; return r; }
-
-/// Returns point within a unit ball
-
-/// To get a random point on a sphere, simply normalize the result.
-/// \tparam    N    dimensions of ball
-/// @param[in]  point  an array of size N
-template <int N, class T>
-inline void ball(T * point){ global().ball<N>(point); }
-
-/// Returns point within a unit ball
-template <template<int,class> class VecType, int N, class T>
-inline void ball(VecType<N,T>& point){ ball<N>(&point[0]); }
-
-/// Returns point within a unit ball
-template <class VecType>
-inline VecType ball(){ VecType v; ball(v); return v; }
-
-/// Returns standard normal variate
-inline float normal(){ return global().normal(); }
-inline float gaussian(){ return normal(); }
-
-/// Returns triangle distribution variate, in (-1,1)
-inline float triangle(){ return global().triangle(); }
-
-/// Returns true with probability 0.5
-inline bool prob(){ return global().prob(); }
-
-/// Returns true with probability p
-inline bool prob(float p){ return global().prob(p); }
-
-/// Returns argument with sign randomly flipped
-inline float sign(float x=1.f){ return global().sign(x); }
-
-/// Returns uniform random in [0, 1)
-inline float uniform(){ return global().uniform(); }
-
-/// Returns uniform random in [0, hi)
-template <class T>
-inline T uniform(const T& hi){ return global().uniform(hi); }
-
-/// Returns uniform random in [lo, hi)
-template <class T>
-inline T uniform(const T& hi, const T& lo){ return global().uniform(hi,lo); }
-
-/// Returns signed uniform random in (-1, 1)
-inline float uniformS(){ return global().uniformS(); }
-
-/// Returns signed uniform random in (-lim, lim)
-template <class T>
-inline T uniformS(const T& lim){ return global().uniformS(lim); }
-
-
-
 // Implementation_______________________________________________________________
 
 inline Tausworthe::Tausworthe(){ seed(al::rnd::seed()); }
@@ -475,6 +396,87 @@ void Random<RNG>::shuffle(T * arr, uint32_t len){
 }
 
 } // al::rnd::
+
+// for using std random class with al_Random interface
+
+class StdRnd {
+public:
+    rand_uniformf mUniformf;
+    rand_uniformi mUniformi;
+
+    StdRnd(): mUniformf {} {}
+    StdRnd(unsigned int seed): mUniformf {seed}, mUniformi {seed} {}
+
+    // [0, 1)
+    float operator() () { return mUniformf(); }
+    float operator() (float hi) { return mUniformf(0, hi); }
+    float operator() (float lo, float hi) { return mUniformf(lo, hi); }
+
+    void seed(unsigned int s) {
+        mUniformf.seed(s);
+    }
+
+    int randi(int hi) { return mUniformi(0, hi); }
+    int randi(int lo, int hi) { return mUniformi(lo, hi); }
+
+    void seedi(unsigned int s) {
+        mUniformi.seed(s);
+    }
+};
+
+using StdRandom = rnd::Random<StdRnd>;
+
+template<>
+float StdRandom::uniform() {
+    return mRNG();
+}
+
+template<>
+template<typename T>
+T StdRandom::uniform(T const& hi) {
+    return static_cast<T>(mRNG(float(hi)));
+}
+
+template<>
+template<typename T>
+T StdRandom::uniform(T const& hi, T const& lo) {
+    return static_cast<T>(mRNG(float(lo), float(hi)));
+}
+
+template<>
+float StdRandom::uniformS() {
+    return mRNG(-1.0f, 1.0f);
+}
+
+template<>
+template<typename T>
+T StdRandom::uniformS(T const& lim) {
+    return static_cast<T>(mRNG(float(-lim), float(lim)));
+}
+
+template <>
+float StdRandom::triangle() {
+    return 0.5f * (uniformS() + uniformS());
+}
+
+template <>
+float StdRandom::sign(float x) {
+    static float arr[2] = {-1.0f, 1.0f};
+    return x * arr[mRNG.randi(0, 1)];
+}
+
+template <>
+template <class T>
+void StdRandom::shuffle(T * arr, uint32_t len) {
+    for (uint32_t i = len-1; i > 0; i -= 1) {
+        uint32_t j = mRNG.randi(i+1);
+        T t = arr[i];
+        arr[i] = arr[j];
+        arr[j] = t;
+    }
+}
+
 } // al::
+
 #endif
 
