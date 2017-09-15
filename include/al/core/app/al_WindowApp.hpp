@@ -18,9 +18,7 @@
 
 namespace al {
 
-class WindowApp : public Window, public WindowEventHandler,
-  public FPS
-{
+class WindowApp : public Window, public WindowEventHandler, public FPS {
 public:
   // basic window app keyboard actions: fullscreen, quit, ...
   struct StandardWindowAppKeyControls : WindowEventHandler {
@@ -32,11 +30,8 @@ public:
   int mFrameCount = 0;
 
   WindowApp();
-  // virtual ~WindowApp();
 
-  void quit() {
-    mShouldQuitApp = true;
-  }
+  void quit() { mShouldQuitApp = true; }
   bool shouldQuit() {
     return mShouldQuitApp || shouldClose();
   }
@@ -54,7 +49,6 @@ public:
   virtual void close();
 
   // user will override these
-  virtual void onInit() {}
   virtual void onCreate() {}
   virtual void onDraw() {}
   virtual void onKeyDown(Keyboard const& k) {}
@@ -65,12 +59,6 @@ public:
   virtual void onMouseMove(Mouse const& m) {}
   virtual void onResize(int w, int h) {}
   virtual void onVisibility(bool v) {}
-
-  // for child classes to override
-  virtual void preOnCreate() {}
-  virtual void postOnCreate() {}
-  virtual void preOnDraw() {}
-  virtual void postOnDraw() {}
 
   // call user event functions using WindowEventHandler class
   virtual bool keyDown(const Keyboard& k) override;
@@ -85,6 +73,7 @@ public:
   int frameCount() {
     return mFrameCount;
   }
+
 };
 
 }

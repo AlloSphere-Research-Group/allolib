@@ -5,23 +5,23 @@
 using namespace al;
 
 bool WindowApp::StandardWindowAppKeyControls::keyDown(const Keyboard& k){
-      if(k.ctrl()){
-        switch(k.key()){
-          case 'q': app->quit(); return false;
-          // case 'h': window().hide(); return false;
-          // case 'm': window().iconify(); return false;
-          // case 'c': window().cursorHideToggle(); return false;
-          default:;
-        }
-      }
-      else{
-        switch(k.key()){
-          case Keyboard::ESCAPE: app->fullScreenToggle(); return false;
-          default:;
-        }
-      }
-      return true;
+  if(k.ctrl()){
+    switch(k.key()){
+      case 'q': app->quit(); return false;
+      // case 'h': window().hide(); return false;
+      // case 'm': window().iconify(); return false;
+      case 'c': window().cursorHideToggle(); return false;
+      default:;
     }
+  }
+  else{
+    switch(k.key()){
+      case Keyboard::ESCAPE: app->fullScreenToggle(); return false;
+      default:;
+    }
+  }
+  return true;
+}
 
 WindowApp::WindowApp() {
     stdControls.app = this;
@@ -29,22 +29,14 @@ WindowApp::WindowApp() {
     append(windowEventHandler());
 }
 
-// WindowApp::~WindowApp() {}
-
 void WindowApp::open() {
   glfw::init();
-  onInit();
   create();
-  gl::default_gl_settings();
-  preOnCreate();
   onCreate();
-  postOnCreate();
 }
 
 void WindowApp::loop() {
-  preOnDraw();
   onDraw();
-  postOnDraw();
   refresh();
   mFrameCount += 1;
 }
@@ -68,7 +60,7 @@ void WindowApp::start() {
   close();
 }
 
-// call user event functions using WindowEventHandler class
+// call user event functions inside WindowEventHandler class
 bool WindowApp::keyDown(const Keyboard& k) {
   onKeyDown(k);
   return true;

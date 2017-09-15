@@ -8,6 +8,7 @@
 #include "al/core/app/al_AudioApp.hpp"
 #include "al/core/protocol/al_OSC.hpp"
 
+#include "al/core/gl/al_GLFW.hpp"
 #include "al/core/gl/al_Graphics.hpp"
 #include "al/core/gl/al_Viewpoint.hpp"
 #include "al/core/spatial/al_Pose.hpp"
@@ -23,10 +24,35 @@ namespace al {
 class App: public WindowApp, public AudioApp, public osc::PacketHandler {
 public:
 
+  virtual void onInit() {}
   virtual void onAnimate(double dt) {}
   virtual void onExit() {}
 
+  // for child classes to override
+  virtual void preOnCreate() {}
+  virtual void postOnCreate() {}
+  virtual void preOnDraw() {}
+  virtual void postOnDraw() {}
   virtual void preOnAnimate(double dt) {}
+
+  // from WindowApp
+  virtual void open() override {
+    glfw::init();
+    onInit();
+    create();
+    preOnCreate();
+    onCreate();
+    postOnCreate();
+  }
+
+  // from WindowApp
+  virtual void loop() override {
+    preOnDraw();
+    onDraw();
+    postOnDraw();
+    refresh();
+    mFrameCount += 1;
+  }
 
   // overrides WindowApp's start to also initiate AudioApp and etc.
   virtual void start() override {
@@ -43,7 +69,7 @@ public:
     }
     onExit(); // user defined
     endAudio(); // AudioApp
-    close(); // WindowApp (calls onExit)
+    close(); // WindowApp
   }
 
   // PacketHandler

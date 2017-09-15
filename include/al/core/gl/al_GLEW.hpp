@@ -21,8 +21,6 @@ namespace gl
 
 bool loaded();
 
-void default_gl_settings();
-
 }
 
 }

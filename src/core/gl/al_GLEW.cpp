@@ -33,8 +33,3 @@ void glew::init() {
 bool gl::loaded() {
   return glew_loaded();
 }
-
-void gl::default_gl_settings() {
-	glDisable(GL_LINE_SMOOTH); // acts weirdly depending on OS / version
-	glLineWidth(1); // only 1 is guaranteed to be supported...
-}
