@@ -191,6 +191,10 @@ void Graphics::camera(Viewpoint::SpecialType v) {
   camera(v, 0, 0, mWindow.fbWidth(), mWindow.fbHeight());
 }
 
+void Graphics::camera(Viewpoint::SpecialType v, int w, int h) {
+  camera(v, 0, 0, w, h);
+}
+
 void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
   switch (v) {
 

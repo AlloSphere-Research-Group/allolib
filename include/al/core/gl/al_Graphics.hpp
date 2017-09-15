@@ -382,6 +382,7 @@ public:
 
   void camera(Viewpoint& v);
   void camera(Viewpoint::SpecialType v);
+  void camera(Viewpoint::SpecialType v, int w, int h);
   void camera(Viewpoint::SpecialType v, int x, int y, int w, int h);
 
   void update();
