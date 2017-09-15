@@ -13,7 +13,11 @@ if (IS_DIRECTORY AL_APP_FILE)
   message("\n[!] pass file to this cmake script\n")
 endif ()
 
-get_filename_component(file_full_path ${CMAKE_CURRENT_BINARY_DIR}/${AL_APP_FILE} ABSOLUTE)
+if (IS_ABSOLUTE ${AL_APP_FILE})
+	get_filename_component(file_full_path ${AL_APP_FILE} ABSOLUTE)
+else ()
+	get_filename_component(file_full_path ${CMAKE_CURRENT_BINARY_DIR}/${AL_APP_FILE} ABSOLUTE)
+endif ()
 
 # app.cmake needs:
 #         app_name
