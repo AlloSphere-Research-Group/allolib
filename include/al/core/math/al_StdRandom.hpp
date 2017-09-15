@@ -2,6 +2,10 @@
 #define INCLUDE_AL_STD_RANDOM_HPP
 
 /*
+    For most use case,
+    inline functions in rnd:: namespace will do the work
+    ex) rnd::uniform(0, 100)
+
     Keehong Youn, 2017, younkeehong@gmail.com
 */
 
