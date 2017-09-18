@@ -377,6 +377,10 @@ public:
   void scissor(const Viewport& v);
   Viewport scissor() const;
 
+  void framebuffer(FBO& fbo) { fbo.bind(); }
+  void framebuffer(unsigned int fboID) { FBO::bind(fboID); }
+
+
   void shader(ShaderProgram& s);
   ShaderProgram& shader();
 

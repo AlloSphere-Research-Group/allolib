@@ -5,14 +5,10 @@
 
 using namespace al;
 
-bool& glew_loaded() {
-  static bool b;
-  return b;
-}
+bool glew_loaded = false;
 
 void glew::init() {
-  // static bool inited = false;
-  if (glew_loaded()) {
+  if (glew_loaded) {
     std::cout << "GLEW already initialized" << std::endl;
     return;
   }
@@ -25,11 +21,10 @@ void glew::init() {
     exit(EXIT_FAILURE); // FIXME? is this recommended way of terminating?
   }
   std::cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
-  // inited = true;/
-  glew_loaded() = true;
+  glew_loaded = true;
 }
 
 
 bool gl::loaded() {
-  return glew_loaded();
+  return glew_loaded;
 }
