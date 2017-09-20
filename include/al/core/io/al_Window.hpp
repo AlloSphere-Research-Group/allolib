@@ -292,8 +292,7 @@ public:
   int fbHeight() const;
   int fbWidth() const;
   
-  float x_highres() { return highres_factor_w; }
-  float y_highres() { return highres_factor_h; }
+  float highres_factor() { return mHighresFactor; }
 
   bool decorated() const;
 
@@ -354,8 +353,7 @@ protected:
   bool mDecorated = true;
 
   // for high pixel density monitors (RETINA, etc.)
-  float highres_factor_h = 0;
-  float highres_factor_w = 0;
+  float mHighresFactor = 0;
   int mFramebufferWidth = 0;
   int mFramebufferHeight = 0;
 

@@ -13,6 +13,7 @@
 #include "al/core/gl/al_Viewpoint.hpp"
 #include "al/core/spatial/al_Pose.hpp"
 #include "al/core/io/al_ControlNav.hpp"
+#include "al/core/gl/al_DefaultShaders.hpp"
 
 #include <iostream>
 

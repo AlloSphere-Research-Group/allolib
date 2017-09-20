@@ -82,7 +82,6 @@ struct Viewport {
 /// @ingroup allocore
 class Viewpoint : public Pose {
 public:
-  // Viewpoint(Viewport const& vp = Viewport(0, 0, 0, 0), Lens const& lens = Lens());
 
   const Lens& lens() const { return mLens; }
   Lens& lens() { return mLens; }
@@ -102,18 +101,24 @@ public:
   Viewpoint& viewport(Viewport const& vp){ mViewport = vp; return *this; }
   Viewpoint& viewport(int left, int bottom, int width, int height);
 
-  Matrix4f viewMatrix();
-  Matrix4f projMatrix();
+  Matrix4f viewMatrix() const;
+  Matrix4f projMatrix() const;
+  Matrix4f projMatrix(float x, float y, float w, float h) const;
 
-  Viewpoint& ortho(bool b = true) {
+  Viewpoint& ortho(bool b) {
     mIsOrtho = b;
     return *this;
   }
+  Viewpoint& ortho(float width, float height) {
+    return ortho(- width / 2, - height / 2, width / 2, height / 2);
+  }
+  Viewpoint& ortho(float left, float bottom, float right, float top);
 private:
-  // Pose* mPose; // local transform
   Lens mLens;
   Viewport mViewport; // screen display region
-  bool mIsOrtho {false};
+  float l, b, r, t; // for ortho
+  Matrix4f mOrthoMat;
+  bool mIsOrtho = false;
 
 public:
   enum SpecialType {

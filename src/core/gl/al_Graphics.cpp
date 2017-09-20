@@ -38,7 +38,7 @@ bool Graphics::error(const char * msg, int ID){
   return false;
 }
 
-Graphics::Graphics(Window* window): mWindow(*window) {}
+Graphics::Graphics(Window* window): mWindowPtr(window) {}
 
 void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq){
   glBlendEquation(eq);
@@ -154,9 +154,9 @@ void Graphics::clear(float grayscale) {
   clear(grayscale, grayscale, grayscale);
 }
 
-void Graphics::viewport(const Viewport& v){
-  glViewport(v.l, v.b, v.w, v.h);
-}
+// void Graphics::viewport(const Viewport& v){
+//   glViewport(v.l, v.b, v.w, v.h);
+// }
 
 void Graphics::viewport(int left, int bottom, int width, int height) {
   glViewport(left, bottom, width, height);
@@ -166,8 +166,13 @@ void Graphics::scissor(int left, int bottom, int width, int height) {
   glScissor(left, bottom, width, height);
 }
 
-void Graphics::scissor(const Viewport& v) {
-  glScissor(v.l, v.b, v.w, v.h);
+// void Graphics::scissor(const Viewport& v) {
+//   glScissor(v.l, v.b, v.w, v.h);
+// }
+
+void Graphics::framebuffer(unsigned int id) {
+  FBO::bind(id);
+  mFBOID = id;
 }
 
 void Graphics::shader(ShaderProgram& s) {
@@ -180,15 +185,27 @@ ShaderProgram& Graphics::shader() {
   return *mShaderPtr;
 }
 
-void Graphics::camera(Viewpoint& v) {
+void Graphics::camera(Viewpoint const& v) {
   mViewMat = v.viewMatrix();
   mProjMat = v.projMatrix();
-  viewport(v.viewport());
+  auto const& vp = v.viewport();
+  viewport(vp.l, vp.b, vp.w, vp.h, (mFBOID == 0)? mWindowPtr->highres_factor() : 1);
+  mMatChanged = true;
+}
+
+void Graphics::camera(Viewpoint const& v, int w, int h) {
+  camera(v, 0, 0, w, h);
+}
+
+void Graphics::camera(Viewpoint const& v, int x, int y, int w, int h) {
+  mViewMat = v.viewMatrix();
+  mProjMat = v.projMatrix(x, y, w, h);
+  viewport(x, y, w, h, (mFBOID == 0)? mWindowPtr->highres_factor() : 1);
   mMatChanged = true;
 }
 
 void Graphics::camera(Viewpoint::SpecialType v) {
-  camera(v, 0, 0, mWindow.fbWidth(), mWindow.fbHeight());
+  camera(v, 0, 0, mWindowPtr->width(), mWindowPtr->height());
 }
 
 void Graphics::camera(Viewpoint::SpecialType v, int w, int h) {
@@ -201,16 +218,14 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
   case Viewpoint::IDENTITY:
     mViewMat = Matrix4f::identity();
     mProjMat = Matrix4f::identity();
-    viewport(x, y, w, h);
     break;
 
   case Viewpoint::ORTHO_FOR_2D:
     // 1. place eye so that bottom left is (0, 0), top right is (width, height)
-    // 2. set lens to be ortho, with given (width and height)
+    // 2. set lens to be ortho, with given width and height
 
-    // viewport is in framebuffer unit, so get values in window pixel unit
-    float half_w = (w - x) * 0.5f / mWindow.x_highres();
-    float half_h = (h - y) * 0.5f / mWindow.y_highres();
+    float half_w = (w - x) * 0.5f;
+    float half_h = (h - y) * 0.5f;
 
     // z = 1 because 2D things will be drawn at z = 0
     // because of that we set near to 0.5 and far to 1.5
@@ -224,19 +239,15 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
       -half_h, half_h, // bottom, top
       0.5f, 1.5f // near, far
     );
-    viewport(x, y, w, h);
     break;
   }
 
+  // viewport is in framebuffer unit
+  viewport(x, y, w, h, (mFBOID == 0)? mWindowPtr->highres_factor() : 1);
   mMatChanged = true;
 }
 
 void Graphics::update() {
-    if (mShaderPtr == nullptr) {
-        AL_WARN_ONCE("shader not bound: bind shader by g.shader(myShader)");
-        return;
-    }
-
     if (mShaderChanged || mMatChanged) {
         shader().uniform("MV", viewMatrix() * modelMatrix());
         shader().uniform("P", projMatrix());

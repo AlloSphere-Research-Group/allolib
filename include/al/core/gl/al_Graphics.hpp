@@ -63,7 +63,6 @@
 #include "al/core/gl/al_FBO.hpp"
 #include "al/core/gl/al_EasyFBO.hpp"
 #include "al/core/io/al_Window.hpp"
-#include "al/core/gl/al_DefaultShaders.hpp"
 
 #include <iostream>
 #include <map>
@@ -73,17 +72,17 @@
   Used for reporting graphics errors from source files
 */
 //#define AL_ENABLE_DEBUG
-#ifdef AL_ENABLE_DEBUG
-#define AL_GRAPHICS_ERROR(msg, ID)\
-{ const char * errStr = al::Graphics::errorString();\
-  if(errStr[0]){\
-    if(ID>=0) AL_WARN_ONCE("Error " msg " (id=%d): %s", ID, errStr);\
-    else    AL_WARN_ONCE("Error " msg ": %s", errStr);\
-  }\
-}
-#else
-#define AL_GRAPHICS_ERROR(msg, ID) ((void)0)
-#endif
+// #ifdef AL_ENABLE_DEBUG
+// #define AL_GRAPHICS_ERROR(msg, ID)\
+// { const char * errStr = al::Graphics::errorString();\
+//   if(errStr[0]){\
+//     if(ID>=0) AL_WARN_ONCE("Error " msg " (id=%d): %s", ID, errStr);\
+//     else    AL_WARN_ONCE("Error " msg ": %s", errStr);\
+//   }\
+// }
+// #else
+// #define AL_GRAPHICS_ERROR(msg, ID) ((void)0)
+// #endif
 
 namespace al {
 
@@ -355,36 +354,24 @@ public:
   void clear(float r, float g, float b, float a=1, float d=1, int drawbuffer = 0);
   void clear(float grayscale);
 
-  void uniformColor(float r, float g, float b, float a = 1.0f);
-  void uniformColor(Color const& c);
-
-  void uniformColorMix(float m);
-
-  void textureMix(float m, int tex_num = 0);
-  void textureMix(float m0, float m1, float m2);
-  void texture(int binding_point, int tex_num = 0);
-  void texture(Texture& t, int tex_num = 0);
-
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
-  /// Set viewport
-  void viewport(const Viewport& v);
-  /// Get current viewport
-  Viewport viewport() const;
+  void viewport(int l, int b, int w, int h, float pixelDensity) {
+    viewport(l * pixelDensity, b * pixelDensity, w * pixelDensity, h * pixelDensity);
+  }
 
-  // scissor area is represented with Viewport class
   void scissor(int left, int bottom, int width, int height);
-  void scissor(const Viewport& v);
-  Viewport scissor() const;
 
-  void framebuffer(FBO& fbo) { fbo.bind(); }
-  void framebuffer(unsigned int fboID) { FBO::bind(fboID); }
-
+  void framebuffer(EasyFBO& easyFBO) { framebuffer(easyFBO.fbo().id()); }
+  void framebuffer(FBO& fbo) { framebuffer(fbo.id()); }
+  void framebuffer(unsigned int id);
 
   void shader(ShaderProgram& s);
   ShaderProgram& shader();
 
-  void camera(Viewpoint& v);
+  void camera(Viewpoint const& v);
+  void camera(Viewpoint const& v, int w, int h);
+  void camera(Viewpoint const& v, int x, int y, int w, int h);
   void camera(Viewpoint::SpecialType v);
   void camera(Viewpoint::SpecialType v, int w, int h);
   void camera(Viewpoint::SpecialType v, int x, int y, int w, int h);
@@ -395,10 +382,10 @@ public:
   void draw(Mesh& mesh);
   void draw(Mesh&& mesh);
 
-  Window& window() { return mWindow; }
+  Window& window() { return *mWindowPtr; }
 
 protected:
-  Window& mWindow;
+  Window* mWindowPtr;
 
   ShaderProgram* mShaderPtr = nullptr;
   bool mShaderChanged = false;
@@ -412,6 +399,8 @@ protected:
   float mClearDepth = 1;
 
   EasyVAO mInternalVAO;
+
+  unsigned int mFBOID = 0;
 };
 
 }

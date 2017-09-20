@@ -1,11 +1,12 @@
 #include "al/core/gl/al_Shader.hpp"
 #include "al/core/gl/al_GLEW.hpp"
-#include "al/core/gl/al_Graphics.hpp" // AL_GRAPHICS_ERROR
+// #include "al/core/gl/al_Graphics.hpp" // AL_GRAPHICS_ERROR
+#include "al/core/system/al_Printing.hpp"
 
-#include <stdio.h>
+// #include <stdio.h>
 #include <map>
 #include <string>
-#include <iostream>
+// #include <iostream>
 #include <cstring>
 
 using std::map;
@@ -62,9 +63,9 @@ Shader::Shader(const std::string& source, Shader::Type type)
 :  mSource(source), mType(type){}
 
 Shader& Shader::compile(){
-  AL_GRAPHICS_ERROR("(before Shader::compile)", id());
+  // AL_GRAPHICS_ERROR("(before Shader::compile)", id());
   validate(); // triggers a call to onCreate, if not created
-  AL_GRAPHICS_ERROR("Shader::compile", id());
+  // AL_GRAPHICS_ERROR("Shader::compile", id());
   return *this;
 }
 
@@ -73,36 +74,36 @@ bool Shader::compiled() const {
   GLhandleARB h = (GLhandleARB)id();
   glGetObjectParameterivARB(h, GL_COMPILE_STATUS, &v);
   //glGetProgramiv(id(), GL_COMPILE_STATUS, &v);
-  AL_GRAPHICS_ERROR("Shader::compiled()", id());
+  // AL_GRAPHICS_ERROR("Shader::compiled()", id());
   return v;
 }
 
 void Shader::get(int pname, void * params) const { glGetShaderiv(id(), pname, (GLint *)params); }
 
 void Shader::onCreate(){
-  AL_GRAPHICS_ERROR("(before Shader::onCreate)", id());
+  // AL_GRAPHICS_ERROR("(before Shader::onCreate)", id());
   mID = glCreateShader(gl_shader_type(mType));
   //printf("Create shader %lu\n",id());
   if(0 == id()){
     AL_WARN("Error creating shader object");
     return;
   }
-  AL_GRAPHICS_ERROR("glCreateShader", id());
+  // AL_GRAPHICS_ERROR("glCreateShader", id());
 
   if(mSource[0]){
     sendSource();
-    AL_GRAPHICS_ERROR("Shader::sendSource", id());
+    // AL_GRAPHICS_ERROR("Shader::sendSource", id());
     glCompileShader(id());
-    AL_GRAPHICS_ERROR("glCompileShader", id());
+    // AL_GRAPHICS_ERROR("glCompileShader", id());
   }
 }
 
 void Shader::onDestroy(){
-  AL_GRAPHICS_ERROR("(before Shader::onDestroy)", id());
+  // AL_GRAPHICS_ERROR("(before Shader::onDestroy)", id());
 //printf("Destroy shader %lu\n", id());
   //glDeleteObjectARB((GLhandleARB)handle());
   glDeleteShader(id());
-  AL_GRAPHICS_ERROR("glDeleteShader", id());
+  // AL_GRAPHICS_ERROR("glDeleteShader", id());
 }
 
 void Shader::sendSource(){
@@ -201,9 +202,9 @@ bool ShaderProgram::validateProgram(bool doPrintLog) const {
   glValidateProgram(id());
   glGetProgramiv(id(), GL_VALIDATE_STATUS, &isValid);
   if(GL_FALSE == isValid){
-    AL_GRAPHICS_ERROR("ShaderProgram::link", id());
+    // AL_GRAPHICS_ERROR("ShaderProgram::link", id());
     if(doPrintLog) printLog();
-    return false;
+    // return false;
   }
   return true;
 }

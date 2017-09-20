@@ -149,8 +149,7 @@ public:
 
     // update framebuffer size
     glfwGetFramebufferSize(window, &(win->mFramebufferWidth), &(win->mFramebufferHeight));
-    win->highres_factor_w = win->mFramebufferWidth / float(w);
-    win->highres_factor_h = win->mFramebufferHeight / float(h);
+    win->mHighresFactor = win->mFramebufferWidth / float(w);
 
     win->callHandlersResize(w, h);
   }
@@ -254,10 +253,9 @@ bool Window::implCreate() {
 
   // int fbw, fbh;
   glfwGetFramebufferSize(mImpl->mGLFWwindow, &mFramebufferWidth, &mFramebufferHeight);
-  highres_factor_w = mFramebufferWidth / float(mDim.w);
-  highres_factor_h = mFramebufferHeight / float(mDim.h);
+  mHighresFactor = mFramebufferWidth / float(mDim.w);
   cout << "framebuffer size: " << mFramebufferWidth << ", " << mFramebufferHeight << endl;
-  cout << "highres factor: " << highres_factor_w << ", " << highres_factor_h << endl;
+  cout << "highres factor: " << mHighresFactor << endl;
 
   mImpl->registerCBs();
   vsync(mVSync);

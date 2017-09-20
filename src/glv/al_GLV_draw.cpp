@@ -2,6 +2,7 @@
 
 #include "al/core/gl/al_Mesh.hpp" // GraphicsData
 #include "al/core/gl/al_Shapes.hpp"
+#include "al/core/gl/al_DefaultShaders.hpp"
 
 
 #include <cmath>
@@ -193,14 +194,6 @@ void scissorTest(bool doScissor) {
 
 void scissor(int x, int y, int w, int h) {
     graphicsHolder().get().scissor(x, y, w, h);
-}
-
-float windowHighresFactorX() {
-    return graphicsHolder().get().window().x_highres();
-}
-
-float windowHighresFactorY() {
-    return graphicsHolder().get().window().y_highres();
 }
 
 void color(float r, float g, float b, float a) {
@@ -740,10 +733,10 @@ void al::al_draw_glv(
     g.shader(glv::graphicsHolder().shader());
     g.camera(
         al::Viewpoint::ORTHO_FOR_2D,
-        int(x * g.window().x_highres()),
-		int(y * g.window().y_highres()),
-		int(w * g.window().x_highres()),
-		int(h * g.window().y_highres())
+        int(x * g.window().highres_factor()),
+		int(y * g.window().highres_factor()),
+		int(w * g.window().highres_factor()),
+		int(h * g.window().highres_factor())
     );
 
     glv::graphicsHolder().set(g);
