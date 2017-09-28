@@ -1,15 +1,10 @@
 #include "al/core/gl/al_Shader.hpp"
 #include "al/core/gl/al_GLEW.hpp"
-// #include "al/core/gl/al_Graphics.hpp" // AL_GRAPHICS_ERROR
 #include "al/core/system/al_Printing.hpp"
 
-// #include <stdio.h>
-#include <map>
 #include <string>
-// #include <iostream>
 #include <cstring>
 
-using std::map;
 using std::string;
 
 namespace al{
@@ -24,15 +19,8 @@ GLenum gl_shader_type(Shader::Type v) {
 }
 
 const char * ShaderBase::log() const {
-//  GLint lsize; get(GL_INFO_LOG_LENGTH, &lsize);
-//  if(0==lsize) return NULL;
-//  newLog(lsize);
-//  glGetShaderInfoLog(id(), 4096, NULL, mLog);
-//  //glGetInfoLogARB((GLhandleARB)handle(), 4096, NULL, mLog);
-//  return mLog;
-
   GLint lsize; get(GL_INFO_LOG_LENGTH, &lsize);
-  if(0==lsize) return NULL;
+  if (0 == lsize) return nullptr;
 
   static char buf[AL_SHADER_MAX_LOG_SIZE];
   getLog(buf);
@@ -47,82 +35,51 @@ void ShaderBase::printLog() const {
 void Shader::getLog(char * buf) const {
   glGetShaderInfoLog(id(), AL_SHADER_MAX_LOG_SIZE, NULL, buf);
 }
+
 void ShaderProgram::getLog(char * buf) const {
   glGetProgramInfoLog(id(), AL_SHADER_MAX_LOG_SIZE, NULL, buf);
 }
 
-/*
-GLuint glCreateProgram (void);
-GLuint glCreateShader (GLenum type);
-void glDeleteShader (GLuint shader);
-void glDeleteProgram (GLuint program);
-void glDetachShader(GLuint program, GLuint shader);
-*/
-
 Shader::Shader(const std::string& source, Shader::Type type)
-:  mSource(source), mType(type){}
+	: mSource(source), mType(type) {}
 
-Shader& Shader::compile(){
-  // AL_GRAPHICS_ERROR("(before Shader::compile)", id());
-  validate(); // triggers a call to onCreate, if not created
-  // AL_GRAPHICS_ERROR("Shader::compile", id());
-  return *this;
+Shader& Shader::compile()
+{	
+	if (!mSource.empty()) {
+		create();
+		const char * s = mSource.c_str();
+		glShaderSource(mID, 1, &s, NULL);
+		glCompileShader(mID);
+	}
+	return *this;
 }
 
 bool Shader::compiled() const {
   GLint v;
   GLhandleARB h = (GLhandleARB)id();
   glGetObjectParameterivARB(h, GL_COMPILE_STATUS, &v);
-  //glGetProgramiv(id(), GL_COMPILE_STATUS, &v);
-  // AL_GRAPHICS_ERROR("Shader::compiled()", id());
   return v;
 }
 
 void Shader::get(int pname, void * params) const { glGetShaderiv(id(), pname, (GLint *)params); }
 
 void Shader::onCreate(){
-  // AL_GRAPHICS_ERROR("(before Shader::onCreate)", id());
   mID = glCreateShader(gl_shader_type(mType));
-  //printf("Create shader %lu\n",id());
-  if(0 == id()){
-    AL_WARN("Error creating shader object");
-    return;
-  }
-  // AL_GRAPHICS_ERROR("glCreateShader", id());
-
-  if(mSource[0]){
-    sendSource();
-    // AL_GRAPHICS_ERROR("Shader::sendSource", id());
-    glCompileShader(id());
-    // AL_GRAPHICS_ERROR("glCompileShader", id());
-  }
+  if(0 == id()) AL_WARN("Error creating shader object");
 }
 
 void Shader::onDestroy(){
-  // AL_GRAPHICS_ERROR("(before Shader::onDestroy)", id());
-//printf("Destroy shader %lu\n", id());
-  //glDeleteObjectARB((GLhandleARB)handle());
   glDeleteShader(id());
-  // AL_GRAPHICS_ERROR("glDeleteShader", id());
-}
-
-void Shader::sendSource(){
-  validate();
-  const char * s = mSource.c_str();
-  glShaderSource(id(), 1, &s, NULL);
-  //glShaderSourceARB((GLhandleARB)handle(), 1, &s, NULL);
 }
 
 Shader& Shader::source(const std::string& v){
   mSource = v;
-  invalidate();
   return *this;
 }
 
 Shader& Shader::source(const std::string& src, Shader::Type type){
   mType=type; return source(src);
 }
-
 
 static ShaderProgram::Type param_type_from_gltype(GLenum gltype) {
   switch(gltype) {
@@ -156,39 +113,19 @@ static ShaderProgram::Type param_type_from_gltype(GLenum gltype) {
   }
 }
 
-ShaderProgram::ShaderProgram(): mActive(true) {
-  //-
-}
+ShaderProgram::ShaderProgram() {}
 
-ShaderProgram::~ShaderProgram(){
+ShaderProgram::~ShaderProgram() {
   destroy();
 }
 
 ShaderProgram& ShaderProgram::attach(Shader& s){
-  validate();
-  // s.compile();
-  // glAttachObjectARB((GLhandleARB)id(), (GLhandleARB)s.id());
   glAttachShader(id(), s.id());
-
-  // TODO: check for geometry shader extensions
-//#ifdef GL_EXT_geometry_shader4
-//  printf("GL_EXT_geometry_shader4 defined\n");
-//#endif
-//#ifdef GL_ARB_geometry_shader4
-//  printf("GL_ARB_geometry_shader4 defined\n");
-//#endif
-
-  // if (s.type() == Shader::GEOMETRY) {
-  //   glProgramParameteriEXT(id(),GL_GEOMETRY_INPUT_TYPE_EXT, mInPrim);
-  //   glProgramParameteriEXT(id(),GL_GEOMETRY_OUTPUT_TYPE_EXT, mOutPrim);
-  //   glProgramParameteriEXT(id(),GL_GEOMETRY_VERTICES_OUT_EXT,mOutVertices);
-  // }
-
   return *this;
 }
+
 const ShaderProgram& ShaderProgram::detach(const Shader& s) const {
   glDetachShader(id(), s.id());
-  //glDetachObjectARB((GLhandleARB)handle(), (GLhandleARB)s.handle());
   return *this;
 }
 const ShaderProgram& ShaderProgram::link(bool doValidate) const {
@@ -202,98 +139,77 @@ bool ShaderProgram::validateProgram(bool doPrintLog) const {
   glValidateProgram(id());
   glGetProgramiv(id(), GL_VALIDATE_STATUS, &isValid);
   if(GL_FALSE == isValid){
-    // AL_GRAPHICS_ERROR("ShaderProgram::link", id());
     if(doPrintLog) printLog();
-    // return false;
   }
   return true;
 }
 
-bool ShaderProgram::compile(
-  const std::string& vertSource,
-  const std::string& fragSource,
-  const std::string& geomSource
-) {
-  create(); // will destroy and recreate if already created
+bool ShaderProgram::compile (
+	const std::string& vertSource,
+	const std::string& fragSource,
+	const std::string& geomSource)
+{
+	create(); // will destroy and recreate if already created
 
-  mVertSource = vertSource;
-  mFragSource = fragSource;
-  mGeomSource = geomSource;
+	mVertSource = vertSource;
+	mFragSource = fragSource;
+	mGeomSource = geomSource;
 
-  Shader mShaderV, mShaderF, mShaderG;
-  mShaderV.source(vertSource, al::Shader::VERTEX);
-  mShaderV.compile();
-  mShaderV.printLog();
-  attach(mShaderV);
+	Shader mShaderV {vertSource, al::Shader::VERTEX};
+	mShaderV.compile();
+	mShaderV.printLog();
+	attach(mShaderV);
 
-  mShaderF.source(fragSource, al::Shader::FRAGMENT);
-  mShaderF.compile();
-  mShaderF.printLog();
-  attach(mShaderF);
+	Shader mShaderF {fragSource, al::Shader::FRAGMENT};
+	mShaderF.compile();
+	mShaderF.printLog();
+	attach(mShaderF);
 
-  bool bGeom = geomSource[0]; // because geomSrouce's default value is ""
-  if(bGeom){
-    mShaderG.source(geomSource, al::Shader::GEOMETRY);
-    mShaderG.compile();
-    mShaderG.printLog();
-    attach(mShaderG);
-  }
+	Shader mShaderG {geomSource, al::Shader::GEOMETRY};
+	bool bGeom = !geomSource.empty();
+	if (bGeom) {
+		mShaderG.compile();
+		mShaderG.printLog();
+		attach(mShaderG);
+	}
 
-  link(false);
-  printLog();
+	link(false);
+	printLog();
 
-  // OpenGL.org says to detach shaders after linking:
-  //   https://www.opengl.org/wiki/Shader_Compilation
-  detach(mShaderV);
-  detach(mShaderF);
-  if (bGeom) detach(mShaderG);
+	// OpenGL.org says to detach shaders after linking:
+	//   https://www.opengl.org/wiki/Shader_Compilation
+	detach(mShaderV);
+	detach(mShaderF);
+	if (bGeom) detach(mShaderG);
 
-  if (!linked()) {
-      return false;
-  }
-  
-  return true;
+	if (!linked()) {
+		return false;
+	}
+	return true;
 }
 
 void ShaderProgram::onCreate(){
-  //mHandle = glCreateProgramObjectARB();
-  //mID = (long)handle();
   mID = glCreateProgram();
-
-  // Automatically compile any code set with ShaderProgram::compile
-  // if(!mVertSource.empty()){
-    // compile(mVertSource, mFragSource, mGeomSource);
-  // }
 }
 void ShaderProgram::onDestroy(){
   glDeleteProgram(id());
-  //glDeleteObjectARB((GLhandleARB)handle());
 }
 
-void ShaderProgram::use(unsigned programID){
+void ShaderProgram::use(unsigned programID) {
   glUseProgram(programID);
 }
 
-const ShaderProgram& ShaderProgram::use(){
-  //if(active()){
-    //validate();
+const ShaderProgram& ShaderProgram::use() {
     use(id());
-  //}
-  //glUseProgramObjectARB((GLhandleARB)handle());
-  return *this;
+	return *this;
 }
 
-bool ShaderProgram::begin(){
-  if(active()){
+void ShaderProgram::begin(){
     use();
-    return true;
-  }
-  return false;
 }
 
 void ShaderProgram::end() const {
-  if(active()) glUseProgram(0);
-  //glUseProgramObjectARB(0);
+	glUseProgram(0);
 }
 
 bool ShaderProgram::linked() const {
@@ -301,7 +217,6 @@ bool ShaderProgram::linked() const {
   get(GL_LINK_STATUS, &v);
   return (v == GL_TRUE);
 }
-// GLint v; glGetProgramiv(id(), GL_LINK_STATUS, &v); return v; }
 
 #define GET_LOC(map, glGetFunc)\
   int loc;\
@@ -314,7 +229,7 @@ bool ShaderProgram::linked() const {
     map[name] = loc;\
   }
 
-int ShaderProgram::uniform(const char * name) const {
+int ShaderProgram::getUniformLocation(const char * name) const {
   GET_LOC(mUniformLocs, glGetUniformLocation);
   if(-1 == loc) {
     AL_WARN_ONCE("No such uniform named \"%s\"", name);
@@ -351,38 +266,40 @@ const ShaderProgram& ShaderProgram::uniformMatrix3(int loc, const float * v, boo
 const ShaderProgram& ShaderProgram::uniformMatrix4(int loc, const float * v, bool transpose) const {
   glUniformMatrix4fv(loc, 1, transpose, v); return *this;
 }
+
 const ShaderProgram& ShaderProgram::uniform1(const char * name, const float * v, int count) const{
-  glUniform1fv(uniform(name), count, v); return *this;
+  glUniform1fv(getUniformLocation(name), count, v); return *this;
 }
 const ShaderProgram& ShaderProgram::uniform2(const char * name, const float * v, int count) const{
-  glUniform2fv(uniform(name), count, v); return *this;
+  glUniform2fv(getUniformLocation(name), count, v); return *this;
 }
 const ShaderProgram& ShaderProgram::uniform3(const char * name, const float * v, int count) const{
-  glUniform3fv(uniform(name), count, v); return *this;
+  glUniform3fv(getUniformLocation(name), count, v); return *this;
 }
 const ShaderProgram& ShaderProgram::uniform4(const char * name, const float * v, int count) const{
-  glUniform4fv(uniform(name), count, v); return *this;
+  glUniform4fv(getUniformLocation(name), count, v); return *this;
 }
+
 const ShaderProgram& ShaderProgram::uniform(const char * name, int v) const{
-  return uniform(uniform(name), v);
+  return uniform(getUniformLocation(name), v);
 }
 const ShaderProgram& ShaderProgram::uniform(const char * name, float v) const{
-  return uniform(uniform(name), v);
+  return uniform(getUniformLocation(name), v);
 }
 const ShaderProgram& ShaderProgram::uniform(const char * name, float v0, float v1) const{
-  return uniform(uniform(name), v0,v1);
+  return uniform(getUniformLocation(name), v0,v1);
 }
 const ShaderProgram& ShaderProgram::uniform(const char * name, float v0, float v1, float v2) const{
-  return uniform(uniform(name), v0,v1,v2);
+  return uniform(getUniformLocation(name), v0,v1,v2);
 }
 const ShaderProgram& ShaderProgram::uniform(const char * name, float v0, float v1, float v2, float v3) const{
-  return uniform(uniform(name), v0,v1,v2,v3);
+  return uniform(getUniformLocation(name), v0,v1,v2,v3);
 }
 const ShaderProgram& ShaderProgram::uniformMatrix3(const char * name, const float * v, bool transpose) const{
-  return uniformMatrix3(uniform(name), v, transpose);
+  return uniformMatrix3(getUniformLocation(name), v, transpose);
 }
 const ShaderProgram& ShaderProgram::uniformMatrix4(const char * name, const float * v, bool transpose) const{
-  return uniformMatrix4(uniform(name), v, transpose);
+  return uniformMatrix4(getUniformLocation(name), v, transpose);
 }
 
 const ShaderProgram& ShaderProgram::attribute(int loc, float v) const{
@@ -471,24 +388,6 @@ void ShaderProgram::listParams() const {
 
     printf("uniform %d(%s): type %d size %d length %d\n",
       j, name, param_type_from_gltype(gltype), size, length);
-
-//    //could already have a param if the user set some values before compiling
-//    map<string, ShaderProgram *>::iterator it = mParameters.find(name);
-//    if(it != mParameters.end()) {
-//      ShaderProgram::Type type = param_type_from_gltype(gltype);
-//      ShaderProgram &p = *(it->second);
-//      p.set_active(true);
-//      p.set_location(j);
-//      p.set_type(type);
-//      p.set_count(size);
-//    }
-    /*
-    Only use params defined in shader file
-    else
-    {
-      ShaderProgram *p = new ShaderProgram(name, j, type, size);
-      mParameters[ name ] = p;
-    }*/
   }
 
   for(int j=0; j < numActiveAttributes; j++) {
@@ -507,21 +406,6 @@ void ShaderProgram::listParams() const {
 
     printf("attribute %d(%s): type %d size %d length %d\n",
       j, name, param_type_from_gltype(gltype), size, length);
-
-    //map<string, ShaderAttribute *>::iterator it = mAttributes.find(name);
-//    if(it != mAttributes.end()) {
-//      // TODO: FIX THIS HACK
-//      #if defined(MURO_LINUX_VERSION)
-//      int loc = (j < 0) ? 1 : j+1;
-//      #else
-//      int loc = (j <= 0) ? 1 : j;
-//      #endif
-//      ShaderProgram::Type type = param_type_from_gltype(gltype);
-//      ShaderAttribute &a = *(it->second);
-//      a.realize_location(loc);
-//      a.set_type(type);
-//      //a.setCount(size);
-//    }
   }
 }
 

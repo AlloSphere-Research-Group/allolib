@@ -76,8 +76,6 @@ protected:
   virtual void getLog(char * buf) const = 0;
 };
 
-
-
 /// Shader object
 
 /// A shader object represents your source code. You are able to pass your
@@ -108,7 +106,6 @@ public:
 private:
   std::string mSource;
   Shader::Type mType;
-  void sendSource();
 
   virtual void get(int pname, void * params) const;
   virtual void getLog(char * buf) const;
@@ -199,21 +196,11 @@ public:
 
   const ShaderProgram& use();
 
-  /// Get whether program is active
-  bool active() const { return mActive; }
-
-  /// Set whether program is active
-  ShaderProgram& active(bool v){ mActive=v; return *this; }
-
-  /// Toggle active state
-  ShaderProgram& toggleActive(){ mActive^=true; return *this; }
-
   /// Begin use of shader program
-  bool begin();
+  void begin();
 
   /// End use of shader program
   void end() const;
-
 
   /// Returns whether program linked successfully
   bool linked() const;
@@ -221,17 +208,11 @@ public:
   /// Returns whether linked program can execute in current graphics state
   bool validateProgram(bool printLog=false) const;
 
-
-  // These parameters must be set before attaching geometry shaders
-  // void setGeometryInputPrimitive(Graphics::Primitive prim){ mInPrim = prim; }
-  // void setGeometryOutputPrimitive(Graphics::Primitive prim){ mOutPrim = prim; }
-  // void setGeometryOutputVertices(unsigned int i){ mOutVertices = i; }
-
   /// Print out all the input parameters to the shader
   void listParams() const;
 
   /// Get location of uniform
-  int uniform(const char * name) const;
+  int getUniformLocation(const char * name) const;
 
   /// Get location of attribute
   int attribute(const char * name) const;
@@ -359,7 +340,7 @@ protected:
   // unsigned int mOutVertices;
   std::string mVertSource, mFragSource, mGeomSource;
   mutable std::unordered_map<std::string, int> mUniformLocs, mAttribLocs;
-  bool mActive;
+  //bool mActive;
 
   virtual void get(int pname, void * params) const;
   virtual void getLog(char * buf) const;
