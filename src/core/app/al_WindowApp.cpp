@@ -7,7 +7,7 @@ using namespace al;
 bool WindowApp::StandardWindowAppKeyControls::keyDown(const Keyboard& k){
   if(k.ctrl()){
     switch(k.key()){
-      case 'q': app->quit(); return false;
+	  case 'q': window().close(); return false;
       // case 'h': window().hide(); return false;
       // case 'm': window().iconify(); return false;
       case 'c': window().cursorHideToggle(); return false;
@@ -16,7 +16,7 @@ bool WindowApp::StandardWindowAppKeyControls::keyDown(const Keyboard& k){
   }
   else{
     switch(k.key()){
-      case Keyboard::ESCAPE: app->fullScreenToggle(); return false;
+      case Keyboard::ESCAPE: window().fullScreenToggle(); return false;
       default:;
     }
   }
@@ -24,7 +24,6 @@ bool WindowApp::StandardWindowAppKeyControls::keyDown(const Keyboard& k){
 }
 
 WindowApp::WindowApp() {
-    stdControls.app = this;
     append(stdControls);
     append(windowEventHandler());
 }
@@ -38,10 +37,9 @@ void WindowApp::open() {
 void WindowApp::loop() {
   onDraw();
   refresh();
-  mFrameCount += 1;
 }
 
-void WindowApp::close() {
+void WindowApp::closeApp() {
   destroy(); // destroy window
   glfw::terminate(); // this also closes existing windows
 }
@@ -53,7 +51,7 @@ void WindowApp::start() {
     loop();
     tickFPS();
   }
-  close();
+  closeApp();
 }
 
 // call user event functions inside WindowEventHandler class

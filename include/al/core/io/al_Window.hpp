@@ -263,6 +263,7 @@ public:
   // refresh window (swap buffers, poll events, etc.)
   void refresh();
 
+  void close();
   bool shouldClose();
 
   /// Destroy current window and its associated graphics context
@@ -372,6 +373,7 @@ protected:
   void implIconify();
   void implSetDecorated();
   bool implShouldClose();
+  void implClose ();
 
   Window& insert(WindowEventHandler& v, int i);
 

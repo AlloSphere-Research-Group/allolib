@@ -31,7 +31,6 @@ public:
 
   // for child classes to override
   virtual void preOnCreate() {}
-  virtual void postOnCreate() {}
   virtual void preOnDraw() {}
   virtual void postOnDraw() {}
   virtual void preOnAnimate(double dt) {}
@@ -43,7 +42,6 @@ public:
     create();
     preOnCreate();
     onCreate();
-    postOnCreate();
   }
 
   // from WindowApp
@@ -52,7 +50,6 @@ public:
     onDraw();
     postOnDraw();
     refresh();
-    mFrameCount += 1;
   }
 
   // overrides WindowApp's start to also initiate AudioApp and etc.
@@ -70,7 +67,7 @@ public:
     }
     onExit(); // user defined
     endAudio(); // AudioApp
-    close(); // WindowApp
+    closeApp(); // WindowApp
   }
 
   // PacketHandler

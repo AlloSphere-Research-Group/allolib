@@ -73,6 +73,9 @@ bool Window::create() {
 bool Window::created() const {return implCreated(); }
 void Window::refresh() { implRefresh(); }
 void Window::destroy(){ if(created()){ implDestroy(); } }
+
+void Window::close () { if (created()) implClose(); }
+
 bool Window::shouldClose() {
     if (created()) {
         return implShouldClose();

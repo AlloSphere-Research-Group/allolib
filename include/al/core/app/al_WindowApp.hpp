@@ -22,31 +22,23 @@ class WindowApp : public Window, public WindowEventHandler, public FPS {
 public:
   // basic window app keyboard actions: fullscreen, quit, ...
   struct StandardWindowAppKeyControls : WindowEventHandler {
-    WindowApp* app;
     bool keyDown(const Keyboard& k);
   };
   StandardWindowAppKeyControls stdControls;
+
   std::atomic<bool> mShouldQuitApp {false};
-  int mFrameCount = 0;
 
   WindowApp();
 
+  virtual void start();
+  virtual void open();
+  virtual void loop();
+  virtual void closeApp();
+
   void quit() { mShouldQuitApp = true; }
   bool shouldQuit() {
-    return mShouldQuitApp || shouldClose();
+	  return mShouldQuitApp || Window::shouldClose();
   }
-
-  // could and should be overrided
-  // when subclass inherits from other app classes (AudioApp, etc.)
-  virtual void start();
-
-  // init glfw and open a window
-  virtual void open();
-  // app specific behind-the-scene loop logic
-  // could add stereo, omni, default shader
-  virtual void loop();
-  // destroy gpu objects, close window, terminate glfw
-  virtual void close();
 
   // user will override these
   virtual void onCreate() {}
@@ -69,10 +61,6 @@ public:
   virtual bool mouseUp(const Mouse& m) override;
   virtual bool resize(int dw, int dh) override;
   virtual bool visibility(bool v) override;
-
-  int frameCount() {
-    return mFrameCount;
-  }
 
 };
 
