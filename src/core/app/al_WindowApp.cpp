@@ -42,10 +42,6 @@ void WindowApp::loop() {
 }
 
 void WindowApp::close() {
-  // onExit();
-  // free all GPUObjects (shaders, textures, vao, bo, ...)
-  // before terminating glfw (closing window)
-  GPUObject::destroyAll();
   destroy(); // destroy window
   glfw::terminate(); // this also closes existing windows
 }

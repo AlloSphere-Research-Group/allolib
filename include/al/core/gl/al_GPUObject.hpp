@@ -69,34 +69,6 @@
 
 namespace al{
 
-/*
-
-/// Context for signaling resource changes to GPU objects
-///
-/// @ingroup allocore
-class GPUContext {
-public:
-  GPUContext();
-  virtual ~GPUContext();
-
-  /// Triggers create handler for each GPUObject registered in a given context
-  void contextCreate();
-
-  /// Triggers destroy handler for each GPUObject registered in a given context
-  void contextDestroy();
-
-  /// Get context ID
-  int contextID() const { return mContextID; }
-
-  void makeDefaultContext();
-  static int defaultContextID();
-
-protected:
-  int mContextID;
-};
-
-*/
-
 /// Base class for allocated resources on the GPU
 ///
 /// @ingroup allocore
@@ -114,7 +86,6 @@ public:
 
   virtual ~GPUObject();
 
-
   /// Returns whether object has been created
   bool created() const;
 
@@ -124,19 +95,10 @@ public:
   /// Destroys object on GPU
   void destroy();
 
-  static void destroyAll();
-
   /// Returns the assigned object id
   unsigned long id() const { return mID; }
 
   void id(unsigned long v){ mID = v; }
-
-
-  /// Register with a context
-
-  /// This will unregister any existing context registration.
-  ///
-  // void contextRegister(int ctx);
 
   /// Ensure that the GPUObject is ready to use
 
@@ -158,9 +120,6 @@ protected:
 
   /// Called when currently assigned context is destroyed
   virtual void onDestroy() = 0;
-
-  // remove from the context:
-  // void contextUnregister();
 };
 
 } // ::al
