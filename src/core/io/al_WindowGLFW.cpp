@@ -282,7 +282,7 @@ void Window::implDestroy() {
 }
 
 void Window::implClose () {
-	glfwSetWindowShouldClose(mImpl->mGLFWwindow, GLFW_TRUE);
+	glfwSetWindowShouldClose(mImpl->mGLFWwindow, true);
 }
 
 bool Window::implShouldClose() {
