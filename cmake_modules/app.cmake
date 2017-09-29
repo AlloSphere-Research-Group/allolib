@@ -58,6 +58,12 @@ set(flags
 link_directories(${CORE_LIBRARY_DIRS})
 
 # --- setup app target ------------------------------------
+
+# multi configuration generators
+if (MSVC)
+    set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+endif ()
+
 add_executable(${app_name} ${app_files_list})
 
 set_target_properties(${app_name} PROPERTIES DEBUG_POSTFIX _debug)

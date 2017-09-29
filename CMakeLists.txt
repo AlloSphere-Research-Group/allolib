@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
+
 project(allolib)
 set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
 set(BUILDING_ALLOLIB 1)
@@ -54,6 +55,11 @@ set(flags
 link_directories(${CORE_LIBRARY_DIRS})
 
 # --- NOW WE ARE READY TO SETUP THE LIBRARY TARGET ---------------------
+
+# multi configuration generators
+if (MSVC)
+    set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+endif ()
 
 add_library(al STATIC ${headers} ${sources})
 
