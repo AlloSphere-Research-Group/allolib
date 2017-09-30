@@ -483,22 +483,8 @@ TEST_CASE("Math"){
 	const double pinf = INFINITY;		// + infinity
 	const double ninf =-INFINITY;		// - infinity
 
-	#define T(x) REQUIRE(std::abs(x) == ( x < 0 ? -x : x));
-	T(0.) T(1.) T((-1.))
-	T(0) T(1) T((-1))
-	#undef T
-
 	#define T(x,y, r) REQUIRE(al::atLeast(x,y) == r);
 	T(0.,1., 1.) T(+0.1,1., 1.) T(-0.1,1., -1.)
-	#undef T
-
-	#define T(x,y) REQUIRE(std::abs(al::atan2Fast(x,y) - std::atan2(x,y)) < 1e-5);
-	T(1.,0.) T(1.,1.) T(0.,1.) T(-1.,1.) T(-1.,0.) T(-1.,-1.) T(0.,-1.) T(1.,-1.)
-	#undef T
-
-	#define T(x, y) REQUIRE(std::ceil(x) == y);
-	T(0., 0.)	T( 1., 1.) T( 1.2, 2.) T( 1.8, 2.) T( 1000.1, 1001.)
-				T(-1.,-1.) T(-1.2,-1.) T(-1.8,-1.) T(-1000.1,-1000.)
 	#undef T
 
 	#define T(x, y) REQUIRE(al::ceilEven(x) == y);
@@ -535,11 +521,6 @@ TEST_CASE("Math"){
 		);
 	}
 
-	#define T(x, y) REQUIRE(std::floor(x) == y);
-	T(0., 0.)	T( 1., 1.) T( 1.2, 1.) T( 1.8, 1.) T( 1000.1, 1000.)
-				T(-1.,-1.) T(-1.2,-2.) T(-1.8,-2.) T(-1000.1,-1001.)
-	#undef T
-
 	#define T(x, y) REQUIRE(al::floorPow2(x) == y);
 	T(0, 1) T(1, 1) T(2, 2) T(3, 2)
 	T(513, 512) T(1090, 1024)
@@ -560,18 +541,6 @@ TEST_CASE("Math"){
 
 	#define T(x,y,r) REQUIRE(al::lessAbs(x,y)==r);
 	T(0.1,1., true) T(-0.1,1., true) T(1.,1., false) T(-1.,1., false)
-	#undef T
-
-	#define T(x) REQUIRE(std::log2(1<<x) == x);
-	T(0) T(1) T(2) T(3) T(4) T(29) T(30) T(31)
-	#undef T
-
-	#define T(x,y,r) REQUIRE(std::max(x,y)==r);
-	T(0,0,0) T(0,1,1) T(1,0,1) T(-1,1,1)
-	#undef T
-
-	#define T(x,y,r) REQUIRE(std::min(x,y)==r);
-	T(0,0,0) T(0,1,0) T(1,0,0) T(-1,1,-1)
 	#undef T
 
 	#define T(x,r) REQUIRE(al::odd(x) == r);
@@ -622,15 +591,6 @@ TEST_CASE("Math"){
 //	T(0, false) T(1, true) T(2, true) T(3, false) T(4, true)
 //	#undef T
 
-	#define T(x,y,r) REQUIRE(std::remainder(x,y) == r);
-	T(7,7,0) T(7,1,0) T(7,4,3) T(7,3,1) T(14,3,2)
-	#undef T
-
-	#define T(x,y) REQUIRE(std::round(x) == y);
-	T(0.f, 0.f) T(0.2f, 0.f) T(0.8f, 1.f) T(-0.2f, 0.f) T(-0.8f,-1.f) T(0.5f, 0.f) T(-0.5f, 0.f)
-	T(0.0, 0.0) T(0.20, 0.0) T(0.80, 1.0) T(-0.20, 0.0) T(-0.80,-1.0) T(0.50, 0.0) T(-0.50, 0.0)
-	#undef T
-
 	#define T(x,y,r) REQUIRE(al::round(x,y) == r);
 	T(0.0,0.1, 0.0) T(0.1,0.1, 0.1) T(0.15,0.1, 0.1) T(-0.15,0.1, -0.1)
 	#undef T
@@ -658,11 +618,6 @@ TEST_CASE("Math"){
 
 	#define T(x,r) REQUIRE(al::trailingZeroes(x) == r);
 	T(0, 0) T(1, 0) T(2, 1) T(3, 0) T(4, 2) T(8, 3) T(9, 0)
-	#undef T
-
-	#define T(x,y) REQUIRE(std::trunc(x) == y);
-	T(0.f, 0.f) T(0.2f, 0.f) T(0.8f, 0.f) T(-0.2f, 0.f) T(-0.8f, 0.f) T(0.5f, 0.f) T(-0.5f, 0.f)
-	T(0.0, 0.0) T(0.20, 0.0) T(0.80, 0.0) T(-0.20, 0.0) T(-0.80, 0.0) T(0.50, 0.0) T(-0.50, 0.0)
 	#undef T
 
 	#define T(x,l,h,r) REQUIRE(al::within(x,l,h)==r);

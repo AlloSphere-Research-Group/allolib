@@ -1,9 +1,6 @@
 #include "al/core/io/al_AudioIO.hpp"
+#include <cmath>
 
-#include "Gamma/Oscillator.h"
-#include "Gamma/Domain.h"
-
-gam::Sine<> s(440);
 using namespace al;
 
 TEST_CASE( "Audio Device Enum" ) {
@@ -11,13 +8,19 @@ TEST_CASE( "Audio Device Enum" ) {
 }
 
 static void callback(AudioIOData &io) {
-    while(io()) {
-        io.out(0) = s();
+    static double phase = 0.0;
+    static double phaseInc = M_2PI * 440.0 / io.framesPerSecond();
+    while (io()) {
+        io.out(0) = std::sin(phase);
+        phase += phaseInc;
+        if (phase > M_2PI) {
+            phase -= M_2PI;
+        }
     }
 }
 
+
 TEST_CASE( "Audio IO Object" ) {
-    gam::sampleRate(44100);
     int userData = 5;
     AudioIO audioIO;
 #ifdef AL_WINDOWS
