@@ -37,13 +37,13 @@ set(libs_to_link
   ${EXTERNAL_LIBRARIES}
 )
 
-set(debug_libs_to_link
-  ${EXTERNAL_DEBUG_LIBRARIES}
-)
+# set(debug_libs_to_link
+#   ${EXTERNAL_DEBUG_LIBRARIES}
+# )
 
-set(release_libs_to_link
-  ${EXTERNAL_RELEASE_LIBRARIES}
-)
+# set(release_libs_to_link
+#   ${EXTERNAL_RELEASE_LIBRARIES}
+# )
 
 set(definitions
   ${PLATFORM_DEFINITION}
@@ -96,16 +96,17 @@ else()
   target_link_libraries(${app_name} debug ${al_path}/libal_debug.a optimized ${al_path}/libal.a)
 endif (AL_WINDOWS)
 target_link_libraries(${app_name} ${libs_to_link})
-target_link_libraries(
-  ${app_name}
-  debug ${debug_libs_to_link}
-  optimized ${release_libs_to_link}
-)
+# target_link_libraries(
+#   ${app_name}
+#   debug ${debug_libs_to_link}
+#   optimized ${release_libs_to_link}
+# )
 
 if (AL_WINDOWS)
   # when run from Visual Studio, working directory is where the solution is by default
   # set it to app output directory
   set_target_properties(${app_name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${app_path}/bin)
+  # startup project is `ALL_BUILD` by default so we change it to app project
   set_directory_properties(PROPERTIES VS_STARTUP_PROJECT ${app_name})
 
   # post build events for copying dlls

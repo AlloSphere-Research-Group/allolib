@@ -36,13 +36,13 @@ set(libs_to_link
   ${CORE_LIBRARIES} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
 )
 
-set(debug_libs_to_link
-  ${EXTERNAL_DEBUG_LIBRARIES}
-)
+# set(debug_libs_to_link
+#   ${EXTERNAL_DEBUG_LIBRARIES}
+# )
 
-set(release_libs_to_link
-  ${EXTERNAL_RELEASE_LIBRARIES}
-)
+# set(release_libs_to_link
+#   ${EXTERNAL_RELEASE_LIBRARIES}
+# )
 
 set(definitions
   ${PLATFORM_DEFINITION} ${EXTERNAL_DEFINITIONS} ${ADDITIONAL_DEFINITIONS}
@@ -78,7 +78,6 @@ target_compile_options(al PUBLIC ${flags}) # public because of headers
 set_target_properties(al PROPERTIES CXX_STANDARD 14)
 set_target_properties(al PROPERTIES CXX_STANDARD_REQUIRED ON)
 
-
 # definitions
 target_compile_definitions(al PRIVATE ${definitions})
 
@@ -91,11 +90,11 @@ target_include_directories(al PRIVATE ${dirs_to_include})
 
 # libs
 target_link_libraries(al ${libs_to_link})
-target_link_libraries(
-  al
-  debug ${debug_libs_to_link}
-  optimized ${release_libs_to_link}
-)
+# target_link_libraries(
+#   al
+#   debug ${debug_libs_to_link}
+#   optimized ${release_libs_to_link}
+# )
 
 # --- Testing -----------------------------------------
 add_subdirectory(test)

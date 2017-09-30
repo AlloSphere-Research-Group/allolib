@@ -9,12 +9,12 @@ set(AudioAPI "rtaudio" CACHE STRING "Library for Audio IO")
 set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
 
 include(${al_path}/cmake_modules/external/oscpack.cmake)
-include(${al_path}/cmake_modules/external/gamma.cmake)
+# include(${al_path}/cmake_modules/external/gamma.cmake)
 include(${al_path}/cmake_modules/external/rtmidi.cmake)
 
 set(EXTERNAL_INCLUDE_DIRS
   ${OSCPACK_INCLUDE_DIR}
-  ${GAMMA_INCLUDE_DIR}
+  # ${GAMMA_INCLUDE_DIR}
   ${RTMIDI_INCLUDE_DIR}
 )
 
@@ -27,13 +27,13 @@ set(EXTERNAL_LIBRARIES
   ${RTMIDI_LIBRARIES}
 )
 
-set(EXTERNAL_DEBUG_LIBRARIES
-  ${GAMMA_DEBUG_LIBRARY}
-)
+# set(EXTERNAL_DEBUG_LIBRARIES
+#   ${GAMMA_DEBUG_LIBRARY}
+# )
 
-set(EXTERNAL_RELEASE_LIBRARIES
-  ${GAMMA_RELEASE_LIBRARY}
-)
+# set(EXTERNAL_RELEASE_LIBRARIES
+#   ${GAMMA_RELEASE_LIBRARY}
+# )
 
 set(EXTERNAL_DEFINITIONS
   ${RTMIDI_DEFINITIONS}
@@ -64,7 +64,7 @@ if(AudioAPI STREQUAL "rtaudio")
 
 elseif(AudioAPI STREQUAL "portaudio")
   if (AL_WINDOWS)
-      set(PORTAUDIO_INCLUDE_DIRS ${al_path}/dependencies/portaudio/include)
+        
       set(PORTAUDIO_LIBRARIES ${al_path}/dependencies/portaudio/portaudio_x64.lib)
   else ()
       pkg_search_module(PORTAUDIO REQUIRED portaudio-2.0)
