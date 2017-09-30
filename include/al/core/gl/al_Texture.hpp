@@ -137,13 +137,13 @@ public:
 
 
   /// Bind the texture (to a multitexture unit)
-  void bind(int binding_point = 0);
+  void bind(int binding_point = 0) const;
   /// use lasts binding point for temporary binding
   /// so doesn't (most of the time) collide with user's binding
   void bind_temp();
 
   /// Unbind the texture (from a multitexture unit)
-  void unbind(int binding_point = 0);
+  void unbind(int binding_point = 0) const;
   static void unbind(int binding_point, unsigned int target);
 
   /// Get target type (e.g., TEXTURE_2D)
