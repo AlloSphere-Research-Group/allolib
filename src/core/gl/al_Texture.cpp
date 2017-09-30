@@ -91,7 +91,7 @@ void Texture::onDestroy() {
   glDeleteTextures(1, (GLuint *)&mID);
 }
 
-void Texture::bind(int binding_point) {
+void Texture::bind(int binding_point) const {
   // AL_GRAPHICS_ERROR("(before Texture::bind)", id());
   glActiveTexture(GL_TEXTURE0 + binding_point);
   glBindTexture(target(), id());
@@ -102,7 +102,7 @@ void Texture::bind_temp() {
   bind(AL_TEX_TEMP_BINDING_UNIT);
 }
 
-void Texture::unbind(int binding_point) {
+void Texture::unbind(int binding_point) const {
   unbind(binding_point, target());
 }
 
