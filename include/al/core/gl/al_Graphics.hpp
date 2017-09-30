@@ -368,6 +368,7 @@ public:
 
   void shader(ShaderProgram& s);
   ShaderProgram& shader();
+  ShaderProgram* shaderPtr() { return mShaderPtr; }
 
   void camera(Viewpoint const& v);
   void camera(Viewpoint const& v, int w, int h);
