@@ -2,12 +2,12 @@ set (test_src
     src/main.cpp
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/external/catch)
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/catch)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 #These should be provided by the CMakeFile for the library
 # include_directories(${CMAKE_SOURCE_DIR}/external/Gamma)
-include_directories(${CMAKE_SOURCE_DIR}/external/rtmidi)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/rtmidi)
 
 if (AL_WINDOWS)
   # CMAKE_BINARY_DIR: contains the driectory where cmake is run
@@ -20,6 +20,10 @@ add_executable(al_tests ${test_src})
 set_target_properties(al_tests PROPERTIES DEBUG_POSTFIX _debug)
 set_target_properties(al_tests PROPERTIES CXX_STANDARD 14)
 set_target_properties(al_tests PROPERTIES CXX_STANDARD_REQUIRED ON)
+set_target_properties(al_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
+set_target_properties(al_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
+set_target_properties(al_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
+
 target_link_libraries(al_tests al)
 # if (AL_WINDOWS)
 # target_link_libraries(
