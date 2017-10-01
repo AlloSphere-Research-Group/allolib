@@ -91,9 +91,9 @@ target_include_directories(${app_name} PRIVATE ${dirs_to_include})
 
 # libs
 if (AL_WINDOWS)
-  target_link_libraries(${app_name} debug ${al_path}/al_debug.lib optimized ${al_path}/al.lib)
+  target_link_libraries(${app_name} debug ${al_path}/lib/al_debug.lib optimized ${al_path}/lib/al.lib)
 else()
-  target_link_libraries(${app_name} debug ${al_path}/libal_debug.a optimized ${al_path}/libal.a)
+  target_link_libraries(${app_name} debug ${al_path}/lib/libal_debug.a optimized ${al_path}/lib/libal.a)
 endif (AL_WINDOWS)
 target_link_libraries(${app_name} ${libs_to_link})
 # target_link_libraries(
