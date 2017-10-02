@@ -42,6 +42,11 @@ else ()
 
 endif (AL_WINDOWS)
 
+get_target_property(AL_GLFW_INCLUDE_DIR PkgConfig::GLFW INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(AL_GLFW_LINK_LIBS PkgConfig::GLFW INTERFACE_LINK_LIBRARIES)
+message("glfw include dirs: ${AL_GLFW_INCLUDE_DIR}")
+message("glfw link libs: ${AL_GLFW_LINK_LIBS}")
+
 # message("opengl lib: ${OPENGL_LIBRARY}")
 
 # set(CORE_INCLUDE_DIRS
