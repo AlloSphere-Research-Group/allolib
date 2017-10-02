@@ -1,3 +1,6 @@
+branches:
+  except:
+  - modern_cmake
 language: cpp
 dist: trusty
 os:
