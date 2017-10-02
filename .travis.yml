@@ -10,6 +10,7 @@ before_install:
   - sudo add-apt-repository ppa:keithw/glfw3 -y
   - sudo apt-get update -q
   - sudo apt-get install libglfw3-dev -y
+  - sudo apt-get install xorg-dev
   - ( git clone -b devel https://github.com/AlloSphere-Research-Group/Gamma /tmp/Gamma )
   - ( git clone -b cmake https://github.com/AlloSphere-Research-Group/GLV /tmp/GLV )
   - ( git clone https://github.com/rbtsx/cuttlebone.git /tmp/cuttlebone )
