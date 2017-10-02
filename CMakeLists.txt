@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.0)
 
 project(allolib)
 set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
@@ -28,20 +28,12 @@ set(sources
   ${al_sources} ${EXTERNAL_SRC} ${ADDITIONAL_SOURCES}
 )
 
-# set(dirs_to_include
-#   ${CORE_INCLUDE_DIRS} ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
-# )
-
 set(dirs_to_include
-  ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
+  ${CORE_INCLUDE_DIRS} ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
 )
 
-# set(libs_to_link
-#   ${CORE_LIBRARIES} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
-# )
-
 set(libs_to_link
-  ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
+  ${CORE_LIBRARIES} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
 )
 
 # set(debug_libs_to_link
@@ -60,7 +52,7 @@ set(flags
   ${basic_flags}
 )
 
-# link_directories(${CORE_LIBRARY_DIRS})
+link_directories(${CORE_LIBRARY_DIRS})
 
 # --- NOW WE ARE READY TO SETUP THE LIBRARY TARGET ---------------------
 
@@ -69,12 +61,7 @@ if (MSVC)
     set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 endif ()
 
-# add_library(al STATIC ${headers} ${sources})
-add_library(al STATIC "")
-# add_library(al STATIC ${sources})
-# add_library(al STATIC ${headers})
-target_sources(al PRIVATE ${sources})
-target_sources(al PRIVATE ${headers})
+add_library(al STATIC ${headers} ${sources})
 
 #paths
 set_target_properties(al
@@ -103,11 +90,6 @@ target_include_directories(al PRIVATE ${dirs_to_include})
 
 # libs
 target_link_libraries(al ${libs_to_link})
-target_link_libraries(al
-    GLEW::GLEW
-    PkgConfig::GLFW
-    ${OPENGL_LIBRARY}
-)
 # target_link_libraries(
 #   al
 #   debug ${debug_libs_to_link}

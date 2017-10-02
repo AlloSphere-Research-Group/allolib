@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.0)
 
 # This cmake file is for single file projects that does not have
 # CMakeLists.txt file in the project folder.

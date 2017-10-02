@@ -25,14 +25,14 @@ include(${al_path}/cmake_modules/basic_flags.cmake)
 set(dirs_to_include
   ${al_path}/include
   ${app_include_dirs}
-  # ${CORE_INCLUDE_DIRS}
+  ${CORE_INCLUDE_DIRS}
   ${ADDITIONAL_INCLUDE_DIRS}
   ${EXTERNAL_INCLUDE_DIRS}
 )
 
 set(libs_to_link
   ${app_link_libs}
-  # ${CORE_LIBRARIES}
+  ${CORE_LIBRARIES}
   ${ADDITIONAL_LIBRARIES}
   ${EXTERNAL_LIBRARIES}
 )
@@ -55,7 +55,7 @@ set(flags
   ${basic_flags}
 )
 
-# link_directories(${CORE_LIBRARY_DIRS})
+link_directories(${CORE_LIBRARY_DIRS})
 
 # --- setup app target ------------------------------------
 
@@ -96,11 +96,6 @@ else()
   target_link_libraries(${app_name} debug ${al_path}/lib/libal_debug.a optimized ${al_path}/lib/libal.a)
 endif (AL_WINDOWS)
 target_link_libraries(${app_name} ${libs_to_link})
-target_link_libraries(${app_name}
-    GLEW::GLEW
-    PkgConfig::GLFW
-    ${OPENGL_LIBRARY}
-)
 # target_link_libraries(
 #   ${app_name}
 #   debug ${debug_libs_to_link}
