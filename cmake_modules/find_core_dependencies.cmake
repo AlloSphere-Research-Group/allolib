@@ -52,7 +52,8 @@ get_target_property(AL_GLFW_LINK_LIBS PkgConfig::GLFW INTERFACE_LINK_LIBRARIES)
 message("pkgconfig::glfw include dirs: ${AL_GLFW_INCLUDE_DIR}")
 message("pkgconfig::glfw link libs: ${AL_GLFW_LINK_LIBS}")
 
-# message("opengl lib: ${OPENGL_LIBRARY}")
+message("opengl lib: ${OPENGL_gl_LIBRARY}")
+message("opengl lib: ${OPENGL_glu_LIBRARY}")
 
 # set(CORE_INCLUDE_DIRS
   # ${GLFW_INCLUDE_DIRS}
