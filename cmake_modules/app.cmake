@@ -60,7 +60,7 @@ link_directories(${CORE_LIBRARY_DIRS})
 # --- setup app target ------------------------------------
 
 # multi configuration generators
-if (MSVC)
+if (DEFINED CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 endif ()
 
