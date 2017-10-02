@@ -96,8 +96,11 @@ else()
   target_link_libraries(${app_name} debug ${al_path}/lib/libal_debug.a optimized ${al_path}/lib/libal.a)
 endif (AL_WINDOWS)
 target_link_libraries(${app_name} ${libs_to_link})
-target_link_libraries(${app_name} GLEW::GLEW)
-target_link_libraries(${app_name} PkgConfig::GLFW)
+target_link_libraries(${app_name}
+    GLEW::GLEW
+    PkgConfig::GLFW
+    ${OPENGL_LIBRARY}
+)
 # target_link_libraries(
 #   ${app_name}
 #   debug ${debug_libs_to_link}

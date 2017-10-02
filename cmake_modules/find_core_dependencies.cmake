@@ -5,7 +5,7 @@
 
 # al_path needs to be set prior to calling this script
 
-find_package(OpenGL REQUIRED)
+find_package(OpenGL REQUIRED) # >> ${OPENGL_LIBRARY}, inlcude dirs are handled with glew
 
 if (AL_WINDOWS)
 
@@ -24,8 +24,8 @@ if (AL_WINDOWS)
             ${al_path}/dependencies/glew/bin/Release/x64/glew32.dll
     )
 
-    add_library(GLFW::GLFW SHARED IMPORTED)
-    set_target_properties(GLFW::GLFW PROPERTIES
+    add_library(PkgConfig::GLFW SHARED IMPORTED)
+    set_target_properties(PkgConfig::GLFW PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES
             ${al_path}/dependencies/glfw/include
         IMPORTED_IMPLIB
@@ -41,6 +41,8 @@ else ()
   pkg_search_module(GLFW REQUIRED IMPORTED_TARGET glfw3)
 
 endif (AL_WINDOWS)
+
+# message("opengl lib: ${OPENGL_LIBRARY}")
 
 # set(CORE_INCLUDE_DIRS
   # ${GLFW_INCLUDE_DIRS}

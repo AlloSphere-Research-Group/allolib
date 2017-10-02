@@ -103,8 +103,11 @@ target_include_directories(al PRIVATE ${dirs_to_include})
 
 # libs
 target_link_libraries(al ${libs_to_link})
-target_link_libraries(al GLEW::GLEW)
-target_link_libraries(al PkgConfig::GLFW)
+target_link_libraries(al
+    GLEW::GLEW
+    PkgConfig::GLFW
+    ${OPENGL_LIBRARY}
+)
 # target_link_libraries(
 #   al
 #   debug ${debug_libs_to_link}
