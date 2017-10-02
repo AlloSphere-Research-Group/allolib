@@ -6,11 +6,11 @@ cmake_minimum_required(VERSION 3.0)
 # user needs to pass definition `AL_APP_FILE` to this script
 
 if (NOT AL_APP_FILE)
-  message("\n[!] app file needs to be provided\n")
+  message(FATAL_ERROR "\n[!] app file needs to be provided\n")
 endif ()
 
 if (IS_DIRECTORY AL_APP_FILE)
-  message("\n[!] pass file to this cmake script\n")
+  message(FATAL_ERROR "\n[!] pass file to this cmake script\n")
 endif ()
 
 if (IS_ABSOLUTE ${AL_APP_FILE})
