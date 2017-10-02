@@ -34,8 +34,8 @@ if (AL_WINDOWS)
 
 else ()
 
-  find_package(PkgConfig REQUIRED)
   if (USE_APR)
+    find_package(PkgConfig REQUIRED)
     pkg_search_module(APR REQUIRED apr-1)
   endif (USE_APR)
 

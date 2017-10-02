@@ -28,12 +28,20 @@ set(sources
   ${al_sources} ${EXTERNAL_SRC} ${ADDITIONAL_SOURCES}
 )
 
+# set(dirs_to_include
+#   ${CORE_INCLUDE_DIRS} ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
+# )
+
 set(dirs_to_include
-  ${CORE_INCLUDE_DIRS} ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
+  ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
 )
 
+# set(libs_to_link
+#   ${CORE_LIBRARIES} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
+# )
+
 set(libs_to_link
-  ${CORE_LIBRARIES} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
+  ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
 )
 
 # set(debug_libs_to_link
@@ -52,7 +60,7 @@ set(flags
   ${basic_flags}
 )
 
-link_directories(${CORE_LIBRARY_DIRS})
+# link_directories(${CORE_LIBRARY_DIRS})
 
 # --- NOW WE ARE READY TO SETUP THE LIBRARY TARGET ---------------------
 
@@ -61,7 +69,12 @@ if (MSVC)
     set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 endif ()
 
-add_library(al STATIC ${headers} ${sources})
+# add_library(al STATIC ${headers} ${sources})
+add_library(al STATIC "")
+# add_library(al STATIC ${sources})
+# add_library(al STATIC ${headers})
+target_sources(al PRIVATE ${sources})
+target_sources(al PRIVATE ${headers})
 
 #paths
 set_target_properties(al
@@ -90,6 +103,8 @@ target_include_directories(al PRIVATE ${dirs_to_include})
 
 # libs
 target_link_libraries(al ${libs_to_link})
+target_link_libraries(al GLEW::GLEW)
+target_link_libraries(al PkgConfig::GLFW)
 # target_link_libraries(
 #   al
 #   debug ${debug_libs_to_link}
