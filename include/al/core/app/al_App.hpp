@@ -24,13 +24,21 @@ namespace al {
 // TODO: better osc interface
 class App: public WindowApp, public AudioApp, public osc::PacketHandler {
 public:
+  Graphics g {this};
+  ShaderProgram mesh_shader;
+  ShaderProgram color_shader;
+  ShaderProgram tex_shader;
 
   virtual void onInit() {}
   virtual void onAnimate(double dt) {}
   virtual void onExit() {}
 
   // for child classes to override
-  virtual void preOnCreate() {}
+  virtual void preOnCreate() {
+    al::compileDefaultShader(mesh_shader, al::ShaderType::MESH);
+    al::compileDefaultShader(color_shader, al::ShaderType::COLOR);
+    al::compileDefaultShader(tex_shader, al::ShaderType::TEXTURE);
+  }
   virtual void preOnDraw() {}
   virtual void postOnDraw() {}
   virtual void preOnAnimate(double dt) {}
@@ -47,9 +55,12 @@ public:
   // from WindowApp
   virtual void loop() override {
     preOnDraw();
+    g.loadIdentity();
+    g.pushMatrix();
     onDraw();
+    g.popMatrix();
     postOnDraw();
-    refresh();
+    refresh(); // Window
   }
 
   // overrides WindowApp's start to also initiate AudioApp and etc.
@@ -76,13 +87,8 @@ public:
 
 class EasyApp : public App {
 public:
-  Graphics g {this};
   Viewpoint view;
   NavInputControl nav;
-
-  ShaderProgram mesh_shader;
-  ShaderProgram color_shader;
-  ShaderProgram tex_shader;
 
   class EasyAppEventHandler : public WindowEventHandler {
   public:
