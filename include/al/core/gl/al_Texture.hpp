@@ -58,7 +58,7 @@ In GL 3.3, this was 48; in 4.3, it is 96.
 #define AL_TEX_MAX_BINDING_UNIT 48
 // for temporary internal binding such as creating a texture
 #define AL_TEX_TEMP_BINDING_UNIT 47
-// for drawing quad slabs with texture in al::Graphics
+// for drawing quad slabs with texture
 #define AL_TEX_QUAD_DRAW_BINDING_UNIT 46
 
 /*
@@ -140,10 +140,11 @@ public:
   void bind(int binding_point = 0) const;
   /// use lasts binding point for temporary binding
   /// so doesn't (most of the time) collide with user's binding
-  void bind_temp();
+  void bind_temp() const;
 
   /// Unbind the texture (from a multitexture unit)
   void unbind(int binding_point = 0) const;
+  void unbind_temp() const;
   static void unbind(int binding_point, unsigned int target);
 
   /// Get target type (e.g., TEXTURE_2D)
@@ -225,6 +226,9 @@ public:
   void update_wrap();
   void update_mipmap();
 
+  void generateMipmap ();
+  void disableMipmap ();
+  
 protected:
   virtual void onCreate() override;
   virtual void onDestroy() override;

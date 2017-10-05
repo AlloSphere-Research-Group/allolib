@@ -45,6 +45,7 @@ void Texture::create2D(
   update_filter();
   update_wrap();
   update_mipmap();
+  unbind_temp();
 }
 
 void Texture::createCubemap(
@@ -81,6 +82,7 @@ void Texture::createCubemap(
     update_filter();
     update_wrap();
     update_mipmap();
+    unbind_temp();
 }
 
 void Texture::onCreate() {
@@ -98,8 +100,12 @@ void Texture::bind(int binding_point) const {
   // AL_GRAPHICS_ERROR("binding texture", id());
 }
 
-void Texture::bind_temp() {
+void Texture::bind_temp() const {
   bind(AL_TEX_TEMP_BINDING_UNIT);
+}
+
+void Texture::unbind_temp() const {
+    unbind(AL_TEX_TEMP_BINDING_UNIT, target());
 }
 
 void Texture::unbind(int binding_point) const {
@@ -222,6 +228,7 @@ void Texture::submit(const void * pixels) {
   update_filter();
   update_wrap();
   update_mipmap();
+  unbind_temp();
 }
 
 void Texture::update_filter() {
@@ -259,6 +266,23 @@ void Texture::update_mipmap() {
   }
 }
 
+void Texture::generateMipmap ()
+{
+    bind_temp();
+    glTexParameteri(target(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 1000);
+    glGenerateMipmap(target());
+    unbind_temp();
+}
+
+void Texture::disableMipmap ()
+{
+    bind_temp();
+    glTexParameteri(target(), GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 0);
+    unbind_temp();
+}
+
 void Texture::update(bool force) {
   bind_temp();
   if (force) {
@@ -269,6 +293,7 @@ void Texture::update(bool force) {
   update_filter();
   update_wrap();
   update_mipmap();
+  unbind_temp();
 }
 
 } // al::

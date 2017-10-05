@@ -78,7 +78,7 @@ GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32F
 GL_DEPTH24_STENCIL8, GL_DEPTH32F_STENCIL8
 */
 
-class RBO : public GPUObject{
+class RBO : public GPUObject {
 public:
 
   /// @param[in] format  internal format of buffer

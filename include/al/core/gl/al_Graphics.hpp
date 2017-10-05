@@ -34,10 +34,8 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE.
 
-
   File description:
   A general high-level interface to graphics rendering
-  [!] is SINGLETON,
   [!] only call from main (graphics) thread
 
   File author(s):

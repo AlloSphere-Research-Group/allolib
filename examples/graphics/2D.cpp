@@ -16,10 +16,11 @@ using namespace al;
 class MyApp : public App {
 public:
 
-	Mesh verts {Mesh::LINE_STRIP};
+	Mesh verts;
 
 	void onCreate ()
 	{
+		verts.primitive(Mesh::LINE_STRIP);
 		// Create a sine wave
 		const int N = 128;
 		for(int i=0; i<N; ++i){
@@ -28,16 +29,16 @@ public:
 		}
 	}
 
-	void onDraw ()
+	void onDraw (AppGraphics& g)
 	{
 		g.clear(0);
-		g.shader(color_shader);
 		g.camera(Viewpoint::IDENTITY);
-		g.shader().uniform("col0", 1, 1, 1, 1);
+		g.color(1, 1, 1);
 		g.draw(verts);
 	}
 };
 
 int main () {
-	MyApp().start();
+	MyApp app;
+	app.start();
 }
