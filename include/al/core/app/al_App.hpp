@@ -14,6 +14,7 @@
 #include "al/core/spatial/al_Pose.hpp"
 #include "al/core/io/al_ControlNav.hpp"
 #include "al/core/gl/al_DefaultShaders.hpp"
+#include "al/core/types/al_Color.hpp"
 
 #include <iostream>
 
@@ -26,7 +27,11 @@ public:
     ShaderProgram color_shader;
     ShaderProgram tex_shader;
     int color_location = 0;
-    const al::Texture* texPtr = nullptr;
+    int color_tint_location = 0;
+    int tex_tint_location = 0;
+    int mesh_tint_location = 0;
+    al::Color tint_color {1.0f, 1.0f, 1.0f, 1.0f};
+    al::Texture* texPtr = nullptr;
     
     AppGraphics (Window* win) : Graphics {win} {}
 
@@ -36,20 +41,43 @@ public:
         compileDefaultShader(color_shader, ShaderType::COLOR);
         compileDefaultShader(tex_shader, ShaderType::TEXTURE);
         color_location = color_shader.getUniformLocation("col0");
+        color_tint_location = color_shader.getUniformLocation("tint");
+        tex_tint_location = tex_shader.getUniformLocation("tint");
+        mesh_tint_location = mesh_shader.getUniformLocation("tint");
         tex_shader.begin();
         tex_shader.uniform("tex0", 0);
+        tex_shader.uniform(tex_tint_location, 1, 1, 1, 1);
         tex_shader.end();
+        color_shader.begin();
+        color_shader.uniform(color_tint_location, 1, 1, 1, 1);
+        color_shader.end();
+        mesh_shader.begin();
+        mesh_shader.uniform(mesh_tint_location, 1, 1, 1, 1);
+        mesh_shader.end();
         shader(color_shader);
+    }
+
+    void tint(float r, float g, float b, float a = 1.0f) {
+        tint_color.set(r, g, b, a);
+    }
+
+    void tint(float grayscale, float a = 1.0f) {
+        tint_color.set(grayscale, grayscale, grayscale, a);
     }
 
     void color (float r, float g, float b, float a = 1.0f)
     {
         if (shader().id() != color_shader.id()) shader(color_shader);
         shader().uniform(color_location, r, g, b, a);
+        shader().uniform4v(color_tint_location, tint_color.components);
     }
 
-    void bind(const Texture& t) {
+    void color (float k, float a = 1.0f) { color(k, k, k, a); }
+    void color (Color const& c) { color(c.r, c.g, c.b, c.a); }
+
+    void bind(Texture& t) {
         if (shader().id() != tex_shader.id()) shader(tex_shader);
+        shader().uniform4v(tex_tint_location, tint_color.components);
         t.bind(0);
         texPtr = &t;
     }
@@ -58,7 +86,12 @@ public:
         texPtr = nullptr;
     }
 
-    void quad(const Texture& tex, float x, float y, float w, float h)
+    void meshColor() {
+        if (shader().id() != mesh_shader.id()) shader(mesh_shader);
+        shader().uniform4v(mesh_tint_location, tint_color.components);
+    }
+
+    void quad(Texture& tex, float x, float y, float w, float h)
     {
         static Mesh m = [] () {
             Mesh m {Mesh::TRIANGLE_STRIP};
@@ -81,6 +114,7 @@ public:
         draw(m);
         unbind();
     }
+
 };
 
 // single window, audioIO, and single port osc recv & send
@@ -165,8 +199,8 @@ public:
         while (!shouldQuit()) {
             // to quit, call WindowApp::quit() or click close button of window,
             // or press ctrl + q
-            preOnAnimate(dt() / 1000000);
-            onAnimate(dt() / 1000000); // millis for dt
+            preOnAnimate(dt() / 1000000.0f);
+            onAnimate(dt() / 1000000.0f); // millis for dt
             loop(); // WindowApp (onDraw, refresh)
             tickFPS(); // WindowApp (FPS)
         }

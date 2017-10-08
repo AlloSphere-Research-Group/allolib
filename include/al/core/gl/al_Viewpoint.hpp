@@ -123,7 +123,8 @@ private:
 public:
   enum SpecialType {
     IDENTITY,
-    ORTHO_FOR_2D
+    ORTHO_FOR_2D,
+    UNIT_ORTHO
   };
 };
 

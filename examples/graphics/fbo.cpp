@@ -36,6 +36,7 @@ class MyApp : public App {
 		// both depth and color attachees must be valid on the GPU before use:
 		rbo.create(w, h);
 		fbotex.create2D(w, h);
+		fbotex.filter(GL_NEAREST);
 
 		fbo.bind();
 		fbo.attachTexture2D(fbotex);
@@ -62,8 +63,14 @@ class MyApp : public App {
 		g.draw(m);
 
 		// mipmaps can be generated after rendering to FBO
-		if (mipmap) fbotex.generateMipmap();
-		else fbotex.disableMipmap();
+		if (mipmap) {
+			fbotex.filter(GL_LINEAR_MIPMAP_LINEAR); // specify filtering for mipmap
+			fbotex.generateMipmap();
+		}
+		else {
+			fbotex.filter(GL_NEAREST);
+			fbotex.disableMipmap();
+		}
 
 		// show in blue-world:
 		g.framebuffer(FBO::DEFAULT);
@@ -88,5 +95,6 @@ class MyApp : public App {
 int main () {
 	MyApp app;
 	app.dimensions(800, 600);
+	app.fps(10);
 	app.start();
 }

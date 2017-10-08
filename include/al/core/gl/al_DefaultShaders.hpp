@@ -26,12 +26,14 @@ void main() {
 inline std::string al_mesh_frag_shader() { return R"(
 #version 330
 
+uniform vec4 tint;
+
 in vec4 color_;
 
 out vec4 frag_color;
 
 void main() {
-  frag_color = color_;
+  frag_color = color_ * tint;
 }
 )";}
 
@@ -57,13 +59,14 @@ inline std::string al_tex_frag_shader() { return R"(
 #version 330
 
 uniform sampler2D tex0;
+uniform vec4 tint;
 
 in vec2 texcoord_;
 
 out vec4 frag_color;
 
 void main() {
-  frag_color = texture(tex0, texcoord_);
+  frag_color = texture(tex0, texcoord_) * tint;
 }
 )";}
 
@@ -85,11 +88,12 @@ inline std::string al_color_frag_shader() { return R"(
 #version 330
 
 uniform vec4 col0;
+uniform vec4 tint;
 
 out vec4 frag_color;
 
 void main() {
-  frag_color = col0;
+  frag_color = col0 * tint;
 }
 )";}
 

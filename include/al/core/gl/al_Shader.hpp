@@ -217,8 +217,8 @@ public:
   /// Get location of attribute
   int attribute(const char * name) const;
 
-  const ShaderProgram& uniform(const char * name, Color v) const {
-    return uniform(name, v[0], v[1], v[2], v[3]);
+  const ShaderProgram& uniform(const char * name, const Color& c) const {
+    return uniform4(name, c.components);
   }
 
   const ShaderProgram& uniform(int loc, int v) const;
@@ -227,6 +227,9 @@ public:
   const ShaderProgram& uniform(int loc, float v0, float v1) const;
   const ShaderProgram& uniform(int loc, float v0, float v1, float v2) const;
   const ShaderProgram& uniform(int loc, float v0, float v1, float v2, float v3) const;
+  const ShaderProgram& uniform4v(int loc, const float* v, int count=1) const;
+
+
   template <typename T>
   const ShaderProgram& uniform(int loc, const Vec<2,T>& v) const {
     return uniform(loc, v.x, v.y);

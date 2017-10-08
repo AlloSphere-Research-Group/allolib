@@ -350,7 +350,8 @@ public:
   void clearDepth();
   void clearDepth(float d);
   void clear(float r, float g, float b, float a=1, float d=1, int drawbuffer = 0);
-  void clear(float grayscale);
+  void clear(float grayscale, float d=1) { clear(grayscale, grayscale, grayscale, 1, d); }
+  void clear(Color const& c, float d=1) { clear(c.r, c.g, c.b, c.a, d); }
 
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);

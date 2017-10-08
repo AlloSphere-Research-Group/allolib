@@ -77,18 +77,8 @@ myTex.filter(GL_LINEAR);
 myTex.wrap(GL_CLAMP_TO_EDGE);
 myTex.update(); // remember to call update, this is not needed when calling create2D (internally called)
 
-*/
-
-/*
-  
-  frequently used internal format
-  
-  GL_RGBA32F
-  GL_RGBA8
-
-  GL_DEPTH_COMPONENT32F
-  GL_DEPTH_COMPONENT16
-
+  frequently used internal format:
+    GL_RGBA32F GL_RGBA8 GL_DEPTH_COMPONENT32F GL_DEPTH_COMPONENT16
 */
 
 namespace al {
@@ -96,21 +86,6 @@ namespace al {
 /// A simple wrapper around an OpenGL Texture
 /// @ingroup allocore
 class Texture : public GPUObject {
-protected:
-  unsigned int mTarget;
-  int mInternalFormat;
-  unsigned int mWidth, mHeight, mDepth;
-  unsigned int mFormat;
-  unsigned int mType;
-
-  int mWrapS = GL_CLAMP_TO_EDGE, mWrapT = GL_CLAMP_TO_EDGE, mWrapR = GL_CLAMP_TO_EDGE;
-  int mFilterMin = GL_NEAREST, mFilterMag = GL_NEAREST;
-  bool mUseMipmap = false; // by default no mipmap
-
-  bool mFilterUpdated = true; // Flags change in texture params (wrap, filter)
-  bool mWrapUpdated = true; // Flags change in texture params (wrap, filter)
-  bool mUsingMipmapUpdated = true;;
-
 public:
   Texture();
   virtual ~Texture();
@@ -137,14 +112,15 @@ public:
 
 
   /// Bind the texture (to a multitexture unit)
-  void bind(int binding_point = 0) const;
-  /// use lasts binding point for temporary binding
-  /// so doesn't (most of the time) collide with user's binding
-  void bind_temp() const;
+  /// also update params and mipmap if changed
+  void bind(int binding_point = 0);
+  /// use last binding point so it doesn't collide with user's binding
+  /// also bind without updating params
+  void bind_temp();
 
   /// Unbind the texture (from a multitexture unit)
-  void unbind(int binding_point = 0) const;
-  void unbind_temp() const;
+  void unbind(int binding_point = 0);
+  void unbind_temp() { unbind(AL_TEX_TEMP_BINDING_UNIT, target()); }
   static void unbind(int binding_point, unsigned int target);
 
   /// Get target type (e.g., TEXTURE_2D)
@@ -185,8 +161,30 @@ public:
 
   bool mipmap() const { return mUseMipmap; }
 
+  /// Get number of components per pixel
+  // unsigned numComponents() const { return Graphics::numComponents(format()); }
+
+  /// Get total number of elements (components x width x height x depth)
+  // unsigned numElems() const {
+  //   return numPixels() * numComponents();
+  // }
+
+  /// Get total number of pixels
+  // unsigned numPixels() const {
+  //   return width() * (height()?height():1) * (depth()?depth():1);
+  // }
+
+  /// Resize 1D texture
+  void resize (unsigned w) { }
+
+  /// Resize 2D texture
+  void resize (unsigned w, unsigned h) { }
+
+  /// Resize 3D texture
+  void resize (unsigned w, unsigned h, unsigned d) { }
+
   /// Set minification and magnification filter types all at once
-  void filter(int v);
+  void filter(int v) { filterMin(v); filterMag(v); }
 
   /// Set minification filter type
   void filterMin(int v);
@@ -194,44 +192,58 @@ public:
   /// Set magnification filter type
   void filterMag(int v);
 
-  /// Set wrapping mode for all dimensions
-  void wrap(int v);
-
-  void wrapS(int v);
-  void wrapT(int v);
-  void wrapR(int v);
-
-  /// Set 2D wrapping modes
-  void wrap(int S, int T){ wrapS(S); wrapT(T); }
-
   /// Set 3D wrapping modes
-  void wrap(int S, int T, int R) {
-    wrapS(S); wrapT(T); wrapR(R);
-  };
+  void wrap(int S, int T, int R);
+  
+  /// Set 2D wrapping modes
+  void wrap(int S, int T) { wrap(S,T,mWrapR); }
+
+  /// Set wrapping mode for all dimensions
+  void wrap(int v) { wrap(v,v,v); }
+
+  void wrapS(int v) { wrap(v, mWrapT, mWrapR); };
+  void wrapT(int v) { wrap(mWrapS, v, mWrapR); };
+  void wrapR(int v) { wrap(mWrapS, mWrapT, v); };
 
   /// Set whether to generate mipmaps
-  void mipmap(bool b);
+  // void mipmap(bool b);
 
   /// Copy client pixels to GPU texels
-
   /// NOTE: the graphics context (e.g. Window) must have been created
   /// If pixels is NULL, then the only effect is to resize the texture
   /// remotely.
   void submit(const void * pixels);
 
   // update the changes in params or settings
-  void update(bool force=false);
-  // should call makeActiveTexture before calling these
-  void update_filter();
-  void update_wrap();
-  void update_mipmap();
+  // void update(bool force=false);
 
   void generateMipmap ();
   void disableMipmap ();
+
+  bool resize (int w, int h);
+
+  /// Copy pixels from current frame buffer to texture texels
+
+  /// @param[in] w    width of region to copy; w<0 uses w + 1 + texture.width
+  /// @param[in] h    height of region to copy; h<0 uses h + 1 + texture.height
+  /// @param[in] fbx    pixel offset from left edge of frame buffer
+  /// @param[in] fby    pixel offset from bottom edge of frame buffer
+  /// @param[in] texx   texel offset in x direction
+  /// @param[in] texy   texel offset in y direction (2D/3D only)
+  /// @param[in] texz   texel offset in z direction (3D only)
+  void copyFrameBuffer(
+    int w=-1, int h=-1,
+    int fbx=0, int fby=0,
+    int texx=0, int texy=0, int texz=0
+  );
   
 protected:
-  virtual void onCreate() override;
-  virtual void onDestroy() override;
+  void onCreate() override;
+  void onDestroy() override;
+
+  void update_filter();
+  void update_wrap();
+  void update_mipmap();
 
   // Pattern for setting a variable that when changed sets a notification flag
   // if v != var, update var and set flag to true
@@ -239,6 +251,20 @@ protected:
   void update_param(const T& v, T& var, bool& flag){
     if(v!=var){ var=v; flag=true; }
   }
+
+  unsigned int mTarget = GL_TEXTURE_2D;
+  int mInternalFormat = GL_RGBA8;
+  unsigned int mWidth = 0, mHeight = 0, mDepth = 0;
+  unsigned int mFormat = GL_RGBA;
+  unsigned int mType = GL_UNSIGNED_BYTE;
+
+  int mWrapS = GL_CLAMP_TO_EDGE, mWrapT = GL_CLAMP_TO_EDGE, mWrapR = GL_CLAMP_TO_EDGE;
+  int mFilterMin = GL_NEAREST, mFilterMag = GL_NEAREST;
+  bool mUseMipmap = false; // by default no mipmap
+
+  bool mFilterUpdated = true; // Flags change in texture params (wrap, filter)
+  bool mWrapUpdated = true; // Flags change in texture params (wrap, filter)
+  bool mUsingMipmapUpdated = true;;
 
 };
 

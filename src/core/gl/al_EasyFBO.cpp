@@ -11,7 +11,7 @@ void EasyFBO::init(int width, int height, EasyFBOSetting const& setting) {
     mTex.wrapS(setting.wrapS);
     mTex.wrapT(setting.wrapT);
     mTex.wrapR(setting.wrapR);
-    mTex.mipmap(setting.mUseMipmap);
+    // mTex.mipmap(setting.mUseMipmap);
     mTex.create2D(mWidth, mHeight, setting.internal, setting.format, setting.type);
 
     mRbo.create(mWidth, mHeight, setting.depth_format);

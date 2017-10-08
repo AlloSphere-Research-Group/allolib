@@ -150,13 +150,6 @@ void Graphics::clear(float r, float g, float b, float a, float d, int drawbuffer
     clearColor(r, g, b, a, drawbuffer);
     clearDepth(d);
 }
-void Graphics::clear(float grayscale) {
-  clear(grayscale, grayscale, grayscale);
-}
-
-// void Graphics::viewport(const Viewport& v){
-//   glViewport(v.l, v.b, v.w, v.h);
-// }
 
 void Graphics::viewport(int left, int bottom, int width, int height) {
   glViewport(left, bottom, width, height);
@@ -215,20 +208,19 @@ void Graphics::camera(Viewpoint::SpecialType v, int w, int h) {
 void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
   switch (v) {
 
-  case Viewpoint::IDENTITY:
+  case Viewpoint::IDENTITY: {
     mViewMat = Matrix4f::identity();
     mProjMat = Matrix4f::identity();
-    break;
+  }
+  break;
 
-  case Viewpoint::ORTHO_FOR_2D:
+  case Viewpoint::ORTHO_FOR_2D: {
     // 1. place eye so that bottom left is (0, 0), top right is (width, height)
     // 2. set lens to be ortho, with given width and height
-
     float half_w = (w - x) * 0.5f;
     float half_h = (h - y) * 0.5f;
 
-    // z = 1 because 2D things will be drawn at z = 0
-    // because of that we set near to 0.5 and far to 1.5
+    // 2D things will be drawn at z = 0 >> z = 1, near: 0.5, far: 1.5
     mViewMat = Matrix4f::lookAt(
       Vec3f(half_w, half_h, 1), // eye
       Vec3f(half_w, half_h, 0), // at
@@ -239,7 +231,23 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
       -half_h, half_h, // bottom, top
       0.5f, 1.5f // near, far
     );
-    break;
+  }
+  break;
+
+  case Viewpoint::UNIT_ORTHO:
+    float spanx = float(w) / h;
+    float spany = 1;
+    if (spanx < 1) {
+      spanx = 1;
+      spany = float(h) / w;
+    }
+    mViewMat = Matrix4f::identity();
+    mProjMat = Matrix4f::ortho(
+      -spanx, spanx, // left, right
+      -spany, spany, // bottom, top
+      -0.5f, 0.5f // near, far
+    );
+  break;
   }
 
   // viewport is in framebuffer unit

@@ -260,6 +260,11 @@ const ShaderProgram& ShaderProgram::uniform(int loc, float v0, float v1, float v
 const ShaderProgram& ShaderProgram::uniform(int loc, float v0, float v1, float v2, float v3) const{
   glUniform4f(loc, v0,v1,v2,v3); return *this;
 }
+
+const ShaderProgram& ShaderProgram::uniform4v(int loc, const float* v, int count) const {
+    glUniform4fv(loc, count, v); return *this;
+}
+
 const ShaderProgram& ShaderProgram::uniformMatrix3(int loc, const float * v, bool transpose) const {
   glUniformMatrix3fv(loc, 1, transpose, v); return *this;
 }
@@ -277,7 +282,8 @@ const ShaderProgram& ShaderProgram::uniform3(const char * name, const float * v,
   glUniform3fv(getUniformLocation(name), count, v); return *this;
 }
 const ShaderProgram& ShaderProgram::uniform4(const char * name, const float * v, int count) const{
-  glUniform4fv(getUniformLocation(name), count, v); return *this;
+  return uniform4v(getUniformLocation(name), v, count);
+  // glUniform4fv(getUniformLocation(name), count, v); return *this;
 }
 
 const ShaderProgram& ShaderProgram::uniform(const char * name, int v) const{

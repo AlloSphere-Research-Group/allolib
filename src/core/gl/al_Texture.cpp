@@ -27,6 +27,11 @@ void Texture::create2D(
   mFormat = format;
   mType = type;
 
+  // force sending params
+  mFilterUpdated = true;
+  mWrapUpdated = true;
+  mUsingMipmapUpdated = true;
+
   // AL_GRAPHICS_ERROR("before creating 2D texture", id());
   create();
   bind_temp();
@@ -39,12 +44,10 @@ void Texture::create2D(
     mFormat, mType, NULL
   );
   // AL_GRAPHICS_ERROR("creating 2D texture", id());
-  mFilterUpdated = true;
-  mWrapUpdated = true;
-  mUsingMipmapUpdated = true;
   update_filter();
   update_wrap();
-  update_mipmap();
+  // no mipmap update since there's no data yet,
+  // just flagging mUsingMipmapUpdated to be true
   unbind_temp();
 }
 
@@ -62,6 +65,11 @@ void Texture::createCubemap(
     mFormat = format;
     mType = type;
 
+    // force sending params
+    mFilterUpdated = true;
+    mWrapUpdated = true;
+    mUsingMipmapUpdated = true;
+
     // AL_GRAPHICS_ERROR("before creating 2D texture", id());
     create();
     bind_temp();
@@ -76,12 +84,10 @@ void Texture::createCubemap(
         nullptr
       ); //< no actual data yet
     }
-    mFilterUpdated = true;
-    mWrapUpdated = true;
-    mUsingMipmapUpdated = true;
     update_filter();
     update_wrap();
-    update_mipmap();
+    // no mipmap update since there's no data yet,
+    // just flagging mUsingMipmapUpdated to be true
     unbind_temp();
 }
 
@@ -93,40 +99,39 @@ void Texture::onDestroy() {
   glDeleteTextures(1, (GLuint *)&mID);
 }
 
-void Texture::bind(int binding_point) const {
-  // AL_GRAPHICS_ERROR("(before Texture::bind)", id());
-  glActiveTexture(GL_TEXTURE0 + binding_point);
-  glBindTexture(target(), id());
-  // AL_GRAPHICS_ERROR("binding texture", id());
+void Texture::bind(int binding_point) {
+    // AL_GRAPHICS_ERROR("(before Texture::bind)", id());
+    glActiveTexture(GL_TEXTURE0 + binding_point);
+    glBindTexture(target(), id());
+    // AL_GRAPHICS_ERROR("binding texture", id());
+
+    // update params & mipmap if they were changed
+    update_filter();
+    update_wrap();
+    update_mipmap();
 }
 
-void Texture::bind_temp() const {
-  bind(AL_TEX_TEMP_BINDING_UNIT);
+void Texture::bind_temp() {
+    glActiveTexture(GL_TEXTURE0 + AL_TEX_TEMP_BINDING_UNIT);
+    glBindTexture(target(), id());
 }
 
-void Texture::unbind_temp() const {
-    unbind(AL_TEX_TEMP_BINDING_UNIT, target());
-}
-
-void Texture::unbind(int binding_point) const {
-  unbind(binding_point, target());
+void Texture::unbind(int binding_point) {
+    unbind(binding_point, target());
 }
 
 void Texture::unbind(int binding_point, unsigned int target) {
-  glActiveTexture(GL_TEXTURE0 + binding_point);
-  glBindTexture(target, 0);
+    glActiveTexture(GL_TEXTURE0 + binding_point);
+    glBindTexture(target, 0);
 }
 
 void Texture::filterMin(int v) {
-  switch(v) {
+  switch (v) {
     case GL_NEAREST_MIPMAP_NEAREST:
     case GL_LINEAR_MIPMAP_NEAREST:
     case GL_NEAREST_MIPMAP_LINEAR:
     case GL_LINEAR_MIPMAP_LINEAR:
-      update_param(true, mUseMipmap, mUsingMipmapUpdated);
-      break;
-    default:
-      update_param(false, mUseMipmap, mUsingMipmapUpdated);
+    default: break;
   }
   update_param(v, mFilterMin, mFilterUpdated);
 }
@@ -137,98 +142,20 @@ void Texture::filterMag(int v) {
   switch(v) {
     case GL_NEAREST_MIPMAP_NEAREST:
     case GL_NEAREST_MIPMAP_LINEAR:
-      update_param(GL_NEAREST, mFilterMag, mFilterUpdated);
+      v = GL_NEAREST; break;
     case GL_LINEAR_MIPMAP_NEAREST:
     case GL_LINEAR_MIPMAP_LINEAR:
-      update_param(GL_LINEAR, mFilterMag, mFilterUpdated);
-      break;
-    default:
-      update_param(v, mFilterMag, mFilterUpdated);
+      v = GL_LINEAR; break;
+    default: break;
   }
+  update_param(v, mFilterMag, mFilterUpdated);
 }
 
-void Texture::filter(int v) {
-  switch(v) {
-    case GL_NEAREST_MIPMAP_NEAREST:
-    case GL_NEAREST_MIPMAP_LINEAR:
-      mFilterMag = GL_NEAREST;
-      mUseMipmap = true;
-      break;
-    case GL_LINEAR_MIPMAP_NEAREST:
-    case GL_LINEAR_MIPMAP_LINEAR:
-      mFilterMag = GL_LINEAR;
-      mUseMipmap = true;
-      break;
-    default:
-      mFilterMag = v;
-      mUseMipmap = false;
-  }
-  mFilterMin = v;
-  mFilterUpdated = true;
-}
-
-void Texture::wrapS(int v) {
-  update_param(v, mWrapS, mWrapUpdated);
-}
-
-void Texture::wrapT(int v) {
-  update_param(v, mWrapT, mWrapUpdated);
-}
-
-void Texture::wrapR(int v) {
-  update_param(v, mWrapR, mWrapUpdated);
-}
-
-void Texture::wrap(int v) {
-  mWrapS = v;
-  mWrapT = v;
-  mWrapR = v;
-  mWrapUpdated = true;
-}
-
-void Texture::mipmap(bool b) {
-  update_param(b, mUseMipmap, mUsingMipmapUpdated);
-}
-
-void Texture::submit(const void * pixels) {
-  if (!pixels) {
-    return;
-  }
-  bind_temp();
-  // AL_GRAPHICS_ERROR("before Texture::submit (glTexSubImage)", id());
-  switch (target()) {
-    case GL_TEXTURE_1D:
-      glTexSubImage1D(
-        target(), 0,
-        0, width(),
-        format(), type(), pixels
-      );
-      break;
-    case GL_TEXTURE_2D:
-      glTexSubImage2D(
-        target(), 0,
-        0, 0, width(), height(),
-        format(), type(), pixels
-      );
-      break;
-    case GL_TEXTURE_3D:
-      glTexSubImage3D(
-        target(), 0,
-        0, 0, 0, width(), height(), depth(),
-        format(), type(), pixels
-      );
-      break;
-    default:
-      AL_WARN("invalid texture target %d", target());
-  }
-  // AL_GRAPHICS_ERROR("Texture::submit (glTexSubImage)", id());
-
-  // update mipmap with new data
-  mUsingMipmapUpdated = true;
-  update_filter();
-  update_wrap();
-  update_mipmap();
-  unbind_temp();
+void Texture::wrap (int S, int T, int R) {
+    if (S != mWrapS || T != mWrapT || R != mWrapR) {
+        mWrapS = S; mWrapT = T; mWrapR = R;
+        mWrapUpdated = true;
+    }
 }
 
 void Texture::update_filter() {
@@ -251,16 +178,16 @@ void Texture::update_wrap() {
 void Texture::update_mipmap() {
   if (mUsingMipmapUpdated) {
     if (mUseMipmap) {
-      // base level is 0 if untouched so no need to call
-      // glTexParameteri(target(), GL_TEXTURE_BASE_LEVEL, 0);
-      // 1000 is default value of OpenGL
-      glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 1000);
-      glGenerateMipmap(target());
+        // base level is 0 if untouched so no need to call
+        // glTexParameteri(target(), GL_TEXTURE_BASE_LEVEL, 0);
+        // MAX LEVEL 1000 is default value of OpenGL
+        glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 1000);
+        glGenerateMipmap(target());
     }
     else {
-      // base level is 0 if untouched
-      // glTexParameteri(target(), GL_TEXTURE_BASE_LEVEL, 0);
-      glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 0);
+        // base level is 0 if untouched
+        // glTexParameteri(target(), GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 0);
     }
     mUsingMipmapUpdated = false;
   }
@@ -268,32 +195,105 @@ void Texture::update_mipmap() {
 
 void Texture::generateMipmap ()
 {
-    bind_temp();
-    glTexParameteri(target(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 1000);
-    glGenerateMipmap(target());
-    unbind_temp();
+    mUsingMipmapUpdated = true;
+    mUseMipmap = true;
+    // bind_temp();
+    // glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 1000);
+    // glGenerateMipmap(target());
+    // unbind_temp();
 }
 
 void Texture::disableMipmap ()
 {
-    bind_temp();
-    glTexParameteri(target(), GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 0);
-    unbind_temp();
+    mUsingMipmapUpdated = true;
+    mUseMipmap = false;
+    // bind_temp();
+    // glTexParameteri(target(), GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 0);
+    // unbind_temp();
 }
 
-void Texture::update(bool force) {
+// void Texture::update(bool force) {
+//   bind_temp();
+//   if (force) {
+//     mFilterUpdated = true;
+//     mWrapUpdated = true;
+//     mUsingMipmapUpdated = true;
+//   }
+//   update_filter();
+//   update_wrap();
+//   update_mipmap();
+//   unbind_temp();
+// }
+
+
+void Texture::submit(const void * pixels) {
+  if (!pixels) { return; }
   bind_temp();
-  if (force) {
-    mFilterUpdated = true;
-    mWrapUpdated = true;
-    mUsingMipmapUpdated = true;
+  // AL_GRAPHICS_ERROR("before Texture::submit (glTexSubImage)", id());
+  switch (target()) {
+    case GL_TEXTURE_1D:
+      glTexSubImage1D(target(), 0,
+        0, width(), format(), type(), pixels);
+      break;
+    case GL_TEXTURE_2D:
+      glTexSubImage2D(target(), 0,
+        0, 0, width(), height(), format(), type(), pixels);
+      break;
+    case GL_TEXTURE_3D:
+      glTexSubImage3D(target(), 0,
+        0, 0, 0, width(), height(), depth(), format(), type(), pixels);
+      break;
+    default:
+      AL_WARN("invalid texture target %d", target());
   }
+  // AL_GRAPHICS_ERROR("Texture::submit (glTexSubImage)", id());
+
+  // update mipmap with new data
+  mUsingMipmapUpdated = true;
   update_filter();
   update_wrap();
   update_mipmap();
   unbind_temp();
+}
+
+bool Texture::resize (int w, int h) {
+    if (target() != GL_TEXTURE_2D) {
+        AL_WARN("invalid geometry for texture 2D target");
+        return false;
+    }
+    if (w == mWidth && h == mHeight) {
+        // AL_WARN("same egometry");
+        return false;
+    }
+    create2D(w, h, mInternalFormat, mFormat, mType);
+    return true;
+}
+
+void Texture::copyFrameBuffer(
+    int w, int h, int fbx, int fby, int texx, int texy, int texz
+){
+    if(w < 0){
+        w += 1 + width();
+    }
+    if(h < 0){
+        h += 1 + height();
+    }
+
+    bind_temp();
+    switch(target()){
+    case GL_TEXTURE_1D:
+        glCopyTexSubImage1D(GL_TEXTURE_1D, 0, texx, fbx,fby, w);
+        break;
+    case GL_TEXTURE_2D:
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, texx,texy, fbx,fby, w, h);
+        break;
+    case GL_TEXTURE_3D:
+        glCopyTexSubImage3D(GL_TEXTURE_3D, 0, texx,texy,texz, fbx,fby, w, h);
+        break;
+    default:;
+    }
+    unbind_temp();
 }
 
 } // al::

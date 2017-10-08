@@ -204,6 +204,13 @@ public:
   	return *mPosePtr;
   }
 
+  /// Set position
+  template <class T>
+  Nav& pos(T t){ pose().pos(t); return *this; }
+
+  /// Set position from individual components
+  Nav& pos(double x, double y, double z) { pose().pos(x, y, z); return *this; }
+
   Nav& target(Pose& pose) {
     mPosePtr = &pose;
     updateDirectionVectors();
