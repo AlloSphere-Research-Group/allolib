@@ -18,7 +18,6 @@ dependencies/gamma/
 dependencies/FreeImage/
 build/
 */build/
-*/build2/
 .vs/
 Debug/
 */Debug/
@@ -35,3 +34,6 @@ bin/
 al.dir/
 x64
 CmakeSettings.json
+
+*.sublime-project
+*.sublime-workspace

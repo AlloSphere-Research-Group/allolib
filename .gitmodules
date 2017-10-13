@@ -1,9 +1,6 @@
 [submodule "external/rtaudio"]
 	path = external/rtaudio
 	url = https://github.com/thestk/rtaudio.git
-[submodule "external/Gamma"]
-	path = external/Gamma
-	url = https://github.com/AlloSphere-Research-Group/Gamma
 [submodule "external/rtmidi"]
 	path = external/rtmidi
 	url = https://github.com/thestk/rtmidi
