@@ -391,6 +391,16 @@ protected:
   Primitive mPrimitive;
 };
 
+template <class T>
+Mesh& Mesh::transform(const Mat<4,T>& m, int begin, int end){
+  if(end<0) end += vertices().size()+1; // negative index wraps to end of array
+  for(int i=begin; i<end; ++i){
+    Vertex& v = vertices()[i];
+    v.set(m * Vec<4,T>(v, 1));
+  }
+  return *this;
+}
+
 } // al::
 
 #endif

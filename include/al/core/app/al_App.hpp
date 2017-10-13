@@ -30,6 +30,7 @@ public:
     int color_tint_location = 0;
     int tex_tint_location = 0;
     int mesh_tint_location = 0;
+    int tint_location = 0;
     al::Color tint_color {1.0f, 1.0f, 1.0f, 1.0f};
     al::Texture* texPtr = nullptr;
     
@@ -55,19 +56,24 @@ public:
         mesh_shader.uniform(mesh_tint_location, 1, 1, 1, 1);
         mesh_shader.end();
         shader(color_shader);
+        tint_location = color_tint_location;
     }
 
     void tint(float r, float g, float b, float a = 1.0f) {
         tint_color.set(r, g, b, a);
+        shader().uniform4v(tint_location, tint_color.components);
     }
 
     void tint(float grayscale, float a = 1.0f) {
-        tint_color.set(grayscale, grayscale, grayscale, a);
+        tint(grayscale, grayscale, grayscale, a);
     }
 
     void color (float r, float g, float b, float a = 1.0f)
     {
-        if (shader().id() != color_shader.id()) shader(color_shader);
+        if (shader().id() != color_shader.id()) {
+            shader(color_shader);
+            tint_location = color_tint_location;
+        }
         shader().uniform(color_location, r, g, b, a);
         shader().uniform4v(color_tint_location, tint_color.components);
     }
@@ -76,7 +82,10 @@ public:
     void color (Color const& c) { color(c.r, c.g, c.b, c.a); }
 
     void bind(Texture& t) {
-        if (shader().id() != tex_shader.id()) shader(tex_shader);
+        if (shader().id() != tex_shader.id()) {
+            shader(tex_shader);
+            tint_location = tex_tint_location;
+        }
         shader().uniform4v(tex_tint_location, tint_color.components);
         t.bind(0);
         texPtr = &t;
@@ -87,7 +96,10 @@ public:
     }
 
     void meshColor() {
-        if (shader().id() != mesh_shader.id()) shader(mesh_shader);
+        if (shader().id() != mesh_shader.id()) {
+            shader(mesh_shader);
+            tint_location = mesh_tint_location;
+        }
         shader().uniform4v(mesh_tint_location, tint_color.components);
     }
 

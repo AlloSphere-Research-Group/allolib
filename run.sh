@@ -85,8 +85,8 @@ fi
 # go to where the binary is so we have cwd there
 # (app's cmake is set to put binary in 'bin')
 cd ${INITIALDIR}
-cd ${APP_PATH}
+cd ${APP_PATH}/bin
 echo " "
 echo "___ running ${APP_NAME} __________"
 echo " "
-./bin/"${APP_NAME}${POSTFIX}"
+./"${APP_NAME}${POSTFIX}"

@@ -229,6 +229,7 @@ void Texture::disableMipmap ()
 
 void Texture::submit(const void * pixels) {
   if (!pixels) { return; }
+  
   bind_temp();
   // AL_GRAPHICS_ERROR("before Texture::submit (glTexSubImage)", id());
   switch (target()) {
