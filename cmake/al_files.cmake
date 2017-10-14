@@ -4,25 +4,26 @@ set(core_headers
   include/al/core/app/al_AudioApp.hpp
   include/al/core/app/al_FPS.hpp
   include/al/core/app/al_WindowApp.hpp
-  include/al/core/gl/al_BufferObject.hpp
-  include/al/core/gl/al_DefaultShaders.hpp
-  include/al/core/gl/al_EasyFBO.hpp
-  include/al/core/gl/al_EasyVAO.hpp
-  include/al/core/gl/al_FBO.hpp
-  include/al/core/gl/al_GLEW.hpp
-  include/al/core/gl/al_GLFW.hpp
-  include/al/core/gl/al_GPUObject.hpp
-  include/al/core/gl/al_Graphics.hpp
-  include/al/core/gl/al_Lens.hpp
-  # include/al/core/gl/al_Light.hpp
-  include/al/core/gl/al_Mesh.hpp
-  include/al/core/gl/al_Shader.hpp
-  include/al/core/gl/al_Shapes.hpp
-  # include/al/core/gl/al_Stereographic.hpp
-  include/al/core/gl/al_Texture.hpp
-  include/al/core/gl/al_VAO.hpp
-  include/al/core/gl/al_VAOMesh.hpp
-  include/al/core/gl/al_Viewpoint.hpp
+  include/al/core/graphics/al_BufferObject.hpp
+  include/al/core/graphics/al_DefaultShaders.hpp
+  include/al/core/graphics/al_EasyFBO.hpp
+  include/al/core/graphics/al_EasyVAO.hpp
+  include/al/core/graphics/al_FBO.hpp
+  include/al/core/graphics/al_GLEW.hpp
+  include/al/core/graphics/al_GLFW.hpp
+  include/al/core/graphics/al_GPUObject.hpp
+  include/al/core/graphics/al_Graphics.hpp
+  include/al/core/graphics/al_Lens.hpp
+  # include/al/core/graphics/al_Light.hpp
+  include/al/core/graphics/al_Mesh.hpp
+  include/al/core/graphics/al_OpenGL.hpp
+  include/al/core/graphics/al_Shader.hpp
+  include/al/core/graphics/al_Shapes.hpp
+  # include/al/core/graphics/al_Stereographic.hpp
+  include/al/core/graphics/al_Texture.hpp
+  include/al/core/graphics/al_VAO.hpp
+  include/al/core/graphics/al_VAOMesh.hpp
+  include/al/core/graphics/al_Viewpoint.hpp
   include/al/core/io/al_AudioIO.hpp
   include/al/core/io/al_AudioIOData.hpp
   include/al/core/io/al_ControlNav.hpp
@@ -48,25 +49,26 @@ set(core_sources
   src/core/app/al_AudioApp.cpp
   src/core/app/al_FPS.cpp
   src/core/app/al_WindowApp.cpp
-  src/core/gl/al_BufferObject.cpp
-  src/core/gl/al_DefaultShaders.cpp
-  src/core/gl/al_EasyFBO.cpp
-  src/core/gl/al_EasyVAO.cpp
-  src/core/gl/al_FBO.cpp
-  src/core/gl/al_GLEW.cpp
-  src/core/gl/al_GLFW.cpp
-  src/core/gl/al_GPUObject.cpp
-  src/core/gl/al_Graphics.cpp
-  src/core/gl/al_Lens.cpp
-  # src/core/gl/al_Light.cpp
-  src/core/gl/al_Mesh.cpp
-  src/core/gl/al_Shader.cpp
-  src/core/gl/al_Shapes.cpp
-  # src/core/gl/al_Stereographic.cpp
-  src/core/gl/al_Texture.cpp
-  src/core/gl/al_VAO.cpp
-  src/core/gl/al_VAOMesh.cpp
-  src/core/gl/al_Viewpoint.cpp
+  src/core/graphics/al_BufferObject.cpp
+  src/core/graphics/al_DefaultShaders.cpp
+  src/core/graphics/al_EasyFBO.cpp
+  src/core/graphics/al_EasyVAO.cpp
+  src/core/graphics/al_FBO.cpp
+  src/core/graphics/al_GLEW.cpp
+  src/core/graphics/al_GLFW.cpp
+  src/core/graphics/al_GPUObject.cpp
+  src/core/graphics/al_Graphics.cpp
+  src/core/graphics/al_Lens.cpp
+  # src/core/graphics/al_Light.cpp
+  src/core/graphics/al_Mesh.cpp
+  src/core/graphics/al_OpenGL.cpp
+  src/core/graphics/al_Shader.cpp
+  src/core/graphics/al_Shapes.cpp
+  # src/core/graphics/al_Stereographic.cpp
+  src/core/graphics/al_Texture.cpp
+  src/core/graphics/al_VAO.cpp
+  src/core/graphics/al_VAOMesh.cpp
+  src/core/graphics/al_Viewpoint.cpp
   src/core/io/al_AudioIO.cpp
   src/core/io/al_AudioIOData.cpp
   src/core/io/al_ControlNav.cpp

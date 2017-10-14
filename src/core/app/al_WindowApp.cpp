@@ -1,6 +1,6 @@
 #include "al/core/app/al_WindowApp.hpp"
-#include "al/core/gl/al_GLFW.hpp"
-#include "al/core/gl/al_GPUObject.hpp"
+#include "al/core/graphics/al_GLFW.hpp"
+#include "al/core/graphics/al_GPUObject.hpp"
 
 using namespace al;
 

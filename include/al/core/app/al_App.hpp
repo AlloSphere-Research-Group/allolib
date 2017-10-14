@@ -8,12 +8,12 @@
 #include "al/core/app/al_AudioApp.hpp"
 #include "al/core/protocol/al_OSC.hpp"
 
-#include "al/core/gl/al_GLFW.hpp"
-#include "al/core/gl/al_Graphics.hpp"
-#include "al/core/gl/al_Viewpoint.hpp"
+#include "al/core/graphics/al_GLFW.hpp"
+#include "al/core/graphics/al_Graphics.hpp"
+#include "al/core/graphics/al_Viewpoint.hpp"
 #include "al/core/spatial/al_Pose.hpp"
 #include "al/core/io/al_ControlNav.hpp"
-#include "al/core/gl/al_DefaultShaders.hpp"
+#include "al/core/graphics/al_DefaultShaders.hpp"
 #include "al/core/types/al_Color.hpp"
 
 #include <iostream>

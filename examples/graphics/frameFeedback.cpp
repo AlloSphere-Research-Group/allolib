@@ -14,8 +14,19 @@ Keehong Youn, 2017
 */
 
 #include "al/core.hpp"
+#include <iostream>
 
 using namespace al;
+
+void testFunc (const char* msg, int ID) {
+	std::cout << msg << ", id=" << ID << std::endl;
+}
+
+#if 0
+#define AL_TEST(msg, ID) testFunc(msg, ID)
+#else
+#define AL_TEST(msg, ID) ((void)0)
+#endif
 
 class MyApp : public App {
 public:
@@ -36,6 +47,9 @@ public:
 		}
 
 		texBlur.filter(GL_LINEAR);
+
+		AL_TEST("test", 1);
+		al::gl::error("test error", 30);
 	}
 
 	void onAnimate (double dt) override

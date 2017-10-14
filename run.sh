@@ -73,7 +73,7 @@ cd build
 mkdir -p ${APP_NAME}
 cd ${APP_NAME}
 
-cmake ${AL_LIB_PATH}/cmake_modules/single_file -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Dal_path=${AL_LIB_PATH} -DAL_APP_FILE=../../${APP_FILE}
+cmake ${AL_LIB_PATH}/cmake/single_file -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Dal_path=${AL_LIB_PATH} -DAL_APP_FILE=../../${APP_FILE}
 make
 APP_BUILD_RESULT=$?
 # if app failed to build, exit

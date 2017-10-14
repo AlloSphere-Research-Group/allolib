@@ -1,4 +1,4 @@
-#include "al/core/gl/al_Mesh.hpp"
+#include "al/core/graphics/al_Mesh.hpp"
 #include "al/glv/glv_widget.h"
 
 namespace glv{

@@ -4,7 +4,7 @@
 /*	Graphics Library of Views (GLV) - GUI Building Toolkit
 	See COPYRIGHT file for authors and license information */
 
-#include "al/core/gl/al_Mesh.hpp"
+#include "al/core/graphics/al_Mesh.hpp"
 
 namespace glv{
 

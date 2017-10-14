@@ -1,8 +1,8 @@
 #include "al/glv/al_GLV.hpp"
 
-#include "al/core/gl/al_Mesh.hpp" // GraphicsData
-#include "al/core/gl/al_Shapes.hpp"
-#include "al/core/gl/al_DefaultShaders.hpp"
+#include "al/core/graphics/al_Mesh.hpp" // GraphicsData
+#include "al/core/graphics/al_Shapes.hpp"
+#include "al/core/graphics/al_DefaultShaders.hpp"
 
 
 #include <cmath>
@@ -727,7 +727,7 @@ void al::al_draw_glv(
     g.depthTesting(false);
     g.blending(true);
     g.blendModeTrans();
-    g.polygonMode(al::Graphics::FILL);
+    g.polygonMode(al::FILL);
     g.cullFace(false);
 
     g.shader(glv::graphicsHolder().shader());
