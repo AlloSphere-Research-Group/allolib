@@ -46,10 +46,9 @@
 
 #include "al/core/graphics/al_GLEW.hpp"
 #include "al/core/graphics/al_GPUObject.hpp"
+#include "al/core/graphics/al_Texture.hpp"
 
 namespace al{
-
-class Texture;
 
 /// Render buffer object
 
@@ -130,8 +129,6 @@ protected:
   virtual void onCreate();
   virtual void onDestroy();
 };
-
-
 
 /// Frame buffer object
 

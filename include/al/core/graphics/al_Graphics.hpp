@@ -155,6 +155,47 @@ public:
 class Graphics {
 public:
 
+  enum BlendFunc : unsigned int {
+      SRC_ALPHA               = GL_SRC_ALPHA,             /**< */
+      ONE_MINUS_SRC_ALPHA     = GL_ONE_MINUS_SRC_ALPHA,   /**< */
+      SRC_COLOR               = GL_SRC_COLOR,             /**< */
+      ONE_MINUS_SRC_COLOR     = GL_ONE_MINUS_SRC_COLOR,   /**< */
+      DST_ALPHA               = GL_DST_ALPHA,             /**< */
+      ONE_MINUS_DST_ALPHA     = GL_ONE_MINUS_DST_ALPHA,   /**< */
+      DST_COLOR               = GL_DST_COLOR,             /**< */
+      ONE_MINUS_DST_COLOR     = GL_ONE_MINUS_DST_COLOR,   /**< */
+      ZERO                    = GL_ZERO,                  /**< */
+      ONE                     = GL_ONE,                   /**< */
+      SRC_ALPHA_SATURATE      = GL_SRC_ALPHA_SATURATE     /**< */
+  };
+
+  enum BlendEq : unsigned int {
+      FUNC_ADD                = GL_FUNC_ADD,              /**< Source + destination */
+      FUNC_SUBTRACT           = GL_FUNC_SUBTRACT,         /**< Source - destination */
+      FUNC_REVERSE_SUBTRACT   = GL_FUNC_REVERSE_SUBTRACT, /**< Destination - source */
+      MIN                     = GL_MIN,                   /**< Minimum value of source and destination */
+      MAX                     = GL_MAX                    /**< Maximum value of source and destination */
+  };
+
+  enum Capability : unsigned int {
+      BLEND        = GL_BLEND,        /**< Blend rather than replacing with new color */
+      DEPTH_TEST   = GL_DEPTH_TEST,   /**< Test depth of incoming fragments */
+      SCISSOR_TEST = GL_SCISSOR_TEST, /**< Crop fragments according to scissor region */
+      CULL_FACE    = GL_CULL_FACE     /**< Cull faces */
+  };
+
+  enum Face : unsigned int {
+      FRONT          = GL_FRONT,         /**< Front face */
+      BACK           = GL_BACK,          /**< Back face */
+      FRONT_AND_BACK = GL_FRONT_AND_BACK /**< Front and back face */
+  };
+
+  enum PolygonMode : unsigned int {
+      POINT = GL_POINT, /**< Render only points at each vertex */
+      LINE  = GL_LINE,  /**< Render only lines along vertex path */
+      FILL  = GL_FILL   /**< Render vertices normally according to primitive */
+  };
+
   Graphics(Window* window);
 
   /// Enable a capability

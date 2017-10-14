@@ -727,7 +727,7 @@ void al::al_draw_glv(
     g.depthTesting(false);
     g.blending(true);
     g.blendModeTrans();
-    g.polygonMode(al::FILL);
+    g.polygonMode(al::Graphics::FILL);
     g.cullFace(false);
 
     g.shader(glv::graphicsHolder().shader());
