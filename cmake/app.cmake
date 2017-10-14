@@ -9,17 +9,17 @@
 #         al_path
 
 
-include(${al_path}/cmake_modules/configure_platform.cmake)
+include(${al_path}/cmake/configure_platform.cmake)
 # sets: AL_MACOS || AL_LINUX || AL_WINDOWS, and PLATFORM_DEFINITION
-include(${al_path}/cmake_modules/find_core_dependencies.cmake)
+include(${al_path}/cmake/find_core_dependencies.cmake)
 # sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES, CORE_LIBRARY_DIRS
-include(${al_path}/cmake_modules/find_additional_dependencies.cmake)
+include(${al_path}/cmake/find_additional_dependencies.cmake)
 # sets: ADDITIONAL_INCLUDE_DIRS, ADDITIONAL_LIBRARIES, ADDITIONAL_HEADERS,
 #       ADDITIONAL_SOURCES, ADDITIONAL_DEFINITIONS
-include(${al_path}/cmake_modules/external.cmake)
+include(${al_path}/cmake/external.cmake)
 # sets: EXTERNAL_INCLUDE_DIRS, EXTERNAL_DEFINITIONS
 #       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
-include(${al_path}/cmake_modules/basic_flags.cmake)
+include(${al_path}/cmake/basic_flags.cmake)
 # sets: basic_flags
 
 set(dirs_to_include

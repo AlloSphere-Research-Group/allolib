@@ -4,19 +4,19 @@ project(allolib)
 set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
 # set(BUILDING_ALLOLIB 1)
 
-include(cmake_modules/configure_platform.cmake)
+include(cmake/configure_platform.cmake)
 # sets: AL_MACOS || AL_LINUX || AL_WINDOWS, and PLATFORM_DEFINITION
-include(cmake_modules/find_core_dependencies.cmake)
+include(cmake/find_core_dependencies.cmake)
 # sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES, CORE_LIBRARY_DIRS
-include(cmake_modules/find_additional_dependencies.cmake)
+include(cmake/find_additional_dependencies.cmake)
 # sets: ADDITIONAL_INCLUDE_DIRS, ADDITIONAL_LIBRARIES, ADDITIONAL_HEADERS,
 #       ADDITIONAL_SOURCES, ADDITIONAL_DEFINITIONS
-include(cmake_modules/external.cmake)
+include(cmake/external.cmake)
 # sets: EXTERNAL_INCLUDE_DIRS, EXTERNAL_SRC, EXTERNAL_DEFINITIONS
 #       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
-include(cmake_modules/al_files.cmake)
+include(cmake/al_files.cmake)
 # sets: al_headers, al_sources
-include(cmake_modules/basic_flags.cmake)
+include(cmake/basic_flags.cmake)
 # sets: basic_flags
 
 

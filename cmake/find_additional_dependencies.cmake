@@ -40,10 +40,10 @@ else ()
   endif (USE_APR)
 
   list(APPEND CMAKE_MODULE_PATH
-    ${al_path}/cmake_modules/find_scripts
+    ${al_path}/cmake/find_scripts
   )
 
-  find_package(FreeImage) # uses cmake_modules/find_scripts/FindFreeImage.cmake
+  find_package(FreeImage) # uses cmake/find_scripts/FindFreeImage.cmake
                           # and sets:
                           #     FREEIMAGE_FOUND
                           #     FREEIMAGE_INCLUDE_PATH

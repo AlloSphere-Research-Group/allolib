@@ -38,4 +38,4 @@ message("app path: ${app_path}")
 message("app name: ${app_name}")
 message("al path: ${al_path}")
 
-include(${al_path}/cmake_modules/app.cmake)
+include(${al_path}/cmake/app.cmake)

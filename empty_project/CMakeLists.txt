@@ -26,4 +26,4 @@ if (NOT al_path)
 	set(al_path ${user_al_path})
 endif (NOT al_path)
 
-include(${al_path}/cmake_modules/app.cmake)
+include(${al_path}/cmake/app.cmake)
