@@ -63,7 +63,7 @@
 #include "al/core/io/al_Window.hpp"
 
 #include <iostream>
-#include <map>
+#include <unordered_map>
 
 namespace al {
 
@@ -318,6 +318,8 @@ protected:
 
   ShaderProgram* mShaderPtr = nullptr;
   bool mShaderChanged = false;
+  std::unordered_map<unsigned int, int> modelviewLocs;
+  std::unordered_map<unsigned int, int> projLocs;
 
   Matrix4f mViewMat;
   Matrix4f mProjMat;

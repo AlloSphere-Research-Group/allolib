@@ -127,10 +127,6 @@ void Graphics::scissor(int left, int bottom, int width, int height) {
   glScissor(left, bottom, width, height);
 }
 
-// void Graphics::scissor(const Viewport& v) {
-//   glScissor(v.l, v.b, v.w, v.h);
-// }
-
 void Graphics::framebuffer(unsigned int id) {
   FBO::bind(id);
   mFBOID = id;
@@ -140,6 +136,16 @@ void Graphics::shader(ShaderProgram& s) {
   mShaderPtr = &s;
   mShaderPtr->use();
   mShaderChanged = true;
+
+  auto mv_search = modelviewLocs.find(mShaderPtr->id());
+  if (mv_search == modelviewLocs.end()) {
+    modelviewLocs[mShaderPtr->id()] = mShaderPtr->getUniformLocation("MV");
+  }
+
+  auto pr_search = projLocs.find(mShaderPtr->id());
+  if (pr_search == projLocs.end()) {
+    projLocs[mShaderPtr->id()] = mShaderPtr->getUniformLocation("P");
+  }
 }
 
 ShaderProgram& Graphics::shader() {
@@ -225,8 +231,8 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
 
 void Graphics::update() {
     if (mShaderChanged || mMatChanged) {
-        shader().uniform("MV", viewMatrix() * modelMatrix());
-        shader().uniform("P", projMatrix());
+        shader().uniform(modelviewLocs[mShaderPtr->id()], viewMatrix() * modelMatrix());
+        shader().uniform(projLocs[mShaderPtr->id()], projMatrix());
     }
 
     mShaderChanged = false;
