@@ -101,8 +101,51 @@ public:
         return stack.back();
     }
 
+    void set(const Matrix4f& m) {
+      stack.back() = m;
+    }
+
     void setIdentity() {
         stack.back().setIdentity();
+    }
+
+};
+
+class ViewportStack {
+public:
+    std::vector<Viewport> stack;
+
+    ViewportStack() {
+        stack.emplace_back();
+    }
+
+    void push() {
+        Viewport v = stack.back();
+        stack.push_back(v);
+    }
+
+    void pop() {
+        if (stack.size() > 1) {
+            stack.pop_back();
+        }
+        else if (stack.size() == 1) {
+            return; // don't pop all
+        }
+        else { // no element, add one
+            stack.emplace_back();
+        }
+    }
+
+    Viewport get() {
+        return stack.back();
+    }
+
+    void set(const Viewport& m) {
+      stack.back().set(m);
+    }
+
+    void set(int left, int bottom, int width, int height) {
+      stack.back().set(left, bottom, width, height);
     }
 
 };
@@ -287,6 +330,12 @@ public:
   void viewport(int l, int b, int w, int h, float pixelDensity) {
     viewport(l * pixelDensity, b * pixelDensity, w * pixelDensity, h * pixelDensity);
   }
+  void viewport(const Viewport& v) {
+    viewport(v.l, v.b, v.w, v.h);
+  }
+  void viewport(const Viewport& v, float pixelDensity) {
+    viewport(v.l, v.b, v.w, v.h, pixelDensity);
+  }
 
   void scissor(int left, int bottom, int width, int height);
 
@@ -304,6 +353,9 @@ public:
   void camera(Viewpoint::SpecialType v);
   void camera(Viewpoint::SpecialType v, int w, int h);
   void camera(Viewpoint::SpecialType v, int x, int y, int w, int h);
+
+  void pushCamera();
+  void popCamera();
 
   void update();
   void draw(VAOMesh& mesh);
@@ -323,6 +375,8 @@ protected:
 
   Matrix4f mViewMat;
   Matrix4f mProjMat;
+  MatrixStack mViewStack;
+  MatrixStack mProjStack;
   MatrixStack mModelStack;
   bool mMatChanged = false;
 
@@ -332,6 +386,9 @@ protected:
   EasyVAO mInternalVAO;
 
   unsigned int mFBOID = 0;
+
+  Viewport mViewport;
+  ViewportStack mViewportStack;
 };
 
 }

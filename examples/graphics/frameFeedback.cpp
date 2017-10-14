@@ -18,16 +18,6 @@ Keehong Youn, 2017
 
 using namespace al;
 
-void testFunc (const char* msg, int ID) {
-	std::cout << msg << ", id=" << ID << std::endl;
-}
-
-#if 0
-#define AL_TEST(msg, ID) testFunc(msg, ID)
-#else
-#define AL_TEST(msg, ID) ((void)0)
-#endif
-
 class MyApp : public App {
 public:
 
@@ -47,9 +37,6 @@ public:
 		}
 
 		texBlur.filter(GL_LINEAR);
-
-		AL_TEST("test", 1);
-		al::gl::error("test error", 30);
 	}
 
 	void onAnimate (double dt) override
@@ -60,21 +47,20 @@ public:
 
 	void onDraw (AppGraphics& g) override
 	{
-		g.clear(0, 0);
+		g.clear(0);
 
-		// 1. Match texture dimensions to viewport
+		// 1. Match texture dimensions to window
 		texBlur.resize(fbWidth(), fbHeight());
 
 		// 2. Draw feedback texture. Try the different varieties!
-		g.camera(Viewpoint::IDENTITY); // sets up [-1:1] x [-1:1] camera
 		g.tint(0.98);
-		// g.quad(texBlur, -1, -1, 2, 2);               // Plain (non-transformed) feedback
-		g.quad(texBlur, -1.005, -1.005, 2.01, 2.01); // Outward feedback
-		// g.quad(texBlur, -0.995, -0.995, 1.99, 1.99); // Inward feedback
-		// g.quad(texBlur, -1.005, -1.00, 2.01, 2.0);   // Oblate feedback
-		// g.quad(texBlur, -1.005, -0.995, 2.01, 1.99); // Squeeze feedback!
+		g.quadViewport(texBlur, -1.005, -1.005, 2.01, 2.01); // Outward
+		// g.quadViewport(texBlur, -0.995, -0.995, 1.99, 1.99); // Inward
+		// g.quadViewport(texBlur, -1.005, -1.00, 2.01, 2.0);   // Oblate
+		// g.quadViewport(texBlur, -1.005, -0.995, 2.01, 1.99); // Squeeze
+		// g.quadViewport(texBlur, -1, -1, 2, 2);               // non-transformed
 		g.tint(1); // set tint back to 1
-
+		
 		// 3. Do your drawing...
 		g.camera(Viewpoint::UNIT_ORTHO); // ortho camera that fits [-1:1] x [-1:1]
 		g.rotate(angle, 0,0,1);

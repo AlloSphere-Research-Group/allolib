@@ -41,11 +41,13 @@ Matrix4f Graphics::modelMatrix() {
 }
 
 Matrix4f Graphics::viewMatrix() {
-  return mViewMat;
+  // return mViewMat;
+  return mViewStack.get();
 }
 
 Matrix4f Graphics::projMatrix() {
-  return mProjMat;
+  // return mProjMat;
+  return mProjStack.get();
 }
 
 void Graphics::loadIdentity() { mModelStack.setIdentity(); }
@@ -120,6 +122,8 @@ void Graphics::clear(float r, float g, float b, float a, float d, int drawbuffer
 }
 
 void Graphics::viewport(int left, int bottom, int width, int height) {
+  // mViewport.set(left, bottom, width, height);
+  mViewportStack.set(left, bottom, width, height);
   glViewport(left, bottom, width, height);
 }
 
@@ -153,8 +157,10 @@ ShaderProgram& Graphics::shader() {
 }
 
 void Graphics::camera(Viewpoint const& v) {
-  mViewMat = v.viewMatrix();
-  mProjMat = v.projMatrix();
+  // mViewMat = v.viewMatrix();
+  // mProjMat = v.projMatrix();
+  mViewStack.set(v.viewMatrix());
+  mProjStack.set(v.projMatrix());
   auto const& vp = v.viewport();
   viewport(vp.l, vp.b, vp.w, vp.h, (mFBOID == 0)? mWindowPtr->highres_factor() : 1);
   mMatChanged = true;
@@ -165,8 +171,10 @@ void Graphics::camera(Viewpoint const& v, int w, int h) {
 }
 
 void Graphics::camera(Viewpoint const& v, int x, int y, int w, int h) {
-  mViewMat = v.viewMatrix();
-  mProjMat = v.projMatrix(x, y, w, h);
+  // mViewMat = v.viewMatrix();
+  // mProjMat = v.projMatrix(x, y, w, h);
+  mViewStack.set(v.viewMatrix());
+  mProjStack.set(v.projMatrix(x, y, w, h));
   viewport(x, y, w, h, (mFBOID == 0)? mWindowPtr->highres_factor() : 1);
   mMatChanged = true;
 }
@@ -183,8 +191,10 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
   switch (v) {
 
   case Viewpoint::IDENTITY: {
-    mViewMat = Matrix4f::identity();
-    mProjMat = Matrix4f::identity();
+    // mViewMat = Matrix4f::identity();
+    // mProjMat = Matrix4f::identity();
+    mViewStack.setIdentity();
+    mProjStack.setIdentity();
   }
   break;
 
@@ -195,16 +205,26 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
     float half_h = (h - y) * 0.5f;
 
     // 2D things will be drawn at z = 0 >> z = 1, near: 0.5, far: 1.5
-    mViewMat = Matrix4f::lookAt(
+    // mViewMat = Matrix4f::lookAt(
+    //   Vec3f(half_w, half_h, 1), // eye
+    //   Vec3f(half_w, half_h, 0), // at
+    //   Vec3f(0, 1, 0) // up
+    // );
+    // mProjMat = Matrix4f::ortho(
+    //   -half_w, half_w, // left, right
+    //   -half_h, half_h, // bottom, top
+    //   0.5f, 1.5f // near, far
+    // );
+    mViewStack.set(Matrix4f::lookAt(
       Vec3f(half_w, half_h, 1), // eye
       Vec3f(half_w, half_h, 0), // at
       Vec3f(0, 1, 0) // up
-    );
-    mProjMat = Matrix4f::ortho(
+    ));
+    mProjStack.set(Matrix4f::ortho(
       -half_w, half_w, // left, right
       -half_h, half_h, // bottom, top
       0.5f, 1.5f // near, far
-    );
+    ));
   }
   break;
 
@@ -215,17 +235,36 @@ void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
       spanx = 1;
       spany = float(h) / w;
     }
-    mViewMat = Matrix4f::identity();
-    mProjMat = Matrix4f::ortho(
+    // mViewMat = Matrix4f::identity();
+    // mProjMat = Matrix4f::ortho(
+    //   -spanx, spanx, // left, right
+    //   -spany, spany, // bottom, top
+    //   -0.5f, 0.5f // near, far
+    // );
+    mViewStack.setIdentity();
+    mProjStack.set(Matrix4f::ortho(
       -spanx, spanx, // left, right
       -spany, spany, // bottom, top
       -0.5f, 0.5f // near, far
-    );
+    ));
   break;
   }
 
   // viewport is in framebuffer unit
   viewport(x, y, w, h, (mFBOID == 0)? mWindowPtr->highres_factor() : 1);
+  mMatChanged = true;
+}
+
+void Graphics::pushCamera() {
+  mViewStack.push();
+  mProjStack.push();
+  mViewportStack.push();
+}
+void Graphics::popCamera() {
+  mViewStack.pop();
+  mProjStack.pop();
+  mViewportStack.pop();
+  viewport(mViewportStack.get());
   mMatChanged = true;
 }
 

@@ -127,6 +127,14 @@ public:
         unbind();
     }
 
+    void quadViewport(Texture& tex, float x=-1, float y=-1, float w=2, float h=2)
+    {
+        pushCamera();
+        camera(Viewpoint::IDENTITY);
+        quad(tex, x, y, w, h);
+        popCamera();
+    }
+
 };
 
 // single window, audioIO, and single port osc recv & send

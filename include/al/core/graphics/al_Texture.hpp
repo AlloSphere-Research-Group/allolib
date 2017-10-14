@@ -178,7 +178,8 @@ public:
   void resize (unsigned w) { }
 
   /// Resize 2D texture
-  void resize (unsigned w, unsigned h) { }
+  // void resize (unsigned w, unsigned h) { }
+  bool resize (int w, int h);
 
   /// Resize 3D texture
   void resize (unsigned w, unsigned h, unsigned d) { }
@@ -220,7 +221,6 @@ public:
   void generateMipmap ();
   void disableMipmap ();
 
-  bool resize (int w, int h);
 
   /// Copy pixels from current frame buffer to texture texels
 
