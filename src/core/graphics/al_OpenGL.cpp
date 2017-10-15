@@ -1,9 +1,8 @@
 #include "al/core/graphics/al_OpenGL.hpp"
 #include "al/core/system/al_Printing.hpp"
 
-using namespace al;
-
 namespace al {
+
 namespace gl {
 
 const char * errorString(bool verbose) {
@@ -31,5 +30,6 @@ bool error(const char *msg, int ID) {
   return false;
 }
 
-}
+} // gl::
+
 }

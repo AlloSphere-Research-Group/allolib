@@ -17,6 +17,7 @@ set(core_headers
   # include/al/core/graphics/al_Light.hpp
   include/al/core/graphics/al_Mesh.hpp
   include/al/core/graphics/al_OpenGL.hpp
+  include/al/core/graphics/al_RenderManager.hpp
   include/al/core/graphics/al_Shader.hpp
   include/al/core/graphics/al_Shapes.hpp
   # include/al/core/graphics/al_Stereographic.hpp
@@ -62,6 +63,7 @@ set(core_sources
   # src/core/graphics/al_Light.cpp
   src/core/graphics/al_Mesh.cpp
   src/core/graphics/al_OpenGL.cpp
+  src/core/graphics/al_RenderManager.cpp
   src/core/graphics/al_Shader.cpp
   src/core/graphics/al_Shapes.cpp
   # src/core/graphics/al_Stereographic.cpp

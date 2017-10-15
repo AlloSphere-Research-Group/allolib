@@ -10,20 +10,22 @@
 #include <memory>
 #include <iostream>
 
+using namespace al;
+
 namespace glv {
 
 struct GraphicsHolder {
-    al::Graphics* mGraphics;
-    std::unique_ptr<al::ShaderProgram> mShaderPtr;
-    void set(al::Graphics& g) {
+    Graphics* mGraphics;
+    std::unique_ptr<ShaderProgram> mShaderPtr;
+    void set(Graphics& g) {
         mGraphics = &g;
     }
-    al::Graphics& get() {
+    Graphics& get() {
         return *mGraphics;
     }
-    al::ShaderProgram& shader() {
+    ShaderProgram& shader() {
         if (!mShaderPtr) {
-            mShaderPtr = std::make_unique<al::ShaderProgram>();
+            mShaderPtr = std::make_unique<ShaderProgram>();
             mShaderPtr->compile(al_color_vert_shader(), al_color_frag_shader());
         }
         return *mShaderPtr;
@@ -45,9 +47,8 @@ float pixc(float v) {
 }
 
 void rectangle(float l, float t, float r, float b) {
-    static al::VAOMesh mesh = [&](){
-        al::VAOMesh mesh;
-        mesh.primitive(al::Mesh::TRIANGLES);
+    static VAOMesh mesh = [&](){
+        VAOMesh mesh {Mesh::TRIANGLES};
         // reserve 6 vertices
         mesh.vertices().reserve(6);
         for (int i = 0; i < 6; i += 1) {
@@ -73,9 +74,8 @@ void rectangle(float l, float t, float r, float b) {
 }
 
 void frame(float l, float t, float r, float b) {
-    static al::VAOMesh mesh = [&](){
-        al::VAOMesh mesh;
-        mesh.primitive(al::Mesh::LINE_STRIP);
+    static VAOMesh mesh = [&](){
+        VAOMesh mesh {Mesh::LINE_STRIP};
         // reserve 5 vertices
         mesh.vertices().reserve(5);
         for (int i = 0; i < 5; i += 1) {
@@ -89,7 +89,7 @@ void frame(float l, float t, float r, float b) {
     float w = r - l;
     float h = b - t;
     // mesh.reset();
-    // mesh.primitive(al::Mesh::LINE_STRIP);
+    // mesh.primitive(LINE_STRIP);
     mesh.vertices()[0].set(x, y, 0);
     mesh.vertices()[1].set(x + w, y, 0);
     mesh.vertices()[2].set(x + w, y + h, 0);
@@ -101,9 +101,8 @@ void frame(float l, float t, float r, float b) {
 }
 
 void line(float x0, float y0, float x1, float y1) {
-    static al::VAOMesh mesh = [&](){
-        al::VAOMesh mesh;
-        mesh.primitive(al::Mesh::LINES);
+    static VAOMesh mesh = [&](){
+        VAOMesh mesh {Mesh::LINES};
         // reserve 5 vertices
         mesh.vertices().reserve(2);
         for (int i = 0; i < 2; i += 1) {
@@ -112,7 +111,6 @@ void line(float x0, float y0, float x1, float y1) {
         return mesh;
     }();
 
-    mesh.primitive(al::Mesh::LINES);
     mesh.vertices()[0].set(x0, y0, 0);
     mesh.vertices()[1].set(x1, y1, 0);
     mesh.update();
@@ -120,9 +118,10 @@ void line(float x0, float y0, float x1, float y1) {
     graphicsHolder().get().draw(mesh);
 }
 
-void lines(al::Mesh& gd) {
-    static al::EasyVAO vao;
-    vao.primitive(GL_LINES);
+void lines(Mesh& gd) {
+    static EasyVAO vao;
+    // vao.primitive(GL_LINES);
+    vao.primitive(Mesh::LINES);
     vao.updatePosition(gd.vertices().data(), gd.vertices().size());
     graphicsHolder().get().draw(vao);
 }
@@ -132,10 +131,9 @@ void grid (
     float divx, float divy,
     bool incEnds=true
 ) {
-    static al::VAOMesh mesh;
+    static VAOMesh mesh {Mesh::LINES};
 
     mesh.reset();
-    mesh.primitive(al::Mesh::LINES);
     float inc, r=l+w, b=t+h;
 
     if(divy > 0 && h>0){
@@ -197,10 +195,10 @@ void scissor(int x, int y, int w, int h) {
 }
 
 void color(float r, float g, float b, float a) {
-    graphicsHolder().get().shader().uniform("col0", al::Color(r, g, b, a));
+    graphicsHolder().get().shader().uniform("col0", Color(r, g, b, a));
 }
 
-void color(al::Color const& c) {
+void color(Color const& c) {
     color(c.r, c.g, c.b, c.a);
 }
 
@@ -482,7 +480,7 @@ void Sliders::onDraw(GLV& glv) {
     }
 }
 
-void Font::render(al::Mesh& gd, const char * v, float x, float y, float z) const {
+void Font::render(Mesh& gd, const char * v, float x, float y, float z) const {
     //static bool print_once = [](){ std::cout << "Font::render" << std::endl; return true; }();
 
     gd.reset();
@@ -498,12 +496,12 @@ void Font::render(al::Mesh& gd, const char * v, float x, float y, float z) const
     //tx=ty=tz=0;
 
     struct RenderText : public TextIterator{
-        RenderText(const Font& f_, const char *& s_, al::Mesh& g_, float tx_, float ty_, float sx_, float sy_)
+        RenderText(const Font& f_, const char *& s_, Mesh& g_, float tx_, float ty_, float sx_, float sy_)
         : TextIterator(f_,s_), g(g_), tx(tx_), ty(ty_), sx(sx_), sy(sy_){}
         bool onPrintable(char c){
             return addCharacter(g, c, pixc(tx+x*sx), pixc(ty+y*sy), sx, sy);
         }
-        al::Mesh    & g;
+        Mesh    & g;
         float tx,ty,sx,sy;
     } renderText(*this, v, gd, tx,ty,sx,sy);
 
@@ -721,18 +719,18 @@ void Buttons::onDraw(GLV& g){
 } // namespace glv
 
 void al::al_draw_glv(
-    glv::GLV& glv, al::Graphics& g,
+    glv::GLV& glv, Graphics& g,
     unsigned x, unsigned y, unsigned w, unsigned h
 ) {
     g.depthTesting(false);
     g.blending(true);
     g.blendModeTrans();
-    g.polygonMode(al::Graphics::FILL);
+    g.polygonMode(Graphics::FILL);
     g.cullFace(false);
 
     g.shader(glv::graphicsHolder().shader());
     g.camera(
-        al::Viewpoint::ORTHO_FOR_2D,
+        Viewpoint::ORTHO_FOR_2D,
         int(x * g.window().highres_factor()),
 		int(y * g.window().highres_factor()),
 		int(w * g.window().highres_factor()),
@@ -749,7 +747,7 @@ void al::al_draw_glv(
     g.popMatrix();
 }
 
-void al::al_draw_glv(glv::GLV& glv, al::Graphics& g) {
+void al_draw_glv(glv::GLV& glv, Graphics& g) {
     // animation is disabled...
-    al::al_draw_glv(glv, g, 0, 0, g.window().width(), g.window().height());
+    al_draw_glv(glv, g, 0, 0, g.window().width(), g.window().height());
 }

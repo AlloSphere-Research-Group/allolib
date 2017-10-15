@@ -52,7 +52,7 @@ public:
     std::shared_ptr<VAOWrapper> vaoWrapper;
 
     VAOMesh();
-    VAOMesh(Mesh::Primitive p);
+    VAOMesh(Primitive p);
     VAOMesh(VAOMesh const& other);
     VAOMesh(VAOMesh&& other);
     VAOMesh& operator = (VAOMesh const& other);

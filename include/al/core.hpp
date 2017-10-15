@@ -19,6 +19,7 @@
 // #include "al/core/graphics/al_Light.hpp"
 #include "al/core/graphics/al_Mesh.hpp"
 #include "al/core/graphics/al_OpenGL.hpp"
+#include "al/core/graphics/al_RenderManager.hpp"
 #include "al/core/graphics/al_Shader.hpp"
 #include "al/core/graphics/al_Shapes.hpp"
 // #include "al/core/graphics/al_Stereographic.hpp"

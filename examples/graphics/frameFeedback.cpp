@@ -36,7 +36,7 @@ public:
 			shape.color(HSV(theta/2/M_PI));
 		}
 
-		texBlur.filter(GL_LINEAR);
+		texBlur.filter(Texture::LINEAR);
 	}
 
 	void onAnimate (double dt) override
@@ -45,7 +45,7 @@ public:
 		if(angle >= M_2PI) angle -= M_2PI;
 	}
 
-	void onDraw (AppGraphics& g) override
+	void onDraw (Graphics& g) override
 	{
 		g.clear(0);
 

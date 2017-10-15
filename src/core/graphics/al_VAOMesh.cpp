@@ -6,7 +6,7 @@ using namespace al;
 VAOMesh::VAOMesh() {
     vaoWrapper = std::make_shared<VAOWrapper>();
 }
-VAOMesh::VAOMesh(Mesh::Primitive p): Mesh(p) {
+VAOMesh::VAOMesh(Primitive p): Mesh(p) {
     vaoWrapper = std::make_shared<VAOWrapper>();
 }
 

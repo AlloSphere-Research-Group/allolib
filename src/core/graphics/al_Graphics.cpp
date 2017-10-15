@@ -6,300 +6,155 @@
 
 namespace al {
 
-Graphics::Graphics(Window* window): mWindowPtr(window) {}
 
-void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq){
-  glBlendEquation(eq);
-  glBlendFunc(src, dst);
-}
+    void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq){
+      glBlendEquation(eq);
+      glBlendFunc(src, dst);
+  }
 
-void Graphics::capability(Capability cap, bool v){
-  v ? enable(cap) : disable(cap);
-}
+  void Graphics::capability(Capability cap, bool v){
+      v ? enable(cap) : disable(cap);
+  }
 
-void Graphics::blending(bool b){ capability(BLEND, b); }
-void Graphics::colorMask(bool r, bool g, bool b, bool a){
-  glColorMask(
-    r?GL_TRUE:GL_FALSE,
-    g?GL_TRUE:GL_FALSE,
-    b?GL_TRUE:GL_FALSE,
-    a?GL_TRUE:GL_FALSE
-  );
-}
-void Graphics::colorMask(bool b){ colorMask(b,b,b,b); }
-void Graphics::depthMask(bool b){ glDepthMask(b?GL_TRUE:GL_FALSE); }
-void Graphics::depthTesting(bool b){ capability(DEPTH_TEST, b); }
-void Graphics::scissorTest(bool b){ capability(SCISSOR_TEST, b); }
-void Graphics::cullFace(bool b){ capability(CULL_FACE, b); }
-void Graphics::cullFace(bool b, Face face) {
-  capability(CULL_FACE, b);
-  glCullFace(face);
-}
+  void Graphics::blending(bool b){ capability(BLEND, b); }
+  void Graphics::colorMask(bool r, bool g, bool b, bool a){
+      glColorMask(
+        r?GL_TRUE:GL_FALSE,
+        g?GL_TRUE:GL_FALSE,
+        b?GL_TRUE:GL_FALSE,
+        a?GL_TRUE:GL_FALSE
+        );
+  }
+  void Graphics::colorMask(bool b){ colorMask(b,b,b,b); }
+  void Graphics::depthMask(bool b){ glDepthMask(b?GL_TRUE:GL_FALSE); }
+  void Graphics::depthTesting(bool b){ capability(DEPTH_TEST, b); }
+  void Graphics::scissorTest(bool b){ capability(SCISSOR_TEST, b); }
+  void Graphics::cullFace(bool b){ capability(CULL_FACE, b); }
+  void Graphics::cullFace(bool b, Face face) {
+      capability(CULL_FACE, b);
+      glCullFace(face);
+  }
 
-Matrix4f Graphics::modelMatrix() {
-    return mModelStack.get();
-}
-
-Matrix4f Graphics::viewMatrix() {
-  // return mViewMat;
-  return mViewStack.get();
-}
-
-Matrix4f Graphics::projMatrix() {
-  // return mProjMat;
-  return mProjStack.get();
-}
-
-void Graphics::loadIdentity() { mModelStack.setIdentity(); }
-
-void Graphics::pushMatrix(){
-    mModelStack.push();
-    mMatChanged = true;
-}
-void Graphics::popMatrix(){
-    mModelStack.pop();
-    mMatChanged = true;
-}
-void Graphics::translate(float x, float y, float z){
-    mModelStack.mult(Matrix4f::translation(x, y, z));
-    mMatChanged = true;
-}
-void Graphics::rotate(float angle, float x, float y, float z){
-    mModelStack.mult(Matrix4f::rotate(angle, x, y, z));
-    mMatChanged = true;
-}
-void Graphics::rotate(const Quatf& q) {
-  Matrix4f m;
-  q.toMatrix(m.elems());
-  mModelStack.mult(m);
-  mMatChanged = true;
-}
-void Graphics::scale(float s){
-  scale(s, s, s);
-}
-void Graphics::scale(float x, float y, float z){
-  mModelStack.mult(Matrix4f::scaling(x, y, z));
-  mMatChanged = true;
-}
 // void Graphics::lineWidth(float v) { glLineWidth(v); }
-void Graphics::pointSize(float v) { glPointSize(v); }
-void Graphics::polygonMode(PolygonMode m, Face f){ glPolygonMode(f,m); }
+  void Graphics::pointSize(float v) { glPointSize(v); }
+  void Graphics::polygonMode(PolygonMode m, Face f){ glPolygonMode(f,m); }
 
-void Graphics::setClearColor(float r, float g, float b, float a) {
-    mClearColor.set(r, g, b, a);
+
+  void Graphics::init ()
+  {
+    compileDefaultShader(mesh_shader, ShaderType::MESH);
+    compileDefaultShader(color_shader, ShaderType::COLOR);
+    compileDefaultShader(tex_shader, ShaderType::TEXTURE);
+    color_location = color_shader.getUniformLocation("col0");
+    color_tint_location = color_shader.getUniformLocation("tint");
+    tex_tint_location = tex_shader.getUniformLocation("tint");
+    mesh_tint_location = mesh_shader.getUniformLocation("tint");
+    tex_shader.begin();
+    tex_shader.uniform("tex0", 0);
+    tex_shader.uniform(tex_tint_location, 1, 1, 1, 1);
+    tex_shader.end();
+    color_shader.begin();
+    color_shader.uniform(color_tint_location, 1, 1, 1, 1);
+    color_shader.end();
+    mesh_shader.begin();
+    mesh_shader.uniform(mesh_tint_location, 1, 1, 1, 1);
+    mesh_shader.end();
+    shader(color_shader);
+    tint_location = color_tint_location;
 }
 
-void Graphics::clearColor(int drawbuffer) {
-    glClearBufferfv(GL_COLOR, drawbuffer, mClearColor.components);
+void Graphics::tint(float r, float g, float b, float a) {
+    tint_color.set(r, g, b, a);
+    shader().uniform4v(tint_location, tint_color.components);
 }
 
-void Graphics::clearColor(float r, float g, float b, float a, int drawbuffer) {
-    setClearColor(r, g, b, a);
-    clearColor(drawbuffer);
-}
-
-void Graphics::clearColor(Color const& c, int drawbuffer) {
-    setClearColor(c.r, c.g, c.b, c.a);
-    clearColor(drawbuffer);
-}
-
-void Graphics::setClearDepth(float d) {
-    mClearDepth = d;
-}
-
-void Graphics::clearDepth() {
-    glClearBufferfv(GL_DEPTH, 0, &mClearDepth);
-}
-
-void Graphics::clearDepth(float d) {
-    setClearDepth(d);
-    clearDepth();
-}
-
-void Graphics::clear(float r, float g, float b, float a, float d, int drawbuffer) {
-    clearColor(r, g, b, a, drawbuffer);
-    clearDepth(d);
-}
-
-void Graphics::viewport(int left, int bottom, int width, int height) {
-  // mViewport.set(left, bottom, width, height);
-  mViewportStack.set(left, bottom, width, height);
-  glViewport(left, bottom, width, height);
-}
-
-void Graphics::scissor(int left, int bottom, int width, int height) {
-  glScissor(left, bottom, width, height);
-}
-
-void Graphics::framebuffer(unsigned int id) {
-  FBO::bind(id);
-  mFBOID = id;
-}
-
-void Graphics::shader(ShaderProgram& s) {
-  mShaderPtr = &s;
-  mShaderPtr->use();
-  mShaderChanged = true;
-
-  auto mv_search = modelviewLocs.find(mShaderPtr->id());
-  if (mv_search == modelviewLocs.end()) {
-    modelviewLocs[mShaderPtr->id()] = mShaderPtr->getUniformLocation("MV");
-  }
-
-  auto pr_search = projLocs.find(mShaderPtr->id());
-  if (pr_search == projLocs.end()) {
-    projLocs[mShaderPtr->id()] = mShaderPtr->getUniformLocation("P");
-  }
-}
-
-ShaderProgram& Graphics::shader() {
-  return *mShaderPtr;
-}
-
-void Graphics::camera(Viewpoint const& v) {
-  // mViewMat = v.viewMatrix();
-  // mProjMat = v.projMatrix();
-  mViewStack.set(v.viewMatrix());
-  mProjStack.set(v.projMatrix());
-  auto const& vp = v.viewport();
-  viewport(vp.l, vp.b, vp.w, vp.h, (mFBOID == 0)? mWindowPtr->highres_factor() : 1);
-  mMatChanged = true;
-}
-
-void Graphics::camera(Viewpoint const& v, int w, int h) {
-  camera(v, 0, 0, w, h);
-}
-
-void Graphics::camera(Viewpoint const& v, int x, int y, int w, int h) {
-  // mViewMat = v.viewMatrix();
-  // mProjMat = v.projMatrix(x, y, w, h);
-  mViewStack.set(v.viewMatrix());
-  mProjStack.set(v.projMatrix(x, y, w, h));
-  viewport(x, y, w, h, (mFBOID == 0)? mWindowPtr->highres_factor() : 1);
-  mMatChanged = true;
-}
-
-void Graphics::camera(Viewpoint::SpecialType v) {
-  camera(v, 0, 0, mWindowPtr->width(), mWindowPtr->height());
-}
-
-void Graphics::camera(Viewpoint::SpecialType v, int w, int h) {
-  camera(v, 0, 0, w, h);
-}
-
-void Graphics::camera(Viewpoint::SpecialType v, int x, int y, int w, int h) {
-  switch (v) {
-
-  case Viewpoint::IDENTITY: {
-    // mViewMat = Matrix4f::identity();
-    // mProjMat = Matrix4f::identity();
-    mViewStack.setIdentity();
-    mProjStack.setIdentity();
-  }
-  break;
-
-  case Viewpoint::ORTHO_FOR_2D: {
-    // 1. place eye so that bottom left is (0, 0), top right is (width, height)
-    // 2. set lens to be ortho, with given width and height
-    float half_w = (w - x) * 0.5f;
-    float half_h = (h - y) * 0.5f;
-
-    // 2D things will be drawn at z = 0 >> z = 1, near: 0.5, far: 1.5
-    // mViewMat = Matrix4f::lookAt(
-    //   Vec3f(half_w, half_h, 1), // eye
-    //   Vec3f(half_w, half_h, 0), // at
-    //   Vec3f(0, 1, 0) // up
-    // );
-    // mProjMat = Matrix4f::ortho(
-    //   -half_w, half_w, // left, right
-    //   -half_h, half_h, // bottom, top
-    //   0.5f, 1.5f // near, far
-    // );
-    mViewStack.set(Matrix4f::lookAt(
-      Vec3f(half_w, half_h, 1), // eye
-      Vec3f(half_w, half_h, 0), // at
-      Vec3f(0, 1, 0) // up
-    ));
-    mProjStack.set(Matrix4f::ortho(
-      -half_w, half_w, // left, right
-      -half_h, half_h, // bottom, top
-      0.5f, 1.5f // near, far
-    ));
-  }
-  break;
-
-  case Viewpoint::UNIT_ORTHO:
-    float spanx = float(w) / h;
-    float spany = 1;
-    if (spanx < 1) {
-      spanx = 1;
-      spany = float(h) / w;
+void Graphics::color (float r, float g, float b, float a)
+{
+    if (shader().id() != color_shader.id()) {
+        shader(color_shader);
+        tint_location = color_tint_location;
     }
-    // mViewMat = Matrix4f::identity();
-    // mProjMat = Matrix4f::ortho(
-    //   -spanx, spanx, // left, right
-    //   -spany, spany, // bottom, top
-    //   -0.5f, 0.5f // near, far
-    // );
-    mViewStack.setIdentity();
-    mProjStack.set(Matrix4f::ortho(
-      -spanx, spanx, // left, right
-      -spany, spany, // bottom, top
-      -0.5f, 0.5f // near, far
-    ));
-  break;
-  }
-
-  // viewport is in framebuffer unit
-  viewport(x, y, w, h, (mFBOID == 0)? mWindowPtr->highres_factor() : 1);
-  mMatChanged = true;
+    shader().uniform(color_location, r, g, b, a);
+    shader().uniform4v(color_tint_location, tint_color.components);
 }
 
-void Graphics::pushCamera() {
-  mViewStack.push();
-  mProjStack.push();
-  mViewportStack.push();
-}
-void Graphics::popCamera() {
-  mViewStack.pop();
-  mProjStack.pop();
-  mViewportStack.pop();
-  viewport(mViewportStack.get());
-  mMatChanged = true;
-}
-
-void Graphics::update() {
-    if (mShaderChanged || mMatChanged) {
-        shader().uniform(modelviewLocs[mShaderPtr->id()], viewMatrix() * modelMatrix());
-        shader().uniform(projLocs[mShaderPtr->id()], projMatrix());
+void Graphics::bind(Texture& t) {
+    if (shader().id() != tex_shader.id()) {
+        shader(tex_shader);
+        tint_location = tex_tint_location;
     }
-
-    mShaderChanged = false;
-    mMatChanged = false;
+    shader().uniform4v(tex_tint_location, tint_color.components);
+    t.bind(0);
+    texPtr = &t;
 }
 
-void Graphics::draw(VAOMesh& mesh) {
-  update();
-  mesh.draw();
+void Graphics::unbind() {
+    texPtr->unbind(0);
+    texPtr = nullptr;
 }
 
-void Graphics::draw(EasyVAO& vao) {
-  update();
-  vao.draw();
+void Graphics::meshColor() {
+    if (shader().id() != mesh_shader.id()) {
+        shader(mesh_shader);
+        tint_location = mesh_tint_location;
+    }
+    shader().uniform4v(mesh_tint_location, tint_color.components);
 }
 
-void Graphics::draw(Mesh& mesh) {
-  // uses internal vao object.
-  mInternalVAO.update(mesh);
-  update();
-  mInternalVAO.draw();
+void Graphics::quad(Texture& tex, float x, float y, float w, float h)
+{
+    static Mesh m = [] () {
+        Mesh m {Mesh::TRIANGLE_STRIP};
+        m.vertex(0, 0, 0); m.vertex(0, 0, 0);
+        m.vertex(0, 0, 0); m.vertex(0, 0, 0);
+        m.texCoord(0, 0);
+        m.texCoord(1, 0);
+        m.texCoord(0, 1);
+        m.texCoord(1, 1);
+        return m;
+    }();
+
+    auto& verts = m.vertices();
+    verts[0].set(x, y, 0);
+    verts[1].set(x + w, y, 0);
+    verts[2].set(x, y + h, 0);
+    verts[3].set(x + w, y + h, 0);
+
+    bind(tex);
+    draw(m);
+    unbind();
 }
 
-void Graphics::draw(Mesh&& mesh) {
-  // uses internal vao object.
-  mInternalVAO.update(mesh);
-  update();
-  mInternalVAO.draw();
+void Graphics::quadViewport(Texture& tex, float x, float y, float w, float h)
+{
+    pushCamera();
+    camera(Viewpoint::IDENTITY);
+    quad(tex, x, y, w, h);
+    popCamera();
 }
+
+namespace gl {
+
+int numBytes(Graphics::DataType v) {
+    #define CS(a,b) case a: return sizeof(b);
+    switch(v){
+        CS(Graphics::BYTE, GLbyte)
+        CS(Graphics::UBYTE, GLubyte)
+        CS(Graphics::SHORT, GLshort)
+        CS(Graphics::USHORT, GLushort)
+        CS(Graphics::INT, GLint)
+        CS(Graphics::UINT, GLuint)
+        CS(Graphics::BYTES_2, char[2])
+        CS(Graphics::BYTES_3, char[3])
+        CS(Graphics::BYTES_4, char[4])
+        CS(Graphics::FLOAT, GLfloat)
+        CS(Graphics::DOUBLE, GLdouble)
+        default: return 0;
+    };
+    #undef CS
+}
+
+}
+
 
 } // al::

@@ -36,7 +36,7 @@ class MyApp : public App {
 		// both depth and color attachees must be valid on the GPU before use:
 		rbo.create(w, h);
 		fbotex.create2D(w, h);
-		fbotex.filter(GL_NEAREST);
+		fbotex.filter(Texture::NEAREST);
 
 		fbo.bind();
 		fbo.attachTexture2D(fbotex);
@@ -46,7 +46,7 @@ class MyApp : public App {
 		cout << "fbo status " << fbo.statusString() << endl;
 	}
 
-	void onDraw (AppGraphics& g) {
+	void onDraw (Graphics& g) {
 
 		// capture green-world to texture:
 		g.framebuffer(fbo);
@@ -64,11 +64,11 @@ class MyApp : public App {
 
 		// mipmaps can be generated after rendering to FBO
 		if (mipmap) {
-			fbotex.filter(GL_LINEAR_MIPMAP_LINEAR); // specify filtering for mipmap
+			fbotex.filter(Texture::LINEAR_MIPMAP_LINEAR); // specify filtering for mipmap
 			fbotex.generateMipmap();
 		}
 		else {
-			fbotex.filter(GL_NEAREST);
+			fbotex.filter(Texture::NEAREST);
 			fbotex.disableMipmap();
 		}
 

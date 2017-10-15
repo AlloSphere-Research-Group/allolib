@@ -45,7 +45,7 @@ public:
         nav().pos(0,0,24);
     }
 
-    void onDraw (AppGraphics& g) override
+    void onDraw (Graphics& g) override
     {
         g.clear(0);
         // using default 3D camera

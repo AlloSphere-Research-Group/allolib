@@ -29,7 +29,7 @@ public:
 		}
 	}
 
-	void onDraw (AppGraphics& g)
+	void onDraw (Graphics& g)
 	{
 		g.clear(0);
 		g.camera(Viewpoint::IDENTITY);

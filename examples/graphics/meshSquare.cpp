@@ -55,7 +55,7 @@ public:
 		nav().pos(0,0,4);
 	}
 
-	void onDraw(AppGraphics& g) override
+	void onDraw(Graphics& g) override
 	{
 		g.clear(0);
 		g.meshColor(); // use mesh's color
