@@ -20,6 +20,14 @@ const char * errorString(bool verbose=false);
 /// \returns whether there was an error
 bool error(const char *msg="", int ID=-1);
 
+
+/// Returns number of bytes for given data type
+int numBytes(GLenum v);
+
+/// Get DataType associated with a basic C type
+template<typename Type>
+GLenum toDataType();
+
 } // gl::
 
 /*!
@@ -35,6 +43,6 @@ bool error(const char *msg="", int ID=-1);
 #define AL_GRAPHICS_ERROR(msg, ID) ((void)0)
 #endif
 
-}
+} // al::
 
 #endif

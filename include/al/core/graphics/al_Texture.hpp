@@ -70,12 +70,14 @@ myTex.wrap(GL_CLAMP_TO_EDGE);
 myTex.mipmap(false);
 myTex.create2D(width, height, GL_RGB8, GL_RGBA, GL_FLOAT);
 
-myTex.submit(pointer_to_data); // you can skip this if using the texture for render target
+myTex.submit(pointer_to_data); // you can skip this if using the texture for
+render target
 
 to update  params:
 myTex.filter(GL_LINEAR);
 myTex.wrap(GL_CLAMP_TO_EDGE);
-myTex.update(); // remember to call update, this is not needed when calling create2D (internally called)
+myTex.update(); // remember to call update, this is not needed when calling
+create2D (internally called)
 
   frequently used internal format:
     GL_RGBA32F GL_RGBA8 GL_DEPTH_COMPONENT32F GL_DEPTH_COMPONENT16
@@ -86,51 +88,61 @@ namespace al {
 /// A simple wrapper around an OpenGL Texture
 /// @ingroup allocore
 class Texture : public GPUObject {
-public:
-
-  enum Target : unsigned int {
-    TEXTURE_1D                   = GL_TEXTURE_1D,
-    TEXTURE_2D                   = GL_TEXTURE_2D,
-    TEXTURE_3D                   = GL_TEXTURE_3D,
-    TEXTURE_1D_ARRAY             = GL_TEXTURE_1D_ARRAY,
-    TEXTURE_2D_ARRAY             = GL_TEXTURE_2D_ARRAY,
-    TEXTURE_RECTANGLE            = GL_TEXTURE_RECTANGLE,
-    TEXTURE_CUBE_MAP             = GL_TEXTURE_CUBE_MAP,
-    TEXTURE_BUFFER               = GL_TEXTURE_BUFFER,
-    TEXTURE_2D_MULTISAMPLE       = GL_TEXTURE_2D_MULTISAMPLE,
-    TEXTURE_2D_MULTISAMPLE_ARRAY = GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
-    NO_TARGET                    = 0
+ public:
+  enum DataType : unsigned int /* GLenum */ {
+    BYTE = GL_BYTE,             /**< */
+    UBYTE = GL_UNSIGNED_BYTE,   /**< */
+    SHORT = GL_SHORT,           /**< */
+    USHORT = GL_UNSIGNED_SHORT, /**< */
+    INT = GL_INT,               /**< */
+    UINT = GL_UNSIGNED_INT,     /**< */
+    FLOAT = GL_FLOAT,           /**< */
+    DOUBLE = GL_DOUBLE          /**< */
   };
 
-  enum Wrap : unsigned int {
-    CLAMP_TO_EDGE           = GL_CLAMP_TO_EDGE,
-    CLAMP_TO_BORDER         = GL_CLAMP_TO_BORDER,
-    MIRRORED_REPEAT         = GL_MIRRORED_REPEAT,
-    REPEAT                  = GL_REPEAT
+  enum Target : unsigned int /* GLenum */ {
+    TEX_1D = GL_TEXTURE_1D,
+    TEX_2D = GL_TEXTURE_2D,
+    TEX_3D = GL_TEXTURE_3D,
+    TEX_1D_ARRAY = GL_TEXTURE_1D_ARRAY,
+    TEX_2D_ARRAY = GL_TEXTURE_2D_ARRAY,
+    TEX_RECTANGLE = GL_TEXTURE_RECTANGLE,
+    TEX_CUBE_MAP = GL_TEXTURE_CUBE_MAP,
+    TEX_BUFFER = GL_TEXTURE_BUFFER,
+    TEX_2D_MULTISAMPLE = GL_TEXTURE_2D_MULTISAMPLE,
+    TEX_2D_MULTISAMPLE_ARRAY = GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
+    NO_TARGET = 0
   };
 
-  enum Filter : unsigned int {
-    NEAREST                 = GL_NEAREST,
-    LINEAR                  = GL_LINEAR,
+  enum Wrap : int /* GLint */ {
+    CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE,
+    CLAMP_TO_BORDER = GL_CLAMP_TO_BORDER,
+    MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
+    REPEAT = GL_REPEAT
+  };
+
+  enum Filter : int /* GLint */ {
+    NEAREST = GL_NEAREST,
+    LINEAR = GL_LINEAR,
     // first term is within mipmap level, second term is between mipmap levels:
-    NEAREST_MIPMAP_NEAREST  = GL_NEAREST_MIPMAP_NEAREST,
-    LINEAR_MIPMAP_NEAREST   = GL_LINEAR_MIPMAP_NEAREST,
-    NEAREST_MIPMAP_LINEAR   = GL_NEAREST_MIPMAP_LINEAR,
-    LINEAR_MIPMAP_LINEAR    = GL_LINEAR_MIPMAP_LINEAR
+    NEAREST_MIPMAP_NEAREST = GL_NEAREST_MIPMAP_NEAREST,
+    LINEAR_MIPMAP_NEAREST = GL_LINEAR_MIPMAP_NEAREST,
+    NEAREST_MIPMAP_LINEAR = GL_NEAREST_MIPMAP_LINEAR,
+    LINEAR_MIPMAP_LINEAR = GL_LINEAR_MIPMAP_LINEAR
   };
 
-  enum Format : unsigned int {
-    RED             = GL_RED,
-    RG              = GL_RG,
-    RGB             = GL_RGB,
-    BGR             = GL_BGR,
-    RGBA            = GL_RGBA,
-    BGRA            = GL_BGRA,
+  enum Format : unsigned int /* GLenum */ {
+    RED = GL_RED,
+    RG = GL_RG,
+    RGB = GL_RGB,
+    BGR = GL_BGR,
+    RGBA = GL_RGBA,
+    BGRA = GL_BGRA,
     DEPTH_COMPONENT = GL_DEPTH_COMPONENT,
-    DEPTH_STENCIL   = GL_DEPTH_STENCIL
+    DEPTH_STENCIL = GL_DEPTH_STENCIL
   };
 
-  enum Internal : unsigned int {
+  enum Internal : int /* GLint */ {
     RGBA32F = GL_RGBA32F,
     RGBA16 = GL_RGBA16,
     RGBA16F = GL_RGBA16F,
@@ -167,23 +179,18 @@ public:
   // TODO
   // void create1D();
 
-  void create2D(
-    unsigned int width, unsigned int height,
-    int internal = GL_RGBA8,
-    unsigned int format = GL_RGBA,
-    unsigned int type = GL_UNSIGNED_BYTE // or GL_FLOAT is used
+  void create2D(unsigned int width, unsigned int height,
+                int internal = GL_RGBA8, unsigned int format = GL_RGBA,
+                unsigned int type = GL_UNSIGNED_BYTE  // or GL_FLOAT is used
   );
 
   // TODO
   // void create3D();
 
   void createCubemap(
-    unsigned int size,
-    int internal = GL_RGBA8,
-    unsigned int format = GL_RGBA,
-    unsigned int type = GL_UNSIGNED_BYTE // or GL_FLOAT is used
+      unsigned int size, int internal = GL_RGBA8, unsigned int format = GL_RGBA,
+      unsigned int type = GL_UNSIGNED_BYTE  // or GL_FLOAT is used
   );
-
 
   /// Bind the texture (to a multitexture unit)
   /// also update params and mipmap if changed
@@ -229,14 +236,15 @@ public:
 
   /// Get T wrapping type
   int wrapT() const { return mWrapT; }
-  
+
   /// Get R wrapping type
   int wrapR() const { return mWrapR; }
 
   bool mipmap() const { return mUseMipmap; }
 
   /// Get number of components per pixel
-  // unsigned numComponents() const { return Graphics::numComponents(format()); }
+  // unsigned numComponents() const { return Graphics::numComponents(format());
+  // }
 
   /// Get total number of elements (components x width x height x depth)
   // unsigned numElems() const {
@@ -249,17 +257,20 @@ public:
   // }
 
   /// Resize 1D texture
-  void resize (unsigned w) { }
+  void resize(unsigned w) {}
 
   /// Resize 2D texture
   // void resize (unsigned w, unsigned h) { }
-  bool resize (int w, int h);
+  bool resize(int w, int h);
 
   /// Resize 3D texture
-  void resize (unsigned w, unsigned h, unsigned d) { }
+  void resize(unsigned w, unsigned h, unsigned d) {}
 
   /// Set minification and magnification filter types all at once
-  void filter(int v) { filterMin(v); filterMag(v); }
+  void filter(int v) {
+    filterMin(v);
+    filterMag(v);
+  }
 
   /// Set minification filter type
   void filterMin(int v);
@@ -269,12 +280,12 @@ public:
 
   /// Set 3D wrapping modes
   void wrap(int S, int T, int R);
-  
+
   /// Set 2D wrapping modes
-  void wrap(int S, int T) { wrap(S,T,mWrapR); }
+  void wrap(int S, int T) { wrap(S, T, mWrapR); }
 
   /// Set wrapping mode for all dimensions
-  void wrap(int v) { wrap(v,v,v); }
+  void wrap(int v) { wrap(v, v, v); }
 
   void wrapS(int v) { wrap(v, mWrapT, mWrapR); };
   void wrapT(int v) { wrap(mWrapS, v, mWrapR); };
@@ -287,14 +298,13 @@ public:
   /// NOTE: the graphics context (e.g. Window) must have been created
   /// If pixels is NULL, then the only effect is to resize the texture
   /// remotely.
-  void submit(const void * pixels);
+  void submit(const void* pixels);
 
   // update the changes in params or settings
   // void update(bool force=false);
 
-  void generateMipmap ();
-  void disableMipmap ();
-
+  void generateMipmap();
+  void disableMipmap();
 
   /// Copy pixels from current frame buffer to texture texels
 
@@ -305,13 +315,13 @@ public:
   /// @param[in] texx   texel offset in x direction
   /// @param[in] texy   texel offset in y direction (2D/3D only)
   /// @param[in] texz   texel offset in z direction (3D only)
-  void copyFrameBuffer(
-    int w=-1, int h=-1,
-    int fbx=0, int fby=0,
-    int texx=0, int texy=0, int texz=0
-  );
-  
-protected:
+  void copyFrameBuffer(int w = -1, int h = -1, int fbx = 0, int fby = 0,
+                       int texx = 0, int texy = 0, int texz = 0);
+
+  /// Returns number of components for given color type
+  static int numComponents(Texture::Format v);
+
+ protected:
   void onCreate() override;
   void onDestroy() override;
 
@@ -321,9 +331,12 @@ protected:
 
   // Pattern for setting a variable that when changed sets a notification flag
   // if v != var, update var and set flag to true
-  template<class T>
-  void update_param(const T& v, T& var, bool& flag){
-    if(v!=var){ var=v; flag=true; }
+  template <class T>
+  void update_param(const T& v, T& var, bool& flag) {
+    if (v != var) {
+      var = v;
+      flag = true;
+    }
   }
 
   unsigned int mTarget = GL_TEXTURE_2D;
@@ -332,32 +345,16 @@ protected:
   unsigned int mFormat = GL_RGBA;
   unsigned int mType = GL_UNSIGNED_BYTE;
 
-  int mWrapS = GL_CLAMP_TO_EDGE, mWrapT = GL_CLAMP_TO_EDGE, mWrapR = GL_CLAMP_TO_EDGE;
+  int mWrapS = GL_CLAMP_TO_EDGE, mWrapT = GL_CLAMP_TO_EDGE,
+      mWrapR = GL_CLAMP_TO_EDGE;
   int mFilterMin = GL_NEAREST, mFilterMag = GL_NEAREST;
-  bool mUseMipmap = false; // by default no mipmap
+  bool mUseMipmap = false;  // by default no mipmap
 
-  bool mFilterUpdated = true; // Flags change in texture params (wrap, filter)
-  bool mWrapUpdated = true; // Flags change in texture params (wrap, filter)
-  bool mUsingMipmapUpdated = true;;
-
+  bool mFilterUpdated = true;  // Flags change in texture params (wrap, filter)
+  bool mWrapUpdated = true;    // Flags change in texture params (wrap, filter)
+  bool mUsingMipmapUpdated = true;
 };
 
-
-/// Returns number of components for given color type
-inline int numComponents(Texture::Format v) {
-    switch(v){
-        case Texture::RED:               return 1;
-        case Texture::RG:                return 2;
-        case Texture::RGB:
-        case Texture::BGR:               return 3;
-        case Texture::RGBA:
-        case Texture::BGRA:              return 4;
-        case Texture::DEPTH_COMPONENT:   return 1;
-        case Texture::DEPTH_STENCIL:     return 2;
-        default:                return 0;
-    };
-}
-
-} // al::
+}  // namespace al
 
 #endif

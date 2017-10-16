@@ -45,78 +45,64 @@
 
 */
 
+#include "al/core/graphics/al_DefaultShaders.hpp"
 #include "al/core/graphics/al_OpenGL.hpp"
 #include "al/core/graphics/al_RenderManager.hpp"
-#include "al/core/graphics/al_DefaultShaders.hpp"
 
 namespace al {
 
-class Graphics : public RenderManager
-{
-public:
-
-  enum DataType {
-    BYTE                    = GL_BYTE,                  /**< */
-    UBYTE                   = GL_UNSIGNED_BYTE,         /**< */
-    SHORT                   = GL_SHORT,                 /**< */
-    USHORT                  = GL_UNSIGNED_SHORT,        /**< */
-    INT                     = GL_INT,                   /**< */
-    UINT                    = GL_UNSIGNED_INT,          /**< */
-    BYTES_2                 = GL_2_BYTES,               /**< */
-    BYTES_3                 = GL_3_BYTES,               /**< */
-    BYTES_4                 = GL_4_BYTES,               /**< */
-    FLOAT                   = GL_FLOAT,                 /**< */
-    DOUBLE                  = GL_DOUBLE                 /**< */
-  };
-
+class Graphics : public RenderManager {
+ public:
   enum BlendFunc : unsigned int {
-    SRC_ALPHA               = GL_SRC_ALPHA,             /**< */
-    ONE_MINUS_SRC_ALPHA     = GL_ONE_MINUS_SRC_ALPHA,   /**< */
-    SRC_COLOR               = GL_SRC_COLOR,             /**< */
-    ONE_MINUS_SRC_COLOR     = GL_ONE_MINUS_SRC_COLOR,   /**< */
-    DST_ALPHA               = GL_DST_ALPHA,             /**< */
-    ONE_MINUS_DST_ALPHA     = GL_ONE_MINUS_DST_ALPHA,   /**< */
-    DST_COLOR               = GL_DST_COLOR,             /**< */
-    ONE_MINUS_DST_COLOR     = GL_ONE_MINUS_DST_COLOR,   /**< */
-    ZERO                    = GL_ZERO,                  /**< */
-    ONE                     = GL_ONE,                   /**< */
-    SRC_ALPHA_SATURATE      = GL_SRC_ALPHA_SATURATE     /**< */
+    SRC_ALPHA = GL_SRC_ALPHA,                     /**< */
+    ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA, /**< */
+    SRC_COLOR = GL_SRC_COLOR,                     /**< */
+    ONE_MINUS_SRC_COLOR = GL_ONE_MINUS_SRC_COLOR, /**< */
+    DST_ALPHA = GL_DST_ALPHA,                     /**< */
+    ONE_MINUS_DST_ALPHA = GL_ONE_MINUS_DST_ALPHA, /**< */
+    DST_COLOR = GL_DST_COLOR,                     /**< */
+    ONE_MINUS_DST_COLOR = GL_ONE_MINUS_DST_COLOR, /**< */
+    ZERO = GL_ZERO,                               /**< */
+    ONE = GL_ONE,                                 /**< */
+    SRC_ALPHA_SATURATE = GL_SRC_ALPHA_SATURATE    /**< */
   };
 
   enum BlendEq : unsigned int {
-    FUNC_ADD                = GL_FUNC_ADD,              /**< Source + destination */
-    FUNC_SUBTRACT           = GL_FUNC_SUBTRACT,         /**< Source - destination */
-    FUNC_REVERSE_SUBTRACT   = GL_FUNC_REVERSE_SUBTRACT, /**< Destination - source */
-    MIN                     = GL_MIN,                   /**< Minimum value of source and destination */
-    MAX                     = GL_MAX                    /**< Maximum value of source and destination */
+    FUNC_ADD = GL_FUNC_ADD,           /**< Source + destination */
+    FUNC_SUBTRACT = GL_FUNC_SUBTRACT, /**< Source - destination */
+    FUNC_REVERSE_SUBTRACT =
+        GL_FUNC_REVERSE_SUBTRACT, /**< Destination - source */
+    MIN = GL_MIN, /**< Minimum value of source and destination */
+    MAX = GL_MAX  /**< Maximum value of source and destination */
   };
 
   enum Capability : unsigned int {
-    BLEND        = GL_BLEND,        /**< Blend rather than replacing with new color */
-    DEPTH_TEST   = GL_DEPTH_TEST,   /**< Test depth of incoming fragments */
-    SCISSOR_TEST = GL_SCISSOR_TEST, /**< Crop fragments according to scissor region */
-    CULL_FACE    = GL_CULL_FACE     /**< Cull faces */
+    BLEND = GL_BLEND, /**< Blend rather than replacing with new color */
+    DEPTH_TEST = GL_DEPTH_TEST, /**< Test depth of incoming fragments */
+    SCISSOR_TEST =
+        GL_SCISSOR_TEST,     /**< Crop fragments according to scissor region */
+    CULL_FACE = GL_CULL_FACE /**< Cull faces */
   };
 
   enum Face : unsigned int {
-    FRONT          = GL_FRONT,         /**< Front face */
-    BACK           = GL_BACK,          /**< Back face */
+    FRONT = GL_FRONT,                  /**< Front face */
+    BACK = GL_BACK,                    /**< Back face */
     FRONT_AND_BACK = GL_FRONT_AND_BACK /**< Front and back face */
   };
 
   enum PolygonMode : unsigned int {
     POINT = GL_POINT, /**< Render only points at each vertex */
-    LINE  = GL_LINE,  /**< Render only lines along vertex path */
-    FILL  = GL_FILL   /**< Render vertices normally according to primitive */
+    LINE = GL_LINE,   /**< Render only lines along vertex path */
+    FILL = GL_FILL    /**< Render vertices normally according to primitive */
   };
-  
-  Graphics (Window* win) : RenderManager {win} {}
+
+  Graphics(Window* win) : RenderManager{win} {}
 
   /// Enable a capability
-  void enable(Capability v){ glEnable(v); }
+  void enable(Capability v) { glEnable(v); }
 
   /// Disable a capability
-  void disable(Capability v){ glDisable(v); }
+  void disable(Capability v) { glDisable(v); }
 
   /// Set a capability
   void capability(Capability cap, bool value);
@@ -145,7 +131,6 @@ public:
   /// Turn face culling on/off and set the culled face
   void cullFace(bool b, Face face);
 
-
   /// Set both line width and point diameter
   // void stroke(float v){ lineWidth(v); pointSize(v); }
 
@@ -156,71 +141,91 @@ public:
   void pointSize(float v);
 
   /// Set polygon drawing mode
-  void polygonMode(PolygonMode m, Face f=FRONT_AND_BACK);
+  void polygonMode(PolygonMode m, Face f = FRONT_AND_BACK);
 
   /// Draw only edges of polygons with lines
-  void polygonLine(Face f=FRONT_AND_BACK){ polygonMode(LINE,f); }
+  void polygonLine(Face f = FRONT_AND_BACK) { polygonMode(LINE, f); }
 
   /// Draw filled polygons
-  void polygonFill(Face f=FRONT_AND_BACK){ polygonMode(FILL,f); }
+  void polygonFill(Face f = FRONT_AND_BACK) { polygonMode(FILL, f); }
 
   /// Set blend mode
-  void blendMode(BlendFunc src, BlendFunc dst, BlendEq eq=FUNC_ADD);
+  void blendMode(BlendFunc src, BlendFunc dst, BlendEq eq = FUNC_ADD);
 
   /// Set blend mode to additive (symmetric additive lighten)
-  void blendModeAdd(){ blendMode(SRC_ALPHA, ONE, FUNC_ADD); }
+  void blendModeAdd() { blendMode(SRC_ALPHA, ONE, FUNC_ADD); }
 
   /// Set blend mode to subtractive (symmetric additive darken)
-  void blendModeSub(){ blendMode(SRC_ALPHA, ONE, FUNC_REVERSE_SUBTRACT); }
+  void blendModeSub() { blendMode(SRC_ALPHA, ONE, FUNC_REVERSE_SUBTRACT); }
 
   /// Set blend mode to screen (symmetric multiplicative lighten)
-  void blendModeScreen(){ blendMode(ONE, ONE_MINUS_SRC_COLOR, FUNC_ADD); }
+  void blendModeScreen() { blendMode(ONE, ONE_MINUS_SRC_COLOR, FUNC_ADD); }
 
   /// Set blend mode to multiplicative (symmetric multiplicative darken)
-  void blendModeMul(){ blendMode(DST_COLOR, ZERO, FUNC_ADD); }
+  void blendModeMul() { blendMode(DST_COLOR, ZERO, FUNC_ADD); }
 
   /// Set blend mode to transparent (asymmetric)
-  void blendModeTrans(){ blendMode(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, FUNC_ADD); }
+  void blendModeTrans() { blendMode(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, FUNC_ADD); }
 
   /// Turn blending states on (without setting mode)
-  void blendOn(){ depthMask(false); blending(true); }
+  void blendOn() {
+    depthMask(false);
+    blending(true);
+  }
 
   /// Set states for additive blending
-  void blendAdd(){ blendOn(); blendModeAdd(); }
+  void blendAdd() {
+    blendOn();
+    blendModeAdd();
+  }
 
   /// Set states for subtractive blending
-  void blendSub(){ blendOn(); blendModeSub(); }
+  void blendSub() {
+    blendOn();
+    blendModeSub();
+  }
 
   /// Set states for screen blending
-  void blendScreen(){ blendOn(); blendModeScreen(); }
+  void blendScreen() {
+    blendOn();
+    blendModeScreen();
+  }
 
   /// Set states for multiplicative blending
-  void blendMul(){ blendOn(); blendModeMul(); }
+  void blendMul() {
+    blendOn();
+    blendModeMul();
+  }
 
   /// Set states for transparent blending
-  void blendTrans(){ blendOn(); blendModeTrans(); }
+  void blendTrans() {
+    blendOn();
+    blendModeTrans();
+  }
 
   /// Turn blending states off (opaque rendering)
-  void blendOff(){ depthMask(true); blending(false); }
-
+  void blendOff() {
+    depthMask(true);
+    blending(false);
+  }
 
   // extended render managing -----------------------------
-  void init ();
+  void init();
   void tint(float r, float g, float b, float a = 1.0f);
   void tint(float grayscale, float a = 1.0f) {
     tint(grayscale, grayscale, grayscale, a);
   }
-  void color (float r, float g, float b, float a = 1.0f);
-  void color (float k, float a = 1.0f) { color(k, k, k, a); }
-  void color (Color const& c) { color(c.r, c.g, c.b, c.a); }
+  void color(float r, float g, float b, float a = 1.0f);
+  void color(float k, float a = 1.0f) { color(k, k, k, a); }
+  void color(Color const& c) { color(c.r, c.g, c.b, c.a); }
   void bind(Texture& t);
   void unbind();
   void meshColor();
   void quad(Texture& tex, float x, float y, float w, float h);
-  void quadViewport(Texture& tex, float x=-1, float y=-1, float w=2, float h=2);
+  void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2,
+                    float h = 2);
 
-private:
-
+ private:
   ShaderProgram mesh_shader;
   ShaderProgram color_shader;
   ShaderProgram tex_shader;
@@ -229,29 +234,9 @@ private:
   int tex_tint_location = 0;
   int mesh_tint_location = 0;
   int tint_location = 0;
-  al::Color tint_color {1.0f, 1.0f, 1.0f, 1.0f};
+  al::Color tint_color{1.0f, 1.0f, 1.0f, 1.0f};
   al::Texture* texPtr = nullptr;
-
 };
 
-namespace gl {
-
-/// Returns number of bytes for given data type
-int numBytes(Graphics::DataType v);
-
-/// Get DataType associated with a basic C type
-template<typename Type>
-inline Graphics::DataType toDataType();
-template<> inline Graphics::DataType toDataType<char>(){ return Graphics::BYTE; }
-template<> inline Graphics::DataType toDataType<unsigned char>(){ return Graphics::UBYTE; }
-template<> inline Graphics::DataType toDataType<short>(){ return Graphics::SHORT; }
-template<> inline Graphics::DataType toDataType<unsigned short>(){ return Graphics::USHORT; }
-template<> inline Graphics::DataType toDataType<int>(){ return Graphics::INT; }
-template<> inline Graphics::DataType toDataType<unsigned int>(){ return Graphics::UINT; }
-template<> inline Graphics::DataType toDataType<float>(){ return Graphics::FLOAT; }
-template<> inline Graphics::DataType toDataType<double>(){ return Graphics::DOUBLE; }
-
-}
-
-} // al::
+}  // namespace al
 #endif

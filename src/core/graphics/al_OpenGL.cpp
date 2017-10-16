@@ -30,6 +30,32 @@ bool error(const char *msg, int ID) {
   return false;
 }
 
+int numBytes(GLenum v)
+{
+  #define CS(a,b) case a: return sizeof(b);
+  switch(v){
+    CS(GL_BYTE, GLbyte)
+    CS(GL_UNSIGNED_BYTE, GLubyte)
+    CS(GL_SHORT, GLshort)
+    CS(GL_UNSIGNED_SHORT, GLushort)
+    CS(GL_INT, GLint)
+    CS(GL_UNSIGNED_INT, GLuint)
+    CS(GL_FLOAT, GLfloat)
+    CS(GL_DOUBLE, GLdouble)
+    default: return 0;
+  };
+  #undef CS
+}
+
+template<> GLenum toDataType<char>(){ return GL_BYTE; }
+template<> GLenum toDataType<unsigned char>(){ return GL_UNSIGNED_BYTE; }
+template<> GLenum toDataType<short>(){ return GL_SHORT; }
+template<> GLenum toDataType<unsigned short>(){ return GL_UNSIGNED_SHORT; }
+template<> GLenum toDataType<int>(){ return GL_INT; }
+template<> GLenum toDataType<unsigned int>(){ return GL_UNSIGNED_INT; }
+template<> GLenum toDataType<float>(){ return GL_FLOAT; }
+template<> GLenum toDataType<double>(){ return GL_DOUBLE; }
+
 } // gl::
 
 }
