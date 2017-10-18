@@ -20,12 +20,16 @@ fi
 
 # check if we want debug build
 BUILD_TYPE=Release
-while getopts ":d" opt; do
+while getopts ":dn" opt; do
   case $opt in
   d)
   BUILD_TYPE=Debug
   POSTFIX=_debug
   shift # consume option
+    ;;
+  n)
+  EXIT_AFTER_BUILD=1
+  shift
     ;;
   esac
 done
@@ -79,6 +83,10 @@ APP_BUILD_RESULT=$?
 # if app failed to build, exit
 if [ ${APP_BUILD_RESULT} != 0 ]; then
   exit 1
+fi
+
+if [ ${EXIT_AFTER_BUILD} ]; then
+  exit 0
 fi
 
 # run app ######################################################################
