@@ -46,7 +46,7 @@ public:
         stack.back() = stack.back() * m;
     }
 
-    Matrix4f get() {
+    Matrix4f get() const {
         return stack.back();
     }
 
@@ -85,7 +85,7 @@ public:
         }
     }
 
-    Viewport get() {
+    Viewport get() const {
         return stack.back();
     }
 
@@ -136,9 +136,13 @@ public:
   //void multMatrix(const Matrix4d &m) {/* !!!!!!!!!!!!! */}
   //void multMatrix(const Matrix4f &m) {/* !!!!!!!!!!!!! */}
 
-  Matrix4f modelMatrix();
-  Matrix4f viewMatrix();
-  Matrix4f projMatrix();
+  Matrix4f modelMatrix() const { return mModelStack.get(); }
+  Matrix4f viewMatrix() const { return mViewStack.get(); }
+  Matrix4f projMatrix() const { return mProjStack.get(); }
+
+  void modelMatrix(const Matrix4f& m);
+  void viewMatrix(const Matrix4f& m);
+  void projMatrix(const Matrix4f& m);
 
   /// Rotate current matrix
 

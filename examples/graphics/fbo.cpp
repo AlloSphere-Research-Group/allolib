@@ -36,13 +36,11 @@ class MyApp : public App {
 		// both depth and color attachees must be valid on the GPU before use:
 		rbo.create(w, h);
 		fbotex.create2D(w, h);
-		fbotex.filter(Texture::NEAREST);
 
 		fbo.bind();
 		fbo.attachTexture2D(fbotex);
 		fbo.attachRBO(rbo);
 		fbo.unbind();
-
 		cout << "fbo status " << fbo.statusString() << endl;
 	}
 
