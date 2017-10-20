@@ -18,141 +18,80 @@ namespace al {
 
 class MatrixStack {
 public:
+    MatrixStack();
+    void push();
+    void pop();
+    void mult(Matrix4f const& m);
+    void set(const Matrix4f& m);
+    void setIdentity();
+    Matrix4f get() const;
+private:
     std::vector<Matrix4f> stack;
-
-    MatrixStack() {
-        // default constructor make identity matrix
-        stack.emplace_back();
-    }
-
-    void push() {
-        Matrix4f m = stack.back();
-        stack.push_back(m);
-    }
-
-    void pop() {
-        if (stack.size() > 1) { // why 1? don't pop all
-            stack.pop_back();
-        }
-        else if (stack.size() == 1) {
-            setIdentity();
-        }
-        else {
-            stack.emplace_back();
-        }
-    }
-
-    void mult(Matrix4f const& m) {
-        stack.back() = stack.back() * m;
-    }
-
-    Matrix4f get() const {
-        return stack.back();
-    }
-
-    void set(const Matrix4f& m) {
-      stack.back() = m;
-    }
-
-    void setIdentity() {
-        stack.back().setIdentity();
-    }
-
 };
 
 class ViewportStack {
 public:
+    ViewportStack();
+    void push();
+    void pop();
+    Viewport get() const;
+    void set(const Viewport& m);
+    void set(int left, int bottom, int width, int height);
+private:
     std::vector<Viewport> stack;
-
-    ViewportStack() {
-        stack.emplace_back();
-    }
-
-    void push() {
-        Viewport v = stack.back();
-        stack.push_back(v);
-    }
-
-    void pop() {
-        if (stack.size() > 1) {
-            stack.pop_back();
-        }
-        else if (stack.size() == 1) {
-            return; // don't pop all
-        }
-        else { // no element, add one
-            stack.emplace_back();
-        }
-    }
-
-    Viewport get() const {
-        return stack.back();
-    }
-
-    void set(const Viewport& m) {
-      stack.back().set(m);
-    }
-
-    void set(int left, int bottom, int width, int height) {
-      stack.back().set(left, bottom, width, height);
-    }
-
 };
 
 class RenderManager {
 public:
-  
-  void setClearColor(float r, float g, float b, float a = 1);
-  void clearColor(int drawbuffer=0);
-  void clearColor(float r, float g, float b, float a = 1, int drawbuffer = 0);
-  void clearColor(Color const& c, int drawbuffer = 0);
-
-  void setClearDepth(float d);
-  void clearDepth();
-  void clearDepth(float d);
-
-  void clear(float r, float g, float b, float a=1, float d=1, int drawbuffer = 0);
-  void clear(float grayscale, float d=1) { clear(grayscale, grayscale, grayscale, 1, d); }
-  void clear(Color const& c, float d=1) { clear(c.r, c.g, c.b, c.a, d); }
-
-  /// Push current matrix stack
-  void pushMatrix();
-
-  /// Pop current matrix stack
-  void popMatrix();
-
-  /// Set current matrix to identity
-  void loadIdentity();
-
-  /// Set current matrix
-  //void loadMatrix(const Matrix4d &m) {/* !!!!!!!!!!!!! */}
-  //void loadMatrix(const Matrix4f &m) {/* !!!!!!!!!!!!! */}
 
   /// Multiply current matrix
-  //void multMatrix(const Matrix4d &m) {/* !!!!!!!!!!!!! */}
-  //void multMatrix(const Matrix4f &m) {/* !!!!!!!!!!!!! */}
+  void multModelMatrix(const Matrix4f &m) { mModelStack.mult(m); mMatChanged = true; }
+  void multViewMatrix(const Matrix4f &m) { mViewStack.mult(m); mMatChanged = true;}
+  void multProjMatrix(const Matrix4f &m) { mProjStack.mult(m); mMatChanged = true;}
 
   Matrix4f modelMatrix() const { return mModelStack.get(); }
   Matrix4f viewMatrix() const { return mViewStack.get(); }
   Matrix4f projMatrix() const { return mProjStack.get(); }
 
-  void modelMatrix(const Matrix4f& m);
-  void viewMatrix(const Matrix4f& m);
-  void projMatrix(const Matrix4f& m);
+  void modelMatrix(const Matrix4f& m) { mModelStack.set(m); mMatChanged = true; }
+  void viewMatrix(const Matrix4f& m) { mViewStack.set(m); mMatChanged = true; }
+  void projMatrix(const Matrix4f& m) { mProjStack.set(m); mMatChanged = true; }
+
+  void pushModelMatrix() { mModelStack.push(); }
+  void pushViewMatrix() { mViewStack.push(); }
+  void pushProjMatrix() { mProjStack.push(); }
+
+  void popModelMatrix() { mModelStack.pop(); }
+  void popViewMatrix() { mViewStack.pop(); }
+  void popProjMatrix() { mProjStack.pop(); }
+
+  /// Push current matrix stack
+  void pushMatrix() { pushModelMatrix(); }
+
+  /// Pop current matrix stack
+  void popMatrix() { popModelMatrix(); }
+
+  /// Set current matrix to identity
+  void loadIdentity() { mModelStack.setIdentity(); }
+
+  /// Translate current matrix
+  void translate(float x, float y, float z=0.);
+  /// Translate current matrix
+  template <class T>
+  void translate(const Vec<3,T>& v){ translate(v[0],v[1],v[2]); }
+  /// Translate current matrix
+  template <class T>
+  void translate(const Vec<2,T>& v){ translate(v[0],v[1]); }
 
   /// Rotate current matrix
-
   /// \param[in] angle  angle, in degrees
   /// \param[in] x    x component of rotation axis
   /// \param[in] y    y component of rotation axis
   /// \param[in] z    z component of rotation axis
   void rotate(float angle, float x=0., float y=0., float z=1.);
-
   /// Rotate current matrix
   void rotate(const Quatf& q);
-
   /// Rotate current matrix
-
   /// \param[in] angle  angle, in degrees
   /// \param[in] axis   rotation axis
   template <class T>
@@ -162,60 +101,41 @@ public:
 
   /// Scale current matrix uniformly
   void scale(float s);
-
   /// Scale current matrix along each dimension
   void scale(float x, float y, float z=1.);
-
   /// Scale current matrix along each dimension
   template <class T>
   void scale(const Vec<3,T>& v){ scale(v[0],v[1],v[2]); }
-
   /// Scale current matrix along each dimension
   template <class T>
   void scale(const Vec<2,T>& v){ scale(v[0],v[1]); }
 
-  /// Translate current matrix
-  void translate(float x, float y, float z=0.);
-
-  /// Translate current matrix
-  template <class T>
-  void translate(const Vec<3,T>& v){ translate(v[0],v[1],v[2]); }
-
-  /// Translate current matrix
-  template <class T>
-  void translate(const Vec<2,T>& v){ translate(v[0],v[1]); }
 
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
-  void viewport(int l, int b, int w, int h, float pixelDensity) {
-    viewport(l * pixelDensity, b * pixelDensity, w * pixelDensity, h * pixelDensity);
+  void viewport(const Viewport& v) { viewport(v.l, v.b, v.w, v.h); }
+  Viewport viewport() { return mViewportStack.get(); }
+  void pushViewport();
+  void popViewport();
+  void pushViewport(int l, int b, int w, int h) {
+    pushViewport(); viewport(l, b, w, h);
   }
-  void viewport(const Viewport& v) {
-    viewport(v.l, v.b, v.w, v.h);
-  }
-  void viewport(const Viewport& v, float pixelDensity) {
-    viewport(v.l, v.b, v.w, v.h, pixelDensity);
-  }
-
-  void scissor(int left, int bottom, int width, int height);
+  void pushViewport(const Viewport& v) { pushViewport(); viewport(v); }
 
   void framebuffer(EasyFBO& easyFBO) { framebuffer(easyFBO.fbo().id()); }
   void framebuffer(FBO& fbo) { framebuffer(fbo.id()); }
   void framebuffer(unsigned int id);
 
   void shader(ShaderProgram& s);
-  ShaderProgram& shader();
+  ShaderProgram& shader() { return *mShaderPtr; };
   ShaderProgram* shaderPtr() { return mShaderPtr; }
 
   void camera(Viewpoint const& v);
-  void camera(Viewpoint const& v, int w, int h);
-  void camera(Viewpoint const& v, int x, int y, int w, int h);
   void camera(Viewpoint::SpecialType v);
-  void camera(Viewpoint::SpecialType v, int w, int h);
-  void camera(Viewpoint::SpecialType v, int x, int y, int w, int h);
-
   void pushCamera();
   void popCamera();
+  void pushCamera(Viewpoint const& v) { pushCamera(); camera(v); }
+  void pushCamera(Viewpoint::SpecialType v) { pushCamera(); camera(v); }
 
   void update();
   void draw(VAOMesh& mesh);
