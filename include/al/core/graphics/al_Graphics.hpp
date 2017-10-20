@@ -252,6 +252,9 @@ class Graphics : public RenderManager {
   int tint_location = 0;
   al::Color tint_color{1.0f, 1.0f, 1.0f, 1.0f};
   al::Texture* texPtr = nullptr;
+  Color mClearColor {0, 0, 0, 1};
+  float mClearDepth = 1;
+
 };
 
 }  // namespace al
