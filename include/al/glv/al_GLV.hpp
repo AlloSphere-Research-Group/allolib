@@ -18,7 +18,7 @@
 namespace al {
 
 void al_draw_glv(glv::GLV& glv, al::Graphics& g, unsigned x, unsigned y, unsigned w, unsigned h);
-void al_draw_glv(glv::GLV& glv, al::Graphics& g);
+void al_draw_glv(glv::GLV& glv, al::Graphics& g, al::Window* win);
 
 class GLVEventHandler : public WindowEventHandler {
 public:

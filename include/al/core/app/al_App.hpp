@@ -25,14 +25,15 @@ public:
         App* app;
         AppEventHandler(App* a): app(a) {}
         bool resize (int dw, int dh) override {
-            app->view().viewport(0, 0, app->width(), app->height());
+            app->mViewport.set(0, 0, app->fbWidth(), app->fbHeight());
             return true;
         }
     };
 
-    Graphics mGraphics {this};
+    Graphics mGraphics;
     AppEventHandler eventHandler {this};
     Viewpoint mView;
+    Viewport mViewport;
     NavInputControl mNavControl;
 
     Viewpoint& view() { return mView; }
@@ -48,8 +49,9 @@ public:
     virtual void preOnCreate() {
         mNavControl.target(mView);
         append(mNavControl);
+        append(eventHandler);
         mGraphics.init();
-        mView.viewport(0, 0, width(), height());
+        mViewport.set(0, 0, fbWidth(), fbHeight());
     }
 
     virtual void preOnAnimate(double dt) {
@@ -58,6 +60,7 @@ public:
 
     virtual void preOnDraw() {
         mGraphics.framebuffer(FBO::DEFAULT);
+        mGraphics.viewport(mViewport);
         mGraphics.camera(mView);
         mGraphics.loadIdentity();
         mGraphics.pushMatrix();

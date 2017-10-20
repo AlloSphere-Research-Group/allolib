@@ -1,16 +1,16 @@
 #ifndef INCLUDE_AL_RENDER_MANAGER_HPP
 #define INCLUDE_AL_RENDER_MANAGER_HPP
 
-#include "al/core/math/al_Vec.hpp"
-#include "al/core/math/al_Quat.hpp"
-#include "al/core/math/al_Matrix4.hpp"
-#include "al/core/graphics/al_VAOMesh.hpp"
-#include "al/core/graphics/al_EasyVAO.hpp"
-#include "al/core/graphics/al_Shader.hpp"
-#include "al/core/graphics/al_Viewpoint.hpp"
-#include "al/core/graphics/al_FBO.hpp"
 #include "al/core/graphics/al_EasyFBO.hpp"
+#include "al/core/graphics/al_EasyVAO.hpp"
+#include "al/core/graphics/al_FBO.hpp"
+#include "al/core/graphics/al_Shader.hpp"
+#include "al/core/graphics/al_VAOMesh.hpp"
+#include "al/core/graphics/al_Viewpoint.hpp"
 #include "al/core/io/al_Window.hpp"
+#include "al/core/math/al_Matrix4.hpp"
+#include "al/core/math/al_Quat.hpp"
+#include "al/core/math/al_Vec.hpp"
 
 #include <unordered_map>
 
@@ -227,34 +227,49 @@ public:
   void draw(Mesh& mesh);
   void draw(Mesh&& mesh);
 
-  Window& window() { return *mWindowPtr; }
-
 protected:
-  Window* mWindowPtr;
-
   ShaderProgram* mShaderPtr = nullptr;
-  bool mShaderChanged = false;
   std::unordered_map<unsigned int, int> modelviewLocs;
   std::unordered_map<unsigned int, int> projLocs;
+  bool mShaderChanged = false;
 
-  Matrix4f mViewMat;
-  Matrix4f mProjMat;
   MatrixStack mViewStack;
   MatrixStack mProjStack;
   MatrixStack mModelStack;
   bool mMatChanged = false;
 
+  ViewportStack mViewportStack;
+
   EasyVAO mInternalVAO;
 
   unsigned int mFBOID = 0;
-
-  Viewport mViewport;
-  ViewportStack mViewportStack;
-
-
-  Color mClearColor {0, 0, 0, 1};
-  float mClearDepth = 1;
 };
 
-}
+#if 0
+class RenderManager {
+ public:
+ private:
+  CameraStack mCameraStack;
+  ViewportStack mViewportStack;
+};
+
+class RenderManagerBackEnd {
+ public:
+ private:
+  Matrix4f mViewMat;
+  Matrix4f mProjMat;
+  Matrix4f mModelMat;
+
+  ShaderProgram* mShaderPtr = nullptr;
+  std::unordered_map<unsigned int, int> modelviewLocs;
+  std::unordered_map<unsigned int, int> projLocs;
+
+  bool mShaderChanged = false;
+  bool mMatChanged = false;
+
+  EasyVAO mInternalVAO;
+};
+#endif
+
+}  // namespace al
 #endif

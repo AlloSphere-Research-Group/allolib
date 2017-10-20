@@ -89,10 +89,10 @@ public:
 
 
   /// Turn to face a given world-coordinate point
-  virtual void faceToward(const Vec3d& p, double amt = 1.);
+  void faceToward(const Vec3d& p, double amt = 1.);
 
   /// Turn to face a given world-coordinate point, while maintaining an up vector
-  virtual void faceToward(const Vec3d& point, const Vec3d& up, double amt=1.);
+  void faceToward(const Vec3d& point, const Vec3d& up, double amt=1.);
 
 
 
@@ -219,7 +219,7 @@ public:
 protected:
   Vec3d mVec;    // position in 3-space
   Quatd mQuat;  // orientation of reference frame as a quaternion (relative to global axes)
-  Pose const* mParentTransform;     // parent transform, nullptr if none
+  const Pose* mParentTransform;     // parent transform, nullptr if none
 };
 
 

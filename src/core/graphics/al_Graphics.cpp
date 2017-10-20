@@ -34,6 +34,45 @@ void Graphics::cullFace(bool b, Face face) {
 void Graphics::pointSize(float v) { glPointSize(v); }
 void Graphics::polygonMode(PolygonMode m, Face f) { glPolygonMode(f, m); }
 
+void Graphics::scissor(int left, int bottom, int width, int height) {
+  glScissor(left, bottom, width, height);
+}
+
+void Graphics::setClearColor(float r, float g, float b, float a) {
+  mClearColor.set(r, g, b, a);
+}
+
+void Graphics::clearColor(int drawbuffer) {
+  glClearBufferfv(GL_COLOR, drawbuffer, mClearColor.components);
+}
+
+void Graphics::clearColor(float r, float g, float b, float a,
+                               int drawbuffer) {
+  setClearColor(r, g, b, a);
+  clearColor(drawbuffer);
+}
+
+void Graphics::clearColor(Color const& c, int drawbuffer) {
+  setClearColor(c.r, c.g, c.b, c.a);
+  clearColor(drawbuffer);
+}
+
+void Graphics::setClearDepth(float d) { mClearDepth = d; }
+
+void Graphics::clearDepth() { glClearBufferfv(GL_DEPTH, 0, &mClearDepth); }
+
+void Graphics::clearDepth(float d) {
+  setClearDepth(d);
+  clearDepth();
+}
+
+void Graphics::clear(float r, float g, float b, float a, float d,
+                          int drawbuffer) {
+  clearColor(r, g, b, a, drawbuffer);
+  clearDepth(d);
+}
+
+
 void Graphics::init() {
   compileDefaultShader(mesh_shader, ShaderType::MESH);
   compileDefaultShader(color_shader, ShaderType::COLOR);

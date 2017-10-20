@@ -322,5 +322,5 @@ float al::GlvGui::numberDialerValue(std::string name) {
 }
 
 void al::GlvGui::draw(Graphics& g) {
-    al_draw_glv(mGlv, g);
+    al_draw_glv(mGlv, g, mWindowPtr);
 }

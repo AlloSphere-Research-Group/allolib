@@ -96,29 +96,26 @@ public:
   Viewpoint& pose(Pose const& v){ set(v); return *this; }
   // Viewpoint& faceToward(Vec3f point, Vec3f upvec);
 
-  const Viewport& viewport() const { return mViewport; }
-  Viewport& viewport(){ return mViewport; }
-  Viewpoint& viewport(Viewport const& vp){ mViewport = vp; return *this; }
-  Viewpoint& viewport(int left, int bottom, int width, int height);
+  // const Viewport& viewport() const { return mViewport; }
+  // Viewport& viewport(){ return mViewport; }
+  // Viewpoint& viewport(Viewport const& vp){ mViewport = vp; return *this; }
+  // Viewpoint& viewport(int left, int bottom, int width, int height);
 
   Matrix4f viewMatrix() const;
-  Matrix4f projMatrix() const;
-  Matrix4f projMatrix(float x, float y, float w, float h) const;
+  // Matrix4f projMatrix() const;
+  Matrix4f projMatrix(float aspect_ratio) const;
+  Matrix4f projMatrix(float width, float height) const {
+    return projMatrix(width / height);
+  }
+  // Matrix4f projMatrix(float x, float y, float w, float h) const;
+  // Matrix4f projMatrix(float w, float h) const {
+  //   return projMatrix(-w / 2, -h / 2, w, h);
+  // };
 
-  Viewpoint& ortho(bool b) {
-    mIsOrtho = b;
-    return *this;
-  }
-  Viewpoint& ortho(float width, float height) {
-    return ortho(- width / 2, - height / 2, width / 2, height / 2);
-  }
-  Viewpoint& ortho(float left, float bottom, float right, float top);
+
 private:
   Lens mLens;
-  Viewport mViewport; // screen display region
-  float l, b, r, t; // for ortho
-  Matrix4f mOrthoMat;
-  bool mIsOrtho = false;
+  // Viewport mViewport; // screen display region
 
 public:
   enum SpecialType {

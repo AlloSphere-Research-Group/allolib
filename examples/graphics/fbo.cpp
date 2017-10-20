@@ -49,7 +49,8 @@ class MyApp : public App {
 		// capture green-world to texture:
 		g.framebuffer(fbo);
 		g.clear(0, 0.5, 0);
-		g.camera(Viewpoint::IDENTITY, w, h);
+		g.viewport(0, 0, w, h);
+		g.camera(Viewpoint::IDENTITY);
 
 		Mesh m;
 		m.primitive(Mesh::TRIANGLES);
@@ -73,6 +74,7 @@ class MyApp : public App {
 		// show in blue-world:
 		g.framebuffer(FBO::DEFAULT);
 		g.clear(0, 0, 0.5);
+		g.viewport(0, 0, fbWidth(), fbHeight());
 		g.camera(Viewpoint::IDENTITY);
 		g.quad(fbotex, -0.9, -0.9, 0.8, 0.8); // x, y, w, h
 		g.quad(fbotex, 0.1, -0.9, 0.4, 0.4);

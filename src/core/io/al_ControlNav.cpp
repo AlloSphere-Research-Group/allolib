@@ -170,7 +170,7 @@ bool NavInputControl::keyDown(const Keyboard& k){
 	if(k.shift()) v *= 0.1;
 
 	switch(k.key()){
-		// case '`':				nav().halt().home(); return false;
+		case '`':				nav().halt().home(); return false;
 		case 's':				nav().halt(); return false;
 		case Keyboard::UP:		nav().spinR( a); return false;
 		case Keyboard::DOWN:	nav().spinR(-a); return false;

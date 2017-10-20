@@ -543,10 +543,10 @@ void Label::onDraw(GLV& g){
 
 void NumberDialers::fitExtent() {
     //static bool print_once = [](){ std::cout << "NumberDialers::fitExtent" << std::endl; return true; }();
-	extent(
-		// pix(sizeX() * (paddingX()*2 + (numDigits() * font().advance('M'))) + 1),
-		float(pix(sizeX() * (paddingX() + (numDigits() * font().advance('M'))))),
-		float(pix(sizeY() * (paddingY() * 2 + font().cap())))
+    extent(
+        // pix(sizeX() * (paddingX()*2 + (numDigits() * font().advance('M'))) + 1),
+        float(pix(sizeX() * (paddingX() + (numDigits() * font().advance('M'))))),
+        float(pix(sizeY() * (paddingY() * 2 + font().cap())))
     );
 }
 
@@ -729,25 +729,23 @@ void al::al_draw_glv(
     g.cullFace(false);
 
     g.shader(glv::graphicsHolder().shader());
-    g.camera(
-        Viewpoint::ORTHO_FOR_2D,
-        int(x * g.window().highres_factor()),
-		int(y * g.window().highres_factor()),
-		int(w * g.window().highres_factor()),
-		int(h * g.window().highres_factor())
-    );
+
+    g.pushViewport(x, y, w, h);
+    g.pushCamera(Viewpoint::ORTHO_FOR_2D);
 
     glv::graphicsHolder().set(g);
 
     g.pushMatrix();
     g.loadIdentity();
-    g.translate(0.0f, float(g.window().height())); // move to top-right
+    g.translate(0.0f, float(h)); // move to top-left
     g.scale(1, -1); // flip y
     glv.drawWidgets(w, h, 0); // 0 for dsec: animation disabled...
+
     g.popMatrix();
+    g.popCamera();
 }
 
-void al_draw_glv(glv::GLV& glv, Graphics& g) {
+void al_draw_glv(glv::GLV& glv, Graphics& g, Window* w) {
     // animation is disabled...
-    al_draw_glv(glv, g, 0, 0, g.window().width(), g.window().height());
+    al_draw_glv(glv, g, 0, 0, w->fbWidth(), w->fbHeight());
 }
