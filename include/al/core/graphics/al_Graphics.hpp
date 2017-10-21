@@ -226,35 +226,36 @@ class Graphics : public RenderManager {
   void clear(Color const &c, float d = 1) { clear(c.r, c.g, c.b, c.a, d); }
 
   // extended render managing -----------------------------
-  void init();
-  void tint(float r, float g, float b, float a = 1.0f);
-  void tint(float grayscale, float a = 1.0f) {
+  static void init();
+  static void tint(float r, float g, float b, float a = 1.0f);
+  static void tint(float grayscale, float a = 1.0f) {
     tint(grayscale, grayscale, grayscale, a);
   }
-  void color(float r, float g, float b, float a = 1.0f);
-  void color(float k, float a = 1.0f) { color(k, k, k, a); }
-  void color(Color const& c) { color(c.r, c.g, c.b, c.a); }
-  void bind(Texture& t);
-  void unbind();
-  void meshColor();
+  static void color(float r, float g, float b, float a = 1.0f);
+  static void color(float k, float a = 1.0f) { color(k, k, k, a); }
+  static void color(Color const& c) { color(c.r, c.g, c.b, c.a); }
+  static void bind(Texture& t);
+  static void unbind();
+  static void meshColor();
+
   void quad(Texture& tex, float x, float y, float w, float h);
   void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2,
                     float h = 2);
 
- private:
-  ShaderProgram mesh_shader;
-  ShaderProgram color_shader;
-  ShaderProgram tex_shader;
-  int color_location = 0;
-  int color_tint_location = 0;
-  int tex_tint_location = 0;
-  int mesh_tint_location = 0;
-  int tint_location = 0;
-  al::Color tint_color{1.0f, 1.0f, 1.0f, 1.0f};
-  al::Texture* texPtr = nullptr;
-  Color mClearColor {0, 0, 0, 1};
-  float mClearDepth = 1;
-
+private:
+  static bool initialized;
+  static ShaderProgram mesh_shader;
+  static ShaderProgram color_shader;
+  static ShaderProgram tex_shader;
+  static int color_location;
+  static int color_tint_location;
+  static int tex_tint_location;
+  static int mesh_tint_location;
+  static int tint_location;
+  static Color tint_color;
+  static Texture* texPtr;
+  static Color mClearColor;
+  static float mClearDepth;
 };
 
 }  // namespace al

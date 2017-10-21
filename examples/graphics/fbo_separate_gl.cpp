@@ -35,7 +35,6 @@ class MyApp : public App {
 	void onCreate()
 	{
 		fbo.init(w, h);
-		gl.init();
 
 		m.vertex(-0.5f, -0.5f);
 		m.vertex(0.5f, -0.5f);
@@ -43,22 +42,24 @@ class MyApp : public App {
 	}
 
 	void onDraw (Graphics& g) {
+		// does not affect things drawn by gl
+		g.translate(0.5, 0);
 
 		// capture green-world to texture:
-		gl.begin(fbo);
-		gl.pushViewport(0, 0, w, h);
+		gl.pushFramebuffer(fbo);
+		gl.viewport(0, 0, w, h);
 		gl.clear(0, 0.5, 0);
+		gl.resetMatrixStack();
 		gl.camera(Viewpoint::IDENTITY);
+		gl.translate(0.2, 0.4);
 		gl.color(1, 1, 0);
 		gl.draw(m);
-		gl.popViewport();
-		gl.end();
+		gl.popFramebuffer();
 
 		// show in blue-world:
-		g.framebuffer(FBO::DEFAULT);
+		g.viewport(0, 0, fbWidth(), fbHeight());
 		g.clear(0, 0, 0.5);
 		g.quadViewport(fbo.tex(), -0.9, -0.9, 0.8, 0.8); // x, y, w, h
-
 	}
 
 };

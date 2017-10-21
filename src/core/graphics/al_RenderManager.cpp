@@ -9,10 +9,14 @@ bool RenderManager::mShaderChanged = false;
 bool RenderManager::mMatChanged = false;
 ViewportStack RenderManager::mViewportStack;
 EasyVAO RenderManager::mInternalVAO;
-unsigned int RenderManager::mFBOID = 0;
+// unsigned int RenderManager::mFBOID = 0;
+FBOStack RenderManager::mFBOStack;
 
 
-MatrixStack::MatrixStack() { stack.emplace_back(); }
+
+//______________________________________________________________________________
+
+MatrixStack::MatrixStack() { stack.emplace_back(); stack.reserve(10); }
 void MatrixStack::mult(Matrix4f const& m) { stack.back() = stack.back() * m; }
 void MatrixStack::set(const Matrix4f& m) { stack.back() = m; }
 void MatrixStack::setIdentity() { stack.back().setIdentity(); }
@@ -24,10 +28,13 @@ void MatrixStack::push() {
 }
 
 void MatrixStack::pop() { stack.pop_back(); }
+void MatrixStack::pop_all() { stack.clear(); stack.emplace_back(); }
+
+
 
 //______________________________________________________________________________
 
-ViewportStack::ViewportStack() { stack.emplace_back(); }
+ViewportStack::ViewportStack() { stack.emplace_back(); stack.reserve(10); }
 void ViewportStack::set(const Viewport& m) { stack.back().set(m); }
 void ViewportStack::set(int left, int bottom, int width, int height) {
   stack.back().set(left, bottom, width, height);
@@ -40,6 +47,18 @@ void ViewportStack::push() {
 }
 
 void ViewportStack::pop() { stack.pop_back(); }
+
+
+
+//______________________________________________________________________________
+
+FBOStack::FBOStack() { stack.emplace_back(); stack.reserve(10); }
+void FBOStack::push() { unsigned int i = stack.back(); stack.push_back(i); }
+void FBOStack::pop() { stack.pop_back(); }
+unsigned int FBOStack::get() const { return stack.back(); }
+void FBOStack::set(unsigned int id) { stack.back() = id; }
+
+
 
 //______________________________________________________________________________
 
@@ -79,7 +98,16 @@ void RenderManager::popViewport() {
 
 void RenderManager::framebuffer(unsigned int id) {
   FBO::bind(id);
-  mFBOID = id;
+  mFBOStack.set(id);
+  // mFBOID = id;
+}
+
+void RenderManager::pushFramebuffer() {
+  mFBOStack.push();
+}
+void RenderManager::popFramebuffer() {
+  mFBOStack.pop();
+  framebuffer(mFBOStack.get());
 }
 
 void RenderManager::shader(ShaderProgram& s) {

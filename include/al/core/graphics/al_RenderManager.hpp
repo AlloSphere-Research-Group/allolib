@@ -23,6 +23,7 @@ public:
     void mult(Matrix4f const& m);
     void set(const Matrix4f& m);
     void setIdentity();
+    void pop_all();
     Matrix4f get() const;
 private:
     std::vector<Matrix4f> stack;
@@ -40,13 +41,19 @@ private:
     std::vector<Viewport> stack;
 };
 
+class FBOStack {
+public:
+    FBOStack();
+    void push();
+    void pop();
+    unsigned int get() const;
+    void set(unsigned int id);
+private:
+    std::vector<unsigned int> stack;
+};
+
 class RenderManager {
 public:
-
-  void begin() { mMatChanged = true; loadIdentity(); }
-  void begin(EasyFBO& f) { begin(); framebuffer(f); }
-  void begin(FBO& f) { begin(); framebuffer(f); }
-  void end() { mMatChanged = true; }
 
   /// Multiply current matrix
   void multModelMatrix(const Matrix4f &m) { mModelStack.mult(m); mMatChanged = true; }
@@ -68,6 +75,15 @@ public:
   void popModelMatrix() { mModelStack.pop(); }
   void popViewMatrix() { mViewStack.pop(); }
   void popProjMatrix() { mProjStack.pop(); }
+
+  void resetModelMatrixStack() { mModelStack.pop_all(); mMatChanged = true; }
+  void resetViewMatrixStack() { mViewStack.pop_all(); mMatChanged = true; }
+  void resetProjMatrixStack() { mProjStack.pop_all(); mMatChanged = true; }
+  void resetMatrixStack() {
+    resetModelMatrixStack();
+    resetViewMatrixStack();
+    resetProjMatrixStack();
+  }
 
   /// Push current matrix stack
   void pushMatrix() { pushModelMatrix(); }
@@ -129,6 +145,13 @@ public:
   static void framebuffer(EasyFBO& easyFBO) { framebuffer(easyFBO.fbo().id()); }
   static void framebuffer(FBO& fbo) { framebuffer(fbo.id()); }
   static void framebuffer(unsigned int id);
+  // static unsigned int framebuffer() { return mFBOID; }
+  static unsigned int framebuffer() { return mFBOStack.get(); }
+  static void pushFramebuffer();
+  static void popFramebuffer();
+  static void pushFramebuffer(EasyFBO& f) { pushFramebuffer(); framebuffer(f);}
+  static void pushFramebuffer(FBO& f) { pushFramebuffer(); framebuffer(f);}
+  static void pushFramebuffer(unsigned int f) { pushFramebuffer(); framebuffer(f);}
 
   static void shader(ShaderProgram& s);
   static ShaderProgram& shader() { return *mShaderPtr; };
@@ -161,7 +184,8 @@ protected:
 
   static ViewportStack mViewportStack;
   static EasyVAO mInternalVAO;
-  static unsigned int mFBOID;
+  // static unsigned int mFBOID;
+  static FBOStack mFBOStack;
 };
 
 }  // namespace al

@@ -6,6 +6,20 @@
 
 namespace al {
 
+bool Graphics::initialized = false;
+ShaderProgram Graphics::mesh_shader;
+ShaderProgram Graphics::color_shader;
+ShaderProgram Graphics::tex_shader;
+int Graphics::color_location = 0;
+int Graphics::color_tint_location = 0;
+int Graphics::tex_tint_location = 0;
+int Graphics::mesh_tint_location = 0;
+int Graphics::tint_location = 0;
+Color Graphics::tint_color{1.0f, 1.0f, 1.0f, 1.0f};
+Texture* Graphics::texPtr = nullptr;
+Color Graphics::mClearColor {0, 0, 0, 1};
+float Graphics::mClearDepth = 1;
+
 void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq) {
   glBlendEquation(eq);
   glBlendFunc(src, dst);
@@ -74,6 +88,7 @@ void Graphics::clear(float r, float g, float b, float a, float d,
 
 
 void Graphics::init() {
+  if (initialized) return;
   compileDefaultShader(mesh_shader, ShaderType::MESH);
   compileDefaultShader(color_shader, ShaderType::COLOR);
   compileDefaultShader(tex_shader, ShaderType::TEXTURE);
