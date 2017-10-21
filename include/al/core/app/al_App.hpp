@@ -9,6 +9,7 @@
 #include "al/core/protocol/al_OSC.hpp"
 
 #include "al/core/graphics/al_GLFW.hpp"
+#include "al/core/io/al_Window.hpp"
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/io/al_ControlNav.hpp"
 

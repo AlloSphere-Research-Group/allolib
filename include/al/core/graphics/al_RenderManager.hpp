@@ -7,7 +7,6 @@
 #include "al/core/graphics/al_Shader.hpp"
 #include "al/core/graphics/al_VAOMesh.hpp"
 #include "al/core/graphics/al_Viewpoint.hpp"
-#include "al/core/io/al_Window.hpp"
 #include "al/core/math/al_Matrix4.hpp"
 #include "al/core/math/al_Quat.hpp"
 #include "al/core/math/al_Vec.hpp"
@@ -164,32 +163,6 @@ protected:
   static EasyVAO mInternalVAO;
   static unsigned int mFBOID;
 };
-
-#if 0
-class RenderManager {
- public:
- private:
-  CameraStack mCameraStack;
-  ViewportStack mViewportStack;
-};
-
-class RenderManagerBackEnd {
- public:
- private:
-  Matrix4f mViewMat;
-  Matrix4f mProjMat;
-  Matrix4f mModelMat;
-
-  ShaderProgram* mShaderPtr = nullptr;
-  std::unordered_map<unsigned int, int> modelviewLocs;
-  std::unordered_map<unsigned int, int> projLocs;
-
-  bool mShaderChanged = false;
-  bool mMatChanged = false;
-
-  EasyVAO mInternalVAO;
-};
-#endif
 
 }  // namespace al
 #endif

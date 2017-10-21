@@ -5,6 +5,7 @@
     Keehong Youn, 2017, younkeehong@gmail.com
 */
 
+#include "al/core/io/al_Window.hpp"
 #include "al/core/graphics/al_Graphics.hpp"
 
 #include "al/glv/glv_core.h" // GLV, View
