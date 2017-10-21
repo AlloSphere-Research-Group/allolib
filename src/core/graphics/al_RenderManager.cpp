@@ -2,6 +2,16 @@
 
 using namespace al;
 
+ShaderProgram* RenderManager::mShaderPtr = nullptr;
+std::unordered_map<unsigned int, int> RenderManager::modelviewLocs;
+std::unordered_map<unsigned int, int> RenderManager::projLocs;
+bool RenderManager::mShaderChanged = false;
+bool RenderManager::mMatChanged = false;
+ViewportStack RenderManager::mViewportStack;
+EasyVAO RenderManager::mInternalVAO;
+unsigned int RenderManager::mFBOID = 0;
+
+
 MatrixStack::MatrixStack() { stack.emplace_back(); }
 void MatrixStack::mult(Matrix4f const& m) { stack.back() = stack.back() * m; }
 void MatrixStack::set(const Matrix4f& m) { stack.back() = m; }

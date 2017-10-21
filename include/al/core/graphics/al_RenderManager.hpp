@@ -44,6 +44,11 @@ private:
 class RenderManager {
 public:
 
+  void begin() { mMatChanged = true; loadIdentity(); }
+  void begin(EasyFBO& f) { begin(); framebuffer(f); }
+  void begin(FBO& f) { begin(); framebuffer(f); }
+  void end() { mMatChanged = true; }
+
   /// Multiply current matrix
   void multModelMatrix(const Matrix4f &m) { mModelStack.mult(m); mMatChanged = true; }
   void multViewMatrix(const Matrix4f &m) { mViewStack.mult(m); mMatChanged = true;}
@@ -112,23 +117,23 @@ public:
 
 
   /// Set viewport
-  void viewport(int left, int bottom, int width, int height);
-  void viewport(const Viewport& v) { viewport(v.l, v.b, v.w, v.h); }
-  Viewport viewport() { return mViewportStack.get(); }
-  void pushViewport();
-  void popViewport();
-  void pushViewport(int l, int b, int w, int h) {
+  static void viewport(int left, int bottom, int width, int height);
+  static void viewport(const Viewport& v) { viewport(v.l, v.b, v.w, v.h); }
+  static Viewport viewport() { return mViewportStack.get(); }
+  static void pushViewport();
+  static void popViewport();
+  static void pushViewport(int l, int b, int w, int h) {
     pushViewport(); viewport(l, b, w, h);
   }
-  void pushViewport(const Viewport& v) { pushViewport(); viewport(v); }
+  static void pushViewport(const Viewport& v) { pushViewport(); viewport(v); }
 
-  void framebuffer(EasyFBO& easyFBO) { framebuffer(easyFBO.fbo().id()); }
-  void framebuffer(FBO& fbo) { framebuffer(fbo.id()); }
-  void framebuffer(unsigned int id);
+  static void framebuffer(EasyFBO& easyFBO) { framebuffer(easyFBO.fbo().id()); }
+  static void framebuffer(FBO& fbo) { framebuffer(fbo.id()); }
+  static void framebuffer(unsigned int id);
 
-  void shader(ShaderProgram& s);
-  ShaderProgram& shader() { return *mShaderPtr; };
-  ShaderProgram* shaderPtr() { return mShaderPtr; }
+  static void shader(ShaderProgram& s);
+  static ShaderProgram& shader() { return *mShaderPtr; };
+  static ShaderProgram* shaderPtr() { return mShaderPtr; }
 
   void camera(Viewpoint const& v);
   void camera(Viewpoint::SpecialType v);
@@ -144,21 +149,20 @@ public:
   void draw(Mesh&& mesh);
 
 protected:
-  ShaderProgram* mShaderPtr = nullptr;
-  std::unordered_map<unsigned int, int> modelviewLocs;
-  std::unordered_map<unsigned int, int> projLocs;
-  bool mShaderChanged = false;
+  static ShaderProgram* mShaderPtr;
+  static std::unordered_map<unsigned int, int> modelviewLocs;
+  static std::unordered_map<unsigned int, int> projLocs;
+  static bool mShaderChanged;
 
+  // let matrix stack be local to objects
   MatrixStack mViewStack;
   MatrixStack mProjStack;
   MatrixStack mModelStack;
-  bool mMatChanged = false;
+  static bool mMatChanged;
 
-  ViewportStack mViewportStack;
-
-  EasyVAO mInternalVAO;
-
-  unsigned int mFBOID = 0;
+  static ViewportStack mViewportStack;
+  static EasyVAO mInternalVAO;
+  static unsigned int mFBOID;
 };
 
 #if 0

@@ -1,0 +1,71 @@
+/*
+Allocore Example: FBO
+
+Description:
+This demonstrates how to use an FBO
+MipMaps:
+
+FBOs won't generate the mip maps automatically
+If texture filterMin is set to a MIPMAP option, then the texture will need to have mipmaps generated manually (after the FBO is unbound), using tex.generateMipmap();
+
+
+Author:
+Graham Wakefield, 2012
+Keehong Youn, 2017
+
+*/
+
+#include "al/core.hpp"
+#include <iostream>
+
+using namespace al;
+using namespace std;
+
+int w = 256;
+int h = 256;
+
+EasyFBO fbo;
+bool mipmap = true;
+
+class MyApp : public App {
+	
+	Mesh m {Mesh::TRIANGLES};
+	Graphics gl;
+
+	void onCreate()
+	{
+		fbo.init(w, h);
+		gl.init();
+
+		m.vertex(-0.5f, -0.5f);
+		m.vertex(0.5f, -0.5f);
+		m.vertex(-0.5f, 0.5f);
+	}
+
+	void onDraw (Graphics& g) {
+
+		// capture green-world to texture:
+		gl.begin(fbo);
+		gl.pushViewport(0, 0, w, h);
+		gl.clear(0, 0.5, 0);
+		gl.camera(Viewpoint::IDENTITY);
+		gl.color(1, 1, 0);
+		gl.draw(m);
+		gl.popViewport();
+		gl.end();
+
+		// show in blue-world:
+		g.framebuffer(FBO::DEFAULT);
+		g.clear(0, 0, 0.5);
+		g.quadViewport(fbo.tex(), -0.9, -0.9, 0.8, 0.8); // x, y, w, h
+
+	}
+
+};
+
+int main () {
+	MyApp app;
+	app.dimensions(800, 600);
+	app.fps(10);
+	app.start();
+}
