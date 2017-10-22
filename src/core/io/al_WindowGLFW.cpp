@@ -16,21 +16,10 @@ public:
   typedef std::map<GLFWwindow*, WindowImpl*> WindowsMap;
   typedef std::unordered_map<int, int> KeyMap;
 
-  WindowImpl(Window* w) : mWindow(w) {
-
-  }
-
-  ~WindowImpl() {
-    destroy();
-  }
-
-  GLFWwindow* glfwWindow() {
-    return mGLFWwindow;
-  }
-
-  bool created() const {
-    return mGLFWwindow != nullptr;
-  }
+  WindowImpl(Window* w) : mWindow(w) { }
+  ~WindowImpl() { destroy(); }
+  GLFWwindow* glfwWindow() { return mGLFWwindow; }
+  bool created() const { return mGLFWwindow != nullptr; }
 
   void makeCurrent() {
     if (mGLFWwindow != mCurrentGLFWwindow) {
@@ -39,7 +28,7 @@ public:
     }
   }
 
-  void destroy(){
+  void destroy() {
     if(created()){
       windows().erase(mGLFWwindow);
       glfwDestroyWindow(mGLFWwindow);
@@ -143,32 +132,43 @@ public:
   static void cbReshape(GLFWwindow* window, int w, int h) {
     auto* win = getWindow(window);
     if (!win) return;
+
+    // update window size
     Window::Dim& dimCurr = win->mFullScreen? win->mFullScreenDim : win->mDim;
     dimCurr.w = w;
     dimCurr.h = h;
 
-    // update framebuffer size
-    glfwGetFramebufferSize(window, &(win->mFramebufferWidth), &(win->mFramebufferHeight));
+    // update pixel density
     win->mHighresFactor = win->mFramebufferWidth / float(w);
 
     win->callHandlersResize(w, h);
   }
 
-  //static void window_close_callback(GLFWwindow* window) {
-  //  glfwSetWindowShouldClose(window, GLFW_FALSE);
-  //}
+  static void cbReshapeFb(GLFWwindow* window, int fbw, int fbh) {
+    auto* win = getWindow(window);
+    if (!win) return;
+
+    // update framebuffer size
+    win->mFramebufferWidth = fbw;
+    win->mFramebufferHeight = fbh;
+    
+    // update pixel density
+    Window::Dim& dimCurr = win->mFullScreen? win->mFullScreenDim : win->mDim;
+    win->mHighresFactor = win->mFramebufferWidth / float(dimCurr.w);
+
+    win->callHandlersResize(dimCurr.w, dimCurr.h);
+  }
 
   void registerCBs(){ 
+    glfwSetWindowSizeCallback(mGLFWwindow, cbReshape);
+    glfwSetFramebufferSizeCallback(mGLFWwindow, cbReshapeFb);
     glfwSetKeyCallback(mGLFWwindow, cbKeyboard);
     glfwSetMouseButtonCallback(mGLFWwindow, cbMouse);
-    glfwSetWindowSizeCallback(mGLFWwindow, cbReshape);
     glfwSetCursorPosCallback(mGLFWwindow, cbMotion);
-    // glfwSetWindowPosCallback(window, cb_windowpos);
-    // glfwSetFramebufferSizeCallback(window, cb_framebuffersize);
-    //glfwSetWindowCloseCallback(mGLFWwindow, window_close_callback);
+    // glfwSetWindowPosCallback(mGLFWwindow, cbReshape);
+    // glfwSetWindowCloseCallback(mGLFWwindow, window_close_callback);
     // glfwSetWindowRefreshCallback(window, cb_windowrefresh);
     // glfwSetWindowFocusCallback(window, cb_windowfocus);
-    // glfwSetErrorCallback(errorCallback);
   }
 
   static KeyMap& keymap() {
@@ -208,10 +208,10 @@ bool Window::implCreate() {
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_DECORATED, mDecorated ? true : false);
+  glfwWindowHint(GLFW_DECORATED, mDecorated);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true); // if OSX, this is a must
-  
+  glfwWindowHint(GLFW_AUTO_ICONIFY, GL_FALSE); // so fullcreen does not iconify
 
   // TODO
   // bits: STENCIL_BUF etc. ...
@@ -234,12 +234,13 @@ bool Window::implCreate() {
       actual_top != mDim.t
   ) {
     cout << "screen dimension different from requested" << endl;
-    cout << actual_width << " X " << actual_height << " at " << actual_left << ", " << actual_top << endl;
     mDim.w = actual_width;
     mDim.h = actual_height;
     mDim.l = actual_left;
     mDim.t = actual_top;
   }
+  cout << "window opened, size: (" << mDim.w << ", " << mDim.h << "), "
+                  << "position: (" << mDim.l << ", " << mDim.t << ")" << endl;
   
   glew::init();
 
@@ -251,15 +252,15 @@ bool Window::implCreate() {
   char* glsl_version = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
   std::cout << "glsl version: " << glsl_version << std::endl;
 
-  // int fbw, fbh;
   glfwGetFramebufferSize(mImpl->mGLFWwindow, &mFramebufferWidth, &mFramebufferHeight);
   mHighresFactor = mFramebufferWidth / float(mDim.w);
   cout << "framebuffer size: " << mFramebufferWidth << ", " << mFramebufferHeight << endl;
-  cout << "highres factor: " << mHighresFactor << endl;
+  cout << "pixel density: " << mHighresFactor << endl;
 
   mImpl->registerCBs();
   vsync(mVSync);
   WindowImpl::windows()[mImpl->mGLFWwindow] = mImpl.get();
+
   return true;
 }
 
@@ -268,7 +269,6 @@ bool Window::implCreated() const {
 }
 
 void Window::implRefresh() {
-  mImpl->makeCurrent();
   // [!] POLLEVENTS IS AFTER SWAPBUFFERS
   // why: if an event destroys window
   //      swapbuffers will throw error
@@ -303,23 +303,22 @@ void Window::implSetCursorHide() {
 }
 
 void Window::implSetDimensions() {
-  mImpl->makeCurrent();
   if (mFullScreen) {
     fullScreen(false);
   }
   else {
-    glfwSetWindowSize(mImpl->mGLFWwindow, mDim.w, mDim.h);
     glfwSetWindowPos(mImpl->mGLFWwindow, mDim.l, mDim.t);
+    glfwSetWindowSize(mImpl->mGLFWwindow, mDim.w, mDim.h);
   }
 }
 
 void Window::implSetFullScreen() {
-  mImpl->makeCurrent();
 
-// glfwSetWindowMonitor came in at glfw 3.2
+// glfwSetWindowMonitor available since glfw 3.2
 #if GLFW_VERSION_MINOR > 1
   if (mFullScreen) {
     // TODO: selection for multi-monitor
+
     GLFWmonitor* primary = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(primary);
     glfwSetWindowMonitor(
@@ -327,15 +326,13 @@ void Window::implSetFullScreen() {
       0, 0, mode->width, mode->height,
       mode->refreshRate
     );
-    glfwGetWindowSize(mImpl->mGLFWwindow, &mFullScreenDim.w, &mFullScreenDim.h);
-    glfwGetWindowPos(mImpl->mGLFWwindow, &mFullScreenDim.l, &mFullScreenDim.t);
     vsync(mVSync);
   }
   else {
     glfwSetWindowMonitor(
       mImpl->mGLFWwindow, NULL,
       mDim.l, mDim.t, mDim.w, mDim.h,
-      GLFW_DONT_CARE // refreshRate 
+      GLFW_DONT_CARE
     );
     vsync(mVSync);
   }
@@ -347,7 +344,6 @@ void Window::implSetTitle() {
 
 // See: https://www.opengl.org/wiki/Swap_Interval
 void Window::implSetVSync() {
-  mImpl->makeCurrent();
   glfwSwapInterval(mVSync? 1 : 0);
 }
 

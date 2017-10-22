@@ -3,7 +3,12 @@
 #include <iostream>
 #include <cstdlib> // exit, EXIT_FAILURE
 
-using namespace al;
+
+void cbError(int code, const char* description) {
+  std::cout << "glfw error [" << code << "]: " << description << std::endl;
+}
+
+namespace al {
 
 void glfw::init() {
   static bool inited = false;
@@ -17,6 +22,7 @@ void glfw::init() {
     exit(EXIT_FAILURE);
   }
   std::cout << "Initialized GLFW " << glfwGetVersionString() << std::endl;
+  glfwSetErrorCallback(cbError);
 
   inited = true;
 }
@@ -25,4 +31,6 @@ void glfw::terminate() {
   std::cout << "Terminating GLFW ... ";
   glfwTerminate();
   std::cout << "Done." << std::endl;
+}
+
 }
