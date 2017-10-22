@@ -211,8 +211,10 @@ bool Window::implCreate() {
   glfwWindowHint(GLFW_DECORATED, mDecorated);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true); // if OSX, this is a must
-  glfwWindowHint(GLFW_AUTO_ICONIFY, GL_FALSE); // so fullcreen does not iconify
-
+  // AUTO_ICONIFY available after 3.2
+#if 10 * GLFW_VERSION_MAJOR + GLFW_VERSION_MINOR > 31
+  glfwWindowHint(GLFW_AUTO_ICONIFY, false); // so fullcreen does not iconify
+#endif
   // TODO
   // bits: STENCIL_BUF etc. ...
 
@@ -315,7 +317,7 @@ void Window::implSetDimensions() {
 void Window::implSetFullScreen() {
 
 // glfwSetWindowMonitor available since glfw 3.2
-#if GLFW_VERSION_MINOR > 1
+#if 10 * GLFW_VERSION_MAJOR + GLFW_VERSION_MINOR > 31
   if (mFullScreen) {
     // TODO: selection for multi-monitor
 
