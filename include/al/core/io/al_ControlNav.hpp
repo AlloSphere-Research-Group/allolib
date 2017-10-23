@@ -80,6 +80,15 @@ public:
   /// Get forward unit vector
   const Vec3d& uf() const { return mUF; }
 
+  /// Get world space X unit vector
+  auto ux() const { return pose().ux(); }
+
+  /// Get world space Y unit vector
+  auto uy() const { return pose().uy(); }
+
+  /// Get world space Z unit vector
+  auto uz() const { return pose().uz(); }
+
   /// Get current linear and angular velocities as a Pose
   Pose vel() const {
     return Pose(mMove1, Quatd().fromEuler(mSpin1));
@@ -210,6 +219,9 @@ public:
 
   /// Set position from individual components
   Nav& pos(double x, double y, double z) { pose().pos(x, y, z); return *this; }
+
+  auto pos() { return pose().pos(); }
+  auto quat() { return pose().quat(); }
 
   Nav& target(Pose& pose) {
     mPosePtr = &pose;

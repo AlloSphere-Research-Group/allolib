@@ -62,15 +62,13 @@ public:
     virtual void preOnDraw() {
         mGraphics.framebuffer(FBO::DEFAULT);
         mGraphics.viewport(mViewport);
+        mGraphics.resetMatrixStack();
         mGraphics.camera(mView);
-        mGraphics.loadIdentity();
-        mGraphics.pushMatrix();
     }
 
     virtual void onDraw (Graphics& g) {}
 
     virtual void postOnDraw() {
-        mGraphics.popMatrix();
     }
 
     void onDraw () override {
