@@ -72,6 +72,10 @@ public:
   void pushViewMatrix() { mViewStack.push(); }
   void pushProjMatrix() { mProjStack.push(); }
 
+  void pushModelMatrix(const Matrix4f& m) { mModelStack.push(); modelMatrix(m); }
+  void pushViewMatrix(const Matrix4f& m) { mViewStack.push(); viewMatrix(m); }
+  void pushProjMatrix(const Matrix4f& m) { mProjStack.push(); projMatrix(m); }
+
   void popModelMatrix() { mModelStack.pop(); mMatChanged = true; }
   void popViewMatrix() { mViewStack.pop(); mMatChanged = true; }
   void popProjMatrix() { mProjStack.pop(); mMatChanged = true; }
