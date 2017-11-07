@@ -123,10 +123,10 @@ public:
     rotate(angle, axis[0],axis[1],axis[2]);
   }
 
-  /// Scale current matrix uniformly
-  void scale(float s);
   /// Scale current matrix along each dimension
   void scale(float x, float y, float z=1.);
+  /// Scale current matrix uniformly
+  void scale(float s) { scale(s, s, s); }
   /// Scale current matrix along each dimension
   template <class T>
   void scale(const Vec<3,T>& v){ scale(v[0],v[1],v[2]); }
@@ -145,6 +145,9 @@ public:
     pushViewport(); viewport(l, b, w, h);
   }
   static void pushViewport(const Viewport& v) { pushViewport(); viewport(v); }
+  static void pushViewport(int w, int h) {
+    pushViewport(); viewport(0, 0, w, h);
+  }
 
   static void framebuffer(EasyFBO& easyFBO) { framebuffer(easyFBO.fbo().id()); }
   static void framebuffer(FBO& fbo) { framebuffer(fbo.id()); }

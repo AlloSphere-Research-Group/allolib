@@ -210,6 +210,7 @@ class Graphics : public RenderManager {
   void scissor(int left, int bottom, int width, int height);
   
   void setClearColor(float r, float g, float b, float a = 1);
+  void setClearColor(Color const& c);
   void clearColor(int drawbuffer = 0);
   void clearColor(float r, float g, float b, float a = 1, int drawbuffer = 0);
   void clearColor(Color const &c, int drawbuffer = 0);
@@ -218,12 +219,9 @@ class Graphics : public RenderManager {
   void clearDepth();
   void clearDepth(float d);
 
-  void clear(float r, float g, float b, float a = 1, float d = 1,
-             int drawbuffer = 0);
-  void clear(float grayscale, float d = 1) {
-    clear(grayscale, grayscale, grayscale, 1, d);
-  }
+  void clear(float r, float g, float b, float a = 1, float d = 1, int drawbuffer = 0);
   void clear(Color const &c, float d = 1) { clear(c.r, c.g, c.b, c.a, d); }
+  void clear(int drawbuffer = 0) { clearColor(drawbuffer); clearDepth(); }
 
   // extended render managing -----------------------------
   static void init();

@@ -56,6 +56,10 @@ void Graphics::setClearColor(float r, float g, float b, float a) {
   mClearColor.set(r, g, b, a);
 }
 
+void Graphics::setClearColor(Color const& c) {
+  mClearColor = c;
+}
+
 void Graphics::clearColor(int drawbuffer) {
   glClearBufferfv(GL_COLOR, drawbuffer, mClearColor.components);
 }
@@ -80,8 +84,7 @@ void Graphics::clearDepth(float d) {
   clearDepth();
 }
 
-void Graphics::clear(float r, float g, float b, float a, float d,
-                          int drawbuffer) {
+void Graphics::clear(float r, float g, float b, float a, float d, int drawbuffer) {
   clearColor(r, g, b, a, drawbuffer);
   clearDepth(d);
 }

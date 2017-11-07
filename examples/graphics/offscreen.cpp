@@ -2,19 +2,17 @@
 
 using namespace al;
 
-class Offscreen : public Graphics
+struct offscreen : Graphics
 {
-    EasyFBO mFBO;
-
-public:
+    EasyFBO fbo;
     
     void init(int w, int h) {
-        mFBO.init(w, h);
+        fbo.init(w, h);
         Graphics::init();
     }
 
     void begin() {
-        pushFramebuffer(mFBO);
+        pushFramebuffer(fbo);
         pushViewport(0, 0, width(), height());
         resetMatrixStack();
     }
@@ -24,9 +22,9 @@ public:
         popFramebuffer();
     }
 
-    int width() { return mFBO.width(); }
-    int height() { return mFBO.height(); }
-    Texture& tex() { return mFBO.tex(); }
+    int width() { return fbo.width(); }
+    int height() { return fbo.height(); }
+    Texture& tex() { return fbo.tex(); }
 
 };
 
@@ -34,7 +32,7 @@ class MyApp : public App {
 public:
 
     Mesh m {Mesh::TRIANGLES};
-    Offscreen s;
+    offscreen s;
 
     void onCreate()
     {

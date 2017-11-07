@@ -186,8 +186,10 @@ void Texture::generateMipmap() {
 }
 
 void Texture::disableMipmap() {
-  mUsingMipmapUpdated = true;
-  mUseMipmap = false;
+  if (mUseMipmap) {
+    mUsingMipmapUpdated = true;
+    mUseMipmap = false;
+  }
   // bind_temp();
   // glTexParameteri(target(), GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   // glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 0);

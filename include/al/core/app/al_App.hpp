@@ -33,22 +33,26 @@ public:
 
     Graphics mGraphics;
     AppEventHandler eventHandler {this};
-    Viewpoint mView;
+    Nav mNav;
+    Viewpoint mView {mNav.transformed()};
+    NavInputControl mNavControl {mNav};
     Viewport mViewport;
-    NavInputControl mNavControl;
 
     Viewpoint& view() { return mView; }
     const Viewpoint& view() const { return mView; }
 
-    Nav& nav() { return mNavControl.nav(); }
-    const Nav& nav() const { return mNavControl.nav(); }
+    Nav& nav() { return mNav; }
+    const Nav& nav() const { return mNav; }
+
+    Lens& lens() { return mView.lens(); }
+
+    Graphics& graphics() { return mGraphics; }
 
     virtual void onInit() {}
     virtual void onAnimate(double dt) {}
     virtual void onExit() {}
 
     virtual void preOnCreate() {
-        mNavControl.target(mView);
         append(mNavControl);
         append(eventHandler);
         mGraphics.init();
@@ -56,7 +60,7 @@ public:
     }
 
     virtual void preOnAnimate(double dt) {
-        mNavControl.step();
+        mNav.step();
     }
 
     virtual void preOnDraw() {
@@ -64,12 +68,12 @@ public:
         mGraphics.viewport(mViewport);
         mGraphics.resetMatrixStack();
         mGraphics.camera(mView);
+        mGraphics.color(1, 1, 1);
     }
 
     virtual void onDraw (Graphics& g) {}
 
-    virtual void postOnDraw() {
-    }
+    virtual void postOnDraw() {}
 
     void onDraw () override {
         onDraw(mGraphics);

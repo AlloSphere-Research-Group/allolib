@@ -41,8 +41,8 @@ public:
 
 	void onAnimate (double dt) override
 	{
-		angle += 2 * dt / 1000; // dt is in millis
-		if(angle >= M_2PI) angle -= M_2PI;
+		angle += 90 * dt / 1000; // dt is in millis
+		if(angle >= 360) angle -= 360;
 	}
 
 	void onDraw (Graphics& g) override

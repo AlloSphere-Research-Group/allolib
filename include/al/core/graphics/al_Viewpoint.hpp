@@ -33,16 +33,15 @@
   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE.
-  
-  viewpoint: Pose(view matrix) + Lens(projection matrix) + viewport
 
-  Keehong Youn, 2017, younkeehong@gmail.com
 */
 
 #include "al/core/spatial/al_Pose.hpp"
 #include "al/core/graphics/al_Lens.hpp"
 
 namespace al {
+
+Matrix4f view_mat(Pose const&);
 
 /// A framed area on a display screen
 /// @ingroup allocore
@@ -76,45 +75,32 @@ struct Viewport {
 
 /// Viewpoint within a scene
 
-/// A viewpoint is an aggregation of a viewport (screen region) and a lens, 
-/// with a pointer to the pose (3D pos and orientation) that it is attached to
+/// A viewpoint is an aggregation of a lens with a pointer to the pose 
+/// (3D pos and orientation) that it is attached to
 ///
 /// @ingroup allocore
-class Viewpoint : public Pose {
+class Viewpoint {
 public:
-
+  Viewpoint() {}
+  Viewpoint(Pose& p): mPose(&p) {}
+  
   const Lens& lens() const { return mLens; }
   Lens& lens() { return mLens; }
   Viewpoint& lens(Lens const& v){ mLens=v; return *this; }
-  Viewpoint& fovy(float deg);
-  Viewpoint& near(float n);
-  Viewpoint& far(float f);
 
-  // const Pose& pose() const { return *mPose; }
-  // Pose& pose(){ return *mPose; }
-  Viewpoint& pose(Pose& v){ set(v); return *this; }
-  Viewpoint& pose(Pose const& v){ set(v); return *this; }
-  // Viewpoint& faceToward(Vec3f point, Vec3f upvec);
-
-  // const Viewport& viewport() const { return mViewport; }
-  // Viewport& viewport(){ return mViewport; }
-  // Viewpoint& viewport(Viewport const& vp){ mViewport = vp; return *this; }
-  // Viewpoint& viewport(int left, int bottom, int width, int height);
+  const Pose& pose() const { return *mPose; }
+  Pose& pose(){ return *mPose; }
+  Viewpoint& pose(Pose& p){ mPose = &p; return *this; }
 
   Matrix4f viewMatrix() const;
-  // Matrix4f projMatrix() const;
   Matrix4f projMatrix(float aspect_ratio) const;
   Matrix4f projMatrix(float width, float height) const {
     return projMatrix(width / height);
   }
-  // Matrix4f projMatrix(float x, float y, float w, float h) const;
-  // Matrix4f projMatrix(float w, float h) const {
-  //   return projMatrix(-w / 2, -h / 2, w, h);
-  // };
-
 
 private:
   Lens mLens;
+  Pose* mPose = nullptr;
   // Viewport mViewport; // screen display region
 
 public:
@@ -124,6 +110,7 @@ public:
     UNIT_ORTHO
   };
 };
+
 
 } // al::
 

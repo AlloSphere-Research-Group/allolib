@@ -31,7 +31,7 @@ public:
 
 	void onDraw (Graphics& g)
 	{
-		g.clear(0);
+		g.clear(0, 0, 0);
 		g.camera(Viewpoint::IDENTITY);
 		g.color(1, 1, 1);
 		g.draw(verts);

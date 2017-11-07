@@ -1,22 +1,16 @@
 #include "al/core/io/al_ControlNav.hpp"
-// #include <iostream>
+#include <iostream>
 
 namespace al {
 
-Nav::Nav(double smooth)
-:  mPosePtr(nullptr), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
-{
-  // updateDirectionVectors();
-}
-
-Nav::Nav(Pose& pose, double smooth)
-:  mPosePtr(&pose), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
+Nav::Nav(const Vec3d& pos, double smooth)
+:  Pose(pos), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
 {
   updateDirectionVectors();
 }
 
 Nav::Nav(const Nav& nav)
-:  mPosePtr(nav.mPosePtr),
+: Pose(nav.pos(), nav.quat()),
   mMove0(nav.mMove0), mMove1(nav.mMove1),  // linear velocities (raw, smoothed)
   mSpin0(nav.mSpin0), mSpin1(nav.mSpin1),  // angular velocities (raw, smoothed)
   mTurn(nav.mTurn), mNudge(nav.mNudge),      //
@@ -37,21 +31,21 @@ void Nav::faceToward(const Vec3d& point, double amt){
   if(amt == 1.)  quat() = rot * quat();
   else      quat() = rot.pow(amt) * quat();*/
 
-  mPosePtr->faceToward(point, amt);
+  Pose::faceToward(point, amt);
   updateDirectionVectors();
 }
 
 void Nav::faceToward(const Vec3d& point, const Vec3d& up, double amt){
-  mPosePtr->faceToward(point, up, amt);
+  Pose::faceToward(point, up, amt);
   updateDirectionVectors();
 }
 
 void Nav::nudgeToward(const Vec3d& p, double amt){
   Vec3d rotEuler;
-  Vec3d target(p - mPosePtr->pos());
+  Vec3d target(p - pos());
   target.normalize();  // unit vector of direction to move (in world frame)
   // rotate target into local frame:
-  target = mPosePtr->quat().rotate(target);
+  target = quat().rotate(target);
   // push ourselves in that particular direction:
   nudge(target * amt);
 }
@@ -68,11 +62,11 @@ Nav& Nav::halt(){
 }
 
 Nav& Nav::home(){
-  mPosePtr->quat().identity();
+  quat().identity();
   view(0, 0, 0);
   turn(0, 0, 0);
   spin(0, 0, 0);
-  mPosePtr->vec().set(0);
+  vec().set(0);
   updateDirectionVectors();
   return *this;
 }
@@ -82,19 +76,19 @@ Nav& Nav::view(double azimuth, double elevation, double bank) {
 }
 
 Nav& Nav::view(const Quatd& v) {
-  mPosePtr->quat(v);
+  quat(v);
   updateDirectionVectors();
   return *this;
 }
 
 Nav& Nav::set(const Pose& v){
-  mPosePtr->set(v);
+  Pose::set(v);
   updateDirectionVectors();
   return *this;
 }
 
 Nav& Nav::set(const Nav& v){
-  set(v.pose());
+  Pose::set(v);
   mMove0 = v.mMove0;
   mMove1 = v.mMove1;
   mSpin0 = v.mSpin0;
@@ -124,29 +118,30 @@ void Nav::step(double dt){
   // Update orientation from smoothed orientation differential
   // Note that vel() returns a smoothed Pose diff from mMove1 and mSpin1.
   // mQuat *= vel().quat();
-  mPosePtr->quat() *= vel().quat();
+  mQuat *= vel().quat();
   updateDirectionVectors();
 
   // Move according to smoothed position differential (mMove1)
-  for(int i=0; i<mPosePtr->pos().size(); ++i){
-    mPosePtr->pos()[i] += mMove1.dot(Vec3d(ur()[i], uu()[i], uf()[i]));
+  for(int i=0; i< pos().size(); ++i){
+    pos()[i] += mMove1.dot(Vec3d(ur()[i], uu()[i], uf()[i]));
   }
 
   mPullBack1 = mPullBack1 + (mPullBack0-mPullBack1)*amt;
 
-  mTransformed = *mPosePtr;
+  mTransformed = *this;
   if(mPullBack1 > 1e-16){
     mTransformed.pos() -= uf() * mPullBack1;
   }
 }
 
 
+
 NavInputControl::NavInputControl(double vscale, double tscale)
 : mNav(), mVScale(vscale), mTScale(tscale), mUseMouse(true)
 {}
 
-NavInputControl::NavInputControl(Pose& pose, double vscale, double tscale)
-:	mNav(pose), mVScale(vscale), mTScale(tscale), mUseMouse(true)
+NavInputControl::NavInputControl(Nav& nav, double vscale, double tscale)
+:	mNav(&nav), mVScale(vscale), mTScale(tscale), mUseMouse(true)
 {}
 
 NavInputControl::NavInputControl(const NavInputControl& v)
@@ -223,62 +218,5 @@ bool NavInputControl::mouseDrag(const Mouse& m){
 	}
 	return true;
 }
-
-// NavInputControlCosm::NavInputControlCosm(Nav& nav, double vscale, double tscale)
-// :	NavInputControl(nav, vscale, tscale)
-// {}
-
-// bool NavInputControlCosm::onKeyDown(const Keyboard& k){
-
-// 	double a = mTScale * M_DEG2RAD;	// rotational speed: rad/sec
-// 	double v = mVScale;				// speed: world units/sec
-
-// 	if(k.ctrl()) v *= 0.1;
-// 	if(k.alt()) v *= 10;
-
-// 	if(k.ctrl()) a *= 0.1;
-// 	if(k.alt()) a *= 10;
-
-// 	switch(k.key()){
-// 		case '`':				nav().halt().home(); return false;
-// 		case 'w':				nav().spinR( a); return false;
-// 		case 'x':				nav().spinR(-a); return false;
-// 		case Keyboard::RIGHT:	nav().spinU( -a); return false;
-// 		case Keyboard::LEFT:	nav().spinU( a); return false;
-// 		case 'a':				nav().spinF( a); return false;
-// 		case 'd':				nav().spinF(-a); return false;
-// 		case ',':				nav().moveR(-v); return false;
-// 		case '.':				nav().moveR( v); return false;
-// 		case '\'':				nav().moveU( v); return false;
-// 		case '/':				nav().moveU(-v); return false;
-// 		case Keyboard::UP:		nav().moveF( v); return false;
-// 		case Keyboard::DOWN:	nav().moveF(-v); return false;
-// 		default:;
-// 	}
-// 	return true;
-// }
-
-// bool NavInputControlCosm::onKeyUp(const Keyboard& k) {
-// 	switch (k.key()) {
-// 		case 'w':
-// 		case 'x':				nav().spinR(0); return false;
-// 		case Keyboard::RIGHT:
-// 		case Keyboard::LEFT:	nav().spinU(0); return false;
-// 		case 'a':
-// 		case 'd':				nav().spinF(0); return false;
-// 		case ',':
-// 		case '.':				nav().moveR(0); return false;
-// 		case '\'':
-// 		case '/':				nav().moveU(0); return false;
-// 		case Keyboard::UP:
-// 		case Keyboard::DOWN:	nav().moveF(0); return false;
-// 		default:;
-// 	}
-// 	return true;
-// }
-
-// bool NavInputControlCosm::onMouseDrag(const Mouse& m){
-// 	return true;
-// }
 
 } // al::

@@ -321,6 +321,9 @@ class Texture : public GPUObject {
   /// Returns number of components for given color type
   static int numComponents(Texture::Format v);
 
+  /// Get number of components per pixel
+  unsigned numComponents() const { return numComponents(Texture::Format(format())); }
+
  protected:
   void onCreate() override;
   void onDestroy() override;

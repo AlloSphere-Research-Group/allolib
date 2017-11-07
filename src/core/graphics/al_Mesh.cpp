@@ -57,7 +57,7 @@ void Mesh::decompress(){
       if(N > 1){\
         std::vector<Type> old(N);\
         std::copy(&buf[0], (&buf[0]) + N, old.begin());\
-        buf.reserve(Ni);\
+        buf.resize(Ni);\
         for(int i=0; i<Ni; ++i)  buf[i] = old[indices()[i]];\
       }\
     }

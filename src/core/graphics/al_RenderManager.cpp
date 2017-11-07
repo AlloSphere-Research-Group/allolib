@@ -68,7 +68,7 @@ void RenderManager::translate(float x, float y, float z) {
 }
 
 void RenderManager::rotate(float angle, float x, float y, float z) {
-  mModelStack.mult(Matrix4f::rotate(angle, x, y, z));
+  mModelStack.mult(Matrix4f::rotate(M_2PI * angle / 360.0f, x, y, z));
   mMatChanged = true;
 }
 
