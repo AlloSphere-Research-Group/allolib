@@ -14,8 +14,18 @@ void compileDefaultShader(ShaderProgram& s, ShaderType type)
 		case ShaderType::TEXTURE:
 			s.compile(al_tex_vert_shader(), al_tex_frag_shader());
 			return;
-		case ShaderType::LIGHTING:
-		default: break;
+		case ShaderType::LIGHTING_COLOR:
+			s.compile(al_lighting_color_vert_shader(), al_lighting_color_frag_shader());
+			return;
+		case ShaderType::LIGHTING_MESH:
+			s.compile(al_lighting_mesh_vert_shader(), al_lighting_mesh_frag_shader());
+			return;
+		case ShaderType::LIGHTING_TEXTURE:
+			s.compile(al_lighting_tex_vert_shader(), al_lighting_tex_frag_shader());
+			return;
+		case ShaderType::LIGHTING_MATERIAL:
+			s.compile(al_lighting_material_vert_shader(), al_lighting_material_frag_shader());
+			return;
 	}
 }
 

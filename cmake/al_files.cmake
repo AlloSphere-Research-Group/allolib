@@ -1,3 +1,5 @@
+option(USE_GLV "" OFF)
+
 # Main Library
 set(core_headers
   include/al/core/app/al_App.hpp
@@ -14,7 +16,7 @@ set(core_headers
   include/al/core/graphics/al_GPUObject.hpp
   include/al/core/graphics/al_Graphics.hpp
   include/al/core/graphics/al_Lens.hpp
-  # include/al/core/graphics/al_Light.hpp
+  include/al/core/graphics/al_Light.hpp
   include/al/core/graphics/al_Mesh.hpp
   include/al/core/graphics/al_OpenGL.hpp
   include/al/core/graphics/al_RenderManager.hpp
@@ -125,10 +127,13 @@ set(glv_sources
 
 set(al_headers
   ${core_headers}
-  ${glv_headers}
 )
 
 set(al_sources
   ${core_sources}
-  ${glv_sources}
 )
+
+if (USE_GLV)
+  list(APPEND al_headers ${glv_headers})
+  list(APPEND al_sources ${glv_sources})
+endif()

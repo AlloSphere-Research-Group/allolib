@@ -48,6 +48,9 @@
 #include "al/core/graphics/al_DefaultShaders.hpp"
 #include "al/core/graphics/al_OpenGL.hpp"
 #include "al/core/graphics/al_RenderManager.hpp"
+#include "al/core/graphics/al_Light.hpp"
+
+#include <iostream>
 
 namespace al {
 
@@ -94,6 +97,13 @@ class Graphics : public RenderManager {
     POINT = GL_POINT, /**< Render only points at each vertex */
     LINE = GL_LINE,   /**< Render only lines along vertex path */
     FILL = GL_FILL    /**< Render vertices normally according to primitive */
+  };
+
+  enum class ColoringMode : unsigned int {
+    UNIFORM,
+    MESH,
+    TEXTURE,
+    MATERIAL
   };
 
   /// Enable a capability
@@ -223,37 +233,139 @@ class Graphics : public RenderManager {
   void clear(Color const &c, float d = 1) { clear(c.r, c.g, c.b, c.a, d); }
   void clear(int drawbuffer = 0) { clearColor(drawbuffer); clearDepth(); }
 
-  // extended render managing -----------------------------
+
+  // extended, predefined render managing --------------------------------------
   static void init();
-  static void tint(float r, float g, float b, float a = 1.0f);
-  static void tint(float grayscale, float a = 1.0f) {
+
+  // set overall tint, regardless of rendering mode
+  void tint(Color const& c) { mTint = c; mUniformChanged = true; }
+  void tint(float r, float g, float b, float a = 1.0f) {
+    mTint.set(r, g, b, a);
+    mUniformChanged = true;
+  }
+  void tint(float grayscale, float a = 1.0f) {
     tint(grayscale, grayscale, grayscale, a);
   }
-  static void color(float r, float g, float b, float a = 1.0f);
-  static void color(float k, float a = 1.0f) { color(k, k, k, a); }
-  static void color(Color const& c) { color(c.r, c.g, c.b, c.a); }
-  static void bind(Texture& t);
-  static void unbind();
-  static void meshColor();
+
+  // set to uniform color mode, using previously set uniform color
+  void color() {
+    if (mColoringMode != ColoringMode::UNIFORM) {
+      mColoringMode = ColoringMode::UNIFORM;
+      mRenderModeChanged = true;
+    }
+  }
+  // set to uniform color mode, using provided color
+  void color(float r, float g, float b, float a = 1.0f) {
+    mColor.set(r, g, b, a);
+    mUniformChanged = true;
+    color();
+  }
+  // set to uniform color mode, using provided color
+  void color(Color const& c) {
+    mColor = c;
+    mUniformChanged = true;
+    color();
+  }
+  // set to uniform color mode, using provided color
+  void color(float k, float a = 1.0f) { color(k, k, k, a); }
+
+  // set to mesh color mode, using mesh's color array
+  void meshColor() {
+    if (mColoringMode != ColoringMode::MESH) {
+      mColoringMode = ColoringMode::MESH;
+      mRenderModeChanged = true;
+    }
+  }
+
+  // set to texture mode, using texture bound by user at location=0
+  void texture() {
+    if (mColoringMode != ColoringMode::TEXTURE) {
+      mColoringMode = ColoringMode::TEXTURE;
+      mRenderModeChanged = true;
+    }
+  }
+
+  // set to material mode, using previously set material
+  // if lighting is disabled, ColoringMode::COLOR will be used
+  void material() {
+    if (mColoringMode != ColoringMode::MATERIAL) {
+      mColoringMode = ColoringMode::MATERIAL;
+      mRenderModeChanged = true;
+    }
+  }
+  // set to material mode, using provied material
+  void material(Material const& m) {
+    mMaterial = m;
+    mUniformChanged = true;
+    material();
+  }
+
+  void lighting(bool b) {
+    if (mLightingEnabled != b) {
+      mLightingEnabled = b;
+      mRenderModeChanged = true;
+    }
+  }
+
+  void light(Light const& l) {
+    mLight = l;
+    mUniformChanged = true;
+  }
+
+
+  void send_uniforms(ShaderProgram& s, Material const& m) {
+
+  }
+
+  void send_uniforms(ShaderProgram& s, Light const& l) {
+    s.uniform4("light0_ambient", l.ambient().components);
+    s.uniform4("light0_diffuse", l.diffuse().components);
+    s.uniform("light0_eye", viewMatrix() * Vec4f{l.pos()});
+    shader().uniform("N", (viewMatrix() * modelMatrix()).inversed().transpose());
+  }
 
   void quad(Texture& tex, float x, float y, float w, float h);
   void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2,
                     float h = 2);
 
+  void update() override;
+
 private:
-  static bool initialized;
-  static ShaderProgram mesh_shader;
+  Color mClearColor {0, 0, 0, 1};
+  float mClearDepth = 1;
+
+  Color mColor {1, 1, 1, 1};
+  Color mTint {1, 1, 1, 1};
+
+  Material mMaterial;
+  Light mLight;
+  bool mLightingEnabled = false;
+
+  ColoringMode mColoringMode = ColoringMode::UNIFORM;
+
+  static bool mRenderModeChanged;
+  static bool mUniformChanged;
+
   static ShaderProgram color_shader;
+  static ShaderProgram mesh_shader;
   static ShaderProgram tex_shader;
+
+  static ShaderProgram lighting_color_shader;
+  static ShaderProgram lighting_mesh_shader;
+  static ShaderProgram lighting_tex_shader;
+  static ShaderProgram lighting_material_shader;
+
   static int color_location;
   static int color_tint_location;
-  static int tex_tint_location;
   static int mesh_tint_location;
-  static int tint_location;
-  static Color tint_color;
-  static Texture* texPtr;
-  static Color mClearColor;
-  static float mClearDepth;
+  static int tex_tint_location;
+
+  static int lighting_color_location;
+  static int lighting_color_tint_location;
+  static int lighting_mesh_tint_location;
+  static int lighting_tex_tint_location;
+  static int lighting_material_tint_location;
+
 };
 
 }  // namespace al

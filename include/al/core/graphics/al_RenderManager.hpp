@@ -171,7 +171,7 @@ public:
   void pushCamera(Viewpoint const& v) { pushCamera(); camera(v); }
   void pushCamera(Viewpoint::SpecialType v) { pushCamera(); camera(v); }
 
-  void update();
+  virtual void update();
   void draw(VAOMesh& mesh);
   void draw(EasyVAO& vao);
   void draw(Mesh& mesh);

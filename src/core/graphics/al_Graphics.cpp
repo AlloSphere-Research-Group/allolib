@@ -6,19 +6,24 @@
 
 namespace al {
 
-bool Graphics::initialized = false;
 ShaderProgram Graphics::mesh_shader;
 ShaderProgram Graphics::color_shader;
 ShaderProgram Graphics::tex_shader;
+ShaderProgram Graphics::lighting_color_shader;
+ShaderProgram Graphics::lighting_mesh_shader;
+ShaderProgram Graphics::lighting_tex_shader;
+ShaderProgram Graphics::lighting_material_shader;
 int Graphics::color_location = 0;
 int Graphics::color_tint_location = 0;
-int Graphics::tex_tint_location = 0;
 int Graphics::mesh_tint_location = 0;
-int Graphics::tint_location = 0;
-Color Graphics::tint_color{1.0f, 1.0f, 1.0f, 1.0f};
-Texture* Graphics::texPtr = nullptr;
-Color Graphics::mClearColor {0, 0, 0, 1};
-float Graphics::mClearDepth = 1;
+int Graphics::tex_tint_location = 0;
+int Graphics::lighting_color_location = 0;
+int Graphics::lighting_color_tint_location = 0;
+int Graphics::lighting_mesh_tint_location = 0;
+int Graphics::lighting_tex_tint_location = 0;
+int Graphics::lighting_material_tint_location = 0;
+bool Graphics::mRenderModeChanged = true;
+bool Graphics::mUniformChanged = true;
 
 void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq) {
   glBlendEquation(eq);
@@ -56,16 +61,13 @@ void Graphics::setClearColor(float r, float g, float b, float a) {
   mClearColor.set(r, g, b, a);
 }
 
-void Graphics::setClearColor(Color const& c) {
-  mClearColor = c;
-}
+void Graphics::setClearColor(Color const& c) { mClearColor = c; }
 
 void Graphics::clearColor(int drawbuffer) {
   glClearBufferfv(GL_COLOR, drawbuffer, mClearColor.components);
 }
 
-void Graphics::clearColor(float r, float g, float b, float a,
-                               int drawbuffer) {
+void Graphics::clearColor(float r, float g, float b, float a, int drawbuffer) {
   setClearColor(r, g, b, a);
   clearColor(drawbuffer);
 }
@@ -84,70 +86,46 @@ void Graphics::clearDepth(float d) {
   clearDepth();
 }
 
-void Graphics::clear(float r, float g, float b, float a, float d, int drawbuffer) {
+void Graphics::clear(float r, float g, float b, float a, float d,
+                     int drawbuffer) {
   clearColor(r, g, b, a, drawbuffer);
   clearDepth(d);
 }
 
-
 void Graphics::init() {
+  static bool initialized = false;
   if (initialized) return;
-  compileDefaultShader(mesh_shader, ShaderType::MESH);
+
   compileDefaultShader(color_shader, ShaderType::COLOR);
+  compileDefaultShader(mesh_shader, ShaderType::MESH);
   compileDefaultShader(tex_shader, ShaderType::TEXTURE);
+  compileDefaultShader(lighting_color_shader, ShaderType::LIGHTING_COLOR);
+  compileDefaultShader(lighting_mesh_shader, ShaderType::LIGHTING_MESH);
+  compileDefaultShader(lighting_tex_shader, ShaderType::LIGHTING_TEXTURE);
+  compileDefaultShader(lighting_material_shader, ShaderType::LIGHTING_MATERIAL);
+
   color_location = color_shader.getUniformLocation("col0");
   color_tint_location = color_shader.getUniformLocation("tint");
   tex_tint_location = tex_shader.getUniformLocation("tint");
   mesh_tint_location = mesh_shader.getUniformLocation("tint");
+
+  lighting_color_location = lighting_color_shader.getUniformLocation("col0");
+  lighting_color_tint_location =
+      lighting_color_shader.getUniformLocation("tint");
+  lighting_mesh_tint_location = lighting_mesh_shader.getUniformLocation("tint");
+  lighting_tex_tint_location = lighting_tex_shader.getUniformLocation("tint");
+  lighting_material_tint_location =
+      lighting_material_shader.getUniformLocation("tint");
+
   tex_shader.begin();
   tex_shader.uniform("tex0", 0);
-  tex_shader.uniform(tex_tint_location, 1, 1, 1, 1);
   tex_shader.end();
-  color_shader.begin();
-  color_shader.uniform(color_tint_location, 1, 1, 1, 1);
-  color_shader.end();
-  mesh_shader.begin();
-  mesh_shader.uniform(mesh_tint_location, 1, 1, 1, 1);
-  mesh_shader.end();
-  shader(color_shader);
-  tint_location = color_tint_location;
-}
 
-void Graphics::tint(float r, float g, float b, float a) {
-  tint_color.set(r, g, b, a);
-  shader().uniform4v(tint_location, tint_color.components);
-}
+  lighting_tex_shader.begin();
+  lighting_tex_shader.uniform("tex0", 0);
+  lighting_tex_shader.end();
 
-void Graphics::color(float r, float g, float b, float a) {
-  if (shader().id() != color_shader.id()) {
-    shader(color_shader);
-    tint_location = color_tint_location;
-  }
-  shader().uniform(color_location, r, g, b, a);
-  shader().uniform4v(color_tint_location, tint_color.components);
-}
-
-void Graphics::bind(Texture& t) {
-  if (shader().id() != tex_shader.id()) {
-    shader(tex_shader);
-    tint_location = tex_tint_location;
-  }
-  shader().uniform4v(tex_tint_location, tint_color.components);
-  t.bind(0);
-  texPtr = &t;
-}
-
-void Graphics::unbind() {
-  texPtr->unbind(0);
-  texPtr = nullptr;
-}
-
-void Graphics::meshColor() {
-  if (shader().id() != mesh_shader.id()) {
-    shader(mesh_shader);
-    tint_location = mesh_tint_location;
-  }
-  shader().uniform4v(mesh_tint_location, tint_color.components);
+  initialized = true;
 }
 
 void Graphics::quad(Texture& tex, float x, float y, float w, float h) {
@@ -170,9 +148,10 @@ void Graphics::quad(Texture& tex, float x, float y, float w, float h) {
   verts[2].set(x, y + h, 0);
   verts[3].set(x + w, y + h, 0);
 
-  bind(tex);
+  tex.bind(0);
+  texture();
   draw(m);
-  unbind();
+  tex.unbind(0);
 }
 
 void Graphics::quadViewport(Texture& tex, float x, float y, float w, float h) {
@@ -180,6 +159,71 @@ void Graphics::quadViewport(Texture& tex, float x, float y, float w, float h) {
   camera(Viewpoint::IDENTITY);
   quad(tex, x, y, w, h);
   popCamera();
+}
+
+void Graphics::update() {
+  if (mRenderModeChanged) {
+    switch (mColoringMode) {
+      case ColoringMode::UNIFORM:
+        shader(mLightingEnabled ? lighting_color_shader : color_shader);
+        break;
+      case ColoringMode::MESH:
+        shader(mLightingEnabled ? lighting_mesh_shader : mesh_shader);
+        break;
+      case ColoringMode::TEXTURE:
+        shader(mLightingEnabled ? lighting_tex_shader : tex_shader);
+        break;
+      case ColoringMode::MATERIAL:
+        shader(mLightingEnabled ? lighting_material_shader : color_shader);
+        break;
+    }
+    mRenderModeChanged = false;
+    mUniformChanged = true;
+  }
+
+  if (mUniformChanged) {
+    switch (mColoringMode) {
+      case ColoringMode::UNIFORM:
+        if (mLightingEnabled) {
+          send_uniforms(shader(), mLight);
+          shader().uniform4v(lighting_color_location, mColor.components);
+          shader().uniform4v(lighting_color_tint_location, mTint.components);
+        } else {
+          shader().uniform4v(color_location, mColor.components);
+          shader().uniform4v(color_tint_location, mTint.components);
+        }
+        break;
+      case ColoringMode::MESH:
+        if (mLightingEnabled) {
+          send_uniforms(shader(), mLight);
+          shader().uniform4v(lighting_mesh_tint_location, mTint.components);
+        } else {
+          shader().uniform4v(mesh_tint_location, mTint.components);
+        }
+        break;
+      case ColoringMode::TEXTURE:
+        if (mLightingEnabled) {
+          send_uniforms(shader(), mLight);
+          shader().uniform4v(lighting_tex_tint_location, mTint.components);
+        } else {
+          shader().uniform4v(tex_tint_location, mTint.components);
+        }
+        break;
+      case ColoringMode::MATERIAL:
+        if (mLightingEnabled) {
+          send_uniforms(shader(), mMaterial);
+          send_uniforms(shader(), mLight);
+          shader().uniform4v(lighting_material_tint_location, mTint.components);
+        } else {
+          shader().uniform4v(color_location, mColor.components);
+          shader().uniform4v(color_tint_location, mTint.components);
+        }
+        break;
+    }
+    mUniformChanged = false;
+  }
+
+  RenderManager::update();
 }
 
 }  // namespace al

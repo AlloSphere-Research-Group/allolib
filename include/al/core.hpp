@@ -16,7 +16,7 @@
 #include "al/core/graphics/al_GPUObject.hpp"
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/graphics/al_Lens.hpp"
-// #include "al/core/graphics/al_Light.hpp"
+#include "al/core/graphics/al_Light.hpp"
 #include "al/core/graphics/al_Mesh.hpp"
 #include "al/core/graphics/al_OpenGL.hpp"
 #include "al/core/graphics/al_RenderManager.hpp"

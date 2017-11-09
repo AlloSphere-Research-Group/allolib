@@ -85,11 +85,10 @@ public:
 		g.clear(0, 0, 0);
 
 		// We must tell the GPU to use the texture when rendering primitives
-		// tex.bind();
-		g.bind(tex);
-			g.draw(mesh);
-		g.unbind();
-		// tex.unbind();
+		tex.bind();
+		g.texture();
+		g.draw(mesh);
+		tex.unbind();
 	}
 };
 
