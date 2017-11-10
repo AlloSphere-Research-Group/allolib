@@ -13,7 +13,7 @@ namespace al {
 namespace glfw {
     void init();
     void terminate();
-    GLFWwindow* current_window() { return glfwGetCurrentContext(); }
+    inline GLFWwindow* current_window() { return glfwGetCurrentContext(); }
 }
 
 }
