@@ -172,6 +172,9 @@ public:
   /// Go to origin, reset orientation
   Nav& home();
 
+  /// set current nav to be home
+  Nav& setHome();  
+
   /// Update coordinate frame basis vectors based on internal quaternion
   void updateDirectionVectors(){
     quat().normalize();
@@ -205,6 +208,7 @@ protected:
   double mVelScale;    // velocity scaling factor
   double mPullBack0, mPullBack1;
   Pose mTransformed;
+  Pose mHome;
 };
 
 /// Mapping from keyboard and mouse controls to a Nav object

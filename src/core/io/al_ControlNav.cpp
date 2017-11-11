@@ -3,8 +3,15 @@
 
 namespace al {
 
+Pose defaultHome() {
+  Pose p;
+  p.quat().identity();
+  p.vec().set(0);
+  return p;
+}
+
 Nav::Nav(const Vec3d& pos, double smooth)
-:  Pose(pos), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0)
+:  Pose(pos), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0), mHome(defaultHome())
 {
   updateDirectionVectors();
 }
@@ -15,7 +22,8 @@ Nav::Nav(const Nav& nav)
   mSpin0(nav.mSpin0), mSpin1(nav.mSpin1),  // angular velocities (raw, smoothed)
   mTurn(nav.mTurn), mNudge(nav.mNudge),      //
   mSmooth(nav.smooth()), mVelScale(nav.mVelScale),
-  mPullBack0(nav.mPullBack0), mPullBack1(nav.mPullBack1)
+  mPullBack0(nav.mPullBack0), mPullBack1(nav.mPullBack1),
+  mHome(defaultHome())
 {
   updateDirectionVectors();
 }
@@ -61,13 +69,16 @@ Nav& Nav::halt(){
   return *this;
 }
 
-Nav& Nav::home(){
-  quat().identity();
-  view(0, 0, 0);
-  turn(0, 0, 0);
+Nav& Nav::home() {
+  Pose::set(mHome);
+  move(0, 0, 0);
   spin(0, 0, 0);
-  vec().set(0);
   updateDirectionVectors();
+  return *this;
+}
+
+Nav& Nav::setHome(){
+  mHome.set(*this);
   return *this;
 }
 

@@ -134,7 +134,6 @@ public:
   template <class T>
   void scale(const Vec<2,T>& v){ scale(v[0],v[1]); }
 
-
   /// Set viewport
   static void viewport(int left, int bottom, int width, int height);
   static void viewport(const Viewport& v) { viewport(v.l, v.b, v.w, v.h); }
@@ -161,7 +160,7 @@ public:
   static void pushFramebuffer(unsigned int f) { pushFramebuffer(); framebuffer(f);}
 
   static void shader(ShaderProgram& s);
-  static ShaderProgram& shader() { return *mShaderPtr; };
+  static ShaderProgram& shader() { return *mShaderPtr; }
   static ShaderProgram* shaderPtr() { return mShaderPtr; }
 
   void camera(Viewpoint const& v);

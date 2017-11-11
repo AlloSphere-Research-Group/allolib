@@ -11,6 +11,7 @@ struct MyApp : App
     Material material;
     Mesh mesh;
     Texture tex;
+    ShaderProgram my_shader;
 
     void onCreate()
     {
@@ -21,8 +22,8 @@ struct MyApp : App
         for(int i=0; i<64; ++i){ float x = float(i) / (64 - 1);
             int idx = j * 64 + i;
             pixels[4 * idx + 0] = x * 255;
-            pixels[4 * idx + 1] = y * 255;
-            pixels[4 * idx + 2] = 0;
+            pixels[4 * idx + 1] = 255;
+            pixels[4 * idx + 2] = y * 255;
             pixels[4 * idx + 3] = 255;
         }}
         tex.submit(pixels.data());
@@ -32,17 +33,42 @@ struct MyApp : App
         // light.dir(0, -1, 0);
         light.ambient({0.1, 0.1, 0.5});
         light.diffuse({1, 0, 0});
-        // light.specular(1, 1, 0.5);
+        light.specular({0, 1, 1});
         // light.attenuation(1, 1, 0);
 
-        // material.ambient(1, 1, 1);
+        material.ambient({0, 0.5, 0});
         material.diffuse({1, 1, 0});
-        // material.specular(1, 1, 1);
-        // material.shininess(50);
+        material.specular({0, 0, 1});
+        material.shininess(1);
         // material.emission(1, 1, 1);
 
         addSphereWithTexcoords(mesh, 2);
+        const int n = mesh.vertices().size();
+        auto& c = mesh.colors();
+        c.resize(n);
+        for (int i = 0 ; i < n; i += 1) {
+            c[i].set(rnd::uniform(), rnd::uniform(), rnd::uniform());
+        }
+
         nav().pos(0, 10, 50).faceToward({0, 0, 0}, {0, 1, 0});
+        nav().setHome();
+
+        my_shader.compile(R"(
+            #version 330
+            uniform mat4 MV;
+            uniform mat4 P;
+            layout (location = 0) in vec3 position;
+            void main() {
+              gl_Position = P * MV * vec4(position, 1.0);
+            }
+        )", R"(
+            #version 330
+            uniform vec4 color;
+            out vec4 frag_color;
+            void main() {
+              frag_color = color;
+            }
+        )");
     }
 
     void draw(Mesh& m, float x, float y, float z)
@@ -73,20 +99,20 @@ struct MyApp : App
         g.light(light);
 
         // light + material
-        // g.material(material);
-        // draw(mesh, -12, 0, 0);
+        g.material(material);
+        draw(mesh, -12, 0, 0);
 
         // light + uniform color
         g.color(0.5, 0.5, 0.5);
         draw(mesh, -6, 0, 0);
 
         // light + mesh color
-        // g.meshColor();
-        // draw(mesh, 0, 0, 0);
+        g.meshColor();
+        draw(mesh, 0, 0, 0);
 
         // light + texture
-        // g.texture();
-        // draw(mesh, 6, 0, 0);
+        g.texture();
+        draw(mesh, 6, 0, 0);
 
         // no lighting
         g.lighting(false);
@@ -94,7 +120,15 @@ struct MyApp : App
         g.color(1, 1, 0);
         draw(mesh, 12, 0, 0);
 
+        g.color(0, 0, 0);
+        auto* lp = light.pos();
+        draw(mesh, lp[0], lp[1], lp[2]);
+
         tex.unbind();
+
+        g.shader(my_shader);
+        g.shader().uniform("color", 0.0, 0.0, 1.0, 1.0);
+        draw(mesh, 15, 0, 0);
     }
 
 };

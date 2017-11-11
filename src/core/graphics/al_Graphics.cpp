@@ -165,16 +165,19 @@ void Graphics::update() {
   if (mRenderModeChanged) {
     switch (mColoringMode) {
       case ColoringMode::UNIFORM:
-        shader(mLightingEnabled ? lighting_color_shader : color_shader);
+        RenderManager::shader(mLightingEnabled ? lighting_color_shader : color_shader);
         break;
       case ColoringMode::MESH:
-        shader(mLightingEnabled ? lighting_mesh_shader : mesh_shader);
+        RenderManager::shader(mLightingEnabled ? lighting_mesh_shader : mesh_shader);
         break;
       case ColoringMode::TEXTURE:
-        shader(mLightingEnabled ? lighting_tex_shader : tex_shader);
+        RenderManager::shader(mLightingEnabled ? lighting_tex_shader : tex_shader);
         break;
       case ColoringMode::MATERIAL:
-        shader(mLightingEnabled ? lighting_material_shader : color_shader);
+        RenderManager::shader(mLightingEnabled ? lighting_material_shader : color_shader);
+        break;
+      case ColoringMode::CUSTOM:
+        // do nothing
         break;
     }
     mRenderModeChanged = false;
@@ -182,43 +185,47 @@ void Graphics::update() {
   }
 
   if (mUniformChanged) {
+    auto& s = RenderManager::shader();
     switch (mColoringMode) {
       case ColoringMode::UNIFORM:
         if (mLightingEnabled) {
-          send_uniforms(shader(), mLight);
-          shader().uniform4v(lighting_color_location, mColor.components);
-          shader().uniform4v(lighting_color_tint_location, mTint.components);
+          send_uniforms(s, mLight);
+          s.uniform4v(lighting_color_location, mColor.components);
+          s.uniform4v(lighting_color_tint_location, mTint.components);
         } else {
-          shader().uniform4v(color_location, mColor.components);
-          shader().uniform4v(color_tint_location, mTint.components);
+          s.uniform4v(color_location, mColor.components);
+          s.uniform4v(color_tint_location, mTint.components);
         }
         break;
       case ColoringMode::MESH:
         if (mLightingEnabled) {
-          send_uniforms(shader(), mLight);
-          shader().uniform4v(lighting_mesh_tint_location, mTint.components);
+          send_uniforms(s, mLight);
+          s.uniform4v(lighting_mesh_tint_location, mTint.components);
         } else {
-          shader().uniform4v(mesh_tint_location, mTint.components);
+          s.uniform4v(mesh_tint_location, mTint.components);
         }
         break;
       case ColoringMode::TEXTURE:
         if (mLightingEnabled) {
-          send_uniforms(shader(), mLight);
-          shader().uniform4v(lighting_tex_tint_location, mTint.components);
+          send_uniforms(s, mLight);
+          s.uniform4v(lighting_tex_tint_location, mTint.components);
         } else {
-          shader().uniform4v(tex_tint_location, mTint.components);
+          s.uniform4v(tex_tint_location, mTint.components);
         }
         break;
       case ColoringMode::MATERIAL:
         if (mLightingEnabled) {
-          send_uniforms(shader(), mMaterial);
-          send_uniforms(shader(), mLight);
-          shader().uniform4v(lighting_material_tint_location, mTint.components);
+          send_uniforms(s, mMaterial);
+          send_uniforms(s, mLight);
+          s.uniform4v(lighting_material_tint_location, mTint.components);
         } else {
-          shader().uniform4v(color_location, mColor.components);
-          shader().uniform4v(color_tint_location, mTint.components);
+          s.uniform4v(color_location, mColor.components);
+          s.uniform4v(color_tint_location, mTint.components);
         }
         break;
+      case ColoringMode::CUSTOM:
+        // do nothing
+       break;
     }
     mUniformChanged = false;
   }

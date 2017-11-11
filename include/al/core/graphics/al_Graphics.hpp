@@ -103,7 +103,8 @@ class Graphics : public RenderManager {
     UNIFORM,
     MESH,
     TEXTURE,
-    MATERIAL
+    MATERIAL,
+    CUSTOM
   };
 
   /// Enable a capability
@@ -314,19 +315,30 @@ class Graphics : public RenderManager {
 
 
   void send_uniforms(ShaderProgram& s, Material const& m) {
-
+    s.uniform4("material0_ambient", m.ambient().components);
+    s.uniform4("material0_diffuse", m.diffuse().components);
+    s.uniform4("material0_specular", m.specular().components);
+    s.uniform("material0_shininess", m.shininess());
   }
 
   void send_uniforms(ShaderProgram& s, Light const& l) {
     s.uniform4("light0_ambient", l.ambient().components);
     s.uniform4("light0_diffuse", l.diffuse().components);
+    s.uniform4("light0_specular", l.specular().components);
     s.uniform("light0_eye", viewMatrix() * Vec4f{l.pos()});
-    shader().uniform("N", (viewMatrix() * modelMatrix()).inversed().transpose());
+    RenderManager::shader().uniform("N", (viewMatrix() * modelMatrix()).inversed().transpose());
   }
 
   void quad(Texture& tex, float x, float y, float w, float h);
   void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2,
                     float h = 2);
+
+  void shader(ShaderProgram& s) {
+    mColoringMode = ColoringMode::CUSTOM;
+    RenderManager::shader(s);
+  }
+  ShaderProgram& shader() { return RenderManager::shader(); }
+  ShaderProgram* shaderPtr() { return RenderManager::shaderPtr(); }
 
   void update() override;
 
