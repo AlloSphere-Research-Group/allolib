@@ -6,6 +6,7 @@
 
 namespace al {
 
+Graphics::ColoringMode Graphics::mColoringMode = ColoringMode::UNIFORM;
 ShaderProgram Graphics::mesh_shader;
 ShaderProgram Graphics::color_shader;
 ShaderProgram Graphics::tex_shader;
@@ -63,18 +64,13 @@ void Graphics::setClearColor(float r, float g, float b, float a) {
 
 void Graphics::setClearColor(Color const& c) { mClearColor = c; }
 
-void Graphics::clearColor(int drawbuffer) {
+void Graphics::clearColorBuffer(int drawbuffer) {
   glClearBufferfv(GL_COLOR, drawbuffer, mClearColor.components);
 }
 
-void Graphics::clearColor(float r, float g, float b, float a, int drawbuffer) {
+void Graphics::clearColorBuffer(float r, float g, float b, float a, int drawbuffer) {
   setClearColor(r, g, b, a);
-  clearColor(drawbuffer);
-}
-
-void Graphics::clearColor(Color const& c, int drawbuffer) {
-  setClearColor(c.r, c.g, c.b, c.a);
-  clearColor(drawbuffer);
+  clearColorBuffer(drawbuffer);
 }
 
 void Graphics::setClearDepth(float d) { mClearDepth = d; }
@@ -86,9 +82,13 @@ void Graphics::clearDepth(float d) {
   clearDepth();
 }
 
-void Graphics::clear(float r, float g, float b, float a, float d,
-                     int drawbuffer) {
-  clearColor(r, g, b, a, drawbuffer);
+void Graphics::clearBuffer(int drawbuffer) {
+  clearColorBuffer(drawbuffer);
+  clearDepth();
+}
+
+void Graphics::clearBuffer(float r, float g, float b, float a, float d, int drawbuffer) {
+  clearColorBuffer(r, g, b, a, drawbuffer);
   clearDepth(d);
 }
 

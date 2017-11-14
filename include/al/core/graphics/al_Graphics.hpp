@@ -222,17 +222,29 @@ class Graphics : public RenderManager {
   
   void setClearColor(float r, float g, float b, float a = 1);
   void setClearColor(Color const& c);
-  void clearColor(int drawbuffer = 0);
-  void clearColor(float r, float g, float b, float a = 1, int drawbuffer = 0);
-  void clearColor(Color const &c, int drawbuffer = 0);
+
+  void clearColorBuffer(int drawbuffer);
+  void clearColorBuffer(float r, float g, float b, float a, int drawbuffer);
+  void clearColorBuffer(float k, float a, int drawbuffer) { clearColorBuffer(k, k, k, a, drawbuffer); }
+  void clearColorBuffer(Color const &c, int drawbuffer) { clearColorBuffer(c.r, c.g, c.b, c.a, drawbuffer); }
+
+  void clearColor() { clearColorBuffer(0); };
+  void clearColor(float r, float g, float b, float a = 1) { clearColorBuffer(r, g, b, a, 0); }
+  void clearColor(float k, float a = 1) { clearColorBuffer(k, k, k, a, 0); }
+  void clearColor(Color const &c)  { clearColorBuffer(c.r, c.g, c.b, c.a, 0); };
 
   void setClearDepth(float d);
   void clearDepth();
   void clearDepth(float d);
 
-  void clear(float r, float g, float b, float a = 1, float d = 1, int drawbuffer = 0);
-  void clear(Color const &c, float d = 1) { clear(c.r, c.g, c.b, c.a, d); }
-  void clear(int drawbuffer = 0) { clearColor(drawbuffer); clearDepth(); }
+  void clearBuffer(int drawbuffer);
+  void clearBuffer(float r, float g, float b, float a, float d, int drawbuffer);
+  void clearBuffer(float k, float a, float d, int drawbuffer) { clearBuffer(k, k, k, a, d, drawbuffer); }
+  void clearBuffer(Color const &c, float d, int drawbuffer) { clearBuffer(c.r, c.g, c.b, c.a, d, drawbuffer); }
+
+  void clear(float r, float g, float b, float a = 1, float d = 1) { clearBuffer(r, g, b, a, d, 0); }
+  void clear(float k, float a = 1, float d = 1) { clearBuffer(k, k, k, a, d, 0); }
+  void clear(Color const &c, float d = 1) { clearBuffer(c.r, c.g, c.b, c.a, d, 0); }
 
 
   // extended, predefined render managing --------------------------------------
@@ -353,7 +365,7 @@ private:
   Light mLight;
   bool mLightingEnabled = false;
 
-  ColoringMode mColoringMode = ColoringMode::UNIFORM;
+  static ColoringMode mColoringMode;
 
   static bool mRenderModeChanged;
   static bool mUniformChanged;

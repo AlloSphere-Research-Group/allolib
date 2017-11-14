@@ -87,7 +87,7 @@ struct MyApp : App
 
     void onDraw(Graphics& g)
     {
-        g.clear(1, 1, 1);
+        g.clear(0, 0, 0);
         g.depthTesting(true);
 
         // will be used when Graphics::texture() is called
@@ -120,15 +120,17 @@ struct MyApp : App
         g.color(1, 1, 0);
         draw(mesh, 12, 0, 0);
 
-        g.color(0, 0, 0);
-        auto* lp = light.pos();
-        draw(mesh, lp[0], lp[1], lp[2]);
-
         tex.unbind();
 
+        // testing custom shader
         g.shader(my_shader);
         g.shader().uniform("color", 0.0, 0.0, 1.0, 1.0);
-        draw(mesh, 15, 0, 0);
+        draw(mesh, 0, -6, 0);
+
+        // draw light pos
+        g.color(0.2, 0.2, 0.2);
+        auto* lp = light.pos();
+        draw(mesh, lp[0], lp[1], lp[2]);
     }
 
 };
