@@ -1,6 +1,8 @@
 #ifndef INCLUDE_AL_LIGHT_HPP
 #define INCLUDE_AL_LIGHT_HPP
 
+#include "al/core/types/al_Color.hpp"
+
 namespace al {
 
 struct Light
@@ -19,19 +21,19 @@ struct Light
     const Color& specular() const { return mSpecular; }
     // const float * attenuation() const { return mAtten; }
 
-    // static void globalAmbient(const Color& v);
-    // static const Color& globalAmbient() const { return mGlobalAmbient; };
+    static void globalAmbient(const Color& v);
+    static const Color& globalAmbient() { return mGlobalAmbient; };
 
 private:
     // initial values are values from fixed pipeline defaults
     // https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glLight.xml
-    Color mAmbient;
-    Color mDiffuse;
-    Color mSpecular;
-    float mPos[4];
+    Color mAmbient {0};
+    Color mDiffuse {1};
+    Color mSpecular {1};
+    float mPos[4] {0, 0, 1, 0};
     // float mAtten[3];
 
-    // static Color mGlobalAmbient;
+    static Color mGlobalAmbient; // {0.2, 0.2, 0.2, 1.0}
 };
 
 struct Material

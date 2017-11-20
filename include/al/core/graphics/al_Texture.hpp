@@ -47,6 +47,9 @@
 
 #include "al/core/graphics/al_GPUObject.hpp"
 #include "al/core/graphics/al_OpenGL.hpp"
+#include "al/core/types/al_Color.hpp"
+
+#include <vector>
 
 /*
 https://www.khronos.org/opengl/wiki/Shader#Resource_limitations
@@ -55,11 +58,10 @@ The total number of texture units that can be used from all active programs.
 This is the limit on glActiveTexture(GL_TEXTURE0 + i) and glBindSampler.
 In GL 3.3, this was 48; in 4.3, it is 96.
 */
+
 #define AL_TEX_MAX_BINDING_UNIT 48
 // for temporary internal binding such as creating a texture
 #define AL_TEX_TEMP_BINDING_UNIT 47
-// for drawing quad slabs with texture
-#define AL_TEX_QUAD_DRAW_BINDING_UNIT 46
 
 /*
 
@@ -298,7 +300,15 @@ class Texture : public GPUObject {
   /// NOTE: the graphics context (e.g. Window) must have been created
   /// If pixels is NULL, then the only effect is to resize the texture
   /// remotely.
-  void submit(const void* pixels);
+  void submit(const void* pixels, unsigned int format, unsigned int type);
+  void submit(const void* pixels) { submit(pixels, format(), type()); }
+
+  void submit(std::vector<Colori> const& pixels) {
+    submit(pixels.data(), Texture::RGBA, Texture::UBYTE);
+  }
+  void submit(std::vector<Color> const& pixels) {
+    submit(pixels.data(), Texture::RGBA, Texture::FLOAT);
+  }
 
   // update the changes in params or settings
   // void update(bool force=false);

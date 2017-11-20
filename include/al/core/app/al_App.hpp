@@ -44,6 +44,9 @@ public:
     Nav& nav() { return mNav; }
     const Nav& nav() const { return mNav; }
 
+    NavInputControl& navControl() { return mNavControl; }
+    const NavInputControl& navControl() const { return mNavControl; }
+
     Lens& lens() { return mView.lens(); }
 
     Graphics& graphics() { return mGraphics; }

@@ -106,6 +106,7 @@ inline std::string al_lighting_color_frag_shader() { return R"(
 #version 330
 uniform vec4 col0;
 uniform vec4 tint;
+uniform vec4 light_global_ambient;
 uniform vec4 light0_ambient;
 uniform vec4 light0_diffuse;
 uniform vec4 light0_specular;
@@ -123,6 +124,7 @@ void main() {
   float e_r = max(dot(e, r), 0.0);
   // shininess 5.0 is OpenGL 2.x default value
   vec3 l0 = light0_ambient.rgb + n_d0 * light0_diffuse.rgb + light0_specular.rgb * pow(e_r, 5.0);
+  l0 += light_global_ambient.rgb;
   frag_color = col0 * tint * vec4(l0, 1.0);
 }
 )";}
@@ -157,6 +159,7 @@ void main() {
 inline std::string al_lighting_mesh_frag_shader() { return R"(
 #version 330
 uniform vec4 tint;
+uniform vec4 light_global_ambient;
 uniform vec4 light0_ambient;
 uniform vec4 light0_diffuse;
 uniform vec4 light0_specular;
@@ -175,6 +178,7 @@ void main() {
   float e_r = max(dot(e, r), 0.0);
   // shininess 5.0 is OpenGL 2.x default value
   vec3 l0 = light0_ambient.rgb + n_d0 * light0_diffuse.rgb + light0_specular.rgb * pow(e_r, 5.0);
+  l0 += light_global_ambient.rgb;
   frag_color = color_ * tint * vec4(l0, 1.0);
 }
 )";}
@@ -210,6 +214,7 @@ inline std::string al_lighting_tex_frag_shader() { return R"(
 #version 330
 uniform sampler2D tex0;
 uniform vec4 tint;
+uniform vec4 light_global_ambient;
 uniform vec4 light0_ambient;
 uniform vec4 light0_diffuse;
 uniform vec4 light0_specular;
@@ -228,6 +233,7 @@ void main() {
   float e_r = max(dot(e, r), 0.0);
   // shininess 5.0 is OpenGL 2.x default value
   vec3 l0 = light0_ambient.rgb + n_d0 * light0_diffuse.rgb + light0_specular.rgb * pow(e_r, 5.0);
+  l0 += light_global_ambient.rgb;
   frag_color = texture(tex0, texcoord_) * tint * vec4(l0, 1.0);
 }
 )";}
@@ -259,6 +265,7 @@ void main() {
 inline std::string al_lighting_material_frag_shader() { return R"(
 #version 330
 uniform vec4 tint;
+uniform vec4 light_global_ambient;
 uniform vec4 light0_ambient;
 uniform vec4 light0_diffuse;
 uniform vec4 light0_specular;
@@ -282,6 +289,7 @@ void main() {
   vec3 l0 = material0_ambient.rgb  * light0_ambient.rgb
           + material0_diffuse.rgb  * light0_diffuse.rgb  * n_d0
           + material0_specular.rgb * light0_specular.rgb * pow(e_r, material0_shininess);
+  l0 += material0_ambient.rgb * light_global_ambient.rgb;
   frag_color = tint * vec4(l0, 1.0);
 }
 )";}

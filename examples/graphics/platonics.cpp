@@ -63,7 +63,7 @@ public:
 		// Create face normals
 		for(int i=0; i<5; ++i){
 			solids[i].decompress();
-			// solids[i].generateNormals();
+			solids[i].generateNormals();
 		}
 
 		nav().pullBack(16);
@@ -78,7 +78,7 @@ public:
 		g.clear(0, 0, 0);
 
 		g.depthTesting(true);
-		// light();
+		g.lighting(true);
 
 		float angPos = 2*M_PI/5;
 		float R = 3;
@@ -92,7 +92,7 @@ public:
 				g.polygonMode(Graphics::FILL);
 				g.draw(solids[i]);
 				g.scale(1.01);
-				g.color(1, 1, 1);
+				g.color(0);
 				g.polygonMode(Graphics::LINE);
 				g.draw(solids[i]);
 			g.popMatrix();

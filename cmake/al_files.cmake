@@ -62,7 +62,7 @@ set(core_sources
   src/core/graphics/al_GPUObject.cpp
   src/core/graphics/al_Graphics.cpp
   src/core/graphics/al_Lens.cpp
-  # src/core/graphics/al_Light.cpp
+  src/core/graphics/al_Light.cpp
   src/core/graphics/al_Mesh.cpp
   src/core/graphics/al_OpenGL.cpp
   src/core/graphics/al_RenderManager.cpp

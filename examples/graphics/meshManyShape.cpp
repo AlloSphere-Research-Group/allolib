@@ -48,8 +48,9 @@ public:
     void onDraw (Graphics& g) override
     {
         g.clear(0);
-        // using default 3D camera
-        g.meshColor(); // use mesh's color array
+        g.depthTesting(true);
+        g.lighting(true);
+        g.meshColor(); // with lighting, use mesh's color array
         g.draw(shapes);
     }
 

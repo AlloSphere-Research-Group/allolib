@@ -209,7 +209,7 @@ void Texture::disableMipmap() {
 //   unbind_temp();
 // }
 
-void Texture::submit(const void *pixels) {
+void Texture::submit(const void *pixels, unsigned int format, unsigned int type) {
   if (!pixels) {
     return;
   }
@@ -218,15 +218,15 @@ void Texture::submit(const void *pixels) {
   // AL_GRAPHICS_ERROR("before Texture::submit (glTexSubImage)", id());
   switch (target()) {
     case GL_TEXTURE_1D:
-      glTexSubImage1D(target(), 0, 0, width(), format(), type(), pixels);
+      glTexSubImage1D(target(), 0, 0, width(), format, type, pixels);
       break;
     case GL_TEXTURE_2D:
-      glTexSubImage2D(target(), 0, 0, 0, width(), height(), format(), type(),
+      glTexSubImage2D(target(), 0, 0, 0, width(), height(), format, type,
                       pixels);
       break;
     case GL_TEXTURE_3D:
       glTexSubImage3D(target(), 0, 0, 0, 0, width(), height(), depth(),
-                      format(), type(), pixels);
+                      format, type, pixels);
       break;
     default:
       AL_WARN("invalid texture target %d", target());

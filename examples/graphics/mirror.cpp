@@ -20,9 +20,12 @@ public:
   EasyFBO fbo;
   Pose mirrorPose;
   Pose fboPose;
-  Vec3f lightPos;
+
+  Light light;      // Necessary to light objects in the scene
+  Material material;    // Necessary for specular highlights
+
   Mesh surface, sphere; // Geometry to render
-  double phase;     // Animation phase
+  double phase = 0.5;     // Animation phase
 
   void onCreate() {
     fbo.init(1024,1024);
@@ -34,8 +37,6 @@ public:
     // position nav
     nav().pos(0,-2.2,0.5);
     nav().faceToward(Vec3f(0,0,0.5));
-
-    phase = 0.5;
 
     // Create a circular wave pattern
     addSurface(surface, 64,64);
@@ -50,6 +51,17 @@ public:
 
     // Create a sphere to see the location of the light source.
     addSphere(sphere, 0.05);
+
+    // Set up light
+    // light.globalAmbient(RGB(0.1));  // Ambient reflection for all lights
+    light.ambient(RGB(0));      // Ambient reflection for this light
+    light.diffuse(RGB(1,1,0.5));  // Light scattered directly from light
+    // light.attenuation(1,1,0);   // Inverse distance attenuation
+    //light.attenuation(1,0,1);   // Inverse-squared distance attenuation
+
+    // Set up material (i.e., specularity)
+    material.specular(light.diffuse()*0.2); // Specular highlight, "shine"
+    material.shininess(50);     // Concentration of specular component [0,128]
   }
 
   void onAnimate(double dt){
@@ -59,8 +71,7 @@ public:
     float y = sin(11*phase*2*M_PI);
     float z = cos(phase*2*M_PI)*0.5 + 0.6;
 
-    // light.pos(x,y,z);
-    lightPos.set(x, y, z);
+    light.pos(x, y, z);
   }
 
   // move scene draw into seperate method since we will be rendering it twice
@@ -68,23 +79,23 @@ public:
   void drawScene(Graphics& g){
 
     // Render sphere at light position
+    g.lighting(false);
     g.pushMatrix();
-      g.loadIdentity();
-      g.translate(lightPos);
-      g.color(1, 1, 1);
+      g.translate(Vec3f(light.pos()));
+      g.color(light.diffuse());
       g.draw(sphere);
     g.popMatrix();
 
     // Draw surface
-    g.color(1, 0, 0);
+    g.lighting(true);
+    g.light(light);
+    g.material(material);
     g.draw(surface);
 
   }
 
 
   void onDraw(Graphics& g){
-    g.clear(0, 0, 0);
-
     // pose representing the virtual camera we will use to render the fbo 
     Pose mirrorCam;
 
@@ -95,6 +106,8 @@ public:
     // face toward a point along reflected direction from nav to mirror across mirror plane normal, keep mirror up vector
     mirrorCam.faceToward(mirrorCam.pos() + (mirrorPose.pos()-nav().pos()).reflect(mirrorPose.uf()), mirrorPose.uu());
 
+    g.depthTesting(true);
+
     // render scene to frame buffer
     g.pushFramebuffer(fbo);
     g.pushViewport(0, 0, 1024, 1024);
@@ -103,8 +116,11 @@ public:
     g.pushViewMatrix(Matrix4f::lookAt(mirrorCam.ux(), mirrorCam.uy(), mirrorCam.uz(), mirrorCam.pos()));
 
     drawScene(g); // draw scene to mirror fbo
+
     g.pushMatrix();
     g.translate(nav().pos()); // draw nav as sphere in mirror fbo
+    g.lighting(false);
+    g.color(light.diffuse());
     g.draw(sphere);
     g.popMatrix();
 
@@ -113,7 +129,10 @@ public:
     g.popViewport();
     g.popFramebuffer();
 
+
     // draw our mirror
+    g.clear(0, 0, 0);
+    g.lighting(false);
     g.pushMatrix();
     g.translate(mirrorPose.pos());
     g.rotate(mirrorPose.quat());

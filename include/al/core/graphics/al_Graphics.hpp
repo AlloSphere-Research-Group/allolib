@@ -242,9 +242,10 @@ class Graphics : public RenderManager {
   void clearBuffer(float k, float a, float d, int drawbuffer) { clearBuffer(k, k, k, a, d, drawbuffer); }
   void clearBuffer(Color const &c, float d, int drawbuffer) { clearBuffer(c.r, c.g, c.b, c.a, d, drawbuffer); }
 
-  void clear(float r, float g, float b, float a = 1, float d = 1) { clearBuffer(r, g, b, a, d, 0); }
-  void clear(float k, float a = 1, float d = 1) { clearBuffer(k, k, k, a, d, 0); }
-  void clear(Color const &c, float d = 1) { clearBuffer(c.r, c.g, c.b, c.a, d, 0); }
+  void clear() { clearBuffer(0); }
+  void clear(float r, float g, float b, float a = 1) { clearBuffer(r, g, b, a, 1, 0); }
+  void clear(float k, float a = 1) { clearBuffer(k, k, k, a, 1, 0); }
+  void clear(Color const &c) { clearBuffer(c.r, c.g, c.b, c.a, 1, 0); }
 
 
   // extended, predefined render managing --------------------------------------
@@ -325,6 +326,10 @@ class Graphics : public RenderManager {
     mUniformChanged = true;
   }
 
+  Light& light() {
+    mUniformChanged = true;
+    return mLight;
+  }
 
   void send_uniforms(ShaderProgram& s, Material const& m) {
     s.uniform4("material0_ambient", m.ambient().components);
@@ -334,6 +339,7 @@ class Graphics : public RenderManager {
   }
 
   void send_uniforms(ShaderProgram& s, Light const& l) {
+    s.uniform4("light_global_ambient", Light::globalAmbient().components);
     s.uniform4("light0_ambient", l.ambient().components);
     s.uniform4("light0_diffuse", l.diffuse().components);
     s.uniform4("light0_specular", l.specular().components);
