@@ -39,17 +39,20 @@ else ()
     pkg_search_module(APR REQUIRED apr-1)
   endif (USE_APR)
 
+  # for freeimage, assimp, freetype
   list(APPEND CMAKE_MODULE_PATH
     ${al_path}/cmake/find_scripts
   )
 
-  find_package(FreeImage) # uses cmake/find_scripts/FindFreeImage.cmake
-                          # and sets:
-                          #     FREEIMAGE_FOUND
-                          #     FREEIMAGE_INCLUDE_PATH
-                          #     FREEIMAGE_LIBRARY
+  find_package(FreeImage QUIET)
+  find_package(Assimp QUIET)
+  find_package(Freetype QUIET)
+
 
 endif (AL_WINDOWS)
+
+
+# NOW ADD OPTIONAL FILES -------------------------------------------------------
 
 if (USE_APR)
   set(APR_HEADERS
@@ -70,26 +73,49 @@ if (FREEIMAGE_FOUND)
   )
 endif (FREEIMAGE_FOUND)
 
+if (ASSIMP_LIBRARY)
+  message("found assimp")
+  set(assimp_headers ${al_path}/include/al/util/al_Asset.hpp)
+  set(assimp_sources ${al_path}/src/util/al_Asset.cpp)
+endif()
+
+if (FREETYPE_INCLUDE_DIRS)
+  message("found freetype")
+  set(freetype_headers ${al_path}/include/al/util/al_Font.hpp)
+  set(freetype_sources ${al_path}/src/util/al_Font.cpp)
+endif()
+
+
+# EXPORT SEARCH RESULTS AND FILE LISTS -----------------------------------------
+
 set(ADDITIONAL_INCLUDE_DIRS
 	# ${PORTAUDIO_INCLUDE_DIRS}
 	${APR_INCLUDE_DIRS}
   ${FREEIMAGE_INCLUDE_PATH}
+  ${ASSIMP_INCLUDE_DIR}
+  ${FREETYPE_INCLUDE_DIRS}
 )
 
 set(ADDITIONAL_LIBRARIES
 	# ${PORTAUDIO_LIBRARIES}
 	${APR_LIBRARIES}
   ${FREEIMAGE_LIBRARY}
+  ${ASSIMP_LIBRARY}
+  ${FREETYPE_LIBRARY}
 )
 
 set(ADDITIONAL_HEADERS
   ${FREEIMAGE_HEADERS}
 	${APR_HEADERS}
+  ${assimp_headers}
+  ${freetype_headers}
 )
 
 set(ADDITIONAL_SOURCES
   ${FREEIMAGE_SOURCES}
 	${APR_SOURCES}
+  ${assimp_sources}
+  ${freetype_sources}
 )
 
 set(ADDITIONAL_DEFINITIONS

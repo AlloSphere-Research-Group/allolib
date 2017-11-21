@@ -51,6 +51,8 @@ public:
 
     Graphics& graphics() { return mGraphics; }
 
+    Viewport const& viewport() { return mViewport; }
+
     virtual void onInit() {}
     virtual void onAnimate(double dt) {}
     virtual void onExit() {}

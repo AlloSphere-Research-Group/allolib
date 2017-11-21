@@ -1,317 +1,304 @@
-#ifndef INCLUDE_AL2_IMAGE_HPP
-#define INCLUDE_AL2_IMAGE_HPP
+#ifndef INCLUDE_AL_IMAGE_HPP
+#define INCLUDE_AL_IMAGE_HPP
 
-/*  Allocore --
-    Multimedia / virtual environment application class library
+/*	Allocore --
+	Multimedia / virtual environment application class library
 
-    Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology, UCSB.
-    Copyright (C) 2012. The Regents of the University of California.
-    All rights reserved.
+	Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology, UCSB.
+	Copyright (C) 2012. The Regents of the University of California.
+	All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions are met:
+	Redistribution and use in source and binary forms, with or without
+	modification, are permitted provided that the following conditions are met:
 
-        Redistributions of source code must retain the above copyright notice,
-        this list of conditions and the following disclaimer.
+		Redistributions of source code must retain the above copyright notice,
+		this list of conditions and the following disclaimer.
 
-        Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
+		Redistributions in binary form must reproduce the above copyright
+		notice, this list of conditions and the following disclaimer in the
+		documentation and/or other materials provided with the distribution.
 
-        Neither the name of the University of California nor the names of its
-        contributors may be used to endorse or promote products derived from
-        this software without specific prior written permission.
+		Neither the name of the University of California nor the names of its
+		contributors may be used to endorse or promote products derived from
+		this software without specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+	AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+	IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+	ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+	LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+	CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+	SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+	INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+	CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+	ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+	POSSIBILITY OF SUCH DAMAGE.
 
 
-    File description:
-    Loads and saves images
+	File description:
+	Loads and saves images
 
-    File author(s):
-    Graham Wakefield, 2010, grrrwaaa@gmail.com
-    Keehong Youn, 2017, younkeehong@gmail.com
+	File author(s):
+	Graham Wakefield, 2010, grrrwaaa@gmail.com
 */
 
+#include "al/util/al_Array.hpp"
+#include "al/core/graphics/al_Texture.hpp"
 #include <string>
-#include <cstdint>
-#include <vector>
 
-// #include <iostream>
-
-namespace al {
+namespace al{
 
 /*!
-    \class Image
+	\class Image
 
-    Loads and saves images.
+	Loads and saves images.
 
-    Default implementation uses the FreeImage library. Supported formats include:
+	Default implementation uses the FreeImage library. Supported formats include:
 
-        bmp, chead, cut, dcx, dds, doom, doomFlat, exif, gif, hdr, ico, jasc_pal, jpg,
-        lbm, lif, mdl, pcd, pcx, pic, pix, png, pnm, psd, psp, pxr, raw, sgi, tgo, tif,
-        wal, xpm
+		bmp, chead, cut, dcx, dds, doom, doomFlat, exif, gif, hdr, ico, jasc_pal, jpg,
+		lbm, lif, mdl, pcd, pcx, pic, pix, png, pnm, psd, psp, pxr, raw, sgi, tgo, tif,
+		wal, xpm
 
-    FreeImage is used under the FreeImage Public License (FIPL) v1.0
-    See the /licenses folder in the source tree, or
-    http://freeimage.sourceforge.net/freeimage-license.txt
+	FreeImage is used under the FreeImage Public License (FIPL) v1.0
+	See the /licenses folder in the source tree, or
+	http://freeimage.sourceforge.net/freeimage-license.txt
 */
 
 /// @ingroup allocore
 class Image {
 public:
+	/*!
+		Image data formats.
+	*/
+	enum Format {
+		LUMINANCE = 0,	//!< luminance (1-plane)
+		LUMALPHA,		//!< lumalpha (2-plane)
+		RGB,			//!< rgb (3-plane)
+		RGBA,			//!< rgba (4-plane)
+		UNKNOWN_FORMAT
+	};
 
-    class Array
-    {
-    public:
-        std::vector<uint8_t> mData;
-        int components=1;
-        int width=1;
-        int height=1;
+	template<typename T>
+	struct RGBPix { T r, g, b; };
 
-        uint8_t* data() {
-            return mData.data();
-        }
-        const uint8_t* data() const {
-            return mData.data();
-        }
-        int stride(int i) const {
-            if (i == 0) return components;
-            if (i == 1) return components * width;
-            return 0;
-        }
-        int dim(int i) const {
-            if (i == 0) return width;
-            if (i == 1) return height;
-            return 0;
-        }
-        uint8_t* cell(int x, int y) {
-            return &mData[y * width * components + x * components];
-        }
-        const uint8_t* cell(int x, int y) const {
-            return &mData[y * width * components + x * components];
-        }
-        void format(int comps, int dimx, int dimy);
-    };
-
-    /*!
-        Image data formats.
-    */
-    enum Format {
-        LUMINANCE = 0,  //!< luminance (1-plane)
-        LUMALPHA,       //!< lumalpha (2-plane)
-        RGB,            //!< rgb (3-plane)
-        RGBA,           //!< rgba (4-plane)
-        UNKNOWN_FORMAT
-    };
-
-    // template<typename T>
-    struct RGBPix { uint8_t r, g, b; };
-
-    // template<typename T>
-    struct RGBAPix { uint8_t r, g, b, a; };
+	template<typename T>
+	struct RGBAPix { T r, g, b, a; };
 
 
-    Image();
+	Image();
 
-    /// @param[in] filePath     Image file to load
-    Image(const std::string& filePath);
+	/// @param[in] filePath		Image file to load
+	Image(const std::string& filePath);
 
-    ~Image();
+	~Image();
 
 
-    /// Load image from disk
+	/// Load image from disk
 
-    /// @param[in] filePath     File to load. Image type determined by file 
-    ///                         extension.
+	/// @param[in] filePath		File to load. Image type determined by file 
+	///							extension.
     /// \returns true for success or print error message and return false
-    bool load(const std::string& filePath);
+	bool load(const std::string& filePath);
 
-    /// Save image to disk
+	/// Save image to disk
 
-    /// @param[in] filePath     File to save. Image type determined by file 
-    ///                         extension.
+	/// @param[in] filePath		File to save. Image type determined by file 
+	///							extension.
     /// \returns true for success or print error message and return false
-    bool save(const std::string& filePath);
+	bool save(const std::string& filePath);
 
-    /// Save pixel data to disk
+	/// Save pixel data to disk
 
-    /// @param[in] filePath     File to save. Image type determined by file 
-    ///                         extension.
-    /// @param[in] src          source array containing pixel data
-    /// @param[in] compressFlags level of compression in [0,100] and other flags
-    // static bool save(const std::string& filePath, const Array& src, int compressFlags=50);
+	/// @param[in] filePath		File to save. Image type determined by file 
+	///							extension.
+	/// @param[in] src			source array containing pixel data
+	/// @param[in] compressFlags level of compression in [0,100] and other flags
+	static bool save(const std::string& filePath, const Array& src, int compressFlags=50);
 
-    /// Save pixel data to disk
+	/// Save pixel data to disk
 
-    /// @param[in] filePath     File to save. Image type determined by file 
-    ///                         extension.
-    /// @param[in] pixels       pixel data
-    /// @param[in] nx           number of pixels along the x dimension
-    /// @param[in] ny           number of pixels along the y dimension
-    /// @param[in] fmt          pixel format
-    /// @param[in] compressFlags level of compression in [0,100] and other flags
-    // template <class T>
-    // static bool save(const std::string& filePath, const T * pixels, int nx, int ny, Format fmt, int compressFlags=0);
-
-
-    /// File path to image
-    const std::string& filepath() const { return mFilename; }
-
-    /// Whether image was loaded from file
-    bool loaded() const { return mLoaded; }
+	/// @param[in] filePath		File to save. Image type determined by file 
+	///							extension.
+	/// @param[in] pixels		pixel data
+	/// @param[in] nx			number of pixels along the x dimension
+	/// @param[in] ny			number of pixels along the y dimension
+	/// @param[in] fmt			pixel format
+	/// @param[in] compressFlags level of compression in [0,100] and other flags
+	template <class T>
+	static bool save(const std::string& filePath, const T * pixels, int nx, int ny, Format fmt, int compressFlags=50);
 
 
-    /// Get pixels as an Array
-    Array& array(){ return mArray; }
+	/// File path to image
+	const std::string& filepath() const { return mFilename; }
 
-    /// Get pixels as an Array (read-only)
-    const Array& array() const { return mArray; }
-
-    /// Get pointer to pixels
-    // template <typename T>
-    uint8_t* pixels(){ return array().data(); }
-
-    /// Get pointer to pixels (read-only)
-    // template <typename T>
-    const uint8_t* pixels() const { return array().data(); }
+	/// Whether image was loaded from file
+	bool loaded() const { return mLoaded; }
 
 
-    /// Get number of bytes per pixel
-    // unsigned bytesPerPixel() const { return allo_type_size(array().type()) * array().components(); }
+	/// Get pixels as an Array
+	Array& array(){ return mArray; }
 
-    /// Get pixel format
-    Format format() const;
+	/// Get pixels as an Array (read-only)
+	const Array& array() const { return mArray; }
 
-    /// Get width, in pixels
-    unsigned width() const { return array().width; }
+	/// Get pointer to pixels
+	template <typename T>
+	T * pixels(){ return (T*)(mArray.data.ptr); }
 
-    /// Get height, in pixels
-    unsigned height() const { return array().height; }
-
-    unsigned channels() const { return array().components; }
-
-
-    /// Get compression flags for saving
-    int compression() const { return mCompression; }
-
-    /// Set compression flags for saving
-
-    /// The flags consist of a bitwise-or of the level of compression in [0,100]
-    /// and other flags which may be specific to the image format.
-    Image& compression(int flags){ mCompression=flags; return *this; }
+	/// Get pointer to pixels (read-only)
+	template <typename T>
+	const T * pixels() const { return (const T*)(mArray.data.ptr); }
 
 
-    /// Get read-only reference to a pixel
+	/// Get number of bytes per pixel
+	unsigned bytesPerPixel() const { return allo_type_size(array().type()) * array().components(); }
 
-    /// Warning: doesn't check that Pix has matching type/component count.
-    /// Warning: no bounds checking performed on x and y.
-    template<typename Pix = RGBAPix>
-    const Pix& at(unsigned x, unsigned y) const {
-        return *reinterpret_cast<Pix*>(array().cell(x, y));
+	/// Get pixel format
+	Format format() const;
+
+	/// Get width, in pixels
+	unsigned width() const { return array().width(); }
+
+	/// Get height, in pixels
+	unsigned height() const { return array().height(); }
+
+
+	/// Get compression flags for saving
+	int compression() const { return mCompression; }
+
+	/// Set compression flags for saving
+
+	/// The flags consist of a bitwise-or of the level of compression in [0,100]
+	/// and other flags which may be specific to the image format.
+	Image& compression(int flags){ mCompression=flags; return *this; }
+
+
+	/// Get read-only reference to a pixel
+
+	/// Warning: doesn't check that Pix has matching type/component count.
+	/// Warning: no bounds checking performed on x and y.
+	template<typename Pix>
+	const Pix& at(unsigned x, unsigned y) const {
+		return *array().cell<Pix>(x, y);
+	}
+
+	/// Get mutable reference to a pixel
+
+	/// Warning: doesn't check that Pix has matching type/component count.
+	/// Warning: no bounds checking performed on x and y.
+	template<typename Pix>
+	Pix& at(unsigned x, unsigned y){
+		return *array().cell<Pix>(x, y);
+	}
+
+	/// Write a pixel to an Image
+
+	/// Warning: doesn't check that Pix has matching type/component count
+	/// Warning: no bounds checking performed on x and y
+	template<typename Pix>
+	void write(const Pix& pix, unsigned x, unsigned y) {
+		array().write(&pix.r, x, y);
+	}
+
+	/// Read a pixel from an Image
+
+	/// Warning: doesn't check that Pix has matching type/component count
+	/// Warning: no bounds checking performed on x and y
+	template<typename Pix>
+	void read(Pix& pix, unsigned x, unsigned y) const {
+		array().read(&pix.r, x, y);
+	}
+
+	/// Resize internal pixel buffer. Erases any existing data.
+
+	/// @param[in] dimX		number of pixels in x direction
+	/// @param[in] dimY		number of pixels in y direction
+	/// @param[in] format	pixel color format
+	/// \returns True on success; false otherwise.
+	template <typename T>
+	bool resize(int dimX, int dimY, Format format){
+		mArray.formatAligned(components(format), Array::type<T>(), dimX, dimY, 1);
+		return true;
+	}
+
+    void sendToTexture(Texture& tex, Texture::Internal i, Texture::Format f, Texture::DataType d) {
+        tex.create2D(width(), height(), i, f, d);
+        tex.submit(pixels<uint8_t>(), f, Texture::UBYTE);
     }
 
-    /// Get mutable reference to a pixel
-
-    /// Warning: doesn't check that Pix has matching type/component count.
-    /// Warning: no bounds checking performed on x and y.
-    template<typename Pix = RGBAPix>
-    Pix& at(unsigned x, unsigned y){
-        return *reinterpret_cast<Pix*>(array().cell(x, y));
-    }
-
-    /// Write a pixel to an Image
-
-    /// Warning: doesn't check that Pix has matching type/component count
-    /// Warning: no bounds checking performed on x and y
-    // template<typename Pix>
-    // void write(const Pix& pix, unsigned x, unsigned y) {
-    //     array().write(&pix.r, x, y);
-    // }
-
-    /// Read a pixel from an Image
-
-    /// Warning: doesn't check that Pix has matching type/component count
-    /// Warning: no bounds checking performed on x and y
-    // template<typename Pix>
-    // void read(Pix& pix, unsigned x, unsigned y) const {
-    //     array().read(&pix.r, x, y);
-    // }
-
-    /// Resize internal pixel buffer. Erases any existing data.
-
-    /// @param[in] dimX     number of pixels in x direction
-    /// @param[in] dimY     number of pixels in y direction
-    /// @param[in] format   pixel color format
-    /// \returns True on success; false otherwise.
-    // template <typename T>
-    // bool resize(int dimX, int dimY, Format format){
-    void resize(int dimX, int dimY, Format format){
-        resize(dimX, dimY, components(format));
-    }
-
-    void resize(int dimX, int dimY, int channels){
-        mArray.format(channels, dimX, dimY);
+    void sendToTexture(Texture& tex) {
+        auto to_texture_internalformat = [](Format f) {
+            switch (f) {
+                case LUMINANCE: return Texture::R8;
+                case LUMALPHA: return Texture::RG8;
+                case RGB: return Texture::RGB8;
+                case RGBA: return Texture::RGBA8;
+                default: return Texture::RGBA8;
+            }
+        };
+        auto to_texture_format = [](Format f) {
+            switch (f) {
+                case LUMINANCE: return Texture::RED;
+                case LUMALPHA: return Texture::RG;
+                case RGB: return Texture::RGB;
+                case RGBA: return Texture::RGBA;
+                default: return Texture::RGBA;
+            }
+        };
+        sendToTexture(tex, to_texture_internalformat(format()), to_texture_format(format()), Texture::UBYTE);
     }
 
 
-    /// Get number of components per pixel element
-    static int components(Format v);
+	/// Get number of components per pixel element
+	static int components(Format v);
 
-    static Format getFormat(int planes);
+	static Format getFormat(int planes);
 
-    class Impl {
-    public:
-        virtual ~Impl() {};
-        virtual bool load(const std::string& filename, Array& lat) = 0;
-        virtual bool save(const std::string& filename, const Array& lat, int compressFlags) = 0;
-    };
+	class Impl {
+	public:
+		virtual ~Impl() {};
+		virtual bool load(const std::string& filename, Array& lat) = 0;
+		virtual bool save(const std::string& filename, const Array& lat, int compressFlags) = 0;
+	};
 
 protected:
-    Array mArray;           // pixel data
-    Impl * mImpl;           // library implementation
-    std::string mFilename;
-    int mCompression;
-    bool mLoaded;           // true after image data is loaded
+	Array mArray;			// pixel data
+	Impl * mImpl;			// library implementation
+	std::string mFilename;
+	int mCompression;
+	bool mLoaded;			// true after image data is loaded
 };
+
+
+
 
 // Implementation ______________________________________________________________
 inline int Image::components(Format v){
-    switch(v){
-    case Format::LUMINANCE: return 1;
-    case Format::LUMALPHA:  return 2;
-    case Format::RGB:       return 3;
-    case Format::RGBA:      return 4;
-    default:;
-    }
-    return 0;
+	switch(v){
+	case LUMINANCE:	return 1;
+	case LUMALPHA:	return 2;
+	case RGB:		return 3;
+	case RGBA:		return 4;
+	default:;
+	}
+	return 0;
 }
 
-// template <class T>
-// bool Image::save(
-//     const std::string& filePath, const T * pixels, int nx, int ny, Format fmt, int compress
-// ){
-//     Array a;
-//     a.data.ptr          = (char *)const_cast<T *>(pixels);
-//     a.header.type       = Array::type<T>();
-//     a.header.components = Image::components(fmt);
-//     allo_array_setdim2d(&a.header, nx, ny);
-//     allo_array_setstride(&a.header, 1);
+template <class T>
+bool Image::save(
+	const std::string& filePath, const T * pixels, int nx, int ny, Format fmt, int compress
+){
+	Array a;
+	a.data.ptr			= (char *)const_cast<T *>(pixels);
+	a.header.type		= Array::type<T>();
+	a.header.components	= Image::components(fmt);
+	allo_array_setdim2d(&a.header, nx, ny);
+	allo_array_setstride(&a.header, 1);
 
-//     bool res = save(filePath, a, compress);
-//     a.data.ptr = NULL; // prevent ~Array from deleting data
-//     return res;
-// }
+	bool res = save(filePath, a, compress);
+	a.data.ptr = NULL; // prevent ~Array from deleting data
+	return res;
+}
 
 
 } // al::

@@ -22,7 +22,6 @@ set(core_headers
   include/al/core/graphics/al_RenderManager.hpp
   include/al/core/graphics/al_Shader.hpp
   include/al/core/graphics/al_Shapes.hpp
-  # include/al/core/graphics/al_Stereographic.hpp
   include/al/core/graphics/al_Texture.hpp
   include/al/core/graphics/al_VAO.hpp
   include/al/core/graphics/al_VAOMesh.hpp
@@ -68,7 +67,6 @@ set(core_sources
   src/core/graphics/al_RenderManager.cpp
   src/core/graphics/al_Shader.cpp
   src/core/graphics/al_Shapes.cpp
-  # src/core/graphics/al_Stereographic.cpp
   src/core/graphics/al_Texture.cpp
   src/core/graphics/al_VAO.cpp
   src/core/graphics/al_VAOMesh.cpp
@@ -89,6 +87,28 @@ set(core_sources
   src/core/system/al_Time.cpp
   src/core/types/al_Color.cpp
 )
+
+set(util_headers
+  include/al/util/al_Array.h
+  include/al/util/al_Array.hpp
+)
+
+set(util_sources
+  src/util/al_Array_C.c
+  src/util/al_Array.cpp
+)
+
+set(al_headers
+  ${core_headers}
+  ${util_headers}
+)
+
+set(al_sources
+  ${core_sources}
+  ${util_sources}
+)
+
+# OPTIONAL ---------------------------------------------------------------------
 
 set(glv_headers
   include/al/glv/al_GLV.hpp
@@ -123,14 +143,6 @@ set(glv_sources
   src/glv/glv_textview.cpp
   src/glv/glv_view.cpp
   src/glv/glv_widget.cpp
-)
-
-set(al_headers
-  ${core_headers}
-)
-
-set(al_sources
-  ${core_sources}
 )
 
 if (USE_GLV)

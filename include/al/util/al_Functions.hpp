@@ -43,8 +43,9 @@
   Lance Putnam, 2006, putnam.lance@gmail.com
 */
 
-#include <cmath>
 #include "al/core/math/al_Constants.hpp"
+#include <cmath>
+#include <algorithm>
 
 namespace al {
 
@@ -780,7 +781,7 @@ TEM inline T roundAway(const T& v, const T& s){ return v<T(0) ? al::floor(v,s) :
 
 TEM inline T sgn(const T& v, const T& norm){ return v==T(0) ? T(0) : v<T(0) ? -norm : norm; }
 
-TEM inline T sinc(const T& r, const T& eps){ return (al::abs(r) > eps) ? std::sin(r)/r : std::cos(r); }
+TEM inline T sinc(const T& r, const T& eps){ return (std::abs(r) > eps) ? std::sin(r)/r : std::cos(r); }
 
 TEM inline T slope(const T& x1, const T& y1, const T& x2, const T& y2){ return (y2-y1)/(x2-x1); }
 
