@@ -35,6 +35,6 @@ al.dir/
 x64
 CmakeSettings.json
 al/
-
+!include/al/
 *.sublime-project
 *.sublime-workspace
