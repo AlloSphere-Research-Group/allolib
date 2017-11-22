@@ -45,7 +45,7 @@ public:
     const Nav& nav() const { return mNav; }
 
     NavInputControl& navControl() { return mNavControl; }
-    const NavInputControl& navControl() const { return mNavControl; }
+    NavInputControl const& navControl() const { return mNavControl; }
 
     Lens& lens() { return mView.lens(); }
 
@@ -95,6 +95,8 @@ public:
 
     // from WindowApp
     void loop() override {
+        preOnAnimate(dt() / 1000000.0f);
+        onAnimate(dt() / 1000000.0f); // millis for dt
         preOnDraw();
         onDraw();
         postOnDraw();
@@ -109,8 +111,6 @@ public:
         while (!shouldQuit()) {
             // to quit, call WindowApp::quit() or click close button of window,
             // or press ctrl + q
-            preOnAnimate(dt() / 1000000.0f);
-            onAnimate(dt() / 1000000.0f); // millis for dt
             loop(); // WindowApp (onDraw, refresh)
             tickFPS(); // WindowApp (FPS)
         }

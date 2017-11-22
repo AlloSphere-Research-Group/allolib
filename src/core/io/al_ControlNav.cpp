@@ -1,5 +1,5 @@
 #include "al/core/io/al_ControlNav.hpp"
-#include <iostream>
+// #include <iostream>
 
 namespace al {
 
@@ -152,7 +152,7 @@ NavInputControl::NavInputControl(double vscale, double tscale)
 {}
 
 NavInputControl::NavInputControl(Nav& nav, double vscale, double tscale)
-:	mNav(&nav), mVScale(vscale), mTScale(tscale), mUseMouse(true)
+: mNav(&nav), mVScale(vscale), mTScale(tscale), mUseMouse(true)
 {}
 
 NavInputControl::NavInputControl(const NavInputControl& v)
@@ -160,74 +160,77 @@ NavInputControl::NavInputControl(const NavInputControl& v)
 {}
 
 bool NavInputControl::keyDown(const Keyboard& k){
-	if(k.ctrl()) return true;
+  if (!mActive) return true;
+  if(k.ctrl()) return true;
 
-	double a = mTScale * M_DEG2RAD;	// rotational speed: rad/sec
-	double v = mVScale;				// speed: world units/sec
+  double a = mTScale * M_DEG2RAD; // rotational speed: rad/sec
+  double v = mVScale;       // speed: world units/sec
 
-	if(k.alt()){
-		switch(k.key()){
-		case Keyboard::UP:  nav().pullBack(nav().pullBack()*0.8); return false;
-		case Keyboard::DOWN:nav().pullBack(nav().pullBack()/0.8); return false;
-		}
-	}
+  if(k.alt()){
+    switch(k.key()){
+    case Keyboard::UP:  nav().pullBack(nav().pullBack()*0.8); return false;
+    case Keyboard::DOWN:nav().pullBack(nav().pullBack()/0.8); return false;
+    }
+  }
 
-	if(k.alt()) v *= 10;
-	if(k.shift()) v *= 0.1;
+  if(k.alt()) v *= 10;
+  if(k.shift()) v *= 0.1;
 
-	switch(k.key()){
-		case '`':				nav().halt().home(); return false;
-		case 's':				nav().halt(); return false;
-		case Keyboard::UP:		nav().spinR( a); return false;
-		case Keyboard::DOWN:	nav().spinR(-a); return false;
-		case Keyboard::RIGHT:	nav().spinU(-a); return false;
-		case Keyboard::LEFT:	nav().spinU( a); return false;
-		case 'q': case 'Q':		nav().spinF( a); return false;
-		case 'z': case 'Z':		nav().spinF(-a); return false;
-		case 'a': case 'A':		nav().moveR(-v); return false;
-		case 'd': case 'D':		nav().moveR( v); return false;
-		case 'e': case 'E':		nav().moveU( v); return false;
-		case 'c': case 'C':		nav().moveU(-v); return false;
-		case 'x': case 'X':		nav().moveF(-v); return false;
-		case 'w': case 'W':		nav().moveF( v); return false;
-		default:;
-	}
-	return true;
+  switch(k.key()){
+    case '`':       nav().halt().home(); return false;
+    case 's':       nav().halt(); return false;
+    case Keyboard::UP:    nav().spinR( a); return false;
+    case Keyboard::DOWN:  nav().spinR(-a); return false;
+    case Keyboard::RIGHT: nav().spinU(-a); return false;
+    case Keyboard::LEFT:  nav().spinU( a); return false;
+    case 'q': case 'Q':   nav().spinF( a); return false;
+    case 'z': case 'Z':   nav().spinF(-a); return false;
+    case 'a': case 'A':   nav().moveR(-v); return false;
+    case 'd': case 'D':   nav().moveR( v); return false;
+    case 'e': case 'E':   nav().moveU( v); return false;
+    case 'c': case 'C':   nav().moveU(-v); return false;
+    case 'x': case 'X':   nav().moveF(-v); return false;
+    case 'w': case 'W':   nav().moveF( v); return false;
+    default:;
+  }
+  return true;
 }
 
 bool NavInputControl::keyUp(const Keyboard& k) {
-	switch(k.key()){
-		case Keyboard::UP:
-		case Keyboard::DOWN:	nav().spinR(0); return false;
-		case Keyboard::RIGHT:
-		case Keyboard::LEFT:	nav().spinU(0); return false;
-		case 'q': case 'Q':
-		case 'z': case 'Z':		nav().spinF(0); return false;
-		case 'a': case 'A':
-		case 'd': case 'D':		nav().moveR(0); return false;
-		case 'e': case 'E':
-		case 'c': case 'C':		nav().moveU(0); return false;
-		case 'x': case 'X':
-		case 'w': case 'W':		nav().moveF(0); return false;
-		default:;
-	}
-	return true;
+  // keyUp is for stopping, so no need to skip even if mActive is false
+  switch(k.key()){
+    case Keyboard::UP:
+    case Keyboard::DOWN:  nav().spinR(0); return false;
+    case Keyboard::RIGHT:
+    case Keyboard::LEFT:  nav().spinU(0); return false;
+    case 'q': case 'Q':
+    case 'z': case 'Z':   nav().spinF(0); return false;
+    case 'a': case 'A':
+    case 'd': case 'D':   nav().moveR(0); return false;
+    case 'e': case 'E':
+    case 'c': case 'C':   nav().moveU(0); return false;
+    case 'x': case 'X':
+    case 'w': case 'W':   nav().moveF(0); return false;
+    default:;
+  }
+  return true;
 }
 
 bool NavInputControl::mouseDrag(const Mouse& m){
-	if(mUseMouse){
-		if(m.left()){
-			nav().turnU(-m.dx() * 0.2 * M_DEG2RAD);
-			nav().turnR(-m.dy() * 0.2 * M_DEG2RAD);
-			return false;
-		}
-		else if(m.right()){
-			nav().turnF( m.dx() * 0.2 * M_DEG2RAD);
-			nav().pullBack(nav().pullBack() + m.dy()*0.02);
-			return false;
-		}
-	}
-	return true;
+  if (!mActive) return true;
+  if(mUseMouse){
+    if(m.left()){
+      nav().turnU(-m.dx() * 0.2 * M_DEG2RAD);
+      nav().turnR(-m.dy() * 0.2 * M_DEG2RAD);
+      return false;
+    }
+    else if(m.right()){
+      nav().turnF( m.dx() * 0.2 * M_DEG2RAD);
+      nav().pullBack(nav().pullBack() + m.dy()*0.02);
+      return false;
+    }
+  }
+  return true;
 }
 
 } // al::
