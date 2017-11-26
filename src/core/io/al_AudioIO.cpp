@@ -912,14 +912,16 @@ AudioIO::AudioIO()
       callback(nullptr),
       mZeroNANs(true),
       mClipOut(true),
-      mAutoZeroOut(true) {}
+      mAutoZeroOut(true),
+      mBackend{std::make_unique<AudioBackend>()}
+{}
 
 AudioIO::~AudioIO() { close(); }
 
 void AudioIO::init(void (*callbackA)(AudioIOData &), void *userData,
                    int framesPerBuf, double framesPerSec, int outChansA,
                    int inChansA) {
-  mBackend = std::make_unique<AudioBackend>();
+  // mBackend = std::make_unique<AudioBackend>();
   callback = callbackA;
   user(userData);
   deviceIn(AudioDevice::defaultInput());
