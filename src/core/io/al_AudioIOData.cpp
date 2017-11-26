@@ -36,7 +36,7 @@ void AudioDeviceInfo::setDefaultSampleRate(double rate) {
 //==============================================================================
 
 AudioIOData::AudioIOData(void *userData)
-    : mUser(userData), mFrame(0), mFramesPerBuffer(0), mFramesPerSecond(0),
+    : mUser(userData), mFrame(0), mFramesPerBuffer(512), mFramesPerSecond(44100),
       mBufI(nullptr), mBufO(nullptr), mBufB(nullptr), mBufT(nullptr), mNumI(0),
       mNumO(0), mNumB(0), mGain(1), mGainPrev(1) {}
 
