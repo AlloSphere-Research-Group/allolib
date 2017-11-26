@@ -1,21 +1,18 @@
 TODO
 
-- stereo window
 - fullscreen with specific monitor
-- connect omnirender
-
-- al::random
+- stereo & omni
 - font loading
 - Parameter class
-- alloAudio
-
-- build n deploy
 
 DEPENDENCIES
 
 - GLFW
 - GLEW
-- pkg-config (ubuntu and macos)
+- pkg-config (ubuntu and macos, for glfw)
+- freeimage (optional)
+- freetype (optional)
+- assimp (optional)
 
 NOTE
 
