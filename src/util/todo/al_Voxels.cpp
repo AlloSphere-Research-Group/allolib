@@ -1,9 +1,9 @@
 //#include <cassert>
 #include <algorithm> // min,max
-#include "allocore/types/al_Voxels.hpp"
-#include "allocore/io/al_File.hpp"
-#include "allocore/system/al_Printing.hpp"
-#include "allocore/graphics/al_Image.hpp"
+#include "al/core/types/al_Voxels.hpp"
+#include "al/core/io/al_File.hpp"
+#include "al/core/system/al_Printing.hpp"
+#include "al/core/graphics/al_Image.hpp"
 
 namespace al {
 

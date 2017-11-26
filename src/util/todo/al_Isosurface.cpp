@@ -1,6 +1,6 @@
 #include <math.h>
-#include "allocore/graphics/al_Isosurface.hpp"
-#include "allocore/graphics/al_Graphics.hpp"
+#include "al/core/graphics/al_Isosurface.hpp"
+#include "al/core/graphics/al_Graphics.hpp"
 
 namespace al{
 

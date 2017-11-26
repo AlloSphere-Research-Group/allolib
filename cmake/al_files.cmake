@@ -40,6 +40,15 @@ set(core_headers
   include/al/core/math/al_StdRandom.hpp
   include/al/core/math/al_Vec.hpp
   include/al/core/protocol/al_OSC.hpp
+  include/al/core/sound/al_Ambisonics.hpp
+  include/al/core/sound/al_AudioScene.hpp
+  include/al/core/sound/al_Biquad.hpp
+  include/al/core/sound/al_Crossover.hpp
+  include/al/core/sound/al_Dbap.hpp
+  include/al/core/sound/al_Reverb.hpp
+  include/al/core/sound/al_Speaker.hpp
+  include/al/core/sound/al_StereoPanner.hpp
+  include/al/core/sound/al_Vbap.hpp
   include/al/core/spatial/al_Pose.hpp
   include/al/core/system/al_Printing.hpp
   include/al/core/system/al_Thread.hpp
@@ -81,6 +90,11 @@ set(core_sources
   src/core/io/al_WindowGLFW.cpp
   src/core/math/al_StdRandom.cpp
   src/core/protocol/al_OSC.cpp
+  src/core/sound/al_Ambisonics.cpp
+  src/core/sound/al_AudioScene.cpp
+  src/core/sound/al_Biquad.cpp
+  src/core/sound/al_Dbap.cpp
+  src/core/sound/al_Vbap.cpp
   src/core/spatial/al_Pose.cpp
   src/core/system/al_Printing.cpp
   src/core/system/al_ThreadNative.cpp

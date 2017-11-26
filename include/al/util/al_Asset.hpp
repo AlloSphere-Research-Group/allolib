@@ -78,7 +78,7 @@
 */
 
 #include <string>
-// #include "allocore/graphics/al_Graphics.hpp"
+// #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/types/al_Color.hpp"
 #include "al/core/graphics/al_Mesh.hpp"
 #include "al/core/math/al_Vec.hpp"

@@ -53,8 +53,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "allocore/types/al_Array.hpp"
-#include "allocore/types/al_Conversion.hpp"
+#include "al/core/types/al_Array.hpp"
+#include "al/core/types/al_Conversion.hpp"
 
 
 namespace al {

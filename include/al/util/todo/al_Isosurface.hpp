@@ -64,9 +64,9 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
-#include "allocore/types/al_Buffer.hpp"
-#include "allocore/graphics/al_Mesh.hpp"
-#include "allocore/types/al_Voxels.hpp"
+#include "al/core/types/al_Buffer.hpp"
+#include "al/core/graphics/al_Mesh.hpp"
+#include "al/core/types/al_Voxels.hpp"
 
 namespace al{
 

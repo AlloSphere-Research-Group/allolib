@@ -46,7 +46,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "al/util/al_Array.h"
-#include "al/util/al_Functions.hpp"
+#include "al/core/math/al_Functions.hpp"
 #include "al/core/math/al_Vec.hpp"
 
 #define AL_ARRAY_DEFAULT_ALIGNMENT (4)

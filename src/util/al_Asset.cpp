@@ -1,5 +1,5 @@
 #include "al/util/al_Asset.hpp"
-// #include "allocore/graphics/al_Graphics.hpp"
+// #include "al/core/graphics/al_Graphics.hpp"
 
 #ifdef USE_ASSIMP3
 

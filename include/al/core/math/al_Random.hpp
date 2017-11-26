@@ -45,7 +45,7 @@
 #include "al/core/math/al_StdRandom.hpp"
 
 /* req'd for int to float conversion */
-#include "al/util/al_Conversion.hpp"
+#include "al/core/math/al_Conversion.hpp"
 #include "al/core/math/al_Constants.hpp"
 
 #include <time.h> /* req'd for time() */

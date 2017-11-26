@@ -3,11 +3,11 @@
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/math/al_Quat.hpp"
 #include "al/core/math/al_Mat.hpp"
-#include "al/util/al_Functions.hpp"
+#include "al/core/math/al_Functions.hpp"
+// #include "al/core/math/al_Random.hpp"
 #include "al/util/al_Frustum.hpp"
 #include "al/util/al_Complex.hpp"
 #include "al/util/al_Interval.hpp"
-// #include "al/util/al_Random.hpp"
 
 using namespace al;
 
