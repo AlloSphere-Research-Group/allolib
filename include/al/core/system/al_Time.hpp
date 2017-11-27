@@ -71,6 +71,7 @@ al_nsec al_steady_time_nsec();
 void al_sleep(al_sec dt);
 void al_sleep_nsec(al_nsec dt);
 void al_sleep_until(al_sec target);
+inline void wait(al_sec dt){ al_sleep(dt); }
 
 /// Convert nanoseconds to timecode string
 std::string toTimecode(al_nsec t, const std::string& format="D:H:M:S:m:u");

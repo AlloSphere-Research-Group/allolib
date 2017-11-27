@@ -1,0 +1,5 @@
+Cause: Implementation of osc classes uses oscpack's socket class
+       instead of al::Socket (which uses APR's socket)
+Problems found:
+  - osc::Recv::opened & osc::Recv::timeout (from al::Socket) not available
+  - osc::Send::send does not return bytes sent

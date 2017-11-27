@@ -91,6 +91,7 @@ public:
 
   /// Push current matrix stack
   void pushMatrix() { pushModelMatrix(); }
+  void pushMatrix(const Matrix4f& m) { pushModelMatrix(m); }
 
   /// Pop current matrix stack
   void popMatrix() { popModelMatrix(); }
