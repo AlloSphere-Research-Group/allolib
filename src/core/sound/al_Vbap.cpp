@@ -1,4 +1,5 @@
 #include "al/core/sound/al_Vbap.hpp"
+#include <utility> // move
 
 namespace al{
 
@@ -392,7 +393,8 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker>& spkrs){
 
 void Vbap::makePhantomChannel(int channelIndex, std::vector<int> assignedOutputs)
 {
-	mPhantomChannels[channelIndex] = assignedOutputs;
+	mPhantomChannels[channelIndex] = std::move(assignedOutputs);
+	// mPhantomChannels[channelIndex] = assignedOutputs;
 }
 
 void Vbap::compile(Listener& listener){

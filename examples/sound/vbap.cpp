@@ -1,16 +1,14 @@
-
-
-
-#include <atomic>
-#include <vector>
-
 #include "al/core.hpp"
 #include "al/core/sound/al_Vbap.hpp"
 #include "al/core/sound/al_Speaker.hpp"
 #include "al/util/al_Font.hpp"
 #include "al/util/al_AlloSphereSpeakerLayout.hpp"
 
+#include <atomic>
+#include <vector>
+
 using namespace al;
+using namespace std;
 
 #define BLOCK_SIZE (2048)
 
@@ -21,7 +19,7 @@ static float speedMult = 0.01f;
 static float srcElev = 1.6f;
 
 static Vec3d srcpos(0.0,0.0,0.0);
-static std::atomic<float> *mPeaks;
+static atomic<float> *mPeaks;
 
 ////Currently bypasses al_AudioScene
 
@@ -84,16 +82,16 @@ class MyApp : public App
 	Mesh mText;
 
 	Mesh mSpeakerMesh;
-	std::vector<Mesh> mVec;
+	vector<Mesh> mVec;
 
-	std::vector<Vec3d> sCoords;
-	std::vector<int>  sChannels;
+	vector<Vec3d> sCoords;
+	vector<int>  sChannels;
 
 	Light mLight;
 
 
 public:
-	MyApp(std::vector<SpeakerTriple> sts)  {
+	MyApp(vector<SpeakerTriple> sts)  {
 
 		//Setup the triangles
 		for(int j = 0; j < sts.size();++j){
@@ -168,11 +166,11 @@ public:
 			g.scale(0.02 + 0.04 * peak * 30);
 
 			int chan = sChannels[i];
-			// mFont.write(mText,std::to_string(chan));
+			// mFont.write(mText,to_string(chan));
 			// mFont.texture().bind();
 			// g.draw(mText);
 			// mFont.texture().unbind();
-			mFont.render(g, std::to_string(chan));
+			mFont.render(g, to_string(chan));
 
 			g.color(1);
 			g.draw(mSpeakerMesh);
@@ -190,22 +188,21 @@ int main (int argc, char * argv[]){
 	tempLayout= AlloSphereSpeakerLayout();
 	Speakers spks = tempLayout.speakers();
 
-	for(Speaker s : spks){
+	
+	for(Speaker s : spks) {
 		s.radius = rad;
 		speakerLayout.addSpeaker(s);
-
 	}
 	speakerLayout.addSpeaker(Speaker(12, 0, 90, rad)); // Phantom speakers
 	speakerLayout.addSpeaker(Speaker(13, 0, -90, rad)); // Phantom speakers
 
-	std::vector<int> assignedSpeakersTop = {0,1,2,3,4,5,6,7,8,9,10,11};
-	panner->makePhantomChannel(12, assignedSpeakersTop);
-	std::vector<int> assignedSpeakersBottom = {0,1,2,3,4,5,6,7,8,9,10,11};
-	panner->makePhantomChannel(13, assignedSpeakersBottom);
-
 	panner = new Vbap(speakerLayout, true);
-
-
+	// vector<int> assignedSpeakersTop = {0,1,2,3,4,5,6,7,8,9,10,11};
+	// panner->makePhantomChannel(12, assignedSpeakersTop);
+	panner->makePhantomChannel(12, {0,1,2,3,4,5,6,7,8,9,10,11}); // assigned speakers top
+	// vector<int> assignedSpeakersBottom = {0,1,2,3,4,5,6,7,8,9,10,11};
+	// panner->makePhantomChannel(13, assignedSpeakersBottom);
+	panner->makePhantomChannel(13, {0,1,2,3,4,5,6,7,8,9,10,11}); // assigned speakers bottom	
 	panner->print();
 
 	//Determine number of output channels
@@ -217,7 +214,7 @@ int main (int argc, char * argv[]){
 		}
 	}
 
-	mPeaks = new std::atomic<float>[speakerLayout.speakers().size()];
+	mPeaks = new atomic<float>[speakerLayout.speakers().size()];
 
 	int outputChannels = highestChannel + 1;
 
