@@ -3,8 +3,7 @@
 #include <string>
 #include <iostream>
 
-void al_print_lighting_uniforms(lighting_shader_uniforms const& u,
-                                std::string name = "shader")
+void al_print_lighting_uniforms(lighting_shader_uniforms const& u, std::string name)
 {
   std::cout << name << " locations:" << std::endl;
   std::cout << "\tglobal ambient: " << u.global_ambient << std::endl;
@@ -31,7 +30,7 @@ void al_print_lighting_uniforms(lighting_shader_uniforms const& u,
 }
 
 lighting_shader_uniforms al_get_lighting_uniform_locations(al::ShaderProgram& s,
-                                                           bool print_result=false)
+                                                           bool print_result)
 {
     using namespace std::string_literals;
     lighting_shader_uniforms u;

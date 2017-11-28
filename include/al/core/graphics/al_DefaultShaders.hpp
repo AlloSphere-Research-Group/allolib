@@ -6,6 +6,7 @@
 
 #include "al/core/graphics/al_Shader.hpp"
 #include <string>
+#include <vector>
 
 inline constexpr int al_max_num_lights() { return 8; }
 
