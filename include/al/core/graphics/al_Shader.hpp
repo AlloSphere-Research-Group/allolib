@@ -213,6 +213,7 @@ public:
 
   /// Get location of uniform
   int getUniformLocation(const char * name) const;
+  int getUniformLocation(const std::string& s) const { return getUniformLocation(s.c_str()); }
 
   /// Get location of attribute
   int attribute(const char * name) const;

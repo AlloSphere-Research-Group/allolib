@@ -31,7 +31,7 @@ private:
     Color mDiffuse {1};
     Color mSpecular {1};
     float mPos[4] {0, 0, 1, 0};
-    // float mAtten[3];
+    // float mAtten[4];
 
     static Color mGlobalAmbient; // {0.2, 0.2, 0.2, 1.0}
 };

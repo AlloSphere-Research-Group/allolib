@@ -7,6 +7,41 @@
 #include "al/core/graphics/al_Shader.hpp"
 #include <string>
 
+inline constexpr int al_max_num_lights() { return 8; }
+
+struct per_light_uniform_locations
+{
+    int ambient = -1;
+    int diffuse = -1;
+    int specular = -1;
+    int position = -1;
+    int atten = -1;
+};
+
+struct material_uniform_locations
+{
+    int ambient = -1;
+    int diffuse = -1;
+    int specular = -1;
+    int shininess = -1;
+    int emission = -1;
+};
+
+struct lighting_shader_uniforms
+{
+    int global_ambient = -1;
+    int normal_matrix = -1;
+    int num_lights = 0;
+    material_uniform_locations material;
+    std::vector<per_light_uniform_locations> lights;
+    bool has_material = false;
+};
+
+void al_print_lighting_uniforms(lighting_shader_uniforms const& u, std::string name = "shader");
+
+lighting_shader_uniforms al_get_lighting_uniform_locations(al::ShaderProgram& s,
+                                                           bool print_result=false);
+
 inline std::string al_mesh_vert_shader() { return R"(
 #version 330
 uniform mat4 MV;
@@ -269,10 +304,10 @@ uniform vec4 light_global_ambient;
 uniform vec4 light0_ambient;
 uniform vec4 light0_diffuse;
 uniform vec4 light0_specular;
-uniform vec4 material0_ambient;
-uniform vec4 material0_diffuse;
-uniform vec4 material0_specular;
-uniform float material0_shininess;
+uniform vec4 material_ambient;
+uniform vec4 material_diffuse;
+uniform vec4 material_specular;
+uniform float material_shininess;
 in vec3 normal_eye;
 in vec3 light0_dir;
 in vec3 eye_dir;
@@ -286,10 +321,10 @@ void main() {
   float n_d0 = max(dot(d0, n), 0.0);
   float e_r = max(dot(e, r), 0.0);
   // shininess 5.0 is OpenGL 2.x default value
-  vec3 l0 = material0_ambient.rgb  * light0_ambient.rgb
-          + material0_diffuse.rgb  * light0_diffuse.rgb  * n_d0
-          + material0_specular.rgb * light0_specular.rgb * pow(e_r, material0_shininess);
-  l0 += material0_ambient.rgb * light_global_ambient.rgb;
+  vec3 l0 = material_ambient.rgb  * light0_ambient.rgb
+          + material_diffuse.rgb  * light0_diffuse.rgb  * n_d0
+          + material_specular.rgb * light0_specular.rgb * pow(e_r, material_shininess);
+  l0 += material_ambient.rgb * light_global_ambient.rgb;
   frag_color = tint * vec4(l0, 1.0);
 }
 )";}
@@ -309,6 +344,8 @@ enum class ShaderType : unsigned char {
 };
 
 void compileDefaultShader(ShaderProgram& s, ShaderType type);
+
+void compileMultiLightShader(ShaderProgram& s, ShaderType type, int num_lights);
 
 }
 

@@ -1,7 +1,7 @@
 #include "al/core/graphics/al_Graphics.hpp"
 
-#include <stdio.h>
-#include <iostream>
+// #include <stdio.h>
+// #include <iostream>
 
 namespace al {
 
@@ -24,6 +24,12 @@ int Graphics::lighting_tex_tint_location = 0;
 int Graphics::lighting_material_tint_location = 0;
 bool Graphics::mRenderModeChanged = true;
 bool Graphics::mUniformChanged = true;
+bool Graphics::mLightingEnabled = false;
+
+lighting_shader_uniforms Graphics::lighting_color_uniforms;
+lighting_shader_uniforms Graphics::lighting_mesh_uniforms;
+lighting_shader_uniforms Graphics::lighting_tex_uniforms;
+lighting_shader_uniforms Graphics::lighting_material_uniforms;
 
 void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq) {
   glBlendEquation(eq);
@@ -109,12 +115,19 @@ void Graphics::init() {
   mesh_tint_location = mesh_shader.getUniformLocation("tint");
 
   lighting_color_location = lighting_color_shader.getUniformLocation("col0");
-  lighting_color_tint_location =
-      lighting_color_shader.getUniformLocation("tint");
+  lighting_color_tint_location = lighting_color_shader.getUniformLocation("tint");
   lighting_mesh_tint_location = lighting_mesh_shader.getUniformLocation("tint");
   lighting_tex_tint_location = lighting_tex_shader.getUniformLocation("tint");
-  lighting_material_tint_location =
-      lighting_material_shader.getUniformLocation("tint");
+  lighting_material_tint_location = lighting_material_shader.getUniformLocation("tint");
+
+  lighting_color_uniforms = al_get_lighting_uniform_locations(lighting_color_shader);
+  lighting_mesh_uniforms = al_get_lighting_uniform_locations(lighting_mesh_shader);
+  lighting_tex_uniforms = al_get_lighting_uniform_locations(lighting_tex_shader);
+  lighting_material_uniforms = al_get_lighting_uniform_locations(lighting_material_shader);
+  // al_print_lighting_uniforms(lighting_color_uniforms, "lighting color");
+  // al_print_lighting_uniforms(lighting_mesh_uniforms, "lighting mesh");
+  // al_print_lighting_uniforms(lighting_tex_uniforms, "lighting tex");
+  // al_print_lighting_uniforms(lighting_material_uniforms, "lighting material");
 
   tex_shader.begin();
   tex_shader.uniform("tex0", 0);
@@ -160,6 +173,26 @@ void Graphics::quadViewport(Texture& tex, float x, float y, float w, float h) {
   popCamera();
 }
 
+void Graphics::send_lighting_uniforms(ShaderProgram& s, lighting_shader_uniforms const& u) {
+  s.uniform4v(u.global_ambient, Light::globalAmbient().components);
+  s.uniformMatrix4(u.normal_matrix, (viewMatrix() * modelMatrix()).inversed().transpose().elems());
+  for (int i = 0; i < u.num_lights; i += 1) {
+      s.uniform4v(u.lights[i].ambient, mLights[i].ambient().components);
+      s.uniform4v(u.lights[i].diffuse, mLights[i].diffuse().components);
+      s.uniform4v(u.lights[i].specular, mLights[i].specular().components);
+      s.uniform4v(u.lights[i].position, (viewMatrix() * Vec4f{mLights[i].pos()}).elems()); // could be optimized...
+      // s.uniform4v(u.lights[i].atten, mLights[i].attenuation());
+  }
+
+  if (u.has_material) {
+      s.uniform4v(u.material.ambient, mMaterial.ambient().components);
+      s.uniform4v(u.material.diffuse, mMaterial.diffuse().components);
+      s.uniform4v(u.material.specular, mMaterial.specular().components);
+      s.uniform(u.material.shininess, mMaterial.shininess());
+      // s.uniform4v(u.material.emission, mMaterial.emission().components);
+  }
+}
+
 void Graphics::update() {
   if (mRenderModeChanged) {
     switch (mColoringMode) {
@@ -180,7 +213,7 @@ void Graphics::update() {
         break;
     }
     mRenderModeChanged = false;
-    mUniformChanged = true;
+    mUniformChanged = true; // force uniform update since shader changed
   }
 
   if (mUniformChanged) {
@@ -188,7 +221,8 @@ void Graphics::update() {
     switch (mColoringMode) {
       case ColoringMode::UNIFORM:
         if (mLightingEnabled) {
-          send_uniforms(s, mLight);
+          // send_uniforms(s, mLights[0]);
+          send_lighting_uniforms(s, lighting_color_uniforms);
           s.uniform4v(lighting_color_location, mColor.components);
           s.uniform4v(lighting_color_tint_location, mTint.components);
         } else {
@@ -198,7 +232,8 @@ void Graphics::update() {
         break;
       case ColoringMode::MESH:
         if (mLightingEnabled) {
-          send_uniforms(s, mLight);
+          // send_uniforms(s, mLights[0]);
+          send_lighting_uniforms(s, lighting_mesh_uniforms);
           s.uniform4v(lighting_mesh_tint_location, mTint.components);
         } else {
           s.uniform4v(mesh_tint_location, mTint.components);
@@ -206,7 +241,8 @@ void Graphics::update() {
         break;
       case ColoringMode::TEXTURE:
         if (mLightingEnabled) {
-          send_uniforms(s, mLight);
+          // send_uniforms(s, mLights[0]);
+          send_lighting_uniforms(s, lighting_tex_uniforms);
           s.uniform4v(lighting_tex_tint_location, mTint.components);
         } else {
           s.uniform4v(tex_tint_location, mTint.components);
@@ -214,8 +250,9 @@ void Graphics::update() {
         break;
       case ColoringMode::MATERIAL:
         if (mLightingEnabled) {
-          send_uniforms(s, mMaterial);
-          send_uniforms(s, mLight);
+          // send_uniforms(s, mMaterial);
+          // send_uniforms(s, mLights[0]);
+          send_lighting_uniforms(s, lighting_material_uniforms);
           s.uniform4v(lighting_material_tint_location, mTint.components);
         } else {
           s.uniform4v(color_location, mColor.components);

@@ -50,8 +50,6 @@
 #include "al/core/graphics/al_RenderManager.hpp"
 #include "al/core/graphics/al_Light.hpp"
 
-#include <iostream>
-
 namespace al {
 
 class Graphics : public RenderManager {
@@ -177,46 +175,25 @@ class Graphics : public RenderManager {
   void blendModeTrans() { blendMode(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, FUNC_ADD); }
 
   /// Turn blending states on (without setting mode)
-  void blendOn() {
-    depthMask(false);
-    blending(true);
-  }
+  void blendOn() { depthMask(false); blending(true); }
 
   /// Set states for additive blending
-  void blendAdd() {
-    blendOn();
-    blendModeAdd();
-  }
+  void blendAdd() { blendOn(); blendModeAdd(); }
 
   /// Set states for subtractive blending
-  void blendSub() {
-    blendOn();
-    blendModeSub();
-  }
+  void blendSub() { blendOn(); blendModeSub(); }
 
   /// Set states for screen blending
-  void blendScreen() {
-    blendOn();
-    blendModeScreen();
-  }
+  void blendScreen() { blendOn(); blendModeScreen(); }
 
   /// Set states for multiplicative blending
-  void blendMul() {
-    blendOn();
-    blendModeMul();
-  }
+  void blendMul() { blendOn(); blendModeMul(); }
 
   /// Set states for transparent blending
-  void blendTrans() {
-    blendOn();
-    blendModeTrans();
-  }
+  void blendTrans() { blendOn(); blendModeTrans(); }
 
   /// Turn blending states off (opaque rendering)
-  void blendOff() {
-    depthMask(true);
-    blending(false);
-  }
+  void blendOff() { depthMask(true); blending(false); }
 
   void scissor(int left, int bottom, int width, int height);
   
@@ -257,9 +234,7 @@ class Graphics : public RenderManager {
     mTint.set(r, g, b, a);
     mUniformChanged = true;
   }
-  void tint(float grayscale, float a = 1.0f) {
-    tint(grayscale, grayscale, grayscale, a);
-  }
+  void tint(float grayscale, float a = 1.0f) { tint(grayscale, grayscale, grayscale, a); }
 
   // set to uniform color mode, using previously set uniform color
   void color() {
@@ -321,43 +296,18 @@ class Graphics : public RenderManager {
     }
   }
 
-  void light(Light const& l) {
-    mLight = l;
-    mUniformChanged = true;
-  }
-
-  Light& light() {
-    mUniformChanged = true;
-    return mLight;
-  }
-
-  void send_uniforms(ShaderProgram& s, Material const& m) {
-    s.uniform4("material0_ambient", m.ambient().components);
-    s.uniform4("material0_diffuse", m.diffuse().components);
-    s.uniform4("material0_specular", m.specular().components);
-    s.uniform("material0_shininess", m.shininess());
-  }
-
-  void send_uniforms(ShaderProgram& s, Light const& l) {
-    s.uniform4("light_global_ambient", Light::globalAmbient().components);
-    s.uniform4("light0_ambient", l.ambient().components);
-    s.uniform4("light0_diffuse", l.diffuse().components);
-    s.uniform4("light0_specular", l.specular().components);
-    s.uniform("light0_eye", viewMatrix() * Vec4f{l.pos()});
-    RenderManager::shader().uniform("N", (viewMatrix() * modelMatrix()).inversed().transpose());
-  }
-
+  void light(Light const& l) { mLights[0] = l; mUniformChanged = true; }
+  Light& light() { mUniformChanged = true; return mLights[0]; }
+  const Light& light() const { return mLights[0]; }
+  
   void quad(Texture& tex, float x, float y, float w, float h);
-  void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2,
-                    float h = 2);
+  void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2, float h = 2);
 
-  void shader(ShaderProgram& s) {
-    mColoringMode = ColoringMode::CUSTOM;
-    RenderManager::shader(s);
-  }
+  void shader(ShaderProgram& s) { mColoringMode = ColoringMode::CUSTOM; RenderManager::shader(s); }
   ShaderProgram& shader() { return RenderManager::shader(); }
   ShaderProgram* shaderPtr() { return RenderManager::shaderPtr(); }
 
+  void send_lighting_uniforms(ShaderProgram& s, lighting_shader_uniforms const& u);
   void update() override;
 
 private:
@@ -368,11 +318,10 @@ private:
   Color mTint {1, 1, 1, 1};
 
   Material mMaterial;
-  Light mLight;
-  bool mLightingEnabled = false;
+  Light mLights[al_max_num_lights()];
 
   static ColoringMode mColoringMode;
-
+  static bool mLightingEnabled;
   static bool mRenderModeChanged;
   static bool mUniformChanged;
 
@@ -395,6 +344,11 @@ private:
   static int lighting_mesh_tint_location;
   static int lighting_tex_tint_location;
   static int lighting_material_tint_location;
+
+  static lighting_shader_uniforms lighting_color_uniforms;
+  static lighting_shader_uniforms lighting_mesh_uniforms;
+  static lighting_shader_uniforms lighting_tex_uniforms;
+  static lighting_shader_uniforms lighting_material_uniforms;
 
 };
 
