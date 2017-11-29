@@ -99,6 +99,12 @@ rand_uniformf& global();
 rand_normal& global_normal();
 rand_uniformi& global_ui();
 
+// [0, high]
+inline int uniformi(int high) { return global_ui()(high); }
+
+// [low, high]
+inline int uniformi(int low, int high) { return global_ui()(low, high); }
+
 /// Returns uniform random in [0, 1)
 inline float uniform(){ return global()(); }
 
