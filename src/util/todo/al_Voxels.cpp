@@ -1,9 +1,11 @@
-//#include <cassert>
-#include <algorithm> // min,max
-#include "al/core/types/al_Voxels.hpp"
+#include "al/util/al_Voxels.hpp"
 #include "al/core/io/al_File.hpp"
 #include "al/core/system/al_Printing.hpp"
-#include "al/core/graphics/al_Image.hpp"
+#include "al/util/al_Image.hpp"
+
+#include <algorithm> // min,max
+#include <cmath>
+//#include <cassert>
 
 namespace al {
 

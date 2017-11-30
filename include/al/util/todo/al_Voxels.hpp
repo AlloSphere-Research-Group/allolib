@@ -53,7 +53,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "al/core/types/al_Array.hpp"
+#include "al/util/al_Array.hpp"
 #include "al/core/types/al_Conversion.hpp"
 
 

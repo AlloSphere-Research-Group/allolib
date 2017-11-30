@@ -49,7 +49,9 @@ set(core_headers
   include/al/core/sound/al_Speaker.hpp
   include/al/core/sound/al_StereoPanner.hpp
   include/al/core/sound/al_Vbap.hpp
+  include/al/core/spatial/al_HashSpace.hpp
   include/al/core/spatial/al_Pose.hpp
+  include/al/core/system/al_PeriodicThread.hpp
   include/al/core/system/al_Printing.hpp
   include/al/core/system/al_Thread.hpp
   include/al/core/system/al_Time.hpp
@@ -95,7 +97,9 @@ set(core_sources
   src/core/sound/al_Biquad.cpp
   src/core/sound/al_Dbap.cpp
   src/core/sound/al_Vbap.cpp
+  src/core/spatial/al_HashSpace.cpp
   src/core/spatial/al_Pose.cpp
+  src/core/system/al_PeriodicThread.cpp
   src/core/system/al_Printing.cpp
   src/core/system/al_ThreadNative.cpp
   src/core/system/al_Time.cpp

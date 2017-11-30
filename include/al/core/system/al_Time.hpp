@@ -71,7 +71,11 @@ al_nsec al_steady_time_nsec();
 void al_sleep(al_sec dt);
 void al_sleep_nsec(al_nsec dt);
 void al_sleep_until(al_sec target);
+
+// backward compatibility
 inline void wait(al_sec dt){ al_sleep(dt); }
+inline al_sec walltime(){ return al_system_time(); }
+inline al_sec timeNow(){ return al_system_time(); }
 
 /// Convert nanoseconds to timecode string
 std::string toTimecode(al_nsec t, const std::string& format="D:H:M:S:m:u");

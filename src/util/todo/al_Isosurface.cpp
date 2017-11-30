@@ -1,5 +1,5 @@
 #include <math.h>
-#include "al/core/graphics/al_Isosurface.hpp"
+#include "al/util/al_Isosurface.hpp"
 #include "al/core/graphics/al_Graphics.hpp"
 
 namespace al{
@@ -529,7 +529,7 @@ void Isosurface::begin(){
 
 void Isosurface::end(){
   compressTriangles();
-  primitive(Graphics::TRIANGLES); // must be set for proper normal generation
+  primitive(Mesh::TRIANGLES); // must be set for proper normal generation
   if(mComputeNormals) generateNormals(mNormalize);
   mValidSurface = true;
 }

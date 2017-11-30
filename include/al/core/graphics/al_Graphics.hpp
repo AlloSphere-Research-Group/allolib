@@ -289,6 +289,7 @@ class Graphics : public RenderManager {
     material();
   }
 
+  // enable/disable lighting
   void lighting(bool b) {
     if (mLightingEnabled != b) {
       mLightingEnabled = b;
@@ -296,13 +297,17 @@ class Graphics : public RenderManager {
     }
   }
 
+  // set light for single light lighting mode. does not enable lighting
+  // to enable lighting call Graphics::lighting(bool)
   void light(Light const& l) { mLights[0] = l; mUniformChanged = true; }
   Light& light() { mUniformChanged = true; return mLights[0]; }
   const Light& light() const { return mLights[0]; }
-  
+
   void quad(Texture& tex, float x, float y, float w, float h);
   void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2, float h = 2);
 
+  // use user made non-default shader. with this call user should set uniforms manually
+  // (but stiil use allolib interface for mesh and model/view/proj matrices)
   void shader(ShaderProgram& s) { mColoringMode = ColoringMode::CUSTOM; RenderManager::shader(s); }
   ShaderProgram& shader() { return RenderManager::shader(); }
   ShaderProgram* shaderPtr() { return RenderManager::shaderPtr(); }

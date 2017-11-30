@@ -4,7 +4,7 @@
 #include "al/core/math/al_Vec.hpp"
 
 #include <vector>
-
+#include <algorithm>
 
 /*  Allocore --
   Multimedia / virtual environment application class library
@@ -367,8 +367,8 @@ inline int HashSpace::Query :: operator()(const HashSpace& space, Vec3d center, 
   unsigned nres = 0;
   double minr2 = minRadius*minRadius;
   double maxr2 = maxRadius*maxRadius;
-  uint32_t iminr2 = al::max(uint32_t(0), uint32_t(minRadius*minRadius));
-  uint32_t imaxr2 = al::min(space.mMaxHalfD2, uint32_t(1 + (maxRadius+1)*(maxRadius+1)));
+  uint32_t iminr2 = std::max(uint32_t(0), uint32_t(minRadius*minRadius));
+  uint32_t imaxr2 = std::min(space.mMaxHalfD2, uint32_t(1 + (maxRadius+1)*(maxRadius+1)));
   if (iminr2 < imaxr2) {
     uint32_t cellstart = space.mDistanceToVoxelIndices[iminr2];
     uint32_t cellend = space.mDistanceToVoxelIndices[imaxr2];
@@ -408,8 +408,8 @@ inline int HashSpace::Query :: operator()(const HashSpace& space, const HashSpac
   const Vec3d& center = obj->pos;
   double minr2 = minRadius*minRadius;
   double maxr2 = maxRadius*maxRadius;
-  uint32_t iminr2 = al::max(uint32_t(0), uint32_t(minRadius*minRadius));
-  uint32_t imaxr2 = al::min(space.mMaxHalfD2, uint32_t(1 + (maxRadius+1)*(maxRadius+1)));
+  uint32_t iminr2 = std::max(uint32_t(0), uint32_t(minRadius*minRadius));
+  uint32_t imaxr2 = std::min(space.mMaxHalfD2, uint32_t(1 + (maxRadius+1)*(maxRadius+1)));
   if (iminr2 < imaxr2) {
     uint32_t cellstart = space.mDistanceToVoxelIndices[iminr2];
     uint32_t cellend = space.mDistanceToVoxelIndices[imaxr2];
