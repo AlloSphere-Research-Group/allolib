@@ -14,6 +14,8 @@ Lance Putnam, Nov. 2015
 #include "al/core.hpp"
 #include "al/core/types/al_Conversion.hpp" // clone
 #include <algorithm> // max
+#include <cmath>
+
 using namespace al;
 
 // A particle with acceleration
@@ -41,7 +43,7 @@ public:
 	Mesh body1, body2;
 	Light light1, light2;
 
-	void onCreate(){
+	void onCreate() {
 		reset();
 		addIcosahedron(body1, 0.03);
 		body1.generateNormals();
@@ -115,21 +117,25 @@ public:
 	}
 
 	void onDraw(Graphics& g){
-		g.clear(0);
+		g.clear(0.1);
 
-		// g.cullFace(true);
+		g.cullFace(true);
 		g.depthTesting(true);
 		g.lighting(true);
-		// g.lighting(false);
 		//g.polygonMode(Graphics::LINE);
 
 		light1.dir(1,1,1);
 		g.light(light1);
 
-		// light2.pos(0,0,0);
+		light2.pos(0,0,0);
 		// light2.attenuation(1,0,4);
-		// light2.diffuse(body2.colors()[0]);
-		// light2();
+		light2.diffuse(HSV(0.2));
+		g.light(light2, 1);
+
+		Light l3;
+		l3.pos(5 * sin(2 * sec()), -1, 5 * cos(2 * sec()));
+		l3.diffuse({1, 0, 0});
+		g.light(l3, 2);
 
 		// Draw the well
 		g.color(HSV(0.2));
@@ -143,6 +149,9 @@ public:
 			g.draw(body1);
 			g.popMatrix();
 		}
+
+		// cout << "\rfps: " << fps() << rnd::uniform() << flush;
+		cout << "\rfps: " << fps() << "   " << rnd::uniform() << flush;
 	}
 
 	void onKeyDown(const Keyboard& k){

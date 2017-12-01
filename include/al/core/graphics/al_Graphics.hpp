@@ -297,11 +297,23 @@ class Graphics : public RenderManager {
     }
   }
 
-  // set light for single light lighting mode. does not enable lighting
-  // to enable lighting call Graphics::lighting(bool)
-  void light(Light const& l) { mLights[0] = l; mUniformChanged = true; }
-  Light& light() { mUniformChanged = true; return mLights[0]; }
-  const Light& light() const { return mLights[0]; }
+  void numLight(int n) {
+    if (num_lights < n) {
+      // if lighting on, should update change in light number
+      // else it will get updated later when lighting gets enabled
+      if (mLightingEnabled) mRenderModeChanged = true;
+      num_lights = n;
+    }
+  }
+
+  // does not enable light, call lighting(true) to enable lighting
+  void light(Light const& l, int idx=0) {
+    mLights[idx] = l;
+    // if lighting on, should update change in light info
+    // else it will get updated later when lighting gets enabled
+    if (mLightingEnabled) mUniformChanged = true;
+    numLight(idx + 1);
+  }
 
   void quad(Texture& tex, float x, float y, float w, float h);
   void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2, float h = 2);
@@ -316,14 +328,10 @@ class Graphics : public RenderManager {
   void update() override;
 
 private:
-  Color mClearColor {0, 0, 0, 1};
-  float mClearDepth = 1;
-
-  Color mColor {1, 1, 1, 1};
-  Color mTint {1, 1, 1, 1};
-
-  Material mMaterial;
-  Light mLights[al_max_num_lights()];
+  static Color mClearColor;
+  static float mClearDepth;
+  static Color mColor;
+  static Color mTint;
 
   static ColoringMode mColoringMode;
   static bool mLightingEnabled;
@@ -334,26 +342,31 @@ private:
   static ShaderProgram mesh_shader;
   static ShaderProgram tex_shader;
 
-  static ShaderProgram lighting_color_shader;
-  static ShaderProgram lighting_mesh_shader;
-  static ShaderProgram lighting_tex_shader;
-  static ShaderProgram lighting_material_shader;
-
   static int color_location;
   static int color_tint_location;
   static int mesh_tint_location;
   static int tex_tint_location;
 
-  static int lighting_color_location;
-  static int lighting_color_tint_location;
-  static int lighting_mesh_tint_location;
-  static int lighting_tex_tint_location;
-  static int lighting_material_tint_location;
+  static Material mMaterial;
+  static Light mLights[al_max_num_lights()];
+  static bool mLightOn[al_max_num_lights()];
+  static int num_lights;
 
-  static lighting_shader_uniforms lighting_color_uniforms;
-  static lighting_shader_uniforms lighting_mesh_uniforms;
-  static lighting_shader_uniforms lighting_tex_uniforms;
-  static lighting_shader_uniforms lighting_material_uniforms;
+  static ShaderProgram lighting_color_shader[al_max_num_lights()];
+  static ShaderProgram lighting_mesh_shader[al_max_num_lights()];
+  static ShaderProgram lighting_tex_shader[al_max_num_lights()];
+  static ShaderProgram lighting_material_shader[al_max_num_lights()];
+
+  static int lighting_color_location[al_max_num_lights()];
+  static int lighting_color_tint_location[al_max_num_lights()];
+  static int lighting_mesh_tint_location[al_max_num_lights()];
+  static int lighting_tex_tint_location[al_max_num_lights()];
+  static int lighting_material_tint_location[al_max_num_lights()];
+
+  static lighting_shader_uniforms lighting_color_uniforms[al_max_num_lights()];
+  static lighting_shader_uniforms lighting_mesh_uniforms[al_max_num_lights()];
+  static lighting_shader_uniforms lighting_tex_uniforms[al_max_num_lights()];
+  static lighting_shader_uniforms lighting_material_uniforms[al_max_num_lights()];
 
 };
 

@@ -1,6 +1,5 @@
 #include "al/core/graphics/al_DefaultShaders.hpp"
 #include "al/core/graphics/al_GLEW.hpp"
-#include <string>
 #include <iostream>
 
 void al_print_lighting_uniforms(lighting_shader_uniforms const& u, std::string name)

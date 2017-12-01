@@ -345,6 +345,9 @@ enum class ShaderType : unsigned char {
 };
 
 void compileDefaultShader(ShaderProgram& s, ShaderType type);
+
+std::string multilight_vert_shader(ShaderType type, int num_lights);
+std::string multilight_frag_shader(ShaderType type, int num_lights);
 void compileMultiLightShader(ShaderProgram& s, ShaderType type, int num_lights);
 
 }
