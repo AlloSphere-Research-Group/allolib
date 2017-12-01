@@ -104,10 +104,16 @@ void Graphics::init() {
   compileDefaultShader(color_shader, ShaderType::COLOR);
   compileDefaultShader(mesh_shader, ShaderType::MESH);
   compileDefaultShader(tex_shader, ShaderType::TEXTURE);
-  compileDefaultShader(lighting_color_shader, ShaderType::LIGHTING_COLOR);
-  compileDefaultShader(lighting_mesh_shader, ShaderType::LIGHTING_MESH);
-  compileDefaultShader(lighting_tex_shader, ShaderType::LIGHTING_TEXTURE);
-  compileDefaultShader(lighting_material_shader, ShaderType::LIGHTING_MATERIAL);
+  
+  // compileDefaultShader(lighting_color_shader, ShaderType::LIGHTING_COLOR);
+  // compileDefaultShader(lighting_mesh_shader, ShaderType::LIGHTING_MESH);
+  // compileDefaultShader(lighting_tex_shader, ShaderType::LIGHTING_TEXTURE);
+  // compileDefaultShader(lighting_material_shader, ShaderType::LIGHTING_MATERIAL);
+
+  compileMultiLightShader(lighting_color_shader, ShaderType::LIGHTING_COLOR, 1);
+  compileMultiLightShader(lighting_mesh_shader, ShaderType::LIGHTING_MESH, 1);
+  compileMultiLightShader(lighting_tex_shader, ShaderType::LIGHTING_TEXTURE, 1);
+  compileMultiLightShader(lighting_material_shader, ShaderType::LIGHTING_MATERIAL, 1);
 
   color_location = color_shader.getUniformLocation("col0");
   color_tint_location = color_shader.getUniformLocation("tint");

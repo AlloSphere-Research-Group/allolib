@@ -28,7 +28,7 @@ struct MyApp : App
         }}
         tex.submit(pixels.data());
 
-        // Light::globalAmbient(1, 1, 1);
+        Light::globalAmbient({0.2, 1, 0.2});
 
         // light.dir(0, -1, 0);
         light.ambient({0.1, 0.1, 0.5});

@@ -335,9 +335,9 @@ void main() {
 namespace al {
 
 enum class ShaderType : unsigned char {
-	COLOR,
-	MESH,
-	TEXTURE,
+  COLOR,
+  MESH,
+  TEXTURE,
   LIGHTING_COLOR,
   LIGHTING_MESH,
   LIGHTING_TEXTURE,
@@ -345,7 +345,6 @@ enum class ShaderType : unsigned char {
 };
 
 void compileDefaultShader(ShaderProgram& s, ShaderType type);
-
 void compileMultiLightShader(ShaderProgram& s, ShaderType type, int num_lights);
 
 }

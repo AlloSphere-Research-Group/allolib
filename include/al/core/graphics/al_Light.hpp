@@ -21,7 +21,7 @@ struct Light
     const Color& specular() const { return mSpecular; }
     // const float * attenuation() const { return mAtten; }
 
-    static void globalAmbient(const Color& v);
+    static void globalAmbient(const Color& v) { mGlobalAmbient = v; }
     static const Color& globalAmbient() { return mGlobalAmbient; };
 
 private:
