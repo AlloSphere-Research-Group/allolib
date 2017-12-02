@@ -303,6 +303,29 @@ FilePath::FilePath(const std::string& fullpath) {
 }
 
 
+
+// bool Dir::make(const std::string& path, bool recursive)
+bool Dir::make(const std::string& path)
+{
+  // return Impl().make(path, -1, recursive);
+  return minFileSys::createDir(path);
+}
+
+bool Dir::remove(const std::string& path)
+{
+  // return Impl().remove(path);
+  return minFileSys::deleteDir(path);
+}
+
+bool Dir::removeRecursively(const std::string &path)
+{
+  // return Impl().removeRecursively(path);
+  return minFileSys::deleteDirRecursively(path);
+}
+
+
+
+
 void FileList::print() const {
   printf("FileList:\n");
   std::vector<FilePath>::const_iterator it = mFiles.begin();

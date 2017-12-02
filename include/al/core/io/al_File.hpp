@@ -351,8 +351,6 @@ protected:
 };
 
 
-#if 0 /* commenting out Dir */
-
 /// Filesystem directory
 ///
 /// @ingroup allocore
@@ -360,40 +358,41 @@ class Dir{
 public:
 
 	/// Constructor. This does not attempt to open the directory.
-	Dir() {};
+	// Dir() {};
 
 	/// @param[in] dirToOpen	path to directory to open
-	Dir(std::string dirToOpen): mDirToOpen(dirToOpen) {};
+	// Dir(std::string dirToOpen): mDirToOpen(dirToOpen) {};
 
-	~Dir() = default;
+	// ~Dir() = default;
 
 
 	/// Open a directory
 
 	/// @param[in] dirPath	path to directory
 	/// \returns whether the directory was successfully opened
-	bool open(const std::string& dirPath);
+	// bool open(const std::string& dirPath);
 
 	/// Close directory
 
 	/// \returns whether directory was successfully closed
 	///
-	bool close();
+	// bool close();
 
 	/// Read the next entry in the currently opened directory
 
 	/// No ordering is guaranteed for the entries read.
 	/// \returns whether there is another entry to read
-	bool read();
+	// bool read();
 
 	/// Get current directory entry (file) information
-	const FileInfo& entry() const { return mEntry; }
+	// const FileInfo& entry() const { return mEntry; }
 
 	/// Go back to first entry in directory
-	bool rewind();
+	// bool rewind();
 
 	/// Make a directory
-	static bool make(const std::string& path, bool recursive=true);
+	// static bool make(const std::string& path, bool recursive=true);
+	static bool make(const std::string& path);
 
 	/// Remove a directory
 	static bool remove(const std::string& path);
@@ -403,11 +402,10 @@ public:
 
 private:
 	// class Impl; Impl * mImpl;
-	std::string mDirToOpen;
-	FileInfo mEntry;
+	// std::string mDirToOpen;
+	// FileInfo mEntry;
 };
 
-#endif /* commenting out Dir */
 
 /// Keeps a list of files
 ///
