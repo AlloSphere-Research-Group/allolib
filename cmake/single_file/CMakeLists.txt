@@ -23,8 +23,8 @@ endif ()
 #         app_name
 #         app_path
 #         app_files_list
-#         app_include_dirs (skipped here)
-#         app_link_libs (skipped here)
+#         app_include_dirs
+#         app_link_libs
 #         al_path
 
 get_filename_component(app_name ${file_full_path} NAME_WE)
@@ -37,5 +37,7 @@ message("file full path: ${file_full_path}")
 message("app path: ${app_path}")
 message("app name: ${app_name}")
 message("al path: ${al_path}")
+message("include dirs: ${app_include_dirs}")
+message("link libs: ${app_link_libs}")
 
 include(${al_path}/cmake/app.cmake)

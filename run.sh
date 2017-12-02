@@ -1,11 +1,11 @@
 #!/bin/bash
 
-INITIALDIR=${PWD}
+INITIALDIR=${PWD} # gives absolute path
 # echo "Script executed from: ${INITIALDIR}"
 
 # BASH_SOURCE has the script's path
 # could be absolute, could be relative
-SCRIPT_PATH=$(dirname ${BASH_SOURCE})
+SCRIPT_PATH=$(dirname ${BASH_SOURCE[0]})
 
 FIRSTCHAR=${SCRIPT_PATH:0:1}
 if [ ${FIRSTCHAR} == "/" ]; then
