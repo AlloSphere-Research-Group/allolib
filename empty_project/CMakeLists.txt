@@ -26,4 +26,11 @@ if (NOT al_path)
 	set(al_path ${user_al_path})
 endif (NOT al_path)
 
+# app.cmake script needs following to be predefined:
+#         al_path
+#         app_name
+#         app_path
+#         app_files_list
+#         app_include_dirs (optional)
+#         app_link_libs (optional)
 include(${al_path}/cmake/app.cmake)
