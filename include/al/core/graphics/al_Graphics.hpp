@@ -237,83 +237,43 @@ class Graphics : public RenderManager {
   void tint(float grayscale, float a = 1.0f) { tint(grayscale, grayscale, grayscale, a); }
 
   // set to uniform color mode, using previously set uniform color
-  void color() {
-    if (mColoringMode != ColoringMode::UNIFORM) {
-      mColoringMode = ColoringMode::UNIFORM;
-      mRenderModeChanged = true;
-    }
-  }
+  void color();
   // set to uniform color mode, using provided color
-  void color(float r, float g, float b, float a = 1.0f) {
-    mColor.set(r, g, b, a);
-    mUniformChanged = true;
-    color();
-  }
+  void color(float r, float g, float b, float a = 1.0f);
   // set to uniform color mode, using provided color
-  void color(Color const& c) {
-    mColor = c;
-    mUniformChanged = true;
-    color();
-  }
+  void color(Color const& c);
   // set to uniform color mode, using provided color
   void color(float k, float a = 1.0f) { color(k, k, k, a); }
 
   // set to mesh color mode, using mesh's color array
-  void meshColor() {
-    if (mColoringMode != ColoringMode::MESH) {
-      mColoringMode = ColoringMode::MESH;
-      mRenderModeChanged = true;
-    }
-  }
+  void meshColor();
 
   // set to texture mode, using texture bound by user at location=0
-  void texture() {
-    if (mColoringMode != ColoringMode::TEXTURE) {
-      mColoringMode = ColoringMode::TEXTURE;
-      mRenderModeChanged = true;
-    }
-  }
+  void texture();
 
   // set to material mode, using previously set material
   // if lighting is disabled, ColoringMode::COLOR will be used
-  void material() {
-    if (mColoringMode != ColoringMode::MATERIAL) {
-      mColoringMode = ColoringMode::MATERIAL;
-      mRenderModeChanged = true;
-    }
-  }
+  void material();
+
   // set to material mode, using provied material
-  void material(Material const& m) {
-    mMaterial = m;
-    mUniformChanged = true;
-    material();
-  }
+  void material(Material const& m);
 
   // enable/disable lighting
-  void lighting(bool b) {
-    if (mLightingEnabled != b) {
-      mLightingEnabled = b;
-      mRenderModeChanged = true;
-    }
-  }
+  void lighting(bool b);
 
-  void numLight(int n) {
-    if (num_lights < n) {
-      // if lighting on, should update change in light number
-      // else it will get updated later when lighting gets enabled
-      if (mLightingEnabled) mRenderModeChanged = true;
-      num_lights = n;
-    }
-  }
+  // set number of lights used
+  void numLight(int n);
 
-  // does not enable light, call lighting(true) to enable lighting
-  void light(Light const& l, int idx=0) {
-    mLights[idx] = l;
-    // if lighting on, should update change in light info
-    // else it will get updated later when lighting gets enabled
-    if (mLightingEnabled) mUniformChanged = true;
-    numLight(idx + 1);
-  }
+  // turn on/off light at specified index.
+  // if light is off it still gets calculated in the shader but zero is multiplied as intensity.
+  // to prevent calculation, reorder lights and call `numLight` function
+  // to change shader to one with less number of lights
+  void enableLight(int idx);
+  void disableLight(int idx);
+  void toggleLight(int idx);
+
+  // does not enable lighting, call lighting(true) to enable lighting
+  void light(Light const& l, int idx=0);
 
   void quad(Texture& tex, float x, float y, float w, float h);
   void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2, float h = 2);

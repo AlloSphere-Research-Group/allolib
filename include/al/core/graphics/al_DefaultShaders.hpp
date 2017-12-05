@@ -16,6 +16,7 @@ struct per_light_uniform_locations
     int diffuse = -1;
     int specular = -1;
     int position = -1;
+    int enabled = -1;
     int atten = -1;
 };
 
@@ -146,6 +147,7 @@ uniform vec4 light_global_ambient;
 uniform vec4 light0_ambient;
 uniform vec4 light0_diffuse;
 uniform vec4 light0_specular;
+uniform float light0_enabled;
 in vec3 normal_eye;
 in vec3 light0_dir;
 in vec3 eye_dir;
@@ -160,6 +162,7 @@ void main() {
   float e_r = max(dot(e, r), 0.0);
   // shininess 5.0 is OpenGL 2.x default value
   vec3 l0 = light0_ambient.rgb + n_d0 * light0_diffuse.rgb + light0_specular.rgb * pow(e_r, 5.0);
+  l0 *= light0_enabled;
   l0 += light_global_ambient.rgb;
   frag_color = col0 * tint * vec4(l0, 1.0);
 }
@@ -199,6 +202,7 @@ uniform vec4 light_global_ambient;
 uniform vec4 light0_ambient;
 uniform vec4 light0_diffuse;
 uniform vec4 light0_specular;
+uniform float light0_enabled;
 in vec4 color_;
 in vec3 normal_eye;
 in vec3 light0_dir;
@@ -214,6 +218,7 @@ void main() {
   float e_r = max(dot(e, r), 0.0);
   // shininess 5.0 is OpenGL 2.x default value
   vec3 l0 = light0_ambient.rgb + n_d0 * light0_diffuse.rgb + light0_specular.rgb * pow(e_r, 5.0);
+  l0 *= light0_enabled;
   l0 += light_global_ambient.rgb;
   frag_color = color_ * tint * vec4(l0, 1.0);
 }
@@ -254,6 +259,7 @@ uniform vec4 light_global_ambient;
 uniform vec4 light0_ambient;
 uniform vec4 light0_diffuse;
 uniform vec4 light0_specular;
+uniform float light0_enabled;
 in vec2 texcoord_;
 in vec3 normal_eye;
 in vec3 light0_dir;
@@ -269,6 +275,7 @@ void main() {
   float e_r = max(dot(e, r), 0.0);
   // shininess 5.0 is OpenGL 2.x default value
   vec3 l0 = light0_ambient.rgb + n_d0 * light0_diffuse.rgb + light0_specular.rgb * pow(e_r, 5.0);
+  l0 *= light0_enabled;
   l0 += light_global_ambient.rgb;
   frag_color = texture(tex0, texcoord_) * tint * vec4(l0, 1.0);
 }
@@ -305,6 +312,7 @@ uniform vec4 light_global_ambient;
 uniform vec4 light0_ambient;
 uniform vec4 light0_diffuse;
 uniform vec4 light0_specular;
+uniform float light0_enabled;
 uniform vec4 material_ambient;
 uniform vec4 material_diffuse;
 uniform vec4 material_specular;
@@ -325,6 +333,7 @@ void main() {
   vec3 l0 = material_ambient.rgb  * light0_ambient.rgb
           + material_diffuse.rgb  * light0_diffuse.rgb  * n_d0
           + material_specular.rgb * light0_specular.rgb * pow(e_r, material_shininess);
+  l0 *= light0_enabled;
   l0 += material_ambient.rgb * light_global_ambient.rgb;
   frag_color = tint * vec4(l0, 1.0);
 }

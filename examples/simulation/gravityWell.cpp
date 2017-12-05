@@ -156,6 +156,10 @@ public:
 
 	void onKeyDown(const Keyboard& k){
 		reset(k.key());
+
+		if (k.key() == ' ') {
+			graphics().toggleLight(1);
+		}
 	}
 };
 

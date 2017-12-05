@@ -148,9 +148,92 @@ void Graphics::init() {
     lighting_tex_shader[i].begin();
     lighting_tex_shader[i].uniform("tex0", 0);
     lighting_tex_shader[i].end();
+
+    mLightOn[i] = true;
   }
 
   initialized = true;
+}
+
+void Graphics::color() {
+  if (mColoringMode != ColoringMode::UNIFORM) {
+    mColoringMode = ColoringMode::UNIFORM;
+    mRenderModeChanged = true;
+  }
+}
+
+void Graphics::color(float r, float g, float b, float a) {
+  mColor.set(r, g, b, a);
+  mUniformChanged = true;
+  color();
+}
+
+void Graphics::color(Color const& c) {
+  mColor = c;
+  mUniformChanged = true;
+  color();
+}
+
+void Graphics::meshColor() {
+  if (mColoringMode != ColoringMode::MESH) {
+    mColoringMode = ColoringMode::MESH;
+    mRenderModeChanged = true;
+  }
+}
+
+void Graphics::texture() {
+  if (mColoringMode != ColoringMode::TEXTURE) {
+    mColoringMode = ColoringMode::TEXTURE;
+    mRenderModeChanged = true;
+  }
+}
+
+void Graphics::material() {
+  if (mColoringMode != ColoringMode::MATERIAL) {
+    mColoringMode = ColoringMode::MATERIAL;
+    mRenderModeChanged = true;
+  }
+}
+// set to material mode, using provied material
+void Graphics::material(Material const& m) {
+  mMaterial = m;
+  mUniformChanged = true;
+  material();
+}
+
+// enable/disable lighting
+void Graphics::lighting(bool b) {
+  if (mLightingEnabled != b) {
+    mLightingEnabled = b;
+    mRenderModeChanged = true;
+  }
+}
+
+void Graphics::numLight(int n) {
+  // if lighting on, should update change in light number
+  // else it will get updated later when lighting gets enabled
+  if (mLightingEnabled) mRenderModeChanged = true;
+  num_lights = n;
+}
+
+// does not enable light, call lighting(true) to enable lighting
+void Graphics::light(Light const& l, int idx) {
+  mLights[idx] = l;
+  // if lighting on, should update change in light info
+  // else it will get updated later when lighting gets enabled
+  if (mLightingEnabled) mUniformChanged = true;
+  // change shader only if current number of light is less than given index
+  if (num_lights <= idx) numLight(idx + 1);
+}
+
+void Graphics::enableLight(int idx) {
+  mLightOn[idx] = true;
+}
+void Graphics::disableLight(int idx) {
+  mLightOn[idx] = false;
+}
+void Graphics::toggleLight(int idx) {
+  mLightOn[idx] = !mLightOn[idx];
 }
 
 void Graphics::quad(Texture& tex, float x, float y, float w, float h) {
@@ -194,6 +277,7 @@ void Graphics::send_lighting_uniforms(ShaderProgram& s, lighting_shader_uniforms
       s.uniform4v(u.lights[i].diffuse, mLights[i].diffuse().components);
       s.uniform4v(u.lights[i].specular, mLights[i].specular().components);
       s.uniform4v(u.lights[i].position, (viewMatrix() * Vec4f{mLights[i].pos()}).elems()); // could be optimized...
+      s.uniform(u.lights[i].enabled, (mLightOn[i]? 1.0f : 0.0f)); // could be optimized...
       // s.uniform4v(u.lights[i].atten, mLights[i].attenuation());
   }
 
@@ -279,6 +363,7 @@ void Graphics::update() {
     mUniformChanged = false;
   }
 
+  // also call base class's update
   RenderManager::update();
 }
 

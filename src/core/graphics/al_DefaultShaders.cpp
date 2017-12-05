@@ -15,6 +15,7 @@ void al_print_lighting_uniforms(lighting_shader_uniforms const& u, std::string n
       std::cout << "\t\t\tdiffuse " << l.diffuse << std::endl;
       std::cout << "\t\t\tspecular " << l.specular << std::endl;
       std::cout << "\t\t\tposition " << l.position << std::endl;
+      std::cout << "\t\t\enabled " << l.enabled << std::endl;
       // std::cout << "\t\t\tattenuation " << l.atten << std::endl;
   }
   std::cout << "\thas material: " << (u.has_material? "yes" : "no") << std::endl;
@@ -48,6 +49,7 @@ lighting_shader_uniforms al_get_lighting_uniform_locations(al::ShaderProgram& s,
         l.diffuse = glGetUniformLocation(s.id(), (light_i + "_diffuse"s).c_str());
         l.specular = glGetUniformLocation(s.id(), (light_i + "_specular"s).c_str());
         l.position = glGetUniformLocation(s.id(), (light_i + "_eye"s).c_str());
+        l.enabled = glGetUniformLocation(s.id(), (light_i + "_enabled"s).c_str());
         // l.atten = s.getUniformLocation("");
         if (l.ambient != -1 && l.diffuse != -1 && l.specular != -1 && l.position != -1) {
             u.lights.push_back(l);
@@ -248,6 +250,7 @@ std::string multilight_frag_header_perlight(int num_lights)
         s += "uniform vec4 "s + light_i + "_ambient;\n"s;
         s += "uniform vec4 "s + light_i + "_diffuse;\n"s;
         s += "uniform vec4 "s + light_i + "_specular;\n"s;
+        s += "uniform float "s + light_i + "_enabled;\n"s;
         // TODO: atten
     }
     return s;
@@ -316,9 +319,10 @@ std::string multilight_frag_body_perlight(int num_lights)
         s += "    r = -reflect(d, n);\n"s;
         s += "    n_d = max(dot(n, d), 0.0);\n"s;
         s += "    e_r = max(dot(e, r), 0.0);\n"s;
-        s += "    lighting += ambient * "s + light_i + "_ambient.rgb;\n"s;
-        s += "    lighting += diffuse * "s + light_i + "_diffuse.rgb * n_d;\n"s;
-        s += "    lighting += specular * "s + light_i + "_specular.rgb * pow(e_r, shininess);\n"s;
+        s += "    lighting += "s + light_i + "_enabled * ("s
+                  + "ambient * "s + light_i + "_ambient.rgb + "s
+                  + "diffuse * "s + light_i + "_diffuse.rgb * n_d + "s
+                  + "specular * "s + light_i + "_specular.rgb * pow(e_r, shininess));\n"s;
         // TODO: atten
     }
     return s;

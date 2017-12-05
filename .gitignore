@@ -1,3 +1,16 @@
+# don't ignore `bin` anywhere in folder tree
+!**/bin
+# but ignore things inside folder named bin
+**/bin/*
+# while not ignoring things inside bin/data
+!**/bin/data
+
+**/build
+
+# only top level al folder
+/al/
+
+# cmake stuff
 CMakeFiles/
 test/CMakeFiles/
 cmake_install.cmake
@@ -6,35 +19,28 @@ CMakeCache.txt
 test/CMakeCache.txt
 Makefile
 test/Makefile
-*.a
-gl_test/al_gl_test
-test/al_test
-*/al_test
-dependencies/glfw/
-dependencies/glew/
-dependencies/cuttlebone/
-dependencies/glv/
-dependencies/gamma/
-dependencies/FreeImage/
-build/
-*/build/
-.vs/
-Debug/
-*/Debug/
+CmakeSettings.json
+
+# lib locations for Windows
+dependencies/glfw
+dependencies/glew
+dependencies/cuttlebone
+dependencies/glv
+dependencies/gamma
+dependencies/FreeImage
 dependencies/apr
-dependencies/apr2
 dependencies/portaudio
+
+# file formats
+*.a
+*.lib
+
+# ide stuff
+**/Debug
+.vs/
 *.vcxproj
 *.filters
-*.lib
 *.sln
 *.db
-*/bin/
-bin/
-al.dir/
 x64
-CmakeSettings.json
-al/
-!include/al/
-*.sublime-project
-*.sublime-workspace
+al.dir/
