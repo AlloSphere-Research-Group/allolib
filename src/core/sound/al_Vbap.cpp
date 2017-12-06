@@ -1,5 +1,6 @@
 #include "al/core/sound/al_Vbap.hpp"
 #include <utility> // move
+#include <vector>
 
 namespace al{
 
@@ -96,9 +97,12 @@ void Vbap::findSpeakerPairs(const std::vector<Speaker>& spkrs){
 
 	unsigned numSpeakers = spkrs.size();
 	unsigned j, index;
-	unsigned speakerMapping[numSpeakers]; // To map unordered speakers into an ordered set.
-	float speakerAngles[numSpeakers];
+	std::vector<unsigned> speakerMapping;// [numSpeakers]; // To map unordered speakers into an ordered set.
+	std::vector<float> speakerAngles;// [numSpeakers];
 	float indexAngle;
+
+	speakerMapping.resize(numSpeakers);
+	speakerAngles.resize(numSpeakers);
 
 	// Build a map to the speaker, that points to speaker indexes.
 	for (unsigned i = 0; i < numSpeakers; i++) {
