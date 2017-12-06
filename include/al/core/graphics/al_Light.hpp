@@ -27,10 +27,10 @@ struct Light
 private:
     // initial values are values from fixed pipeline defaults
     // https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glLight.xml
-    Color mAmbient {0};
-    Color mDiffuse {1};
-    Color mSpecular {1};
-    float mPos[4] {0, 0, 1, 0};
+    Color mAmbient {0.0f};
+    Color mDiffuse {1.0f};
+    Color mSpecular {1.0f};
+    float mPos[4] {0.0f, 0.0f, 1.0f, 0.0f};
     // float mAtten[4];
 
     static Color mGlobalAmbient; // {0.2, 0.2, 0.2, 1.0}
@@ -53,11 +53,11 @@ struct Material
 private:
     // initial values are values from fixed pipeline defaults
     // https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glMaterial.xml
-    Color mAmbient {0.2};
-    Color mDiffuse {0.8};
+    Color mAmbient {0.2f};
+    Color mDiffuse {0.8f};
     // Color mEmission {0};
-    Color mSpecular {0};
-    float mShine = 5;
+    Color mSpecular {0.0f};
+    float mShine = 5.0f;
 };
 
 } // namespace al

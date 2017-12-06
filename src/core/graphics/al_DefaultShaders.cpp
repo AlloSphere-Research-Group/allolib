@@ -15,7 +15,7 @@ void al_print_lighting_uniforms(lighting_shader_uniforms const& u, std::string n
       std::cout << "\t\t\tdiffuse " << l.diffuse << std::endl;
       std::cout << "\t\t\tspecular " << l.specular << std::endl;
       std::cout << "\t\t\tposition " << l.position << std::endl;
-      std::cout << "\t\t\enabled " << l.enabled << std::endl;
+      std::cout << "\t\t\tenabled " << l.enabled << std::endl;
       // std::cout << "\t\t\tattenuation " << l.atten << std::endl;
   }
   std::cout << "\thas material: " << (u.has_material? "yes" : "no") << std::endl;

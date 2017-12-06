@@ -2,6 +2,6 @@
 
 namespace al {
 
-Color Light::mGlobalAmbient {0.2};
+Color Light::mGlobalAmbient {0.2f};
 
 } // ::al

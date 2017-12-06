@@ -178,8 +178,8 @@ bool isDirEmpty(std::string const& dir_path)
     {
         do {
             // does windows also have these aliases?
-            if (std::strcmp(dp->d_name, ".") == 0) continue;
-            if (std::strcmp(dp->d_name, "..") == 0) continue;
+            if (std::strcmp(data.cFileName, ".") == 0) continue;
+            if (std::strcmp(data.cFileName, "..") == 0) continue;
             FindClose(hFind);
             return false;
         }
