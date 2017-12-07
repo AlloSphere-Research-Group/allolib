@@ -3,23 +3,25 @@
 using namespace al;
 using namespace std;
 
-class MyApp : public EasyApp {
+class MyApp : public App {
 public:
   Mesh mesh;
+  osc::Recv server {11117};
 
   void onCreate() {
     addIcosahedron(mesh);
+
+	server.handler(*this);
+	server.start();
   }
 
   void onAnimate(double dt) {
     
   }
 
-  void onDraw() {
+  void onDraw(Graphics& g) {
     g.clear(0, 0, 0);
-    g.shader(color_shader);
-    g.shader().uniform("col0", Color(1, 0, 0));
-    g.camera(view);
+    g.color(1, 0, 0);
     g.polygonMode(Graphics::LINE);
     g.draw(mesh);
   }
@@ -36,6 +38,10 @@ public:
       io.out(1) = out;
     }
   }
+
+  void onMessage(osc::Message& m)
+  {
+  }
 };
 
 int main() {
@@ -45,5 +51,4 @@ int main() {
   app.dimensions(500, 500);
   app.initAudio();
   app.start();
-  return 0;
 }
