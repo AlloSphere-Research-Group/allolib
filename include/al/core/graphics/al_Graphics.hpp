@@ -224,6 +224,13 @@ class Graphics : public RenderManager {
   void clear(float k, float a = 1) { clearBuffer(k, k, k, a, 1, 0); }
   void clear(Color const &c) { clearBuffer(c.r, c.g, c.b, c.a, 1, 0); }
 
+  // GL_NONE       /  GL_COLOR_ATTACHMENTn
+  // GL_FRONT_LEFT /  GL_FRONT_RIGHT
+  // GL_BACK_LEFT  /  GL_BACK_RIGHT
+  void drawBuffer(unsigned int mode) {
+    // glDrawBuffers(GLsizei n, GLenum const* bufs);
+    glDrawBuffers(1, &mode);
+  }
 
   // extended, predefined render managing --------------------------------------
   static void init();
@@ -294,6 +301,8 @@ class Graphics : public RenderManager {
   void send_lighting_uniforms(ShaderProgram& s, lighting_shader_uniforms const& u);
   void update() override;
 
+  // to pass to the shader, combined with mLens.eyeSep(),
+  // will set the uniform "eye_sep"
   static const float LEFT_EYE;
   static const float RIGHT_EYE;
   static const float MONO_EYE;

@@ -367,7 +367,7 @@ void Graphics::update() {
         // do nothing
        break;
     }
-    s.uniform("eye_sep", mLens.eyeSep() * mEye);
+    s.uniform("eye_sep", mLens.eyeSep() * mEye / 2.0f);
     s.uniform("foc_len", mLens.focalLength());
     mUniformChanged = false;
   }
