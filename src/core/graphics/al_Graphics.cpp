@@ -5,6 +5,10 @@
 
 namespace al {
 
+const float Graphics::LEFT_EYE = -1.0f;
+const float Graphics::RIGHT_EYE = 1.0f;
+const float Graphics::MONO_EYE = 0.0f;
+
 Color Graphics::mClearColor {0, 0, 0, 1};
 float Graphics::mClearDepth = 1;
 Color Graphics::mColor {1, 1, 1, 1};
@@ -44,6 +48,9 @@ lighting_shader_uniforms Graphics::lighting_color_uniforms[al_max_num_lights()];
 lighting_shader_uniforms Graphics::lighting_mesh_uniforms[al_max_num_lights()];
 lighting_shader_uniforms Graphics::lighting_tex_uniforms[al_max_num_lights()];
 lighting_shader_uniforms Graphics::lighting_material_uniforms[al_max_num_lights()];
+
+Lens Graphics::mLens;
+float Graphics::mEye = 0.0f;
 
 void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq) {
   glBlendEquation(eq);
@@ -360,6 +367,8 @@ void Graphics::update() {
         // do nothing
        break;
     }
+    s.uniform("eye_sep", mLens.eyeSep() * mEye);
+    s.uniform("foc_len", mLens.focalLength());
     mUniformChanged = false;
   }
 

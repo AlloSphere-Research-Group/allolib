@@ -284,14 +284,32 @@ class Graphics : public RenderManager {
   ShaderProgram& shader() { return RenderManager::shader(); }
   ShaderProgram* shaderPtr() { return RenderManager::shaderPtr(); }
 
+  using RenderManager::camera; // makes camera(Viewpoint::SpecialType v) accessible
+  void camera(Viewpoint const& v) override {
+    mLens = v.lens();
+    mUniformChanged = true;
+    RenderManager::camera(v);
+  }
+
   void send_lighting_uniforms(ShaderProgram& s, lighting_shader_uniforms const& u);
   void update() override;
+
+  static const float LEFT_EYE;
+  static const float RIGHT_EYE;
+  static const float MONO_EYE;
+  void eye(float e) {
+    mEye = e;
+    mUniformChanged = true;
+  }
 
 private:
   static Color mClearColor;
   static float mClearDepth;
   static Color mColor;
   static Color mTint;
+
+  static Lens mLens;
+  static float mEye;
 
   static ColoringMode mColoringMode;
   static bool mLightingEnabled;

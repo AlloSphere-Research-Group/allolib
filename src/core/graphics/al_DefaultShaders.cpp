@@ -89,16 +89,20 @@ void compileDefaultShader(ShaderProgram& s, ShaderType type)
             s.compile(al_tex_vert_shader(), al_tex_frag_shader());
             return;
         case ShaderType::LIGHTING_COLOR:
-            s.compile(al_lighting_color_vert_shader(), al_lighting_color_frag_shader());
+            s.compile(multilight_vert_shader(ShaderType::LIGHTING_COLOR, 1),
+                      multilight_frag_shader(ShaderType::LIGHTING_COLOR, 1));
             return;
         case ShaderType::LIGHTING_MESH:
-            s.compile(al_lighting_mesh_vert_shader(), al_lighting_mesh_frag_shader());
+            s.compile(multilight_vert_shader(ShaderType::LIGHTING_MESH, 1),
+                      multilight_frag_shader(ShaderType::LIGHTING_MESH, 1));
             return;
         case ShaderType::LIGHTING_TEXTURE:
-            s.compile(al_lighting_tex_vert_shader(), al_lighting_tex_frag_shader());
+            s.compile(multilight_vert_shader(ShaderType::LIGHTING_TEXTURE, 1),
+                      multilight_frag_shader(ShaderType::LIGHTING_TEXTURE, 1));
             return;
         case ShaderType::LIGHTING_MATERIAL:
-            s.compile(al_lighting_material_vert_shader(), al_lighting_material_frag_shader());
+            s.compile(multilight_vert_shader(ShaderType::LIGHTING_MATERIAL, 1),
+                      multilight_frag_shader(ShaderType::LIGHTING_MATERIAL, 1));
             return;
     }
 }

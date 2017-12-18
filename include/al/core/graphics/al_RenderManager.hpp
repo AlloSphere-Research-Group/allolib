@@ -13,6 +13,37 @@
 
 #include <unordered_map>
 
+/*
+
+    Render manager handles basic rendering states
+    1. model / view / projection matrix
+        - model matrix can be directly set
+        - or can be set with translate / rotate / scale functions
+        - view and projection matrix can be directly set
+        - or can be set using Viewpoint class and RenderManager::camera function
+        - matrices can be push / pop'ed
+        - pushing and popping camera will push/pop both view/proj mat
+    2. viewport and framebuffer
+        - keeps track of current state
+        - also provides push / pop functionality
+    3. shaders
+        - keeps track of current shader
+        - get & cache location and set values of uniforms for model, view, projection matrix
+    4. drawing mesh
+        - sending vertex position/color/normal/texcoord to bound shader
+        - mesh can be regular cpu-side al::Mesh
+        - or gpu-stored al::VAOMesh
+    
+    !. writing shader for al::RenderManager
+        - modelview matrix:  uniform mat4 MV;
+        - projection matrix: uniform mat4 P;
+        - vertex position    layout (location = 0) in vec3 position;
+        - vertex color:      layout (location = 1) in vec4 color;
+        - vertex texcoord:   layout (location = 2) in vec2 texcoord;
+        - vertex normal:     layout (location = 3) in vec3 normal;
+
+*/
+
 namespace al {
 
 class MatrixStack {
@@ -164,8 +195,8 @@ public:
   static ShaderProgram& shader() { return *mShaderPtr; }
   static ShaderProgram* shaderPtr() { return mShaderPtr; }
 
-  void camera(Viewpoint const& v);
-  void camera(Viewpoint::SpecialType v);
+  virtual void camera(Viewpoint const& v);
+  virtual void camera(Viewpoint::SpecialType v);
   void pushCamera();
   void popCamera();
   void pushCamera(Viewpoint const& v) { pushCamera(); camera(v); }
