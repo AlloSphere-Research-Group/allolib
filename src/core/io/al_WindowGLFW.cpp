@@ -209,24 +209,44 @@ bool Window::implCreate() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_DECORATED, mDecorated);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Ignored when creating ES
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true); // if OSX, this is a must
-  // AUTO_ICONIFY available after 3.2
+  // GLFW_AUTO_ICONIFY (available after 3.2) specifies whether the full screen window will
+  // automatically iconify and restore the previous video mode on input focus loss.
+  // This hint is ignored for windowed mode windows.
 #if 10 * GLFW_VERSION_MAJOR + GLFW_VERSION_MINOR > 31
   glfwWindowHint(GLFW_AUTO_ICONIFY, false); // so fullcreen does not iconify
 #endif
   // TODO
-  // bits: STENCIL_BUF etc. ...
+  // GLFW_STEREO: GLFW_TRUE GLFW_FALSE
+  // GLFW_CLIENT_API: GLFW_OPENGL_API GLFW_OPENGL_API, GLFW_OPENGL_ES_API or GLFW_NO_API
+
+  bool should_create_stereo = (mDisplayMode & STEREO_BUF)? true : false;
+  glfwWindowHint(GLFW_STEREO, should_create_stereo);
 
   mImpl->mGLFWwindow = glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), NULL, NULL);
   if (!mImpl->created()) {
-    return false;
+    if (should_create_stereo) {
+      glfwWindowHint(GLFW_STEREO, false);
+      mImpl->mGLFWwindow = glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), NULL, NULL);
+      if (!mImpl->created()) {
+        std::cout << "failed to create window" << std::endl;
+        return false;
+      }
+      else {
+          std::cout << "tried to create stereo window but failed. creating mono window" << std::endl;
+      }
+    }
+    else {
+      std::cout << "failed to create window" << std::endl;
+      return false;
+    }
   }
 
   mImpl->makeCurrent();
   glfwSetWindowPos(mImpl->mGLFWwindow, mDim.l, mDim.t);
 
-  // sometimes OS makes window's size different from what we requested
+  // sometimes OS makes window's size different from what we requested (usually MACOS)
   int actual_width, actual_height, actual_left, actual_top;
   glfwGetWindowSize(mImpl->mGLFWwindow, &actual_width, &actual_height);
   glfwGetWindowPos(mImpl->mGLFWwindow, &actual_left, &actual_top);

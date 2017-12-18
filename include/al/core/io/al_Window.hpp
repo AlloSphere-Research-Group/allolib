@@ -220,7 +220,7 @@ public:
   typedef std::vector<WindowEventHandler *> WindowEventHandlers;
 
   /// Window display mode bit flags
-  enum DisplayMode{
+  enum DisplayMode : unsigned int {
     SINGLE_BUF  = 1<<0,    /**< Do single-buffering */
     DOUBLE_BUF  = 1<<1,    /**< Do double-buffering */
     STEREO_BUF  = 1<<2,    /**< Do left-right stereo buffering */
@@ -304,6 +304,11 @@ public:
   void dimensions(int w, int h);  ///< Set dimensions
   void dimensions(int x, int y, int w, int h);  ///< Set dimensions
   void displayMode(DisplayMode v);  ///< Set display mode; will recreate window if different from current
+  // should only be called before creation and should match display hardware capability
+  void stereo(bool v) {
+    if (v) displayMode(static_cast<DisplayMode>(displayMode() | STEREO_BUF));
+    else displayMode(static_cast<DisplayMode>(displayMode() & ~STEREO_BUF));
+  }
 
   /// This will make the window go fullscreen without borders and,
   /// if posssible, without changing the display resolution.
