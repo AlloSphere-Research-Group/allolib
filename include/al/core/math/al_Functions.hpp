@@ -468,7 +468,7 @@ inline bool aeq(float a, float b, int maxULP){
   // Make ai and bi lexicographically ordered as a twos-complement int
   if(ai < 0) ai = 0x80000000 - ai;
   if(bi < 0) bi = 0x80000000 - bi;
-  return std::abs(ai - bi) <= maxULP;
+  return std::abs((float)(ai - bi)) <= maxULP;
 }
 
 inline bool aeq(double a, double b, int maxULP){
@@ -481,7 +481,7 @@ inline bool aeq(double a, double b, int maxULP){
   // Make ai and bi lexicographically ordered as a twos-complement int
   if(ai < 0) ai = 0x8000000000000000ULL - ai;
   if(bi < 0) bi = 0x8000000000000000ULL - bi;
-  return std::abs(ai - bi) <= maxULP;
+  return std::abs((double)(ai - bi)) <= maxULP;
 }
 
 TEM inline T atLeast(const T& v, const T& e){ return (v >= T(0)) ? std::max(v, e) : std::min(v, -e); }
@@ -671,7 +671,7 @@ TEM T legendreP(int l, int m, T ct, T st){
   //    P_{m+1}^m(x) = x(2m+1) P_m^m(x).
 
   T P = 0;        // the result
-  int M = std::abs(m);   // M = |m|
+  int M = std::abs((double)m);   // M = |m|
   T y1 = 1.;        // recursion state variable
 
   for(int i=1; i<=M; ++i)
