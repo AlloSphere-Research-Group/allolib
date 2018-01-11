@@ -243,7 +243,9 @@ public:
   Lens lens_;
   Graphics* g;
   VAOMesh texquad;
-  
+  bool calibration_loaded = false;
+  bool did_begin = false;
+
   // instead of push/pop
   Lens prev_lens_;
   ShaderProgram* prev_shader_;
@@ -262,10 +264,34 @@ public:
     return r;
   }
 
-  void init(int res=1024, float near=0.1, float far=100, float radius = 1e10) {
-    res_ = res;
+  // load_calibration_data needed to be called before this function
+  // also projection_infos_.resize(warpblend_.viewports.size());
+  void update_resolution(int resolution) {
+    res_ = resolution;
+    viewport_.set(0, 0, res_, res_);
+
+    if (!calibration_loaded) return;
+
+    // we have calibration data loaded,
+    // so update textures(color) & renderbuffer(depth)
+    projection_infos_.resize(warpblend_.viewports.size());
+    for(int index = 0; index < warpblend_.viewports.size(); index++) {
+      const ProjectionViewport& vp = warpblend_.viewports[index];
+      ProjectionInfo& info = projection_infos_[index];
+      info.texture.reset(new Texture());
+      info.texture->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+    }
+    rbo_.create(res_, res_);
+    fbo_.bind();
+    fbo_.attachTexture2D(*projection_infos_[0].texture);
+    fbo_.attachRBO(rbo_);
+    fbo_.unbind();
+  }
+
+  void init(int res=1024, float near=0.1, float far=100, float radius = 1e10)
+  {
     lens_.focalLength(radius);
-    // radius_ = radius;
+    res_ = res;
     viewport_.set(0, 0, res_, res_);
 
     projection_infos_.resize(warpblend_.viewports.size());
@@ -322,6 +348,7 @@ public:
     fbo_.attachTexture2D(*projection_infos_[0].texture);
     fbo_.attachRBO(rbo_);
     fbo_.unbind();
+
     // pp_shader_.compile(perprojection_vert(), perprojection_frag());
     // pp_shader_.begin();
     // pp_shader_.uniform("omni_radius", radius_);
@@ -340,6 +367,7 @@ public:
 
   void load_calibration_data(const char* path, const char* hostname) {
     warpblend_.load_allosphere_calibration(path, hostname);
+    calibration_loaded = true;
   }
 
   void begin(Graphics& graphics) {
@@ -352,6 +380,7 @@ public:
     prev_lens_ = g->lens();
     g->lens(lens_);
     prev_shader_ = g->shaderPtr();
+    did_begin = true;
     // g->shader(pp_shader_);
   }
 
@@ -388,11 +417,12 @@ public:
       g->shader(*prev_shader_);
     }
     // fbo_.end();
+    did_begin = false
   }
   
-  void pose(Pose const& p) {
-    pose_ = p;
-  }
+  void pose(Pose const& p) { pose_ = p; if (did_begin) g->viewMatrix(view_mat(pose_)); }
+  Pose& pose() { return pose_; }
+  Pose const& pose() const { return pose_; }
 
   void composite(Graphics& g) {
     g.pushCamera(Viewpoint::IDENTITY);

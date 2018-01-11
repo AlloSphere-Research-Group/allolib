@@ -493,9 +493,9 @@ Isosurface::calcIntersection(int ix, int iy, int iz, int edgeNo, const float * v
 
 	const char& c0 = edgeCorners[edgeNo][0];
 	const char& c1 = edgeCorners[edgeNo][1];
-	const float& val1 = vals[c0];
-	const float& val2 = vals[c1];
-	const int * e1 = cubeVertices[c0];
+	const float& val1 = vals[size_t(c0)];
+	const float& val2 = vals[size_t(c1)];
+	const int * e1 = cubeVertices[size_t(c0)];
 	const float * ed = edgeDirections[edgeNo];
 
 	// Interpolate between two grid points to produce the point at which
@@ -512,8 +512,8 @@ Isosurface::calcIntersection(int ix, int iy, int iz, int edgeNo, const float * v
 //	r.corners[0] = i0;
 //	r.corners[1] = i1;
 	for(int i=0; i<3; ++i){
-		r.corners[0][i] = cubeVertices[c0][i];
-		r.corners[1][i] = cubeVertices[c1][i];
+		r.corners[0][i] = cubeVertices[size_t(c0)][i];
+		r.corners[1][i] = cubeVertices[size_t(c1)][i];
 	}
 	r.mu=mu;
 

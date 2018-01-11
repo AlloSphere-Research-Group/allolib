@@ -17,11 +17,26 @@ struct OmniRenderer : WindowApp
     Graphics mGraphics;
     PerProjectionRender pp_render;
 
-    OmniRenderer()
-        : WindowApp() // appends standard window controls and itself as event handler
+    OmniRenderer(): WindowApp() // appends standard window controls
+                                // and itself as event handler
     {
 
     }
+
+    void omniResolution(int resolution) {
+        pp_render.update_resolution(resolution);
+    }
+
+    void sphereRadius(float radius) {
+        mGraphics.lens().focalLength(radius);
+    }
+
+    Lens& lens() { return mGraphics.lens(); }
+    Lens const& lens() const { return mGraphics.lens(); }
+
+    void pose(Pose const& p) { pp_render.pose(p); }
+    Pose& pose() { return pp_render.pose(); }
+    Pose const& pose() const { return pp_render.pose(); }
 
     // virtual void pre_process() {}
     virtual void onDraw(Graphics& g) {}
@@ -49,6 +64,7 @@ struct OmniRenderer : WindowApp
         create();
         cursorHide(true);
         
+        // need to be called before pp_render.init
         pp_render.load_calibration_data(
             sphere::config_directory("data").c_str(),   // path
             sphere::renderer_hostname("config").c_str() // hostname
