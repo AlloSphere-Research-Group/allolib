@@ -311,7 +311,12 @@ class Graphics : public RenderManager {
     mUniformChanged = true;
   }
 
-  Lens const& lens() {
+  Lens const& lens() const {
+    return mLens;
+  }
+
+  Lens& lens() {
+    mUniformChanged = true;
     return mLens;
   }
 
