@@ -55,7 +55,7 @@ set(flags
   ${basic_flags}
 )
 
-link_directories(${CORE_LIBRARY_DIRS})
+link_directories(${app_link_dirs} ${CORE_LIBRARY_DIRS})
 
 # --- setup app target ------------------------------------
 
