@@ -1,5 +1,5 @@
-#ifndef INCLUDE_OMNIRENDERAPP_HPP
-#define INCLUDE_OMNIRENDERAPP_HPP
+#ifndef INCLUDE_OMNIRENDER_HPP
+#define INCLUDE_OMNIRENDER_HPP
 
 #include "al/sphere/al_Perprojection.hpp"
 #include "al/sphere/al_SphereUtils.hpp"
@@ -12,12 +12,12 @@
 
 namespace al {
 
-struct OmniRendererer : WindowApp
+struct OmniRenderer : WindowApp
 {
     Graphics mGraphics;
     PerProjectionRender pp_render;
 
-    OmniRendererer()
+    OmniRenderer()
         : WindowApp() // appends standard window controls and itself as event handler
     {
 
@@ -114,7 +114,7 @@ struct OmniRendererer : WindowApp
 using namespace std;
 using namespace al;
 
-struct MyOmniRendererApp : OmniRendererer
+struct MyOmniRendererApp : OmniRenderer
 {
     VAOMesh mesh;
     
