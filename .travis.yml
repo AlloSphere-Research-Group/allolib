@@ -10,11 +10,6 @@ compiler:
 - gcc
 - clang
 before_install:
-  - sudo add-apt-repository ppa:keithw/glfw3 -y
-  - sudo apt-get update -q
-  - sudo apt-get install libglfw3 -y
-  - sudo apt-get install libglfw3-dev -y
-  - sudo apt-get install xorg-dev
   # - ( git clone -b devel https://github.com/AlloSphere-Research-Group/Gamma /tmp/Gamma )
   # - ( git clone -b cmake https://github.com/AlloSphere-Research-Group/GLV /tmp/GLV )
   # - ( git clone https://github.com/rbtsx/cuttlebone.git /tmp/cuttlebone )
@@ -23,14 +18,16 @@ install:
 addons:
   apt:
     sources:
-    - ubuntu-toolchain-r-test
-    # - keithw
+    - sourceline: 'ppa:keithw/glfw3'
+    - sourceline: 'ppa:ubuntu-toolchain-r/test'
     packages:
     - gcc-4.9
     - g++-4.9
     # - portaudio19-dev
     # - libsndfile1-dev
     - libglew-dev
+    - libglfw3-dev
+    - xorg-dev
     # - libglfw3-dev
     # - libusb-1.0-0-dev
     - libfreeimage-dev
@@ -40,11 +37,10 @@ addons:
     # - libjsoncpp-dev
     # - libfftw3-dev
 script:
-    -
     - cmake . -DTRAVIS_BUILD=1 -DBUILD_EXAMPLES=1 -DCMAKE_BUILD_TYPE=Debug\
     - make
     - make test
-sudo: required
+sudo: false
 notifications:
   email:
     recipients:
