@@ -12,12 +12,12 @@
 
 namespace al {
 
-struct OmniRendererApp : WindowApp
+struct OmniRendererer : WindowApp
 {
     Graphics mGraphics;
     PerProjectionRender pp_render;
 
-    OmniRendererApp()
+    OmniRendererer()
         : WindowApp() // appends standard window controls and itself as event handler
     {
 
@@ -114,7 +114,7 @@ struct OmniRendererApp : WindowApp
 using namespace std;
 using namespace al;
 
-struct MyOmniRendererApp : OmniRendererApp
+struct MyOmniRendererApp : OmniRendererer
 {
     VAOMesh mesh;
     
