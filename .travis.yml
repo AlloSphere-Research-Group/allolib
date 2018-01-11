@@ -23,12 +23,11 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
-    # - portaudio19-dev
-    # - libsndfile1-dev
+    - portaudio19-dev
+    - libsndfile1-dev
     - libglew-dev
     - libglfw3-dev
     - xorg-dev
-    # - libglfw3-dev
     # - libusb-1.0-0-dev
     - libfreeimage-dev
     - libfreetype6-dev
