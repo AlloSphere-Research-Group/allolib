@@ -2,7 +2,7 @@ branches:
   except:
   - modern_cmake
 language: cpp
-dist: xenial
+dist: trusty
 os:
   - linux
 #  - osx
@@ -10,16 +10,16 @@ compiler:
 - gcc
 - clang
 before_install:
-  # - sudo add-apt-repository ppa:keithw/glfw3 -y
+  - sudo add-apt-repository ppa:keithw/glfw3 -y
   - sudo apt-get update -q
-  # - sudo apt-get install libglfw3 -y
-  # - sudo apt-get install libglfw3-dev -y
+  - sudo apt-get install libglfw3 -y
+  - sudo apt-get install libglfw3-dev -y
   - sudo apt-get install xorg-dev
   # - ( git clone -b devel https://github.com/AlloSphere-Research-Group/Gamma /tmp/Gamma )
   # - ( git clone -b cmake https://github.com/AlloSphere-Research-Group/GLV /tmp/GLV )
   # - ( git clone https://github.com/rbtsx/cuttlebone.git /tmp/cuttlebone )
-# install:
-    # - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+install:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
 addons:
   apt:
     sources:
@@ -31,7 +31,7 @@ addons:
     # - portaudio19-dev
     # - libsndfile1-dev
     - libglew-dev
-    - libglfw3-dev
+    # - libglfw3-dev
     # - libusb-1.0-0-dev
     - libfreeimage-dev
     - libfreetype6-dev
