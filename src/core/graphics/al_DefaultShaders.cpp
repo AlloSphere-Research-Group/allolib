@@ -76,32 +76,32 @@ lighting_shader_uniforms al_get_lighting_uniform_locations(al::ShaderProgram& s,
 
 namespace al {
 
-void compileDefaultShader(ShaderProgram& s, ShaderType type)
+void compileDefaultShader(ShaderProgram& s, ShaderType type, bool is_omni)
 {
     switch (type) {
         case ShaderType::COLOR:
-            s.compile(al_color_vert_shader(), al_color_frag_shader());
+            s.compile(al_color_vert_shader(is_omni), al_color_frag_shader());
             return;
         case ShaderType::MESH:
-            s.compile(al_mesh_vert_shader(), al_mesh_frag_shader());
+            s.compile(al_mesh_vert_shader(is_omni), al_mesh_frag_shader());
             return;
         case ShaderType::TEXTURE:
-            s.compile(al_tex_vert_shader(), al_tex_frag_shader());
+            s.compile(al_tex_vert_shader(is_omni), al_tex_frag_shader());
             return;
         case ShaderType::LIGHTING_COLOR:
-            s.compile(multilight_vert_shader(ShaderType::LIGHTING_COLOR, 1),
+            s.compile(multilight_vert_shader(ShaderType::LIGHTING_COLOR, 1, is_omni),
                       multilight_frag_shader(ShaderType::LIGHTING_COLOR, 1));
             return;
         case ShaderType::LIGHTING_MESH:
-            s.compile(multilight_vert_shader(ShaderType::LIGHTING_MESH, 1),
+            s.compile(multilight_vert_shader(ShaderType::LIGHTING_MESH, 1, is_omni),
                       multilight_frag_shader(ShaderType::LIGHTING_MESH, 1));
             return;
         case ShaderType::LIGHTING_TEXTURE:
-            s.compile(multilight_vert_shader(ShaderType::LIGHTING_TEXTURE, 1),
+            s.compile(multilight_vert_shader(ShaderType::LIGHTING_TEXTURE, 1, is_omni),
                       multilight_frag_shader(ShaderType::LIGHTING_TEXTURE, 1));
             return;
         case ShaderType::LIGHTING_MATERIAL:
-            s.compile(multilight_vert_shader(ShaderType::LIGHTING_MATERIAL, 1),
+            s.compile(multilight_vert_shader(ShaderType::LIGHTING_MATERIAL, 1, is_omni),
                       multilight_frag_shader(ShaderType::LIGHTING_MATERIAL, 1));
             return;
     }
@@ -110,10 +110,12 @@ void compileDefaultShader(ShaderProgram& s, ShaderType type)
 // common lines in the beginning
 std::string multilight_vert_header_common()
 {
-    return R"(#version 330
+    return R"(
 uniform mat4 MV;
 uniform mat4 P;
 uniform mat4 N; // normal matrix: transpose of inverse of MV
+uniform float eye_sep;
+uniform float foc_len;
 layout (location = 0) in vec3 position;
 layout (location = 3) in vec3 normal;
 out vec3 normal_eye;
@@ -161,7 +163,7 @@ std::string multilight_vert_body_begin()
 void main()
 {
     vec4 vert_eye = MV * vec4(position, 1.0);
-    gl_Position = P * vert_eye;
+    gl_Position = P * stereo_displace(vert_eye, eye_sep, foc_len);
     normal_eye = (N * vec4(normalize(normal), 0.0)).xyz;
     eye_dir = -vert_eye.xyz;
 )"; // does not close main function
@@ -342,9 +344,11 @@ std::string multilight_frag_body_end()
 }
 
 
-std::string multilight_vert_shader(ShaderType type, int num_lights)
+std::string multilight_vert_shader(ShaderType type, int num_lights, bool is_omni)
 {
-    return multilight_vert_header_common()
+    return al_default_shader_version_string()
+         + al_default_vert_shader_stereo_functions(is_omni)
+         + multilight_vert_header_common()
          + multilight_vert_header_pertype(type)
          + multilight_vert_header_perlight(num_lights)
          + multilight_vert_body_begin()
@@ -364,11 +368,12 @@ std::string multilight_frag_shader(ShaderType type, int num_lights)
          + multilight_frag_body_end();
 }
 
-void compileMultiLightShader(ShaderProgram& s, ShaderType type, int num_lights)
+void compileMultiLightShader(ShaderProgram& s, ShaderType type, int num_lights, bool is_omni)
 {
-    s.compile(multilight_vert_shader(type, num_lights), multilight_frag_shader(type, num_lights));
+    s.compile(multilight_vert_shader(type, num_lights, is_omni), multilight_frag_shader(type, num_lights));
 }
 
+#if 0
 std::string test_vert(ShaderType type, int num_lights) {
     return multilight_vert_shader(type, num_lights);
 }
@@ -376,5 +381,6 @@ std::string test_vert(ShaderType type, int num_lights) {
 std::string test_frag(ShaderType type, int num_lights) {
     return multilight_frag_shader(type, num_lights);
 }
+#endif
 
 }
