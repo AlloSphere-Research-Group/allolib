@@ -22,73 +22,6 @@ public:
   static int const textures_bidning_point = 11;
 };
 
-inline std::string perprojection_vert() { return R"(
-#version 330
-uniform mat4 MV;
-uniform mat4 P;  // projection matrix is a combination of rotation and projection here
-
-// @eye_sep: the eye parallax distance.
-//  This will be zero for mono, and positive/negative for right/left eyes.
-uniform float eye_sep;
-
-// @foc_len: the radius of the sphere in OpenGL units.
-//  This will be infinity for the original layout (we default to 1e10).
-uniform float foc_len;
-
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec4 color;
-// layout (location = 2) in vec2 texcoord;
-// layout (location = 3) in vec3 normal;
-
-out vec4 color_;
-// out vec2 texcoord_;
-// out vec3 normal_;
-
-vec4 displace(in vec4 vertex) {
-  float l = length(vertex.xz);
-  vec3 vn = normalize(vertex.xyz);
-
-  // Precise formula.
-  float omni_eyeSep = eye_sep;
-  float omni_radius = foc_len;
-  float displacement = omni_eyeSep * (omni_radius * omni_radius - sqrt(l * l * omni_radius * omni_radius + omni_eyeSep * omni_eyeSep * (omni_radius * omni_radius - l * l))) / (omni_radius * omni_radius - omni_eyeSep * omni_eyeSep);
-
-  // Approximation, safe if omni_radius / omni_eyeSep is very large, which is true for the allosphere.
-  // float displacement = omni_eyeSep * (1.0 - l / omni_radius);
-
-  // Displace vertex.
-  return vertex + vec4(displacement * vn.z, 0.0, displacement * -vn.x, 0.0);
-}
-
-void main() {
-  vec4 vertex = MV * vec4(position, 1.0);
-  gl_Position = P * displace(vertex);
-  color_ = color;
-  // texcoord_ = texcoord;
-  // normal_ = normal;
-}
-)";}
-
-inline std::string perprojection_frag() { return R"(
-#version 330
-// uniform sampler2D tex0;
-// uniform float tex0_mix;
-// uniform float light_mix;
-
-in vec4 color_;
-// in vec2 texcoord_;
-// in vec3 normal_;
-
-out vec4 frag_color;
-
-void main() {
-  // vec4 tex_color0 = texture(tex0, texcoord_);
-  // vec4 light_color = vec4(normal_, 1.0); // TODO
-  // vec4 final_color = mix(mix(color_, tex_color0, tex0_mix), light_color, light_mix);
-  frag_color = color_;
-}
-)";}
-
 inline std::string perprojection_samplevert() { return R"(
 #version 330
 uniform mat4 MV;
@@ -114,26 +47,26 @@ uniform float tanFovDiv2;
 in vec2 texcoord_;
 out vec4 frag_color;
 void main() {
-  vec3 dir = texture(sample_tex, texcoord_).rgb;
+  vec4 sample = texture(sample_tex, texcoord_);
+  vec3 dir = sample.rgb;
   vec3 p_coord = (R * vec4(dir, 0)).xyz;
   p_coord.xy /= -p_coord.z;
   p_coord.xy /= tanFovDiv2;
   vec4 cube_color = texture(color_tex, p_coord.xy / 2.0 + 0.5);
-  frag_color = cube_color;
+  frag_color = cube_color * sample.a;
 }
 )";}
 
 class ProjectionViewport {
 public:
   std::string id;
-  int width;
-  int height;
   float b, h, l, w;
   int active;
   std::string filepath;
-  int warp_width, warp_height;
+  int width, height;
   std::vector<Vec3f> warp_data;
   std::vector<float> blend_data;
+  std::vector<Vec4f> warp_and_blend_data;
 };
 
 class WarpBlendData {
@@ -177,46 +110,22 @@ public:
     // Load warp data
     for(int i = 0; i < viewports.size(); i++) {
       ProjectionViewport& vp = viewports[i];
-      std::ifstream file((std::string(path) + "/map3D" + vp.id + ".bin"), std::ios::in | std::ios::binary);
 
+      std::ifstream file(vp.filepath, std::ios::in | std::ios::binary);
       if(!file) {
         std::cout << "could not open file: " << vp.filepath << std::endl;
         continue;
       }
-      int32_t warp_size[2];
-      file.read((char*)warp_size, 8);
-      vp.warp_width = warp_size[1];
-      vp.warp_height = warp_size[0] / 3;
 
-      // std::cout << vp.warp_width << ", " << vp.warp_height << std::endl;
+      vp.warp_and_blend_data.resize(vp.width * vp.height);
+      {
+        auto* data = reinterpret_cast<char*>(vp.warp_and_blend_data.data());
+        file.read(data, sizeof(Vec4f) * vp.width * vp.height);
+      }
+      file.close();
 
-      vp.warp_data.resize(vp.warp_width * vp.warp_height);
-
-      float* buf = new float[vp.warp_width * vp.warp_height];
-      file.read((char*)buf, sizeof(float) * vp.warp_width * vp.warp_height); // x
-      for(int j = 0; j < vp.warp_width * vp.warp_height; j++) {
-          vp.warp_data[j].x = buf[j];
-      }
-      file.read((char*)buf, sizeof(float) * vp.warp_width * vp.warp_height); // y
-      for(int j = 0; j < vp.warp_width * vp.warp_height; j++) {
-          vp.warp_data[j].y = buf[j];
-      }
-      file.read((char*)buf, sizeof(float) * vp.warp_width * vp.warp_height); // z
-      for(int j = 0; j < vp.warp_width * vp.warp_height; j++) {
-          vp.warp_data[j].z = buf[j];
-      }
-      // Flip y axis.
-      for(int y = 0; y < vp.warp_height / 2; y++) {
-          Vec3f* row1 = &vp.warp_data[0] + y * vp.warp_width;
-          Vec3f* row2 = &vp.warp_data[0] + (vp.warp_height - 1 - y) * vp.warp_width;
-          for(int x = 0; x < vp.warp_width; x++) {
-              Vec3f tmp = row1[x];
-              row1[x] = row2[x];
-              row2[x] = tmp;
-          }
-      }
-
-      delete[] buf;
+      vp.width = vp.width;
+      vp.height = vp.height;
     }
   }
 };
@@ -304,16 +213,20 @@ public:
       // Determine projection dimensions.
       // First determine the central direction.
       Vec3f direction(0, 0, 0);
-      for(int i = 0; i < vp.warp_width * vp.warp_height; i++) {
-        Vec3f d = vp.warp_data[i];
-        direction += d;
+      for(int i = 0; i < vp.width * vp.height; i++) {
+        direction.x += vp.warp_and_blend_data[i].x;
+        direction.y += vp.warp_and_blend_data[i].y;
+        direction.z += vp.warp_and_blend_data[i].z;
       }
       direction = direction.normalize();
       // Determine the radius.
       float dot_max = 1;
-      for(int i = 0; i < vp.warp_width * vp.warp_height; i++) {
-        Vec3f d = vp.warp_data[i];
-        d = d.normalize();
+      for(int i = 0; i < vp.width * vp.height; i++) {
+        auto d = Vec3f{
+          vp.warp_and_blend_data[i].x,
+          vp.warp_and_blend_data[i].y,
+          vp.warp_and_blend_data[i].z 
+        }.normalize();
         float dot = d.dot(direction);
         if(dot_max > dot) dot_max = dot;
       }
@@ -340,8 +253,8 @@ public:
       info.tanFovDiv2 = tan(fov / 2.0);
 
       info.warp_texture.reset(new Texture());
-      info.warp_texture->create2D(vp.warp_width, vp.warp_height, GL_RGBA32F, GL_RGB, GL_FLOAT);
-      info.warp_texture->submit(vp.warp_data.data());
+      info.warp_texture->create2D(vp.width, vp.height, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.warp_texture->submit(vp.warp_and_blend_data.data());
     }
     rbo_.create(res_, res_);
     fbo_.bind();
@@ -417,7 +330,7 @@ public:
       g->shader(*prev_shader_);
     }
     // fbo_.end();
-    did_begin = false
+    did_begin = false;
   }
   
   void pose(Pose const& p) { pose_ = p; if (did_begin) g->viewMatrix(view_mat(pose_)); }
