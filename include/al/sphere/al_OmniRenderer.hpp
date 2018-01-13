@@ -16,12 +16,15 @@ struct OmniRenderer : WindowApp
 {
     Graphics mGraphics;
     PerProjectionRender pp_render;
+    bool render_stereo = true;
 
     OmniRenderer(): WindowApp() // appends standard window controls
                                 // and itself as event handler
     {
 
     }
+
+    void stereo(bool b) { render_stereo = b; }
 
     void omniResolution(int resolution) {
         pp_render.update_resolution(resolution);
@@ -87,22 +90,45 @@ struct OmniRenderer : WindowApp
         
         mGraphics.omni(true);
         pp_render.begin(mGraphics);
-        for (int eye = 0; eye < pp_render.num_eyes(); eye += 1) { // 2 for stereo (TODO!)
-            // pp_render.set_eye(eye);
-            pp_render.set_eye(-1);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        bool window_is_stereo_buffered = Window::displayMode() & Window::STEREO_BUF;
+        if (window_is_stereo_buffered && render_stereo) {
+            for (int eye = 0; eye < 2; eye += 1) {
+                pp_render.set_eye(eye);
+                for (int i = 0; i < pp_render.num_projections(); i++) {
+                    pp_render.set_projection(i);
+                    onDraw(mGraphics);
+                }
+            }
+        }
+        else {
+            pp_render.set_eye(-1); // mono eye
             for (int i = 0; i < pp_render.num_projections(); i++) {
                 pp_render.set_projection(i);
                 onDraw(mGraphics);
             }
         }
+        
         pp_render.end();
         mGraphics.omni(false);
-        
         mGraphics.viewport(0, 0, fbWidth(), fbHeight());
-        mGraphics.clearColor(0, 0, 0);
-        mGraphics.clearDepth(1);
-        pp_render.composite(mGraphics);
 
+        if (window_is_stereo_buffered && render_stereo) {
+            glDrawBuffer(GL_BACK_LEFT);
+            mGraphics.clearColor(0, 0, 0);
+            mGraphics.clearDepth(1);
+            pp_render.composite(mGraphics, 0);
+            glDrawBuffer(GL_BACK_RIGHT);
+            mGraphics.clearColor(0, 0, 0);
+            mGraphics.clearDepth(1);
+            pp_render.composite(mGraphics, 1);
+        }
+        else {
+            glDrawBuffer(GL_BACK_LEFT);
+            mGraphics.clearColor(0, 0, 0);
+            mGraphics.clearDepth(1);
+            pp_render.composite(mGraphics, 0);
+        }
         /*
         sample_capture();
         post_process(); // post process sampled result

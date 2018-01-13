@@ -134,7 +134,8 @@ public:
 class PerProjectionRender {
 public:
   struct ProjectionInfo {
-    std::shared_ptr<Texture> texture, warp_texture;
+    std::shared_ptr<Texture> texture[2];
+    std::shared_ptr<Texture> warp_texture;
     Mat4f pc_matrix, r_matrix;
     float tanFovDiv2;
   };
@@ -154,6 +155,7 @@ public:
   VAOMesh texquad;
   bool calibration_loaded = false;
   bool did_begin = false;
+  int current_eye = 0;
 
   // instead of push/pop
   Lens prev_lens_;
@@ -185,14 +187,15 @@ public:
     // so update textures(color) & renderbuffer(depth)
     projection_infos_.resize(warpblend_.viewports.size());
     for(int index = 0; index < warpblend_.viewports.size(); index++) {
-      const ProjectionViewport& vp = warpblend_.viewports[index];
       ProjectionInfo& info = projection_infos_[index];
-      info.texture.reset(new Texture());
-      info.texture->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[0].reset(new Texture());
+      info.texture[1].reset(new Texture());
+      info.texture[0]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[1]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
     }
     rbo_.create(res_, res_);
     fbo_.bind();
-    fbo_.attachTexture2D(*projection_infos_[0].texture);
+    fbo_.attachTexture2D(*projection_infos_[0].texture[0]);
     fbo_.attachRBO(rbo_);
     fbo_.unbind();
   }
@@ -207,8 +210,10 @@ public:
     for(int index = 0; index < warpblend_.viewports.size(); index++) {
       const ProjectionViewport& vp = warpblend_.viewports[index];
       ProjectionInfo& info = projection_infos_[index];
-      info.texture.reset(new Texture());
-      info.texture->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[0].reset(new Texture());
+      info.texture[1].reset(new Texture());
+      info.texture[0]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[1]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
 
       // Determine projection dimensions.
       // First determine the central direction.
@@ -258,8 +263,8 @@ public:
     }
     rbo_.create(res_, res_);
     fbo_.bind();
-    fbo_.attachTexture2D(*projection_infos_[0].texture);
-    fbo_.attachRBO(rbo_);
+    fbo_.attachTexture2D(*projection_infos_[0].texture[0]);
+    fbo_.attachRBO(rbo_);                   // ^ attach left texture by deafult
     fbo_.unbind();
 
     // pp_shader_.compile(perprojection_vert(), perprojection_frag());
@@ -299,15 +304,20 @@ public:
 
   // must only use between begin and end
   void set_eye(int i) {
-    if (i == 0) g->eye(Graphics::LEFT_EYE);
-    else if (i == 1) g->eye(Graphics::RIGHT_EYE);
-    else if (i == -1) g->eye(Graphics::MONO_EYE);
+    if (i == 0) {
+      current_eye = 0;
+      g->eye(Graphics::LEFT_EYE);
+    }
+    else if (i == 1) {
+      current_eye = 1;
+      g->eye(Graphics::RIGHT_EYE);
+    }
+    else if (i == -1) {
+      current_eye = 0;
+      g->eye(Graphics::MONO_EYE);
+    }
 
     // g->shader().uniform("omni_eyeSep", 0.0);
-  }
-
-  int num_eyes() {
-    return 1;
   }
 
   int num_projections() {
@@ -317,7 +327,7 @@ public:
   // must only use between begin and end
   void set_projection(int index) {
     g->projMatrix(projection_infos_[index].pc_matrix);
-    fbo_.attachTexture2D(*projection_infos_[index].texture);
+    fbo_.attachTexture2D(*projection_infos_[index].texture[current_eye]);
   }
 
   void end() {
@@ -337,7 +347,7 @@ public:
   Pose& pose() { return pose_; }
   Pose const& pose() const { return pose_; }
 
-  void composite(Graphics& g) {
+  void composite(Graphics& g, int eye=0) {
     g.pushCamera(Viewpoint::IDENTITY);
     g.pushViewport();
     GLint dims[4];
@@ -350,12 +360,12 @@ public:
 
       g.viewport(vp.l * width, vp.b * height, vp.w * width, vp.h * height);
       projection_infos_[i].warp_texture->bind(PerProjectionRenderConstants::sampletex_binding_point);
-      projection_infos_[i].texture->bind(PerProjectionRenderConstants::textures_bidning_point);
+      projection_infos_[i].texture[eye]->bind(PerProjectionRenderConstants::textures_bidning_point);
       g.shader().uniform("R", projection_infos_[i].r_matrix);
       g.shader().uniform("tanFovDiv2", projection_infos_[i].tanFovDiv2);
       g.draw(texquad); // fill viewport
       projection_infos_[i].warp_texture->unbind(PerProjectionRenderConstants::sampletex_binding_point);
-      projection_infos_[i].texture->unbind(PerProjectionRenderConstants::textures_bidning_point);
+      projection_infos_[i].texture[eye]->unbind(PerProjectionRenderConstants::textures_bidning_point);
     }
     g.popViewport();
     g.popCamera();
