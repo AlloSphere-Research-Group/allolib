@@ -16,6 +16,81 @@
 
 namespace al {
 
+Mat4f get_cube_mat(int face) {
+  switch (face) {
+    // GL_TEXTURE_CUBE_MAP_POSITIVE_X
+    // vertex.xyz = vec3(-vertex.z, -vertex.y, -vertex.x);
+    case 0: return Mat4f {
+      0, 0,-1, 0,
+      0,-1, 0, 0,
+      -1, 0, 0, 0,
+      0, 0, 0, 1
+    };
+    // GL_TEXTURE_CUBE_MAP_NEGATIVE_X
+    // vertex.xyz = vec3(vertex.z, -vertex.y, vertex.x);
+    case 1: return Mat4f {
+      0, 0, 1, 0,
+      0, -1, 0, 0,
+      1, 0, 0, 0,
+      0, 0, 0, 1
+    };
+    // GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+    // vertex.xyz = vec3(vertex.x, vertex.z, -vertex.y);
+    case 2: return Mat4f {
+      1, 0, 0, 0,
+      0, 0, 1, 0,
+      0, -1, 0, 0,
+      0, 0, 0, 1
+    };
+    // GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+    // vertex.xyz = vec3(vertex.x, -vertex.z, vertex.y);
+    case 3: return Mat4f {
+      1, 0, 0, 0,
+      0, 0, -1, 0,
+      0, 1, 0, 0,
+      0, 0, 0, 1
+    };
+    // GL_TEXTURE_CUBE_MAP_POSITIVE_Z
+    // vertex.xyz = vec3(vertex.x, -vertex.y, -vertex.z);
+    case 4: return Mat4f {
+      1, 0, 0, 0,
+      0, -1, 0, 0,
+      0, 0, -1, 0,
+      0, 0, 0, 1
+    };
+    // GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+    // vertex.xyz = vec3(-vertex.x, -vertex.y, vertex.z);
+    case 5: return Mat4f {
+      -1, 0, 0, 0,
+      0, -1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    };
+  }
+  return Mat4f::identity();
+}
+
+struct bhlw { float b; float h; float l; float w; };
+
+bhlw viewport_for_cubemap_face(int idx) {
+  /*
+    _________
+    | |2|   |
+    |1|5|0|4|
+    | |3|   |
+    '''''''''
+  */
+  bhlw v;
+  v.h = 0.33; v.w = 0.25;
+  if      (idx == 0) { v.b = 0.33; v.l = 0.5;  }
+  else if (idx == 1) { v.b = 0.33; v.l = 0.0;  }
+  else if (idx == 2) { v.b = 0.66; v.l = 0.25; }
+  else if (idx == 3) { v.b = 0.0;  v.l = 0.25; }
+  else if (idx == 4) { v.b = 0.33; v.l = 0.75; }
+  else if (idx == 5) { v.b = 0.33; v.l = 0.25; }
+  return v;
+}
+
 class PerProjectionRenderConstants {
 public:
   static int const sampletex_binding_point = 10;
@@ -123,9 +198,27 @@ public:
         file.read(data, sizeof(Vec4f) * vp.width * vp.height);
       }
       file.close();
+    }
+  }
 
-      vp.width = vp.width;
-      vp.height = vp.height;
+  void load_desktop_mode_calibration() {
+    viewports.resize(6);
+    for (int i = 0; i < 6; i += 1) {
+      auto& vp = viewports[i];
+      vp.width = 256;
+      vp.height = 256;
+      bhlw v = viewport_for_cubemap_face(i);
+      vp.b = v.b;
+      vp.h = v.h;
+      vp.l = v.l;
+      vp.w = v.w;
+      vp.active = false;
+      vp.filepath = "";
+    }
+
+    for(int i = 0; i < viewports.size(); i++) {
+      auto& vp = viewports[i];
+      vp.warp_and_blend_data.clear();
     }
   }
 };
@@ -141,7 +234,7 @@ public:
   };
 
   WarpBlendData warpblend_;
-  int res_;
+  int res_ = 1024;
   Pose pose_;
   Viewpoint view_ {pose_};
   Viewport viewport_;
@@ -200,10 +293,14 @@ public:
     fbo_.unbind();
   }
 
-  void init(int res=1024, float near=0.1, float far=100, float radius = 1e10)
+  void sphereRadius(float r) {
+    lens_.focalLength(r);
+    if (did_begin) g->lens(lens_);
+  }
+
+  void init(float near=0.1, float far=1000, float radius = 1e10)
   {
     lens_.focalLength(radius);
-    res_ = res;
     viewport_.set(0, 0, res_, res_);
 
     projection_infos_.resize(warpblend_.viewports.size());
@@ -288,6 +385,55 @@ public:
     calibration_loaded = true;
   }
 
+  void load_and_init_as_desktop_config(float near=0.1, float far=1000, float radius = 1e10) {
+    // add six projection infos that will serve as each face of cubemap
+    // https://www.khronos.org/opengl/wiki/Cubemap_Texture
+    // 0: GL_TEXTURE_CUBE_MAP_POSITIVE_X
+    // 1: GL_TEXTURE_CUBE_MAP_NEGATIVE_X
+    // 2: GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+    // 3: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+    // 4: GL_TEXTURE_CUBE_MAP_POSITIVE_Z
+    // 5: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+
+    warpblend_.load_desktop_mode_calibration();
+    calibration_loaded = true;
+
+    res_ = 512;
+    viewport_.set(0, 0, res_, res_);
+
+    projection_infos_.resize(6);
+    for(int index = 0; index < 6; index++) {
+      ProjectionInfo& info = projection_infos_[index];
+      info.texture[0].reset(new Texture());
+      info.texture[1].reset(new Texture());
+      info.texture[0]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[1]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+
+      float fov = 3.1415926535 / 2;
+      Mat4f rmat = get_cube_mat(index);
+      Mat4f proj;
+      proj.set(
+        1.0f / std::tan(fov / 2.0f), 0, 0, 0,
+        0, 1.0f / std::tan(fov / 2.0f), 0, 0,
+        0, 0, (near + far) / (near - far), (2.0f * near * far) / (near - far),
+        0, 0, -1, 0
+      );
+      Mat4f::multiply(info.pc_matrix, proj, rmat);
+      info.r_matrix = rmat;
+      info.tanFovDiv2 = tan(fov / 2.0);
+      info.warp_texture.reset();
+    }
+
+    rbo_.create(res_, res_);
+    fbo_.bind();
+    fbo_.attachTexture2D(*projection_infos_[0].texture[0]);
+    fbo_.attachRBO(rbo_);
+    fbo_.unbind();
+
+    addTexQuad(texquad);
+    texquad.update();
+  }
+
   void begin(Graphics& graphics) {
     g = &graphics;
     g->pushFramebuffer(fbo_);
@@ -302,7 +448,7 @@ public:
     // g->shader(pp_shader_);
   }
 
-  // must only use between begin and end
+  // must only be used between begin and end
   void set_eye(int i) {
     if (i == 0) {
       current_eye = 0;
@@ -316,8 +462,6 @@ public:
       current_eye = 0;
       g->eye(Graphics::MONO_EYE);
     }
-
-    // g->shader().uniform("omni_eyeSep", 0.0);
   }
 
   int num_projections() {
@@ -339,7 +483,6 @@ public:
     if (prev_shader_ != nullptr) {
       g->shader(*prev_shader_);
     }
-    // fbo_.end();
     did_begin = false;
   }
   
@@ -367,6 +510,30 @@ public:
       projection_infos_[i].warp_texture->unbind(PerProjectionRenderConstants::sampletex_binding_point);
       projection_infos_[i].texture[eye]->unbind(PerProjectionRenderConstants::textures_bidning_point);
     }
+    g.popViewport();
+    g.popCamera();
+  }
+
+  void composite_desktop(Graphics& g, int eye=0) {
+    g.pushCamera(Viewpoint::IDENTITY);
+    g.pushViewport();
+    GLint dims[4];
+    glGetIntegerv(GL_VIEWPORT, dims);
+    int width = dims[2];
+    int height = dims[3];
+    int boundTexture;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &boundTexture);
+    for(int i = 0; i < warpblend_.viewports.size(); i++) {
+      const ProjectionViewport& vp = warpblend_.viewports[i];
+      g.pushMatrix();
+      // flip cubemap faces for them to match the orientation with other faces
+      if (i == 2 || i == 3) g.scale(1, 1, 1);
+      else g.scale(-1, -1, 1);
+      g.viewport(vp.l * width, vp.b * height, vp.w * width, vp.h * height);
+      g.quadViewport(*(projection_infos_[i].texture[eye]));
+      g.popMatrix();
+    }
+    glBindTexture(GL_TEXTURE_2D, boundTexture);
     g.popViewport();
     g.popCamera();
   }
