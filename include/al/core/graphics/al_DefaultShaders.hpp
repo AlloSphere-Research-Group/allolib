@@ -49,9 +49,9 @@ inline std::string al_default_shader_version_string() {
 )";
 }
 
-inline std::string al_default_vert_shader_common_functions() {
-  return R"(
-vec4 flat_stereo(vec4 v, float e, float f) {
+inline std::string al_default_vert_shader_stereo_functions(bool is_omni) {
+  if (!is_omni) return R"(
+vec4 stereo_displace(vec4 v, float e, float f) {
     // eye to vertex distance
     float l = sqrt((v.x - e) * (v.x - e) + v.y * v.y + v.z * v.z);
     // absolute z-direction distance
@@ -66,13 +66,13 @@ vec4 flat_stereo(vec4 v, float e, float f) {
     v.xyz = normalize(v.xyz);
     v.xyz *= l;
     return v;
-}
-
-vec4 omni_stereo(vec4 v, float e, float r) {
+})";
+  else return R"(
+vec4 stereo_displace(vec4 v, float e, float r) {
     vec3 OE = vec3(-v.z, 0.0, v.x); // eye direction, orthogonal to vertex vector
     OE = normalize(OE);             // but preserving +y up-vector
     OE *= e;               // set mag to eye separation
-    vec3 EV = v.xyz - OE;      // eye to vertex
+    vec3 EV = v.xyz - OE;  // eye to vertex
     float ev = length(EV); // save length
     EV /= ev;              // normalize
 
@@ -81,23 +81,22 @@ vec4 omni_stereo(vec4 v, float e, float r) {
     // where theta is angle between OE and EV
     // t is distance to sphere surface from eye
     float b = -dot(OE, EV);         // multiply -1 to dot product because
-                                     // OE needs to be flipped in direction
+                                    // OE needs to be flipped in direction
     float c = e * e - r * r;
-    float t = -b + sqrt(b * b - c);// quadratic formula
+    float t = -b + sqrt(b * b - c); // quadratic formula
 
-    v.xyz = OE + t * EV;           // direction from origin to sphere surface
-    v.xyz = ev * normalize(v.xyz); // normalize and set mag to eye-to-v distance
+    v.xyz = OE + t * EV;            // direction from origin to sphere surface
+    v.xyz = ev * normalize(v.xyz);  // normalize and set mag to eye-to-v distance
     return v; 
-}
-)";
+})";
 }
 
 // ----------------------------------------------------------------------------
 
-inline std::string al_mesh_vert_shader() {
+inline std::string al_mesh_vert_shader(bool is_omni=false) {
   using namespace std::string_literals;
   return al_default_shader_version_string()
-  + al_default_vert_shader_common_functions()
+  + al_default_vert_shader_stereo_functions(is_omni)
   + R"(
 uniform mat4 MV;
 uniform mat4 P;
@@ -108,7 +107,7 @@ uniform float foc_len;
 out vec4 color_;
 void main() {
   // gl_Position = P * MV * vec4(position, 1.0);
-  gl_Position = P * flat_stereo(MV * vec4(position, 1.0), eye_sep, foc_len);
+  gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
   color_ = color;
 }
 )"s;}
@@ -125,10 +124,10 @@ void main() {
 
 // ----------------------------------------------------------------------------
 
-inline std::string al_tex_vert_shader() {
+inline std::string al_tex_vert_shader(bool is_omni=false) {
   using namespace std::string_literals;
   return al_default_shader_version_string()
-  + al_default_vert_shader_common_functions()
+  + al_default_vert_shader_stereo_functions(is_omni)
   + R"(
 uniform mat4 MV;
 uniform mat4 P;
@@ -139,7 +138,7 @@ uniform float foc_len;
 out vec2 texcoord_;
 void main() {
   // gl_Position = P * MV * vec4(position, 1.0);
-  gl_Position = P * flat_stereo(MV * vec4(position, 1.0), eye_sep, foc_len);
+  gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
   texcoord_ = texcoord;
 }
 )";}
@@ -157,10 +156,10 @@ void main() {
 
 // ----------------------------------------------------------------------------
 
-inline std::string al_color_vert_shader() {
+inline std::string al_color_vert_shader(bool is_omni=false) {
   using namespace std::string_literals;
   return al_default_shader_version_string()
-  + al_default_vert_shader_common_functions()
+  + al_default_vert_shader_stereo_functions(is_omni)
   + R"(
 uniform mat4 MV;
 uniform mat4 P;
@@ -169,7 +168,7 @@ uniform float eye_sep;
 uniform float foc_len;
 void main() {
   // gl_Position = P * MV * vec4(position, 1.0);
-  gl_Position = P * flat_stereo(MV * vec4(position, 1.0), eye_sep, foc_len);
+  gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
 }
 )";}
 
@@ -197,11 +196,11 @@ enum class ShaderType : unsigned char {
   LIGHTING_MATERIAL
 };
 
-void compileDefaultShader(ShaderProgram& s, ShaderType type);
+void compileDefaultShader(ShaderProgram& s, ShaderType type, bool is_omni=false);
 
-std::string multilight_vert_shader(ShaderType type, int num_lights);
+std::string multilight_vert_shader(ShaderType type, int num_lights, bool is_omni=false);
 std::string multilight_frag_shader(ShaderType type, int num_lights);
-void compileMultiLightShader(ShaderProgram& s, ShaderType type, int num_lights);
+void compileMultiLightShader(ShaderProgram& s, ShaderType type, int num_lights, bool is_omni=false);
 
 }
 

@@ -234,6 +234,8 @@ bool Window::implCreate() {
         return false;
       }
       else {
+        // unset stereo bit
+          mDisplayMode = static_cast<DisplayMode>(displayMode() & ~STEREO_BUF);
           std::cout << "tried to create stereo window but failed. creating mono window" << std::endl;
       }
     }

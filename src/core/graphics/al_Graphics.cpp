@@ -49,6 +49,33 @@ lighting_shader_uniforms Graphics::lighting_mesh_uniforms[al_max_num_lights()];
 lighting_shader_uniforms Graphics::lighting_tex_uniforms[al_max_num_lights()];
 lighting_shader_uniforms Graphics::lighting_material_uniforms[al_max_num_lights()];
 
+bool Graphics::is_omni = false;
+
+ShaderProgram Graphics::omni_mesh_shader;
+ShaderProgram Graphics::omni_color_shader;
+ShaderProgram Graphics::omni_tex_shader;
+
+int Graphics::omni_color_location = 0;
+int Graphics::omni_color_tint_location = 0;
+int Graphics::omni_mesh_tint_location = 0;
+int Graphics::omni_tex_tint_location = 0;
+
+ShaderProgram Graphics::omni_lighting_color_shader[al_max_num_lights()];
+ShaderProgram Graphics::omni_lighting_mesh_shader[al_max_num_lights()];
+ShaderProgram Graphics::omni_lighting_tex_shader[al_max_num_lights()];
+ShaderProgram Graphics::omni_lighting_material_shader[al_max_num_lights()];
+
+int Graphics::omni_lighting_color_location[al_max_num_lights()];
+int Graphics::omni_lighting_color_tint_location[al_max_num_lights()];
+int Graphics::omni_lighting_mesh_tint_location[al_max_num_lights()];
+int Graphics::omni_lighting_tex_tint_location[al_max_num_lights()];
+int Graphics::omni_lighting_material_tint_location[al_max_num_lights()];
+
+lighting_shader_uniforms Graphics::omni_lighting_color_uniforms[al_max_num_lights()];
+lighting_shader_uniforms Graphics::omni_lighting_mesh_uniforms[al_max_num_lights()];
+lighting_shader_uniforms Graphics::omni_lighting_tex_uniforms[al_max_num_lights()];
+lighting_shader_uniforms Graphics::omni_lighting_material_uniforms[al_max_num_lights()];
+
 Lens Graphics::mLens;
 float Graphics::mEye = 0.0f;
 
@@ -155,9 +182,46 @@ void Graphics::init() {
     lighting_tex_shader[i].begin();
     lighting_tex_shader[i].uniform("tex0", 0);
     lighting_tex_shader[i].end();
-
-    mLightOn[i] = true;
   }
+
+    compileDefaultShader(omni_color_shader, ShaderType::COLOR, true);
+    compileDefaultShader(omni_mesh_shader, ShaderType::MESH, true);
+    compileDefaultShader(omni_tex_shader, ShaderType::TEXTURE, true);
+  
+    omni_color_location = omni_color_shader.getUniformLocation("col0");
+    omni_color_tint_location = omni_color_shader.getUniformLocation("tint");
+    omni_tex_tint_location = omni_tex_shader.getUniformLocation("tint");
+    omni_mesh_tint_location = omni_mesh_shader.getUniformLocation("tint");
+  
+    omni_tex_shader.begin();
+    omni_tex_shader.uniform("tex0", 0);
+    omni_tex_shader.end();
+  
+    for (int i = 0; i < al_max_num_lights(); i += 1) {
+      compileMultiLightShader(omni_lighting_color_shader[i], ShaderType::LIGHTING_COLOR, i + 1, true);
+      compileMultiLightShader(omni_lighting_mesh_shader[i], ShaderType::LIGHTING_MESH, i + 1, true);
+      compileMultiLightShader(omni_lighting_tex_shader[i], ShaderType::LIGHTING_TEXTURE, i + 1, true);
+      compileMultiLightShader(omni_lighting_material_shader[i], ShaderType::LIGHTING_MATERIAL, i + 1, true);
+  
+      omni_lighting_color_location[i] = omni_lighting_color_shader[i].getUniformLocation("col0");
+      omni_lighting_color_tint_location[i] = omni_lighting_color_shader[i].getUniformLocation("tint");
+      omni_lighting_mesh_tint_location[i] = omni_lighting_mesh_shader[i].getUniformLocation("tint");
+      omni_lighting_tex_tint_location[i] = omni_lighting_tex_shader[i].getUniformLocation("tint");
+      omni_lighting_material_tint_location[i] = omni_lighting_material_shader[i].getUniformLocation("tint");
+  
+      omni_lighting_color_uniforms[i] = al_get_lighting_uniform_locations(lighting_color_shader[i]);
+      omni_lighting_mesh_uniforms[i] = al_get_lighting_uniform_locations(lighting_mesh_shader[i]);
+      omni_lighting_tex_uniforms[i] = al_get_lighting_uniform_locations(lighting_tex_shader[i]);
+      omni_lighting_material_uniforms[i] = al_get_lighting_uniform_locations(lighting_material_shader[i]);
+  
+      omni_lighting_tex_shader[i].begin();
+      omni_lighting_tex_shader[i].uniform("tex0", 0);
+      omni_lighting_tex_shader[i].end();
+    }
+
+    for (int i = 0; i < al_max_num_lights(); i += 1) {
+      mLightOn[i] = true;
+    }
 
   initialized = true;
 }
@@ -301,16 +365,20 @@ void Graphics::update() {
   if (mRenderModeChanged) {
     switch (mColoringMode) {
       case ColoringMode::UNIFORM:
-        RenderManager::shader(mLightingEnabled ? lighting_color_shader[num_lights-1] : color_shader);
+        if (!is_omni) RenderManager::shader(mLightingEnabled ? lighting_color_shader[num_lights-1] : color_shader);
+        else RenderManager::shader(mLightingEnabled ? omni_lighting_color_shader[num_lights-1] : omni_color_shader);
         break;
       case ColoringMode::MESH:
-        RenderManager::shader(mLightingEnabled ? lighting_mesh_shader[num_lights-1] : mesh_shader);
+        if (!is_omni) RenderManager::shader(mLightingEnabled ? lighting_mesh_shader[num_lights-1] : mesh_shader);
+        else RenderManager::shader(mLightingEnabled ? omni_lighting_mesh_shader[num_lights-1] : omni_mesh_shader);
         break;
       case ColoringMode::TEXTURE:
-        RenderManager::shader(mLightingEnabled ? lighting_tex_shader[num_lights-1] : tex_shader);
+        if (!is_omni) RenderManager::shader(mLightingEnabled ? lighting_tex_shader[num_lights-1] : tex_shader);
+        else RenderManager::shader(mLightingEnabled ? omni_lighting_tex_shader[num_lights-1] : omni_tex_shader);
         break;
       case ColoringMode::MATERIAL:
-        RenderManager::shader(mLightingEnabled ? lighting_material_shader[num_lights-1] : color_shader);
+        if (!is_omni) RenderManager::shader(mLightingEnabled ? lighting_material_shader[num_lights-1] : color_shader);
+        else RenderManager::shader(mLightingEnabled ? omni_lighting_material_shader[num_lights-1] : omni_color_shader);
         break;
       case ColoringMode::CUSTOM:
         // do nothing
@@ -320,55 +388,104 @@ void Graphics::update() {
     mUniformChanged = true; // force uniform update since shader changed
   }
 
+  /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+      BIG TODO: All uniform handling below can be simplified with uniform buffer object (UBO)
+                for now a lot of conditionals are used.
+                Other possible solution would be using index (but less preferred than UBO)
+                ex) shader[type + num_type * lighting + num_type * num_lighting * omni]
+  */
+
   if (mUniformChanged) {
     auto& s = RenderManager::shader();
     switch (mColoringMode) {
       case ColoringMode::UNIFORM:
         if (mLightingEnabled) {
-          // send_uniforms(s, mLights[0]);
-          send_lighting_uniforms(s, lighting_color_uniforms[num_lights-1]);
-          s.uniform4v(lighting_color_location[num_lights-1], mColor.components);
-          s.uniform4v(lighting_color_tint_location[num_lights-1], mTint.components);
+          if (!is_omni) {
+            send_lighting_uniforms(s, lighting_color_uniforms[num_lights-1]);
+            s.uniform4v(lighting_color_location[num_lights-1], mColor.components);
+            s.uniform4v(lighting_color_tint_location[num_lights-1], mTint.components);
+          }
+          else {
+            send_lighting_uniforms(s, omni_lighting_color_uniforms[num_lights-1]);
+            s.uniform4v(omni_lighting_color_location[num_lights-1], mColor.components);
+            s.uniform4v(omni_lighting_color_tint_location[num_lights-1], mTint.components);
+          }
         } else {
-          s.uniform4v(color_location, mColor.components);
-          s.uniform4v(color_tint_location, mTint.components);
+          if (!is_omni) {
+            s.uniform4v(color_location, mColor.components);
+            s.uniform4v(color_tint_location, mTint.components);
+          }
+          else {
+            s.uniform4v(omni_color_location, mColor.components);
+            s.uniform4v(omni_color_tint_location, mTint.components);
+          }
         }
         break;
       case ColoringMode::MESH:
         if (mLightingEnabled) {
-          // send_uniforms(s, mLights[0]);
-          send_lighting_uniforms(s, lighting_mesh_uniforms[num_lights-1]);
-          s.uniform4v(lighting_mesh_tint_location[num_lights-1], mTint.components);
+          if (!is_omni) {
+            send_lighting_uniforms(s, lighting_mesh_uniforms[num_lights-1]);
+            s.uniform4v(lighting_mesh_tint_location[num_lights-1], mTint.components);
+          }
+          else {
+            send_lighting_uniforms(s, omni_lighting_mesh_uniforms[num_lights-1]);
+            s.uniform4v(omni_lighting_mesh_tint_location[num_lights-1], mTint.components);
+          }
         } else {
-          s.uniform4v(mesh_tint_location, mTint.components);
+          if (!is_omni) {
+            s.uniform4v(mesh_tint_location, mTint.components);
+          }
+          else {
+            s.uniform4v(omni_mesh_tint_location, mTint.components);
+          }
         }
         break;
       case ColoringMode::TEXTURE:
         if (mLightingEnabled) {
-          // send_uniforms(s, mLights[0]);
-          send_lighting_uniforms(s, lighting_tex_uniforms[num_lights-1]);
-          s.uniform4v(lighting_tex_tint_location[num_lights-1], mTint.components);
+          if (!is_omni) {
+            send_lighting_uniforms(s, lighting_tex_uniforms[num_lights-1]);
+            s.uniform4v(lighting_tex_tint_location[num_lights-1], mTint.components);
+          }
+          else {
+            send_lighting_uniforms(s, omni_lighting_tex_uniforms[num_lights-1]);
+            s.uniform4v(omni_lighting_tex_tint_location[num_lights-1], mTint.components);
+          }
         } else {
-          s.uniform4v(tex_tint_location, mTint.components);
+          if (!is_omni) s.uniform4v(tex_tint_location, mTint.components);
+          else s.uniform4v(omni_tex_tint_location, mTint.components);
         }
         break;
       case ColoringMode::MATERIAL:
         if (mLightingEnabled) {
-          // send_uniforms(s, mMaterial);
-          // send_uniforms(s, mLights[0]);
-          send_lighting_uniforms(s, lighting_material_uniforms[num_lights-1]);
-          s.uniform4v(lighting_material_tint_location[num_lights-1], mTint.components);
+          if (!is_omni) {
+            send_lighting_uniforms(s, lighting_material_uniforms[num_lights-1]);
+            s.uniform4v(lighting_material_tint_location[num_lights-1], mTint.components);
+          }
+          else {
+            send_lighting_uniforms(s, omni_lighting_material_uniforms[num_lights-1]);
+            s.uniform4v(omni_lighting_material_tint_location[num_lights-1], mTint.components);
+          }
         } else {
-          s.uniform4v(color_location, mColor.components);
-          s.uniform4v(color_tint_location, mTint.components);
+          if (!is_omni) {
+            s.uniform4v(color_location, mColor.components);
+            s.uniform4v(color_tint_location, mTint.components);
+          }
+          else {
+            s.uniform4v(omni_color_location, mColor.components);
+            s.uniform4v(omni_color_tint_location, mTint.components);
+          }
         }
         break;
       case ColoringMode::CUSTOM:
         // do nothing
        break;
     }
-    s.uniform("eye_sep", mLens.eyeSep() * mEye / 2.0f);
-    s.uniform("foc_len", mLens.focalLength());
+
+    if (mColoringMode != ColoringMode::CUSTOM) {
+      s.uniform("eye_sep", mLens.eyeSep() * mEye / 2.0f);
+      s.uniform("foc_len", mLens.focalLength());
+    }
     mUniformChanged = false;
   }
 

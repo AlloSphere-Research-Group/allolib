@@ -311,6 +311,29 @@ class Graphics : public RenderManager {
     mUniformChanged = true;
   }
 
+  Lens const& lens() const {
+    return mLens;
+  }
+
+  Lens& lens() {
+    mUniformChanged = true;
+    return mLens;
+  }
+
+  void lens(Lens const& l) {
+    mUniformChanged = true;
+    mLens = l;
+  }
+  
+  void omni(bool b) {
+    is_omni = true;
+    mRenderModeChanged = true;
+  }
+  
+  bool omni() {
+    return is_omni;
+  }
+
 private:
   static Color mClearColor;
   static float mClearDepth;
@@ -354,6 +377,33 @@ private:
   static lighting_shader_uniforms lighting_mesh_uniforms[al_max_num_lights()];
   static lighting_shader_uniforms lighting_tex_uniforms[al_max_num_lights()];
   static lighting_shader_uniforms lighting_material_uniforms[al_max_num_lights()];
+  
+  static bool is_omni;
+
+  static ShaderProgram omni_color_shader;
+  static ShaderProgram omni_mesh_shader;
+  static ShaderProgram omni_tex_shader;
+
+  static int omni_color_location;
+  static int omni_color_tint_location;
+  static int omni_mesh_tint_location;
+  static int omni_tex_tint_location;
+
+  static ShaderProgram omni_lighting_color_shader[al_max_num_lights()];
+  static ShaderProgram omni_lighting_mesh_shader[al_max_num_lights()];
+  static ShaderProgram omni_lighting_tex_shader[al_max_num_lights()];
+  static ShaderProgram omni_lighting_material_shader[al_max_num_lights()];
+
+  static int omni_lighting_color_location[al_max_num_lights()];
+  static int omni_lighting_color_tint_location[al_max_num_lights()];
+  static int omni_lighting_mesh_tint_location[al_max_num_lights()];
+  static int omni_lighting_tex_tint_location[al_max_num_lights()];
+  static int omni_lighting_material_tint_location[al_max_num_lights()];
+
+  static lighting_shader_uniforms omni_lighting_color_uniforms[al_max_num_lights()];
+  static lighting_shader_uniforms omni_lighting_mesh_uniforms[al_max_num_lights()];
+  static lighting_shader_uniforms omni_lighting_tex_uniforms[al_max_num_lights()];
+  static lighting_shader_uniforms omni_lighting_material_uniforms[al_max_num_lights()];
 
 };
 

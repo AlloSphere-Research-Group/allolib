@@ -44,10 +44,14 @@ public:
     Nav& nav() { return mNav; }
     const Nav& nav() const { return mNav; }
 
+    Pose& pose() { return mNav; }
+    const Pose& pose() const { return mNav; }
+
     NavInputControl& navControl() { return mNavControl; }
     NavInputControl const& navControl() const { return mNavControl; }
 
     Lens& lens() { return mView.lens(); }
+    Lens const& lens() const { return mView.lens(); }
 
     Graphics& graphics() { return mGraphics; }
 
