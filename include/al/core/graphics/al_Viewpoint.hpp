@@ -107,7 +107,8 @@ public:
   enum SpecialType {
     IDENTITY,
     ORTHO_FOR_2D,
-    UNIT_ORTHO
+    UNIT_ORTHO, // fits [-1:1] X [-1:1] inside
+    UNIT_ORTHO_INCLUSIVE // fits in [-1:1] X [-1:1]
   };
 };
 

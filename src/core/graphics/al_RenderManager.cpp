@@ -133,26 +133,33 @@ void RenderManager::camera(Viewpoint const& v) {
 }
 
 void RenderManager::camera(Viewpoint::SpecialType v) {
+  // let's draw 2D things at z = [0:1] (larger z, closer)
+  // so cam_z = 2, near: 1, far: 2
   switch (v) {
     case Viewpoint::IDENTITY: {
-      mViewStack.setIdentity();
-      mProjStack.setIdentity();
+      mViewStack.set(Matrix4f::lookAt(Vec3f(0, 0, 2), // eye
+                                      Vec3f(0, 0, 0), // at
+                                      Vec3f(0, 1, 0)  // up
+                                      ));
+      mProjStack.set(Matrix4f::ortho(-1, 1, // left, right
+                                     -1, 1, // bottom, top
+                                     1, 2   // near, far
+                                     ));
     } break;
 
     case Viewpoint::ORTHO_FOR_2D: {
       // 1. place eye so that bot-left (0, 0), top right (width, height)
       // 2. set lens to be ortho, with given width and height
-      // 2D things will be drawn at z = 0 so cam_z = 1, near: 0.5, far: 1.5
       auto v = viewport();
       float half_w = (v.w - v.l) * 0.5f;
       float half_h = (v.h - v.b) * 0.5f;
-      mViewStack.set(Matrix4f::lookAt(Vec3f(half_w, half_h, 1),  // eye
-                                      Vec3f(half_w, half_h, 0),  // at
-                                      Vec3f(0, 1, 0)             // up
+      mViewStack.set(Matrix4f::lookAt(Vec3f(half_w, half_h, 2), // eye
+                                      Vec3f(half_w, half_h, 0), // at
+                                      Vec3f(0, 1, 0)            // up
                                       ));
-      mProjStack.set(Matrix4f::ortho(-half_w, half_w,  // left, right
-                                     -half_h, half_h,  // bottom, top
-                                     0.5f, 1.5f        // near, far
+      mProjStack.set(Matrix4f::ortho(-half_w, half_w, // left, right
+                                     -half_h, half_h, // bottom, top
+                                     1.0f, 2.0f       // near, far
                                      ));
     } break;
 
@@ -164,13 +171,33 @@ void RenderManager::camera(Viewpoint::SpecialType v) {
         spanx = 1;
         spany = float(v.h) / v.w;
       }
-      mViewStack.setIdentity();
-      mProjStack.set(Matrix4f::ortho(-spanx, spanx,  // left, right
-                                     -spany, spany,  // bottom, top
-                                     -0.5f, 0.5f     // near, far
+      mViewStack.set(Matrix4f::lookAt(Vec3f(0, 0, 2), // eye
+                                      Vec3f(0, 0, 0), // at
+                                      Vec3f(0, 1, 0)  // up
+                                      ));
+      mProjStack.set(Matrix4f::ortho(-spanx, spanx, // left, right
+                                     -spany, spany, // bottom, top
+                                     1, 2           // near, far
                                      ));
     } break;
 
+    case Viewpoint::UNIT_ORTHO_INCLUSIVE: {
+      auto v = viewport();
+      float spanx = float(v.w) / v.h;
+      float spany = 1;
+      if (spanx > 1) {
+        spanx = 1;
+        spany = float(v.h) / v.w;
+      }
+      mViewStack.set(Matrix4f::lookAt(Vec3f(0, 0, 2), // eye
+                                      Vec3f(0, 0, 0), // at
+                                      Vec3f(0, 1, 0)  // up
+                                      ));
+      mProjStack.set(Matrix4f::ortho(-spanx, spanx,  // left, right
+                                     -spany, spany,  // bottom, top
+                                     1.0f, 2.0f        // near, far
+                                     ));
+    }
     default:
       break;
   }
