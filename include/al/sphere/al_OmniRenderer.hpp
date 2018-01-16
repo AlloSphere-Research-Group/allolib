@@ -100,7 +100,7 @@ struct OmniRenderer : WindowApp
         mGraphics.omni(true);
         pp_render.begin(mGraphics);
         glDrawBuffer(GL_COLOR_ATTACHMENT0); // for fbo's output
-        if (window_is_stereo_buffered && render_stereo) {
+        if (render_stereo) {
             for (int eye = 0; eye < 2; eye += 1) {
                 pp_render.set_eye(eye);
                 for (int i = 0; i < pp_render.num_projections(); i++) {
