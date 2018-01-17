@@ -482,6 +482,8 @@ void Graphics::update() {
        break;
     }
 
+    // for any default shaders, needs to be cleaned up with other uniforms
+    // (using pre saved location, or possibly uniform buffer)
     if (mColoringMode != ColoringMode::CUSTOM) {
       s.uniform("eye_sep", mLens.eyeSep() * mEye / 2.0f);
       s.uniform("foc_len", mLens.focalLength());

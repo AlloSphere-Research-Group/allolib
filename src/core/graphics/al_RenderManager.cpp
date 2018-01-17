@@ -154,8 +154,8 @@ void RenderManager::camera(Viewpoint::SpecialType v) {
       // 1. place eye so that bot-left (0, 0), top right (width, height)
       // 2. set lens to be ortho, with given width and height
       auto v = viewport();
-      float half_w = (v.w - v.l) * 0.5f;
-      float half_h = (v.h - v.b) * 0.5f;
+      // float half_w = (v.w - v.l) * 0.5f;
+      // float half_h = (v.h - v.b) * 0.5f;
       mViewStack.setIdentity();
       // mViewStack.set(Matrix4f::translation(x, y, z));
       /*
