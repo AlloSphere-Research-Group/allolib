@@ -106,8 +106,12 @@ uniform float eye_sep;
 uniform float foc_len;
 out vec4 color_;
 void main() {
-  // gl_Position = P * MV * vec4(position, 1.0);
-  gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
+  if (eye_sep == 0) {
+    gl_Position = P * MV * vec4(position, 1.0);
+  }
+  else {
+    gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
+  }
   color_ = color;
 }
 )"s;}
@@ -137,8 +141,12 @@ uniform float eye_sep;
 uniform float foc_len;
 out vec2 texcoord_;
 void main() {
-  // gl_Position = P * MV * vec4(position, 1.0);
-  gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
+  if (eye_sep == 0) {
+    gl_Position = P * MV * vec4(position, 1.0);
+  }
+  else {
+    gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
+  }
   texcoord_ = texcoord;
 }
 )";}
@@ -167,8 +175,12 @@ layout (location = 0) in vec3 position;
 uniform float eye_sep;
 uniform float foc_len;
 void main() {
-  // gl_Position = P * MV * vec4(position, 1.0);
-  gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
+  if (eye_sep == 0) {
+    gl_Position = P * MV * vec4(position, 1.0);
+  }
+  else {
+    gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
+  }
 }
 )";}
 

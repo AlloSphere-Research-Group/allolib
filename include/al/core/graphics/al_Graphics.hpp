@@ -311,6 +311,10 @@ class Graphics : public RenderManager {
     mUniformChanged = true;
   }
 
+  float eye() {
+    return mEye;
+  }
+
   Lens const& lens() const {
     return mLens;
   }
@@ -326,7 +330,7 @@ class Graphics : public RenderManager {
   }
   
   void omni(bool b) {
-    is_omni = true;
+    is_omni = b;
     mRenderModeChanged = true;
   }
   

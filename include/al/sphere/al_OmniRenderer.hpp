@@ -31,6 +31,8 @@ struct OmniRenderer : WindowApp
     void omniResolution(int res) { pp_render.update_resolution(res); }
     void sphereRadius(float radius) { pp_render.sphereRadius(radius); }
 
+    int omniResolution() { return pp_render.res_; }
+
     // only for testing with desktop mode, loops (mono -> left -> right)
     void loopEyeForDesktopMode() {
         eye_to_render += 1;
@@ -68,6 +70,7 @@ struct OmniRenderer : WindowApp
         }
         create();
         cursorHide(true);
+
         window_is_stereo_buffered = Window::displayMode() & Window::STEREO_BUF;
 
         if (running_in_sphere_renderer) {
@@ -76,7 +79,7 @@ struct OmniRenderer : WindowApp
                 sphere::config_directory("data").c_str(),   // path
                 sphere::renderer_hostname("config").c_str() // hostname
             ); // parameters will be used to look for file ${path}/${hostname}.txt
-            pp_render.init(1024);
+            pp_render.init();
         }
         else {
             // load fake projection data for desktop rendering
@@ -91,13 +94,13 @@ struct OmniRenderer : WindowApp
     virtual void onAnimate(double dt) {}
     virtual void onDraw(Graphics& g) {}
 
-
     void onDraw() override
     {
         onAnimate(dt() / 1000000.0f); // millis for dt
 
         // start drawing to perprojection fbos
         mGraphics.omni(true);
+        // pushes fbo, viewport, viewmat, projmat, lens, shader
         pp_render.begin(mGraphics);
         glDrawBuffer(GL_COLOR_ATTACHMENT0); // for fbo's output
         if (render_stereo) {
@@ -110,24 +113,25 @@ struct OmniRenderer : WindowApp
             }
         }
         else {
+            // std::cout << "rendering eye " << eye_to_render << std::endl;
             pp_render.set_eye(eye_to_render);
             for (int i = 0; i < pp_render.num_projections(); i++) {
                 pp_render.set_projection(i);
                 onDraw(mGraphics);
             }
         }
-        pp_render.end();
+        pp_render.end(); // pops everything pushed before
+
+        // no stereo and no omni when actually displaying sampled result
         mGraphics.omni(false);
-
-        // now sample the results
-        mGraphics.viewport(0, 0, fbWidth(), fbHeight());
-        mGraphics.pushViewport();
-
-        // no stereo when actually displaying sampled result
         mGraphics.eye(Graphics::MONO_EYE);
 
+        // perprojection compositing changes viewport, save it
+        mGraphics.pushViewport(0, 0, fbWidth(), fbHeight());
+
+        // now sample the results
         if (running_in_sphere_renderer) {
-            if (window_is_stereo_buffered && render_stereo) {
+            if (window_is_stereo_buffered) {
             // rendering stereo in sphere
                 glDrawBuffer(GL_BACK_LEFT);
                 mGraphics.clearColor(0, 0, 0);
@@ -139,14 +143,15 @@ struct OmniRenderer : WindowApp
                 pp_render.composite(mGraphics, 1);
             }
             else { // rendering mono in sphere
+                // std::cout << "sampling mono in sphere setup" << std::endl;
                 glDrawBuffer(GL_BACK_LEFT);
-                mGraphics.clearColor(0, 0, 0);
+                mGraphics.clearColor(1, 0, 0);
                 mGraphics.clearDepth(1);
-                pp_render.composite(mGraphics, 0);
+                pp_render.composite(mGraphics, (eye_to_render == 1)? 1:0);
             }
         }
         else {
-            if (window_is_stereo_buffered && render_stereo) {
+            if (window_is_stereo_buffered) {
             // rendering stereo on display other than sphere
                 glDrawBuffer(GL_BACK_LEFT);
                 mGraphics.clearColor(0, 0, 0);
@@ -158,6 +163,7 @@ struct OmniRenderer : WindowApp
                 pp_render.composite_desktop(mGraphics, 1); // texture[1]: right
             }
             else { // rendering mono on display other than sphere
+                // std::cout << "sampling mono on flat display" << std::endl;
                 glDrawBuffer(GL_BACK_LEFT);
                 mGraphics.clearColor(0.2, 0.2, 0.2);
                 mGraphics.clearDepth(1);
@@ -168,10 +174,9 @@ struct OmniRenderer : WindowApp
                 );
             }
         }
-
         mGraphics.popViewport();
         // put back default drawbuffer
-        glDrawBuffer(GL_BACK);
+        glDrawBuffer(GL_BACK_LEFT);
     }
 
     void onKeyDown(Keyboard const& k) override {}

@@ -127,8 +127,8 @@ void main() {
   vec3 p_coord = (R * vec4(dir, 0)).xyz;
   p_coord.xy /= -p_coord.z;
   p_coord.xy /= tanFovDiv2;
-  vec4 cube_color = texture(color_tex, p_coord.xy / 2.0 + 0.5);
-  frag_color = cube_color * sample.a;
+  vec4 sampled_color = texture(color_tex, p_coord.xy / 2.0 + 0.5);
+  frag_color = sampled_color * sample.a;
 }
 )";}
 
@@ -182,6 +182,8 @@ public:
       } while(got_next);
     }
 
+    // std::cout << "loaded " << viewports.size() << " viewports from " << path << "/" << hostname << ".txt" << std::endl;
+
     // Load warp data
     for(int i = 0; i < viewports.size(); i++) {
       ProjectionViewport& vp = viewports[i];
@@ -198,6 +200,7 @@ public:
         file.read(data, sizeof(Vec4f) * vp.width * vp.height);
       }
       file.close();
+      // std::cout << "loaded warp/blend data from " << vp.filepath << std::endl;
     }
   }
 
@@ -338,7 +341,6 @@ public:
       }
       float fov = std::acos(dot_max) * 2.0f;
       // std::cout << fov << std::endl;
-        // ProjectionTexture& pt = tex_projections_[vp];
       Vec3f rotation_axis = Vec3f(0, 0, -1).cross(direction);
       rotation_axis = rotation_axis.normalize();
       float rotation_angle = std::acos(Vec3f(0, 0, -1).dot(direction));
@@ -350,6 +352,7 @@ public:
         0, 0, (near + far) / (near - far), (2.0f * near * far) / (near - far),
         0, 0, -1, 0
       );
+
       Mat4f::multiply(info.pc_matrix, proj, rmat);
       info.r_matrix = rmat;
       info.tanFovDiv2 = tan(fov / 2.0);
@@ -358,6 +361,7 @@ public:
       info.warp_texture->create2D(vp.width, vp.height, GL_RGBA32F, GL_RGBA, GL_FLOAT);
       info.warp_texture->submit(vp.warp_and_blend_data.data());
     }
+
     rbo_.create(res_, res_);
     fbo_.bind();
     fbo_.attachTexture2D(*projection_infos_[0].texture[0]);
@@ -398,6 +402,7 @@ public:
     warpblend_.load_desktop_mode_calibration();
     calibration_loaded = true;
 
+    lens_.focalLength(radius);
     res_ = 512;
     viewport_.set(0, 0, res_, res_);
 
@@ -500,7 +505,6 @@ public:
     g.shader(composite_shader_);
     for(int i = 0; i < warpblend_.viewports.size(); i++) {
       const ProjectionViewport& vp = warpblend_.viewports[i];
-
       g.viewport(vp.l * width, vp.b * height, vp.w * width, vp.h * height);
       projection_infos_[i].warp_texture->bind(PerProjectionRenderConstants::sampletex_binding_point);
       projection_infos_[i].texture[eye]->bind(PerProjectionRenderConstants::textures_bidning_point);
@@ -521,19 +525,16 @@ public:
     glGetIntegerv(GL_VIEWPORT, dims);
     int width = dims[2];
     int height = dims[3];
-    int boundTexture;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &boundTexture);
     for(int i = 0; i < warpblend_.viewports.size(); i++) {
       const ProjectionViewport& vp = warpblend_.viewports[i];
+      g.viewport(vp.l * width, vp.b * height, vp.w * width, vp.h * height);
       g.pushMatrix();
       // flip cubemap faces for them to match the orientation with other faces
       if (i == 2 || i == 3) g.scale(1, 1, 1);
       else g.scale(-1, -1, 1);
-      g.viewport(vp.l * width, vp.b * height, vp.w * width, vp.h * height);
       g.quadViewport(*(projection_infos_[i].texture[eye]));
       g.popMatrix();
     }
-    glBindTexture(GL_TEXTURE_2D, boundTexture);
     g.popViewport();
     g.popCamera();
   }

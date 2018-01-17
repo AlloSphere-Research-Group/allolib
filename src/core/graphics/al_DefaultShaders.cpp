@@ -163,7 +163,12 @@ std::string multilight_vert_body_begin()
 void main()
 {
     vec4 vert_eye = MV * vec4(position, 1.0);
-    gl_Position = P * stereo_displace(vert_eye, eye_sep, foc_len);
+    if (eye_sep == 0) {
+        gl_Position = P * MV * vec4(position, 1.0);
+    }
+    else {
+        gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
+    }
     normal_eye = (N * vec4(normalize(normal), 0.0)).xyz;
     eye_dir = -vert_eye.xyz;
 )"; // does not close main function
