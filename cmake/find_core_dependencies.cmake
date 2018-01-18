@@ -23,8 +23,8 @@ else ()
 endif (AL_WINDOWS)
 
 set(CORE_INCLUDE_DIRS
-    ${GLFW_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
+    ${GLFW_INCLUDE_DIRS}
 )
 
 set(CORE_LIBRARIES
@@ -32,6 +32,14 @@ set(CORE_LIBRARIES
     ${GLEW_LIBRARIES}
     ${GLFW_LIBRARIES}
 )
+
+if (${GLFW_LIBRARIES} STREQUAL "glfw3")
+  message("using static version of glfw")
+  if (AL_MACOS)
+    list(APPEND CORE_LIBRARIES "-framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreVideo")
+  elseif(AL_LINUX)
+  endif()
+endif()
 
 set(CORE_LIBRARY_DIRS
     ${GLFW_LIBRARY_DIRS}
