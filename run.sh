@@ -20,7 +20,8 @@ fi
 
 # check if we want debug build
 BUILD_TYPE=Release
-while getopts ":dn" opt; do
+DO_CLEAN=0
+while getopts ":dnc" opt; do
   case $opt in
   d)
   BUILD_TYPE=Debug
@@ -29,6 +30,10 @@ while getopts ":dn" opt; do
     ;;
   n)
   EXIT_AFTER_BUILD=1
+  shift
+    ;;
+  c)
+  DO_CLEAN=1
   shift
     ;;
   esac
@@ -43,6 +48,10 @@ echo " "
 cd ${AL_LIB_PATH}
 git submodule init
 git submodule update
+if [ ${DO_CLEAN} == 1 ]; then
+  echo "cleaning build"
+  rm -r build
+fi
 mkdir -p build
 cd build
 mkdir -p "${BUILD_TYPE}"
@@ -72,6 +81,10 @@ echo " "
 
 cd ${INITIALDIR}
 cd ${APP_PATH}
+if [ ${DO_CLEAN} == 1 ]; then
+  echo "cleaning build"
+  rm -r build
+fi
 mkdir -p build
 cd build
 mkdir -p ${APP_NAME}
