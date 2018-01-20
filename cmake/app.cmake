@@ -143,3 +143,10 @@ if (AL_WINDOWS)
     COMMAND ${post_build_command}
   )
 endif (AL_WINDOWS)
+
+add_custom_target("run"
+  COMMAND "${app_name}"
+  DEPENDS "${app_name}"
+  WORKING_DIRECTORY "${app_path}"
+  COMMENT "Running: ${app_name}")
+
