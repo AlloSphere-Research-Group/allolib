@@ -39,9 +39,10 @@ public:
 		texBlur.filter(Texture::LINEAR);
 	}
 
-	void onAnimate (double dt) override
+	void onAnimate (double dt_sec) override
 	{
-		angle += 90 * dt / 1000; // dt is in millis
+		angle += dt_sec * 90;
+		// angle += 90 * dt / 1000; // dt is in millis
 		if(angle >= 360) angle -= 360;
 	}
 

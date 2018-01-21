@@ -30,7 +30,7 @@ public:
 
 	void onAnimate(double dt){
 
-		angle += 0.001 * dt;
+		angle += 2 * dt;
 		if(angle > 360) angle -= 360;
 
 		// Clear all the meshes
