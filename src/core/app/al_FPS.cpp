@@ -29,6 +29,10 @@ double FPS::dt() {
   return static_cast<double>(deltaTime);
 }
 
+double FPS::dt_sec() {
+  return static_cast<double>(deltaTime) / 1000000000.0;
+}
+
 void FPS::startFPS() {
   deltaTime = interval;
   al_start_steady_clock();

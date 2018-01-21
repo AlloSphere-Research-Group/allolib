@@ -20,7 +20,8 @@ public:
   // get time
   double sec();
   double msec(); // millis
-  double dt();
+  double dt(); // in nanos
+  double dt_sec(); // in seconds
   void startFPS();
   void tickFPS();
 };

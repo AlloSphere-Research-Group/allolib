@@ -99,8 +99,8 @@ public:
 
     // from WindowApp
     void loop() override {
-        preOnAnimate(dt() / 1000000.0f);
-        onAnimate(dt() / 1000000.0f); // millis for dt
+        preOnAnimate(dt_sec());
+        onAnimate(dt_sec());
         preOnDraw();
         onDraw();
         postOnDraw();
