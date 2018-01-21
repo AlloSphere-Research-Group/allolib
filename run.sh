@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ $# == 0 ]; then
+  echo "pass file to run"
+  echo "ex) ./run.sh src/main.cpp"
+  exit 1
+fi
+
 INITIALDIR=${PWD} # gives absolute path
 # echo "Script executed from: ${INITIALDIR}"
 
