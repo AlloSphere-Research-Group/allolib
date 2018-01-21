@@ -336,7 +336,10 @@ void Graphics::quad(Texture& tex, float x, float y, float w, float h) {
 void Graphics::quadViewport(Texture& tex, float x, float y, float w, float h) {
   pushCamera();
   camera(Viewpoint::IDENTITY);
+  bool prev_lighting = mLightingEnabled;
+  lighting(false);
   quad(tex, x, y, w, h);
+  lighting(prev_lighting); // put back previous lighting mode
   popCamera();
 }
 
