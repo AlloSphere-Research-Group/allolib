@@ -96,7 +96,7 @@ struct OmniRenderer : WindowApp
 
     void onDraw() override
     {
-        onAnimate(dt() / 1000000.0f); // millis for dt
+        onAnimate(dt_sec()); // millis for dt
 
         // start drawing to perprojection fbos
         mGraphics.omni(true);
