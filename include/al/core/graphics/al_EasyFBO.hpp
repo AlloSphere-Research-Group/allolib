@@ -51,13 +51,14 @@ struct EasyFBOSetting {
     int internal = GL_RGBA8;
     unsigned int format = GL_RGBA;
     unsigned int type = GL_UNSIGNED_BYTE;
-    unsigned int depth_format = GL_DEPTH_COMPONENT16;
+    unsigned int depth_format = GL_DEPTH_COMPONENT24;
     int wrapS = GL_CLAMP_TO_EDGE;
     int wrapT = GL_CLAMP_TO_EDGE;
     int wrapR = GL_CLAMP_TO_EDGE;
     int filterMin = GL_NEAREST;
     int filterMag = GL_NEAREST;
     // bool mUseMipmap = false;
+    bool use_depth_texture = false;
 };
 
 /// Encapsulates FBO, depth buffer, and texture
@@ -66,6 +67,7 @@ struct EasyFBOSetting {
 class EasyFBO {
   int mWidth, mHeight;
   Texture mTex;
+  Texture mDepthTex;
   RBO mRbo;
   FBO mFbo;
 
@@ -75,6 +77,7 @@ public:
   int height() { return mHeight; }
   FBO& fbo() { return mFbo; }
   Texture& tex() { return mTex; }
+  Texture& depthTex() { return mDepthTex; }
   RBO& rbo() { return mRbo; }
   void begin() { mFbo.bind(); }
   void end() { mFbo.unbind(); }
