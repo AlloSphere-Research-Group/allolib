@@ -4,19 +4,24 @@
 
 using namespace al;
 
-bool WindowApp::StandardWindowAppKeyControls::keyDown(const Keyboard& k){
-  if(k.ctrl()){
-    switch(k.key()){
-	  case 'q': window().close(); return false;
+bool WindowApp::StandardWindowAppKeyControls::keyDown(const Keyboard& k) {
+  if (k.ctrl()) {
+    switch (k.key()) {
+      case 'q':
+        window().close();
+        return false;
       // case 'h': window().hide(); return false;
       // case 'm': window().iconify(); return false;
-      case 'c': window().cursorHideToggle(); return false;
+      case 'u':
+        window().cursorHideToggle();
+        return false;
       default:;
     }
-  }
-  else{
-    switch(k.key()){
-      case Keyboard::ESCAPE: window().fullScreenToggle(); return false;
+  } else {
+    switch (k.key()) {
+      case Keyboard::ESCAPE:
+        window().fullScreenToggle();
+        return false;
       default:;
     }
   }
@@ -24,8 +29,8 @@ bool WindowApp::StandardWindowAppKeyControls::keyDown(const Keyboard& k){
 }
 
 WindowApp::WindowApp() {
-    append(stdControls);
-    append(windowEventHandler());
+  append(stdControls);
+  append(windowEventHandler());
 }
 
 void WindowApp::open() {
@@ -40,8 +45,8 @@ void WindowApp::loop() {
 }
 
 void WindowApp::closeApp() {
-  destroy(); // destroy window
-  glfw::terminate(); // this also closes existing windows
+  destroy();          // destroy window
+  glfw::terminate();  // this also closes existing windows
 }
 
 void WindowApp::start() {
