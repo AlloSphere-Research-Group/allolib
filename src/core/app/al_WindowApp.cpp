@@ -34,8 +34,8 @@ WindowApp::WindowApp() {
 }
 
 void WindowApp::open() {
-  glfw::init();
-  create();
+  glfw::init(is_verbose);
+  Window::create(is_verbose);
   onCreate();
 }
 
@@ -46,7 +46,7 @@ void WindowApp::loop() {
 
 void WindowApp::closeApp() {
   destroy();          // destroy window
-  glfw::terminate();  // this also closes existing windows
+  glfw::terminate(is_verbose);  // this also closes existing windows
 }
 
 void WindowApp::start() {

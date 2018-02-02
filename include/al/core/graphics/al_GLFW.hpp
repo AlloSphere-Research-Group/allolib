@@ -11,8 +11,8 @@
 namespace al {
 
 namespace glfw {
-    void init();
-    void terminate();
+    void init(bool is_verbose=false);
+    void terminate(bool is_verbose=false);
     inline GLFWwindow* current_window() { return glfwGetCurrentContext(); }
 }
 

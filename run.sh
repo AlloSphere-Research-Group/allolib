@@ -27,42 +27,53 @@ fi
 # check if we want debug build
 BUILD_TYPE=Release
 DO_CLEAN=0
-while getopts ":dnc" opt; do
-  case $opt in
+IS_VERBOSE=0
+VERBOSE_FLAG=OFF
+
+while getopts "dncv" opt; do
+  case "${opt}" in
   d)
-  BUILD_TYPE=Debug
-  POSTFIX=_debug
-  shift # consume option
+    BUILD_TYPE=Debug
+    POSTFIX=_debug # if release, there's no postfix
     ;;
   n)
-  EXIT_AFTER_BUILD=1
-  shift
+    EXIT_AFTER_BUILD=1
     ;;
   c)
-  DO_CLEAN=1
-  shift
+    DO_CLEAN=1
+    ;;
+  v)
+    IS_VERBOSE=1
+    VERBOSE_FLAG=ON
     ;;
   esac
 done
-echo "BUILD TYPE: ${BUILD_TYPE}"
+# consume options that were parsed
+shift $(expr $OPTIND - 1 )
+
+if [ ${IS_VERBOSE} == 1 ]; then
+  echo "BUILD TYPE: ${BUILD_TYPE}"
+fi
+
 
 # first build allolib ###########################################################
 echo " "
 echo "___ building allolib __________"
-echo " "
 
 cd ${AL_LIB_PATH}
 git submodule init
 git submodule update
 if [ ${DO_CLEAN} == 1 ]; then
-  echo "cleaning build"
+  if [ ${IS_VERBOSE} == 1 ]; then
+    echo "cleaning build"
+  fi
   rm -r build
 fi
 mkdir -p build
 cd build
 mkdir -p "${BUILD_TYPE}"
 cd "${BUILD_TYPE}"
-cmake ../.. -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ../..
 make
 LIB_BUILD_RESULT=$?
 # if lib failed to build, exit
@@ -79,7 +90,6 @@ APP_NAME=${APP_FILE%.*} # remove extension (once, assuming .cpp)
 
 echo " "
 echo "___ building ${APP_NAME} __________"
-echo " "
 
 # echo "app path: ${APP_PATH}"
 # echo "app file: ${APP_FILE}"
@@ -88,7 +98,9 @@ echo " "
 cd ${INITIALDIR}
 cd ${APP_PATH}
 if [ ${DO_CLEAN} == 1 ]; then
-  echo "cleaning build"
+  if [ ${IS_VERBOSE} == 1 ]; then
+    echo "cleaning build"
+  fi
   rm -r build
 fi
 mkdir -p build
@@ -96,7 +108,7 @@ cd build
 mkdir -p ${APP_NAME}
 cd ${APP_NAME}
 
-cmake ${AL_LIB_PATH}/cmake/single_file -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Dal_path=${AL_LIB_PATH} -DAL_APP_FILE=../../${APP_FILE}
+cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Dal_path=${AL_LIB_PATH} -DAL_APP_FILE=../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${AL_LIB_PATH}/cmake/single_file
 make
 APP_BUILD_RESULT=$?
 # if app failed to build, exit
@@ -115,5 +127,4 @@ cd ${INITIALDIR}
 cd ${APP_PATH}/bin
 echo " "
 echo "___ running ${APP_NAME} __________"
-echo " "
 ./"${APP_NAME}${POSTFIX}"

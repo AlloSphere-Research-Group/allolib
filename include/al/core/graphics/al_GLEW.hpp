@@ -12,7 +12,7 @@ namespace glew {
 
 // load OpenGL functions
 // crashes if failed, should be called after context creation
-void init();
+void init(bool is_verbose=false);
 
 }
 

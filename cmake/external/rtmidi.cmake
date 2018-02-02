@@ -5,7 +5,9 @@
 #   RTMIDI_DEFINITIONS
 
 if(IS_DIRECTORY "${al_path}/external/rtmidi")
-  message("Using RtMidi")
+  if (AL_VERBOSE_OUTPUT)
+    message("Using RtMidi")
+  endif()
 
   set(RTMIDI_INCLUDE_DIR ${al_path}/external/rtmidi)
   set(RTMIDI_SRC external/rtmidi/RtMidi.cpp)

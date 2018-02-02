@@ -258,7 +258,7 @@ public:
   /// This will create a new window only if the the window has not already
   /// been created.
   /// \returns whether a valid window is created
-  bool create();
+  bool create(bool is_verbose=false);
 
   // refresh window (swap buffers, poll events, etc.)
   void refresh();
@@ -359,7 +359,7 @@ protected:
   int mFramebufferHeight = 0;
 
   // Must be defined in pimpl-specific file
-  bool implCreate();
+  bool implCreate(bool is_verbose=false);
   bool implCreated() const;
   void implRefresh();
   void implDestroy();

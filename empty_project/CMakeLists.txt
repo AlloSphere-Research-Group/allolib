@@ -3,6 +3,8 @@ set(app_path ${CMAKE_CURRENT_SOURCE_DIR})
 get_filename_component(app_name ${app_path} NAME)
 project(${app_name})
 
+option(AL_VERBOSE_OUTPUT "" OFF)
+
 #some definitions for user
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(MACOS 1)

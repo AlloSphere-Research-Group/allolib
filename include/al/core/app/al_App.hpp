@@ -90,9 +90,9 @@ public:
 
     // from WindowApp
     void open() override {
-        glfw::init();
+        glfw::init(is_verbose);
         onInit();
-        create();
+        Window::create(is_verbose);
         preOnCreate();
         onCreate();
     }

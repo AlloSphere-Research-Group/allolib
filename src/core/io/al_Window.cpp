@@ -62,9 +62,9 @@ void WindowEventHandler::removeFromWindow(){
 }
 
 
-bool Window::create() {
+bool Window::create(bool verbose) {
   if (!created()) {
-    if (implCreate()) {
+    if (implCreate(verbose)) {
       return true;
     }
   }

@@ -53,7 +53,7 @@ struct OmniRenderer : WindowApp
 
     void open() override
     {
-        glfw::init();
+        glfw::init(is_verbose);
         if (sphere::is_renderer()) running_in_sphere_renderer = true;
 
         if (running_in_sphere_renderer) {
@@ -68,7 +68,7 @@ struct OmniRenderer : WindowApp
                           << "width and/or height are/is zero!" << std::endl;
             }
         }
-        create();
+        Window::create(is_verbose);
         cursorHide(true);
 
         window_is_stereo_buffered = Window::displayMode() & Window::STEREO_BUF;

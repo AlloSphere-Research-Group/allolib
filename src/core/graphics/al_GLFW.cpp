@@ -10,7 +10,7 @@ void cbError(int code, const char* description) {
 
 namespace al {
 
-void glfw::init() {
+void glfw::init(bool is_verbose) {
   static bool inited = false;
   if (inited) {
     //std::cout << "GLFW already initialized" << std::endl;
@@ -21,16 +21,16 @@ void glfw::init() {
     std::cout << "ERROR: could not start GLFW" << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << "Initialized GLFW " << glfwGetVersionString() << std::endl;
+  if (is_verbose) std::cout << "Initialized GLFW " << glfwGetVersionString() << std::endl;
   glfwSetErrorCallback(cbError);
 
   inited = true;
 }
 
-void glfw::terminate() {
-  std::cout << "Terminating GLFW ... ";
+void glfw::terminate(bool is_verbose) {
+  if (is_verbose) std::cout << "Terminating GLFW ... ";
   glfwTerminate();
-  std::cout << "Done." << std::endl;
+  if (is_verbose) std::cout << "Done." << std::endl;
 }
 
 }

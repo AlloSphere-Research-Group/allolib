@@ -7,9 +7,9 @@ using namespace al;
 
 bool glew_loaded = false;
 
-void glew::init() {
+void glew::init(bool is_verbose) {
   if (glew_loaded) {
-    std::cout << "GLEW already initialized" << std::endl;
+    if (is_verbose) std::cout << "GLEW already initialized" << std::endl;
     return;
   }
 #if GLEW_VERSION < 2
@@ -20,7 +20,7 @@ void glew::init() {
     std::cout << "Glew Error: " << glewGetErrorString(err) << std::endl;
     exit(EXIT_FAILURE); // FIXME? is this recommended way of terminating?
   }
-  std::cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
+  if (is_verbose) std::cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
   glew_loaded = true;
 }
 

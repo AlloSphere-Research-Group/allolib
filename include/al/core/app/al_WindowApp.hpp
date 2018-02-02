@@ -11,23 +11,25 @@
 // Keehong Youn, 2016
 // younkeehong@gmail.com
 
-#include "al/core/io/al_Window.hpp"
 #include "al/core/app/al_FPS.hpp"
+#include "al/core/io/al_Window.hpp"
 
 #include <atomic>
 
 namespace al {
 
 class WindowApp : public Window, public WindowEventHandler, public FPS {
-public:
+ public:
   // basic window app keyboard actions: fullscreen, quit, ...
   struct StandardWindowAppKeyControls : WindowEventHandler {
     bool keyDown(const Keyboard& k);
   };
   StandardWindowAppKeyControls stdControls;
 
-  std::atomic<bool> mShouldQuitApp {false};
-
+  std::atomic<bool> mShouldQuitApp{false};
+  bool is_verbose = false;
+  void verbose(bool b = true) { is_verbose = b; }
+  
   WindowApp();
 
   virtual void start();
@@ -36,9 +38,7 @@ public:
   virtual void closeApp();
 
   void quit() { mShouldQuitApp = true; }
-  bool shouldQuit() {
-	  return mShouldQuitApp || Window::shouldClose();
-  }
+  bool shouldQuit() { return mShouldQuitApp || Window::shouldClose(); }
 
   // user will override these
   virtual void onCreate() {}
@@ -61,9 +61,8 @@ public:
   virtual bool mouseUp(const Mouse& m) override;
   virtual bool resize(int dw, int dh) override;
   virtual bool visibility(bool v) override;
-
 };
 
-}
+}  // namespace al
 
 #endif

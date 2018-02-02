@@ -1,22 +1,22 @@
-#include "al/core/io/al_Window.hpp"
 #include "al/core/graphics/al_GLEW.hpp"
 #include "al/core/graphics/al_GLFW.hpp"
+#include "al/core/io/al_Window.hpp"
 
+#include <cmath>
+#include <iostream>
 #include <map>
 #include <unordered_map>
-#include <iostream>
-#include <cmath>
 
 using namespace std;
 
 namespace al {
 
 class WindowImpl {
-public:
+ public:
   typedef std::map<GLFWwindow*, WindowImpl*> WindowsMap;
   typedef std::unordered_map<int, int> KeyMap;
 
-  WindowImpl(Window* w) : mWindow(w) { }
+  WindowImpl(Window* w) : mWindow(w) {}
   ~WindowImpl() { destroy(); }
   GLFWwindow* glfwWindow() { return mGLFWwindow; }
   bool created() const { return mGLFWwindow != nullptr; }
@@ -29,32 +29,33 @@ public:
   }
 
   void destroy() {
-    if(created()){
+    if (created()) {
       windows().erase(mGLFWwindow);
       glfwDestroyWindow(mGLFWwindow);
       mGLFWwindow = nullptr;
     }
   }
 
-  static WindowsMap& windows(){
+  static WindowsMap& windows() {
     static WindowsMap* v = new WindowsMap;
     return *v;
   }
 
   static Window* getWindow(GLFWwindow* w) {
     WindowImpl* impl = getWindowImpl(w);
-    return impl? impl->mWindow : nullptr;
+    return impl ? impl->mWindow : nullptr;
   }
 
-  static WindowImpl * getWindowImpl(GLFWwindow* w){
+  static WindowImpl* getWindowImpl(GLFWwindow* w) {
     WindowsMap::iterator it = windows().find(w);
-    if(windows().end() != it){
+    if (windows().end() != it) {
       return it->second;
     }
     return nullptr;
   }
 
-  static void cbKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods){
+  static void cbKeyboard(GLFWwindow* window, int key, int scancode, int action,
+                         int mods) {
     auto* w = getWindow(window);
     if (!w) return;
 
@@ -64,7 +65,7 @@ public:
     k.ctrl(mods & GLFW_MOD_CONTROL);
     k.shift(mods & GLFW_MOD_SHIFT);
 
-    switch(action) {
+    switch (action) {
       case GLFW_PRESS:
         k.setKey(remapKey(key), true);
         w->callHandlersKeyDown();
@@ -78,15 +79,22 @@ public:
     }
   }
 
-  static void cbMouse(GLFWwindow* window, int button, int action, int mods){
+  static void cbMouse(GLFWwindow* window, int button, int action, int mods) {
     auto* w = getWindow(window);
-    if(!w) return;
+    if (!w) return;
 
-    switch(button){
-      case GLFW_MOUSE_BUTTON_LEFT: button = Mouse::LEFT; break;
-      case GLFW_MOUSE_BUTTON_RIGHT: button = Mouse::MIDDLE; break;
-      case GLFW_MOUSE_BUTTON_MIDDLE: button = Mouse::RIGHT; break;
-      default: button = Mouse::EXTRA;    // unrecognized button
+    switch (button) {
+      case GLFW_MOUSE_BUTTON_LEFT:
+        button = Mouse::LEFT;
+        break;
+      case GLFW_MOUSE_BUTTON_RIGHT:
+        button = Mouse::MIDDLE;
+        break;
+      case GLFW_MOUSE_BUTTON_MIDDLE:
+        button = Mouse::RIGHT;
+        break;
+      default:
+        button = Mouse::EXTRA;  // unrecognized button
     }
 
     Keyboard& k = w->mKeyboard;
@@ -120,8 +128,7 @@ public:
 
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS ||
         glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS ||
-        glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS)
-    {
+        glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS) {
       w->callHandlersMouseDrag();
       return;
     }
@@ -134,7 +141,7 @@ public:
     if (!win) return;
 
     // update window size
-    Window::Dim& dimCurr = win->mFullScreen? win->mFullScreenDim : win->mDim;
+    Window::Dim& dimCurr = win->mFullScreen ? win->mFullScreenDim : win->mDim;
     dimCurr.w = w;
     dimCurr.h = h;
 
@@ -151,15 +158,15 @@ public:
     // update framebuffer size
     win->mFramebufferWidth = fbw;
     win->mFramebufferHeight = fbh;
-    
+
     // update pixel density
-    Window::Dim& dimCurr = win->mFullScreen? win->mFullScreenDim : win->mDim;
+    Window::Dim& dimCurr = win->mFullScreen ? win->mFullScreenDim : win->mDim;
     win->mHighresFactor = win->mFramebufferWidth / float(dimCurr.w);
 
     win->callHandlersResize(dimCurr.w, dimCurr.h);
   }
 
-  void registerCBs(){ 
+  void registerCBs() {
     glfwSetWindowSizeCallback(mGLFWwindow, cbReshape);
     glfwSetFramebufferSizeCallback(mGLFWwindow, cbReshapeFb);
     glfwSetKeyCallback(mGLFWwindow, cbKeyboard);
@@ -178,15 +185,15 @@ public:
 
   static KeyMap make_glfw_keymap();
 
-  static int remapKey(int key){
+  static int remapKey(int key) {
     auto search = keymap().find(key);
-    if(search != keymap().end()) return search->second;
+    if (search != keymap().end()) return search->second;
     return 0;
   }
 
-private:
+ private:
   friend class Window;
-  Window * mWindow = nullptr;
+  Window* mWindow = nullptr;
   GLFWwindow* mGLFWwindow = nullptr;
   static GLFWwindow* mCurrentGLFWwindow;
 };
@@ -195,52 +202,53 @@ GLFWwindow* WindowImpl::mCurrentGLFWwindow = nullptr;
 
 // ---------------------------------------------------------
 
-Window::Window() {
-  mImpl = make_unique<WindowImpl>(this);
-}
+Window::Window() { mImpl = make_unique<WindowImpl>(this); }
 
-Window::~Window() {
+Window::~Window() {}
 
-}
-
-bool Window::implCreate() {
+bool Window::implCreate(bool is_verbose) {
   glfw::init();
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_DECORATED, mDecorated);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Ignored when creating ES
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true); // if OSX, this is a must
-  // GLFW_AUTO_ICONIFY (available after 3.2) specifies whether the full screen window will
-  // automatically iconify and restore the previous video mode on input focus loss.
-  // This hint is ignored for windowed mode windows.
+  glfwWindowHint(GLFW_OPENGL_PROFILE,
+                 GLFW_OPENGL_CORE_PROFILE);          // Ignored when creating ES
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);  // if OSX, this is a must
+  // GLFW_AUTO_ICONIFY (available after 3.2) specifies whether the full screen
+  // window will automatically iconify and restore the previous video mode on
+  // input focus loss. This hint is ignored for windowed mode windows.
 #if 10 * GLFW_VERSION_MAJOR + GLFW_VERSION_MINOR > 31
-  glfwWindowHint(GLFW_AUTO_ICONIFY, false); // so fullcreen does not iconify
+  glfwWindowHint(GLFW_AUTO_ICONIFY, false);  // so fullcreen does not iconify
 #endif
   // TODO
   // GLFW_STEREO: GLFW_TRUE GLFW_FALSE
-  // GLFW_CLIENT_API: GLFW_OPENGL_API GLFW_OPENGL_API, GLFW_OPENGL_ES_API or GLFW_NO_API
+  // GLFW_CLIENT_API: GLFW_OPENGL_API GLFW_OPENGL_API, GLFW_OPENGL_ES_API or
+  // GLFW_NO_API
 
-  bool should_create_stereo = (mDisplayMode & STEREO_BUF)? true : false;
+  bool should_create_stereo = (mDisplayMode & STEREO_BUF) ? true : false;
   glfwWindowHint(GLFW_STEREO, should_create_stereo);
 
-  mImpl->mGLFWwindow = glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), NULL, NULL);
+  mImpl->mGLFWwindow =
+      glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), NULL, NULL);
   if (!mImpl->created()) {
     if (should_create_stereo) {
       glfwWindowHint(GLFW_STEREO, false);
-      mImpl->mGLFWwindow = glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), NULL, NULL);
+      mImpl->mGLFWwindow =
+          glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), NULL, NULL);
       if (!mImpl->created()) {
-        std::cout << "failed to create window" << std::endl;
+        if (is_verbose) std::cout << "failed to create window" << std::endl;
         return false;
-      }
-      else {
+      } else {
         // unset stereo bit
-          mDisplayMode = static_cast<DisplayMode>(displayMode() & ~STEREO_BUF);
-          std::cout << "tried to create stereo window but failed. creating mono window" << std::endl;
+        mDisplayMode = static_cast<DisplayMode>(displayMode() & ~STEREO_BUF);
+        if (is_verbose)
+          std::cout << "tried to create stereo window but failed. creating "
+                       "mono window"
+                    << std::endl;
       }
-    }
-    else {
-      std::cout << "failed to create window" << std::endl;
+    } else {
+      if (is_verbose) std::cout << "failed to create window" << std::endl;
       return false;
     }
   }
@@ -248,38 +256,45 @@ bool Window::implCreate() {
   mImpl->makeCurrent();
   glfwSetWindowPos(mImpl->mGLFWwindow, mDim.l, mDim.t);
 
-  // sometimes OS makes window's size different from what we requested (usually MACOS)
+  // sometimes OS makes window's size different from what we requested (usually
+  // MACOS)
   int actual_width, actual_height, actual_left, actual_top;
   glfwGetWindowSize(mImpl->mGLFWwindow, &actual_width, &actual_height);
   glfwGetWindowPos(mImpl->mGLFWwindow, &actual_left, &actual_top);
-  if (actual_width != mDim.w ||
-      actual_height != mDim.h ||
-      actual_left != mDim.l ||
-      actual_top != mDim.t
-  ) {
-    cout << "screen dimension different from requested" << endl;
+  if (actual_width != mDim.w || actual_height != mDim.h ||
+      actual_left != mDim.l || actual_top != mDim.t) {
+    if (is_verbose) cout << "screen dimension different from requested" << endl;
     mDim.w = actual_width;
     mDim.h = actual_height;
     mDim.l = actual_left;
     mDim.t = actual_top;
   }
-  cout << "window opened, size: (" << mDim.w << ", " << mDim.h << "), "
-                  << "position: (" << mDim.l << ", " << mDim.t << ")" << endl;
-  
+  if (is_verbose)
+    cout << "window opened, size: (" << mDim.w << ", " << mDim.h << "), "
+         << "position: (" << mDim.l << ", " << mDim.t << ")" << endl;
+
   glew::init();
 
-  const GLubyte* renderer = glGetString(GL_RENDERER);
-  std::cout << "renderer: " << renderer << std::endl;
-  int mj = glfwGetWindowAttrib(mImpl->mGLFWwindow, GLFW_CONTEXT_VERSION_MAJOR);
-  int mn = glfwGetWindowAttrib(mImpl->mGLFWwindow, GLFW_CONTEXT_VERSION_MINOR);
-  std::cout << "opengl window version: " << mj << "." << mn << std::endl;
-  char* glsl_version = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-  std::cout << "glsl version: " << glsl_version << std::endl;
+  if (is_verbose) {
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    std::cout << "renderer: " << renderer << std::endl;
+    int mj =
+        glfwGetWindowAttrib(mImpl->mGLFWwindow, GLFW_CONTEXT_VERSION_MAJOR);
+    int mn =
+        glfwGetWindowAttrib(mImpl->mGLFWwindow, GLFW_CONTEXT_VERSION_MINOR);
+    std::cout << "opengl window version: " << mj << "." << mn << std::endl;
+    char* glsl_version = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    std::cout << "glsl version: " << glsl_version << std::endl;
+  }
 
-  glfwGetFramebufferSize(mImpl->mGLFWwindow, &mFramebufferWidth, &mFramebufferHeight);
+  glfwGetFramebufferSize(mImpl->mGLFWwindow, &mFramebufferWidth,
+                         &mFramebufferHeight);
   mHighresFactor = mFramebufferWidth / float(mDim.w);
-  cout << "framebuffer size: " << mFramebufferWidth << ", " << mFramebufferHeight << endl;
-  cout << "pixel density: " << mHighresFactor << endl;
+  if (is_verbose) {
+    cout << "framebuffer size: " << mFramebufferWidth << ", "
+         << mFramebufferHeight << endl;
+    cout << "pixel density: " << mHighresFactor << endl;
+  }
 
   mImpl->registerCBs();
   vsync(mVSync);
@@ -288,9 +303,7 @@ bool Window::implCreate() {
   return true;
 }
 
-bool Window::implCreated() const {
-  return mImpl->created();
-}
+bool Window::implCreated() const { return mImpl->created(); }
 
 void Window::implRefresh() {
   // [!] POLLEVENTS IS AFTER SWAPBUFFERS
@@ -301,43 +314,35 @@ void Window::implRefresh() {
   glfwPollEvents();
 }
 
-void Window::implDestroy() {
-  mImpl->destroy();
-}
+void Window::implDestroy() { mImpl->destroy(); }
 
-void Window::implClose () {
-	glfwSetWindowShouldClose(mImpl->mGLFWwindow, true);
-}
+void Window::implClose() { glfwSetWindowShouldClose(mImpl->mGLFWwindow, true); }
 
 bool Window::implShouldClose() {
-    if (glfwWindowShouldClose(mImpl->mGLFWwindow)) {
-        return true;
-    }
-    else {
-        return false;
-    }
+  if (glfwWindowShouldClose(mImpl->mGLFWwindow)) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
-void Window::implSetCursor() {
-  
-}
+void Window::implSetCursor() {}
 
 void Window::implSetCursorHide() {
-  glfwSetInputMode(mImpl->mGLFWwindow, GLFW_CURSOR, mCursorHide? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+  glfwSetInputMode(mImpl->mGLFWwindow, GLFW_CURSOR,
+                   mCursorHide ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
 }
 
 void Window::implSetDimensions() {
   if (mFullScreen) {
     fullScreen(false);
-  }
-  else {
+  } else {
     glfwSetWindowPos(mImpl->mGLFWwindow, mDim.l, mDim.t);
     glfwSetWindowSize(mImpl->mGLFWwindow, mDim.w, mDim.h);
   }
 }
 
 void Window::implSetFullScreen() {
-
 // glfwSetWindowMonitor available since glfw 3.2
 #if 10 * GLFW_VERSION_MAJOR + GLFW_VERSION_MINOR > 31
   if (mFullScreen) {
@@ -345,53 +350,36 @@ void Window::implSetFullScreen() {
 
     GLFWmonitor* primary = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(primary);
-    glfwSetWindowMonitor(
-      mImpl->mGLFWwindow, primary,
-      0, 0, mode->width, mode->height,
-      mode->refreshRate
-    );
+    glfwSetWindowMonitor(mImpl->mGLFWwindow, primary, 0, 0, mode->width,
+                         mode->height, mode->refreshRate);
     vsync(mVSync);
-  }
-  else {
-    glfwSetWindowMonitor(
-      mImpl->mGLFWwindow, NULL,
-      mDim.l, mDim.t, mDim.w, mDim.h,
-      GLFW_DONT_CARE
-    );
+  } else {
+    glfwSetWindowMonitor(mImpl->mGLFWwindow, NULL, mDim.l, mDim.t, mDim.w,
+                         mDim.h, GLFW_DONT_CARE);
     vsync(mVSync);
   }
 #endif
 }
 
-void Window::implSetTitle() {
-}
+void Window::implSetTitle() {}
 
 // See: https://www.opengl.org/wiki/Swap_Interval
-void Window::implSetVSync() {
-  glfwSwapInterval(mVSync? 1 : 0);
-}
+void Window::implSetVSync() { glfwSwapInterval(mVSync ? 1 : 0); }
 
-void Window::implHide() {
+void Window::implHide() {}
 
-}
+void Window::implIconify() {}
 
-void Window::implIconify() {
+void Window::implSetDecorated() {}
 
-}
-
-void Window::implSetDecorated() {
-
-}
-
-void Window::destroyAll(){
-  //printf("Window::destroyAll\n");
+void Window::destroyAll() {
+  // printf("Window::destroyAll\n");
   // WindowImpl::WindowsMap::iterator it = WindowImpl::windows().begin();
   auto it = WindowImpl::windows().begin();
   while (it != WindowImpl::windows().end()) {
     if (it->second && it->second->mWindow) {
       (it++)->second->mWindow->destroy();
-    }
-    else {
+    } else {
       ++it;
     }
   }
@@ -478,4 +466,4 @@ WindowImpl::KeyMap WindowImpl::make_glfw_keymap() {
   return km;
 }
 
-}
+}  // namespace al

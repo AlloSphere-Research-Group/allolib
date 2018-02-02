@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(allolib)
 set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
+option(AL_VERBOSE_OUTPUT "" OFF)
 # set(BUILDING_ALLOLIB 1)
 
 include(cmake/configure_platform.cmake)

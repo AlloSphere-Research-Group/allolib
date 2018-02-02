@@ -34,7 +34,9 @@ set(CORE_LIBRARIES
 )
 
 if (${GLFW_LIBRARIES} STREQUAL "glfw3")
-  message("using static version of glfw")
+  if (AL_VERBOSE_OUTPUT)
+    message("using static version of glfw")
+  endif()
   if (AL_MACOS)
     list(APPEND CORE_LIBRARIES "-framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreVideo")
   elseif(AL_LINUX)
