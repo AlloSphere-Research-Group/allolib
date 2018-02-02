@@ -73,7 +73,7 @@ mkdir -p build
 cd build
 mkdir -p "${BUILD_TYPE}"
 cd "${BUILD_TYPE}"
-cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ../..
+cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ../.. > cmake_log.txt
 make
 LIB_BUILD_RESULT=$?
 # if lib failed to build, exit
@@ -108,7 +108,7 @@ cd build
 mkdir -p ${APP_NAME}
 cd ${APP_NAME}
 
-cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Dal_path=${AL_LIB_PATH} -DAL_APP_FILE=../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${AL_LIB_PATH}/cmake/single_file
+cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Dal_path=${AL_LIB_PATH} -DAL_APP_FILE=../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
 make
 APP_BUILD_RESULT=$?
 # if app failed to build, exit
