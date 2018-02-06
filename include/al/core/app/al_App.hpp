@@ -13,12 +13,14 @@
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/io/al_ControlNav.hpp"
 
+#include "al/util/al_DeviceServerApp.hpp"
+
 #include <iostream>
 
 namespace al {
 
 // single window, audioIO, and single port osc recv & send
-class App: public WindowApp, public AudioApp, public osc::PacketHandler {
+class App: public WindowApp, public AudioApp, public DeviceServerApp, public osc::PacketHandler {
 public:
 
     class AppEventHandler : public WindowEventHandler {
@@ -41,7 +43,7 @@ public:
     Viewpoint& view() { return mView; }
     const Viewpoint& view() const { return mView; }
 
-    Nav& nav() { return mNav; }
+    Nav& nav() override { return mNav; }
     const Nav& nav() const { return mNav; }
 
     Pose& pose() { return mNav; }
@@ -112,6 +114,7 @@ public:
         open();
         beginAudio(); // only begins if `initAudio` was called before
         startFPS(); // WindowApp (FPS)
+        initDeviceServer();
         while (!shouldQuit()) {
             // to quit, call WindowApp::quit() or click close button of window,
             // or press ctrl + q
