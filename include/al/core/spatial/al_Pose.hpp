@@ -45,11 +45,11 @@
   Wesley Smith, 2010, wesley.hoke@gmail.com
 */
 
-#include "al/core/math/al_Vec.hpp"
-#include "al/core/math/al_Quat.hpp"
-#include "al/core/math/al_Matrix4.hpp"
 #include <stdio.h>
 #include <iostream>
+#include "al/core/math/al_Matrix4.hpp"
+#include "al/core/math/al_Quat.hpp"
+#include "al/core/math/al_Vec.hpp"
 
 namespace al {
 
@@ -61,51 +61,46 @@ namespace al {
 ///
 /// @ingroup allocore
 class Pose {
-public:
-
+ public:
   /// @param[in] pos    Initial position
   /// @param[in] ori    Initial orientation
-  Pose(const Vec3d& pos=Vec3d(0), const Quatd& ori=Quatd::identity());
+  Pose(const Vec3d& pos = Vec3d(0), const Quatd& ori = Quatd::identity());
 
   /// Copy constructor
   Pose(const Pose& p);
 
-
   /// Get identity
-  static Pose identity(){ return Pose().setIdentity(); }
-
+  static Pose identity() { return Pose().setIdentity(); }
 
   // Arithmetic operations
 
   /// Get pose transformed by another pose
-  Pose operator* (const Pose& v) const { return Pose(*this)*=v; }
+  Pose operator*(const Pose& v) const { return Pose(*this) *= v; }
 
   /// Translate and rotate by argument
-  Pose& operator*= (const Pose& v){
+  Pose& operator*=(const Pose& v) {
     mVec += v.vec();
-    mQuat*= v.quat();
+    mQuat *= v.quat();
     return *this;
   }
-
 
   /// Turn to face a given world-coordinate point
   void faceToward(const Vec3d& p, double amt = 1.);
 
-  /// Turn to face a given world-coordinate point, while maintaining an up vector
-  void faceToward(const Vec3d& point, const Vec3d& up, double amt=1.);
-
-
+  /// Turn to face a given world-coordinate point, while maintaining an up
+  /// vector
+  void faceToward(const Vec3d& point, const Vec3d& up, double amt = 1.);
 
   /// Get "position" vector
-  Vec3d& pos(){ return mVec; }
+  Vec3d& pos() { return mVec; }
   const Vec3d& pos() const { return mVec; }
 
   /// Get vector component
-  Vec3d& vec(){ return mVec; }
+  Vec3d& vec() { return mVec; }
   const Vec3d& vec() const { return mVec; }
 
   /// Get quaternion component (represents orientation)
-  Quatd& quat(){ return mQuat; }
+  Quatd& quat() { return mQuat; }
   const Quatd& quat() const { return mQuat; }
 
   double x() const { return mVec[0]; }
@@ -119,8 +114,8 @@ public:
   Mat4d directionMatrix() const;
 
   /// Get the azimuth, elevation & distance from this to another point
-  void toAED(const Vec3d& to, double& azimuth, double& elevation, double& distance) const;
-
+  void toAED(const Vec3d& to, double& azimuth, double& elevation,
+             double& distance) const;
 
   /// Get world space X unit vector
   Vec3d ux() const { return quat().toVectorX(); }
@@ -133,7 +128,7 @@ public:
 
   /// Get world space unit vectors
   template <class T>
-  void unitVectors(Vec<3,T>& ux, Vec<3,T>& uy, Vec<3,T>& uz) const {
+  void unitVectors(Vec<3, T>& ux, Vec<3, T>& uy, Vec<3, T>& uz) const {
     quat().toVectorX<T>(ux);
     quat().toVectorY<T>(uy);
     quat().toVectorZ<T>(uz);
@@ -141,7 +136,7 @@ public:
 
   /// Get local right, up, and forward unit vectors
   template <class T>
-  void directionVectors(Vec<3,T>& ur, Vec<3,T>& uu, Vec<3,T>& uf) const {
+  void directionVectors(Vec<3, T>& ur, Vec<3, T>& uu, Vec<3, T>& uf) const {
     unitVectors(ur, uu, uf);
     uf = -uf;
   }
@@ -155,74 +150,82 @@ public:
   /// Get forward unit vector (negative of Z)
   Vec3d uf() const { return -uz(); }
 
-
   /// Get a linear-interpolated Pose between this and another
   // (useful ingredient for smooth animations, estimations, etc.)
   Pose lerp(const Pose& target, double amt) const;
 
-
   // Setters
 
   /// Copy all attributes from another Pose
-  Pose& set(Pose& src){
+  Pose& set(Pose& src) {
     mVec = src.pos();
     mQuat = src.quat();
-    mParentTransform = &(src.parentTransform());
+    // mParentTransform = &(src.parentTransform());
     return *this;
   }
 
   /// Set state from another Pose
-  Pose& set(const Pose& src){
-    mVec=src.vec();
-    mQuat=src.quat();
-    mParentTransform = &(src.parentTransform());
+  Pose& set(const Pose& src) {
+    mVec = src.vec();
+    mQuat = src.quat();
+    // mParentTransform = &(src.parentTransform());
     return *this;
   }
 
   /// Set to identity transform
-  Pose& setIdentity(){
-    quat().setIdentity(); vec().set(0);
-    mParentTransform = nullptr;
+  Pose& setIdentity() {
+    quat().setIdentity();
+    vec().set(0);
+    // mParentTransform = nullptr;
     return *this;
   }
 
   /// Set position
   template <class T>
-  Pose& pos(const Vec<3,T>& v){ return vec(v); }
+  Pose& pos(const Vec<3, T>& v) {
+    return vec(v);
+  }
 
   /// Set position from individual components
-  Pose& pos(double x, double y, double z) { return vec(Vec3d(x,y,z)); }
+  Pose& pos(double x, double y, double z) { return vec(Vec3d(x, y, z)); }
 
   /// Set vector component
   template <class T>
-  Pose& vec(const Vec<3,T>& v){ mVec.set(v); return *this; }
+  Pose& vec(const Vec<3, T>& v) {
+    mVec.set(v);
+    return *this;
+  }
 
   /// Set quaternion component
   template <class T>
-  Pose& quat(const Quat<T>& v){ quat() = v; return *this; }
-
+  Pose& quat(const Quat<T>& v) {
+    quat() = v;
+    return *this;
+  }
 
   // Overloaded cast operators
   operator Vec3d() { return pos(); }
   operator Quatd() { return quat(); }
 
-  Pose const& parentTransform() const { return *mParentTransform; }
-  Pose& parentTransform(Pose const& v){ mParentTransform = &v; return *this; }
-  // Pose& parentTransform(Pose* v){ mParentTransform = v; return *this; }
-  Pose worldTransform() const {
-    return mParentTransform ? (*mParentTransform) * (*this) : (*this);
-  }
+  // Pose const& parentTransform() const { return *mParentTransform; }
+  // Pose& parentTransform(Pose const& v) {
+  //   mParentTransform = &v;
+  //   return *this;
+  // }
+  // Pose worldTransform() const {
+  //   return mParentTransform ? mParentTransform->worldTransform() * (*this)
+  //                           : (*this);
+  // }
 
   /// Print to standard output
   void print() const;
 
-protected:
-  Vec3d mVec;    // position in 3-space
-  Quatd mQuat;  // orientation of reference frame as a quaternion (relative to global axes)
-  const Pose* mParentTransform;     // parent transform, nullptr if none
+ protected:
+  Vec3d mVec;   // position in 3-space
+  Quatd mQuat;  // orientation of reference frame as a quaternion (relative to
+                // global axes)
+  // const Pose* mParentTransform;  // parent transform, nullptr if none
 };
-
-
 
 /// A Smoothed Pose
 
@@ -231,13 +234,14 @@ protected:
 ///
 /// @ingroup allocore
 class SmoothPose : public Pose {
-public:
-  SmoothPose(const Pose& init=Pose(), double psmooth=0.9, double qsmooth=0.9);
+ public:
+  SmoothPose(const Pose& init = Pose(), double psmooth = 0.9,
+             double qsmooth = 0.9);
 
   // step toward the target:
   SmoothPose& operator()() {
-    pos().lerp(mTarget.pos(), 1.-mPF);
-    quat().slerpTo(mTarget.quat(), 1.-mQF);
+    pos().lerp(mTarget.pos(), 1. - mPF);
+    quat().slerpTo(mTarget.quat(), 1. - mQF);
     return *this;
   }
 
@@ -267,11 +271,11 @@ public:
     quat().set(q);
   }
 
-protected:
+ protected:
   Pose mTarget;
   double mPF, mQF;
 };
 
-} // al::
+}  // namespace al
 
 #endif

@@ -3,7 +3,7 @@
 namespace al{
 
 Pose::Pose(const Vec3d& v, const Quatd& q)
-:  mVec(v), mQuat(q), mParentTransform(nullptr)
+:  mVec(v), mQuat(q)//, mParentTransform(nullptr)
 {}
 
 Pose::Pose(const Pose& p) {
