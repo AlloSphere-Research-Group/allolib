@@ -237,15 +237,17 @@ bool Window::implCreate(bool is_verbose) {
       mImpl->mGLFWwindow =
           glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), NULL, NULL);
       if (!mImpl->created()) {
-        if (is_verbose) std::cout << "failed to create window" << std::endl;
+        if (is_verbose)
+          std::cout << "failed to create stereo window, and also failed to "
+                       "create mono window"
+                    << std::endl;
         return false;
       } else {
         // unset stereo bit
         mDisplayMode = static_cast<DisplayMode>(displayMode() & ~STEREO_BUF);
-        if (is_verbose)
-          std::cout << "tried to create stereo window but failed. creating "
-                       "mono window"
-                    << std::endl;
+        std::cout << "tried to create stereo window but failed. creating "
+                     "mono window"
+                  << std::endl;
       }
     } else {
       if (is_verbose) std::cout << "failed to create window" << std::endl;

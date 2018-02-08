@@ -81,6 +81,7 @@ public:
   RBO& rbo() { return mRbo; }
   void begin() { mFbo.bind(); }
   void end() { mFbo.unbind(); }
+  void bind() { mFbo.bind(); }
 };
 
 } // al::

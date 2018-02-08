@@ -123,7 +123,7 @@ inline float uniformS(){ return global()(-1.0f, 1.0f); }
 
 /// Returns signed uniform random in (-lim, lim)
 template <class T>
-inline T uniformS(const T& lim){
+inline float uniformS(const T& lim){
     return global()(float(-lim), float(lim));
 }
 
