@@ -232,7 +232,7 @@ public:
   struct ProjectionInfo {
     std::shared_ptr<Texture> texture[2];
     std::shared_ptr<Texture> warp_texture;
-    Mat4f pc_matrix, r_matrix;
+    Mat4f pc_matrix, p_matrix, r_matrix;
     float tanFovDiv2;
   };
 
@@ -252,6 +252,7 @@ public:
   bool calibration_loaded = false;
   bool did_begin = false;
   int current_eye = 0;
+  int current_projection = 0;
 
   // instead of push/pop
   Lens prev_lens_;
@@ -355,6 +356,7 @@ public:
 
       Mat4f::multiply(info.pc_matrix, proj, rmat);
       info.r_matrix = rmat;
+      info.p_matrix = proj;
       info.tanFovDiv2 = tan(fov / 2.0);
 
       info.warp_texture.reset(new Texture());
@@ -403,7 +405,7 @@ public:
     calibration_loaded = true;
 
     lens_.focalLength(radius);
-    res_ = 512;
+    res_ = 256;
     viewport_.set(0, 0, res_, res_);
 
     projection_infos_.resize(6);
@@ -425,6 +427,7 @@ public:
       );
       Mat4f::multiply(info.pc_matrix, proj, rmat);
       info.r_matrix = rmat;
+      info.p_matrix = proj;
       info.tanFovDiv2 = tan(fov / 2.0);
       info.warp_texture.reset();
     }
@@ -477,6 +480,15 @@ public:
   void set_projection(int index) {
     g->projMatrix(projection_infos_[index].pc_matrix);
     fbo_.attachTexture2D(*projection_infos_[index].texture[current_eye]);
+    current_projection = index;
+  }
+
+  Mat4f get_r_mat_for_current_projection() {
+    return projection_infos_[current_projection].r_matrix;
+  }
+
+  Mat4f get_p_mat_for_current_projection() {
+    return projection_infos_[current_projection].p_matrix;
   }
 
   void end() {
