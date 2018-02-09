@@ -4,6 +4,7 @@ option(USE_GLV "" OFF)
 set(core_headers
   include/al/core/app/al_App.hpp
   include/al/core/app/al_AudioApp.hpp
+  include/al/core/app/al_DistributedApp.hpp
   include/al/core/app/al_FPS.hpp
   include/al/core/app/al_WindowApp.hpp
   include/al/core/graphics/al_BufferObject.hpp

@@ -3,7 +3,7 @@ set (test_src
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/catch)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include ${dirs_to_include})
 
 #These should be provided by the CMakeFile for the library
 # include_directories(${CMAKE_SOURCE_DIR}/external/Gamma)
