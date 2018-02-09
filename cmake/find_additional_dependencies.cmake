@@ -4,7 +4,8 @@
 # 	ADDITIONAL_HEADERS
 # 	ADDITIONAL_SOURCES
 
-# option(USE_APR "" OFF)
+#option(USE_APR "" OFF)
+option(USE_MPI "" ON)
 
 # al_path needs to be set prior to calling this script
 
@@ -50,6 +51,7 @@ else ()
 
 endif (AL_WINDOWS)
 
+find_package(MPI QUIET)
 
 # NOW ADD OPTIONAL FILES -------------------------------------------------------
 
@@ -88,4 +90,15 @@ if (FREETYPE_INCLUDE_DIRS)
   list(APPEND ADDITIONAL_LIBRARIES ${FREETYPE_LIBRARY})
   list(APPEND ADDITIONAL_HEADERS ${al_path}/include/al/util/al_Font.hpp)
   list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_Font.cpp)
+endif()
+
+if (USE_MPI AND MPI_CXX_FOUND)
+  message("Using MPI: compiler ${MPI_C_COMPILER} ${MPI_CXX_INCLUDE_PATH}")
+  set(MPI_DEFINITIONS "-DAL_BUILD_MPI")
+else()
+  set(MPI_CXX_COMPILE_FLAGS "")
+  set(MPI_CXX_INCLUDE_PATH "")
+  set(MPI_CXX_LINK_FLAGS "")
+  set(MPI_CXX_LIBRARIES "")
+  set(MPI_DEFINITIONS "")
 endif()
