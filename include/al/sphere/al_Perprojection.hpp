@@ -315,7 +315,6 @@ public:
       info.texture[1].reset(new Texture());
       info.texture[0]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
       info.texture[1]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
-#if 0
       // Determine projection dimensions.
       // First determine the central direction.
       Vec3f direction(0, 0, 0);
@@ -325,6 +324,7 @@ public:
         direction.z += vp.warp_and_blend_data[i].z;
       }
       direction = direction.normalize();
+#if 0
       // Determine the radius.
       float dot_max = 1;
       for(int i = 0; i < vp.width * vp.height; i++) {
