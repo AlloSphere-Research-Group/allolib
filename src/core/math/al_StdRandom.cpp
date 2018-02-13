@@ -70,9 +70,9 @@ float rand_exponential::operator()(float const r) {
 }
 
 rand_normal::rand_normal() :
-    engine(al_random_seed()), distribution(1) {}
+    engine(al_random_seed()), distribution(0, 1) {}
 rand_normal::rand_normal(unsigned int const seed) :
-    engine(seed), distribution(1) {}
+    engine(seed), distribution(0, 1) {}
 void rand_normal::seed(unsigned int const seed) { engine.seed(seed); }
 float rand_normal::operator()() {
     return distribution(engine);
