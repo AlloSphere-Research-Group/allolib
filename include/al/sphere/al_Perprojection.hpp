@@ -237,7 +237,7 @@ public:
   };
 
   WarpBlendData warpblend_;
-  int res_ = 2048;
+  int res_ = 4096;
   Pose pose_;
   Viewpoint view_ {pose_};
   Viewport viewport_;
@@ -288,7 +288,9 @@ public:
       info.texture[0].reset(new Texture());
       info.texture[1].reset(new Texture());
       info.texture[0]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[0]->filter(Texture::LINEAR);
       info.texture[1]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[1]->filter(Texture::LINEAR);
     }
     rbo_.create(res_, res_);
     fbo_.bind();
