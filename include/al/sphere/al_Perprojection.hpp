@@ -237,7 +237,7 @@ public:
   };
 
   WarpBlendData warpblend_;
-  int res_ = 1024;
+  int res_ = 2048;
   Pose pose_;
   Viewpoint view_ {pose_};
   Viewport viewport_;
@@ -315,7 +315,7 @@ public:
       info.texture[1].reset(new Texture());
       info.texture[0]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
       info.texture[1]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
-
+#if 0
       // Determine projection dimensions.
       // First determine the central direction.
       Vec3f direction(0, 0, 0);
@@ -341,7 +341,9 @@ public:
         std::cout << "unable to use per-projection mode, viewport angle too large." << std::endl;
       }
       float fov = std::acos(dot_max) * 2.0f;
-      // std::cout << fov << std::endl;
+#endif
+      float fov = 2.0f / 3 * M_PI;
+      // std::cout << "fov: " <<fov << std::endl;
       Vec3f rotation_axis = Vec3f(0, 0, -1).cross(direction);
       rotation_axis = rotation_axis.normalize();
       float rotation_angle = std::acos(Vec3f(0, 0, -1).dot(direction));
