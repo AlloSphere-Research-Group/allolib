@@ -1,4 +1,5 @@
 #include "al/core/graphics/al_RenderManager.hpp"
+#include "al/core/graphics/al_GLFW.hpp"
 
 using namespace al;
 
@@ -134,46 +135,26 @@ void RenderManager::camera(Viewpoint const& v) {
 
 void RenderManager::camera(Viewpoint::SpecialType v) {
   // let's draw 2D things at z = [0:1] (larger z, closer)
-  switch (v) {
+  switch (v)
+  {
     case Viewpoint::IDENTITY: {
       mViewStack.setIdentity();
       mProjStack.setIdentity();
-      /*
-      mViewStack.set(Matrix4f::lookAt(Vec3f(0, 0, 2), // eye
-                                      Vec3f(0, 0, 0), // at
-                                      Vec3f(0, 1, 0)  // up
-                                      ));
-      mProjStack.set(Matrix4f::ortho(-1, 1, // left, right
-                                     -1, 1, // bottom, top
-                                     1, 2   // near, far
-                                     ));
-      */                                     
     } break;
 
     case Viewpoint::ORTHO_FOR_2D: {
-      // 1. place eye so that bot-left (0, 0), top right (width, height)
-      // 2. set lens to be ortho, with given width and height
-      auto v = viewport();
-      // float half_w = (v.w - v.l) * 0.5f;
-      // float half_h = (v.h - v.b) * 0.5f;
+      int fbw, fbh;
+      int winw, winh;
+      glfwGetFramebufferSize(glfw::current_window(), &fbw, &fbh);
+      glfwGetWindowSize(glfw::current_window(), &winw, &winh);
+      float rpd = float(winw) / fbw; // reciprocal of pixel density
+      auto v = viewport(); // viewport in framebuffer unit
       mViewStack.setIdentity();
-      // mViewStack.set(Matrix4f::translation(x, y, z));
-      /*
-      mViewStack.set(Matrix4f::lookAt(Vec3f(half_w, half_h, 1), // eye
-                                      Vec3f(half_w, half_h, 0), // at
-                                      Vec3f(0, 1, 0)            // up
-                                      ));
-      */
-      mProjStack.set(Matrix4f::ortho(v.l, v.w, // left, right
-                                     v.b, v.h, // bottom, top
-                                     0, 1             // near, far
-                                     ));
-      /*
-      mProjStack.set(Matrix4f::ortho(-half_w, half_w, // left, right
-                                     -half_h, half_h, // bottom, top
-                                     0, 1             // near, far
-                                     ));
-      */
+      mProjStack.set(Matrix4f::ortho(
+        v.l * rpd, v.w * rpd, // left, right
+        v.b * rpd, v.h * rpd, // bottom, top
+        0, 1                  // near, far
+      ));
     } break;
 
     case Viewpoint::UNIT_ORTHO: {
@@ -185,17 +166,10 @@ void RenderManager::camera(Viewpoint::SpecialType v) {
         spany = float(v.h) / v.w;
       }
       mViewStack.setIdentity();
-      /*
-      mViewStack.set(Matrix4f::lookAt(Vec3f(0, 0, 2), // eye
-                                      Vec3f(0, 0, 0), // at
-                                      Vec3f(0, 1, 0)  // up
-                                      ));
-      */
-      mProjStack.set(Matrix4f::ortho(-spanx, spanx, // left, right
-                                     -spany, spany, // bottom, top
-                                     0, 1));        // near, far
-                                     // 1, 2));        // near, far
-                                     
+      mProjStack.set(Matrix4f::ortho(
+        -spanx, spanx, // left, right
+        -spany, spany, // bottom, top
+        0, 1));        // near, far
     } break;
 
     case Viewpoint::UNIT_ORTHO_INCLUSIVE: {
@@ -207,19 +181,13 @@ void RenderManager::camera(Viewpoint::SpecialType v) {
         spany = float(v.h) / v.w;
       }
       mViewStack.setIdentity();
-      /*
-      mViewStack.set(Matrix4f::lookAt(Vec3f(0, 0, 2), // eye
-                                      Vec3f(0, 0, 0), // at
-                                      Vec3f(0, 1, 0)  // up
-                                      ));
-      */
-      mProjStack.set(Matrix4f::ortho(-spanx, spanx,  // left, right
-                                     -spany, spany,  // bottom, top
-                                     0, 1));         // near, far
-                                     // 1, 2));         // near, far
-    }
-    default:
-      break;
+      mProjStack.set(Matrix4f::ortho(
+        -spanx, spanx,  // left, right
+        -spany, spany,  // bottom, top
+        0, 1));         // near, far
+    } break;
+
+    default: break;
   }
   mMatChanged = true;
 }
