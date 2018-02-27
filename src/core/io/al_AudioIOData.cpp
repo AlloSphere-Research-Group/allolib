@@ -50,12 +50,12 @@ AudioIOData::~AudioIOData() {
 void AudioIOData::zeroBus() { zero(mBufB, framesPerBuffer() * mNumB); }
 void AudioIOData::zeroOut() { zero(mBufO, channelsOut() * framesPerBuffer()); }
 
-int AudioIOData::channelsIn() const { return mNumI; }
-int AudioIOData::channelsOut() const { return mNumO; }
-int AudioIOData::channelsBus() const { return mNumB; }
+unsigned int AudioIOData::channelsIn() const { return mNumI; }
+unsigned int AudioIOData::channelsOut() const { return mNumO; }
+unsigned int AudioIOData::channelsBus() const { return mNumB; }
 
 double AudioIOData::framesPerSecond() const { return mFramesPerSecond; }
-int AudioIOData::framesPerBuffer() const { return mFramesPerBuffer; }
+unsigned int AudioIOData::framesPerBuffer() const { return mFramesPerBuffer; }
 double AudioIOData::secondsPerBuffer() const {
   return (double)framesPerBuffer() / framesPerSecond();
 }

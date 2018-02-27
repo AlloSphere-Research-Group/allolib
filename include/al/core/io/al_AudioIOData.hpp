@@ -168,46 +168,46 @@ class AudioIOData {
   bool operator()() const { return (++mFrame) < framesPerBuffer(); }
 
   /// Get current frame number
-  int frame() const { return mFrame; }
+  unsigned int frame() const { return mFrame; }
 
   /// Get bus sample at current frame iteration on specified channel
-  float& bus(int chan) const { return bus(chan, frame()); }
+  float& bus(unsigned int chan) const { return bus(chan, frame()); }
 
   /// Get bus sample at specified channel and frame
-  float& bus(int chan, int frame) const;
+  float& bus(unsigned int chan, unsigned int frame) const;
 
   /// Get non-interleaved bus buffer on specified channel
-  float* busBuffer(int chan = 0) const { return &bus(chan, 0); }
+  float* busBuffer(unsigned int chan = 0) const { return &bus(chan, 0); }
 
   /// Get input sample at current frame iteration on specified channel
-  const float& in(int chan) const { return in(chan, frame()); }
+  const float& in(unsigned int chan) const { return in(chan, frame()); }
 
   /// Get input sample at specified channel and frame
-  const float& in(int chan, int frame) const;
+  const float& in(unsigned int chan, unsigned int frame) const;
 
   /// Get non-interleaved input buffer on specified channel
-  const float* inBuffer(int chan = 0) const { return &in(chan, 0); }
+  const float* inBuffer(unsigned int chan = 0) const { return &in(chan, 0); }
 
   /// Get output sample at current frame iteration on specified channel
-  float& out(int chan) const { return out(chan, frame()); }
+  float& out(unsigned int chan) const { return out(chan, frame()); }
 
   /// Get output sample at specified channel and frame
-  float& out(int chan, int frame) const;
+  float& out(unsigned int chan, unsigned int frame) const;
 
   /// Get non-interleaved output buffer on specified channel
-  float* outBuffer(int chan = 0) const { return &out(chan, 0); }
+  float* outBuffer(unsigned int chan = 0) const { return &out(chan, 0); }
 
   /// Add value to current output sample on specified channel
-  void sum(float v, int chan) const { out(chan) += v; }
+  void sum(float v, unsigned int chan) const { out(chan) += v; }
 
   /// Add value to current output sample on specified channels
-  void sum(float v, int ch1, int ch2) const {
+  void sum(float v, unsigned int ch1, unsigned int ch2) const {
     sum(v, ch1);
     sum(v, ch2);
   }
 
   /// Get sample from temporary buffer at specified frame
-  float& temp(int frame) const;
+  float& temp(unsigned int frame) const;
 
   /// Get non-interleaved temporary buffer on specified channel
   float* tempBuffer() const { return &temp(0); }
@@ -219,16 +219,16 @@ class AudioIOData {
     return *(static_cast<UserDataType*>(mUser));
   }
 
-  int channelsIn() const;          ///< Get effective number of input channels
-  int channelsOut() const;         ///< Get effective number of output channels
-  int channelsBus() const;         ///< Get number of allocated bus channels
-  int framesPerBuffer() const;     ///< Get frames/buffer of audio I/O stream
+  unsigned int channelsIn() const;          ///< Get effective number of input channels
+  unsigned int channelsOut() const;         ///< Get effective number of output channels
+  unsigned int channelsBus() const;         ///< Get number of allocated bus channels
+  unsigned int framesPerBuffer() const;     ///< Get frames/buffer of audio I/O stream
   double framesPerSecond() const;  ///< Get frames/second of audio I/O streams
   double fps() const { return framesPerSecond(); }
   double secondsPerBuffer() const;  ///< Get seconds/buffer of audio I/O stream
 
   void user(void* v) { mUser = v; }      ///< Set user data
-  void frame(int v) { mFrame = v - 1; }  ///< Set frame count for next iteration
+  void frame(unsigned int v) { assert(v > 0); mFrame = v - 1; }  ///< Set frame count for next iteration
   void zeroBus();                        ///< Zeros all the bus buffers
   void zeroOut();  ///< Zeros all the internal output buffers
 
@@ -240,12 +240,12 @@ class AudioIOData {
 
  protected:
   void* mUser;  // User specified data
-  mutable int mFrame;
-  int mFramesPerBuffer;
+  mutable unsigned int mFrame;
+  unsigned int mFramesPerBuffer;
   double mFramesPerSecond;
   float *mBufI, *mBufO, *mBufB;  // input, output, and aux buffers
   float* mBufT;                  // temporary one channel buffer
-  int mNumI, mNumO, mNumB;       // input, output, and aux channels
+  unsigned int mNumI, mNumO, mNumB;       // input, output, and aux channels
  private:
   void operator=(const AudioIOData&);  // Disallow copy
  public:
@@ -262,24 +262,24 @@ class AudioCallback {
 };
 
 //==============================================================================
-inline float& AudioIOData::bus(int c, int f) const {
+inline float& AudioIOData::bus(unsigned int c, unsigned int f) const {
   assert(c < mNumB);
   assert(f < framesPerBuffer());
   return mBufB[c * framesPerBuffer() + f];
 }
 
-inline const float& AudioIOData::in(int c, int f) const {
+inline const float& AudioIOData::in(unsigned int c,unsigned  int f) const {
   assert(c < mNumI);
   assert(f < framesPerBuffer());
   return mBufI[c * framesPerBuffer() + f];
 }
 
-inline float& AudioIOData::out(int c, int f) const {
+inline float& AudioIOData::out(unsigned int c,unsigned  int f) const {
   assert(c < mNumO);
   assert(f < framesPerBuffer());
   return mBufO[c * framesPerBuffer() + f];
 }
-inline float& AudioIOData::temp(int f) const { return mBufT[f]; }
+inline float& AudioIOData::temp(unsigned int f) const { return mBufT[f]; }
 
 }  // al::
 

@@ -67,10 +67,10 @@ struct SpeakerTriple{
 	int speakerIdx[3];
 
 	// Speaker speakers[3];
-	int speakerChan[3];
-	int s1Chan;
-	int s2Chan;
-	int s3Chan;
+    unsigned int speakerChan[3];
+    unsigned int s1Chan;
+    unsigned int s2Chan;
+    unsigned int s3Chan;
 
 	bool loadVectors(const std::vector<Speaker>& spkrs);
 };

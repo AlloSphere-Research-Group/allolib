@@ -541,8 +541,8 @@ void Isosurface::compressTriangles(){
 	// Convert edge indices into vertex buffer indices
 
 	if(inBox()){
-		for(int i=0; i<indices().size(); ++i){
-			int ei = indices()[i];
+        for(size_t i=0; i<indices().size(); ++i){
+            size_t ei = indices()[i];
 			int vi = mEdgeToVertexArray[ei];
 			indices()[i] = vi;
 		}
@@ -552,8 +552,8 @@ void Isosurface::compressTriangles(){
 	// Lookup vertex buffer indices in map
 	// This is slower, but uses less memory
 	else{
-		for(int i=0; i<indices().size(); ++i){
-			int ei = indices()[i];
+        for(size_t i=0; i<indices().size(); ++i){
+            size_t ei = indices()[i];
 			int vi = mEdgeToVertex[ei];
 			indices()[i] = vi;
 		}

@@ -241,7 +241,7 @@ void Texture::submit(const void *pixels, unsigned int format, unsigned int type)
   unbind_temp();
 }
 
-bool Texture::resize(int w, int h, int internal, unsigned int format, unsigned int type) {
+bool Texture::resize(unsigned int w, unsigned int h, int internalFormat, unsigned int format, unsigned int type) {
   if (target() != GL_TEXTURE_2D) {
     AL_WARN("invalid geometry for texture 2D target");
     return false;
@@ -250,7 +250,7 @@ bool Texture::resize(int w, int h, int internal, unsigned int format, unsigned i
     // AL_WARN("same egometry");
     return false;
   }
-  create2D(w, h, internal, format, type);
+  create2D(w, h, internalFormat, format, type);
   return true;
 }
 

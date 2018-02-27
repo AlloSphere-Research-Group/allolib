@@ -225,7 +225,7 @@ class AudioIO : public AudioIOData {
   void deviceIn(const AudioDevice &v);   ///< Set input device
   void deviceOut(const AudioDevice &v);  ///< Set output device
   void framesPerSecond(double v);        ///< Set number of frames per second
-  void framesPerBuffer(int n);  ///< Set number of frames per processing buffer
+  void framesPerBuffer(unsigned int n);  ///< Set number of frames per processing buffer
   void zeroNANs(bool v) {
     mZeroNANs = v;
   }  ///< Set whether to zero NANs in output buffer going to DAC

@@ -364,7 +364,7 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker>& spkrs){
 	for(int i = 0; i < numSpeakersSigned; ++i){
 		Speaker s = spkrs[i];
 		Vec3d vec =s.vec().normalized();
-		int devChan = s.deviceChannel;
+        unsigned int devChan = s.deviceChannel;
 
 		std::list<SpeakerTriple>::iterator itg = triplets.begin();
 

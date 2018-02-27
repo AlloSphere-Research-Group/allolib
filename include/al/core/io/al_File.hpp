@@ -219,7 +219,7 @@ public:
 	const std::string& path() const { return mPath; }
 
 	/// Returns size, in bytes, of file contents
-	int size() const { return mSizeBytes; }
+    size_t size() const { return mSizeBytes; }
 
 	/// Return modification time of file (or 0 on failure) as number of seconds since 00:00:00 January 1, 1970 UTC
 	// al_sec modified() const;
@@ -339,7 +339,7 @@ protected:
 	std::string mPath;
 	std::string mMode;
 	char * mContent;
-	int mSizeBytes;
+    size_t mSizeBytes;
 	FILE * mFP;
 
 	void dtor();

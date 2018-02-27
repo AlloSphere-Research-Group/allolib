@@ -666,7 +666,7 @@ static int rtaudioCallback(void *output, void *input, unsigned int frameCount,
   if (input != NULL) {
 	  const float *inBuffers = (const float *)input;
 	  float *hwInBuffer = const_cast<float *>(io.inBuffer(0));
-	  for (int frame = 0; frame < io.framesPerBuffer(); frame++) {
+      for (unsigned int frame = 0; frame < io.framesPerBuffer(); frame++) {
 		  for (int i = 0; i < io.channelsInDevice(); i++) {
 			  hwInBuffer[i * frameCount + frame] = *inBuffers++;
 		  }
@@ -718,7 +718,7 @@ static int rtaudioCallback(void *output, void *input, unsigned int frameCount,
   float *outBuffers = (float *)output;
 
   float *finalOutBuffer = const_cast<float *>(io.outBuffer(0));
-  for (int frame = 0; frame < io.framesPerBuffer(); frame++) {
+  for (unsigned int frame = 0; frame < io.framesPerBuffer(); frame++) {
     for (int i = 0; i < io.channelsOutDevice(); i++) {
       *outBuffers++ = finalOutBuffer[i * frameCount + frame];
     }
@@ -1104,7 +1104,7 @@ void AudioIO::reopen() {
 
 void AudioIO::resizeBuffer(bool forOutput) {
   float *&buffer = forOutput ? mBufO : mBufI;
-  int &chans = forOutput ? mNumO : mNumI;
+  unsigned int &chans = forOutput ? mNumO : mNumI;
 
   if (chans > 0 && mFramesPerBuffer > 0) {
     int n = resize(buffer, chans * mFramesPerBuffer);
@@ -1122,7 +1122,7 @@ void AudioIO::framesPerSecond(double v) {  // printf("AudioIO::fps(%f)\n", v);
   }
 }
 
-void AudioIO::framesPerBuffer(int n) {
+void AudioIO::framesPerBuffer(unsigned int n) {
   if (mBackend->isOpen()) {
     warn("the number of frames/buffer cannnot be set with the stream open",
          "AudioIO");

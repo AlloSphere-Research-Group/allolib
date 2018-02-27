@@ -263,8 +263,8 @@ class Texture : public GPUObject {
 
   /// Resize 2D texture
   // void resize (unsigned w, unsigned h) { }
-  bool resize(int w, int h, int internal, unsigned int format, unsigned int type);
-  bool resize(int w, int h) { return resize(w, h, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE); }
+  bool resize(unsigned int w, unsigned int h, int internal, unsigned int format, unsigned int type);
+  bool resize(unsigned int w, unsigned int h) { return resize(w, h, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE); }
 
   /// Resize 3D texture
   void resize(unsigned w, unsigned h, unsigned d) {}
