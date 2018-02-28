@@ -781,29 +781,50 @@ void AudioBackend::channels(int num, bool forOutput) {
 
 std::string AudioBackend::deviceName(int num) {
   RtAudio rt;
-  RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
-  char name[128];
-  strncpy(name, info.name.c_str(), 127);
-  name[127] = '\0';
-  return info.name;
+  std::string name;
+  try {
+    RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
+    name = info.name;
+  } catch (RtAudioError &e) {
+      std::cerr << "deviceName(" << num << ") " <<  e.getMessage() << std::endl;
+  }
+  return name;
 }
 
 int AudioBackend::deviceMaxInputChannels(int num) {
   RtAudio rt;
-  RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
-  return info.inputChannels;
+  unsigned int numChannels = 0;
+  try {
+    RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
+    numChannels = info.inputChannels;
+  } catch (RtAudioError &e) {
+      std::cerr << "deviceMaxInputChannels(" << num << ") " <<  e.getMessage() << std::endl;
+  }
+  return numChannels;
 }
 
 int AudioBackend::deviceMaxOutputChannels(int num) {
   RtAudio rt;
-  RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
-  return info.outputChannels;
+  unsigned int numChannels = 0;
+  try {
+    RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
+    numChannels = info.outputChannels;
+  } catch (RtAudioError &e) {
+      std::cerr << "deviceMaxOutputChannels(" << num << ") " <<  e.getMessage() << std::endl;
+  }
+  return numChannels;
 }
 
 double AudioBackend::devicePreferredSamplingRate(int num) {
   RtAudio rt;
-  RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
-  return info.preferredSampleRate;
+  double sr = -0.0;
+  try {
+    RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
+    sr = info.preferredSampleRate;
+  } catch (RtAudioError &e) {
+      std::cerr << "devicePreferredSamplingRate(" << num << ") " <<  e.getMessage() << std::endl;
+  }
+  return sr;
 }
 
 #endif

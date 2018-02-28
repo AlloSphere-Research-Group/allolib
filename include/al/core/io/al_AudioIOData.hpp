@@ -228,7 +228,7 @@ class AudioIOData {
   double secondsPerBuffer() const;  ///< Get seconds/buffer of audio I/O stream
 
   void user(void* v) { mUser = v; }      ///< Set user data
-  void frame(unsigned int v) { assert(v > 0); mFrame = v - 1; }  ///< Set frame count for next iteration
+  void frame(unsigned int v) { assert(v >= 0); mFrame = v - 1; }  ///< Set frame count for next iteration
   void zeroBus();                        ///< Zeros all the bus buffers
   void zeroOut();  ///< Zeros all the internal output buffers
 
