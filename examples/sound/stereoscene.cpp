@@ -1,6 +1,6 @@
 // AudioScene example using the Stereo panner class
 // By Andrés Cabrera mantaraya36@gmail.com
-// March 7 2017
+// March 7 2017 updated March 2018
 
 #include <iostream>
 
@@ -14,85 +14,101 @@
 
 using namespace al;
 
-static SoundSource soundSource;
-static AudioScene scene(BLOCK_SIZE);
-static Listener *listener;
-static StereoPanner *panner;
-static SpeakerLayout speakerLayout;
+// Create an agent (graphic marker + sound source)
+class MyAgent : public SoundSource, Nav {
+public:
+    MyAgent () {
+        // The agent is displayed as a tetrahedron
+        addTetrahedron(m, 0.2);
+        m.generateNormals();
+    }
+
+    // the onProcess function will be used in the audio callback
+    // to update the agent's sound buffer
+    void onProcess(AudioIOData& io) {
+        // The agent's sound will be a repeating burst of noise
+        while(io()) {
+            mEnvelope *= 0.9995;
+            float noise = rnd::gaussian() * mEnvelope;
+            if (mEnvelope < 0.0001) { mEnvelope = 0.3; }
+            writeSample(noise); // writeSample() sets the agent's sound
+        }
+    }
+
+    // the onUpdateNav() function will be called whenever the listener
+    // navigation changes. This will adjust the spatial position of
+    // the sound source for AudioScene
+    void onUpdateNav() {
+        SoundSource::pose(*this);
+    }
+
+    // The onDraw() function will be called in the graphics render callback
+    // We only need to specify what the agent should draw. The graphics
+    // scene takes care of positioning and rotation
+    void onDraw(Graphics& g) {
+        g.pushMatrix();
+        g.draw(m);
+        g.popMatrix();
+    }
+
+private:
+    float mEnvelope {0.3};
+    Mesh m;
+};
+
 
 class MyApp : public App {
-	double mX, mY;
-	Light mLight;
-	// Sound variables
-	float mEnvelope;
-	Mesh m;
+    AudioScene scene {BLOCK_SIZE};
+    // To use an AudioScene, we need a Listener, a Panner and a SpeakerLayout
+    Listener *listener;
+    StereoPanner *panner;
+    SpeakerLayout speakerLayout;
+
+    double mX, mY;
+    Light mLight;
+    MyAgent agent;
 
 public:
+    void onCreate() override {
+        // Create a stereo speaker layouy
+        speakerLayout = StereoSpeakerLayout();
+        // Use a simple stereo panning algorithm
+        panner = new StereoPanner(speakerLayout);
+        // Create a listener for the AudioScene that uses stereo panning
+        listener = scene.createListener(panner);
+        // Add our agent to the AudioScene
+        scene.addSource(agent);
+    }
 
-	void onCreate() override {
-		// Make a shape that will mark where the sound comes from.
-		addTetrahedron(m, 0.2);
-		m.generateNormals();
+    void onSound(AudioIOData &io) override {
+        // Update the lister position (once per audio block)
+        listener->pose(nav());
+        // Update the agent's position to let it know how audio should be rendered
+        agent.onUpdateNav();
+        // Update agent audio buffer
+        agent.onProcess(io);
+        // Now that agent information has been updated we render the audio scene
+        scene.render(io);
+    }
 
-		// Audio
-		mEnvelope = 0.3;
-		speakerLayout = StereoSpeakerLayout();
-		panner = new StereoPanner(speakerLayout);
-		listener = scene.createListener(panner);
-		scene.addSource(soundSource);
-	}
+    void onDraw(Graphics &g) override {
+        g.clear(0);
+        g.lighting(true);
+        g.light(mLight);
+        g.color(1);
 
-	void onSound(AudioIOData &io) override {
-
-		while(io()) {
-			mEnvelope *= 0.9995;
-			float noise = rnd::gaussian() * mEnvelope;
-			if (mEnvelope < 0.0001) { mEnvelope = 0.3; }
-			soundSource.writeSample(noise);
-//			io.out(0) = noise;
-		}
-		scene.render(io);
-	}
-
-	void onDraw(Graphics &g) override {
-		// Update the listener position from the visual scene's nav()
-		listener->pose(nav());
-//		std::cout << listener->pose().x() << "," << listener->pose().z() << std::endl;
-//		std::cout << soundSource.pos().x << "," << soundSource.pos().z << std::endl;
-
-		g.clear(0);
-
-		g.depthTesting(true);
-		g.lighting(true);
-		g.light(mLight);
-		g.color(1);
-		
-		g.pushMatrix();
-		// Use the mouse Y position for distance
-		// Scale the mouse pixel position to the current window size
-		g.translate(mX, 0.0, mY);
-		g.draw(m);
-		g.popMatrix();
-	}
-
-	void onMouseMove(const Mouse &m) override {
-		// Update mouse position
-		mX = m.x()/320.0 - 1.0;
-		mY = 4 -m.y()/40.0;
-		// Sound source position is set whenever the mouse is moved
-		soundSource.pos(mX, 0.0, mY);
-	}
-
+        agent.onDraw(g); // Draw the agent in the scene
+    }
 };
 
 int main(int argc, char *argv[])
 {
-	MyApp app;
-	app.dimensions(640, 480);
-	app.title("Stereo Audio Scene");
-	app.fps(30);
-	app.initAudio(SAMPLE_RATE, BLOCK_SIZE, 2, 0);
-	app.start();
-	return 0;
+    MyApp app;
+    app.dimensions(640, 480);
+    app.title("Stereo Audio Scene");
+    app.fps(30);
+    app.initAudio(SAMPLE_RATE, BLOCK_SIZE, 2, 0);
+    app.start();
+    return 0;
 }
 
