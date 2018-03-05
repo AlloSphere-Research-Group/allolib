@@ -44,6 +44,9 @@ struct OmniRenderer : WindowApp
         if (eye_to_render < -1 || eye_to_render > 1) eye_to_render = -1;
     }
 
+    Graphics& graphics() { return mGraphics; }
+    const Graphics& graphics() const { return mGraphics; }
+
     Lens& lens() { return pp_render.lens_; }
     Lens const& lens() const { return pp_render.lens_; }
 

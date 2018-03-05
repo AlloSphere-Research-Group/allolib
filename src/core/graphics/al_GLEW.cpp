@@ -12,7 +12,7 @@ void glew::init(bool is_verbose) {
     if (is_verbose) std::cout << "GLEW already initialized" << std::endl;
     return;
   }
-#if GLEW_VERSION < 2
+#if GLEW_VERSION_MAJOR < 2
   glewExperimental=GL_TRUE; // MUST if glew version is 1.13 or lower (apt!!!!)
 #endif
   GLenum err = glewInit();
