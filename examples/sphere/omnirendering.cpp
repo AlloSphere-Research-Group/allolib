@@ -21,7 +21,7 @@ struct MyOmniRendererApp : OmniRenderer
 
     void onAnimate(double dt) override {
         mNav.step();
-        pp_render.pose(mView.pose()); // should not be in onDraw
+        pose(mView.pose()); // should not be in onDraw
     }
 
     void onDraw(Graphics& g) override {
