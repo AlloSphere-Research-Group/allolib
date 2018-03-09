@@ -78,6 +78,8 @@ public:
         listener = scene.createListener(panner);
         // Add our agent to the AudioScene
         scene.addSource(agent);
+
+        nav().pos() -= {0,0,-1};
     }
 
     void onSound(AudioIOData &io) override {
