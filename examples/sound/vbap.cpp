@@ -116,7 +116,8 @@ public:
 	}
 
 	void onCreate() {
-		mFont.load("allocore/share/fonts/VeraMoIt.ttf", 20);
+    // mFont.load("allocore/share/fonts/VeraMoIt.ttf", 20);
+		mFont.load("data/VeraMoIt.ttf", 20);
 		mLight.pos(0,6,0);
 
 		addSurface(mText,0,4);

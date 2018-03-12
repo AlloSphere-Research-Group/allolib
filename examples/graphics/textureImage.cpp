@@ -30,7 +30,7 @@ public:
 
     // Load a .jpg file
     //
-    const char *filename = "data/image.jpg";
+    const char *filename = "data/hubble.jpg";
 
     if (image.load(filename)) {
       printf("Read image from %s\n", filename);
