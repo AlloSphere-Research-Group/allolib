@@ -12,15 +12,15 @@ void glew::init(bool is_verbose) {
     if (is_verbose) std::cout << "GLEW already initialized" << std::endl;
     return;
   }
-#if GLEW_VERSION_MAJOR < 2
-  glewExperimental=GL_TRUE; // MUST if glew version is 1.13 or lower (apt!!!!)
-#endif
+  glewExperimental = GL_TRUE; // MUST if glew 1.13 or lower (ubuntu 16.04)
   GLenum err = glewInit();
   if (GLEW_OK != err) {
     std::cout << "Glew Error: " << glewGetErrorString(err) << std::endl;
     exit(EXIT_FAILURE); // FIXME? is this recommended way of terminating?
   }
-  if (is_verbose) std::cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
+  if (is_verbose) {
+    std::cout << "Initialized GLEW " << glewGetString(GLEW_VERSION) << std::endl;
+  }
   glew_loaded = true;
 }
 
