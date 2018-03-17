@@ -343,6 +343,8 @@ public:
 	}
 };
 
+Send::Send() {}
+
 // Send::Send(uint16_t port, const char * address, al_sec timeout, int size)
 Send::Send(uint16_t port, const char * address, int size)
 :	/*SocketClient(port, address, timeout, Socket::UDP),*/

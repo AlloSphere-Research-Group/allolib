@@ -279,7 +279,7 @@ class Send : public Packet{
 	std::string mAddress = "";
 
 public:
-	Send(){}
+	Send();
 
 	/// @param[in] port		Port number (valid range is 0-65535)
 	/// @param[in] address	IP address
