@@ -20,7 +20,11 @@ using namespace al;
 class MyApp : public App{
 public:
 
-	osc::Recv server {16447, "", 0.05};
+	// can give params in ctor
+	// osc::Recv server {16447, "", 0.05};
+
+	// or open later with `open` interface (at onCreate in this example)
+	osc::Recv server;
 
 	// MyApp()
 		/* Constructor args:
@@ -33,6 +37,10 @@ public:
 	void onCreate() {
 		// Print out our IP address
 		//std::cout << "SERVER: My IP is " << Socket::hostIP() << "\n";
+
+		// port, address, timeout
+		// "" as address for localhost
+		server.open(16447, "", 0.05);
 
 		// Register ourself (osc::PacketHandler) with the server so onMessage
 		// gets called.

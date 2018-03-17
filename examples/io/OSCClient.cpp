@@ -26,7 +26,11 @@ int main(){
 	//const char * addr = "172.28.247.249";
 
 	// Create an OSC client
-	osc::Send client(port, addr);
+	// osc::Send client(port, addr); // construct with params
+
+	// or open later with `open` interface
+	osc::Send client;
+	client.open(port, addr);
 
 	// Here, we use a loop to send a packet out every half second.
 	//int i=1; while(i++){

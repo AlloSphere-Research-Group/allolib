@@ -274,9 +274,12 @@ public:
 // class Send : public SocketClient, public Packet{
 class Send : public Packet{
 	class SocketSender;
-	std::unique_ptr<SocketSender> const sockerSender;
+	std::unique_ptr<SocketSender> sockerSender;
+
+	std::string mAddress = "";
+
 public:
-	// Send(){}
+	Send(){}
 
 	/// @param[in] port		Port number (valid range is 0-65535)
 	/// @param[in] address	IP address
@@ -286,6 +289,11 @@ public:
 	Send(uint16_t port, const char * address = "localhost", int size=1024);
 
 	~Send();
+
+	// originally SocketServer had these interface in AlloSystem
+	const std::string& address() const;
+	bool open(uint16_t port, const char * address, al_sec timeout=0, int type=0);
+	uint16_t port() const;
 
 	/// Send and clear current packet contents
 	int send();
@@ -351,9 +359,9 @@ public:
 // class Recv : public SocketServer{
 class Recv {
 	class SocketReceiver;
-	std::unique_ptr<SocketReceiver> const socketReceiver;
+	std::unique_ptr<SocketReceiver> socketReceiver;
 public:
-	// Recv();
+	Recv();
 
 	/// @param[in] port		Port number (valid range is 0-65535)
 	/// @param[in] address	IP address. If empty, will bind all network interfaces to socket.
@@ -362,6 +370,11 @@ public:
 	Recv(uint16_t port, al_sec timeout=0);
 
 	virtual ~Recv();
+
+	// originally SocketServer had these interface in AlloSystem
+	const std::string& address() const;
+	bool open(uint16_t port, const char * address, al_sec timeout=0, int type=0);
+	uint16_t port() const;
 
 	/// Whether background polling is activated
 	bool background() const { return mBackground; }
@@ -398,6 +411,7 @@ protected:
 	std::vector<char> mBuffer;
 	al::Thread mThread;
 	bool mBackground;
+	std::string mAddress = "";
 };
 
 

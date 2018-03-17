@@ -352,6 +352,21 @@ Send::Send(uint16_t port, const char * address, int size)
 
 Send::~Send() = default; // put this here so the impl of the dtor sees the dtor of pimpl class
 
+const std::string& Send::address() const {
+	return mAddress;
+}
+	
+bool Send::open(uint16_t port, const char * address, al_sec timeout, int type) {
+	// releases and deletes previously owned object
+	sockerSender = std::make_unique<SocketSender>(port, address);
+	return true;
+}
+
+uint16_t Send::port() const {
+	return 0;
+}
+
+
 int Send::send(){
 	int r = send(*this);
 	OSCTRY("Packet::endMessage", Packet::clear();)
@@ -420,11 +435,11 @@ public:
 	}
 };
 
-// Recv::Recv()
-// :	mHandler(0), mBuffer(1024), mBackground(false)
-// {
-	//printf("Entering Recv::Recv()\n");
-// }
+Recv::Recv()
+:	mHandler(0), mBuffer(1024), mBackground(false)
+{
+	// printf("Entering Recv::Recv()\n");
+}
 
 Recv::Recv(uint16_t port, al_sec timeout)
 :	/*SocketServer(port, address, timeout, Socket::UDP),*/
@@ -444,6 +459,20 @@ Recv::Recv(uint16_t port, const char * address, al_sec timeout)
 
 Recv::~Recv() {
 	stop();
+}
+
+const std::string& Recv::address() const {
+	return mAddress;
+}
+	
+bool Recv::open(uint16_t port, const char * address, al_sec timeout, int type) {
+	// releases and deletes previously owned object
+	socketReceiver = std::make_unique<SocketReceiver>(port, address, this);
+	return true;
+}
+
+uint16_t Recv::port() const {
+	return 0;
 }
 
 // int Recv::recv(){
