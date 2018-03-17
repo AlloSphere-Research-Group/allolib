@@ -111,11 +111,26 @@ set(core_sources
 set(util_headers
   include/al/util/al_Array.h
   include/al/util/al_Array.hpp
+  include/al/util/ui/al_Composition.hpp
+  include/al/util/ui/al_Parameter.hpp
+  # include/al/util/ui/al_ParameterMIDI.hpp
+  include/al/util/ui/al_Preset.hpp
+  include/al/util/ui/al_PresetMapper.hpp
+  # include/al/util/ui/al_PresetMIDI.hpp
+  include/al/util/ui/al_PresetSequencer.hpp
+  include/al/util/ui/al_SequenceRecorder.hpp
 )
 
 set(util_sources
   src/util/al_Array_C.c
   src/util/al_Array.cpp
+  src/util/ui/al_Composition.cpp
+  src/util/ui/al_Parameter.cpp
+  src/util/ui/al_Preset.cpp
+  # src/util/ui/al_PresetMIDI.cpp
+  src/util/ui/al_PresetSequencer.cpp
+  src/util/ui/al_Composition.cpp
+  src/util/ui/al_SequenceRecorder.cpp
 )
 
 set(al_headers
