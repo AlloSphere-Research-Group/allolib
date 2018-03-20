@@ -40,9 +40,16 @@ void FPS::startFPS() {
 
 void FPS::tickFPS() {
     al_nsec after_loop = al_steady_time_nsec();
-    al_nsec to_sleep = std::max(interval - (after_loop - start_of_loop), 0ll);
-    al_sleep_nsec(to_sleep);
-    // dt = new start_of_loop - old start_of_loop
-    deltaTime = (after_loop + to_sleep) - start_of_loop;
-    start_of_loop = after_loop + to_sleep;
+    al_nsec time_took_to_loop = after_loop - start_of_loop;
+    if (time_took_to_loop < interval) {
+      // have some time left
+      al_sleep_nsec(interval - time_took_to_loop);
+      deltaTime = interval;
+      start_of_loop += interval;
+    }
+    else {
+      // no time to sleep
+      deltaTime = time_took_to_loop;
+      start_of_loop = after_loop;
+    }
 }
