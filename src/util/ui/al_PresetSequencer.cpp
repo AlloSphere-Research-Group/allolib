@@ -385,7 +385,7 @@ std::string PresetSequencer::buildFullPath(std::string sequenceName)
 
 SequenceServer::SequenceServer(std::string oscAddress, int oscPort) :
     mServer(nullptr), mRecorder(nullptr),
-    mParamServer(nullptr),
+    // mParamServer(nullptr),
     mOSCpath("/sequence")
 {
 	mServer = new osc::Recv(oscPort, oscAddress.c_str(), 0.001); // Is this 1ms wait OK?
@@ -400,7 +400,7 @@ SequenceServer::SequenceServer(std::string oscAddress, int oscPort) :
 
 SequenceServer::SequenceServer(ParameterServer &paramServer) :
     mServer(nullptr),
-    mParamServer(&paramServer),
+    // mParamServer(&paramServer),
     mOSCpath("/sequence")
 {
 	paramServer.registerOSCListener(this);

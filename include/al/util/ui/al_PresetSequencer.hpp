@@ -345,7 +345,7 @@ private:
 	osc::Recv *mServer;
 	PresetSequencer *mSequencer;
 	SequenceRecorder *mRecorder;
-	ParameterServer *mParamServer;
+	// ParameterServer *mParamServer;
 	std::vector<Composition *> mCompositions;
 //	std::mutex mServerLock;
 	std::string mOSCpath;
