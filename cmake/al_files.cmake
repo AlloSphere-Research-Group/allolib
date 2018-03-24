@@ -128,6 +128,7 @@ set(util_sources
   src/util/ui/al_Parameter.cpp
   src/util/ui/al_Preset.cpp
   # src/util/ui/al_PresetMIDI.cpp
+  src/util/ui/al_PresetMapper.cpp
   src/util/ui/al_PresetSequencer.cpp
   src/util/ui/al_Composition.cpp
   src/util/ui/al_SequenceRecorder.cpp

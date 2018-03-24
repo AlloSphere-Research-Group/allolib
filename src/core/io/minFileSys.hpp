@@ -58,6 +58,7 @@ std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 #include <cstdio> // std::remove
 #include <sys/stat.h> // int stat(const char*, struct stat*), mkdir
 #include <unistd.h> // rmdir
+#include <errno.h>
 #endif
 
 #include <fstream>
@@ -230,10 +231,10 @@ bool deleteFile(std::string const& f)
 #endif
 }
 
-bool createDir(std::string const& dir_path)
+bool createDir(std::string const& path)
 {
-    if (pathExists(dir_path)) {
-        std::cout << "[!] [createDir] " << dir_path << " already exists" << std::endl;
+    if (pathExists(path)) {
+        std::cout << "[!] [createDir] " << path << " already exists" << std::endl;
         return true;
     }
 
@@ -247,10 +248,25 @@ bool createDir(std::string const& dir_path)
     // Group: S_IRGRP (read), S_IWGRP (write), S_IXGRP (execute)
     // Others: S_IROTH (read), S_IWOTH (write), S_IXOTH (execute)
     // Read + Write + Execute: S_IRWXU (User), S_IRWXG (Group), S_IRWXO (Others)
-    const int dir_err = mkdir(dir_path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); // 775
-    if (-1 == dir_err) {
-        std::cout << "[!] [createDir] Error creating directory " << dir_path << std::endl;
-        return false;
+    auto mode = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH; // 755
+
+    // const int dir_err = mkdir(path.c_str(), mode);
+    // if (-1 == dir_err) {
+    //     std::cout << "[!] [createDir] Error creating directory " << path << std::endl;
+    //     return false;
+    // }
+
+    // ALLOSYSTEM CODE
+    // recursively create directories
+    for (unsigned i = 0; i < path.size(); ++i) {
+        if (path[i] == '/' || i == path.size() - 1) {
+            if (mkdir(path.substr(0, i+1).c_str(), mode) != 0) {
+                if (errno != EEXIST) {
+                    std::cout << "[!] [createDir] Error creating directory " << path << std::endl;
+                    return false;
+                }
+            }
+        }
     }
     return true;
 #endif

@@ -450,6 +450,20 @@ FileList SearchPaths::listAll() {
   return fileList;
 }
 
+FileList itemListInDir(std::string const& dir) {
+  auto dir_ = File::conformDirectory(dir);
+  FileList fileList;
+  std::vector<std::string> children;
+  minFileSys::readDir(dir, children);
+  for (auto const& c : children) {
+    if (c == "." || c == "..") {
+      continue;
+    }
+    fileList.add(FilePath{c, dir_});
+  }
+  return fileList;
+}
+
 FileList fileListFromDir(std::string const& dir) {
   auto dir_ = File::conformDirectory(dir);
   FileList fileList;

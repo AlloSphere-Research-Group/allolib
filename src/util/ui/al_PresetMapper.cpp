@@ -6,16 +6,31 @@ using namespace al;
 // TODO is this used? Otherwise remove...
 void PresetMapper::readEntries(std::string path)
 {
-	Dir presetDir(path);
-	while (presetDir.read()) {
-		FileInfo entry = presetDir.entry();
-		if (entry.type() == FileInfo::DIR) {
-			readEntries(entry.name());
-		} else if (entry.type() == FileInfo::REG) {
-			if (entry.name().size() > 4 && entry.name().substr(entry.name().size() - 4) == ".txt") {
-				std::cout << "Found map: " << entry.name();
-			}
-		}
+	// ORIGINAL ALLOSYSTEM VERSION
+	//
+	// Dir presetDir(path);
+	// while (presetDir.read()) {
+	// 	FileInfo entry = presetDir.entry();
+	// 	if (entry.type() == FileInfo::DIR) {
+	// 		readEntries(entry.name());
+	// 	} else if (entry.type() == FileInfo::REG) {
+	// 		if (entry.name().size() > 4 && entry.name().substr(entry.name().size() - 4) == ".txt") {
+	// 			std::cout << "Found map: " << entry.name();
+	// 		}
+	// 	}
+	// }
+
+	// get list of files ending in ".txt"
+	FileList map_list = filterInDir(path, [](const FilePath& f){
+		if (al::checkExtension(f, ".txt")) return true;
+		else return false;
+	});
+
+	// store found preset files
+	for (int i = 0; i < map_list.count(); i += 1) {
+		const FilePath& path = map_list[i];
+		const std::string& name = path.file();
+		std::cout << "Found map: " << name << std::endl;
 	}
 }
 
@@ -99,6 +114,9 @@ bool PresetMapper::load(std::string archiveName)
 std::vector<std::string> PresetMapper::listAvailableMaps(bool showArchives)
 {
 	std::vector<std::string> mapList;
+
+	// ORIGINAL ALLOSYSTEM CODE
+	/*
 	Dir mapperDir(mPresetHandler->getRootPath());
 
 	// TODO it makes more sense to sort entries alphabetically
@@ -117,7 +135,30 @@ std::vector<std::string> PresetMapper::listAvailableMaps(bool showArchives)
 			}
 		}
 	}
-	return mapList;
+	*/
+
+  auto list = itemListInDir(mPresetHandler->getRootPath());
+
+  if (!showArchives) {
+    for (int i = 0; i < list.count(); i += 1) {
+      auto const& name = list[i].file();
+      if (File::isDirectory(name)) continue; // skip dirs
+      if (al::checkExtension(name, ".presetMap")) mapList.push_back(name);
+    }
+  }
+  else {
+    for (int i = 0; i < list.count(); i += 1) {
+      auto const &name = list[i].file();
+      if (!File::isDirectory(name)) continue; // skip files
+      if (name.size() > 18 &&
+          name.substr(name.size() - 18) == ".presetMap_archive")
+      {
+        mapList.push_back(name);
+      }
+    }
+  }
+
+  return mapList;
 }
 
 bool PresetMapper::consumeMessage(osc::Message &m, std::string rootOSCPath)
@@ -137,8 +178,11 @@ bool PresetMapper::restore(std::string mapName, bool overwrite, bool autoCreate)
 	bool ok = true;
 	if (mapName.size() > 18 && mapName.substr(mapName.size() - 18) == ".presetMap_archive") { // restore from archive
 		std::cout << "Restoring archive " << mapName << std::endl;
-		Dir mapDirectory(mPresetHandler->getCurrentPath() + mapName);
 		std::string mapNewName = mapName.substr(0, mapName.size() - sizeof("_archive") + 1);
+
+		// ORIGINAL ALLOSYSTEM CODE
+		/*
+		Dir mapDirectory(mPresetHandler->getCurrentPath() + mapName);
 		while (mapDirectory.read()) {
 			const FileInfo &entry = mapDirectory.entry();
 			if (entry.type() == FileInfo::REG) {
@@ -167,6 +211,40 @@ bool PresetMapper::restore(std::string mapName, bool overwrite, bool autoCreate)
 				}
 			}
 		}
+		*/
+
+		auto list = itemListInDir(mPresetHandler->getRootPath());
+		for (int i = 0; i < list.count(); i += 1) {
+      auto const& name = list[i].file();
+      if (File::isDirectory(name)) continue; // skip dirs
+
+      if (name.substr(name.size() - 7) == ".preset") {
+        if (overwrite && File::exists(mPresetHandler->getCurrentPath() + "/" + name)) {
+          File::remove(mPresetHandler->getCurrentPath() + name);
+        }
+        if (!File::copy(mPresetHandler->getCurrentPath() + mapName + "/" + name,
+                        mPresetHandler->getCurrentPath() + name)) {
+          std::cout << "Error restoring preset " << name << " for " << mapName << std::endl;
+          ok = false;
+        }
+      }
+      else if (name == "default.presetMap") {
+
+        if (overwrite && File::exists(mPresetHandler->getCurrentPath() + "/" + mapNewName)) {
+          File::remove(mPresetHandler->getCurrentPath() + "/" + name);
+        }
+
+        if (!File::copy(mPresetHandler->getCurrentPath() + "/" + mapName + "/default.presetMap",
+                        mPresetHandler->getCurrentPath() + "/" + mapNewName)) {
+          std::cout << "Error restoring preset map " << mapNewName << " for " << mapName << std::endl;
+          ok = false;
+        }
+      }
+      else {
+        std::cout << "PresetMapper::restore() invalid file: " << name << std::endl;
+      }
+    }
+
 		mPresetHandler->setCurrentPresetMap(mapNewName, autoCreate);
 	} else { // set preset map directly
 		mPresetHandler->setCurrentPresetMap(mapName, autoCreate);
@@ -177,6 +255,9 @@ bool PresetMapper::restore(std::string mapName, bool overwrite, bool autoCreate)
 void PresetMapper::findPresetMaps() {
 	std::string presetsPath = mPresetHandler->getCurrentPath();
 
+
+	// ORIGINAL ALLOSYSTEM CODE
+	/*
 	Dir presetDir(presetsPath);
 	while (presetDir.read()) {
 		FileInfo entry = presetDir.entry();
@@ -184,4 +265,14 @@ void PresetMapper::findPresetMaps() {
 			std::cout << "Found map: " << entry.name() << std::endl;
 		}
 	}
+	*/
+
+	auto list = itemListInDir(mPresetHandler->getRootPath());
+	for (int i = 0; i < list.count(); i += 1) {
+    auto const& name = list[i].file();
+    if (name.size() > 4 && name.substr(name.size() - 4) == ".txt") {
+			std::cout << "Found map: " << name << std::endl;
+		}
+  }
+
 }

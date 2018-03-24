@@ -491,9 +491,22 @@ protected:
 	std::string mAppPath;
 };
 
+// below are original to allolib and did not exist in AlloSystem
+// TODO: NEED TO CLEAN THESE CALLS...
+
+// not recursive, contains dirs
+FileList itemListInDir(std::string const& dir);
+
+// recursive, does not contain dirs
 FileList fileListFromDir(std::string const& dir);
+
+// 
 FilePath searchFileFromDir(std::string const& filename, std::string const& dir);
+
+// pass lambda with given signature, returns list of files that f(file) is true
 FileList filterInDir(std::string const& dir, bool(*f)(FilePath const&));
+
+// returns true if given file name/path ends in extension
 bool checkExtension(std::string const& filename, std::string const& extension);
 bool checkExtension(FilePath const& filepath, std::string const& extension);
 
