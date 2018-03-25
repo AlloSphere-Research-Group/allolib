@@ -272,11 +272,12 @@ public:
 ///
 /// @ingroup allocore
 // class Send : public SocketClient, public Packet{
-class Send : public Packet{
+class Send : public Packet {
 	class SocketSender;
 	std::unique_ptr<SocketSender> sockerSender;
 
 	std::string mAddress = "";
+	uint16_t mPort = 0;
 
 public:
 	Send();
@@ -360,6 +361,7 @@ public:
 class Recv {
 	class SocketReceiver;
 	std::unique_ptr<SocketReceiver> socketReceiver;
+
 public:
 	Recv();
 
@@ -376,6 +378,8 @@ public:
 	bool open(uint16_t port, const char * address, al_sec timeout=0, int type=0);
 	uint16_t port() const;
 
+	bool open(uint16_t port, al_sec timeout=0, int type=0);
+	
 	/// Whether background polling is activated
 	bool background() const { return mBackground; }
 
@@ -412,6 +416,7 @@ protected:
 	al::Thread mThread;
 	bool mBackground;
 	std::string mAddress = "";
+	uint16_t mPort = 0;
 };
 
 

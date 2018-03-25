@@ -1,6 +1,6 @@
+#include "al/core.hpp"
+#include "al/util/ui/al_ParameterMIDI.hpp"
 
-#include "allocore/io/al_App.hpp"
-#include "allocore/ui/al_ParameterMIDI.hpp"
 #include <cmath>
 
 using namespace al;
@@ -10,22 +10,22 @@ Parameter Speed("Speed", "", 0.05, "", 0.01, 0.3);
 
 ParameterMIDI parameterMIDI;
 
+struct MyApp : App
+{
+	float x = 0;
+	Mesh m;
 
-class MyApp : public App {
-public:
-	MyApp () {
-		x = 0;
-		addSphere(graphics().mesh());
-
-		initWindow();
+	void onCreate() override {
+		addSphere(m);
 		nav().pos(0, 0, 4);
 	}
 
-	virtual void onDraw(Graphics &g) override {
+	void onDraw(Graphics& g) override {
+		g.clear(0);
 		g.pushMatrix();
 		g.translate(std::sin(x), 0, 0);
 		g.scale(Size.get());
-		g.draw(g.mesh());
+		g.draw(m);
 		g.popMatrix();
 		x += Speed.get();
 		if (x >= M_2PI) {
@@ -33,17 +33,12 @@ public:
 		}
 	}
 
-private:
-	float x;
 };
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	parameterMIDI.connectControl(Size, 1, 1);
 	parameterMIDI.connectControl(Speed, 10, 1);
-
 	MyApp().start();
-
-	return 0;
 }
 

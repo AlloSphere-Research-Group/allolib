@@ -346,13 +346,16 @@ public:
 Send::Send() {}
 
 // Send::Send(uint16_t port, const char * address, al_sec timeout, int size)
-Send::Send(uint16_t port, const char * address, int size)
-:	/*SocketClient(port, address, timeout, Socket::UDP),*/
+Send::Send(uint16_t port, const char * address, int size):
+  /*SocketClient(port, address, timeout, Socket::UDP),*/
 	Packet(size),
 	sockerSender{std::make_unique<SocketSender>(port, address)}
-{}
+{
+	mAddress = address;
+	mPort = port;
+}
 
-Send::~Send() = default; // put this here so the impl of the dtor sees the dtor of pimpl class
+Send::~Send() = default; // put this here so dtor sees the dtor of impl class
 
 const std::string& Send::address() const {
 	return mAddress;
@@ -361,13 +364,14 @@ const std::string& Send::address() const {
 bool Send::open(uint16_t port, const char * address, al_sec timeout, int type) {
 	// releases and deletes previously owned object
 	sockerSender = std::make_unique<SocketSender>(port, address);
+	mAddress = address;
+	mPort = port;
 	return true;
 }
 
 uint16_t Send::port() const {
-	return 0;
+	return mPort;
 }
-
 
 int Send::send(){
 	int r = send(*this);
@@ -443,19 +447,24 @@ Recv::Recv()
 	// printf("Entering Recv::Recv()\n");
 }
 
-Recv::Recv(uint16_t port, al_sec timeout)
-:	/*SocketServer(port, address, timeout, Socket::UDP),*/
+Recv::Recv(uint16_t port, al_sec timeout):
+	//SocketServer(port, address, timeout, Socket::UDP),
 	socketReceiver{std::make_unique<SocketReceiver>(port, this)},
 	mHandler(0), mBuffer(1024), mBackground(false)
 {
+	mAddress = "";
+	mPort = port;
 	//printf("Entering Recv::Recv(port=%d, addr=%s)\n", port, address);
 }
 
-Recv::Recv(uint16_t port, const char * address, al_sec timeout)
-:	/*SocketServer(port, address, timeout, Socket::UDP),*/
+
+Recv::Recv(uint16_t port, const char * address, al_sec timeout):
+ 	// SocketServer(port, address, timeout, Socket::UDP),
 	socketReceiver{std::make_unique<SocketReceiver>(port, address, this)},
 	mHandler(0), mBuffer(1024), mBackground(false)
 {
+	mAddress = address;
+	mPort = port;
 	//printf("Entering Recv::Recv(port=%d, addr=%s)\n", port, address);
 }
 
@@ -470,11 +479,21 @@ const std::string& Recv::address() const {
 bool Recv::open(uint16_t port, const char * address, al_sec timeout, int type) {
 	// releases and deletes previously owned object
 	socketReceiver = std::make_unique<SocketReceiver>(port, address, this);
+	mAddress = address;
+	mPort = port;
+	return true;
+}
+
+bool Recv::open(uint16_t port, al_sec timeout, int type) {
+	// releases and deletes previously owned object
+	socketReceiver = std::make_unique<SocketReceiver>(port, this);
+	mAddress = "";
+	mPort = port;
 	return true;
 }
 
 uint16_t Recv::port() const {
-	return 0;
+	return mPort;
 }
 
 // int Recv::recv(){
