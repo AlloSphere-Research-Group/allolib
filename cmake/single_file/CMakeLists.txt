@@ -44,4 +44,11 @@ if (AL_VERBOSE_OUTPUT)
 	message("link libs: ${app_link_libs}")
 endif()
 
+if(EXISTS "${app_path}/flags.cmake")
+	if (AL_VERBOSE_OUTPUT)
+		message("found flags.cmake")
+	endif()
+	include(${app_path}/flags.cmake)
+endif()
+
 include(${al_path}/cmake/app.cmake)
