@@ -81,7 +81,7 @@ bool Composition::archiveComposition()
 {
 	std::string path = getCurrentPath();
 	std::string compositionName = mCompositionName;
-	bool ok = true;
+//	bool ok = true;
 
 	std::string fullPath = path;
 	fullPath += compositionName + ".composition";

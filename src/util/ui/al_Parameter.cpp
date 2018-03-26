@@ -82,7 +82,7 @@ void Parameter::setNoCalls(float value, void *blockReceiver)
 		value = mProcessCallback(value, mProcessUdata);
 	}
 	if (blockReceiver) {
-		for(int i = 0; i < mCallbacks.size(); ++i) {
+		for(size_t i = 0; i < mCallbacks.size(); ++i) {
 			if (mCallbacks[i]) {
 				mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
 			}
@@ -100,7 +100,7 @@ void Parameter::set(float value)
 		value = mProcessCallback(value, mProcessUdata);
 	}
 	mFloatValue = value;
-	for(int i = 0; i < mCallbacks.size(); ++i) {
+	for(size_t i = 0; i < mCallbacks.size(); ++i) {
 		if (mCallbacks[i]) {
 			mCallbacks[i](value, this, mCallbackUdata[i], NULL);
 		}
@@ -131,7 +131,7 @@ void ParameterBool::setNoCalls(float value, void *blockReceiver)
 		value = mProcessCallback(value, mProcessUdata);
 	}
 	if (blockReceiver) {
-		for(int i = 0; i < mCallbacks.size(); ++i) {
+		for(size_t i = 0; i < mCallbacks.size(); ++i) {
 			if (mCallbacks[i]) {
 				mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
 			}
@@ -149,7 +149,7 @@ void ParameterBool::set(float value)
 		value = mProcessCallback(value, mProcessUdata);
 	}
 	mFloatValue = value;
-	for(int i = 0; i < mCallbacks.size(); ++i) {
+	for(size_t i = 0; i < mCallbacks.size(); ++i) {
 		if (mCallbacks[i]) {
 			mCallbacks[i](value, this, mCallbackUdata[i], NULL);
 		}

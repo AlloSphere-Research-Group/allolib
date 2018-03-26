@@ -140,7 +140,7 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite)
 	mFileLock.unlock();
 
 	if (mUseCallbacks) {
-		for(int i = 0; i < mStoreCallbacks.size(); ++i) {
+		for(size_t i = 0; i < mStoreCallbacks.size(); ++i) {
 			if (mStoreCallbacks[i]) {
 				mStoreCallbacks[i](index, name, mStoreCallbackUdata[i]);
 			}
@@ -168,7 +168,7 @@ void PresetHandler::recallPreset(std::string name)
 	}
 	mCurrentPresetName = name;
 	if (mUseCallbacks) {
-		for(int i = 0; i < mCallbacks.size(); ++i) {
+		for(size_t i = 0; i < mCallbacks.size(); ++i) {
 			if (mCallbacks[i]) {
 				mCallbacks[i](index, this, mCallbackUdata[i]);
 			}
@@ -267,7 +267,7 @@ void PresetHandler::recallPresetSynchronous(std::string name)
 	}
 	mCurrentPresetName = name;
 	if (mUseCallbacks) {
-		for(int i = 0; i < mCallbacks.size(); ++i) {
+		for(size_t i = 0; i < mCallbacks.size(); ++i) {
 			if (mCallbacks[i]) {
 				mCallbacks[i](index, this, mCallbackUdata[i]);
 			}
@@ -415,7 +415,7 @@ void PresetHandler::setCurrentPresetMap(std::string mapName, bool autoCreate)
 			presets.push_back(name.substr(0, name.size()-7)); // exclude extension
 		}
 
-		for(int i = 0; i < presets.size(); ++i) {
+		for(size_t i = 0; i < presets.size(); ++i) {
 			mPresetsMap[i] = presets[i];
 		}
 		mCurrentMapName = mapName;
