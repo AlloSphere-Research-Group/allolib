@@ -81,7 +81,7 @@ bool Composition::archiveComposition()
 {
 	std::string path = getCurrentPath();
 	std::string compositionName = mCompositionName;
-//	bool ok = true;
+	bool ok = true;
 
 	std::string fullPath = path;
 	fullPath += compositionName + ".composition";
@@ -142,7 +142,7 @@ bool Composition::archiveComposition()
 		 ok = false;
 	 }
 
-	return true;
+	return ok;
 }
 
 bool Composition::archive(std::string compositionName, std::string path, bool overwrite)
