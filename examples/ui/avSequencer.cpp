@@ -11,15 +11,19 @@
 
 #include "Gamma/Gamma.h"
 
-#include "allocore/io/al_AudioIO.hpp"
-#include "allocore/ui/al_SynthSequencer.hpp"
-#include "allocore/io/al_App.hpp"
+#include "al/core/io/al_AudioIO.hpp"
+#include "al/util/ui/al_SynthSequencer.hpp"
+#include "al/core/app/al_App.hpp"
+#include "al/core/graphics/al_Shapes.hpp"
 
 using namespace gam;
 using namespace al;
 
-using al::AudioIOData;
-
+// Create a sub class of SynthVoice to determine what each voice should do
+// in the onProcess() audio and video callbacks.
+// Add functions to set voice parameters (per instance parameters)
+// Don't forget to define an onTriggerOn() function to reset envelopes or
+// values for each triggering
 class SineEnv : public SynthVoice {
 public:
 
@@ -95,22 +99,26 @@ protected:
 };
 
 
-static SynthSequencer s;
-
-
+// make an app that contains a SynthSequencer class
+// use the render() functions from the SynthSequencer to produce audio and
+// graphics in the corresponding callback
 class MyApp : public App
 {
 public:
     virtual void onSound(AudioIOData &io) override {
-        s.render(io);
+        s.render(io); // Render audio
     }
 
     virtual void onDraw(Graphics &g) override {
-        s.print();
-        s.render(g);
+        s.print(); // Prints information on active and free voices
+        g.clear();
+        s.render(g); // Render graphics
     }
+
+    SynthSequencer s;
 };
 
+// Function to quickly create a set of notes
 void makeLine(SynthSequencer &s, float startTime, int number,
               float duration, float startFreq, float endFreq, float amp) {
 
@@ -123,25 +131,27 @@ void makeLine(SynthSequencer &s, float startTime, int number,
 
 int main(){
 
-    makeLine(s, 0, 10, 0.6, 440, 660, 0.05);
-    makeLine(s, 3, 10, 0.4, 220, 660, 0.07);
-    makeLine(s, 6, 10, 0.3, 220, 440, 0.08);
-    makeLine(s, 10, 30, 0.2, 220, 440, 0.1);
-    makeLine(s, 13, 80, 0.1, 220, 880, 0.12);
-    makeLine(s, 18, 180, 0.05, 220, 440, 0.19);
-    makeLine(s, 20, 10, 0.1, 880, 1600, 0.2);
-    makeLine(s, 20, 10, 0.1, 880, 1600, 0.3);
-    makeLine(s, 21, 10, 0.1, 440, 1600, 0.4);
-    makeLine(s, 22, 20, 0.05, 220, 3000, 0.2);
-    makeLine(s, 25, 30, 0.1, 3000, 1500, 0.19);
-    makeLine(s, 27, 50, 0.2, 4000, 1000, 0.18);
-    makeLine(s, 30, 80, 0.2, 3000, 500, 0.17);
-    makeLine(s, 31, 10, 0.1, 880, 440, 0.1);
-
+    // Create app instance
     MyApp app;
+
+    // Sequence events using the function defined above
+    makeLine(app.s, 0, 10, 0.6, 440, 660, 0.05);
+    makeLine(app.s, 3, 10, 0.4, 220, 660, 0.07);
+    makeLine(app.s, 6, 10, 0.3, 220, 440, 0.08);
+    makeLine(app.s, 10, 30, 0.2, 220, 440, 0.1);
+    makeLine(app.s, 13, 80, 0.1, 220, 880, 0.12);
+    makeLine(app.s, 18, 180, 0.05, 220, 440, 0.19);
+    makeLine(app.s, 20, 10, 0.1, 880, 1600, 0.2);
+    makeLine(app.s, 20, 10, 0.1, 880, 1600, 0.3);
+    makeLine(app.s, 21, 10, 0.1, 440, 1600, 0.4);
+    makeLine(app.s, 22, 20, 0.05, 220, 3000, 0.2);
+    makeLine(app.s, 25, 30, 0.1, 3000, 1500, 0.19);
+    makeLine(app.s, 27, 50, 0.2, 4000, 1000, 0.18);
+    makeLine(app.s, 30, 80, 0.2, 3000, 500, 0.17);
+    makeLine(app.s, 31, 10, 0.1, 880, 440, 0.1);
+
+    // Start everything
     app.initAudio(44100., 256, 2, 0);
-    app.initWindow();
     Domain::master().spu(app.audioIO().framesPerSecond());
     app.start();
-    printf("\nPress 'enter' to quit...\n"); getchar();
 }

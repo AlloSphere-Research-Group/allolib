@@ -9,22 +9,24 @@ set(AudioAPI "rtaudio" CACHE STRING "Library for Audio IO")
 set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
 
 include(${al_path}/cmake/external/oscpack.cmake)
-# include(${al_path}/cmake/external/gamma.cmake)
+include(${al_path}/cmake/external/gamma.cmake)
 include(${al_path}/cmake/external/rtmidi.cmake)
 
 set(EXTERNAL_INCLUDE_DIRS
   ${OSCPACK_INCLUDE_DIR}
-  # ${GAMMA_INCLUDE_DIR}
+  ${GAMMA_INCLUDE_DIR}
   ${RTMIDI_INCLUDE_DIR}
 )
 
 set(EXTERNAL_SRC
   ${OSCPACK_SRC}
+  ${GAMMA_SRC}
   ${RTMIDI_SRC}
 )
 
 set(EXTERNAL_LIBRARIES
   ${OSCPACK_LINK_LIBRARIES}
+  ${GAMMA_RELEASE_LIBRARY}
   ${RTMIDI_LIBRARIES}
 )
 

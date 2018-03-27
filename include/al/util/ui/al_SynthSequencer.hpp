@@ -52,9 +52,9 @@
 #include <mutex>
 #include <typeinfo> // For class name instrospection
 
-#include "allocore/graphics/al_Graphics.hpp"
-#include "allocore/io/al_AudioIOData.hpp"
-#include "allocore/types/al_SingleRWRingBuffer.hpp"
+#include "al/core/graphics/al_Graphics.hpp"
+#include "al/core/io/al_AudioIOData.hpp"
+#include "al/util/al_SingleRWRingBuffer.hpp"
 
 //#include "Gamma/Domain.h"
 
