@@ -1,12 +1,22 @@
 cmake_minimum_required(VERSION 3.0)
-
 project(allolib)
-set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
-option(AL_VERBOSE_OUTPUT "" OFF)
-# set(BUILDING_ALLOLIB 1)
 
-include(cmake/configure_platform.cmake)
-# sets: AL_MACOS || AL_LINUX || AL_WINDOWS, and PLATFORM_DEFINITION
+set(al_path ${CMAKE_CURRENT_LIST_DIR})
+option(AL_VERBOSE_OUTPUT "" OFF)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(AL_MACOS 1)
+  set(PLATFORM_DEFINITION -DAL_OSX)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(AL_LINUX 1)
+  set(PLATFORM_DEFINITION -DAL_LINUX)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set(AL_WINDOWS 1)
+  set(PLATFORM_DEFINITION -DAL_WINDOWS)
+else ()
+  message(FATAL_ERROR "system platform not defined")
+endif ()
+
 include(cmake/find_core_dependencies.cmake)
 # sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES, CORE_LIBRARY_DIRS
 include(cmake/find_additional_dependencies.cmake)
@@ -37,14 +47,6 @@ set(libs_to_link
   ${CORE_LIBRARIES} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
 )
 
-# set(debug_libs_to_link
-#   ${EXTERNAL_DEBUG_LIBRARIES}
-# )
-
-# set(release_libs_to_link
-#   ${EXTERNAL_RELEASE_LIBRARIES}
-# )
-
 set(definitions
   ${PLATFORM_DEFINITION} ${EXTERNAL_DEFINITIONS} ${ADDITIONAL_DEFINITIONS}
 )
@@ -58,44 +60,38 @@ link_directories(${CORE_LIBRARY_DIRS})
 # --- NOW WE ARE READY TO SETUP THE LIBRARY TARGET ---------------------
 
 # multi configuration generators
-if (MSVC)
-    set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+if (DEFINED CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 endif ()
 
 add_library(al STATIC ${headers} ${sources})
 
 #paths
 set_target_properties(al
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib
-    ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/lib
-    ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/lib
+  PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib
+  ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/lib/Debug
+  ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/lib/Release
 )
 
 #flags
-target_compile_options(al PUBLIC ${flags}) # public because of headers
+target_compile_options(al PUBLIC ${flags})
 
 # c++14
 set_target_properties(al PROPERTIES CXX_STANDARD 14)
 set_target_properties(al PROPERTIES CXX_STANDARD_REQUIRED ON)
 
 # definitions
-target_compile_definitions(al PRIVATE ${definitions})
-
-# naming
-set_target_properties(al PROPERTIES DEBUG_POSTFIX _debug)
+target_compile_definitions(al PUBLIC ${definitions})
 
 # include dirs
-target_include_directories(al PRIVATE include)
-target_include_directories(al PRIVATE ${dirs_to_include})
+target_include_directories(al PUBLIC
+  ${al_path}/include
+  ${dirs_to_include}
+)
 
 # libs
-target_link_libraries(al ${libs_to_link})
-# target_link_libraries(
-#   al
-#   debug ${debug_libs_to_link}
-#   optimized ${release_libs_to_link}
-# )
+target_link_libraries(al PUBLIC ${libs_to_link})
 
 # --- Testing -----------------------------------------
 add_subdirectory(test)
