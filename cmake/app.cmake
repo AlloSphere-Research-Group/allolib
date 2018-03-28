@@ -9,8 +9,19 @@
 #         al_path
 
 
-include(${al_path}/cmake/configure_platform.cmake)
-# sets: AL_MACOS || AL_LINUX || AL_WINDOWS, and PLATFORM_DEFINITION
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(AL_MACOS 1)
+  set(PLATFORM_DEFINITION -DAL_OSX)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(AL_LINUX 1)
+  set(PLATFORM_DEFINITION -DAL_LINUX)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set(AL_WINDOWS 1)
+  set(PLATFORM_DEFINITION -DAL_WINDOWS)
+else ()
+  message(FATAL_ERROR "system platform not defined")
+endif ()
+
 include(${al_path}/cmake/find_core_dependencies.cmake)
 # sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES, CORE_LIBRARY_DIRS
 include(${al_path}/cmake/find_additional_dependencies.cmake)
@@ -19,8 +30,6 @@ include(${al_path}/cmake/find_additional_dependencies.cmake)
 include(${al_path}/cmake/external.cmake)
 # sets: EXTERNAL_INCLUDE_DIRS, EXTERNAL_DEFINITIONS
 #       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
-include(${al_path}/cmake/basic_flags.cmake)
-# sets: basic_flags
 
 set(dirs_to_include
   ${al_path}/include
@@ -36,14 +45,6 @@ set(libs_to_link
   ${ADDITIONAL_LIBRARIES}
   ${EXTERNAL_LIBRARIES}
 )
-
-# set(debug_libs_to_link
-#   ${EXTERNAL_DEBUG_LIBRARIES}
-# )
-
-# set(release_libs_to_link
-#   ${EXTERNAL_RELEASE_LIBRARIES}
-# )
 
 set(definitions
   ${PLATFORM_DEFINITION}
@@ -66,18 +67,21 @@ endif ()
 
 add_executable(${app_name} ${app_files_list})
 
-set_target_properties(${app_name} PROPERTIES DEBUG_POSTFIX _debug)
-
 #paths
 set_target_properties(${app_name}
     PROPERTIES
+    PROPERTIES DEBUG_POSTFIX _debug
     RUNTIME_OUTPUT_DIRECTORY ${app_path}/bin
     RUNTIME_OUTPUT_DIRECTORY_DEBUG ${app_path}/bin
     RUNTIME_OUTPUT_DIRECTORY_RELEASE ${app_path}/bin
 )
 
 # flags
-target_compile_options(${app_name} PUBLIC ${flags}) # public because of headers
+if (AL_WINDOWS)
+  target_compile_options(${app_name} PRIVATE "")
+else ()
+  target_compile_options(${app_name} PRIVATE "-Wall")
+endif (AL_WINDOWS)
 
 # c++14
 set_target_properties(${app_name} PROPERTIES CXX_STANDARD 14)
@@ -87,14 +91,17 @@ set_target_properties(${app_name} PROPERTIES CXX_STANDARD_REQUIRED ON)
 target_compile_definitions(${app_name} PRIVATE ${definitions})
 
 # include dirs
-target_include_directories(${app_name} PRIVATE ${dirs_to_include})
+target_include_directories(${app_name} PRIVATE ${dirs_to_include} ${al_path}/external/Gamma)
 
 # libs
 if (AL_WINDOWS)
   target_link_libraries(${app_name} debug ${al_path}/lib/Debug/al.lib optimized ${al_path}/lib/Debug/al.lib)
+  target_link_libraries(${app_name} debug ${al_path}/external/Gamma/lib/Debug/Gamma.lib optimized ${al_path}/external/Gamma/lib/Release/Gamma.lib)
 else()
   target_link_libraries(${app_name} debug ${al_path}/lib/Debug/libal.a optimized ${al_path}/lib/Release/libal.a)
+  target_link_libraries(${app_name} debug ${al_path}/external/Gamma/lib/Debug/libGamma.a optimized ${al_path}/external/Gamma/lib/Release/libGamma.a)
 endif (AL_WINDOWS)
+
 target_link_libraries(${app_name} ${libs_to_link})
 # target_link_libraries(
 #   ${app_name}

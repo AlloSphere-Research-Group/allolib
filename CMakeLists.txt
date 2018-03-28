@@ -27,9 +27,6 @@ include(cmake/external.cmake)
 #       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
 include(cmake/al_files.cmake)
 # sets: al_headers, al_sources
-include(cmake/basic_flags.cmake)
-# sets: basic_flags
-
 
 set(headers
   ${al_headers} ${ADDITIONAL_HEADERS}
@@ -51,19 +48,27 @@ set(definitions
   ${PLATFORM_DEFINITION} ${EXTERNAL_DEFINITIONS} ${ADDITIONAL_DEFINITIONS}
 )
 
-set(flags
-  ${basic_flags}
-)
-
 link_directories(${CORE_LIBRARY_DIRS})
-
-# --- NOW WE ARE READY TO SETUP THE LIBRARY TARGET ---------------------
 
 # multi configuration generators
 if (DEFINED CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 endif ()
 
+# --- NOW WE ARE READY TO SETUP THE LIBRARY TARGET ---------------------
+
+# first build dependencies
+if (DEFINED CMAKE_CONFIGURATION_TYPES)
+  add_subdirectory(${al_path}/external/Gamma ${al_path}/external/Gamma/build)
+else()
+  if (${CMAKE_BUILD_TYPE} MATCHES Debug)
+    add_subdirectory(${al_path}/external/Gamma ${al_path}/external/Gamma/build/Debug)
+  else()
+    add_subdirectory(${al_path}/external/Gamma ${al_path}/external/Gamma/build/Release)
+  endif()
+endif ()
+
+# then allolib library
 add_library(al STATIC ${headers} ${sources})
 
 #paths
@@ -75,7 +80,11 @@ set_target_properties(al
 )
 
 #flags
-target_compile_options(al PUBLIC ${flags})
+if (AL_WINDOWS)
+  target_compile_options(al PRIVATE "")
+else ()
+  target_compile_options(al PRIVATE "-Wall")
+endif (AL_WINDOWS)
 
 # c++14
 set_target_properties(al PROPERTIES CXX_STANDARD 14)
