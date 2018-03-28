@@ -69,7 +69,6 @@ add_executable(${app_name} ${app_files_list})
 
 #paths
 set_target_properties(${app_name}
-    PROPERTIES
     PROPERTIES DEBUG_POSTFIX _debug
     RUNTIME_OUTPUT_DIRECTORY ${app_path}/bin
     RUNTIME_OUTPUT_DIRECTORY_DEBUG ${app_path}/bin
