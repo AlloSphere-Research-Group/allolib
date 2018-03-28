@@ -50,7 +50,10 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+
 #include <typeinfo> // For class name instrospection
+#include <typeindex>
+
 
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/io/al_AudioIOData.hpp"
@@ -60,6 +63,104 @@
 
 namespace al
 {
+
+static int asciiToIndex(int asciiKey, int offset = 0) {
+	switch(asciiKey){
+	case '1': return offset + 0;
+	case '2': return offset + 1;
+	case '3': return offset + 2;
+	case '4': return offset + 3;
+	case '5': return offset + 4;
+	case '6': return offset + 5;
+	case '7': return offset + 6;
+	case '8': return offset + 7;
+	case '9': return offset + 8;
+	case '0': return offset + 9;
+
+	case 'q': return offset + 10;
+	case 'w': return offset + 11;
+	case 'e': return offset + 12;
+	case 'r': return offset + 13;
+	case 't': return offset + 14;
+	case 'y': return offset + 15;
+	case 'u': return offset + 16;
+	case 'i': return offset + 17;
+	case 'o': return offset + 18;
+	case 'p': return offset + 19;
+	case 'a': return offset + 20;
+
+	case 's': return offset + 21;
+	case 'd': return offset + 22;
+	case 'f': return offset + 23;
+	case 'g': return offset + 24;
+	case 'h': return offset + 25;
+	case 'j': return offset + 26;
+	case 'k': return offset + 27;
+	case 'l': return offset + 28;
+	case ';': return offset + 29;
+
+	case 'z': return offset + 30;
+	case 'x': return offset + 31;
+	case 'c': return offset + 32;
+	case 'v': return offset + 33;
+	case 'b': return offset + 34;
+	case 'n': return offset + 35;
+	case 'm': return offset + 36;
+	case ',': return offset + 37;
+	case '.': return offset + 38;
+	case '/': return offset + 39;
+	}
+	return 0;
+}
+
+static int asciiToMIDI(int asciiKey, int offset = 0) {
+	switch(asciiKey){
+//	case '1': return offset + 0;
+	case '2': return offset + 73;
+	case '3': return offset + 75;
+//	case '4': return offset + 3;
+	case '5': return offset + 78;
+	case '6': return offset + 80;
+	case '7': return offset + 82;
+//	case '8': return offset + 7;
+	case '9': return offset + 85;
+	case '0': return offset + 87;
+
+	case 'q': return offset + 72;
+	case 'w': return offset + 74;
+	case 'e': return offset + 76;
+	case 'r': return offset + 77;
+	case 't': return offset + 79;
+	case 'y': return offset + 81;
+	case 'u': return offset + 83;
+	case 'i': return offset + 84;
+	case 'o': return offset + 86;
+	case 'p': return offset + 88;
+
+//	case 'a': return offset + 20;
+	case 's': return offset + 61;
+	case 'd': return offset + 63;
+//	case 'f': return offset + 23;
+	case 'g': return offset + 66;
+	case 'h': return offset + 68;
+	case 'j': return offset + 70;
+//	case 'k': return offset + 27;
+	case 'l': return offset + 73;
+	case ';': return offset + 75;
+
+	case 'z': return offset + 60;
+	case 'x': return offset + 62;
+	case 'c': return offset + 64;
+	case 'v': return offset + 65;
+	case 'b': return offset + 67;
+	case 'n': return offset + 69;
+	case 'm': return offset + 71;
+	case ',': return offset + 72;
+	case '.': return offset + 74;
+	case '/': return offset + 76;
+	}
+	return 0;
+}
 
 /**
  * @brief The SynthVoice class
@@ -207,12 +308,12 @@ public:
      * chain after setting its properties, otherwise it will be lost.
      */
     template<class TSynthVoice>
-    TSynthVoice &getVoice() {
+    TSynthVoice *getVoice() {
         std::unique_lock<std::mutex> lk(mFreeVoiceLock); // Only one getVoice() call at a time
         SynthVoice *freeVoice = mFreeVoices;
         SynthVoice *previousVoice = nullptr;
         while (freeVoice) {
-            if (typeid(freeVoice) == typeid (TSynthVoice)) {
+            if (std::type_index(typeid(*freeVoice)) == std::type_index(typeid(TSynthVoice))) {
                 if (previousVoice) {
                     previousVoice->next = freeVoice->next;
                 } else {
@@ -228,7 +329,7 @@ public:
             std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
             freeVoice = new TSynthVoice;
         }
-        return *static_cast<TSynthVoice *>(freeVoice);
+        return static_cast<TSynthVoice *>(freeVoice);
     }
 
     /**
@@ -479,9 +580,9 @@ public:
         auto insertedEvent = mEvents.insert(position, SynthSequencerEvent());
         insertedEvent->startTime = startTime;
         insertedEvent->duration = duration;
-        auto &newVoice = mPolySynth.getVoice<TSynthVoice>();
-        insertedEvent->voice = &newVoice;
-        return newVoice;
+        TSynthVoice *newVoice = mPolySynth.getVoice<TSynthVoice>();
+        insertedEvent->voice = newVoice;
+        return *newVoice;
     }
 
     /**
