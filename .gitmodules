@@ -7,3 +7,6 @@
 [submodule "external/Gamma"]
 	path = external/Gamma
 	url = git@github.com:AlloSphere-Research-Group/Gamma.git
+[submodule "external/imgui"]
+	path = external/imgui
+	url = https://github.com/ocornut/imgui.git

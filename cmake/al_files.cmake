@@ -113,6 +113,7 @@ set(util_headers
   ${al_path}/include/al/util/al_Array.hpp
   ${al_path}/include/al/util/ui/al_Composition.hpp
   ${al_path}/include/al/util/ui/al_Parameter.hpp
+  ${al_path}/include/al/util/imgui/imgui_impl_glfw_gl3.h
   # ${al_path}/include/al/util/ui/al_ParameterMIDI.hpp
   ${al_path}/include/al/util/ui/al_Preset.hpp
   ${al_path}/include/al/util/ui/al_PresetMapper.hpp
@@ -125,6 +126,7 @@ set(util_headers
 set(util_sources
   ${al_path}/src/util/al_Array_C.c
   ${al_path}/src/util/al_Array.cpp
+  ${al_path}/src/util/imgui/imgui_impl_glfw_gl3.cpp
   ${al_path}/src/util/ui/al_Composition.cpp
   ${al_path}/src/util/ui/al_Parameter.cpp
   ${al_path}/src/util/ui/al_Preset.cpp
