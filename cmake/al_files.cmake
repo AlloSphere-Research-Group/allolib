@@ -135,6 +135,7 @@ set(util_sources
   ${al_path}/src/util/ui/al_PresetSequencer.cpp
   ${al_path}/src/util/ui/al_Composition.cpp
   ${al_path}/src/util/ui/al_SequenceRecorder.cpp
+  ${al_path}/src/util/ui/al_SynthSequencer.cpp
 )
 
 set(al_headers

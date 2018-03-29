@@ -240,8 +240,8 @@ class AudioIO : public AudioIOData {
   /// Add an AudioCallback handler (internal callback is always called first)
   AudioIO &append(AudioCallback &v);
   AudioIO &prepend(AudioCallback &v);
-  AudioIO &insertBefore(AudioCallback &v);
-  AudioIO &insertAfter(AudioCallback &v);
+  AudioIO &insertBefore(AudioCallback &v, AudioCallback &beforeThis);
+  AudioIO &insertAfter(AudioCallback &v, AudioCallback &afterThis);
 
   /// Remove all input event handlers matching argument
   AudioIO &remove(AudioCallback &v);

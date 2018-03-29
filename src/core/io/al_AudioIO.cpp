@@ -1006,9 +1006,9 @@ AudioIO &AudioIO::prepend(AudioCallback &v) {
   return *this;
 }
 
-AudioIO &AudioIO::insertBefore(AudioCallback &v) {
+AudioIO &AudioIO::insertBefore(AudioCallback &v, AudioCallback &beforeThis) {
   std::vector<AudioCallback *>::iterator pos =
-      std::find(mAudioCallbacks.begin(), mAudioCallbacks.end(), &v);
+      std::find(mAudioCallbacks.begin(), mAudioCallbacks.end(), &beforeThis);
   if (pos == mAudioCallbacks.begin()) {
     prepend(v);
   } else {
@@ -1017,9 +1017,9 @@ AudioIO &AudioIO::insertBefore(AudioCallback &v) {
   return *this;
 }
 
-AudioIO &AudioIO::insertAfter(AudioCallback &v) {
+AudioIO &AudioIO::insertAfter(AudioCallback &v, AudioCallback &afterThis) {
   std::vector<AudioCallback *>::iterator pos =
-      std::find(mAudioCallbacks.begin(), mAudioCallbacks.end(), &v);
+      std::find(mAudioCallbacks.begin(), mAudioCallbacks.end(), &afterThis);
   if (pos == mAudioCallbacks.end()) {
     append(v);
   } else {

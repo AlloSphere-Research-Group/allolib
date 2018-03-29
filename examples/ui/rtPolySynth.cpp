@@ -19,6 +19,9 @@
 using namespace gam;
 using namespace al;
 
+
+Domain graphicsDomain; // This determines the clock for graphics processors
+
 // Create a sub class of SynthVoice to determine what each voice should do
 // in the onProcess() audio and video callbacks.
 // Add functions to set voice parameters (per instance parameters)
@@ -32,7 +35,11 @@ public:
         set (1.5, 60, 0.3, 1, 2);
         mAmpEnv.curve(0); // make segments lines
         mAmpEnv.levels(0,1,1,0);
+        mAmpEnv.sustainPoint(2);
 
+        mSpatialEnv.domain(graphicsDomain); // This envelope runs in the graphics domain
+        mSpatialEnv.levels(0, 3, 2.5, 0);
+        mSpatialEnv.sustainPoint(2);
         addSphere(mMesh, 0.2, 30, 30);
     }
 
@@ -72,11 +79,12 @@ public:
     }
 
     virtual void onProcess(Graphics &g) {
+        float spatialEnv = mSpatialEnv();
         g.pushMatrix();
         g.blendOn();
-        g.translate(mOsc.freq()/500 - 3,  pow(mAmp, 0.3), -8);
+        g.translate(mOsc.freq()/500 - 3,  pow(mAmp, 0.3) + spatialEnv - 2, -8);
         g.scale(1- mDur, mDur, 1);
-        g.color(1, mOsc.freq()/1000, mEnvFollow.value());
+        g.color(mSpatialEnv(), mOsc.freq()/1000, mEnvFollow.value());
         g.draw(mMesh);
         g.popMatrix();
     }
@@ -84,6 +92,13 @@ public:
     virtual void onTriggerOn() override {
         mAmpEnv.totalLength(mDur, 1);
         mAmpEnv.reset();
+        mSpatialEnv.totalLength(mDur);
+        mSpatialEnv.reset();
+    }
+
+    virtual void onTriggerOff() override {
+        mAmpEnv.release();
+        mSpatialEnv.release();
     }
 
 protected:
@@ -95,6 +110,7 @@ protected:
     Env<3> mAmpEnv;
     EnvFollow<> mEnvFollow;
 
+    Env<3> mSpatialEnv;
     Mesh mMesh;
 };
 
@@ -114,13 +130,22 @@ public:
         pSynth.render(g);
     }
 
-    virtual void onKeyDown(Keyboard const& k) {
+    virtual void onKeyDown(Keyboard const& k) override {
         int midiNote = asciiToMIDI(k.key());
         if (midiNote > 0) {
             float frequency = ::pow(2., (midiNote - 69.)/12.) * 440.;
             SineEnv *voice = pSynth.getVoice<SineEnv>();
             voice->freq(frequency);
             pSynth.triggerOn(voice, 0, midiNote);
+        }
+    }
+    virtual void onKeyUp(Keyboard const& k) override {
+        int midiNote = asciiToMIDI(k.key());
+        if (midiNote > 0) {
+            float frequency = ::pow(2., (midiNote - 69.)/12.) * 440.;
+            SineEnv *voice = pSynth.getVoice<SineEnv>();
+            voice->freq(frequency);
+            pSynth.triggerOff(midiNote);
         }
     }
 
@@ -141,6 +166,10 @@ int main(){
 
     // Start everything
     app.initAudio(44100., 256, 2, 0);
+
+    // Set up processing domains
     Domain::master().spu(app.audioIO().framesPerSecond());
+    graphicsDomain.spu(app.fpsWanted());
+
     app.start();
 }
