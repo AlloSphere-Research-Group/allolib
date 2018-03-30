@@ -59,9 +59,9 @@ endif ()
 
 # first build dependencies
 
-set(GLFW_BUILD_EXAMPLES OFF)
-set(GLFW_BUILD_TESTS OFF)
-set(GLFW_BUILD_DOCS OFF)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
 if (DEFINED CMAKE_CONFIGURATION_TYPES)
   add_subdirectory(${al_path}/external/Gamma ${al_path}/external/Gamma/build)
