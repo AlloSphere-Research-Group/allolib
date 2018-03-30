@@ -28,6 +28,8 @@ external/glew/glew.pc
 # file formats
 *.a
 *.lib
+*.so
+*.dylib
 
 # ide stuff
 **/Debug
