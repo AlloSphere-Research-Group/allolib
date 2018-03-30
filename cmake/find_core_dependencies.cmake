@@ -17,8 +17,8 @@ if (AL_WINDOWS)
 else ()
 
   find_package(GLEW REQUIRED)
-  find_package(PkgConfig REQUIRED)
-  pkg_search_module(GLFW REQUIRED glfw3)
+  # find_package(PkgConfig REQUIRED)
+  # pkg_search_module(GLFW REQUIRED glfw3)
 
 endif (AL_WINDOWS)
 
@@ -33,15 +33,15 @@ set(CORE_LIBRARIES
     # ${GLFW_LIBRARIES}
 )
 
-if (${GLFW_LIBRARIES} STREQUAL "glfw3")
-  if (AL_VERBOSE_OUTPUT)
-    message("using static version of glfw")
-  endif()
-  if (AL_MACOS)
-    list(APPEND CORE_LIBRARIES "-framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreVideo")
-  elseif(AL_LINUX)
-  endif()
-endif()
+# if (${GLFW_LIBRARIES} STREQUAL "glfw3")
+#   if (AL_VERBOSE_OUTPUT)
+#     message("using static version of glfw")
+#   endif()
+#   if (AL_MACOS)
+#     list(APPEND CORE_LIBRARIES "-framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreVideo")
+#   elseif(AL_LINUX)
+#   endif()
+# endif()
 
 set(CORE_LIBRARY_DIRS
     # ${GLFW_LIBRARY_DIRS}
