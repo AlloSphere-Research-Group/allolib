@@ -256,7 +256,6 @@ bool Window::implCreate(bool is_verbose) {
   }
 
   mImpl->makeCurrent();
-  glfwFocusWindow(mImpl->mGLFWwindow);
   glfwSetWindowPos(mImpl->mGLFWwindow, mDim.l, mDim.t);
 
   // sometimes OS makes window's size different from what we requested (usually
