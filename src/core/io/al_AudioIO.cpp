@@ -1160,6 +1160,7 @@ void AudioIO::framesPerBuffer(unsigned int n) {
 }
 
 bool AudioIO::start() {
+  if (!mBackend->isOpen()) open();
   return mBackend->start(mFramesPerSecond, mFramesPerBuffer, this);
 }
 
