@@ -58,13 +58,21 @@ endif ()
 # --- NOW WE ARE READY TO SETUP THE LIBRARY TARGET ---------------------
 
 # first build dependencies
+
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(GLFW_BUILD_DOCS OFF)
+
 if (DEFINED CMAKE_CONFIGURATION_TYPES)
   add_subdirectory(${al_path}/external/Gamma ${al_path}/external/Gamma/build)
+  add_subdirectory(${al_path}/external/glfw ${al_path}/external/glfw/build)
 else()
   if (${CMAKE_BUILD_TYPE} MATCHES Debug)
     add_subdirectory(${al_path}/external/Gamma ${al_path}/external/Gamma/build/Debug)
+    add_subdirectory(${al_path}/external/glfw ${al_path}/external/glfw/build/Debug)
   else()
     add_subdirectory(${al_path}/external/Gamma ${al_path}/external/Gamma/build/Release)
+    add_subdirectory(${al_path}/external/glfw ${al_path}/external/glfw/build/Release)
   endif()
 endif ()
 
@@ -100,7 +108,9 @@ target_include_directories(al PUBLIC
 )
 
 # libs
-target_link_libraries(al PUBLIC ${libs_to_link})
+target_link_libraries(al PUBLIC ${libs_to_link} Gamma glfw)
 
 # --- Testing -----------------------------------------
-add_subdirectory(test)
+if (ALLOLIB_BUILD_TESTS)
+  add_subdirectory(test)
+endif()

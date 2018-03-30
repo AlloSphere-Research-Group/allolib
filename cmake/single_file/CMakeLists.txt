@@ -83,7 +83,7 @@ else ()
   target_compile_options(${app_name} PRIVATE "-Wall")
 endif (AL_WINDOWS)
 
-target_link_libraries(${app_name} al Gamma)
+target_link_libraries(${app_name} al)
 
 if (AL_WINDOWS)
   # when run from Visual Studio, working directory is where the solution is by default
