@@ -6,6 +6,8 @@
 !**/bin/data
 
 **/build
+!external/glew/build
+external/glew/build/build
 
 # only top level al folder
 /al/
