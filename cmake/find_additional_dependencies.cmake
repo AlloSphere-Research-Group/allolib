@@ -89,34 +89,3 @@ if (FREETYPE_INCLUDE_DIRS)
   list(APPEND ADDITIONAL_HEADERS ${al_path}/include/al/util/al_Font.hpp)
   list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_Font.cpp)
 endif()
-
-
-# EXPORT SEARCH RESULTS AND FILE LISTS -----------------------------------------
-
-# set(ADDITIONAL_INCLUDE_DIRS
-# 	${APR_INCLUDE_DIRS}
-#   ${FREEIMAGE_INCLUDE_PATH}
-#   ${ASSIMP_INCLUDE_DIR}
-#   ${FREETYPE_INCLUDE_DIRS}
-# )
-
-# set(ADDITIONAL_LIBRARIES
-# 	${APR_LIBRARIES}
-#   ${FREEIMAGE_LIBRARY}
-#   ${ASSIMP_LIBRARY}
-#   ${FREETYPE_LIBRARY}
-# )
-
-# set(ADDITIONAL_HEADERS
-#   ${FREEIMAGE_HEADERS}
-# 	${APR_HEADERS}
-#   ${assimp_headers}
-#   ${freetype_headers}
-# )
-
-# set(ADDITIONAL_SOURCES
-#   ${FREEIMAGE_SOURCES}
-# 	${APR_SOURCES}
-#   ${assimp_sources}
-#   ${freetype_sources}
-# )

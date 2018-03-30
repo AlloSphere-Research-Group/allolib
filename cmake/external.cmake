@@ -4,6 +4,7 @@
 #   EXTERNAL_LIBRARIES EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
 #   EXTERNAL_DEFINITIONS
 
+# al_path needs to be set prior to calling this script
 
 set(AudioAPI "rtaudio" CACHE STRING "Library for Audio IO")
 set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
