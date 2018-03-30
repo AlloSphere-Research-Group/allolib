@@ -22,6 +22,11 @@ else
   AL_LIB_PATH=${INITIALDIR}/${SCRIPT_PATH}
 fi
 
+# Get the number of processors on OS X; Linux; or MSYS2, or take a best guess.
+NPROC=$(grep --count ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu || nproc || echo 2)
+# Save one core for the gui.
+PROC_FLAG=$((NPROC - 1))
+
 # resolve flags ###############################################################
 
 # check if we want debug build
@@ -80,7 +85,7 @@ mkdir -p ${BUILD_TYPE}
 cd ${BUILD_TYPE}
 
 cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Dal_path=${AL_LIB_PATH} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${AL_LIB_PATH}/cmake/example > cmake_log.txt
-make
+make -j$PROC_FLAG
 APP_BUILD_RESULT=$?
 # if app failed to build, exit
 if [ ${APP_BUILD_RESULT} != 0 ]; then
@@ -96,4 +101,15 @@ fi
 # (app's cmake is set to put binary in 'bin')
 cd ${INITIALDIR}
 cd ${APP_PATH}/bin
-./"${APP_NAME}${POSTFIX}"
+
+if [ "$(uname -s)" = "Darwin" ]; then
+  DEBUGGER="lldb -o run -ex "
+else
+  DEBUGGER="gdb -ex run "
+fi
+
+if [ ${BUILD_TYPE} == "Release" ]; then
+  ./"${APP_NAME}${POSTFIX}"
+else
+  ${DEBUGGER} ./"${APP_NAME}${POSTFIX}"
+fi
