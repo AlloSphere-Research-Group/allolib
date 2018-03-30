@@ -44,3 +44,5 @@ dependencies/portaudio
 *.db
 x64
 al.dir/
+
+temp

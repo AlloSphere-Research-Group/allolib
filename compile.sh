@@ -16,24 +16,22 @@ else
   AL_LIB_PATH=${INITIALDIR}/${SCRIPT_PATH}
 fi
 
-
 # check if we want debug build
 BUILD_TYPE=Release
 while getopts ":d" opt; do
   case $opt in
   d)
   BUILD_TYPE=Debug
-  POSTFIX=_debug
   shift # consume option
     ;;
   esac
 done
-echo "BUILD TYPE: ${BUILD_TYPE}"
 
-# first build allolib ###########################################################
-echo " "
-echo "___ building allolib __________"
-echo " "
+# Get the number of processors on OS X; Linux; or MSYS2, or take a best guess.
+NPROC=$(grep --count ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu || nproc || echo 2)
+# Save one core for the gui.
+PROC_FLAG=$((NPROC - 1))
+
 cd ${AL_LIB_PATH}
 git submodule init
 git submodule update
@@ -42,4 +40,4 @@ cd build
 mkdir -p "${BUILD_TYPE}"
 cd "${BUILD_TYPE}"
 cmake ../.. -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
-make
+make -j$PROC_FLAG

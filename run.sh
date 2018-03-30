@@ -22,6 +22,11 @@ else
   AL_LIB_PATH=${INITIALDIR}/${SCRIPT_PATH}
 fi
 
+# Get the number of processors on OS X; Linux; or MSYS2, or take a best guess.
+NPROC=$(grep --count ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu || nproc || echo 2)
+# Save one core for the gui.
+PROC_FLAG=$((NPROC - 1))
+
 # resolve flags ###############################################################
 
 # check if we want debug build
@@ -55,41 +60,10 @@ if [ ${IS_VERBOSE} == 1 ]; then
   echo "BUILD TYPE: ${BUILD_TYPE}"
 fi
 
-
-# first build allolib ###########################################################
-echo " "
-echo "___ building allolib __________"
-
-cd ${AL_LIB_PATH}
-git submodule init
-git submodule update
-if [ ${DO_CLEAN} == 1 ]; then
-  if [ ${IS_VERBOSE} == 1 ]; then
-    echo "cleaning build"
-  fi
-  rm -r build
-fi
-mkdir -p build
-cd build
-mkdir -p "${BUILD_TYPE}"
-cd "${BUILD_TYPE}"
-cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ../.. > cmake_log.txt
-make
-LIB_BUILD_RESULT=$?
-# if lib failed to build, exit
-if [ ${LIB_BUILD_RESULT} != 0 ]; then
-  exit 1
-fi
-
-# then build the app ###########################################################
-
 APP_FILE_INPUT="$1" # first argument (assumming we consumed all the options above)
 APP_PATH=$(dirname ${APP_FILE_INPUT})
 APP_FILE=$(basename ${APP_FILE_INPUT})
 APP_NAME=${APP_FILE%.*} # remove extension (once, assuming .cpp)
-
-echo " "
-echo "___ building ${APP_NAME} __________"
 
 # echo "app path: ${APP_PATH}"
 # echo "app file: ${APP_FILE}"
@@ -105,12 +79,13 @@ if [ ${DO_CLEAN} == 1 ]; then
 fi
 mkdir -p build
 cd build
-mkdir -p ${APP_NAME}_${BUILD_TYPE}
-cd ${APP_NAME}_${BUILD_TYPE}
+mkdir -p ${APP_NAME}
+cd ${APP_NAME}
+mkdir -p ${BUILD_TYPE}
+cd ${BUILD_TYPE}
 
-
-cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Dal_path=${AL_LIB_PATH} -DAL_APP_FILE=../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
-make
+cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
+make -j$PROC_FLAG
 APP_BUILD_RESULT=$?
 # if app failed to build, exit
 if [ ${APP_BUILD_RESULT} != 0 ]; then
@@ -126,6 +101,15 @@ fi
 # (app's cmake is set to put binary in 'bin')
 cd ${INITIALDIR}
 cd ${APP_PATH}/bin
-echo " "
-echo "___ running ${APP_NAME} __________"
-./"${APP_NAME}${POSTFIX}"
+
+if [ "$(uname -s)" = "Darwin" ]; then
+  DEBUGGER="lldb -o run -ex "
+else
+  DEBUGGER="gdb -ex run "
+fi
+
+if [ ${BUILD_TYPE} == "Release" ]; then
+  ./"${APP_NAME}${POSTFIX}"
+else
+  ${DEBUGGER} ./"${APP_NAME}${POSTFIX}"
+fi
