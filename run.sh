@@ -39,7 +39,7 @@ while getopts "dncv" opt; do
   case "${opt}" in
   d)
     BUILD_TYPE=Debug
-    POSTFIX=_debug # if release, there's no postfix
+    POSTFIX=d # if release, there's no postfix
     ;;
   n)
     EXIT_AFTER_BUILD=1

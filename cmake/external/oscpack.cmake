@@ -2,7 +2,7 @@
 #   OSCPACK_INCLUDE_DIR
 #   OSCPACK_SRC
 
-set(OSCPACK_INCLUDE_DIR ${al_path}/external/oscpack)
+set(OSCPACK_INCLUDE_DIR external/oscpack)
 
 set(OSCPACK_SRC
   external/oscpack/osc/OscOutboundPacketStream.cpp

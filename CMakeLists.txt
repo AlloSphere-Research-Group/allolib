@@ -38,9 +38,9 @@ set(sources
   ${al_sources} ${EXTERNAL_SRC} ${ADDITIONAL_SOURCES}
 )
 
-set(dirs_to_include
-  ${CORE_INCLUDE_DIRS} ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
-)
+# set(dirs_to_include
+#   ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
+# )
 
 set(libs_to_link
   ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
@@ -49,8 +49,6 @@ set(libs_to_link
 set(definitions
   ${PLATFORM_DEFINITION} ${EXTERNAL_DEFINITIONS} ${ADDITIONAL_DEFINITIONS}
 )
-
-link_directories(${CORE_LIBRARY_DIRS})
 
 # multi configuration generators
 if (DEFINED CMAKE_CONFIGURATION_TYPES)
@@ -69,18 +67,18 @@ set(BUILD_UTILS OFF CACHE BOOL "" FORCE) # for glew
 set(ext_path ${al_path}/external)
 
 if (DEFINED CMAKE_CONFIGURATION_TYPES)
-  add_subdirectory(${ext_path}/Gamma ${ext_path}/Gamma/build)
-  add_subdirectory(${ext_path}/glfw ${ext_path}/glfw/build)
-  add_subdirectory(${ext_path}/glew/build/cmake ${ext_path}/glew/build/build)
+  add_subdirectory(${ext_path}/Gamma ${CAMKE_CURRENT_BINARY_DIR})
+  add_subdirectory(${ext_path}/glfw ${CAMKE_CURRENT_BINARY_DIR})
+  add_subdirectory(${ext_path}/glew/build/cmake ${CAMKE_CURRENT_BINARY_DIR})
 else()
   if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-    add_subdirectory(${ext_path}/Gamma ${ext_path}/Gamma/build/Debug)
-    add_subdirectory(${ext_path}/glfw ${ext_path}/glfw/build/Debug)
-    add_subdirectory(${ext_path}/glew/build/cmake ${ext_path}/glew/build/build/Debug)
+    add_subdirectory(${ext_path}/Gamma ${CAMKE_CURRENT_BINARY_DIR})
+    add_subdirectory(${ext_path}/glfw ${CAMKE_CURRENT_BINARY_DIR})
+    add_subdirectory(${ext_path}/glew/build/cmake ${CAMKE_CURRENT_BINARY_DIR})
   else()
-    add_subdirectory(${ext_path}/Gamma ${ext_path}/Gamma/build/Release)
-    add_subdirectory(${ext_path}/glfw ${ext_path}/glfw/build/Release)
-    add_subdirectory(${ext_path}/glew/build/cmake ${ext_path}/glew/build/build/Release)
+    add_subdirectory(${ext_path}/Gamma ${CAMKE_CURRENT_BINARY_DIR})
+    add_subdirectory(${ext_path}/glfw ${CAMKE_CURRENT_BINARY_DIR})
+    add_subdirectory(${ext_path}/glew/build/cmake ${CAMKE_CURRENT_BINARY_DIR})
   endif()
 endif ()
 
@@ -90,9 +88,10 @@ add_library(al STATIC ${headers} ${sources})
 #paths
 set_target_properties(al
   PROPERTIES
-  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib
-  ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/lib/Debug
-  ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/lib/Release
+  DEBUG_POSTFIX d
+  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib
+  ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR}/lib
+  ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR}/lib
 )
 
 #flags
@@ -110,10 +109,26 @@ set_target_properties(al PROPERTIES CXX_STANDARD_REQUIRED ON)
 target_compile_definitions(al PUBLIC ${definitions})
 
 # include dirs
+# target_include_directories(al PUBLIC
+#   ${al_path}/include
+#   ${dirs_to_include}
+# )
+
 target_include_directories(al PUBLIC
-  ${al_path}/include
-  ${dirs_to_include}
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
 )
+
+# use external include dirs when building,
+# when installed, external headers will be in `include`
+# so only `include` needs to be specified as include directory
+foreach (dir ${EXTERNAL_INCLUDE_DIRS})
+  target_include_directories(al PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${dir}>"
+  )
+endforeach (dir)
+
+target_include_directories(al PUBLIC ${ADDITIONAL_INCLUDE_DIRS})
 
 # libs
 target_link_libraries(al PUBLIC ${libs_to_link} Gamma glfw glew_s)
@@ -122,3 +137,27 @@ target_link_libraries(al PUBLIC ${libs_to_link} Gamma glfw glew_s)
 if (ALLOLIB_BUILD_TESTS)
   add_subdirectory(test)
 endif()
+
+# ----- INSTALL ----------------------------------------------------------------
+#
+# [!] dependent targets (glew_s, glfw, and Gamma) shoud have install target also
+
+set(CMAKE_INSTALL_PREFIX ${al_path}/al)
+
+install(TARGETS al
+  EXPORT al-targets
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+
+install(EXPORT al-targets DESTINATION lib/cmake)
+install(DIRECTORY ${al_path}/include/al DESTINATION include)
+
+install(DIRECTORY external/oscpack/ip DESTINATION include)
+install(DIRECTORY external/oscpack/osc DESTINATION include)
+install(FILES external/imgui/imgui.h DESTINATION include)
+install(FILES external/imgui/imconfig.h DESTINATION include)
+install(FILES external/rtaudio/RtAudio.h DESTINATION include)
+install(FILES external/rtmidi/rtmidi_c.h external/rtmidi/RtMidi.h
+        DESTINATION include)

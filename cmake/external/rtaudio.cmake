@@ -15,8 +15,8 @@ if(IS_DIRECTORY "${al_path}/external/rtaudio")
 
   add_definitions(-DAL_AUDIO_RTAUDIO)
 
-  set(RTAUDIO_INCLUDE_DIR ${al_path}/external/rtaudio)
-  set(RTAUDIO_SRC external/rtaudio/RtAudio.cpp)
+  set(RTAUDIO_INCLUDE_DIR external/rtaudio)
+  set(RTAUDIO_SRC ${al_path}/external/rtaudio/RtAudio.cpp)
 
   if(AL_LINUX)
     if(RtAudioLinuxAPI STREQUAL "pulse")
