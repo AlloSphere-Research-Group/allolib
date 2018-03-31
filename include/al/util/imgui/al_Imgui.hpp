@@ -10,7 +10,12 @@ namespace al {
 inline void initIMGUI()
 {
   ImGui::CreateContext();
-  ImGui_ImplGlfwGL3_Init(glfwGetCurrentContext(), false);
+  auto* window = glfwGetCurrentContext();
+  // false: don't register glfw event callbacks, allolib will handle them
+  ImGui_ImplGlfwGL3_Init(window, false);
+  // scroll and char callback are not handled by allolib
+  glfwSetScrollCallback(window, ImGui_ImplGlfw_ScrollCallback);
+  glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
 }
 
 inline void beginIMGUI()
