@@ -151,7 +151,7 @@ install(TARGETS al
   ARCHIVE DESTINATION lib
 )
 
-install(EXPORT al-targets DESTINATION lib/cmake)
+install(EXPORT al-targets DESTINATION lib/cmake/al)
 install(DIRECTORY ${al_path}/include/al DESTINATION include)
 
 install(DIRECTORY external/oscpack/ip DESTINATION include)
