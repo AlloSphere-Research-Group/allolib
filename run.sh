@@ -6,6 +6,15 @@ if [ $# == 0 ]; then
   exit 1
 fi
 
+if [ $(uname -s) == "Darwin" ]; then
+  CURRENT_OS="MACOS"
+  # echo "running on macOS"
+fi
+
+if [ $(uname -s) == "Linux" ]; then
+  CURRENT_OS="LINUX"
+fi
+
 INITIALDIR=${PWD} # gives absolute path
 # echo "Script executed from: ${INITIALDIR}"
 
@@ -27,9 +36,7 @@ NPROC=$(grep --count ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu |
 # Save one core for the gui.
 PROC_FLAG=$((NPROC - 1))
 
-# resolve flags ###############################################################
-
-# check if we want debug build
+# resolve flags
 BUILD_TYPE=Release
 DO_CLEAN=0
 IS_VERBOSE=0
@@ -69,26 +76,29 @@ APP_NAME=${APP_FILE%.*} # remove extension (once, assuming .cpp)
 # echo "app file: ${APP_FILE}"
 # echo "app name: ${APP_NAME}"
 
-cd ${INITIALDIR}
-cd ${APP_PATH}
-if [ ${DO_CLEAN} == 1 ]; then
-  if [ ${IS_VERBOSE} == 1 ]; then
-    echo "cleaning build"
+(
+  cd ${APP_PATH}
+  if [ ${DO_CLEAN} == 1 ]; then
+    if [ ${IS_VERBOSE} == 1 ]; then
+      echo "cleaning build"
+    fi
+    rm -r build
   fi
-  rm -r build
-fi
-mkdir -p build
-cd build
-mkdir -p ${APP_NAME}
-cd ${APP_NAME}
-mkdir -p ${BUILD_TYPE}
-cd ${BUILD_TYPE}
+  mkdir -p build
+  cd build
+  mkdir -p ${APP_NAME}
+  cd ${APP_NAME}
+  mkdir -p ${BUILD_TYPE}
+  cd ${BUILD_TYPE}
 
-cmake -Wno-deprecated -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
-make -j$PROC_FLAG
+  cmake -Wno-deprecated -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
+  make -j$PROC_FLAG
+)
+
 APP_BUILD_RESULT=$?
 # if app failed to build, exit
 if [ ${APP_BUILD_RESULT} != 0 ]; then
+  echo "app ${APP_NAME} failed to build"
   exit 1
 fi
 
@@ -96,13 +106,13 @@ if [ ${EXIT_AFTER_BUILD} ]; then
   exit 0
 fi
 
-# run app ######################################################################
+# run app
 # go to where the binary is so we have cwd there
 # (app's cmake is set to put binary in 'bin')
 cd ${INITIALDIR}
 cd ${APP_PATH}/bin
 
-if [ "$(uname -s)" = "Darwin" ]; then
+if [ "${CURRENT_OS}" = "MACOS" ]; then
   DEBUGGER="lldb -o run -ex "
 else
   DEBUGGER="gdb -ex run "
