@@ -14,7 +14,3 @@ set(app_include_dirs
 # other libraries to link?
 set(app_link_libs
 )
-
-# where is allolib?
-# this doesn't get used if app is run via run script in Linux or MacOS
-set(user_al_path ${app_path}/..)
