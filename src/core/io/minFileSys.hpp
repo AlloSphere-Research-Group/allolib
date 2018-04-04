@@ -307,6 +307,7 @@ inline bool deleteDir(std::string const& dir_path)
 #endif
 }
 
+#ifdef ITS_WINDOWS
 inline bool move_files_to_temp_dir_recursively_and_delete_original_folder(std::string d, std::string tempd)
 {
 	//std::cout << "move_files_to_temp_dir_recursively on " << d << std::endl;
@@ -374,6 +375,7 @@ inline bool delete_files_that_starts_with(std::string prefix)
 	}
 	return true;
 }
+#endif // ITS_WINDOWS
 
 inline bool deleteDirRecursively(std::string const& dir_path)
 {
