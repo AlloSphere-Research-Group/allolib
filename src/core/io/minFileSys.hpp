@@ -239,8 +239,18 @@ bool createDir(std::string const& path)
     }
 
 #ifdef ITS_WINDOWS
-    // TODO ...
-    return false;
+    // Create all intermediate dirs up to last one
+    for(unsigned i=0; i<path.size(); ++i){
+        if(path[i] == '/'){
+            if(CreateDirectory(path.substr(0, i+1).c_str(), NULL) != 0){
+                if(GetLastError() != ERROR_ALREADY_EXISTS) {
+                    std::cout << "[!] [createDir] Error creating directory " << path << std::endl;
+                    return false;
+                }
+            }
+        }
+    }
+    return CreateDirectory(path.c_str(), NULL) != 0;
 #endif
 
 #ifdef ITS_POSIX
@@ -259,7 +269,7 @@ bool createDir(std::string const& path)
     // ALLOSYSTEM CODE
     // recursively create directories
     for (unsigned i = 0; i < path.size(); ++i) {
-        if (path[i] == '/' || i == path.size() - 1) {
+        if (path[i] == '/') {
             if (mkdir(path.substr(0, i+1).c_str(), mode) != 0) {
                 if (errno != EEXIST) {
                     std::cout << "[!] [createDir] Error creating directory " << path << std::endl;
@@ -268,7 +278,7 @@ bool createDir(std::string const& path)
             }
         }
     }
-    return true;
+    return mkdir(path.c_str(), mode) == 0;
 #endif
 }
 
@@ -280,7 +290,9 @@ bool deleteDir(std::string const& dir_path)
     }
 
 #ifdef ITS_WINDOWS
-    // TODO ...
+    if(RemoveDirectory(dir_path.c_str()) != 0){
+        return true;
+    }
     return false;
 #endif
 
@@ -320,6 +332,16 @@ bool deleteDirRecursively(std::string const& dir_path)
 
 } // namespace minFileSys
 
+#if defined(ITS_WINDOWS)
+#undef ITS_WINDOWS
+#endif
+
+#if defined(ITS_MACOS)
+#undef ITS_MACOS
+#endif
+
+#if defined(ITS_POSIX)
+#undef ITS_POSIX
 #endif
 
 // DOCUMENTATION ---------------------------------------------------------------
