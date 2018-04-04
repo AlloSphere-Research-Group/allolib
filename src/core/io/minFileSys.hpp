@@ -344,6 +344,8 @@ bool deleteDirRecursively(std::string const& dir_path)
 #undef ITS_POSIX
 #endif
 
+#endif
+
 // DOCUMENTATION ---------------------------------------------------------------
 
 /*
