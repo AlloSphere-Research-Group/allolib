@@ -19,9 +19,11 @@ public:
   /// @param[in] blockSize. Number of sample frames to process per callback
   /// @param[in] outputChannels. Number of output channels to open. -1 for all
   /// @param[in] inputChannels. Number of input channels to open. -1 for all
+  /// @param[in] device. Hardware device to use. -1 for default device
   void initAudio(
     double audioRate, int audioBlockSize,
-    int audioOutputs, int audioInputs
+    int audioOutputs, int audioInputs,
+    int device = -1
   );
 
   // initialize audio with default values from default device
@@ -32,6 +34,7 @@ public:
       IN_AND_OUT = 0b11
   };
   void initAudio(AudioIOConfig config = OUT_ONLY);
+
 
   bool usingAudio() const;
   void beginAudio();

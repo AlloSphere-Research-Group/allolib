@@ -10,9 +10,13 @@ static void AppAudioCB(AudioIOData& io){
 
 void AudioApp::initAudio(
   double audioRate, int audioBlockSize,
-  int audioOutputs, int audioInputs
+  int audioOutputs, int audioInputs,
+  int device
 ) {
   mAudioIO.init(AppAudioCB, this, audioBlockSize, audioRate, audioOutputs, audioInputs);
+  if (device >= 0) {
+       mAudioIO.device(device);
+  }
   mAudioIO.open();
 }
 
