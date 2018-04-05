@@ -68,7 +68,7 @@ endif ()
 add_executable(${app_name} ${app_files_list})
 
 set_target_properties(${app_name} PROPERTIES
-    DEBUG_POSTFIX _debug
+    DEBUG_POSTFIX d
     RUNTIME_OUTPUT_DIRECTORY ${app_path}/bin
     RUNTIME_OUTPUT_DIRECTORY_DEBUG ${app_path}/bin
     RUNTIME_OUTPUT_DIRECTORY_RELEASE ${app_path}/bin
@@ -83,7 +83,7 @@ else ()
   target_compile_options(${app_name} PRIVATE "-Wall")
 endif (AL_WINDOWS)
 
-target_link_libraries(${app_name} al Gamma)
+target_link_libraries(${app_name} al)
 
 if (AL_WINDOWS)
   # when run from Visual Studio, working directory is where the solution is by default

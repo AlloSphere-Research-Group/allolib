@@ -67,7 +67,7 @@ std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 namespace minFileSys {
 
-std::string addPath(std::string parent, std::string const& child)
+inline std::string addPath(std::string parent, std::string const& child)
 {
 #ifdef ITS_WINDOWS
     if (parent[parent.size() - 1] != '\\') parent += "\\";
@@ -83,7 +83,7 @@ std::string addPath(std::string parent, std::string const& child)
 }
 
 // http://www.martinbroadhurst.com/list-the-files-in-a-directory-in-c.html
-void readDir(const std::string& name, std::vector<std::string>& v)
+inline void readDir(const std::string& name, std::vector<std::string>& v)
 {
     if (!pathExists(name)) {
         std::cout << "[!] [readDir] " << name << " does not exist" << std::endl;
@@ -105,6 +105,8 @@ void readDir(const std::string& name, std::vector<std::string>& v)
     if ((hFind = FindFirstFileA(pattern.c_str(), &data)) != INVALID_HANDLE_VALUE)
     {
         do {
+			if (std::strcmp(data.cFileName, ".") == 0) continue;
+			if (std::strcmp(data.cFileName, "..") == 0) continue;
             // unicode
             // v.push_back(converter.to_bytes(data.cFileName));
 
@@ -127,7 +129,7 @@ void readDir(const std::string& name, std::vector<std::string>& v)
 #endif
 }
 
-bool pathExists(std::string const& path)
+inline bool pathExists(std::string const& path)
 {
 #ifdef ITS_WINDOWS
     // unicode
@@ -142,7 +144,7 @@ bool pathExists(std::string const& path)
 #endif
 }
 
-bool isPathDir(std::string const& path)
+inline bool isPathDir(std::string const& path)
 {
 #ifdef ITS_WINDOWS
     // unicode
@@ -160,7 +162,7 @@ bool isPathDir(std::string const& path)
 #endif
 }
 
-bool isDirEmpty(std::string const& dir_path)
+inline bool isDirEmpty(std::string const& dir_path)
 {
 #ifdef ITS_WINDOWS
     std::string pattern(dir_path);
@@ -178,7 +180,6 @@ bool isDirEmpty(std::string const& dir_path)
     if ((hFind = FindFirstFileA(pattern.c_str(), &data)) != INVALID_HANDLE_VALUE)
     {
         do {
-            // does windows also have these aliases?
             if (std::strcmp(data.cFileName, ".") == 0) continue;
             if (std::strcmp(data.cFileName, "..") == 0) continue;
             FindClose(hFind);
@@ -204,7 +205,7 @@ bool isDirEmpty(std::string const& dir_path)
 #endif
 }
 
-void copyFile(std::string const& orig, std::string const& cpyd)
+inline void copyFile(std::string const& orig, std::string const& cpyd)
 {
     std::ifstream origStream{ orig, std::ios::binary };
     std::ofstream cpydStream{ cpyd, std::ios::binary };
@@ -213,7 +214,7 @@ void copyFile(std::string const& orig, std::string const& cpyd)
     cpydStream.close();
 }
 
-bool deleteFile(std::string const& f)
+inline bool deleteFile(std::string const& f)
 {
 #ifdef ITS_WINDOWS
     // unicode
@@ -231,7 +232,7 @@ bool deleteFile(std::string const& f)
 #endif
 }
 
-bool createDir(std::string const& path)
+inline bool createDir(std::string const& path)
 {
     if (pathExists(path)) {
         std::cout << "[!] [createDir] " << path << " already exists" << std::endl;
@@ -239,8 +240,18 @@ bool createDir(std::string const& path)
     }
 
 #ifdef ITS_WINDOWS
-    // TODO ...
-    return false;
+    // Create all intermediate dirs up to last one
+    for(unsigned i=0; i<path.size(); ++i){
+        if(path[i] == '/'){
+            if(CreateDirectory(path.substr(0, i+1).c_str(), NULL) != 0){
+                if(GetLastError() != ERROR_ALREADY_EXISTS) {
+                    std::cout << "[!] [createDir] Error creating directory " << path << std::endl;
+                    return false;
+                }
+            }
+        }
+    }
+    return CreateDirectory(path.c_str(), NULL) != 0;
 #endif
 
 #ifdef ITS_POSIX
@@ -259,7 +270,7 @@ bool createDir(std::string const& path)
     // ALLOSYSTEM CODE
     // recursively create directories
     for (unsigned i = 0; i < path.size(); ++i) {
-        if (path[i] == '/' || i == path.size() - 1) {
+        if (path[i] == '/') {
             if (mkdir(path.substr(0, i+1).c_str(), mode) != 0) {
                 if (errno != EEXIST) {
                     std::cout << "[!] [createDir] Error creating directory " << path << std::endl;
@@ -268,11 +279,11 @@ bool createDir(std::string const& path)
             }
         }
     }
-    return true;
+    return mkdir(path.c_str(), mode) == 0;
 #endif
 }
 
-bool deleteDir(std::string const& dir_path)
+inline bool deleteDir(std::string const& dir_path)
 {
     if (!pathExists(dir_path)) {
         std::cout << "[!] [deleteDir] " << dir_path << " does not exist" << std::endl;
@@ -280,7 +291,9 @@ bool deleteDir(std::string const& dir_path)
     }
 
 #ifdef ITS_WINDOWS
-    // TODO ...
+    if(RemoveDirectory(dir_path.c_str()) != 0){
+        return true;
+    }
     return false;
 #endif
 
@@ -294,13 +307,111 @@ bool deleteDir(std::string const& dir_path)
 #endif
 }
 
-bool deleteDirRecursively(std::string const& dir_path)
+#ifdef ITS_WINDOWS
+inline bool move_files_to_temp_dir_recursively_and_delete_original_folder(std::string d, std::string tempd)
+{
+	//std::cout << "move_files_to_temp_dir_recursively on " << d << std::endl;
+	std::string pattern(d);
+	pattern.append("\\*");
+	WIN32_FIND_DATAA data;
+	HANDLE hFind;
+	if ((hFind = FindFirstFileA(pattern.c_str(), &data)) != INVALID_HANDLE_VALUE) {
+		do {
+			if (std::strcmp(data.cFileName, ".") == 0) continue;
+			if (std::strcmp(data.cFileName, "..") == 0) continue;
+
+			std::string child = d;
+			child.append("\\");
+			child.append(data.cFileName);
+
+			auto attr = GetFileAttributesA(child.c_str());
+			bool is_dir = attr & FILE_ATTRIBUTE_DIRECTORY;
+			//std::cout << data.cFileName << " is dir? " << (is_dir ? 1 : 0) << std::endl;
+			if (is_dir) {
+				bool result = move_files_to_temp_dir_recursively_and_delete_original_folder(child, tempd);
+				if (!result) return false;
+			}
+			else {
+				std::string new_file_path = tempd;
+				new_file_path.append("\\");
+				new_file_path.append("minfilesys_file_to_be_deleted_");
+				new_file_path.append(data.cFileName);
+				while (MoveFile(child.c_str(), new_file_path.c_str()) == 0) {
+					auto err = GetLastError();
+					if (err == ERROR_ALREADY_EXISTS) {
+						new_file_path.append("1");
+					}
+					else {
+						std::cout << "error moving file for deletion " << err << std::endl;
+						return false;
+					}
+				}
+				//std::cout << data.cFileName << std::endl;
+			}
+		}
+		while (FindNextFileA(hFind, &data) != 0);
+
+		FindClose(hFind);
+	}
+	return deleteDir(d);
+}
+
+inline bool delete_files_that_starts_with(std::string prefix)
+{
+	std::string pattern(".\\");
+	pattern.append(prefix);
+	pattern.append("*");
+	WIN32_FIND_DATAA data;
+	HANDLE hFind;
+	if ((hFind = FindFirstFileA(pattern.c_str(), &data)) != INVALID_HANDLE_VALUE) {
+		do {
+			std::string child = ".\\";
+			child.append(data.cFileName);
+			//std::cout << child << std::endl;
+			minFileSys::deleteFile(child);
+		}
+		while (FindNextFileA(hFind, &data) != 0);
+		FindClose(hFind);
+	}
+	return true;
+}
+#endif // ITS_WINDOWS
+
+inline bool deleteDirRecursively(std::string const& dir_path)
 {
     if (!pathExists(dir_path)) {
         std::cout << "[!] [deleteDirRecursively] " << dir_path << " does not exist" << std::endl;
         return true;
     }
 
+#ifdef ITS_WINDOWS
+    // https://stackoverflow.com/questions/734717/how-to-delete-a-folder-in-c
+	// https://github.com/CppCon/CppCon2015/blob/master/Tutorials/Racing%20the%20Filesystem/Racing%20the%20Filesystem%20-%20Niall%20Douglas%20-%20CppCon%202015.pdf
+    // It looks like this solution can fail due to filesystem races:
+    // DeleteFile is not atomic, which means deleting the directory that
+    // contained it can fail because the directory isn't (yet) empty. This talk
+    // explains the problem in detail and gives a safer way to delete a
+    // directory/tree on Windows: youtube.com/watch?v=uhRWMGBjlO8
+    // – Adrian McCarthy
+    
+    // deleting a directory tree on Windows
+    // 1. enumerate directory contents
+    // 2. for every non-empty directory, recurse to step 1
+    // 3. for every file, try to rename to random name in %TEMP and then delete
+    //    mark for later deletion
+    // 4. for every empty directory, rename to random name in %TEMP and then
+    //    delete mark for later deletion
+    // 5. loop the above until directory tree deleted
+    //   (may take as long as any item opened without FILE_SHARE_DELETE is open)
+
+	// move all the files to current dir and delete empty directory
+	move_files_to_temp_dir_recursively_and_delete_original_folder(dir_path, ".");
+	// delete all files
+	delete_files_that_starts_with("minfilesys_file_to_be_deleted_");
+	return false;
+#endif
+
+#ifdef ITS_POSIX
     std::vector<std::string> files;
     readDir(dir_path, files);
     for (auto const& f : files) {
@@ -313,12 +424,24 @@ bool deleteDirRecursively(std::string const& dir_path)
             if (!deleteFile(added_path)) return false;
         }
     }
-    
     return deleteDir(dir_path);
+#endif
 }
 
 
 } // namespace minFileSys
+
+#if defined(ITS_WINDOWS)
+#undef ITS_WINDOWS
+#endif
+
+#if defined(ITS_MACOS)
+#undef ITS_MACOS
+#endif
+
+#if defined(ITS_POSIX)
+#undef ITS_POSIX
+#endif
 
 #endif
 

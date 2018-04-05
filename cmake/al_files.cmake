@@ -2,61 +2,61 @@ option(USE_GLV "" OFF)
 
 # Main Library
 set(core_headers
-  ${al_path}/include/al/core/app/al_App.hpp
-  ${al_path}/include/al/core/app/al_AudioApp.hpp
-  ${al_path}/include/al/core/app/al_FPS.hpp
-  ${al_path}/include/al/core/app/al_WindowApp.hpp
-  ${al_path}/include/al/core/graphics/al_BufferObject.hpp
-  ${al_path}/include/al/core/graphics/al_DefaultShaders.hpp
-  ${al_path}/include/al/core/graphics/al_EasyFBO.hpp
-  ${al_path}/include/al/core/graphics/al_EasyVAO.hpp
-  ${al_path}/include/al/core/graphics/al_FBO.hpp
-  ${al_path}/include/al/core/graphics/al_GLEW.hpp
-  ${al_path}/include/al/core/graphics/al_GLFW.hpp
-  ${al_path}/include/al/core/graphics/al_GPUObject.hpp
-  ${al_path}/include/al/core/graphics/al_Graphics.hpp
-  ${al_path}/include/al/core/graphics/al_Isosurface.hpp
-  ${al_path}/include/al/core/graphics/al_Lens.hpp
-  ${al_path}/include/al/core/graphics/al_Light.hpp
-  ${al_path}/include/al/core/graphics/al_Mesh.hpp
-  ${al_path}/include/al/core/graphics/al_OpenGL.hpp
-  ${al_path}/include/al/core/graphics/al_RenderManager.hpp
-  ${al_path}/include/al/core/graphics/al_Shader.hpp
-  ${al_path}/include/al/core/graphics/al_Shapes.hpp
-  ${al_path}/include/al/core/graphics/al_Texture.hpp
-  ${al_path}/include/al/core/graphics/al_VAO.hpp
-  ${al_path}/include/al/core/graphics/al_VAOMesh.hpp
-  ${al_path}/include/al/core/graphics/al_Viewpoint.hpp
-  ${al_path}/include/al/core/io/al_AudioIO.hpp
-  ${al_path}/include/al/core/io/al_AudioIOData.hpp
-  ${al_path}/include/al/core/io/al_ControlNav.hpp
-  ${al_path}/include/al/core/io/al_CSVReader.hpp
-  ${al_path}/include/al/core/io/al_File.hpp
-  ${al_path}/include/al/core/io/al_MIDI.hpp
-  ${al_path}/include/al/core/io/al_Window.hpp
-  ${al_path}/include/al/core/math/al_Constants.hpp
-  ${al_path}/include/al/core/math/al_Mat.hpp
-  ${al_path}/include/al/core/math/al_Matrix4.hpp
-  ${al_path}/include/al/core/math/al_Quat.hpp
-  ${al_path}/include/al/core/math/al_StdRandom.hpp
-  ${al_path}/include/al/core/math/al_Vec.hpp
-  ${al_path}/include/al/core/protocol/al_OSC.hpp
-  ${al_path}/include/al/core/sound/al_Ambisonics.hpp
-  ${al_path}/include/al/core/sound/al_AudioScene.hpp
-  ${al_path}/include/al/core/sound/al_Biquad.hpp
-  ${al_path}/include/al/core/sound/al_Crossover.hpp
-  ${al_path}/include/al/core/sound/al_Dbap.hpp
-  ${al_path}/include/al/core/sound/al_Reverb.hpp
-  ${al_path}/include/al/core/sound/al_Speaker.hpp
-  ${al_path}/include/al/core/sound/al_StereoPanner.hpp
-  ${al_path}/include/al/core/sound/al_Vbap.hpp
-  ${al_path}/include/al/core/spatial/al_HashSpace.hpp
-  ${al_path}/include/al/core/spatial/al_Pose.hpp
-  ${al_path}/include/al/core/system/al_PeriodicThread.hpp
-  ${al_path}/include/al/core/system/al_Printing.hpp
-  ${al_path}/include/al/core/system/al_Thread.hpp
-  ${al_path}/include/al/core/system/al_Time.hpp
-  ${al_path}/include/al/core/types/al_Color.hpp
+  include/al/core/app/al_App.hpp
+  include/al/core/app/al_AudioApp.hpp
+  include/al/core/app/al_FPS.hpp
+  include/al/core/app/al_WindowApp.hpp
+  include/al/core/graphics/al_BufferObject.hpp
+  include/al/core/graphics/al_DefaultShaders.hpp
+  include/al/core/graphics/al_EasyFBO.hpp
+  include/al/core/graphics/al_EasyVAO.hpp
+  include/al/core/graphics/al_FBO.hpp
+  include/al/core/graphics/al_GLEW.hpp
+  include/al/core/graphics/al_GLFW.hpp
+  include/al/core/graphics/al_GPUObject.hpp
+  include/al/core/graphics/al_Graphics.hpp
+  include/al/core/graphics/al_Isosurface.hpp
+  include/al/core/graphics/al_Lens.hpp
+  include/al/core/graphics/al_Light.hpp
+  include/al/core/graphics/al_Mesh.hpp
+  include/al/core/graphics/al_OpenGL.hpp
+  include/al/core/graphics/al_RenderManager.hpp
+  include/al/core/graphics/al_Shader.hpp
+  include/al/core/graphics/al_Shapes.hpp
+  include/al/core/graphics/al_Texture.hpp
+  include/al/core/graphics/al_VAO.hpp
+  include/al/core/graphics/al_VAOMesh.hpp
+  include/al/core/graphics/al_Viewpoint.hpp
+  include/al/core/io/al_AudioIO.hpp
+  include/al/core/io/al_AudioIOData.hpp
+  include/al/core/io/al_ControlNav.hpp
+  include/al/core/io/al_CSVReader.hpp
+  include/al/core/io/al_File.hpp
+  include/al/core/io/al_MIDI.hpp
+  include/al/core/io/al_Window.hpp
+  include/al/core/math/al_Constants.hpp
+  include/al/core/math/al_Mat.hpp
+  include/al/core/math/al_Matrix4.hpp
+  include/al/core/math/al_Quat.hpp
+  include/al/core/math/al_StdRandom.hpp
+  include/al/core/math/al_Vec.hpp
+  include/al/core/protocol/al_OSC.hpp
+  include/al/core/sound/al_Ambisonics.hpp
+  include/al/core/sound/al_AudioScene.hpp
+  include/al/core/sound/al_Biquad.hpp
+  include/al/core/sound/al_Crossover.hpp
+  include/al/core/sound/al_Dbap.hpp
+  include/al/core/sound/al_Reverb.hpp
+  include/al/core/sound/al_Speaker.hpp
+  include/al/core/sound/al_StereoPanner.hpp
+  include/al/core/sound/al_Vbap.hpp
+  include/al/core/spatial/al_HashSpace.hpp
+  include/al/core/spatial/al_Pose.hpp
+  include/al/core/system/al_PeriodicThread.hpp
+  include/al/core/system/al_Printing.hpp
+  include/al/core/system/al_Thread.hpp
+  include/al/core/system/al_Time.hpp
+  include/al/core/types/al_Color.hpp
 )
 
 set(core_sources
@@ -109,18 +109,18 @@ set(core_sources
 )
 
 set(util_headers
-  ${al_path}/include/al/util/al_Array.h
-  ${al_path}/include/al/util/al_Array.hpp
-  ${al_path}/include/al/util/imgui/imgui_impl_glfw_gl3.h
-  ${al_path}/include/al/util/ui/al_Composition.hpp
-  ${al_path}/include/al/util/ui/al_Parameter.hpp
-  # ${al_path}/include/al/util/ui/al_ParameterMIDI.hpp
-  ${al_path}/include/al/util/ui/al_Preset.hpp
-  ${al_path}/include/al/util/ui/al_PresetMapper.hpp
-  # ${al_path}/include/al/util/ui/al_PresetMIDI.hpp
-  ${al_path}/include/al/util/ui/al_PresetSequencer.hpp
-  ${al_path}/include/al/util/ui/al_SequenceRecorder.hpp
-  ${al_path}/include/al/util/ui/al_SynthSequencer.hpp
+  include/al/util/al_Array.h
+  include/al/util/al_Array.hpp
+  include/al/util/imgui/imgui_impl_glfw_gl3.h
+  include/al/util/ui/al_Composition.hpp
+  include/al/util/ui/al_Parameter.hpp
+  # include/al/util/ui/al_ParameterMIDI.hpp
+  include/al/util/ui/al_Preset.hpp
+  include/al/util/ui/al_PresetMapper.hpp
+  # include/al/util/ui/al_PresetMIDI.hpp
+  include/al/util/ui/al_PresetSequencer.hpp
+  include/al/util/ui/al_SequenceRecorder.hpp
+  include/al/util/ui/al_SynthSequencer.hpp
 )
 
 set(util_sources

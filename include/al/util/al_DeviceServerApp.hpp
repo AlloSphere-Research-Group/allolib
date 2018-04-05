@@ -27,8 +27,8 @@ public:
 	virtual uint16_t outPort(){ return 12000; };
 	virtual uint16_t inPort(){ return 12001; };
 
-	osc::Recv oscRecv {inPort(), "", 0.05};
-	osc::Send oscSend {outPort(), address(), 1024};
+	osc::Recv oscRecv; // {inPort(), "", 0.05};
+	osc::Send oscSend; // {outPort(), address(), 1024};
     
     virtual std::string name(){ return "defaultApp"; };
     virtual std::string config(){ return R"(
@@ -81,7 +81,9 @@ public:
 		}
     }
 
-    void initDeviceServer(){ 
+    void initDeviceServer(){
+    	oscRecv.open(inPort(), "", 0.05);
+		oscSend.open(outPort(), address());
     	oscRecv.handler(handler);
 		oscRecv.start();
 		sendHandshake();

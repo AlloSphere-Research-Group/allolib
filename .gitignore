@@ -6,6 +6,7 @@
 !**/bin/data
 
 **/build
+!external/glew/build
 
 # only top level al folder
 /al/
@@ -21,19 +22,13 @@ Makefile
 test/Makefile
 CmakeSettings.json
 
-# lib locations for Windows
-dependencies/glfw
-dependencies/glew
-dependencies/cuttlebone
-dependencies/glv
-dependencies/gamma
-dependencies/FreeImage
-dependencies/apr
-dependencies/portaudio
+external/glew/glew.pc
 
 # file formats
 *.a
 *.lib
+*.so
+*.dylib
 
 # ide stuff
 **/Debug

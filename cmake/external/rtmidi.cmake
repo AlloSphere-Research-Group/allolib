@@ -9,8 +9,8 @@ if(IS_DIRECTORY "${al_path}/external/rtmidi")
     message("Using RtMidi")
   endif()
 
-  set(RTMIDI_INCLUDE_DIR ${al_path}/external/rtmidi)
-  set(RTMIDI_SRC external/rtmidi/RtMidi.cpp)
+  set(RTMIDI_INCLUDE_DIR external/rtmidi)
+  set(RTMIDI_SRC ${al_path}/external/rtmidi/RtMidi.cpp)
 
   if(AL_LINUX)
     # Use settings from RtAudio as they might conflict if different

@@ -3,20 +3,17 @@
 #   ADDITIONAL_LIBRARIES
 # 	ADDITIONAL_HEADERS
 # 	ADDITIONAL_SOURCES
-#	  ADDITIONAL_DEFINITIONS
 
-option(USE_APR "" OFF)
+# option(USE_APR "" OFF)
 
 # al_path needs to be set prior to calling this script
 
-
-
 if (AL_WINDOWS)
 
-  if (USE_APR)
-    set(APR_INCLUDE_DIRS ${al_path}/dependencies/apr/include)
-    set(APR_LIBRARIES ${al_path}/dependencies/apr/libapr-1.lib)
-  endif (USE_APR)
+  # if (USE_APR)
+  #   set(APR_INCLUDE_DIRS ${al_path}/dependencies/apr/include)
+  #   set(APR_LIBRARIES ${al_path}/dependencies/apr/libapr-1.lib)
+  # endif (USE_APR)
 
   FIND_PATH(FREEIMAGE_INCLUDE_PATH FreeImage.h
     ${al_path}/dependencies/FreeImage/Dist/x64
@@ -36,10 +33,10 @@ if (AL_WINDOWS)
 
 else ()
 
-  if (USE_APR)
-    find_package(PkgConfig REQUIRED)
-    pkg_search_module(APR REQUIRED apr-1)
-  endif (USE_APR)
+  # if (USE_APR)
+  #   find_package(PkgConfig REQUIRED)
+  #   pkg_search_module(APR REQUIRED apr-1)
+  # endif (USE_APR)
 
   # for freeimage, assimp, freetype
   list(APPEND CMAKE_MODULE_PATH
@@ -56,76 +53,39 @@ endif (AL_WINDOWS)
 
 # NOW ADD OPTIONAL FILES -------------------------------------------------------
 
-if (USE_APR)
-  set(APR_HEADERS
-    ${al_path}/include/al/util/al_Socket.hpp
-  )
-  set(APR_SOURCES
-    src/util/al_SocketAPR.cpp
-  )
-endif(USE_APR)
+# if (USE_APR)
+#   list(APPEND ADDITIONAL_INCLUDE_DIRS ${APR_INCLUDE_DIRS})
+#   list(APPEND ADDITIONAL_LIBRARIES ${APR_LIBRARIES})
+#   list(APPEND ADDITIONAL_HEADERS ${al_path}/include/al/util/al_Socket.hpp)
+#   list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_SocketAPR.cpp)
+# endif(USE_APR)
 
 if (FREEIMAGE_FOUND)
   if (AL_VERBOSE_OUTPUT)
     message("found freeimage")
   endif()
-  set(FREEIMAGE_HEADERS
-    ${al_path}/include/al/util/al_Image.hpp
-  )
-  set(FREEIMAGE_SOURCES
-    ${al_path}/src/util/al_Image.cpp
-  )
+  list(APPEND ADDITIONAL_INCLUDE_DIRS ${FREEIMAGE_INCLUDE_PATH})
+  list(APPEND ADDITIONAL_LIBRARIES ${FREEIMAGE_LIBRARY})
+  list(APPEND ADDITIONAL_HEADERS ${al_path}/include/al/util/al_Image.hpp)
+  list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_Image.cpp)
 endif (FREEIMAGE_FOUND)
 
 if (ASSIMP_LIBRARY)
   if (AL_VERBOSE_OUTPUT)
     message("found assimp")
   endif()
-  set(assimp_headers ${al_path}/include/al/util/al_Asset.hpp)
-  set(assimp_sources ${al_path}/src/util/al_Asset.cpp)
+  list(APPEND ADDITIONAL_INCLUDE_DIRS ${ASSIMP_INCLUDE_DIR})
+  list(APPEND ADDITIONAL_LIBRARIES ${ASSIMP_LIBRARY})
+  list(APPEND ADDITIONAL_HEADERS ${al_path}/include/al/util/al_Asset.hpp)
+  list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_Asset.cpp)
 endif()
 
 if (FREETYPE_INCLUDE_DIRS)
   if (AL_VERBOSE_OUTPUT)
     message("found freetype")
   endif()
-  set(freetype_headers ${al_path}/include/al/util/al_Font.hpp)
-  set(freetype_sources ${al_path}/src/util/al_Font.cpp)
+  list(APPEND ADDITIONAL_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIRS})
+  list(APPEND ADDITIONAL_LIBRARIES ${FREETYPE_LIBRARY})
+  list(APPEND ADDITIONAL_HEADERS ${al_path}/include/al/util/al_Font.hpp)
+  list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_Font.cpp)
 endif()
-
-
-# EXPORT SEARCH RESULTS AND FILE LISTS -----------------------------------------
-
-set(ADDITIONAL_INCLUDE_DIRS
-	# ${PORTAUDIO_INCLUDE_DIRS}
-	${APR_INCLUDE_DIRS}
-  ${FREEIMAGE_INCLUDE_PATH}
-  ${ASSIMP_INCLUDE_DIR}
-  ${FREETYPE_INCLUDE_DIRS}
-)
-
-set(ADDITIONAL_LIBRARIES
-	# ${PORTAUDIO_LIBRARIES}
-	${APR_LIBRARIES}
-  ${FREEIMAGE_LIBRARY}
-  ${ASSIMP_LIBRARY}
-  ${FREETYPE_LIBRARY}
-)
-
-set(ADDITIONAL_HEADERS
-  ${FREEIMAGE_HEADERS}
-	${APR_HEADERS}
-  ${assimp_headers}
-  ${freetype_headers}
-)
-
-set(ADDITIONAL_SOURCES
-  ${FREEIMAGE_SOURCES}
-	${APR_SOURCES}
-  ${assimp_sources}
-  ${freetype_sources}
-)
-
-set(ADDITIONAL_DEFINITIONS
-	# ${PORTAUDIO_DEFINITIONS}
-)

@@ -20,7 +20,7 @@
 namespace al {
 
 // single window, audioIO, and single port osc recv & send
-class App: public WindowApp, public AudioApp, public DeviceServerApp, public osc::PacketHandler {
+class App: public WindowApp, public AudioApp, /*public DeviceServerApp,*/ public osc::PacketHandler {
 public:
 
     class AppEventHandler : public WindowEventHandler {
@@ -43,7 +43,8 @@ public:
     Viewpoint& view() { return mView; }
     const Viewpoint& view() const { return mView; }
 
-    Nav& nav() override { return mNav; }
+    // Nav& nav() override { return mNav; }
+    Nav& nav() { return mNav; }
     const Nav& nav() const { return mNav; }
 
     Pose& pose() { return mNav; }
@@ -114,7 +115,7 @@ public:
         open();
         beginAudio(); // only begins if `initAudio` was called before
         startFPS(); // WindowApp (FPS)
-        initDeviceServer();
+        // initDeviceServer();
         while (!shouldQuit()) {
             // to quit, call WindowApp::quit() or click close button of window,
             // or press ctrl + q

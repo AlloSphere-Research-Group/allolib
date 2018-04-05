@@ -2,7 +2,7 @@
 #   IMGUI_INCLUDE_DIR
 #   IMGUI_SRC
 
-set(IMGUI_INCLUDE_DIR ${al_path}/external/imgui)
+set(IMGUI_INCLUDE_DIR external/imgui)
 
 set(IMGUI_SRC
   ${al_path}/external/imgui/imgui.cpp
