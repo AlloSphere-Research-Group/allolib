@@ -271,11 +271,9 @@ public:
 /// Socket for sending OSC packets
 ///
 /// @ingroup allocore
-// class Send : public SocketClient, public Packet{
 class Send : public Packet {
 	class SocketSender;
 	std::unique_ptr<SocketSender> sockerSender;
-
 	std::string mAddress = "";
 	uint16_t mPort = 0;
 
@@ -286,15 +284,15 @@ public:
 	/// @param[in] address	IP address
 	/// @param[in] timeout	< 0: block forever; = 0: no blocking; > 0 block with timeout
 	/// @param[in] size 	Packet buffer size
-	// Send(uint16_t port, const char * address = "localhost", al_sec timeout=0, int size=1024);
-	Send(uint16_t port, const char * address = "localhost", int size=1024);
+	Send(uint16_t port, const char * address = "localhost", al_sec timeout=0,
+		   int size=1024);
 
 	~Send();
 
-	// originally SocketServer had these interface in AlloSystem
-	const std::string& address() const;
-	bool open(uint16_t port, const char * address, al_sec timeout=0, int type=0);
-	uint16_t port() const;
+	bool open(uint16_t port, const char * address);
+
+	const std::string& address() const { return mAddress; }
+	uint16_t port() const { return mPort; }
 
 	/// Send and clear current packet contents
 	int send();
@@ -357,7 +355,6 @@ public:
 /// Supports explicit polling or implicit background thread polling
 ///
 /// @ingroup allocore
-// class Recv : public SocketServer{
 class Recv {
 	class SocketReceiver;
 	std::unique_ptr<SocketReceiver> socketReceiver;
@@ -368,17 +365,14 @@ public:
 	/// @param[in] port		Port number (valid range is 0-65535)
 	/// @param[in] address	IP address. If empty, will bind all network interfaces to socket.
 	/// @param[in] timeout	< 0: block forever; = 0: no blocking; > 0 block with timeout
-	Recv(uint16_t port, const char * address, al_sec timeout=0);
-	Recv(uint16_t port, al_sec timeout=0);
+	Recv(uint16_t port, const char * address = "", al_sec timeout=0);
 
 	virtual ~Recv();
 
-	// originally SocketServer had these interface in AlloSystem
-	const std::string& address() const;
-	bool open(uint16_t port, const char * address, al_sec timeout=0, int type=0);
-	uint16_t port() const;
+	bool open(uint16_t port, const char * address = "", al_sec timeout=0);
 
-	bool open(uint16_t port, al_sec timeout=0, int type=0);
+	const std::string& address() const { return mAddress; }
+	uint16_t port() const { return mPort; }
 	
 	/// Whether background polling is activated
 	bool background() const { return mBackground; }
@@ -395,9 +389,7 @@ public:
 	/// Check for an OSC packet and call handler
 	/// returns bytes read
 	/// note: use while(recv()){} to ensure queue is fully flushed.
-	// int recv();
-
-	void parse(const char *packet, int size, const char *senderAddr);
+	int recv();
 
 	/// Begin a background thread to poll the socket.
 
@@ -405,13 +397,14 @@ public:
 	/// Returns whether the thread was started successfully.
 	bool start();
 
-	void loop();
-
 	/// Stop the background polling
 	void stop();
 
+	void parse(const char *packet, int size, const char *senderAddr);
+	void loop();
+
 protected:
-	PacketHandler * mHandler;
+	PacketHandler * mHandler = nullptr;
 	std::vector<char> mBuffer;
 	al::Thread mThread;
 	bool mBackground;
