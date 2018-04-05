@@ -15,7 +15,7 @@ void AudioApp::initAudio(
 ) {
   mAudioIO.init(AppAudioCB, this, audioBlockSize, audioRate, audioOutputs, audioInputs);
   if (device >= 0) {
-       mAudioIO.device(device);
+       mAudioIO.device(AudioDevice(device));
   }
   mAudioIO.open();
 }
