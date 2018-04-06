@@ -2,7 +2,7 @@
 
 using namespace al;
 
-void EasyVAO::updateIndices(unsigned int* data, size_t size)
+void EasyVAO::updateIndices(const unsigned int* data, size_t size)
 {
     mNumIndices = static_cast<int>(size);
     if (!mIndexBuffer.created())
@@ -23,7 +23,7 @@ void EasyVAO::update(void* data, size_t typeSize, size_t arraySize, MeshAttrib& 
     // unbind();
 }
 
-void EasyVAO::updateWithoutBinding(void* data, size_t typeSize, size_t arraySize, MeshAttrib& attrib, unsigned int dataType) {
+void EasyVAO::updateWithoutBinding(const void* data, size_t typeSize, size_t arraySize, MeshAttrib& attrib, unsigned int dataType) {
     // only enable attribs with content
     if (arraySize > 0) {
         enableAttrib(attrib.layoutIndex);
@@ -46,7 +46,7 @@ void EasyVAO::updateWithoutBinding(void* data, size_t typeSize, size_t arraySize
     // attrib.buffer.unbind();
 }
 
-void EasyVAO::update(Mesh& m) {
+void EasyVAO::update(const Mesh& m) {
     primitive(m.primitive());
     validate();
     bind();

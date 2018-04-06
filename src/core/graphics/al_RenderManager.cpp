@@ -224,7 +224,7 @@ void RenderManager::draw(EasyVAO& vao) {
   vao.draw();
 }
 
-void RenderManager::draw(Mesh& mesh) {
+void RenderManager::draw(const Mesh& mesh) {
   // uses internal vao object.
   mInternalVAO.update(mesh);
   update();

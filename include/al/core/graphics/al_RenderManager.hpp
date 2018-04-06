@@ -205,7 +205,7 @@ public:
   virtual void update();
   void draw(VAOMesh& mesh);
   void draw(EasyVAO& vao);
-  void draw(Mesh& mesh);
+  void draw(const Mesh& mesh);
   void draw(Mesh&& mesh);
 
 protected:

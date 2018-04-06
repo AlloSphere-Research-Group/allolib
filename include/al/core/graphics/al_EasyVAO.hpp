@@ -105,16 +105,16 @@ public:
     }
 
     // indices should be unsigned int
-    void updateIndices(unsigned int* data, size_t size);
+    void updateIndices(const unsigned int* data, size_t size);
     void update(void* data, size_t typeSize, size_t arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
     void primitive(unsigned int prim);
     void draw();
 
     // also recceives al::Mesh
-    void update(Mesh& m);
+    void update(const Mesh& m);
 
 private:
-    void updateWithoutBinding(void* data, size_t typeSize, size_t arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
+    void updateWithoutBinding(const void* data, size_t typeSize, size_t arraySize, MeshAttrib& attrib, unsigned int dataType = GL_FLOAT);
     
     unsigned int mGLPrimMode = GL_TRIANGLES;
 	int mNumVertices = 0;
