@@ -3,25 +3,11 @@ set(app_path ${CMAKE_CURRENT_LIST_DIR})
 get_filename_component(app_name ${app_path} NAME)
 project(${app_name})
 option(AL_VERBOSE_OUTPUT "" OFF)
-set(allolib_dir ${CMAKE_CURRENT_LIST_DIR}/../allolib)
-
-#some definitions for user
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(MACOS 1)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(LINUX 1)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(WINDOWS 1)
-endif ()
-
-if (WINDOWS)
-    set(home_path $ENV{HOMEPATH})
-else ()
-    set(home_path $ENV{HOME})
-endif ()
 
 # app config user specified
 include(app_config.cmake) 
+
+set(allolib_dir ${CMAKE_CURRENT_LIST_DIR}/${allolib_directory})
 
 if (AL_VERBOSE_OUTPUT)
 	message("binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
@@ -44,10 +30,10 @@ else()
 	endif()
 endif ()
 
-add_executable(${app_name} ${app_files_list})
+add_executable(bin ${app_files_list})
 
-set_target_properties(${app_name} PROPERTIES
-    DEBUG_POSTFIX d
+set_target_properties(bin PROPERTIES
+    DEBUG_POSTFIX _debug
     RUNTIME_OUTPUT_DIRECTORY ${app_path}/bin
     RUNTIME_OUTPUT_DIRECTORY_DEBUG ${app_path}/bin
     RUNTIME_OUTPUT_DIRECTORY_RELEASE ${app_path}/bin
@@ -57,17 +43,17 @@ set_target_properties(${app_name} PROPERTIES
 
 # flags
 if (WINDOWS)
-  target_compile_options(${app_name} PRIVATE "")
+  target_compile_options(bin PRIVATE "")
 else ()
-  target_compile_options(${app_name} PRIVATE "-Wall")
+  target_compile_options(bin PRIVATE "-Wall")
 endif (WINDOWS)
 
-target_link_libraries(${app_name} al)
+target_link_libraries(bin al)
 
 if (WINDOWS)
   # when run from Visual Studio, working directory is where the solution is by default
   # set it to app output directory
-  set_target_properties(${app_name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${app_path}/bin)
+  set_target_properties(bin PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${app_path}/bin)
   # startup project is `ALL_BUILD` by default so we change it to app project
-  set_directory_properties(PROPERTIES VS_STARTUP_PROJECT ${app_name})
+  set_directory_properties(PROPERTIES VS_STARTUP_PROJECT bin)
 endif (WINDOWS)
