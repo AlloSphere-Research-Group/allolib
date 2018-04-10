@@ -114,7 +114,7 @@ set(util_headers
   include/al/util/imgui/imgui_impl_glfw_gl3.h
   include/al/util/ui/al_Composition.hpp
   include/al/util/ui/al_Parameter.hpp
-  # include/al/util/ui/al_ParameterMIDI.hpp
+  include/al/util/ui/al_ParameterMIDI.hpp
   include/al/util/ui/al_Preset.hpp
   include/al/util/ui/al_PresetMapper.hpp
   # include/al/util/ui/al_PresetMIDI.hpp

@@ -103,7 +103,7 @@ public:
 		newBinding.param = &param;
 		newBinding.min = min;
 		newBinding.max = max;
-		mBindings.push_back(newBinding);
+		mControlBindings.push_back(newBinding);
 	}
 
 	/**
@@ -157,7 +157,7 @@ public:
 
 	virtual void onMIDIMessage(const MIDIMessage& m) override {
 		if (m.type() & MIDIByte::CONTROL_CHANGE ) {
-			for(ControlBinding binding: mBindings) {
+			for(ControlBinding binding: mControlBindings) {
 				if (m.channel() == binding.channel
 				        && m.controlNumber() == binding.controlNumber) {
 					float newValue = binding.min + (m.controlValue() * (binding.max - binding.min));
@@ -239,7 +239,7 @@ private:
 
 	MIDIIn mMidiIn;
 	bool mVerbose;
-	std::vector<ControlBinding> mBindings;
+	std::vector<ControlBinding> mControlBindings;
 	std::vector<NoteBinding> mNoteBindings;
 	std::vector<ToggleBinding> mToggleBindings;
 	std::vector<IncrementBinding> mIncrementBindings;

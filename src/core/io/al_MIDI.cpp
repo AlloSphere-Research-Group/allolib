@@ -103,7 +103,7 @@ void MIDIMessageHandler::bindTo(RtMidiIn& midiIn, unsigned port){
 		case 1:
 			b.handler->onMIDIMessage(MIDIMessage(t, b.port, m[0]));
 			break;
-		case 0:;
+		case 0:
 		default: // sysex
 			b.handler->onMIDIMessage(MIDIMessage(t, b.port, m[0], m[1], m[2], &m[3]));
 		}
