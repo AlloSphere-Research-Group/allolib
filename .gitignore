@@ -30,6 +30,9 @@ external/glew/glew.pc
 *.so
 *.dylib
 
+# documentation
+doc/html
+
 # ide stuff
 **/Debug
 .vs/
