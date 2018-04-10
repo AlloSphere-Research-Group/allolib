@@ -4,6 +4,33 @@
 
 using namespace al;
 
+#ifdef __GNUG__
+#include <cstdlib>
+#include <memory>
+#include <cxxabi.h>
+
+std::string al::demangle(const char* name) {
+
+    int status = -4; // some arbitrary value to eliminate the compiler warning
+
+    // enable c++11 by passing the flag -std=c++11 to g++
+    std::unique_ptr<char, void(*)(void*)> res {
+        abi::__cxa_demangle(name, NULL, NULL, &status),
+        std::free
+    };
+
+    return (status==0) ? res.get() : name ;
+}
+
+#else
+
+// does nothing if not g++
+std::string al::demangle(const char* name) {
+    return name;
+}
+
+#endif
+
 int al::asciiToIndex(int asciiKey, int offset) {
     switch(asciiKey){
     case '1': return offset + 0;
@@ -108,18 +135,60 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id) {
     assert(voice);
     int thisId = id;
     if (thisId == -1) {
-        thisId = mIdCounter++;
+        if (voice->id() > 0) {
+            thisId = voice->id();
+        } else {
+            thisId = mIdCounter++;
+        }
     }
     voice->id(thisId);
     voice->triggerOn(offsetFrames);
-    std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
-    voice->next = mVoicesToInsert;
-    mVoicesToInsert = voice;
+    {
+        std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
+        voice->next = mVoicesToInsert;
+        mVoicesToInsert = voice;
+    }
+    for (auto cbNode: mTriggerOnCallbacks) {
+        cbNode.first(voice, offsetFrames, thisId, cbNode.second);
+    }
     return thisId;
 }
 
 void PolySynth::triggerOff(int id) {
     mVoiceIdsToTurnOff.write((const char*) &id, sizeof (int));
+    for (auto cbNode: mTriggerOffCallbacks) {
+        cbNode.first(id, cbNode.second);
+    }
+}
+
+void PolySynth::allNotesOff()
+{
+    mAllNotesOff = true;
+}
+
+SynthVoice *PolySynth::getVoice(std::string name)
+{
+    std::unique_lock<std::mutex> lk(mFreeVoiceLock); // Only one getVoice() call at a time
+    SynthVoice *freeVoice = mFreeVoices;
+    SynthVoice *previousVoice = nullptr;
+    while (freeVoice) {
+        if (demangle(typeid(*freeVoice).name()) == name
+                || typeid(*freeVoice).name() == name) {
+            if (previousVoice) {
+                previousVoice->next = freeVoice->next;
+            } else {
+                mFreeVoices = freeVoice->next;
+            }
+            break;
+        }
+        previousVoice = freeVoice;
+        freeVoice = freeVoice->next;
+    }
+    if (!freeVoice) { // No free voice in list, so we need to allocate it
+        // TODO report current polyphony for more informed allocation of polyphony
+        freeVoice = allocateVoice(name);
+    }
+    return freeVoice;
 }
 
 void PolySynth::render(AudioIOData &io) {
@@ -142,39 +211,67 @@ void PolySynth::render(AudioIOData &io) {
             }
             mVoiceToInsertLock.unlock();
         }
+        if (mAllNotesOff) {
+            if (mFreeVoiceLock.try_lock()) {
+                mAllNotesOff = false;
+                if (mActiveVoices) {
+                    auto voice = mActiveVoices->next;
+                    SynthVoice *previousVoice = mActiveVoices;
+                    previousVoice->id(-1);
+                    while(voice) {
+                        voice->id(-1);
+                        previousVoice = voice;
+                        voice = voice->next;
+                    }
+                    previousVoice->next = mFreeVoices; // Connect last active voice to first free voice
+                    mFreeVoices = mActiveVoices; // Move all voices to free voices
+                    mActiveVoices = nullptr; // No active voices left
+                }
+                mFreeVoiceLock.unlock();
+            }
+        }
     }
-    int voicesToTurnOff[8];
+    // Turn off voices
+    int voicesToTurnOff[16];
     int numVoicesToTurnOff;
-    while (numVoicesToTurnOff = mVoiceIdsToTurnOff.read((char *) voicesToTurnOff, sizeof (int))) {
-        for (int i = 0; i < numVoicesToTurnOff; i++) {
+    while ( (numVoicesToTurnOff = mVoiceIdsToTurnOff.read((char *) voicesToTurnOff, 16 * sizeof (int))) ) {
+        for (int i = 0; i < numVoicesToTurnOff/sizeof (int); i++) {
             auto voice = mActiveVoices;
             while (voice) {
                 if (voice->id() == voicesToTurnOff[i]) {
+                    std::cout << voice->id() << std::endl;
                     voice->triggerOff(); // TODO use offset for turn off
                 }
                 voice = voice->next;
-
             }
         }
     }
 
-    // size_t read(char * dst, size_t sz);
-
     // Render active voices
     auto voice = mActiveVoices;
+    int fpb = io.framesPerBuffer();
     while (voice) {
         if (voice->active()) {
-            io.frame(voice->getStartOffsetFrames());
-            //                int endOffsetFrames = voice->getEndOffsetFrames();
-            //                if (endOffsetFrames >= 0) {
-            //                    if (endOffsetFrames < io.framesPerBuffer()) {
-            //                        voice->triggerOff(endOffsetFrames);
-            //                    }
-            //                    endOffsetFrames -= io.framesPerBuffer();
-            //                }
-            voice->onProcess(io);
+            int offset = voice->getStartOffsetFrames(fpb);
+            if (offset < fpb) {
+                io.frame(offset);
+                int endOffsetFrames = voice->getEndOffsetFrames(fpb);
+                if (endOffsetFrames > 0 && endOffsetFrames <= fpb) {
+                    voice->triggerOff(endOffsetFrames);
+                }
+                voice->onProcess(io);
+            }
         }
         voice = voice->next;
+    }
+    io.frame(0);
+    // Process gain
+    for (unsigned int i = 0; i < io.channelsOut(); i++) {
+        float *buffer = io.outBuffer(i);
+        unsigned int samps = io.framesPerBuffer();
+        while (samps--) {
+            *buffer++ *= mAudioGain;
+        }
     }
     // Run post processing callbacks
     for (auto cb: mPostProcessing) {
@@ -188,6 +285,7 @@ void PolySynth::render(AudioIOData &io) {
             SynthVoice *previousVoice = nullptr;
             while(voice) {
                 if (!voice->active()) {
+                    voice->id(-1); // Reset voice id
                     if (previousVoice) {
                         previousVoice->next = voice->next; // Remove from active list
                         voice->next = mFreeVoices;
@@ -221,6 +319,19 @@ void PolySynth::render(Graphics &g) {
             voice->onProcess(g);
         }
         voice = voice->next;
+    }
+}
+
+void PolySynth::insertFreeVoice(SynthVoice *voice) {
+    std::unique_lock<std::mutex> lk(mFreeVoiceLock);
+    SynthVoice *lastVoice = mFreeVoices;
+    if (lastVoice) {
+        while (lastVoice->next) { lastVoice = lastVoice->next; }
+        lastVoice->next = voice;
+        voice->next = nullptr;
+    } else {
+        mFreeVoices = voice;
+        voice->next = nullptr;
     }
 }
 
@@ -302,11 +413,10 @@ void PolySynth::print() {
 
 void SynthSequencer::render(AudioIOData &io) {
     if (mMasterMode ==  PolySynth::TIME_MASTER_AUDIO) {
-        double timeIncrement = io.framesPerBuffer()/(double) io.framesPerSecond();
+        double timeIncrement = mNormalizedTempo * io.framesPerBuffer()/(double) io.framesPerSecond();
         double blockStartTime = mMasterTime;
         mMasterTime += timeIncrement;
-        processEvents(blockStartTime, io.framesPerSecond());
-
+        processEvents(blockStartTime, mNormalizedTempo * io.framesPerSecond());
     }
     mPolySynth.render(io);
 }
@@ -316,26 +426,40 @@ void SynthSequencer::render(Graphics &g) {
         double timeIncrement = 1.0/mFps;
         double blockStartTime = mMasterTime;
         mMasterTime += timeIncrement;
-        processEvents(blockStartTime, mFps);
+        processEvents(blockStartTime, mNormalizedTempo * mFps);
     }
     mPolySynth.render(g);
 }
 
-void SynthSequencer::processEvents(double blockStartTime, double fps) {
-    if (mNextEvent < mEvents.size()) {
-        auto iter = mEvents.begin();
-        std::advance(iter, mNextEvent);
-        auto event = *iter;
-        while (event.startTime <= mMasterTime) {
-            event.offsetCounter = (event.startTime - blockStartTime)*fps;
-            mPolySynth.triggerOn(event.voice, event.offsetCounter);
-            //                    std::cout << "Event " << mNextEvent << " " << event.startTime << " " << typeid(*event.voice.get()).name() << std::endl;
-            mNextEvent++;
-            iter++;
-            if (iter == mEvents.end()) {
-                break;
+void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
+    if (mEventLock.try_lock()) {
+        if (mNextEvent < mEvents.size()) {
+            auto iter = mEvents.begin();
+            std::advance(iter, mNextEvent);
+            auto event = *iter;
+            while (event.startTime <= mMasterTime) {
+                event.offsetCounter = (event.startTime - blockStartTime)*fpsAdjusted;
+                mPolySynth.triggerOn(event.voice, event.offsetCounter);
+                std::cout << "Event " << mNextEvent << " " << event.startTime << " " << typeid(*event.voice).name() << std::endl;
+                mNextEvent++;
+                iter++;
+                if (iter == mEvents.end()) {
+                    break;
+                }
+                event = *iter;
             }
-            event = *iter;
         }
+        for (auto &event : mEvents) {
+//            if (event.startTime*mNormalizedTempo > mMasterTime) {
+//                break;
+//            }
+            double eventTermination = event.startTime + event.duration;
+            if (event.voice && event.voice->active() && eventTermination <= mMasterTime) {
+                mPolySynth.triggerOff(event.voice->id());
+                std::cout << "trigger off " <<  event.voice->id() << " " << eventTermination << " " << mMasterTime  << std::endl;
+                event.voice = nullptr; // When an event gives up a voice, it is done.
+			}
+        }
+        mEventLock.unlock();
     }
 }

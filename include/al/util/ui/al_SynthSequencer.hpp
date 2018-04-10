@@ -45,12 +45,17 @@
 #include <map>
 #include <vector>
 #include <list>
+#include <queue>
 #include <limits.h>
 #include <cassert>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <memory>
 #include <mutex>
 #include <algorithm>
+#include <functional>
+#include <atomic>
 
 #include <typeinfo> // For class name instrospection
 #include <typeindex>
@@ -65,6 +70,8 @@
 namespace al
 {
 
+std::string demangle(const char* name); // Utility function. Should not be used by general users
+
 int asciiToIndex(int asciiKey, int offset = 0);
 
 int asciiToMIDI(int asciiKey, int offset = 0);
@@ -78,8 +85,16 @@ class SynthVoice {
     friend class PolySynth; // PolySynth needs to access private members like "next".
 public:
 
+    SynthVoice() {}
+
+    virtual ~SynthVoice() {}
+
     /// Returns true if voice is currently active
     bool active() { return mActive;}
+
+    virtual bool setParamFields(float *pFields, int numFields) {
+        return false;
+    }
 
     /**
      * @brief Override this function to define audio processing.
@@ -113,6 +128,8 @@ public:
     * */
     virtual void onTriggerOff() {}
 
+    virtual int get(float *pFields) { return -1;}
+
     /// This function can be called to programatically trigger  a voice.
     /// It is used for example in PolySynth to trigger a voice.
     void triggerOn(int offsetFrames = 0) {
@@ -133,19 +150,25 @@ public:
 
     /**
      * @brief returns the offset frames and sets them to 0.
+     * @param framesPerBuffer number of frames per buffer
      * @return offset frames
      *
      * Get the number of frames by which the start of this voice should be offset within a
-     * processing block. This value is set to 0 once read as it should only
-     * apply on the first rendering pass of a voice.
+     * processing block. This value is decremented by framesPerBuffer once read.
      */
-    int getStartOffsetFrames() {
+    int getStartOffsetFrames(int framesPerBuffer) {
         int frames = mOnOffsetFrames;
-        mOnOffsetFrames = 0;
+        mOnOffsetFrames -= framesPerBuffer;
+        if (mOnOffsetFrames < 0) {mOnOffsetFrames = 0.0;}
         return frames;
     }
 
-    int &getEndOffsetFrames() {return mOffOffsetFrames;}
+    int getEndOffsetFrames(int framesPerBuffer) {
+        int frames = mOffOffsetFrames;
+        mOffOffsetFrames -= framesPerBuffer;
+        if (mOffOffsetFrames < 0) {mOffOffsetFrames = 0.0;}
+        return frames;
+    }
 
 protected:
 
@@ -156,7 +179,7 @@ protected:
      * This should be set within one of the render()
      * functions when envelope or time is done and no more processing for
      * the note is needed. The voice will be considered ready for retriggering
-     * by PolySynth
+     * by PolySynth.
      */
     void free() {mActive = false; } // Mark this voice as done.
 
@@ -193,6 +216,11 @@ public:
     void triggerOff(int id);
 
     /**
+     * @brief Call TriggerOff for all active notes
+     */
+    void allNotesOff();
+
+    /**
      * @brief Get a reference to a voice.
      * @return
      *
@@ -202,6 +230,17 @@ public:
      */
     template<class TSynthVoice>
     TSynthVoice *getVoice();
+
+    /**
+     * @brief Get a reference to a free voice by voice type name
+     * @return
+     *
+     * Returns a free voice from the internal dynamic allocated pool.
+     * If voice is not available. It will be allocated. Can return
+     * nullptr if the class name and creator have not been registered
+     * with registerSynthClass()
+     */
+    SynthVoice *getVoice(std::string name);
 
     /**
      * @brief render all the active voices into the audio buffers
@@ -220,6 +259,12 @@ public:
      */
     template<class TSynthVoice>
     void allocatePolyphony(int number);
+
+    /**
+     * @brief Use this function to insert a voice allocated externally into the free voice pool
+     * @param voice the new voice to be added to the free voice pool
+     */
+    void insertFreeVoice(SynthVoice *voice);
 
     /**
      * @brief Insert an AudioCallback object at the end of the callback queue
@@ -297,6 +342,59 @@ public:
      */
     void print();
 
+    /**
+     * @brief Set audio output gain
+     * @param gainValue
+     */
+    void gain(float gainValue) {mAudioGain = gainValue;}
+
+    /**
+     * @brief get current audio gain
+     * @return
+     */
+    float gain() {return mAudioGain;}
+
+    /**
+     * @brief register a callback to be notified of a trigger on event
+     */
+    void registerTriggerOnCallback(std::function<void(SynthVoice *voice, int offsetFrames, int id, void *userData)> cb, void *userData) {
+        TriggerOnCallback cbNode(cb, userData);
+        mTriggerOnCallbacks.push_back(cbNode);
+    }
+
+    /**
+     * @brief register a callback to be notified of a trigger off event
+     */
+    void registerTriggerOffCallback(std::function<void(int id, void *userData)> cb, void *userData) {
+        TriggerOffCallback cbNode(cb, userData);
+        mTriggerOffCallbacks.push_back(cbNode);
+    }
+
+    /**
+     * Register a SynthVoice class to allow instantiating it by name
+     *
+     * This is needed for remote instantiation and for text sequence playback.
+     */
+    template<class TSynthVoice>
+    void registerSynthClass(std::string name) {
+        if (mCreators.find(name) != mCreators.end()) {
+            std::cout << "Warning: Overriding registration of SynthVoice: " << name << std::endl;
+        }
+        mCreators[name] = []() {
+            return new TSynthVoice;
+        };
+    }
+
+    SynthVoice *allocateVoice(std::string name) {
+        if (mCreators.find(name) != mCreators.end()) {
+            std::cout << "Allocating (from name) voice of type " << name << "." << std::endl;
+            return mCreators[name]();
+        } else {
+            std::cout << "Can't allocate voice of type " << name << ". Voice not registered and no polyphony." << std::endl;
+        }
+        return nullptr;
+    }
+
 private:
 
     // Internal voices are allocated in PolySynth and shared with the outside.
@@ -313,7 +411,22 @@ private:
 
     std::vector<AudioCallback *> mPostProcessing;
 
+    typedef std::pair<std::function<void(SynthVoice *voice, int offsetFrames, int id, void *)>, void *> TriggerOnCallback;
+    std::vector<TriggerOnCallback> mTriggerOnCallbacks;
+
+    typedef std::pair<std::function<void(int id, void *)>, void *> TriggerOffCallback;
+    std::vector<TriggerOffCallback> mTriggerOffCallbacks;
+
+    float mAudioGain {1.0};
+
     int mIdCounter {0};
+
+    bool mAllNotesOff {false}; // Flag used to notify processing to turn off all voices
+
+    typedef std::function<SynthVoice *()> VoiceCreatorFunc;
+    typedef std::map<std::string, VoiceCreatorFunc> Creators;
+
+    Creators mCreators;
 };
 
 class SynthSequencerEvent {
@@ -322,6 +435,22 @@ public:
     double duration {-1};
     int offsetCounter {0}; // To offset event within audio buffer
     SynthVoice *voice;
+};
+
+enum SynthEventType {
+    TRIGGER_ON,
+    TRIGGER_OFF,
+    NOTE,
+    PARAMETER_CHANGE
+};
+
+struct SynthEvent {
+    std::string synthName;
+    double time;
+    int id;
+    double duration = -1;
+    std::vector<float> pFields;
+    SynthEventType type;
 };
 
 /**
@@ -398,6 +527,174 @@ public:
         mPolySynth.print();
     }
 
+    void setTempo(float tempo) {mNormalizedTempo = tempo/60.f;}
+
+    bool playSequence(std::string sequenceName) {
+//        synth().allNotesOff();
+        // Add an offset of 0.1 to make sure the allNotesOff message gets processed before the sequence
+        std::list<SynthSequencerEvent> events = loadSequence(sequenceName, mMasterTime + 0.1);
+        std::unique_lock<std::mutex> lk(mEventLock);
+        mEvents = events;
+        mNextEvent = 0;
+        return true;
+    }
+
+    std::list<SynthSequencerEvent> loadSequence(std::string sequenceName, double timeOffset = 0) {
+        std::unique_lock<std::mutex> lk(mLoadingLock);
+        std::list<SynthSequencerEvent> events;
+//        std::string fullName = buildFullPath(sequenceName);
+        std::string fullName = sequenceName;
+        std::ifstream f(fullName);
+        if (!f.is_open()) {
+            std::cout << "Could not open:" << fullName << std::endl;
+            return events;
+        }
+
+        std::string line;
+        while (getline(f, line)) {
+            if (line.substr(0, 2) == "::") {
+                break;
+            }
+            std::stringstream ss(line);
+            int command = ss.get();
+            if (command == '@' && ss.get() == ' ') {
+                std::string name, start, durationText;
+                std::getline(ss, start, ' ');
+                std::getline(ss, durationText, ' ');
+                std::getline(ss, name, ' ');
+
+                float startTime = std::stof(start);
+                double duration = std::stod(durationText);
+
+                SynthVoice *newVoice = mPolySynth.getVoice(name);
+                if (newVoice) {
+                    const int maxPFields = 32;
+                    float pFields[maxPFields];
+
+                    int numFields = 0;
+                    std::string field;
+                    std::getline(ss, field, ' ');
+                    while (field != "" && numFields < maxPFields) {
+                        pFields[numFields] = std::stof(field);
+                        numFields++;
+                        std::getline(ss, field, ' ');
+                    }
+                    std::cout << "Pfields: ";
+                    for (int i = 0; i < numFields; i++) {
+                        std::cout << pFields[i] << " ";
+                    }
+                    std::cout << std::endl;
+
+
+                    if (!newVoice->setParamFields(pFields, numFields)) {
+                        std::cout << "Error setting pFields for voice of type " << name << ". Fields: ";
+                        for (int i = 0; i < numFields; i++) {
+                            std::cout << pFields[i] << " ";
+                        }
+                        std::cout << std::endl;
+                    } else {
+                        std::list<SynthSequencerEvent>::iterator insertedEvent;
+                        double absoluteTime = timeOffset + startTime;
+                        // Insert into event list, sorted.
+                        auto position = events.begin();
+                        while(position != events.end() && position->startTime < absoluteTime) {
+                            position++;
+                        }
+                        insertedEvent = events.insert(position, SynthSequencerEvent());
+                        // Add 0.1 padding to ensure all events play.
+                        insertedEvent->startTime = absoluteTime;
+                        insertedEvent->duration = duration;
+                        insertedEvent->voice = newVoice;
+                        std::cout << "Inserted event " << events.size() << " at time " << absoluteTime << std::endl;
+                    }
+                }
+                std::cout << "Done reading sequence" << std::endl;
+            } else if (command == '+' && ss.get() == ' ') {
+                std::string name, idText, start;
+                std::getline(ss, start, ' ');
+                std::getline(ss, idText, ' ');
+                std::getline(ss, name, ' ');
+
+                float startTime = std::stof(start);
+                int id = std::stoi(idText);
+
+                SynthVoice *newVoice = mPolySynth.getVoice(name);
+                if (newVoice) {
+                    newVoice->id(id);
+                    const int maxPFields = 32;
+                    float pFields[maxPFields];
+
+                    int numFields = 0;
+                    std::string field;
+                    std::getline(ss, field, ' ');
+                    while (field != "" && numFields < maxPFields) {
+                        pFields[numFields] = std::stof(field);
+                        numFields++;
+                        std::getline(ss, field, ' ');
+                    }
+//                    std::cout << "Pfields: ";
+//                    for (int i = 0; i < numFields; i++) {
+//                        std::cout << pFields[i] << " ";
+//                    }
+//                    std::cout << std::endl;
+                    if (!newVoice->setParamFields(pFields, numFields)) {
+                        std::cout << "Error setting pFields for voice of type " << name << ". Fields: ";
+                        for (int i = 0; i < numFields; i++) {
+                            std::cout << pFields[i] << " ";
+                        }
+                        std::cout << std::endl;
+                    } else {
+                        std::list<SynthSequencerEvent>::iterator insertedEvent;
+                        double absoluteTime = timeOffset + startTime;
+                        {
+//                            // Insert into event list, sorted.
+                            auto position = events.begin();
+                            while(position != events.end() && position->startTime < absoluteTime) {
+                                position++;
+                            }
+                            insertedEvent = events.insert(position, SynthSequencerEvent());
+                        }
+                        // Add 0.1 padding to ensure all events play.
+                        insertedEvent->startTime = absoluteTime;
+                        insertedEvent->duration = -1; // Turn on events have undetermined duration until a turn off is found later
+                        insertedEvent->voice = newVoice;
+//                        std::cout << "Inserted event " << id << " at time " << startTime << std::endl;
+                    }
+                } else {
+                    std::cout << "Warning: Unable to get free voice from PolySynth." << std::endl;
+                }
+            } else if (command == '-' && ss.get() == ' ') {
+                std::string time, idText;
+                std::getline(ss, time, ' ');
+                std::getline(ss, idText, ' ');
+                int id = std::stoi(idText);
+                double eventTime = std::stod(time);
+                for (SynthSequencerEvent &event: events) {
+                    if (event.voice->id() == id && event.duration < 0) {
+                        double duration = eventTime - event.startTime + timeOffset;
+                        if (duration < 0) {
+                            duration = 0;
+                        }
+                        event.duration = duration;
+//                        std::cout << "Set event duration " << id << " to " << duration << std::endl;
+                        break;
+                    }
+                }
+            } else {
+                if (command > 0) {
+                    std::cout << "Line ignored. Command: " << command << std::endl;
+                }
+            }
+        }
+        f.close();
+        if (f.bad()) {
+            std::cout << "Error reading:" << sequenceName << std::endl;
+        }
+        return events;
+    }
+
+    PolySynth &synth() {return mPolySynth;}
+
 private:
     PolySynth mPolySynth;
 
@@ -405,9 +702,13 @@ private:
 
     unsigned int mNextEvent {0};
     std::list<SynthSequencerEvent> mEvents; // List of events sorted by start time.
+    std::mutex mEventLock;
+    std::mutex mLoadingLock;
 
     PolySynth::TimeMasterMode mMasterMode {PolySynth::TIME_MASTER_AUDIO};
-    double mMasterTime {0};
+    double mMasterTime {0.0};
+
+    float mNormalizedTempo {1.0f}; // Linearly normalized inverted around 60 bpm (1.0 = 60bpm, 0.5 = 120 bpm)
 
     void processEvents(double blockStartTime, double fps);
 };
@@ -459,15 +760,17 @@ void PolySynth::allocatePolyphony(int number) {
 
 template<class TSynthVoice>
 TSynthVoice &SynthSequencer::add(double startTime, double duration) {
+    std::list<SynthSequencerEvent>::iterator insertedEvent;
+    TSynthVoice *newVoice = mPolySynth.getVoice<TSynthVoice>();
+    std::unique_lock<std::mutex> lk(mEventLock);
     // Insert into event list, sorted.
     auto position = mEvents.begin();
     while(position != mEvents.end() && position->startTime < startTime) {
         position++;
     }
-    auto insertedEvent = mEvents.insert(position, SynthSequencerEvent());
+    insertedEvent = mEvents.insert(position, SynthSequencerEvent());
     insertedEvent->startTime = startTime;
     insertedEvent->duration = duration;
-    TSynthVoice *newVoice = mPolySynth.getVoice<TSynthVoice>();
     insertedEvent->voice = newVoice;
     return *newVoice;
 }

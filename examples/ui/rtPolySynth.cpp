@@ -115,9 +115,7 @@ protected:
 };
 
 
-// make an app that contains a SynthSequencer class
-// use the render() functions from the SynthSequencer to produce audio and
-// graphics in the corresponding callback
+// We will use PolySynth to handle voice triggering and allocation
 class MyApp : public App
 {
 public:
@@ -142,9 +140,6 @@ public:
     virtual void onKeyUp(Keyboard const& k) override {
         int midiNote = asciiToMIDI(k.key());
         if (midiNote > 0) {
-            float frequency = ::pow(2., (midiNote - 69.)/12.) * 440.;
-            SineEnv *voice = pSynth.getVoice<SineEnv>();
-            voice->freq(frequency);
             pSynth.triggerOff(midiNote);
         }
     }
