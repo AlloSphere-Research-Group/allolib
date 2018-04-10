@@ -195,6 +195,11 @@ public:
 	 */
 	std::string getName();
 
+    /**
+	 * @brief getGroup returns the name of the group for the parameter
+	 */
+	std::string getGroup();
+
 	typedef float (*ParameterProcessCallback)(ParameterType value, void *userData);
 	typedef void (*ParameterChangeCallback)(ParameterType value, void *sender,
 	                                        void *userData, void * blockSender);
@@ -829,6 +834,12 @@ template<class ParameterType>
 std::string ParameterWrapper<ParameterType>::getName()
 {
 	return mParameterName;
+}
+
+template<class ParameterType>
+std::string ParameterWrapper<ParameterType>::getGroup()
+{
+    return mGroup;
 }
 
 template<class ParameterType>
