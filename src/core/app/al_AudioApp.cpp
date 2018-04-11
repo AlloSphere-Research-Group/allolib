@@ -38,5 +38,6 @@ void AudioApp::beginAudio() {
 }
 
 void AudioApp::endAudio(){
+  audioIO().stop();
 	audioIO().close();
 }
