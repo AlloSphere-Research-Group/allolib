@@ -2,10 +2,10 @@
 - no skipping curly braces
 - no "using namespace ***" in header file
 - use smart pointers instead of new/delete
-- stay away from macros, especially in headerfiles
+- stay away from macros, especially in header files
 - C++ style rather than C style
 - less templates, int and float for most of things,
 - long long int and double for time
 - try to keep functions pure
 - single responsiblity principle
-- hacks need comment with explanation about metho, limitation and assumption
+- hacks need comment with explanation about method, limitation and assumption
