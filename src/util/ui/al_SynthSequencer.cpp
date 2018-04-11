@@ -239,7 +239,7 @@ void PolySynth::render(AudioIOData &io) {
             auto voice = mActiveVoices;
             while (voice) {
                 if (voice->id() == voicesToTurnOff[i]) {
-                    std::cout << voice->id() << std::endl;
+//                    std::cout << "Voice off "<<  voice->id() << std::endl;
                     voice->triggerOff(); // TODO use offset for turn off
                 }
                 voice = voice->next;
@@ -440,7 +440,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
             while (event.startTime <= mMasterTime) {
                 event.offsetCounter = (event.startTime - blockStartTime)*fpsAdjusted;
                 mPolySynth.triggerOn(event.voice, event.offsetCounter);
-                std::cout << "Event " << mNextEvent << " " << event.startTime << " " << typeid(*event.voice).name() << std::endl;
+//                std::cout << "Event " << mNextEvent << " " << event.startTime << " " << typeid(*event.voice).name() << std::endl;
                 mNextEvent++;
                 iter++;
                 if (iter == mEvents.end()) {
@@ -456,9 +456,9 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
             double eventTermination = event.startTime + event.duration;
             if (event.voice && event.voice->active() && eventTermination <= mMasterTime) {
                 mPolySynth.triggerOff(event.voice->id());
-                std::cout << "trigger off " <<  event.voice->id() << " " << eventTermination << " " << mMasterTime  << std::endl;
+//                std::cout << "trigger off " <<  event.voice->id() << " " << eventTermination << " " << mMasterTime  << std::endl;
                 event.voice = nullptr; // When an event gives up a voice, it is done.
-			}
+            }
         }
         mEventLock.unlock();
     }

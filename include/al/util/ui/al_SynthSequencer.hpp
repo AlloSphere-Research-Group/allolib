@@ -92,9 +92,26 @@ public:
     /// Returns true if voice is currently active
     bool active() { return mActive;}
 
+    /**
+     * @brief Set parameter values
+     * @param pFields array containing the values
+     * @param numFields number of fields to process
+     * @return true if able to set the fields
+     *
+     * You will need to override this function if you want support for
+     * SynthRecorder text sequences.
+     *
+     */
     virtual bool setParamFields(float *pFields, int numFields) {
         return false;
     }
+
+    /**
+     * @brief Get this instance's parameter fields
+     * @param pFields a pre-allocated array where the parameter fields will be written.
+     * @return the number of parameters written
+     */
+    virtual int getParamFields(float *pFields) { return -1;}
 
     /**
      * @brief Override this function to define audio processing.
@@ -128,7 +145,6 @@ public:
     * */
     virtual void onTriggerOff() {}
 
-    virtual int get(float *pFields) { return -1;}
 
     /// This function can be called to programatically trigger  a voice.
     /// It is used for example in PolySynth to trigger a voice.
