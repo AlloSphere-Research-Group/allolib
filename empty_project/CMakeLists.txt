@@ -42,18 +42,18 @@ set_target_properties(bin PROPERTIES
 )
 
 # flags
-if (WINDOWS)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   target_compile_options(bin PRIVATE "")
 else ()
   target_compile_options(bin PRIVATE "-Wall")
-endif (WINDOWS)
+endif ()
 
 target_link_libraries(bin al)
 
-if (WINDOWS)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   # when run from Visual Studio, working directory is where the solution is by default
   # set it to app output directory
   set_target_properties(bin PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${app_path}/bin)
   # startup project is `ALL_BUILD` by default so we change it to app project
   set_directory_properties(PROPERTIES VS_STARTUP_PROJECT bin)
-endif (WINDOWS)
+endif ()
