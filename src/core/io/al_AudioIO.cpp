@@ -604,6 +604,13 @@ bool AudioBackend::open(int framesPerSecond, int framesPerBuffer,
 bool AudioBackend::close() {
   AudioBackendData *data = static_cast<AudioBackendData *>(mBackendData.get());
   if (data->audio.isStreamOpen()) {
+    if (data->audio.isStreamRunning()) {
+      try {
+        data->audio.stopStream();
+      } catch (RtAudioError &e) {
+        e.printMessage();
+      }
+    }
     data->audio.closeStream();
   }
 
