@@ -33,4 +33,10 @@ void glfw::terminate(bool is_verbose) {
   if (is_verbose) std::cout << "Done." << std::endl;
 }
 
+glfw::KeycallbackHandlerList& glfw::get_keycallback_handler_list() {
+  // it is fine to have list as stack var since the list does not own any memory
+  static KeycallbackHandlerList list;
+  return list;
+}
+
 }
