@@ -59,6 +59,14 @@ class WindowImpl {
     auto* w = getWindow(window);
     if (!w) return;
 
+    // loop through raw callbacks user registered
+    auto& handler_list = glfw::get_keycallback_handler_list();
+    if (handler_list.size()) { 
+      for (auto& h : handler_list) {
+        h.key_callback(window, key, scancode, action, mods);
+      }
+    }
+
     // first set modifiers
     Keyboard& k = w->mKeyboard;
     k.alt(mods & GLFW_MOD_ALT);

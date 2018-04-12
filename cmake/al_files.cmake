@@ -111,6 +111,7 @@ set(core_sources
 set(util_headers
   include/al/util/al_Array.h
   include/al/util/al_Array.hpp
+  include/al/util/imgui/al_Imgui.hpp
   include/al/util/imgui/imgui_impl_glfw_gl3.h
   include/al/util/ui/al_Composition.hpp
   include/al/util/ui/al_Parameter.hpp
@@ -128,6 +129,7 @@ set(util_headers
 set(util_sources
   ${al_path}/src/util/al_Array_C.c
   ${al_path}/src/util/al_Array.cpp
+  ${al_path}/src/util/imgui/al_Imgui.cpp
   ${al_path}/src/util/imgui/imgui_impl_glfw_gl3.cpp
   ${al_path}/src/util/ui/al_Composition.cpp
   ${al_path}/src/util/ui/al_Parameter.cpp
