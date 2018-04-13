@@ -48,3 +48,35 @@ void al::shutdownIMGUI()
   ImGui_ImplGlfwGL3_Shutdown();
   ImGui::DestroyContext();
 }
+
+void al::beginIMGUI_minimal(bool use_input)
+{
+  beginIMGUI();
+  ImGui::SetNextWindowBgAlpha(0);
+
+  ImGuiWindowFlags window_flags = 0;
+  window_flags |= ImGuiWindowFlags_NoTitleBar; // if (no_titlebar)
+  // window_flags |= ImGuiWindowFlags_NoScrollbar; // if (no_scrollbar)
+  // window_flags |= ImGuiWindowFlags_MenuBar; // if (!no_menu)
+  window_flags |= ImGuiWindowFlags_NoMove; // if (no_move)
+  window_flags |= ImGuiWindowFlags_NoResize; // if (no_resize)
+  window_flags |= ImGuiWindowFlags_NoCollapse; // if (no_collapse)
+  window_flags |= ImGuiWindowFlags_NoNav; // if (no_nav)
+  if (!use_input) window_flags |= ImGuiWindowFlags_NoInputs;
+
+  ImGui::SetNextWindowSize(ImVec2(0, 0));
+  ImGui::SetNextWindowPos(ImVec2(0, 0));
+  ImGui::Begin("", nullptr, window_flags);
+}
+
+void al::endIMGUI_minimal(bool show)
+{
+  ImGui::End();
+  if (show) endIMGUI();
+}
+
+bool al::imgui_is_using_input()
+{
+  auto& io = ImGui::GetIO();
+  return io.WantCaptureMouse | io.WantCaptureKeyboard | io.WantTextInput;
+}
