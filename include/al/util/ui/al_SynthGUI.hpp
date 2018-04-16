@@ -111,7 +111,7 @@ public:
      */
     void begin() {
         if (mManageIMGUI) {
-            beginIMGUI();
+            beginIMGUI_minimal(true);
         }
     }
 
@@ -120,7 +120,7 @@ public:
      */
     void end() {
         if (mManageIMGUI) {
-            endIMGUI();
+            endIMGUI_minimal(true);
         }
     }
 
@@ -129,6 +129,24 @@ public:
             shutdownIMGUI();
         }
     }
+
+
+
+    /**
+     * @brief usingInput returns true if the mouse is within the imgui window
+     * @return
+     *
+     * Can be used to selectively turn off navigation when using ImGUI you
+     * should place this within your onAnimate() callback:
+     *
+     * @code
+     *  virtual void onAnimate(double dt) override {
+     *      navControl().active(!gui.usingInput());
+     *  }
+     * @endcode
+     *
+     */
+    bool usingInput() {return imgui_is_using_input();}
 
 
 protected:
