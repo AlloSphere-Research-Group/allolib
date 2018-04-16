@@ -7,129 +7,140 @@
 #include "al/core/app/al_WindowApp.hpp"
 #include "al/core/app/al_AudioApp.hpp"
 #include "al/core/protocol/al_OSC.hpp"
-
-#include "al/core/graphics/al_GLFW.hpp"
-#include "al/core/io/al_Window.hpp"
-#include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/io/al_ControlNav.hpp"
-
 #include "al/util/al_DeviceServerApp.hpp"
 
 #include <iostream>
+#include <cmath>
 
 namespace al {
 
-// single window, audioIO, and single port osc recv & send
-class App: public WindowApp, public AudioApp, /*public DeviceServerApp,*/ public osc::PacketHandler {
+class App: public WindowApp,
+           public AudioApp,
+           // public DeviceServerApp,
+           public osc::PacketHandler
+{
+  Nav mNav; // is a Pose itself and also handles manipulation of pose
+  Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
+  NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse
+  std::vector<InitDeinitInterface*> init_deinit_targets;
+
 public:
 
-    class AppEventHandler : public WindowEventHandler {
-    public:
-        App* app;
-        AppEventHandler(App* a): app(a) {}
-        bool resize (int dw, int dh) override {
-            app->mViewport.set(0, 0, app->fbWidth(), app->fbHeight());
-            return true;
-        }
-    };
+  Viewpoint& view() { return mView; }
+  const Viewpoint& view() const { return mView; }
 
-    Graphics mGraphics;
-    AppEventHandler eventHandler {this};
-    Nav mNav;
-    Viewpoint mView {mNav.transformed()};
-    NavInputControl mNavControl {mNav};
-    Viewport mViewport;
+  // Nav& nav() override { return mNav; }
+  Nav& nav() { return mNav; }
+  const Nav& nav() const { return mNav; }
 
-    Viewpoint& view() { return mView; }
-    const Viewpoint& view() const { return mView; }
+  Pose& pose() { return mNav; }
+  const Pose& pose() const { return mNav; }
 
-    // Nav& nav() override { return mNav; }
-    Nav& nav() { return mNav; }
-    const Nav& nav() const { return mNav; }
+  NavInputControl& navControl() { return mNavControl; }
+  NavInputControl const& navControl() const { return mNavControl; }
 
-    Pose& pose() { return mNav; }
-    const Pose& pose() const { return mNav; }
+  Lens& lens() { return mView.lens(); }
+  Lens const& lens() const { return mView.lens(); }
 
-    NavInputControl& navControl() { return mNavControl; }
-    NavInputControl const& navControl() const { return mNavControl; }
+  Graphics& graphics() { return mGraphics; }
 
-    Lens& lens() { return mView.lens(); }
-    Lens const& lens() const { return mView.lens(); }
+  // overrides WindowApp's start to also initiate AudioApp and etc.
+  void start() override;
 
-    Graphics& graphics() { return mGraphics; }
+  // interface from WindowApp
+  // users override these
+  void onInit() override {}
+  void onCreate() override {}
+  void onAnimate(double dt) override {}
+  void onDraw (Graphics& g) override {}
+  void onExit() override {}
+  void onKeyDown(Keyboard const& k) override {}
+  void onKeyUp(Keyboard const& k) override {}
+  void onMouseDown(Mouse const& m) override {}
+  void onMouseUp(Mouse const& m) override {}
+  void onMouseDrag(Mouse const& m) override {}
+  void onMouseMove(Mouse const& m) override {}
+  void onResize(int w, int h) override {}
+  void onVisibility(bool v) override {}
 
-    Viewport const& viewport() { return mViewport; }
+  // extra functionalities to be handled
+  virtual void preOnCreate();
+  virtual void preOnAnimate(double dt);
+  virtual void preOnDraw();
+  virtual void postOnDraw();
+  virtual void postOnExit();
 
-    virtual void onInit() {}
-    virtual void onAnimate(double dt) {}
-    virtual void onExit() {}
-
-    virtual void preOnCreate() {
-        append(mNavControl);
-        append(eventHandler);
-        mGraphics.init();
-        mViewport.set(0, 0, fbWidth(), fbHeight());
-    }
-
-    virtual void preOnAnimate(double dt) {
-        mNav.step();
-    }
-
-    virtual void preOnDraw() {
-        mGraphics.framebuffer(FBO::DEFAULT);
-        mGraphics.viewport(mViewport);
-        mGraphics.resetMatrixStack();
-        mGraphics.camera(mView);
-        mGraphics.color(1, 1, 1);
-    }
-
-    virtual void onDraw (Graphics& g) {}
-
-    virtual void postOnDraw() {}
-
-    void onDraw () override {
-        onDraw(mGraphics);
-    }
-
-    // from WindowApp
-    void open() override {
-        glfw::init(is_verbose);
-        onInit();
-        Window::create(is_verbose);
-        preOnCreate();
-        onCreate();
-    }
-
-    // from WindowApp
-    void loop() override {
-        preOnAnimate(dt_sec());
-        onAnimate(dt_sec());
-        preOnDraw();
-        onDraw();
-        postOnDraw();
-        refresh(); // Window
-    }
-
-    // overrides WindowApp's start to also initiate AudioApp and etc.
-    void start() override {
-        open();
-        beginAudio(); // only begins if `initAudio` was called before
-        startFPS(); // WindowApp (FPS)
-        // initDeviceServer();
-        while (!shouldQuit()) {
-            // to quit, call WindowApp::quit() or click close button of window,
-            // or press ctrl + q
-            loop(); // WindowApp (onDraw, refresh)
-            tickFPS(); // WindowApp (FPS)
-        }
-        onExit(); // user defined
-        endAudio(); // AudioApp
-        closeApp(); // WindowApp
-    }
-
-    // PacketHandler
-    void onMessage(osc::Message& m) override {}
+  // PacketHandler
+  void onMessage(osc::Message& m) override {}
 };
+
+
+// ---------- IMPLEMENTATION ---------------------------------------------------
+
+inline void App::start() {
+  glfw::init(is_verbose);
+  onInit();
+  Window::create(is_verbose);
+  preOnCreate();
+  onCreate();
+  AudioApp::beginAudio(); // only begins if `initAudio` was called before
+  FPS::startFPS(); // WindowApp (FPS)
+  // initDeviceServer();
+
+  while (!WindowApp::shouldQuit()) {
+    // to quit, call WindowApp::quit() or click close button of window,
+    // or press ctrl + q
+    preOnAnimate(dt_sec());
+    onAnimate(dt_sec());
+    preOnDraw();
+    onDraw(mGraphics);
+    postOnDraw();
+    Window::refresh();
+    FPS::tickFPS();
+  }
+
+  onExit(); // user defined
+  postOnExit();
+  AudioApp::endAudio(); // AudioApp
+  Window::destroy();
+  glfw::terminate(is_verbose);
+}
+
+inline void App::preOnCreate() {
+  append(mNavControl);
+  mGraphics.init();
+  if (init_deinit_targets.size()) {
+    for (auto* t : init_deinit_targets) {
+      t->init();
+    }
+  }
+}
+
+inline void App::preOnAnimate(double dt) {
+    mNav.smooth(std::pow(0.0001, dt));
+    mNav.step(dt * fps());
+}
+
+inline void App::preOnDraw() {
+    mGraphics.framebuffer(FBO::DEFAULT);
+    mGraphics.viewport(0, 0, fbWidth(), fbHeight());
+    mGraphics.resetMatrixStack();
+    mGraphics.camera(mView);
+    mGraphics.color(1, 1, 1);
+}
+
+inline void App::postOnDraw() {
+  //
+}
+
+inline void App::postOnExit() {
+  if (init_deinit_targets.size()) {
+    for (auto* t : init_deinit_targets) {
+      t->deinit();
+    }
+  }
+}
 
 }
 

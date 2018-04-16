@@ -101,7 +101,6 @@ public:
 private:
   Lens mLens;
   Pose* mPose = nullptr;
-  // Viewport mViewport; // screen display region
 
 public:
   enum SpecialType {

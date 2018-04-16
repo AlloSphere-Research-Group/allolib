@@ -1,4 +1,5 @@
 #include "al/util/imgui/al_Imgui.hpp"
+#include "al/core/graphics/al_GLFW.hpp"
 
 struct imgui_keycallback_t
 {
@@ -25,7 +26,7 @@ void al::initIMGUI()
   glfwSetScrollCallback(window, ImGui_ImplGlfw_ScrollCallback);
   glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
 
-  // still keycallback needs to be called in some way
+  // still keycallback needs to be called in some way for text input
   // do it by registering to glfw raw keycallback handler list
   auto& handler_list = al::glfw::get_keycallback_handler_list();
   handler_list.emplace_back(get_imgui_keycallback_singleton_object_ptr());

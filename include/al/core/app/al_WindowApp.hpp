@@ -13,6 +13,8 @@
 
 #include "al/core/app/al_FPS.hpp"
 #include "al/core/io/al_Window.hpp"
+#include "al/core/graphics/al_GLFW.hpp"
+#include "al/core/graphics/al_Graphics.hpp"
 
 #include <atomic>
 
@@ -26,23 +28,25 @@ class WindowApp : public Window, public WindowEventHandler, public FPS {
   };
   StandardWindowAppKeyControls stdControls;
 
+  Graphics mGraphics;
   std::atomic<bool> mShouldQuitApp{false};
   bool is_verbose = false;
   void verbose(bool b = true) { is_verbose = b; }
   
   WindowApp();
 
+  // start app loop
   virtual void start();
-  virtual void open();
-  virtual void loop();
-  virtual void closeApp();
 
   void quit() { mShouldQuitApp = true; }
   bool shouldQuit() { return mShouldQuitApp || Window::shouldClose(); }
 
   // user will override these
+  virtual void onInit() {}
   virtual void onCreate() {}
-  virtual void onDraw() {}
+  virtual void onAnimate(double dt) {}
+  virtual void onDraw(Graphics& g) {}
+  virtual void onExit() {}
   virtual void onKeyDown(Keyboard const& k) {}
   virtual void onKeyUp(Keyboard const& k) {}
   virtual void onMouseDown(Mouse const& m) {}
@@ -52,15 +56,15 @@ class WindowApp : public Window, public WindowEventHandler, public FPS {
   virtual void onResize(int w, int h) {}
   virtual void onVisibility(bool v) {}
 
-  // call user event functions using WindowEventHandler class
-  virtual bool keyDown(const Keyboard& k) override;
-  virtual bool keyUp(const Keyboard& k) override;
-  virtual bool mouseDown(const Mouse& m) override;
-  virtual bool mouseDrag(const Mouse& m) override;
-  virtual bool mouseMove(const Mouse& m) override;
-  virtual bool mouseUp(const Mouse& m) override;
-  virtual bool resize(int dw, int dh) override;
-  virtual bool visibility(bool v) override;
+  // callbacks from window class, wil call user event functions like `on***`
+  bool keyDown(const Keyboard& k) final;
+  bool keyUp(const Keyboard& k) final;
+  bool mouseDown(const Mouse& m) final;
+  bool mouseDrag(const Mouse& m) final;
+  bool mouseMove(const Mouse& m) final;
+  bool mouseUp(const Mouse& m) final;
+  bool resize(int dw, int dh) final;
+  bool visibility(bool v) final;
 };
 
 }  // namespace al

@@ -3,7 +3,6 @@
 
 #include "imgui.h"
 #include "al/util/imgui/imgui_impl_glfw_gl3.h"
-#include "al/core/graphics/al_GLFW.hpp"
 
 namespace al {
 

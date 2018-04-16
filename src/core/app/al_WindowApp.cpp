@@ -1,6 +1,4 @@
 #include "al/core/app/al_WindowApp.hpp"
-#include "al/core/graphics/al_GLFW.hpp"
-#include "al/core/graphics/al_GPUObject.hpp"
 
 using namespace al;
 
@@ -33,30 +31,21 @@ WindowApp::WindowApp() {
   append(windowEventHandler());
 }
 
-void WindowApp::open() {
+void WindowApp::start() {
   glfw::init(is_verbose);
+  onInit();
   Window::create(is_verbose);
   onCreate();
-}
-
-void WindowApp::loop() {
-  onDraw();
-  refresh();
-}
-
-void WindowApp::closeApp() {
-  destroy();          // destroy window
-  glfw::terminate(is_verbose);  // this also closes existing windows
-}
-
-void WindowApp::start() {
-  open();
-  startFPS();
+  FPS::startFPS();
   while (!shouldQuit()) {
-    loop();
-    tickFPS();
+    onAnimate(dt_sec());
+    onDraw(mGraphics);
+    Window::refresh();
+    FPS::tickFPS();
   }
-  closeApp();
+  onExit();
+  Window::destroy();          // destroy window
+  glfw::terminate(is_verbose);  // this also closes existing windows
 }
 
 // call user event functions inside WindowEventHandler class

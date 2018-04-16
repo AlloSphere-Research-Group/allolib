@@ -28,46 +28,50 @@ class MyApp : public App {
   void onDraw(Graphics& g) {
     g.clear(0.2);
 
-    g.tint({1});
+    g.tint(1);
     g.quad(font1.texture(), -1, -1, 2, 2);
 
     // Get the viewport dimensions, in pixels, for positioning the text
-    float W = viewport().w;
-    float H = viewport().h;
+    float W = fbWidth();
+    float H = fbHeight();
 
     // Setup our matrices for 2D pixel space
-    g.projMatrix(Matrix4f::ortho2D(0, W, 0, H));
+    // g.projMatrix(Matrix4f::ortho2D(0, W, 0, H));
+    // g.viewMatrix(Matrix4f::identity());
 
-    g.pushMatrix();
+    // or there's oneliner
+    g.camera(Viewpoint::ORTHO_FOR_2D);
 
     // Before rendering text, we must turn on blending
     g.blendAdd();
 
     // Render text in the top-left corner
-    g.loadIdentity();
+    g.pushMatrix();
     g.translate(8, H - (font1.size() + 8));
     g.tint(1, 1, 0, 1);
     font1.render(g, "Top-left text");
+    g.popMatrix();
 
     // Render text in the bottom-left corner
-    g.loadIdentity();
+    g.pushMatrix();
     g.translate(8, 8);
     g.tint(1, 0, 1, 1);
     font3.render(g, "Bottom-left text");
+    g.popMatrix();
 
     // Render text centered on the screen
-    g.loadIdentity();
+    g.pushMatrix();
     std::string str = "Centered text";
     // Note that dimensions must be integers to avoid blurred text
     g.translate(int(W / 2 - font2.width(str) / 2),
                 int(H / 2 - font2.size() / 2));
     g.tint(0, 1, 1, 1);
     font2.render(g, str);
+    g.popMatrix();
 
     // Turn off blending
     g.blendOff();
 
-    g.popMatrix();
   }
 };
 

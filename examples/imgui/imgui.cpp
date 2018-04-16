@@ -8,7 +8,7 @@ using namespace al;
 
 struct my_app : App
 {
-  float x = 0;;
+  float x = 0;
   Color clear_color {0, 0, 0};
   bool show_another_window = false;
   bool show_demo_window = false;
@@ -25,7 +25,7 @@ struct my_app : App
   void onAnimate(double dt) override {
     // call beginIMGUI before everything, so info about gui status can be used
     // to update app state
-    beginIMGUI(); 
+    beginIMGUI();
 
     // don't nav if imgui's using inputs
     // ex) prevents camera rotation when mouse dragging scroll bar

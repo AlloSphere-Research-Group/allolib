@@ -14,7 +14,6 @@ namespace al {
 
 struct OmniRenderer : WindowApp
 {
-  Graphics mGraphics;
   PerProjectionRender pp_render;
   bool render_stereo = true;
   bool running_in_sphere_renderer = false;
@@ -55,17 +54,11 @@ struct OmniRenderer : WindowApp
   Pose const &pose() const { return pp_render.pose(); }
 
   // for user to override
+  void onInit() override {}
   void onCreate() override {}
-  virtual void onAnimate(double dt) {}
-  virtual void onDraw(Graphics &g) {}
-  virtual void onExit() {}
-
-  // omni functionality, impl below out-of-line
-  void open() override;
-  void onDraw() override;
-  void start() override;
-
-  // input events in case on desktop mode
+  void onAnimate(double dt) override {}
+  void onDraw(Graphics &g) override {}
+  void onExit() override {}
   void onKeyDown(Keyboard const &k) override {}
   void onKeyUp(Keyboard const &k) override {}
   void onMouseDown(Mouse const &m) override {}
@@ -74,23 +67,42 @@ struct OmniRenderer : WindowApp
   void onMouseMove(Mouse const &m) override {}
   void onResize(int w, int h) override {}
   void onVisibility(bool v) override {}
+
+  // run app
+  void start() override;
+
+  // omni functionality, impl below out-of-line
+  void check_if_in_sphere_and_setup_window_dimensions();
+  void load_perprojection_configuration();
+  void draw_using_perprojection_capture();
+
+  // input events in case on desktop mode
 };
 
-void OmniRenderer::start() {
-  open();
-  startFPS();
+inline void OmniRenderer::start() {
+  glfw::init(is_verbose);
+  onInit();
+  check_if_in_sphere_and_setup_window_dimensions();
+  Window::create(is_verbose);
+  window_is_stereo_buffered = Window::displayMode() & Window::STEREO_BUF;
+  mGraphics.init();
+  load_perprojection_configuration();
+  cursorHide(true);
+  onCreate();
+  FPS::startFPS();
   while (!shouldQuit()) {
-    loop();
-    tickFPS();
+    onAnimate(dt_sec()); // millis for dt
+    draw_using_perprojection_capture();
+    Window::refresh();
+    FPS::tickFPS();
   }
   onExit();
-  closeApp();
+  Window::destroy();
+  glfw::terminate(is_verbose);
 }
 
-void OmniRenderer::open() {
-  glfw::init(is_verbose);
-  if (sphere::is_renderer())
-    running_in_sphere_renderer = true;
+inline void OmniRenderer::check_if_in_sphere_and_setup_window_dimensions() {
+  if (sphere::is_renderer()) running_in_sphere_renderer = true;
 
   if (running_in_sphere_renderer) {
     int width, height;
@@ -103,11 +115,9 @@ void OmniRenderer::open() {
                 << "width and/or height are/is zero!" << std::endl;
     }
   }
-  Window::create(is_verbose);
-  cursorHide(true);
+}
 
-  window_is_stereo_buffered = Window::displayMode() & Window::STEREO_BUF;
-
+inline void OmniRenderer::load_perprojection_configuration() {
   if (running_in_sphere_renderer) {
     // need to be called before pp_render.init
     pp_render.load_calibration_data(
@@ -119,12 +129,9 @@ void OmniRenderer::open() {
     // load fake projection data for desktop rendering
     pp_render.load_and_init_as_desktop_config();
   }
-  mGraphics.init();
-  onCreate();
 }
 
-void OmniRenderer::onDraw() {
-  onAnimate(dt_sec()); // millis for dt
+inline void OmniRenderer::draw_using_perprojection_capture() {
 
   // start drawing to perprojection fbos
   mGraphics.omni(true);
