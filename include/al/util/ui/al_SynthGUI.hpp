@@ -54,7 +54,11 @@
 
 namespace al
 {
-
+/**
+ * @brief The SynthGUI class
+ *
+ * You must call init() before any draw calls.
+ */
 class SynthGUI {
 public:
 
@@ -86,6 +90,49 @@ public:
     void registerSynthSequencer(SynthSequencer &seq);
 
     void onDraw(Graphics &g);
+
+    /**
+     * @brief Call to set if this GUI manages ImGUI
+     *
+     * Set to false if you want to have additional ImGUI windows.
+     * You will have to handle the initialization, cleanup and
+     * begin/end calls yourself.
+     */
+    void manageImGUI(bool manage) {mManageIMGUI = manage;}
+
+    void init() {
+        if (mManageIMGUI) {
+            initIMGUI();
+        }
+    }
+
+    /**
+     * @brief Call begin() at the start of the outer draw call, if not managing ImGUI
+     */
+    void begin() {
+        if (mManageIMGUI) {
+            beginIMGUI();
+        }
+    }
+
+    /**
+     * @brief Call begin() at the end of the outer draw call, if not managing ImGUI
+     */
+    void end() {
+        if (mManageIMGUI) {
+            endIMGUI();
+        }
+    }
+
+    void cleanup() {
+        if (mManageIMGUI) {
+            shutdownIMGUI();
+        }
+    }
+
+
+protected:
+
 private:
     std::map<std::string, std::vector<Parameter *>> mParameters;
     PresetHandler *mPresetHandler {nullptr};
@@ -96,6 +143,7 @@ private:
     bool mStoreButtonOn {false};
     bool mRecordButtonValue {false};
     bool mOverwriteButtonValue {true};
+    bool mManageIMGUI {true};
 };
 
 }

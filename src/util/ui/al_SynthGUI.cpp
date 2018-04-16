@@ -4,6 +4,7 @@ using namespace al;
 
 
 void SynthGUI::onDraw(Graphics &g) {
+    begin();
     ImGui::SetNextWindowSize(ImVec2(300, 450), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiCond_FirstUseEver);
     ImGui::Begin("");
@@ -71,7 +72,7 @@ void SynthGUI::onDraw(Graphics &g) {
             mSynthSequencer->playSequence("test.synthSequence");
         }
     }
-    ImGui::ShowDemoWindow();
+//    ImGui::ShowDemoWindow();
     for (auto elem: mParameters) {
         if(elem.first == "" || !ImGui::CollapsingHeader(elem.first.c_str())) { // ! to force open by default
             for (auto param: elem.second) {
@@ -85,6 +86,7 @@ void SynthGUI::onDraw(Graphics &g) {
         }
     }
     ImGui::End(); // End the window
+    end();
 }
 
 SynthGUI &SynthGUI::registerParameter(Parameter &param) {
