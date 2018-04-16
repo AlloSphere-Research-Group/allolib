@@ -23,7 +23,6 @@ class App: public WindowApp,
   Nav mNav; // is a Pose itself and also handles manipulation of pose
   Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
   NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse
-  std::vector<InitDeinitInterface*> init_deinit_targets;
 
 public:
 
@@ -110,11 +109,6 @@ inline void App::start() {
 inline void App::preOnCreate() {
   append(mNavControl);
   mGraphics.init();
-  if (init_deinit_targets.size()) {
-    for (auto* t : init_deinit_targets) {
-      t->init();
-    }
-  }
 }
 
 inline void App::preOnAnimate(double dt) {
@@ -135,11 +129,7 @@ inline void App::postOnDraw() {
 }
 
 inline void App::postOnExit() {
-  if (init_deinit_targets.size()) {
-    for (auto* t : init_deinit_targets) {
-      t->deinit();
-    }
-  }
+  //
 }
 
 }
