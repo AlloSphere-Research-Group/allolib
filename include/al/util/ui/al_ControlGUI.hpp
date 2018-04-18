@@ -1,5 +1,5 @@
-#ifndef AL_SYNTHGUI_HPP
-#define AL_SYNTHGUI_HPP
+#ifndef AL_ControlGUI_HPP
+#define AL_ControlGUI_HPP
 
 /*	Allocore --
 	Multimedia / virtual environment application class library
@@ -35,7 +35,7 @@
 	POSSIBILITY OF SUCH DAMAGE.
 
 	File description:
-	SynthGUI class for simple GUI for Synth classes
+    ControlGUI class for simple GUI for Synth classes
 
 	File author(s):
 	Andrés Cabrera mantaraya36@gmail.com
@@ -44,6 +44,7 @@
 #include <string>
 #include <map>
 
+#include "al/core/io/al_ControlNav.hpp"
 #include "al/util/ui/al_ParameterMIDI.hpp"
 #include "al/util/ui/al_SynthSequencer.hpp"
 #include "al/util/ui/al_SynthRecorder.hpp"
@@ -55,37 +56,48 @@
 namespace al
 {
 /**
- * @brief The SynthGUI class
+ * @brief The ControlGUI class
  *
  * You must call init() before any draw calls.
  */
-class SynthGUI {
+class ControlGUI {
 public:
 
-    SynthGUI &registerParameter(Parameter &param);
+    ControlGUI &registerParameter(Parameter &param);
+    ControlGUI &registerParameterBool(ParameterBool &param);
+    ControlGUI &registerNav(Nav &nav);
 
-    SynthGUI &registerPresetHandler(PresetHandler &presetHandler);
+    ControlGUI &registerPresetHandler(PresetHandler &presetHandler);
 
     /// Register parameter using the streaming operator. A widget is shown to control it.
-    SynthGUI &operator << (Parameter& newParam){ return registerParameter(newParam); }
+    ControlGUI &operator << (Parameter& newParam){ return registerParameter(newParam); }
 
     /// Register parameter using the streaming operator. A widget is shown to control it.
-    SynthGUI &operator << (Parameter* newParam){ return registerParameter(*newParam); }
+    ControlGUI &operator << (Parameter* newParam){ return registerParameter(*newParam); }
+
+    /// Register parameter using the streaming operator. A widget is shown to control it.
+    ControlGUI &operator << (ParameterBool& newParam){ return registerParameter(newParam); }
+
+    /// Register parameter using the streaming operator. A widget is shown to control it.
+    ControlGUI &operator << (ParameterBool* newParam){ return registerParameter(*newParam); }
+
+    /// Register nav using the streaming operator. A set of widgets are shown to control it.
+    ControlGUI &operator << (Nav &nav){ return registerNav(nav); }
 
     /// Register preset handler using the streaming operator. GUI widgets for preset control are shown.
-    SynthGUI &operator << (PresetHandler& ph){ return registerPresetHandler(ph); }
+    ControlGUI &operator << (PresetHandler& ph){ return registerPresetHandler(ph); }
 
     /// Register preset handler using the streaming operator. GUI widgets for preset control are shown.
-    SynthGUI &operator << (PresetHandler* ph){ return registerPresetHandler(*ph); }
+    ControlGUI &operator << (PresetHandler* ph){ return registerPresetHandler(*ph); }
 
     /// Register a SynthRecorder. This will display GUI widgets to control it
-    SynthGUI & operator<< (SynthRecorder &recorder) { registerSynthRecorder(recorder);  return *this; }
+    ControlGUI & operator<< (SynthRecorder &recorder) { registerSynthRecorder(recorder);  return *this; }
 
     void registerSynthRecorder(SynthRecorder &recorder);
 
     /// Register a SynthSequencer. This will display GUI widgets to control it
     /// Will also register the PolySynth contained within it.
-    SynthGUI & operator<< (SynthSequencer &seq) { registerSynthSequencer(seq);  return *this; }
+    ControlGUI & operator<< (SynthSequencer &seq) { registerSynthSequencer(seq);  return *this; }
 
     void registerSynthSequencer(SynthSequencer &seq);
 
@@ -153,10 +165,14 @@ protected:
 
 private:
     std::map<std::string, std::vector<Parameter *>> mParameters;
+    std::map<std::string, std::vector<ParameterVec3 *>> mParameterVec3s;
+    std::map<std::string, std::vector<ParameterVec4 *>> mParameterVec4s;
+
     PresetHandler *mPresetHandler {nullptr};
     SynthRecorder *mSynthRecorder {nullptr};
     SynthSequencer *mSynthSequencer {nullptr};
     PolySynth *mPolySynth {nullptr};
+    Nav *mNav {nullptr};
 
     bool mStoreButtonOn {false};
     bool mRecordButtonValue {false};

@@ -1,13 +1,32 @@
-#include "al/util/ui/al_SynthGUI.hpp"
+#include "al/util/ui/al_ControlGUI.hpp"
 
 using namespace al;
 
 
-void SynthGUI::onDraw(Graphics &g) {
+void ControlGUI::onDraw(Graphics &g) {
     begin();
     ImGui::SetNextWindowSize(ImVec2(300, 450), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiCond_FirstUseEver);
     ImGui::Begin("");
+    if (mNav) {
+        Vec3d &currentPos = mNav->pos();
+        float x = currentPos.elems()[0];
+
+        bool changed = ImGui::SliderFloat("X", &x, -10, 10);
+        if (changed) {
+            currentPos.elems()[0] = x;
+        }
+        float y = currentPos.elems()[1];
+        changed = ImGui::SliderFloat("Y", &y, -10, 10);
+        if (changed) {
+            currentPos.elems()[1] = y;
+        }
+        float z = currentPos.elems()[2];
+        changed = ImGui::SliderFloat("Z", &z, -10, 10);
+        if (changed) {
+            currentPos.elems()[2] = z;
+        }
+    }
     if (mPresetHandler) {
         if (!ImGui::CollapsingHeader("Presets")) { // ! to force open by default
 
@@ -89,7 +108,7 @@ void SynthGUI::onDraw(Graphics &g) {
     end();
 }
 
-SynthGUI &SynthGUI::registerParameter(Parameter &param) {
+ControlGUI &ControlGUI::registerParameter(Parameter &param) {
     std::string group = param.getGroup();
     if (mParameters.find(group) == mParameters.end()) {
         mParameters[group] = std::vector<Parameter *>();
@@ -98,16 +117,32 @@ SynthGUI &SynthGUI::registerParameter(Parameter &param) {
     return *this;
 }
 
-SynthGUI &SynthGUI::registerPresetHandler(PresetHandler &presetHandler) {
+ControlGUI &ControlGUI::registerParameterBool(ParameterBool &param)
+{
+    std::string group = param.getGroup();
+    if (mParameters.find(group) == mParameters.end()) {
+        mParameters[group] = std::vector<Parameter *>();
+    }
+    mParameters[group].push_back(&param);
+    return *this;
+}
+
+ControlGUI &ControlGUI::registerNav(Nav &nav)
+{
+    mNav = &nav;
+    return *this;
+}
+
+ControlGUI &ControlGUI::registerPresetHandler(PresetHandler &presetHandler) {
     mPresetHandler = &presetHandler;
     return *this;
 }
 
-void SynthGUI::registerSynthRecorder(SynthRecorder &recorder) {
+void ControlGUI::registerSynthRecorder(SynthRecorder &recorder) {
     mSynthRecorder = &recorder;
 }
 
-void SynthGUI::registerSynthSequencer(SynthSequencer &seq) {
+void ControlGUI::registerSynthSequencer(SynthSequencer &seq) {
     mSynthSequencer = &seq;
     mPolySynth = &seq.synth();
 }
