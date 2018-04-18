@@ -125,7 +125,7 @@ set(util_headers
   include/al/util/ui/al_SequenceRecorder.hpp
   include/al/util/ui/al_SynthSequencer.hpp
   include/al/util/ui/al_SynthRecorder.hpp
-  include/al/util/ui/al_SynthGUI.hpp
+  include/al/util/ui/al_ControlGUI.hpp
 )
 
 set(util_sources
@@ -143,7 +143,7 @@ set(util_sources
   ${al_path}/src/util/ui/al_SequenceRecorder.cpp
   ${al_path}/src/util/ui/al_SynthSequencer.cpp
   ${al_path}/src/util/ui/al_SynthRecorder.cpp
-  ${al_path}/src/util/ui/al_SynthGUI.cpp
+  ${al_path}/src/util/ui/al_ControlGUI.cpp
 )
 
 set(al_headers
