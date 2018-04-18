@@ -41,9 +41,13 @@ BUILD_TYPE=Release
 DO_CLEAN=0
 IS_VERBOSE=0
 VERBOSE_FLAG=OFF
+RUN_MPI=0
 
 while getopts "dncv" opt; do
   case "${opt}" in
+  a)
+    RUN_MPI=1
+    ;;
   d)
     BUILD_TYPE=Debug
     POSTFIX=d # if release, there's no postfix
@@ -118,7 +122,9 @@ else
   DEBUGGER="gdb -ex run "
 fi
 
-if [ ${BUILD_TYPE} == "Release" ]; then
+if [ ${RUN_MPI} ]; then
+  mpirun --hostfile ../../mpi_hosts.txt ./"${APP_NAME}${POSTFIX}"
+elif [ ${BUILD_TYPE} == "Release" ]; then
   ./"${APP_NAME}${POSTFIX}"
 else
   ${DEBUGGER} ./"${APP_NAME}${POSTFIX}"
