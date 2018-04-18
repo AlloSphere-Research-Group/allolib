@@ -32,7 +32,7 @@ endif ()
 get_filename_component(app_name ${file_full_path} NAME_WE)
 get_filename_component(app_path ${file_full_path} DIRECTORY)
 set(app_files_list ${file_full_path})
-set(al_path ${CMAKE_CURRENT_LIST_DIR}/../..)
+set(al_path ${CMAKE_CURRENT_LIST_DIR}/../../../allolib)
 
 option(AL_VERBOSE_OUTPUT "" OFF)
 
@@ -56,12 +56,12 @@ endif()
 # inlcude allolib target and Gamma target
 if (DEFINED CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
-	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../../allolib ${CMAKE_CURRENT_LIST_DIR}/../../../allolib/build)
+        add_subdirectory("${al_path}" "${al_path}/build")
 else()
 	if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-		add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../../allolib ${CMAKE_CURRENT_LIST_DIR}/../../../allolib/build/Debug)
+                add_subdirectory("${al_path}" "${al_path}/build/Debug")
 	else()
-		add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../../allolib ${CMAKE_CURRENT_LIST_DIR}/../../../allolib/build/Release)
+                add_subdirectory("${al_path}" "${al_path}/build/Release")
 	endif()
 endif ()
 
@@ -83,7 +83,52 @@ else ()
   target_compile_options(${app_name} PRIVATE "-Wall")
 endif (AL_WINDOWS)
 
-target_link_libraries(${app_name} al)
+set(dirs_to_include
+  ${al_path}/include
+  ${app_include_dirs}
+  ${CORE_INCLUDE_DIRS}
+  ${ADDITIONAL_INCLUDE_DIRS}
+  ${EXTERNAL_INCLUDE_DIRS}
+)
+
+set(libs_to_link
+    al
+  ${app_link_libs}
+  ${CORE_LIBRARIES}
+  ${ADDITIONAL_LIBRARIES}
+  ${EXTERNAL_LIBRARIES}
+)
+
+set(definitions
+  ${PLATFORM_DEFINITION}
+  ${ADDITIONAL_DEFINITIONS}
+  ${EXTERNAL_DEFINITIONS}
+)
+
+set (compile_flags
+  ${ADDITIONAL_COMPILE_FLAGS}
+)
+
+set (link_flags
+  ${ADDITIONAL_LINK_FLAGS}
+)
+
+target_compile_definitions(${app_name} PRIVATE ${definitions})
+
+target_include_directories(${app_name} PRIVATE ${dirs_to_include} ${al_path}/external/Gamma)
+
+target_link_libraries(${app_name} ${libs_to_link})
+
+if (compile_flags)
+    set_target_properties(${app_name} PROPERTIES
+        COMPILE_FLAGS ${compile_flags})
+endif()
+
+if (link_flags)
+    set_target_properties(${app_name} PROPERTIES
+        LINK_FLAGS_RELEASE ${link_flags}
+        LINK_FLAGS_DEBUG ${link_flags})
+endif (link_flags)
 
 if (AL_WINDOWS)
   # when run from Visual Studio, working directory is where the solution is by default
