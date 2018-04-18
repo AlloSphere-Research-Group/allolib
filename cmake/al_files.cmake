@@ -118,8 +118,9 @@ set(util_headers
   include/al/util/ui/al_Parameter.hpp
   include/al/util/ui/al_ParameterMIDI.hpp
   include/al/util/ui/al_Preset.hpp
+  include/al/util/ui/al_HtmlInterfaceServer.hpp
   include/al/util/ui/al_PresetMapper.hpp
-  # include/al/util/ui/al_PresetMIDI.hpp
+  include/al/util/ui/al_PresetMIDI.hpp
   include/al/util/ui/al_PresetSequencer.hpp
   include/al/util/ui/al_SequenceRecorder.hpp
   include/al/util/ui/al_SynthSequencer.hpp
@@ -135,8 +136,9 @@ set(util_sources
   ${al_path}/src/util/ui/al_Composition.cpp
   ${al_path}/src/util/ui/al_Parameter.cpp
   ${al_path}/src/util/ui/al_Preset.cpp
+  ${al_path}/src/util/ui/al_HtmlInterfaceServer.cpp
   ${al_path}/src/util/ui/al_PresetMapper.cpp
-  # ${al_path}/src/util/ui/al_PresetMIDI.cpp
+  ${al_path}/src/util/ui/al_PresetMIDI.cpp
   ${al_path}/src/util/ui/al_PresetSequencer.cpp
   ${al_path}/src/util/ui/al_SequenceRecorder.cpp
   ${al_path}/src/util/ui/al_SynthSequencer.cpp
