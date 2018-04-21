@@ -298,6 +298,12 @@ void ParameterServer::print()
 	for (Parameter *p:mParameters) {
 		std::cout << "Parameter " << p->getName() << " : " <<  p->getFullAddress() << std::endl;
 	}
+    if (mOSCSenders.size() > 0) {
+        std::cout << "Registered listeners: " << std::endl;
+        for (auto sender:mOSCSenders) {
+            std::cout << sender->address() << ":" << sender->port() << std::endl;
+        }
+    }
 }
 
 void ParameterServer::stopServer()

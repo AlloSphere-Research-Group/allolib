@@ -735,14 +735,17 @@ void PresetServer::print()
 	if (mServer) {
 		std::cout << "Preset server listening on: " << mServer->address() << ":" << mServer->port() << std::endl;
 		std::cout << "Communicating on path: " << mOSCpath << std::endl;
-		std::cout << "Registered listeners: " << std::endl;
 
 	} else {
 		std::cout << "Preset Server Connected to shared server." << std::endl;
 	}
-	for (auto sender:mOSCSenders) {
-		std::cout << sender->address() << ":" << sender->port() << std::endl;
-	}
+
+    if (mOSCSenders.size() > 0) {
+        std::cout << "Registered listeners: " << std::endl;
+        for (auto sender:mOSCSenders) {
+            std::cout << sender->address() << ":" << sender->port() << std::endl;
+        }
+    }
 }
 
 void PresetServer::stopServer()
