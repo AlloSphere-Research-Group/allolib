@@ -16,6 +16,9 @@ if (AL_VERBOSE_OUTPUT)
 	message("allolib path: ${allolib_dir}")
 	message("include dirs: ${app_include_dirs}")
 	message("link libs: ${app_link_libs}")
+  message("definitions: ${app_definitions}")
+  message("compile flags: ${app_compile_flags}")
+  message("linker flags: ${app_linker_flags}")
 endif()
 
 # inlcude allolib target
@@ -33,12 +36,12 @@ endif ()
 add_executable(bin ${app_files_list})
 
 set_target_properties(bin PROPERTIES
-    DEBUG_POSTFIX _debug
-    RUNTIME_OUTPUT_DIRECTORY ${app_path}/bin
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${app_path}/bin
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${app_path}/bin
-    CXX_STANDARD 14
-    CXX_STANDARD_REQUIRED ON
+  DEBUG_POSTFIX _debug
+  RUNTIME_OUTPUT_DIRECTORY ${app_path}/bin
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${app_path}/bin
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE ${app_path}/bin
+  CXX_STANDARD 14
+  CXX_STANDARD_REQUIRED ON
 )
 
 # flags
@@ -49,6 +52,13 @@ else ()
 endif ()
 
 target_link_libraries(bin al)
+
+target_include_directories(bin PRIVATE ${app_include_dirs})
+target_link_libraries(bin ${app_link_libs})
+target_compile_definitions(bin PRIVATE ${app_definitions})
+target_compile_options(bin PRIVATE ${app_compile_flags})
+# Item names starting with -, but not -l or -framework, are treated as linker flags.
+target_link_libraries(bin ${app_linker_flags})
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   # when run from Visual Studio, working directory is where the solution is by default

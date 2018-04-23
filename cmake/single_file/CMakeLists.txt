@@ -15,6 +15,8 @@ cmake_minimum_required(VERSION 3.0)
 
 # allolib's run.sh script will do above process too
 
+option(AL_VERBOSE_OUTPUT "" OFF)
+
 if (NOT AL_APP_FILE)
   message(FATAL_ERROR "\n[!] app file needs to be provided\n")
 endif ()
@@ -24,9 +26,9 @@ if (IS_DIRECTORY AL_APP_FILE)
 endif ()
 
 if (IS_ABSOLUTE ${AL_APP_FILE})
-	get_filename_component(file_full_path ${AL_APP_FILE} ABSOLUTE)
+  get_filename_component(file_full_path ${AL_APP_FILE} ABSOLUTE)
 else ()
-	get_filename_component(file_full_path ${CMAKE_CURRENT_BINARY_DIR}/${AL_APP_FILE} ABSOLUTE)
+  get_filename_component(file_full_path ${CMAKE_CURRENT_BINARY_DIR}/${AL_APP_FILE} ABSOLUTE)
 endif ()
 
 get_filename_component(app_name ${file_full_path} NAME_WE)
@@ -34,7 +36,12 @@ get_filename_component(app_path ${file_full_path} DIRECTORY)
 set(app_files_list ${file_full_path})
 set(al_path ${CMAKE_CURRENT_LIST_DIR}/../../../allolib)
 
-option(AL_VERBOSE_OUTPUT "" OFF)
+if(EXISTS "${app_path}/flags.cmake")
+  if (AL_VERBOSE_OUTPUT)
+    message("found flags.cmake")
+  endif()
+  include(${app_path}/flags.cmake)
+endif()
 
 if (AL_VERBOSE_OUTPUT)
 	message("binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
@@ -44,36 +51,32 @@ if (AL_VERBOSE_OUTPUT)
 	message("al path: ${al_path}")
 	message("include dirs: ${app_include_dirs}")
 	message("link libs: ${app_link_libs}")
-endif()
-
-if(EXISTS "${app_path}/flags.cmake")
-	if (AL_VERBOSE_OUTPUT)
-		message("found flags.cmake")
-	endif()
-	include(${app_path}/flags.cmake)
+  message("definitions: ${app_definitions}")
+  message("compile flags: ${app_compile_flags}")
+  message("linker flags: ${app_linker_flags}")
 endif()
 
 # inlcude allolib target and Gamma target
 if (DEFINED CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
-        add_subdirectory("${al_path}" "${al_path}/build")
+  add_subdirectory("${al_path}" "${al_path}/build")
 else()
 	if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-                add_subdirectory("${al_path}" "${al_path}/build/Debug")
+    add_subdirectory("${al_path}" "${al_path}/build/Debug")
 	else()
-                add_subdirectory("${al_path}" "${al_path}/build/Release")
+    add_subdirectory("${al_path}" "${al_path}/build/Release")
 	endif()
 endif ()
 
 add_executable(${app_name} ${app_files_list})
 
 set_target_properties(${app_name} PROPERTIES
-    DEBUG_POSTFIX d
-    RUNTIME_OUTPUT_DIRECTORY ${app_path}/bin
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${app_path}/bin
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${app_path}/bin
-    CXX_STANDARD 14
-    CXX_STANDARD_REQUIRED ON
+  DEBUG_POSTFIX d
+  RUNTIME_OUTPUT_DIRECTORY ${app_path}/bin
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${app_path}/bin
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE ${app_path}/bin
+  CXX_STANDARD 14
+  CXX_STANDARD_REQUIRED ON
 )
 
 # flags
@@ -83,52 +86,14 @@ else ()
   target_compile_options(${app_name} PRIVATE "-Wall")
 endif (AL_WINDOWS)
 
-set(dirs_to_include
-  ${al_path}/include
-  ${app_include_dirs}
-  ${CORE_INCLUDE_DIRS}
-  ${ADDITIONAL_INCLUDE_DIRS}
-  ${EXTERNAL_INCLUDE_DIRS}
-)
+target_link_libraries(${app_name} al)
 
-set(libs_to_link
-    al
-  ${app_link_libs}
-  ${CORE_LIBRARIES}
-  ${ADDITIONAL_LIBRARIES}
-  ${EXTERNAL_LIBRARIES}
-)
-
-set(definitions
-  ${PLATFORM_DEFINITION}
-  ${ADDITIONAL_DEFINITIONS}
-  ${EXTERNAL_DEFINITIONS}
-)
-
-set (compile_flags
-  ${ADDITIONAL_COMPILE_FLAGS}
-)
-
-set (link_flags
-  ${ADDITIONAL_LINK_FLAGS}
-)
-
-target_compile_definitions(${app_name} PRIVATE ${definitions})
-
-target_include_directories(${app_name} PRIVATE ${dirs_to_include} ${al_path}/external/Gamma)
-
-target_link_libraries(${app_name} ${libs_to_link})
-
-if (compile_flags)
-    set_target_properties(${app_name} PROPERTIES
-        COMPILE_FLAGS ${compile_flags})
-endif()
-
-if (link_flags)
-    set_target_properties(${app_name} PROPERTIES
-        LINK_FLAGS_RELEASE ${link_flags}
-        LINK_FLAGS_DEBUG ${link_flags})
-endif (link_flags)
+target_include_directories(${app_name} PRIVATE ${app_include_dirs})
+target_link_libraries(${app_name} ${app_link_libs})
+target_compile_definitions(${app_name} PRIVATE ${app_definitions})
+target_compile_options(${app_name} PRIVATE ${app_compile_flags})
+# Item names starting with -, but not -l or -framework, are treated as linker flags.
+target_link_libraries(${app_name} ${app_linker_flags})
 
 if (AL_WINDOWS)
   # when run from Visual Studio, working directory is where the solution is by default
@@ -136,12 +101,6 @@ if (AL_WINDOWS)
   set_target_properties(${app_name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${app_path}/bin)
   # startup project is `ALL_BUILD` by default so we change it to app project
   set_directory_properties(PROPERTIES VS_STARTUP_PROJECT ${app_name})
-
-  # post build events for copying dlls
-  set(post_build_command
-    robocopy ${al_path}/dependencies/glew/bin/Release/x64 ${app_path}/bin glew32.dll &
-    robocopy ${al_path}/dependencies/glfw/lib-vc2015 ${app_path}/bin glfw3.dll &
-  )
 
   if (USE_PORTAUDIO)
     list(APPEND post_build_command
