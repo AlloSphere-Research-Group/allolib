@@ -12,6 +12,7 @@
 #include "al/core/io/al_Window.hpp"
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/io/al_ControlNav.hpp"
+#include "al/sphere/al_OmniRenderer.hpp"
 
 #include <iostream>
 
@@ -30,7 +31,7 @@
 namespace al {
 
 template<class TSharedState>
-class DistributedApp: public WindowApp,
+class DistributedApp: public OmniRenderer,
            public AudioApp,
            // public DeviceServerApp,
            public osc::PacketHandler
