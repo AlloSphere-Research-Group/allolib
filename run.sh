@@ -43,7 +43,7 @@ IS_VERBOSE=0
 VERBOSE_FLAG=OFF
 RUN_MPI=0
 
-while getopts "dncv" opt; do
+while getopts "adncv" opt; do
   case "${opt}" in
   a)
     RUN_MPI=1
@@ -122,8 +122,9 @@ else
   DEBUGGER="gdb -ex run "
 fi
 
-if [ ${RUN_MPI} ]; then
-  mpirun --hostfile ../../mpi_hosts.txt ./"${APP_NAME}${POSTFIX}"
+if [ ${RUN_MPI}  != 0 ]; then
+#  echo Running MPI
+  mpirun --hostfile ../../mpi_hosts.txt -n 2 /usr/bin/env DISPLAY=:0 ./"${APP_NAME}${POSTFIX}"
 elif [ ${BUILD_TYPE} == "Release" ]; then
   ./"${APP_NAME}${POSTFIX}"
 else
