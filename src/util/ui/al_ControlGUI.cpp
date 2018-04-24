@@ -3,32 +3,38 @@
 using namespace al;
 
 
-void ControlGUI::onDraw(Graphics &g) {
-    begin();
-    ImGui::SetNextWindowSize(ImVec2(300, 450), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiCond_FirstUseEver);
-    ImGui::Begin("");
-    if (mNav) {
-        Vec3d &currentPos = mNav->pos();
-        float x = currentPos.elems()[0];
+void ControlGUI::draw(Graphics &g) {
 
-        bool changed = ImGui::SliderFloat("X", &x, -10, 10);
-        if (changed) {
-            currentPos.elems()[0] = x;
+    if (mManageIMGUI) {
+        begin();
+    }
+//    ImGui::SetNextWindowSize(ImVec2(300, 450), ImGuiCond_FirstUseEver);
+//    ImGui::SetNextWindowPos(ImVec2(mX, mY), ImGuiCond_FirstUseEver);
+//    ImGui::Begin(std::to_string(mId).c_str());
+    if (mNav) {
+        if (ImGui::CollapsingHeader("Navigation", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+            Vec3d &currentPos = mNav->pos();
+            float x = currentPos.elems()[0];
+
+            bool changed = ImGui::SliderFloat("X", &x, -10, 10);
+            if (changed) {
+                currentPos.elems()[0] = x;
+            }
+            float y = currentPos.elems()[1];
+            changed = ImGui::SliderFloat("Y", &y, -10, 10);
+            if (changed) {
+                currentPos.elems()[1] = y;
+            }
+            float z = currentPos.elems()[2];
+            changed = ImGui::SliderFloat("Z", &z, -10, 10);
+            if (changed) {
+                currentPos.elems()[2] = z;
+            }
         }
-        float y = currentPos.elems()[1];
-        changed = ImGui::SliderFloat("Y", &y, -10, 10);
-        if (changed) {
-            currentPos.elems()[1] = y;
-        }
-        float z = currentPos.elems()[2];
-        changed = ImGui::SliderFloat("Z", &z, -10, 10);
-        if (changed) {
-            currentPos.elems()[2] = z;
-        }
+        ImGui::Spacing();
     }
     if (mPresetHandler) {
-        if (!ImGui::CollapsingHeader("Presets")) { // ! to force open by default
+        if (ImGui::CollapsingHeader("Presets", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
 
             std::map<int, std::string> presets = mPresetHandler->availablePresets();
             static int selection = -1;
@@ -93,7 +99,7 @@ void ControlGUI::onDraw(Graphics &g) {
     }
 //    ImGui::ShowDemoWindow();
     for (auto elem: mParameters) {
-        if(elem.first == "" || !ImGui::CollapsingHeader(elem.first.c_str())) { // ! to force open by default
+        if(elem.first == "" || ImGui::CollapsingHeader(elem.first.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by default
             for (auto param: elem.second) {
                 float value = param->get();
                 bool changed = ImGui::SliderFloat(param->getName().c_str(), &value, param->min(), param->max());
@@ -104,8 +110,35 @@ void ControlGUI::onDraw(Graphics &g) {
 
         }
     }
-    ImGui::End(); // End the window
-    end();
+//    ImGui::End(); // End the window
+    if (mManageIMGUI) {
+        end();
+    }
+}
+
+void ControlGUI::init(int x, int y) {
+    static int id = 0;
+    mId = id++;
+    mX = x;
+    mY = y;
+    if (mManageIMGUI) {
+        initIMGUI();
+    }
+}
+
+void ControlGUI::begin() {
+    string name = "__ControlGUI_" + std::to_string(mId);
+    beginIMGUI_minimal(true, name.c_str(), mX, mY);
+}
+
+void ControlGUI::end() {
+    endIMGUI_minimal(true);
+}
+
+void ControlGUI::cleanup() {
+    if (mManageIMGUI) {
+        shutdownIMGUI();
+    }
 }
 
 ControlGUI &ControlGUI::registerParameter(Parameter &param) {
