@@ -239,7 +239,7 @@ public:
   void active(bool b) { mActive = b; if (!mActive) nav().halt(); }
   bool active() { return mActive; }
   void enable() { active(true); }
-  void diable() { active(false); }
+  void disable() { active(false); }
   void toggleActive() { active(!active()); }
 
 	double vscale() const { return mVScale; }
