@@ -50,7 +50,7 @@ void al::shutdownIMGUI()
   ImGui::DestroyContext();
 }
 
-void al::beginIMGUI_minimal(bool use_input)
+void al::beginIMGUI_minimal(bool use_input, const char *name, int posX, int posY)
 {
   beginIMGUI();
   ImGui::SetNextWindowBgAlpha(0);
@@ -66,8 +66,8 @@ void al::beginIMGUI_minimal(bool use_input)
   if (!use_input) window_flags |= ImGuiWindowFlags_NoInputs;
 
   ImGui::SetNextWindowSize(ImVec2(0, 0));
-  ImGui::SetNextWindowPos(ImVec2(0, 0));
-  ImGui::Begin("", nullptr, window_flags);
+  ImGui::SetNextWindowPos(ImVec2(posX, posY));
+  ImGui::Begin(name , nullptr, window_flags);
 }
 
 void al::endIMGUI_minimal(bool show)
