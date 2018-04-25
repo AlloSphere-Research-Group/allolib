@@ -66,11 +66,11 @@ using namespace al;
 
 
 
-HtmlInterfaceServer::HtmlInterfaceServer(std::string pathToInterfaceJs)
+HtmlInterfaceServer::HtmlInterfaceServer(std::string pathToInterfaceJs, bool autorun)
 {
-	mRootPath = pathToInterfaceJs;
-	mInterfaceSendPort = 9010; // Interface.js sends OSC on this port
-	mInterfaceRecvPort = 10010; // Interface.js receives OSC on this port
+  mRootPath = pathToInterfaceJs;
+  mInterfaceSendPort = 9010; // Interface.js sends OSC on this port
+  mInterfaceRecvPort = 10010; // Interface.js receives OSC on this port
   mNodeJsPath = "/usr/bin/nodejs";
   if (!File::exists(mNodeJsPath)) {
     mNodeJsPath = "/usr/local/bin/node"; // TODO: Try to find node.js in a more robust way.
@@ -82,6 +82,7 @@ HtmlInterfaceServer::HtmlInterfaceServer(std::string pathToInterfaceJs)
   }
 
 #ifndef AL_WINDOWS
+  if (autorun) {
 
 	if (pipe(p_stdin) != 0 || pipe(p_stdout) != 0) {
 		std::cout << "Error setting up process pipes." << std::endl;
@@ -90,14 +91,21 @@ HtmlInterfaceServer::HtmlInterfaceServer(std::string pathToInterfaceJs)
 	mPid = fork();
 
 	if (mPid < 0) {
-	} else if (mPid == 0) {
+    } else if (mPid == 0) {
+        close(p_stdin[WRITE]);
+        dup2(p_stdin[READ], READ);
+        close(p_stdout[READ]);
+        dup2(p_stdout[WRITE], WRITE);
 		runInterfaceJs();
 	}
 	std::cout << "interface.simpleserver pid = " << mPid << std::endl;
 	std::cout << "to kill: kill -9 " << mPid << std::endl;
+  }
 #else
-	std::cout << "HtmlParameterServer() not implemented for Windows." << std::endl;
+  if (autorun) {
+    std::cout << "HtmlParameterServer() autorun not implemented for Windows." << std::endl;
 	// TODO implement for Windows.
+  }
 #endif
 }
 
@@ -118,29 +126,32 @@ HtmlInterfaceServer::~HtmlInterfaceServer()
 
 void HtmlInterfaceServer::runInterfaceJs() {
 #ifndef AL_WINDOWS
-	close(p_stdin[WRITE]);
-	dup2(p_stdin[READ], READ);
-	close(p_stdout[READ]);
-	dup2(p_stdout[WRITE], WRITE);
 	std::string path = mRootPath + "/server";
 	std::cout << path << std::endl;
 	if (chdir(path.c_str()) < 0) {
 		std::cout << "Could not find interface.js folder" << std::endl;
 	}
 	std::string outFlag = "--oscOutPort=" + std::to_string(mInterfaceSendPort);
-	std::string inFlag = "--oscInPort=" + std::to_string(mInterfaceRecvPort);
+    std::string inFlag = "--oscInPort=" + std::to_string(mInterfaceRecvPort);
 	execl(mNodeJsPath.c_str(), mNodeJsPath.c_str(), "interface.simpleserver.js","--oscPort=15439","--serverPort=8080",
 	      outFlag.c_str(), inFlag.c_str(), NULL);
-	perror("execl");
-	exit(1);
+//	perror("execl");
+//	exit(1);
+    std::cout << mNodeJsPath << " "
+              << mNodeJsPath << " "
+              << "interface.simpleserver.js" << " "
+              << "--oscPort=15439" << " "
+              << "--serverPort=8080" << " "
+              << outFlag << " "
+              << inFlag
+              << std::endl;
 #else
 
 #endif
 }
 
-void HtmlInterfaceServer::writeHtmlFile(ParameterServer &paramServer, std::string interfaceName)
+void HtmlInterfaceServer::writeHtmlFile(std::vector<Parameter *> parameters, std::string interfaceName)
 {
-	std::vector<Parameter *> parameters = paramServer.parameters();
 	std::string code = htmlTemplateStart;
 	std::string addCode = "iface.add(";
 	float padding = 0.01;
@@ -176,8 +187,7 @@ void HtmlInterfaceServer::writeHtmlFile(ParameterServer &paramServer, std::strin
 		std::cout << "Error writing html interface file: "
 		          << mRootPath + "/server/interfaces/" + interfaceName + ".html" << std::endl;
 	}
-	f.close();
-	paramServer.addListener("127.0.0.1", mInterfaceRecvPort);
+    f.close();
 }
 
 void HtmlInterfaceServer::writeHtmlFile(PresetServer &presetServer, std::string interfaceName, int numPresets)
@@ -252,10 +262,19 @@ void HtmlInterfaceServer::writeHtmlFile(PresetServer &presetServer, std::string 
 }
 
 
+HtmlInterfaceServer &HtmlInterfaceServer::addParameter(Parameter &param,
+                                                       std::string interfaceName)
+{
+    mParameters.push_back(&param);
+    writeHtmlFile(mParameters, interfaceName);
+    return *this;
+}
+
 HtmlInterfaceServer &HtmlInterfaceServer::addParameterServer(ParameterServer &paramServer,
                                                              std::string interfaceName)
 {
-	writeHtmlFile(paramServer, interfaceName);
+    writeHtmlFile(paramServer.parameters(), interfaceName);
+    paramServer.addListener("127.0.0.1", mInterfaceRecvPort);
 	return *this;
 }
 

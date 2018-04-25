@@ -78,14 +78,19 @@ namespace al
  */
 class HtmlInterfaceServer {
 public:
-	HtmlInterfaceServer(std::string pathToInterfaceJs = "../interface.js");
+    HtmlInterfaceServer(std::string pathToInterfaceJs = "../interface.js", bool autorun = true);
 	~HtmlInterfaceServer();
 
+    HtmlInterfaceServer &addParameter(Parameter &param,
+                                      std::string interfaceName = "");
 	HtmlInterfaceServer &addParameterServer(ParameterServer &paramServer,
 	                                        std::string interfaceName = "");
 	HtmlInterfaceServer &addPresetServer(PresetServer &presetServer,
 	                                     std::string interfaceName = "");
 
+    HtmlInterfaceServer &operator <<(Parameter &param) {
+        return this->addParameter(param);
+    }
 	HtmlInterfaceServer &operator <<(ParameterServer &paramServer) {
 		return this->addParameterServer(paramServer);
 	}
@@ -93,18 +98,21 @@ public:
 		return this->addPresetServer(presetServer);
 	}
 
+    void runInterfaceJs(); // Runs interface.js. Call only if autorun set to false in the constructor
+
 private:
-	void writeHtmlFile(ParameterServer &paramServer, std::string interfaceName = "");
+    void writeHtmlFile(std::vector<Parameter *> parameters, std::string interfaceName = "");
 	void writeHtmlFile(PresetServer &presetServer, std::string interfaceName = "", int numPresets = -1);
 
 	std::string mRootPath;
 	std::string mNodeJsPath;
-	void runInterfaceJs();
 	pid_t  mPid;
 	int p_stdin[2], p_stdout[2];
 
 	int mInterfaceSendPort; // Interface.js sends OSC on this port
 	int mInterfaceRecvPort; // Interface.js receives OSC on this port
+
+    std::vector<Parameter *> mParameters;
 };
 
 } // ::al
