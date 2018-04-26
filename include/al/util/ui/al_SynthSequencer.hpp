@@ -509,6 +509,34 @@ struct SynthEvent {
  * sequencer runs. TIME_MASTER_AUDIO is more precise in time, but you might want
  * to use TIME_MASTER_GRAPHICS if your "note" produces no audio.
  *
+ * Sequences can also be read from text files with the extension
+ * ".synthSequence". You need to register the voices used in the sequence
+ * with the PolySynth using this->synth().registerSynthClass<MyVoice>("MyVoice")
+ * to connect the voice name in the text file to a class name.
+ *
+ * The following commands are accepted:
+ *
+ * Event
+ * @ absTime duration synthName pFields....
+ *
+ * e.g. @ 0.981379 0.116669 MyVoice 0 0 1 698.456 0.1 1
+ *
+ * Turnon
+ * + absTime eventId synthName pFields....
+ *
+ * e.g. + 0.981379 25 MyVoice 0 0 1 698.456 0.1 1
+ *
+ * Turnoff
+ * - absTime eventId
+ *
+ * eventId looks of the oldest id match adn turns it off
+ * e.g. - 1.3 25
+ *
+ * Tempo
+ * t absTime tempoBpm
+ *
+ * e.g. t 4.5 120
+ *
  */
 
 class SynthSequencer {
