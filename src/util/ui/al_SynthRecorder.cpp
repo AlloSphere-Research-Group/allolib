@@ -45,23 +45,37 @@ void SynthRecorder::stopRecord() {
             }
             f << ");" << std::endl;
         }
-    } else if (mFormat == SEQUENCER_FORMAT) {
+    } else if (mFormat == SEQUENCER_EVENT) {
+        std::map<int, SynthEvent> eventStack;
         for (SynthEvent event: mSequence) {
-            if (event.type == SynthEventType::NOTE) {
-                f << "@ " << event.time << " " << event.synthName << " ";
-                for (unsigned int i = 0; i < event.pFields.size(); i++) {
-                    f <<  event.pFields[i] << " ";
+            if (event.type == SynthEventType::TRIGGER_ON) {
+                eventStack[event.id] = event;
+            } else if (event.type == SynthEventType::TRIGGER_OFF) {
+                auto idMatch = eventStack.find(event.id);
+                if (idMatch != eventStack.end()) {
+                    double duration = event.time - idMatch->second.time;
+                    f << "@ " << idMatch->second.time << " " << duration << " " << idMatch->second.synthName << " ";
+                    for (auto field : idMatch->second.pFields) {
+                        f <<  field << " ";
+                    }
+                    f << std::endl;
                 }
-                f << std::endl;
             }
+        }
+        if (eventStack.size() > 0) {
+            std::cout << "WARNING: event stack not empty (trigger on doesn't have a trigger off match)" << std::endl;
+        }
+
+
+    } else if (mFormat == SEQUENCER_TRIGGERS) {
+        for (SynthEvent event: mSequence) {
             if (event.type == SynthEventType::TRIGGER_ON) {
                 f << "+ " << event.time << " " << event.id << " " << event.synthName << " ";
-                for (unsigned int i = 0; i < event.pFields.size(); i++) {
-                    f <<  event.pFields[i] << " ";
+                for (auto field : event.pFields) {
+                    f <<  field << " ";
                 }
                 f << std::endl;
-            }
-            if (event.type == SynthEventType::TRIGGER_OFF) {
+            } else if (event.type == SynthEventType::TRIGGER_OFF) {
                 f << "- " << event.time << " " << event.id << " ";
                 for (unsigned int i = 0; i < event.pFields.size(); i++) {
                     f <<  event.pFields[i] << " ";

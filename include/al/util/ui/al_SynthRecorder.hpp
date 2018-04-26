@@ -92,11 +92,13 @@ class SynthRecorder {
 public:
 
     typedef enum {
-        SEQUENCER_FORMAT,
-        CPP_FORMAT
+        SEQUENCER_EVENT, // Events have duration (uses '@' command only)
+        SEQUENCER_TRIGGERS, // Store events as they were received trigger on and trigger off can be separate entries (uses '+' and '-' text commands)
+        CPP_FORMAT, // Saves code that can be copy-pasted into C++
+        NONE
     } TextFormat;
 
-    SynthRecorder(TextFormat format = SEQUENCER_FORMAT) { mFormat = format;}
+    SynthRecorder(TextFormat format = SEQUENCER_EVENT) { mFormat = format;}
 
     void startRecord(std::string name = "", bool overwrite = false, bool startOnEvent = true);
 
@@ -113,6 +115,13 @@ public:
 
     void registerPolySynth(PolySynth &polySynth);
 
+    /**
+     * @brief onTriggerOn callback for trigger on events
+     * @param voice
+     * @param offsetFrames
+     * @param id
+     * @param userData
+     */
     static void onTriggerOn(SynthVoice *voice, int offsetFrames, int id, void *userData)
     {
         std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
@@ -144,6 +153,11 @@ public:
         }
     }
 
+    /**
+     * @brief onTriggerOff callback for trigger off events
+     * @param id
+     * @param userData
+     */
     static void onTriggerOff(int id, void *userData) {
         std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
         SynthRecorder *rec = static_cast<SynthRecorder *>(userData);
