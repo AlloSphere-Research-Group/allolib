@@ -182,6 +182,9 @@ private:
     bool mOverwriteButtonValue {true};
     bool mManageIMGUI {true};
 
+    int mCurrentSequencerItem {0};
+    char** mSequencerItems;
+
 };
 
 }

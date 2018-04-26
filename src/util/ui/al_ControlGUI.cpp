@@ -74,27 +74,53 @@ void ControlGUI::draw(Graphics &g) {
         }
     }
     if (mPolySynth) {
-        if (ImGui::Button("Panic")) {
-            mPolySynth->allNotesOff();
+        if (ImGui::CollapsingHeader("PolySynth", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::Button("Panic (All notes off)")) {
+                mPolySynth->allNotesOff();
+            }
         }
     }
     if (mSynthRecorder) {
-        static char buf1[64] = "test"; ImGui::InputText("Record Name", buf1, 64);
-        if (ImGui::Checkbox("Record", &mRecordButtonValue)) {
-            if (mRecordButtonValue) {
-                mSynthRecorder->startRecord(buf1, mOverwriteButtonValue);
-            } else {
-                mSynthRecorder->stopRecord();
+        if (ImGui::CollapsingHeader("Recorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+            static char buf1[64] = "test"; ImGui::InputText("Record Name", buf1, 64);
+            if (ImGui::Checkbox("Record", &mRecordButtonValue)) {
+                if (mRecordButtonValue) {
+                    mSynthRecorder->startRecord(buf1, mOverwriteButtonValue);
+                } else {
+                    mSynthRecorder->stopRecord();
+                }
             }
-        }
-        ImGui::SameLine();
-        if (ImGui::Checkbox("Overwrite", &mOverwriteButtonValue)) {
-
+            ImGui::SameLine();
+            ImGui::Checkbox("Overwrite", &mOverwriteButtonValue);
         }
     }
     if (mSynthSequencer) {
-        if (ImGui::Button("Play")) {
-            mSynthSequencer->playSequence("test.synthSequence");
+        if (ImGui::CollapsingHeader("Sequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+            vector<string> seqList = mSynthSequencer->getSequenceList();
+            if (seqList.size() > 0) {
+                if (seqList.size() > 32) {
+                    seqList.resize(32);
+                    std::cout << "Cropping sequence list to 64 items for display" <<std::endl;
+                }
+                for (size_t i = 0; i < seqList.size(); i++) {
+                    strncpy(mSequencerItems[i], seqList[i].c_str(), 32);
+                }
+                int items_count = seqList.size();
+                ImGui::Combo("Sequences", &mCurrentSequencerItem, mSequencerItems, items_count, 16);
+                if (ImGui::Button("Play")) {
+                    mSynthSequencer->synth().allNotesOff();
+                    mSynthSequencer->playSequence(mSequencerItems[mCurrentSequencerItem]);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Stop")) {
+                    mSynthSequencer->stopSequence();
+                    mSynthSequencer->synth().allNotesOff();
+                }
+
+                for (size_t i = 0; i < seqList.size(); i++) {
+                    //                free(items[i]);
+                }
+            }
         }
     }
 //    ImGui::ShowDemoWindow();
@@ -121,6 +147,12 @@ void ControlGUI::init(int x, int y) {
     mId = id++;
     mX = x;
     mY = y;
+
+    mSequencerItems = (char **) malloc(32 * sizeof(char *));
+    for (size_t i = 0; i < 32; i++) {
+        mSequencerItems[i] = (char *) malloc(32 * sizeof(char));
+    }
+
     if (mManageIMGUI) {
         initIMGUI();
     }
@@ -139,6 +171,10 @@ void ControlGUI::cleanup() {
     if (mManageIMGUI) {
         shutdownIMGUI();
     }
+    for (size_t i = 0; i < 32; i++) {
+        free(mSequencerItems[i]);
+    }
+    free(mSequencerItems);
 }
 
 ControlGUI &ControlGUI::registerParameter(Parameter &param) {
