@@ -25,9 +25,9 @@ if(IS_DIRECTORY "${al_path}/external/rtaudio")
         pulse pulse-simple pthread
         )
     elseif(RtAudioLinuxAPI STREQUAL "alsa")
-      set(RTAUDIO_DEFINITIONS -D__LINUX_ALSA__)
+      set(RTAUDIO_DEFINITIONS -D__LINUX_ALSA__ -D__LINUX_PULSE__)
       list(APPEND RTAUDIO_LIBRARIES
-        asound pthread
+        asound pulse-simple pulse pthread
         )
     elseif(RtAudioLinuxAPI STREQUAL "jack")
       set(RTAUDIO_DEFINITIONS -D__UNIX_JACK__)
