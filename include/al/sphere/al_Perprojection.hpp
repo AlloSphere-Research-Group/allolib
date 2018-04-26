@@ -185,7 +185,7 @@ public:
     // std::cout << "loaded " << viewports.size() << " viewports from " << path << "/" << hostname << ".txt" << std::endl;
 
     // Load warp data
-    for(int i = 0; i < viewports.size(); i++) {
+    for(size_t i = 0; i < viewports.size(); i++) {
       ProjectionViewport& vp = viewports[i];
 
       std::ifstream file(vp.filepath, std::ios::in | std::ios::binary);
@@ -219,7 +219,7 @@ public:
       vp.filepath = "";
     }
 
-    for(int i = 0; i < viewports.size(); i++) {
+    for(size_t i = 0; i < viewports.size(); i++) {
       auto& vp = viewports[i];
       vp.warp_and_blend_data.clear();
     }
@@ -283,7 +283,7 @@ public:
     // we have calibration data loaded,
     // so update textures(color) & renderbuffer(depth)
     projection_infos_.resize(warpblend_.viewports.size());
-    for(int index = 0; index < warpblend_.viewports.size(); index++) {
+    for(size_t index = 0; index < warpblend_.viewports.size(); index++) {
       ProjectionInfo& info = projection_infos_[index];
       info.texture[0].reset(new Texture());
       info.texture[1].reset(new Texture());
@@ -310,7 +310,7 @@ public:
     viewport_.set(0, 0, res_, res_);
 
     projection_infos_.resize(warpblend_.viewports.size());
-    for(int index = 0; index < warpblend_.viewports.size(); index++) {
+    for(size_t index = 0; index < warpblend_.viewports.size(); index++) {
       const ProjectionViewport& vp = warpblend_.viewports[index];
       ProjectionInfo& info = projection_infos_[index];
       info.texture[0].reset(new Texture());
@@ -519,7 +519,7 @@ public:
     int width = dims[2];
     int height = dims[3];
     g.shader(composite_shader_);
-    for(int i = 0; i < warpblend_.viewports.size(); i++) {
+    for(size_t i = 0; i < warpblend_.viewports.size(); i++) {
       const ProjectionViewport& vp = warpblend_.viewports[i];
       g.viewport(vp.l * width, vp.b * height, vp.w * width, vp.h * height);
       projection_infos_[i].warp_texture->bind(PerProjectionRenderConstants::sampletex_binding_point);
@@ -541,7 +541,7 @@ public:
     glGetIntegerv(GL_VIEWPORT, dims);
     int width = dims[2];
     int height = dims[3];
-    for(int i = 0; i < warpblend_.viewports.size(); i++) {
+    for(size_t i = 0; i < warpblend_.viewports.size(); i++) {
       const ProjectionViewport& vp = warpblend_.viewports[i];
       g.viewport(vp.l * width, vp.b * height, vp.w * width, vp.h * height);
       g.pushMatrix();

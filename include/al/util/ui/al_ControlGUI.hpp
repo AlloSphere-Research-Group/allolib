@@ -62,12 +62,7 @@ namespace al
  */
 class ControlGUI {
 public:
-
     ControlGUI &registerParameter(Parameter &param);
-    ControlGUI &registerParameterBool(ParameterBool &param);
-    ControlGUI &registerNav(Nav &nav);
-
-    ControlGUI &registerPresetHandler(PresetHandler &presetHandler);
 
     /// Register parameter using the streaming operator. A widget is shown to control it.
     ControlGUI &operator << (Parameter& newParam){ return registerParameter(newParam); }
@@ -75,14 +70,23 @@ public:
     /// Register parameter using the streaming operator. A widget is shown to control it.
     ControlGUI &operator << (Parameter* newParam){ return registerParameter(*newParam); }
 
+
+    ControlGUI &registerParameterBool(ParameterBool &param);
+
     /// Register parameter using the streaming operator. A widget is shown to control it.
     ControlGUI &operator << (ParameterBool& newParam){ return registerParameter(newParam); }
 
     /// Register parameter using the streaming operator. A widget is shown to control it.
     ControlGUI &operator << (ParameterBool* newParam){ return registerParameter(*newParam); }
 
+
+    ControlGUI &registerNav(Nav &nav);
+
     /// Register nav using the streaming operator. A set of widgets are shown to control it.
     ControlGUI &operator << (Nav &nav){ return registerNav(nav); }
+
+
+    ControlGUI &registerPresetHandler(PresetHandler &presetHandler);
 
     /// Register preset handler using the streaming operator. GUI widgets for preset control are shown.
     ControlGUI &operator << (PresetHandler& ph){ return registerPresetHandler(ph); }
@@ -90,18 +94,23 @@ public:
     /// Register preset handler using the streaming operator. GUI widgets for preset control are shown.
     ControlGUI &operator << (PresetHandler* ph){ return registerPresetHandler(*ph); }
 
+
+    void registerSynthRecorder(SynthRecorder &recorder);
+
     /// Register a SynthRecorder. This will display GUI widgets to control it
     ControlGUI & operator<< (SynthRecorder &recorder) { registerSynthRecorder(recorder);  return *this; }
 
-    void registerSynthRecorder(SynthRecorder &recorder);
+
+    void registerSynthSequencer(SynthSequencer &seq);
 
     /// Register a SynthSequencer. This will display GUI widgets to control it
     /// Will also register the PolySynth contained within it.
     ControlGUI & operator<< (SynthSequencer &seq) { registerSynthSequencer(seq);  return *this; }
 
-    void registerSynthSequencer(SynthSequencer &seq);
-
-    void onDraw(Graphics &g);
+    /**
+     * @brief draws the GUI
+     */
+    void draw(Graphics &g);
 
     /**
      * @brief Call to set if this GUI manages ImGUI
@@ -112,41 +121,29 @@ public:
      */
     void manageImGUI(bool manage) {mManageIMGUI = manage;}
 
-    void init() {
-        if (mManageIMGUI) {
-            initIMGUI();
-        }
-    }
+    /**
+     * @brief initialize ImGUI.
+     * @param x x position for the control window
+     * @param y y position for the control window
+     *
+     * This function must be called before anu call to begin() or draw()
+     */
+    void init(int x = 5, int y = 5);
 
     /**
      * @brief Call begin() at the start of the outer draw call, if not managing ImGUI
      */
-    void begin() {
-        if (mManageIMGUI) {
-            beginIMGUI_minimal(true);
-        }
-    }
+    void begin();
 
     /**
      * @brief Call begin() at the end of the outer draw call, if not managing ImGUI
      */
-    void end() {
-        if (mManageIMGUI) {
-            endIMGUI_minimal(true);
-        }
-    }
+    void end();
 
-    void cleanup() {
-        if (mManageIMGUI) {
-            shutdownIMGUI();
-        }
-    }
-
-
+    void cleanup();
 
     /**
      * @brief usingInput returns true if the mouse is within the imgui window
-     * @return
      *
      * Can be used to selectively turn off navigation when using ImGUI you
      * should place this within your onAnimate() callback:
@@ -157,6 +154,9 @@ public:
      *  }
      * @endcode
      *
+     * Note that if the call is placed outside the ImGUI begin and end calls,
+     * then the data is likely to be one frame late. This is often not a big issue
+     * and simplifies the code.
      */
     bool usingInput() {return imgui_is_using_input();}
 
@@ -174,10 +174,14 @@ private:
     PolySynth *mPolySynth {nullptr};
     Nav *mNav {nullptr};
 
+    int mX, mY;
+    int mId;
+
     bool mStoreButtonOn {false};
     bool mRecordButtonValue {false};
     bool mOverwriteButtonValue {true};
     bool mManageIMGUI {true};
+
 };
 
 }

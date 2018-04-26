@@ -12,6 +12,7 @@
 #include "al/core/io/al_Window.hpp"
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/io/al_ControlNav.hpp"
+#include "al/sphere/al_OmniRenderer.hpp"
 
 #include <iostream>
 
@@ -30,7 +31,7 @@
 namespace al {
 
 template<class TSharedState>
-class DistributedApp: public WindowApp,
+class DistributedApp: public OmniRenderer,
            public AudioApp,
            // public DeviceServerApp,
            public osc::PacketHandler
@@ -42,12 +43,12 @@ class DistributedApp: public WindowApp,
 public:
 
   typedef enum {
-      ROLE_SIMULATOR,
-      ROLE_RENDERER,
-      ROLE_AUDIO,
-      ROLE_CONTROL,
-      ROLE_NONE,
-      ROLE_USER // User defined roles can add from here
+      ROLE_SIMULATOR = 0b00001,
+      ROLE_RENDERER =  0b00010,
+      ROLE_AUDIO =     0b00100,
+      ROLE_CONTROL =   0b01000,
+      ROLE_USER =      0b10000, // User defined roles can add from here (using bitshift to use the higher bits)
+      ROLE_NONE =      0b0
   } Role;
 
   DistributedApp() {
@@ -58,8 +59,26 @@ public:
 
       MPI_Get_processor_name(processor_name, &name_len);
 
-      mRoleMap["moxi"] = ROLE_RENDERER;
       mRoleMap["spherez05"] = ROLE_SIMULATOR;
+      mRoleMap["gr01"] = ROLE_SIMULATOR;
+
+      mRoleMap["moxi"] = ROLE_RENDERER;
+      mRoleMap["gr02"] = ROLE_RENDERER;
+      mRoleMap["gr03"] = ROLE_RENDERER;
+      mRoleMap["gr04"] = ROLE_RENDERER;
+      mRoleMap["gr05"] = ROLE_RENDERER;
+      mRoleMap["gr06"] = ROLE_RENDERER;
+      mRoleMap["gr07"] = ROLE_RENDERER;
+      mRoleMap["gr08"] = ROLE_RENDERER;
+      mRoleMap["gr09"] = ROLE_RENDERER;
+      mRoleMap["gr10"] = ROLE_RENDERER;
+      mRoleMap["gr11"] = ROLE_RENDERER;
+      mRoleMap["gr12"] = ROLE_RENDERER;
+      mRoleMap["gr13"] = ROLE_RENDERER;
+      mRoleMap["gr14"] = ROLE_RENDERER;
+
+      mRoleMap["audio"] = ROLE_AUDIO;
+      mRoleMap["ar01"] = ROLE_AUDIO;
 
       for (auto entry: mRoleMap) {
           if (strncmp(processor_name, entry.first.c_str(), name_len) == 0) {
@@ -186,7 +205,7 @@ private:
 
   TSharedState mState;
   int mQueuedStates {0};
-  cuttlebone::Maker<TSharedState> mMaker {"spherez05"};
+  cuttlebone::Maker<TSharedState> mMaker {"192.168.0.255"};
   cuttlebone::Taker<TSharedState> mTaker;
 
 };
