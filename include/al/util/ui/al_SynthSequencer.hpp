@@ -63,6 +63,7 @@
 
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/io/al_AudioIOData.hpp"
+#include "al/core/io/al_File.hpp"
 #include "al/util/al_SingleRWRingBuffer.hpp"
 
 //#include "Gamma/Domain.h"
@@ -447,16 +448,35 @@ private:
 
 class SynthSequencerEvent {
 public:
+    SynthSequencerEvent () {}
+    ~SynthSequencerEvent() {
+
+    }
+
+    typedef enum {
+        EVENT_VOICE,
+        EVENT_PFIELDS,
+        EVENT_TEMPO
+    } EventType;
     double startTime {0};
     double duration {-1};
     int offsetCounter {0}; // To offset event within audio buffer
-    SynthVoice *voice;
+
+    typedef struct {
+        int numFields;
+        float *pFields = nullptr;
+    } ParamFields;
+
+    union {
+        SynthVoice *voice;
+        ParamFields fields;
+        float tempo;
+    };
 };
 
 enum SynthEventType {
     TRIGGER_ON,
     TRIGGER_OFF,
-    NOTE,
     PARAMETER_CHANGE
 };
 
@@ -536,7 +556,7 @@ public:
     }
 
     /**
-     * @brief print debugging information. Is not be thread safe. Use with care.
+     * @brief print current sequence
      */
     void print() {
         std::cout << "POLYSYNTH INFO ................." << std::endl;
@@ -555,11 +575,30 @@ public:
         return true;
     }
 
+    void stopSequence() {
+        std::unique_lock<std::mutex> lk(mEventLock);
+        mEvents.clear();
+        mNextEvent = 0;
+    }
+
+    std::string buildFullPath(std::string sequenceName)
+    {
+        std::string fullName = mDirectory;
+
+        if (fullName.back() != '/') {
+            fullName += "/";
+        }
+        if (sequenceName.size() < 14 || sequenceName.substr(sequenceName.size() - 14) != ".synthSequence") {
+            sequenceName += ".synthSequence";
+        }
+        fullName += sequenceName;
+        return fullName;
+    }
+
     std::list<SynthSequencerEvent> loadSequence(std::string sequenceName, double timeOffset = 0) {
         std::unique_lock<std::mutex> lk(mLoadingLock);
         std::list<SynthSequencerEvent> events;
-//        std::string fullName = buildFullPath(sequenceName);
-        std::string fullName = sequenceName;
+        std::string fullName = buildFullPath(sequenceName);
         std::ifstream f(fullName);
         if (!f.is_open()) {
             std::cout << "Could not open:" << fullName << std::endl;
@@ -595,11 +634,11 @@ public:
                         numFields++;
                         std::getline(ss, field, ' ');
                     }
-                    std::cout << "Pfields: ";
-                    for (int i = 0; i < numFields; i++) {
-                        std::cout << pFields[i] << " ";
-                    }
-                    std::cout << std::endl;
+//                    std::cout << "Pfields: ";
+//                    for (int i = 0; i < numFields; i++) {
+//                        std::cout << pFields[i] << " ";
+//                    }
+//                    std::cout << std::endl;
 
 
                     if (!newVoice->setParamFields(pFields, numFields)) {
@@ -621,10 +660,10 @@ public:
                         insertedEvent->startTime = absoluteTime;
                         insertedEvent->duration = duration;
                         insertedEvent->voice = newVoice;
-                        std::cout << "Inserted event " << events.size() << " at time " << absoluteTime << std::endl;
+//                        std::cout << "Inserted event " << events.size() << " at time " << absoluteTime << std::endl;
                     }
                 }
-                std::cout << "Done reading sequence" << std::endl;
+//                std::cout << "Done reading sequence" << std::endl;
             } else if (command == '+' && ss.get() == ' ') {
                 std::string name, idText, start;
                 std::getline(ss, start, ' ');
@@ -696,6 +735,23 @@ public:
                         break;
                     }
                 }
+            }  else if (command == 't' && ss.get() == ' ') {
+                std::string time, idText;
+                std::getline(ss, time, ' ');
+                std::getline(ss, idText, ' ');
+                int id = std::stoi(idText);
+                double eventTime = std::stod(time);
+                for (SynthSequencerEvent &event: events) {
+                    if (event.voice->id() == id && event.duration < 0) {
+                        double duration = eventTime - event.startTime + timeOffset;
+                        if (duration < 0) {
+                            duration = 0;
+                        }
+                        event.duration = duration;
+//                        std::cout << "Set event duration " << id << " to " << duration << std::endl;
+                        break;
+                    }
+                }
             } else {
                 if (command > 0) {
                     std::cout << "Line ignored. Command: " << command << std::endl;
@@ -704,15 +760,40 @@ public:
         }
         f.close();
         if (f.bad()) {
-            std::cout << "Error reading:" << sequenceName << std::endl;
+            std::cout << "Error reading:" << fullName << std::endl;
         }
         return events;
+    }
+
+    std::vector<std::string> getSequenceList() {
+        std::vector<std::string> sequenceList;
+        std::string path = mDirectory;
+        if (!File::isDirectory(path)) {
+            Dir::make(path);
+        }
+
+        // get list of files ending in ".sequence"
+        FileList sequence_files = filterInDir(path, [](const FilePath& f){
+            if (al::checkExtension(f, ".synthSequence")) return true;
+            else return false;
+        });
+
+        // store found preset files
+        for (int i = 0; i < sequence_files.count(); i += 1) {
+            const FilePath& path = sequence_files[i];
+            const std::string& name = path.file();
+            // exclude extension when adding to sequence list
+            sequenceList.push_back(name.substr(0, name.size()-14));
+        }
+        return sequenceList;
     }
 
     PolySynth &synth() {return mPolySynth;}
 
 private:
     PolySynth mPolySynth;
+
+    std::string mDirectory {"."};
 
     double mFps {30}; // graphics frames per second
 

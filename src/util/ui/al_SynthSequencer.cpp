@@ -129,6 +129,7 @@ int al::asciiToMIDI(int asciiKey, int offset) {
     return 0;
 }
 
+
 //  ----
 
 int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id) {
