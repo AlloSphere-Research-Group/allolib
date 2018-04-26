@@ -375,8 +375,9 @@ std::string PresetSequencer::buildFullPath(std::string sequenceName)
 		fullName += "/";
 	}
 	if (sequenceName.size() < 9 || sequenceName.substr(sequenceName.size() - 9) != ".sequence") {
-		fullName += sequenceName + ".sequence";
+		sequenceName += ".sequence";
 	}
+    fullName += sequenceName;
 	return fullName;
 }
 
