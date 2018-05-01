@@ -5,7 +5,7 @@
 #   RTAUDIO_DEFINITIONS
 
 set(RtAudioLinuxAPI "alsa" CACHE STRING "API For Linux when using RtAudio")
-set_property(CACHE RtAudioLinuxAPI PROPERTY STRINGS alsa pulse jack)
+set_property(CACHE RtAudioLinuxAPI PROPERTY STRINGS alsa pulse jack alsapulse)
 
 
 if(IS_DIRECTORY "${al_path}/external/rtaudio")
@@ -25,6 +25,12 @@ if(IS_DIRECTORY "${al_path}/external/rtaudio")
         pulse pulse-simple pthread
         )
     elseif(RtAudioLinuxAPI STREQUAL "alsa")
+      set(RTAUDIO_DEFINITIONS -D__LINUX_ALSA__)
+      list(APPEND RTAUDIO_LIBRARIES
+        asound pthread
+        )
+
+    elseif(RtAudioLinuxAPI STREQUAL "alsapulse")
       set(RTAUDIO_DEFINITIONS -D__LINUX_ALSA__ -D__LINUX_PULSE__)
       list(APPEND RTAUDIO_LIBRARIES
         asound pulse-simple pulse pthread
