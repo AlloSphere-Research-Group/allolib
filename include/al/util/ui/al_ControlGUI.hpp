@@ -74,10 +74,10 @@ public:
     ControlGUI &registerParameterBool(ParameterBool &param);
 
     /// Register parameter using the streaming operator. A widget is shown to control it.
-    ControlGUI &operator << (ParameterBool& newParam){ return registerParameter(newParam); }
+    ControlGUI &operator << (ParameterBool& newParam){ return registerParameterBool(newParam); }
 
     /// Register parameter using the streaming operator. A widget is shown to control it.
-    ControlGUI &operator << (ParameterBool* newParam){ return registerParameter(*newParam); }
+    ControlGUI &operator << (ParameterBool* newParam){ return registerParameterBool(*newParam); }
 
 
     ControlGUI &registerNav(Nav &nav);
@@ -165,6 +165,7 @@ protected:
 
 private:
     std::map<std::string, std::vector<Parameter *>> mParameters;
+    std::map<std::string, std::vector<ParameterBool *>> mParameterBools;
     std::map<std::string, std::vector<ParameterVec3 *>> mParameterVec3s;
     std::map<std::string, std::vector<ParameterVec4 *>> mParameterVec4s;
 

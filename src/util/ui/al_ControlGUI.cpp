@@ -40,7 +40,12 @@ void ControlGUI::draw(Graphics &g) {
             static int selection = -1;
             std::string currentPresetName = mPresetHandler->getCurrentPresetName();
 
-            ImGui::Text("%s", currentPresetName.c_str());
+            char buf1[64];
+            strncpy(buf1, currentPresetName.c_str(), 64);
+            if (ImGui::InputText("test", buf1, 64)) {
+                currentPresetName = buf1;
+            }
+//            ImGui::Text("%s", currentPresetName.c_str());
 
             int numColumns = 12;
             int numRows = 4;
@@ -136,6 +141,21 @@ void ControlGUI::draw(Graphics &g) {
 
         }
     }
+    for (auto elem: mParameterBools) {
+        if(elem.first == "" || ImGui::CollapsingHeader(elem.first.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by default
+            for (auto param: elem.second) {
+                bool changed = ImGui::Button(param->getName().c_str());
+                if (changed) {
+                    param->set(1.0);
+                } else {
+                    if (param->get() == 1.0) {
+                        param->set(0.0);
+                    }
+                }
+            }
+
+        }
+    }
 //    ImGui::End(); // End the window
     if (mManageIMGUI) {
         end();
@@ -189,10 +209,10 @@ ControlGUI &ControlGUI::registerParameter(Parameter &param) {
 ControlGUI &ControlGUI::registerParameterBool(ParameterBool &param)
 {
     std::string group = param.getGroup();
-    if (mParameters.find(group) == mParameters.end()) {
-        mParameters[group] = std::vector<Parameter *>();
+    if (mParameterBools.find(group) == mParameterBools.end()) {
+        mParameterBools[group] = std::vector<ParameterBool *>();
     }
-    mParameters[group].push_back(&param);
+    mParameterBools[group].push_back(&param);
     return *this;
 }
 
