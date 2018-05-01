@@ -15,6 +15,7 @@
 #include "al/sphere/al_OmniRenderer.hpp"
 
 #include <iostream>
+#include <map>
 
 #ifdef AL_BUILD_MPI
 #include <mpi.h>
@@ -43,15 +44,17 @@ class DistributedApp: public OmniRenderer,
 public:
 
   typedef enum {
-      ROLE_SIMULATOR = 0b00001,
-      ROLE_RENDERER =  0b00010,
-      ROLE_AUDIO =     0b00100,
-      ROLE_CONTROL =   0b01000,
-      ROLE_USER =      0b10000, // User defined roles can add from here (using bitshift to use the higher bits)
-      ROLE_NONE =      0b0
+      ROLE_NONE = 0,
+      ROLE_SIMULATOR,
+      ROLE_RENDERER,
+      ROLE_AUDIO,
+      ROLE_CONTROL,
+      ROLE_INTERFACE, // For interface server
+      ROLE_USER // User defined roles can add from here (using bitshift to use the higher bits)
   } Role;
 
   DistributedApp() {
+#ifdef AL_BUILD_MPI
       MPI_Init(NULL, NULL);
 
       MPI_Comm_size(MPI_COMM_WORLD, &world_size);
@@ -59,40 +62,59 @@ public:
 
       MPI_Get_processor_name(processor_name, &name_len);
 
-      mRoleMap["spherez05"] = ROLE_SIMULATOR;
-      mRoleMap["gr01"] = ROLE_SIMULATOR;
+      mRoleMap["spherez05"] = {ROLE_SIMULATOR, ROLE_INTERFACE};
+      mRoleMap["gr01"] = {ROLE_SIMULATOR};
 
-      mRoleMap["moxi"] = ROLE_RENDERER;
-      mRoleMap["gr02"] = ROLE_RENDERER;
-      mRoleMap["gr03"] = ROLE_RENDERER;
-      mRoleMap["gr04"] = ROLE_RENDERER;
-      mRoleMap["gr05"] = ROLE_RENDERER;
-      mRoleMap["gr06"] = ROLE_RENDERER;
-      mRoleMap["gr07"] = ROLE_RENDERER;
-      mRoleMap["gr08"] = ROLE_RENDERER;
-      mRoleMap["gr09"] = ROLE_RENDERER;
-      mRoleMap["gr10"] = ROLE_RENDERER;
-      mRoleMap["gr11"] = ROLE_RENDERER;
-      mRoleMap["gr12"] = ROLE_RENDERER;
-      mRoleMap["gr13"] = ROLE_RENDERER;
-      mRoleMap["gr14"] = ROLE_RENDERER;
+      mRoleMap["moxi"] = {ROLE_RENDERER};
+      mRoleMap["gr02"] = {ROLE_RENDERER};
+      mRoleMap["gr03"] = {ROLE_RENDERER};
+      mRoleMap["gr04"] = {ROLE_RENDERER};
+      mRoleMap["gr05"] = {ROLE_RENDERER};
+      mRoleMap["gr06"] = {ROLE_RENDERER};
+      mRoleMap["gr07"] = {ROLE_RENDERER};
+      mRoleMap["gr08"] = {ROLE_RENDERER};
+      mRoleMap["gr09"] = {ROLE_RENDERER};
+      mRoleMap["gr10"] = {ROLE_RENDERER};
+      mRoleMap["gr11"] = {ROLE_RENDERER};
+      mRoleMap["gr12"] = {ROLE_RENDERER};
+      mRoleMap["gr13"] = {ROLE_RENDERER};
+      mRoleMap["gr14"] = {ROLE_RENDERER};
 
-      mRoleMap["audio"] = ROLE_AUDIO;
-      mRoleMap["ar01"] = ROLE_AUDIO;
+      mRoleMap["audio"] = {ROLE_AUDIO};
+      mRoleMap["ar01"] = {ROLE_AUDIO};
 
       for (auto entry: mRoleMap) {
           if (strncmp(processor_name, entry.first.c_str(), name_len) == 0) {
-              mRole = entry.second;
-              std::cout << name() << " set role to " << roleName() << std::endl;
+              if (entry.second.size() == 1) {
+                  mRole = entry.second[0];
+              } else {
+                  if (world_rank < entry.second.size()) {
+                      mRole = entry.second[world_rank];
+                  } else {
+                      mRole = entry.second[0];
+                  }
+              }
+              std::cout << name() << ":" << world_rank << " set role to " << roleName() << std::endl;
           }
       }
+#else
+      mRole = ROLE_SIMULATOR;
+#endif
   }
 
   ~DistributedApp() {
+#ifdef AL_BUILD_MPI
       MPI_Finalize();
+#endif
   }
 
-  char *name() {return processor_name;}
+  const char *name() {
+#ifdef AL_BUILD_MPI
+      return processor_name;
+#else
+      return "localhost";
+#endif
+  }
 
   Role role() {return mRole;}
 
@@ -106,20 +128,33 @@ public:
           return "renderer";
       case ROLE_CONTROL:
           return "control";
+      case ROLE_INTERFACE:
+          return "interface";
       case ROLE_NONE:
-          return "control";
+          return "none";
       default:
           return "[user role]";
       }
   }
 
   void print() {
+#ifdef AL_BUILD_MPI
       std::cout << "Processor: " << processor_name
                 << " Rank: " << world_rank
                 << " Of: " << world_size << std::endl;
+      std::cout << name() << ":" << world_rank << " set role to " << roleName() << std::endl;
+#else
+      std::cout << "DistributedApp: Not using MPI. Role: " << roleName() << std::endl;
+#endif
   }
 
-  bool isMaster() {return world_rank == 0;}
+  bool isMaster() {
+#ifdef AL_BUILD_MPI
+      return world_rank == 0;
+#else
+      return true;
+#endif
+  }
 
 
   Viewpoint& view() { return mView; }
@@ -194,14 +229,16 @@ public:
 
 private:
 
+#ifdef AL_BUILD_MPI
   // MPI data
   int world_size;
   int world_rank;
   char processor_name[MPI_MAX_PROCESSOR_NAME];
   int name_len;
+#endif
   Role mRole {ROLE_NONE};
 
-  std::map<string, Role> mRoleMap;
+  std::map<string, std::vector<Role>> mRoleMap;
 
   TSharedState mState;
   int mQueuedStates {0};
@@ -231,6 +268,7 @@ inline void DistributedApp<TSharedState>::start() {
     if (role() == ROLE_SIMULATOR) {
       simulate(dt_sec());
       mMaker.set(mState);
+      mQueuedStates = 1;
     } else {
       mQueuedStates = mTaker.get(mState);
     }
