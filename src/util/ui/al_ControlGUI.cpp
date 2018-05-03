@@ -33,6 +33,31 @@ void ControlGUI::draw(Graphics &g) {
         }
         ImGui::Spacing();
     }
+    if (ImGui::CollapsingHeader("Poses", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        for (auto *pose: mPoses) {
+            Vec3d &currentPos = pose->get().pos();
+            float x = currentPos.elems()[0];
+
+            bool changed = ImGui::SliderFloat((pose->getName() + ":X").c_str(), &x, -5, 5);
+            if (changed) {
+                currentPos.elems()[0] = x;
+                pose->set(Pose(currentPos, pose->get().quat()));
+            }
+            float y = currentPos.elems()[1];
+            changed = ImGui::SliderFloat((pose->getName() + ":Y").c_str(), &y, -5, 5);
+            if (changed) {
+                currentPos.elems()[1] = y;
+                pose->set(Pose(currentPos, pose->get().quat()));
+            }
+            float z = currentPos.elems()[2];
+            changed = ImGui::SliderFloat((pose->getName() + ":Z").c_str(), &z, -10, 0);
+            if (changed) {
+                currentPos.elems()[2] = z;
+                pose->set(Pose(currentPos, pose->get().quat()));
+            }
+        }
+        ImGui::Spacing();
+    }
     if (mPresetHandler) {
         if (ImGui::CollapsingHeader("Presets", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
 
@@ -234,4 +259,9 @@ void ControlGUI::registerSynthRecorder(SynthRecorder &recorder) {
 void ControlGUI::registerSynthSequencer(SynthSequencer &seq) {
     mSynthSequencer = &seq;
     mPolySynth = &seq.synth();
+}
+
+void ControlGUI::registerParameterPose(ParameterPose &pose)
+{
+    mPoses.push_back(&pose);
 }

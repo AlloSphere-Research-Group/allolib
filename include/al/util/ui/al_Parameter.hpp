@@ -49,6 +49,7 @@
 
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/core/math/al_Vec.hpp"
+#include "al/core/spatial/al_Pose.hpp"
 
 namespace al
 {
@@ -113,8 +114,8 @@ public:
    * and doing try_lock() on the mutex to update a cached value in the get()
    * function. In the worst case this might incur some jitter when reading the value.
    */
-	ParameterWrapper(std::string parameterName, std::string group,
-	          ParameterType defaultValue,
+    ParameterWrapper(std::string parameterName, std::string group = "",
+              ParameterType defaultValue = ParameterType(),
 	          std::string prefix ="");
 
 	ParameterWrapper(std::string parameterName, std::string Group,
@@ -131,19 +132,50 @@ public:
 	/**
 	 * @brief set the parameter's value
 	 * 
-	 * This function is thread-safe and can be called from any number of threads
+     * This function is thread-safe and can be called from any number of threads.
+     * It blocks to lock a mutex so its use in critical contexts should be avoided.
 	 */
-	virtual void set(ParameterType value);
+    virtual void set(ParameterType value)
+    {
+//        if (value > mMax) value = mMax;
+//        if (value < mMin) value = mMin;
+        if (mProcessCallback) {
+            value = mProcessCallback(value, mProcessUdata);
+        }
+        setLocking(value);
+        for(size_t i = 0; i < mCallbacks.size(); ++i) {
+            if (mCallbacks[i]) {
+                mCallbacks[i](value, this,  mCallbackUdata[i], NULL);
+            }
+        }
+    }
 
 	/**
 	 * @brief set the parameter's value without calling callbacks
 	 *
 	 * This function is thread-safe and can be called from any number of threads.
+     * It blocks to lock a mutex so its use in critical contexts should be avoided.
 	 * The processing callback is called, but the callbacks registered with
 	 * registerChangeCallback() are not called. This is useful to avoid infinite
 	 * recursion when a widget sets the parameter that then sets the widget.
 	 */
-	virtual void setNoCalls(ParameterType value, void *blockReceiver = NULL);
+    virtual void setNoCalls(ParameterType value, void *blockReceiver = NULL)
+    {
+//        if (value > mMax) value = mMax;
+//        if (value < mMin) value = mMin;
+        if (mProcessCallback) {
+            value = mProcessCallback(value, mProcessUdata);
+        }
+
+        if (blockReceiver) {
+            for(size_t i = 0; i < mCallbacks.size(); ++i) {
+                if (mCallbacks[i]) {
+                    mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
+                }
+            }
+        }
+        setLocking(value);
+    }
 
 	/**
 	 * @brief set the parameter's value forcing a lock
@@ -200,7 +232,7 @@ public:
 	 */
 	std::string getGroup();
 
-	typedef float (*ParameterProcessCallback)(ParameterType value, void *userData);
+    typedef ParameterType (*ParameterProcessCallback)(ParameterType value, void *userData);
 	typedef void (*ParameterChangeCallback)(ParameterType value, void *sender,
 	                                        void *userData, void * blockSender);
 
@@ -320,8 +352,8 @@ public:
    * single float. It realies on float being atomic on the platform so there
    * is no locking. This is a safe assumption for most platforms today.
    */
-	Parameter(std::string parameterName, std::string Group,
-	          float defaultValue,
+    Parameter(std::string parameterName, std::string Group,
+              float defaultValue,
 	          std::string prefix = "",
 	          float min = -99999.0,
 	          float max = 99999.0
@@ -337,6 +369,7 @@ public:
 	 * @brief set the parameter's value
 	 *
 	 * This function is thread-safe and can be called from any number of threads
+     * It does not block and relies on the atomicity of float.
 	 */
 	virtual void set(float value) override;
 
@@ -382,29 +415,12 @@ public:
    * float values for on or off states. It relies on floats being atomic on
    * the platform.
    */
-	ParameterBool(std::string parameterName, std::string Group,
-	          float defaultValue,
+    ParameterBool(std::string parameterName, std::string Group,
+              float defaultValue,
 	          std::string prefix = "",
 	          float min = 0,
 	          float max = 1.0
-	        );
-
-	/**
-	 * @brief set the parameter's value
-	 *
-	 * This function is thread-safe and can be called from any number of threads
-	 */
-	virtual void set(float value) override;
-
-	/**
-	 * @brief set the parameter's value without calling callbacks
-	 *
-	 * This function is thread-safe and can be called from any number of threads.
-	 * The processing callback is called, but the callbacks registered with
-	 * registerChangeCallback() are not called. This is useful to avoid infinite
-	 * recursion when a widget sets the parameter that then sets the widget.
-	 */
-	virtual void setNoCalls(float value, void *blockReceiver = NULL) override;
+            );
 
 	/**
 	 * @brief get the parameter's value
@@ -428,77 +444,22 @@ private:
 class ParameterString: public ParameterWrapper<std::string>
 {
 public:
-	ParameterString(std::string parameterName, std::string Group,
-	              std::string  defaultValue,
+    ParameterString(std::string parameterName, std::string Group,
+                  std::string  defaultValue,
 	              std::string prefix = "") :
 	    ParameterWrapper<std::string>(parameterName, Group, defaultValue, prefix)
 	{ }
 
-	virtual void set(std::string value) override
-	{
-		if (mProcessCallback) {
-			value = mProcessCallback(value, mProcessUdata);
-		}
-		setLocking(value);
-		for(size_t i = 0; i < mCallbacks.size(); ++i) {
-			if (mCallbacks[i]) {
-				mCallbacks[i](value, this,  mCallbackUdata[i], NULL);
-			}
-		}
-	}
-
-	virtual void setNoCalls(std::string value, void *blockReceiver) override
-	{
-		if (mProcessCallback) {
-			value = mProcessCallback(value, mProcessUdata);
-		}
-		if (blockReceiver) {
-			for(size_t i = 0; i < mCallbacks.size(); ++i) {
-				if (mCallbacks[i]) {
-					mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
-				}
-			}
-		}
-		setLocking(value);
-	}
 };
 
 class ParameterVec3: public ParameterWrapper<al::Vec3f>
 {
 public:
-	ParameterVec3(std::string parameterName, std::string Group,
-	              al::Vec3f defaultValue,
+    ParameterVec3(std::string parameterName, std::string Group = "",
+                  al::Vec3f defaultValue = al::Vec3f(),
 	              std::string prefix = "") :
 	    ParameterWrapper<al::Vec3f>(parameterName, Group, defaultValue, prefix)
 	{ }
-
-	virtual void set(Vec3f value) override
-	{
-		if (mProcessCallback) {
-			value = mProcessCallback(value, mProcessUdata);
-		}
-		setLocking(value);
-		for(size_t i = 0; i < mCallbacks.size(); ++i) {
-			if (mCallbacks[i]) {
-				mCallbacks[i](value, this,  mCallbackUdata[i], NULL);
-			}
-		}
-	}
-
-	virtual void setNoCalls(Vec3f value, void *blockReceiver) override
-	{
-		if (mProcessCallback) {
-			value = mProcessCallback(value, mProcessUdata);
-		}
-		if (blockReceiver) {
-			for(size_t i = 0; i < mCallbacks.size(); ++i) {
-				if (mCallbacks[i]) {
-					mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
-				}
-			}
-		}
-		setLocking(value);
-	}
 
 	ParameterVec3 operator=(const Vec3f vec) {this->set(vec); return *this;}
 
@@ -508,44 +469,32 @@ public:
 class ParameterVec4: public ParameterWrapper<al::Vec4f>
 {
 public:
-	ParameterVec4(std::string parameterName, std::string Group,
-	              al::Vec4f defaultValue,
+    ParameterVec4(std::string parameterName, std::string Group = "",
+                  al::Vec4f defaultValue = al::Vec4f(),
 	              std::string prefix = "") :
 	    ParameterWrapper<al::Vec4f>(parameterName, Group, defaultValue, prefix)
 	{ }
-
-	virtual void set(Vec4f value) override
-	{
-		if (mProcessCallback) {
-			value = mProcessCallback(value, mProcessUdata);
-		}
-		setLocking(value);
-		for(size_t i = 0; i < mCallbacks.size(); ++i) {
-			if (mCallbacks[i]) {
-				mCallbacks[i](value, this,  mCallbackUdata[i], NULL);
-			}
-		}
-	}
-
-	virtual void setNoCalls(Vec4f value, void *blockReceiver) override
-	{
-		if (mProcessCallback) {
-			value = mProcessCallback(value, mProcessUdata);
-		}
-		if (blockReceiver) {
-			for(size_t i = 0; i < mCallbacks.size(); ++i) {
-				if (mCallbacks[i]) {
-					mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
-				}
-			}
-		}
-		setLocking(value);
-	}
 
 	ParameterVec4 operator=(const Vec4f vec) {this->set(vec); return *this;}
 
 	float operator[](size_t index) { Vec4f vec = this->get(); return vec[index];}
 };
+
+
+class ParameterPose: public ParameterWrapper<al::Pose>
+{
+public:
+    ParameterPose(std::string parameterName, std::string Group = "",
+                  al::Pose defaultValue = al::Pose(),
+                  std::string prefix = "") :
+        ParameterWrapper<al::Pose>(parameterName, Group, defaultValue, prefix)
+    { }
+
+    al::Pose operator=(const al::Pose vec) {this->set(vec); return *this;}
+
+//    float operator[](size_t index) { Pose vec = this->get(); return vec[index];}
+};
+
 
 /**
  * @brief The ParameterServer class creates an OSC server to receive parameter values
@@ -616,6 +565,16 @@ public:
 	 */
 	void unregisterParameter(ParameterVec4 &param);
 
+    /**
+     * Register a Pose parameter with the server.
+     */
+    ParameterServer &registerParameter(ParameterPose &param);
+
+    /**
+     * Remove a Vec4 parameter from the server.
+     */
+    void unregisterParameter(ParameterPose &param);
+
 	/**
 	 * @brief print prints information about the server to std::out
 	 *
@@ -639,28 +598,12 @@ public:
 	std::vector<Parameter *> parameters() {return mParameters;}
 
 	/// Register parameter using the streaming operator
-	ParameterServer &operator << (Parameter& newParam){ return registerParameter(newParam); }
+    template<class ParameterType>
+    ParameterServer &operator << (ParameterType& newParam){ return registerParameter(newParam); }
 
 	/// Register parameter using the streaming operator
-	ParameterServer &operator << (Parameter* newParam){ return registerParameter(*newParam); }
-
-    /// Register generic parameter using the streaming operator
-	ParameterServer &operator << (ParameterString& newParam){ return registerParameter(newParam); }
-
-	/// Register generic parameter using the streaming operator
-	ParameterServer &operator << (ParameterString* newParam){ return registerParameter(*newParam); }
-
-	/// Register generic parameter using the streaming operator
-	ParameterServer &operator << (ParameterVec3& newParam){ return registerParameter(newParam); }
-
-	/// Register generic parameter using the streaming operator
-	ParameterServer &operator << (ParameterVec3* newParam){ return registerParameter(*newParam); }
-
-	/// Register generic parameter using the streaming operator
-	ParameterServer &operator << (ParameterVec4& newParam){ return registerParameter(newParam); }
-
-	/// Register generic parameter using the streaming operator
-	ParameterServer &operator << (ParameterVec4* newParam){ return registerParameter(*newParam); }
+    template<class ParameterType>
+    ParameterServer &operator << (ParameterType* newParam){ return registerParameter(*newParam); }
 
 	/**
 	 * @brief Append a listener to the osc server.
@@ -676,10 +619,11 @@ public:
 	virtual void onMessage(osc::Message& m);
 
 protected:
-	static void changeCallback(float value, void *sender, void *userData, void *blockThis);
-	static void changeStringCallback(std::string value, void *sender, void *userData, void *blockThis);
-	static void changeVec3Callback(Vec3f value, void *sender, void *userData, void *blockThis);
-	static void changeVec4Callback(Vec4f value, void *sender, void *userData, void *blockThis);
+    static void changeCallback(float value, void *sender, void *userData, void *blockThis);
+    static void changeStringCallback(std::string value, void *sender, void *userData, void *blockThis);
+    static void changeVec3Callback(Vec3f value, void *sender, void *userData, void *blockThis);
+    static void changeVec4Callback(Vec4f value, void *sender, void *userData, void *blockThis);
+    static void changePoseCallback(Pose value, void *sender, void *userData, void *blockThis);
 
 private:
 	std::vector<osc::PacketHandler *> mPacketHandlers;
@@ -688,6 +632,7 @@ private:
 	std::vector<ParameterString *> mStringParameters;
 	std::vector<ParameterVec3 *> mVec3Parameters;
 	std::vector<ParameterVec4 *> mVec4Parameters;
+    std::vector<ParameterPose *> mPoseParameters;
     std::mutex mParameterLock;
 };
 
@@ -773,44 +718,9 @@ ParameterWrapper<ParameterType>::ParameterWrapper(const ParameterWrapper<Paramet
 	mFullAddress += mParameterName;
 }
 
-template<class ParameterType>
-void ParameterWrapper<ParameterType>::set(ParameterType value)
-{
-	if (value > mMax) value = mMax;
-	if (value < mMin) value = mMin;
-	if (mProcessCallback) {
-		value = mProcessCallback(value, mProcessUdata);
-	}
-	mMutex.lock();
-	mValue = value;
-	mMutex.unlock();
-	for(size_t i = 0; i < mCallbacks.size(); ++i) {
-		if (mCallbacks[i]) {
-			mCallbacks[i](value, this,  mCallbackUdata[i], NULL);
-		}
-	}
-}
 
-template<class ParameterType>
-void ParameterWrapper<ParameterType>::setNoCalls(ParameterType value, void *blockReceiver)
-{
-	if (value > mMax) value = mMax;
-	if (value < mMin) value = mMin;
-	if (mProcessCallback) {
-		value = mProcessCallback(value, mProcessUdata);
-	}
 
-	if (blockReceiver) {
-		for(size_t i = 0; i < mCallbacks.size(); ++i) {
-			if (mCallbacks[i]) {
-				mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
-			}
-		}
-	}
-	mMutex.lock();
-	mValue = value;
-	mMutex.unlock();
-}
+
 
 
 
