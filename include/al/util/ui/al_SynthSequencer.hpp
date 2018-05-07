@@ -187,6 +187,10 @@ public:
         return frames;
     }
 
+    void userData(void *ud) {mUserData = ud;}
+
+    void *userData() {return mUserData;}
+
 protected:
 
     ///
@@ -206,6 +210,7 @@ private:
     int mOnOffsetFrames {0};
     int mOffOffsetFrames {0};
     SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
+    void *mUserData;
 };
 
 class PolySynth {
@@ -227,7 +232,7 @@ public:
      *
      * You can use the id to identify the note for later triggerOff() calls
      */
-    int triggerOn(SynthVoice *voice, int offsetFrames = 0, int id = -1);
+    int triggerOn(SynthVoice *voice, int offsetFrames = 0, int id = -1, void *userData = nullptr);
 
     /// trigger release of voice with id
     void triggerOff(int id);

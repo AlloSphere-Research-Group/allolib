@@ -132,7 +132,7 @@ int al::asciiToMIDI(int asciiKey, int offset) {
 
 //  ----
 
-int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id) {
+int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id, void *userData) {
     assert(voice);
     int thisId = id;
     if (thisId == -1) {
@@ -143,6 +143,7 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id) {
         }
     }
     voice->id(thisId);
+    voice->userData(userData);
     voice->triggerOn(offsetFrames);
     {
         std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
