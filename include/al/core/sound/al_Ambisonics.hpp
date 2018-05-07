@@ -289,21 +289,21 @@ public:
 class AmbisonicsSpatializer : public Spatializer {
 public:
 
-	AmbisonicsSpatializer(SpeakerLayout &sl, int dim, int order, int flavor=1);
+	AmbisonicsSpatializer(SpeakerLayout &sl, int dim = 2, int order = 1, int flavor=1);
 
 	void zeroAmbi();
 
 	float * ambiChans(unsigned channel=0);
 
-	virtual void compile(Listener& l) override;
+	virtual void compile() override;
 
-	virtual void numFrames(int v) override;
+	virtual void numFrames(unsigned int v) override;
 
 	void numSpeakers(int num);
 
-	void setSpeakerLayout(const SpeakerLayout& sl);
+	void setSpeakerLayout(const Speakers &speakers);
 
-	virtual void prepare() override;
+	virtual void prepare(AudioIOData& io) override;
 
 	virtual void renderBuffer(AudioIOData& io,
 	                  const Pose& listeningPose,
@@ -321,8 +321,7 @@ private:
 	AmbiDecode mDecoder;
 	AmbiEncode mEncoder;
 	std::vector<float> mAmbiDomainChannels;
-	Listener* mListener;
-	int mNumFrames;
+//	Listener* mListener;
 };
 
 
@@ -483,6 +482,7 @@ void AmbiEncode::encode(float * ambiChans, const XYZ * dir, const float * input,
 
 
 inline float * AmbisonicsSpatializer::ambiChans(unsigned channel) {
+    assert(mNumFrames != 0 && "number of frames not set.");
 	return &mAmbiDomainChannels[channel * mNumFrames];
 }
 
