@@ -19,6 +19,13 @@ void CSVReader::readFile(std::string fileName) {
 	size_t rowLength = calculateRowLength();
 
 	getline(f, line); // TODO Process column names
+        std::stringstream columnNameStream(line);
+        std::string columnName;
+        while (std::getline(columnNameStream, columnName, ',')) {
+            mColumnNames.push_back(columnName);
+        }
+
+
 //	std::cout << line << std::endl;
 	while (getline(f, line)) {
 		if (line.size() == 0) {
