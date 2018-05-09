@@ -90,6 +90,7 @@ public:
 	void notifyListeners(std::string OSCaddress, std::string value);
 	void notifyListeners(std::string OSCaddress, Vec3f value);
 	void notifyListeners(std::string OSCaddress, Vec4f value);
+    void notifyListeners(std::string OSCaddress, Pose value);
 
 protected:
 	std::mutex mListenerLock;
@@ -422,19 +423,6 @@ public:
 	          float max = 1.0
             );
 
-	/**
-	 * @brief get the parameter's value
-	 *
-	 * This function is thread-safe and can be called from any number of threads
-	 *
-	 * @return the parameter value
-	 */
-	virtual float get() override;
-
-	float operator= (const float value) { this->set(value); return value; }
-
-private:
-	float mFloatValue;
 };
 
 // These three types are blocking, should not be used in time-critical contexts
@@ -615,6 +603,13 @@ public:
 	void registerOSCListener(osc::PacketHandler *handler);
 
 	void notifyAll();
+
+        /**
+         * @brief send all currently regeistered parameter values
+         * @param IPaddress
+         * @param oscPort
+         */
+        void sendAllParameters(std::string IPaddress, int oscPort);
 
 	virtual void onMessage(osc::Message& m);
 

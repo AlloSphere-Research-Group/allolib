@@ -55,7 +55,18 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, Vec4f value)
 		sender->send(OSCaddress, value[0], value[1], value[2], value[3]);
 //		std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
 	}
-	mListenerLock.unlock();
+    mListenerLock.unlock();
+}
+
+void OSCNotifier::notifyListeners(std::string OSCaddress, Pose value)
+{
+    mListenerLock.lock();
+    for(osc::Send *sender: mOSCSenders) {
+        sender->send(OSCaddress, value.pos()[0], value.pos()[1], value.pos()[2],
+                value.quat().w, value.quat().x, value.quat().y, value.quat().z);
+//		std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
+    }
+    mListenerLock.unlock();
 }
 
 // Parameter ------------------------------------------------------------------
@@ -115,13 +126,9 @@ ParameterBool::ParameterBool(std::string parameterName, std::string Group,
                      float max) :
     Parameter(parameterName, Group, defaultValue, prefix, min, max)
 {
-	mFloatValue = defaultValue;
+//	mFloatValue = defaultValue;
 }
 
-float ParameterBool::get()
-{
-	return mFloatValue;
-}
 
 //void ParameterBool::setNoCalls(float value, void *blockReceiver)
 //{
@@ -282,12 +289,12 @@ void ParameterServer::onMessage(osc::Message &m)
 	if(m.addressPattern() == requestAddress && m.typeTags() == "s") {
 		std::string parameterAddress;
 		m >> parameterAddress;
-	}
-	float val; // TODO: doens't make sense for parameters of different types
-	m >> val;
+    }
 	mParameterLock.lock();
-	for (Parameter *p:mParameters) {
+        for (Parameter *p:mParameters) {
 		if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "f"){
+                    float val;
+                    m >> val;
 			// Extract the data out of the packet
 			p->set(val);
 //			std::cout << "ParameterServer::onMessage" << val << std::endl;
@@ -295,23 +302,22 @@ void ParameterServer::onMessage(osc::Message &m)
 	}
 	for (ParameterVec3 *p:mVec3Parameters) {
 		if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "fff"){
-			float y,z;
-			m >> y >> z;
-			p->set(Vec3f(val,y,z));
+            float x,y,z;
+            m >> x >> y >> z;
+            p->set(Vec3f(x,y,z));
 		}
 	}
 	for (ParameterVec4 *p:mVec4Parameters) {
 		if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "ffff"){
-			float x,y,z;
-			m >> x >> y >> z;
-			p->set(Vec4f(val,x,y,z));
+            float a,b,c,d;
+            m >> a >> b >> c >> d;
+            p->set(Vec4f(a,b,c,d));
 		}
 	}
     for (ParameterPose *p:mPoseParameters) {
         if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "fffffff"){
             float x, y, z, w, qx, qy, qz;
-            m >> x >> y >> z;
-            m >> w >> qx >> qy >> qz;
+            m >> x >> y >> z >> w >> qx >> qy >> qz;
             p->set(Pose(Vec3d(x,y,z), Quatd(w, qx, qy, qz)));
         } else if(m.addressPattern() == p->getFullAddress() + "/pos" && m.typeTags() == "fff"){
             float x,y,z;
@@ -381,7 +387,30 @@ void ParameterServer::notifyAll()
 {
 	for(Parameter *parameter: mParameters) {
 		notifyListeners(parameter->getFullAddress(), parameter->get());
-	}
+        }
+    for (ParameterVec3 *p:mVec3Parameters) {
+        notifyListeners(p->getFullAddress(), p->get());
+    }
+    for (ParameterVec4 *p:mVec4Parameters) {
+        notifyListeners(p->getFullAddress(), p->get());
+    }
+
+}
+
+void ParameterServer::sendAllParameters(std::string IPaddress, int oscPort)
+{
+    osc::Send sender(oscPort, IPaddress.c_str());
+    for(Parameter *parameter: mParameters) {
+        sender.send(parameter->getFullAddress(), parameter->get());
+    }
+    for (ParameterVec3 *p:mVec3Parameters) {
+        Vec3f vec = p->get();
+        sender.send(p->getFullAddress(), vec.x, vec.y, vec.z);
+    }
+    for (ParameterVec4 *p:mVec4Parameters) {
+        Vec4f vec = p->get();
+        sender.send(p->getFullAddress(), vec[0], vec[1], vec[2], vec[3]);
+    }
 }
 
 void ParameterServer::changeCallback(float value, void *sender, void *userData, void *blockThis)
@@ -416,5 +445,5 @@ void ParameterServer::changePoseCallback(Pose value, void *sender, void *userDat
 {
     ParameterServer *server = static_cast<ParameterServer *>(userData);
     ParameterPose *parameter = static_cast<ParameterPose *>(sender);
-//    server->notifyListeners(parameter->getFullAddress(), parameter->get());
+    server->notifyListeners(parameter->getFullAddress(), parameter->get());
 }
