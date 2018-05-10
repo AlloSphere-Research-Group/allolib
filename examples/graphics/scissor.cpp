@@ -51,7 +51,7 @@ struct MyApp : App {
     Mat4f transform;
 
     // x
-    num_verts_added = addCube(axis); // cylinder is algined to z
+    num_verts_added = addCube(axis);
     transform.setIdentity();
     transform *= Matrix4f::rotation(M_PI / 2, 2, 0); // rotate from z to x
     transform *= Matrix4f::translation(0, 0, 0.5);
@@ -62,7 +62,7 @@ struct MyApp : App {
     }
 
     // y
-    num_verts_added = addCube(axis); // cylinder is algined to z
+    num_verts_added = addCube(axis);
     transform.setIdentity();
     transform *= Matrix4f::rotation(M_PI / 2, 2, 1); // rotate from z to y
     transform *= Matrix4f::translation(0, 0, 0.5);
@@ -73,7 +73,7 @@ struct MyApp : App {
     }
 
     // z
-    num_verts_added = addCube(axis); // cylinder is algined to z
+    num_verts_added = addCube(axis);
     transform.setIdentity();
     transform *= Matrix4f::translation(0, 0, 0.5);
     transform *= Matrix4f::scaling(0.1, 0.1, 3); // rotate from z to x
