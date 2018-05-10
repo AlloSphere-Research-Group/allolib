@@ -1,6 +1,9 @@
 #include "al/core.hpp"
+#include <string>
+#include <sstream>
 
 using namespace al;
+using namespace std;
 
 Matrix4f getLookAt(const Vec3f& ux, const Vec3f& uy, const Vec3f& uz, const Vec3f& p) {
   return Matrix4f(
@@ -16,6 +19,16 @@ Matrix4f getLookAt(const Vec3f& eyePos, const Vec3f& at, const Vec3f& up) {
   Vec3f x = cross(up, z).normalize();
   Vec3f y = cross(z, x).normalize();
   return getLookAt(x, y, z, eyePos);
+}
+
+string mat_to_string(const Matrix4f& m) {
+  stringstream s;
+  s <<
+  to_string(m[0]) << to_string(m[4]) << to_string(m[8]) << to_string(m[12]) << '\n' <<
+  to_string(m[1]) << to_string(m[5]) << to_string(m[9]) << to_string(m[13]) << '\n' <<
+  to_string(m[2]) << to_string(m[6]) << to_string(m[10]) << to_string(m[14]) << '\n' <<
+  to_string(m[3]) << to_string(m[7]) << to_string(m[11]) << to_string(m[15]) << '\n';
+  return s.str();
 }
 
 struct MyApp : App {
@@ -34,22 +47,40 @@ struct MyApp : App {
     mesh.decompress();
     mesh.generateNormals();
 
-    axis.primitive(Mesh::LINES);
+    int num_verts_added;
+    Mat4f transform;
 
-    axis.vertex(-2, 0, 0);
-    axis.vertex(5, 0, 0);
-    axis.color(1, 0, 0);
-    axis.color(1, 0, 0);
+    // x
+    num_verts_added = addCube(axis); // cylinder is algined to z
+    transform.setIdentity();
+    transform *= Matrix4f::rotation(M_PI / 2, 2, 0); // rotate from z to x
+    transform *= Matrix4f::translation(0, 0, 0.5);
+    transform *= Matrix4f::scaling(0.1, 0.1, 3); // rotate from z to x
+    axis.transform(transform, axis.vertices().size() - num_verts_added);
+    for (int i = 0 ; i < num_verts_added; i += 1) {
+      axis.color(1, 0, 0);
+    }
 
-    axis.vertex(0, -2, 0);
-    axis.vertex(0, 5, 0);
-    axis.color(0, 1, 0);
-    axis.color(0, 1, 0);
+    // y
+    num_verts_added = addCube(axis); // cylinder is algined to z
+    transform.setIdentity();
+    transform *= Matrix4f::rotation(M_PI / 2, 2, 1); // rotate from z to y
+    transform *= Matrix4f::translation(0, 0, 0.5);
+    transform *= Matrix4f::scaling(0.1, 0.1, 3); // rotate from z to x
+    axis.transform(transform, axis.vertices().size() - num_verts_added);
+    for (int i = 0 ; i < num_verts_added; i += 1) {
+      axis.color(0, 1, 0);
+    }
 
-    axis.vertex(0, 0, -2);
-    axis.vertex(0, 0, 5);
-    axis.color(0, 0, 1);
-    axis.color(0, 0, 1);
+    // z
+    num_verts_added = addCube(axis); // cylinder is algined to z
+    transform.setIdentity();
+    transform *= Matrix4f::translation(0, 0, 0.5);
+    transform *= Matrix4f::scaling(0.1, 0.1, 3); // rotate from z to x
+    axis.transform(transform, axis.vertices().size() - num_verts_added);
+    for (int i = 0 ; i < num_verts_added; i += 1) {
+      axis.color(0, 0, 1);
+    }
 
     nav().pos(0, 0, 10).faceToward({0, 0, 0}, {0, 1, 0});
 
@@ -71,6 +102,7 @@ struct MyApp : App {
 
       g.lighting(false);
       g.meshColor();
+      g.polygonMode(Graphics::FILL);
       g.draw(axis);
 
       g.rotate(angle1, 0, 1, 0);
@@ -141,6 +173,7 @@ struct MyApp : App {
 
     g.viewport(0, 0, fbWidth(), fbHeight());
     g.scissorTest(false);
+    g.clearDepth(1);
 
     g.pushMatrix();
     draw_mesh();
