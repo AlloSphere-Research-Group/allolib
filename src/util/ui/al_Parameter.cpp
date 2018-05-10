@@ -286,9 +286,17 @@ void ParameterServer::onMessage(osc::Message &m)
 {
 	std::string requestAddress = "/request";
 	m.resetStream(); // Needs to be moved to caller...
-	if(m.addressPattern() == requestAddress && m.typeTags() == "s") {
-		std::string parameterAddress;
-		m >> parameterAddress;
+    if(m.addressPattern() == requestAddress) {
+        if (m.typeTags() == "si") {
+            std::string address;
+            int port;
+            m >> address >> port;
+            sendAllParameters(address, port);
+        } else if (m.typeTags() == "i") {
+            int port;
+            m >> port;
+            sendAllParameters(m.senderAddress(), port);
+        }
     }
 	mParameterLock.lock();
         for (Parameter *p:mParameters) {
