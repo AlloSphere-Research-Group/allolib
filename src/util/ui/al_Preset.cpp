@@ -636,7 +636,6 @@ void PresetServer::onMessage(osc::Message &m)
 {
 	m.resetStream(); // Should be moved to the caller...
 	std::cout << "PresetServer::onMessage " << std::endl;
-	m.print();
 	mPresetChangeLock.lock();
 	mPresetChangeSenderAddr = m.senderAddress();
 	if(m.addressPattern() == mOSCpath && m.typeTags() == "f"){

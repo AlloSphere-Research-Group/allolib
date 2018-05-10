@@ -143,7 +143,9 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id, void *user
         }
     }
     voice->id(thisId);
-    voice->userData(userData);
+    if (userData) {
+        voice->userData(userData);
+    }
     voice->triggerOn(offsetFrames);
     {
         std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
@@ -190,63 +192,15 @@ SynthVoice *PolySynth::getVoice(std::string name)
         // TODO report current polyphony for more informed allocation of polyphony
         freeVoice = allocateVoice(name);
     }
+    freeVoice->userData(mDefaultUserData);
     return freeVoice;
 }
 
 void PolySynth::render(AudioIOData &io) {
-    // TODO implement turn off
     if (mMasterMode == TIME_MASTER_AUDIO) {
-        if (mVoiceToInsertLock.try_lock()) {
-            if (mVoicesToInsert) {
-                // If lock acquired insert queued voices
-                if (mActiveVoices) {
-                    auto voice = mVoicesToInsert;
-                    while (voice->next) { // Find last voice to insert
-                        voice = voice->next;
-                    }
-                    voice->next = mActiveVoices; // Connect last inserted to previously active
-                    mActiveVoices = mVoicesToInsert; // Put new voices in head
-                } else {
-                    mActiveVoices = mVoicesToInsert;
-                }
-                mVoicesToInsert = nullptr;
-            }
-            mVoiceToInsertLock.unlock();
-        }
-        if (mAllNotesOff) {
-            if (mFreeVoiceLock.try_lock()) {
-                mAllNotesOff = false;
-                if (mActiveVoices) {
-                    auto voice = mActiveVoices->next;
-                    SynthVoice *previousVoice = mActiveVoices;
-                    previousVoice->id(-1);
-                    while(voice) {
-                        voice->id(-1);
-                        previousVoice = voice;
-                        voice = voice->next;
-                    }
-                    previousVoice->next = mFreeVoices; // Connect last active voice to first free voice
-                    mFreeVoices = mActiveVoices; // Move all voices to free voices
-                    mActiveVoices = nullptr; // No active voices left
-                }
-                mFreeVoiceLock.unlock();
-            }
-        }
-    }
-    // Turn off voices
-    int voicesToTurnOff[16];
-    int numVoicesToTurnOff;
-    while ( (numVoicesToTurnOff = mVoiceIdsToTurnOff.read((char *) voicesToTurnOff, 16 * sizeof (int))) ) {
-        for (int i = 0; i < numVoicesToTurnOff/sizeof (int); i++) {
-            auto voice = mActiveVoices;
-            while (voice) {
-                if (voice->id() == voicesToTurnOff[i]) {
-//                    std::cout << "Voice off "<<  voice->id() << std::endl;
-                    voice->triggerOff(); // TODO use offset for turn off
-                }
-                voice = voice->next;
-            }
-        }
+        processVoices();
+        // Turn off voices
+        processVoiceTurnOff();
     }
 
     // Render active voices
@@ -266,61 +220,35 @@ void PolySynth::render(AudioIOData &io) {
         }
         voice = voice->next;
     }
-    io.frame(0);
-    // Process gain
-    for (unsigned int i = 0; i < io.channelsOut(); i++) {
-        float *buffer = io.outBuffer(i);
-        unsigned int samps = io.framesPerBuffer();
-        while (samps--) {
-            *buffer++ *= mAudioGain;
-        }
-    }
+    processGain(io);
+
     // Run post processing callbacks
     for (auto cb: mPostProcessing) {
         io.frame(0);
         cb->onAudioCB(io);
     }
-    // Move inactive voices to free queue
     if (mMasterMode == TIME_MASTER_AUDIO) {
-        if (mFreeVoiceLock.try_lock()) { // Attempt to remove inactive voices without waiting.
-            auto voice = mActiveVoices;
-            SynthVoice *previousVoice = nullptr;
-            while(voice) {
-                if (!voice->active()) {
-                    voice->id(-1); // Reset voice id
-                    if (previousVoice) {
-                        previousVoice->next = voice->next; // Remove from active list
-                        voice->next = mFreeVoices;
-                        mFreeVoices = voice; // Insert as head in free voices
-                        voice = previousVoice; // prepare next iteration
-                    } else { // Inactive is head of the list
-                        mActiveVoices = voice->next; // Remove voice from list
-                        voice->next = mFreeVoices;
-                        mFreeVoices = voice; // Insert as head in free voices
-                        voice = mActiveVoices; // prepare next iteration
-                    }
-                }
-                previousVoice = voice;
-                if (voice) {
-                    voice = voice->next;
-                }
-            }
-            mFreeVoiceLock.unlock();
-        }
+        processInactiveVoices();
     }
 }
 
 void PolySynth::render(Graphics &g) {
     if (mMasterMode == TIME_MASTER_GRAPHICS) {
-        // FIXME add support for TIME_MASTER_GRAPHICS
+        processVoices();
+        // Turn off voices
+        processVoiceTurnOff();
     }
     std::unique_lock<std::mutex> lk(mGraphicsLock);
     SynthVoice *voice = mActiveVoices;
     while (voice) {
+        // TODO implement offset?
         if (voice->active()) {
             voice->onProcess(g);
         }
         voice = voice->next;
+    }
+    if (mMasterMode == TIME_MASTER_GRAPHICS) {
+        processInactiveVoices();
     }
 }
 

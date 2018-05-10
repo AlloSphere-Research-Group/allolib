@@ -191,6 +191,8 @@ public:
 
     void *userData() {return mUserData;}
 
+    SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
+
 protected:
 
     ///
@@ -209,7 +211,6 @@ private:
     int mActive {false};
     int mOnOffsetFrames {0};
     int mOffOffsetFrames {0};
-    SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
     void *mUserData;
 };
 
@@ -268,12 +269,12 @@ public:
      * @brief render all the active voices into the audio buffers
      * @param io AudioIOData containing buffers and audio I/O meta data
      */
-    void render(AudioIOData &io);
+    virtual void render(AudioIOData &io);
 
     /**
      * @brief render graphics for all active voices
      */
-    void render(Graphics &g);
+    virtual void render(Graphics &g);
 
     /**
      * Preallocate a number of voices of a particular TSynthVoice to avoid doing realtime
@@ -287,6 +288,14 @@ public:
      * @param voice the new voice to be added to the free voice pool
      */
     void insertFreeVoice(SynthVoice *voice);
+
+
+    /**
+     * @brief Set default user data to set to voices before the are returned
+     * by getVoice()
+     * @param userData
+     */
+    void setDefaultUserData(void *userData) { mDefaultUserData = userData;}
 
     /**
      * @brief Insert an AudioCallback object at the end of the callback queue
@@ -342,7 +351,6 @@ public:
      * If afterThis is not found v is prepended to the callback list
      */
     PolySynth &insertAfter(AudioCallback &v, AudioCallback &afterThis);
-
 
     /**
      *
@@ -417,7 +425,109 @@ public:
         return nullptr;
     }
 
-private:
+    // Testing function. Do not use...
+    SynthVoice *getActiveVoices() {
+        return mActiveVoices;
+    }
+
+protected:
+    inline void processVoices() {
+        if (mVoiceToInsertLock.try_lock()) {
+            if (mVoicesToInsert) {
+                // If lock acquired insert queued voices
+                if (mActiveVoices) {
+                    auto voice = mVoicesToInsert;
+                    while (voice->next) { // Find last voice to insert
+                        voice = voice->next;
+                    }
+                    voice->next = mActiveVoices; // Connect last inserted to previously active
+                    mActiveVoices = mVoicesToInsert; // Put new voices in head
+                } else {
+                    mActiveVoices = mVoicesToInsert;
+                }
+                mVoicesToInsert = nullptr;
+            }
+            mVoiceToInsertLock.unlock();
+        }
+        if (mAllNotesOff) {
+            if (mFreeVoiceLock.try_lock()) {
+                mAllNotesOff = false;
+                if (mActiveVoices) {
+                    auto voice = mActiveVoices->next;
+                    SynthVoice *previousVoice = mActiveVoices;
+                    previousVoice->id(-1);
+                    while(voice) {
+                        voice->id(-1);
+                        previousVoice = voice;
+                        voice = voice->next;
+                    }
+                    previousVoice->next = mFreeVoices; // Connect last active voice to first free voice
+                    mFreeVoices = mActiveVoices; // Move all voices to free voices
+                    mActiveVoices = nullptr; // No active voices left
+                }
+                mFreeVoiceLock.unlock();
+            }
+        }
+    }
+
+    inline void processVoiceTurnOff() {
+        int voicesToTurnOff[16];
+        int numVoicesToTurnOff;
+        while ( (numVoicesToTurnOff = mVoiceIdsToTurnOff.read((char *) voicesToTurnOff, 16 * sizeof (int))) ) {
+            for (int i = 0; i < numVoicesToTurnOff/sizeof (int); i++) {
+                auto voice = mActiveVoices;
+                while (voice) {
+                    if (voice->id() == voicesToTurnOff[i]) {
+    //                    std::cout << "Voice off "<<  voice->id() << std::endl;
+                        voice->triggerOff(); // TODO use offset for turn off
+                    }
+                    voice = voice->next;
+                }
+            }
+        }
+    }
+
+    inline void processInactiveVoices() {
+        // Move inactive voices to free queue
+        if (mFreeVoiceLock.try_lock()) { // Attempt to remove inactive voices without waiting.
+            auto voice = mActiveVoices;
+            SynthVoice *previousVoice = nullptr;
+            while(voice) {
+                if (!voice->active()) {
+                    voice->id(-1); // Reset voice id
+                    if (previousVoice) {
+                        previousVoice->next = voice->next; // Remove from active list
+                        voice->next = mFreeVoices;
+                        mFreeVoices = voice; // Insert as head in free voices
+                        voice = previousVoice; // prepare next iteration
+                    } else { // Inactive is head of the list
+                        mActiveVoices = voice->next; // Remove voice from list
+                        voice->next = mFreeVoices;
+                        mFreeVoices = voice; // Insert as head in free voices
+                        voice = mActiveVoices; // prepare next iteration
+                    }
+                }
+                previousVoice = voice;
+                if (voice) {
+                    voice = voice->next;
+                }
+            }
+            mFreeVoiceLock.unlock();
+        }
+    }
+
+    inline void processGain(AudioIOData &io) {
+        io.frame(0);
+        if (mAudioGain != 1.0) {
+            for (unsigned int i = 0; i < io.channelsOut(); i++) {
+                float *buffer = io.outBuffer(i);
+                unsigned int samps = io.framesPerBuffer();
+                while (samps--) {
+                    *buffer++ *= mAudioGain;
+                }
+            }
+        }
+    }
 
     // Internal voices are allocated in PolySynth and shared with the outside.
     SynthVoice *mVoicesToInsert {nullptr}; //Voices to be inserted in the realtime context
@@ -447,6 +557,8 @@ private:
 
     typedef std::function<SynthVoice *()> VoiceCreatorFunc;
     typedef std::map<std::string, VoiceCreatorFunc> Creators;
+
+    void *mDefaultUserData {nullptr};
 
     Creators mCreators;
 };
@@ -798,6 +910,7 @@ public:
         return events;
     }
 
+
     std::vector<std::string> getSequenceList() {
         std::vector<std::string> sequenceList;
         std::string path = mDirectory;
@@ -867,6 +980,7 @@ TSynthVoice *PolySynth::getVoice() {
         std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
         freeVoice = new TSynthVoice;
     }
+    freeVoice->userData(mDefaultUserData);
     return static_cast<TSynthVoice *>(freeVoice);
 }
 
