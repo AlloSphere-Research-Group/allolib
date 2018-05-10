@@ -1076,32 +1076,25 @@ void AudioIO::channelsBus(int num) {
     return;
   }
 
-  resize(mBufB, num * mFramesPerBuffer);
-  mNumB = num;
+  AudioIOData::channelsBus(num);
 }
 
 void AudioIO::channels(int num, bool forOutput) {
   // printf("Requested %d %s channels\n", num, forOutput?"output":"input");
 
+  if (mBackend->isOpen()) {
+    warn("the number of channels cannnot be set with the stream open",
+         "AudioIO");
+    return;
+  }
   mBackend->channels(num, forOutput);
 
-  // Open all device channels?
-  if (num == -1) {
+  if (num == -1) { // Open all device channels?
     num = (forOutput ? channelsOutDevice() : channelsInDevice());
   }
 
-  const int oldChans = channels(forOutput);
-
-  if (oldChans != num) {
-    forOutput ? mNumO = num : mNumI = num;
-    resizeBuffer(forOutput);
-  }
-  // printf("Set %d %s channels\n", forOutput?mNumO:mNumI,
-  // forOutput?"output":"input");
+  AudioIOData::channels(num, forOutput);
 }
-
-void AudioIO::channelsIn(int n) { channels(n, false); }
-void AudioIO::channelsOut(int n) { channels(n, true); }
 
 int AudioIO::channelsInDevice() const { return (int)mBackend->inDeviceChans(); }
 int AudioIO::channelsOutDevice() const {
@@ -1130,18 +1123,6 @@ void AudioIO::reopen() {
   }
 }
 
-void AudioIO::resizeBuffer(bool forOutput) {
-  float *&buffer = forOutput ? mBufO : mBufI;
-  unsigned int &chans = forOutput ? mNumO : mNumI;
-
-  if (chans > 0 && mFramesPerBuffer > 0) {
-    int n = resize(buffer, chans * mFramesPerBuffer);
-    if (0 == n) chans = 0;
-  } else {
-    deleteBuf(buffer);
-  }
-}
-
 void AudioIO::framesPerSecond(double v) {  // printf("AudioIO::fps(%f)\n", v);
   if (framesPerSecond() != v) {
     if (!supportsFPS(v)) v = mOutDevice.defaultSampleRate();
@@ -1157,13 +1138,7 @@ void AudioIO::framesPerBuffer(unsigned int n) {
     return;
   }
 
-  if (framesPerBuffer() != n) {
-    mFramesPerBuffer = n;
-    resizeBuffer(true);
-    resizeBuffer(false);
-    channelsBus(AudioIOData::channelsBus());
-    resize(mBufT, mFramesPerBuffer);
-  }
+  AudioIOData::framesPerBuffer(n);
 }
 
 bool AudioIO::start() {
@@ -1207,12 +1182,12 @@ void AudioIO::processAudio() {
   }
 }
 
-int AudioIO::channels(bool forOutput) const {
-  return forOutput ? channelsOut() : channelsIn();
-}
-
 double AudioIO::cpu() const { return mBackend->cpu(); }
 bool AudioIO::zeroNANs() const { return mZeroNANs; }
+
+void AudioIO::clipOut(bool v) {
+    mClipOut = v;
+}
 
 double AudioIO::time() const {
   assert(mBackend);
