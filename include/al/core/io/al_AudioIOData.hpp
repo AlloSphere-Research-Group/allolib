@@ -158,7 +158,7 @@ inline AudioDeviceInfo::StreamMode operator|(
 class AudioIOData {
  public:
   /// Constructor
-  AudioIOData(void* user);
+  AudioIOData(void* user = nullptr);
 
   virtual ~AudioIOData();
 
@@ -219,6 +219,8 @@ class AudioIOData {
     return *(static_cast<UserDataType*>(mUser));
   }
 
+
+  int channels(bool forOutput) const;
   unsigned int channelsIn() const;          ///< Get effective number of input channels
   unsigned int channelsOut() const;         ///< Get effective number of output channels
   unsigned int channelsBus() const;         ///< Get number of allocated bus channels
@@ -232,11 +234,28 @@ class AudioIOData {
   void zeroBus();                        ///< Zeros all the bus buffers
   void zeroOut();  ///< Zeros all the internal output buffers
 
+  /// Sets number of effective channels on input or output device depending on
+  /// 'forOutput' flag.
+
+  /// An effective channel is either a real device channel or virtual channel
+  /// depending on how many channels the device supports. Passing in -1 for
+  /// the number of channels opens all available channels.
+  virtual void channels(int num, bool forOutput);
+
+  void channelsIn(int n);     ///< Set number of input channels
+  void channelsOut(int n);    ///< Set number of output channels
+  virtual void channelsBus(int num);  ///< Set number of bus channels
+
+  virtual void framesPerSecond(double v);        ///< Set number of frames per second
+  virtual void framesPerBuffer(unsigned int n);  ///< Set number of frames per processing buffer
+
   AudioIOData& gain(float v) {
     mGain = v;
     return *this;
   }
   bool usingGain() const { return mGain != 1.f || mGainPrev != 1.f; }
+
+  float mGain, mGainPrev;
 
  protected:
   void* mUser;  // User specified data
@@ -246,10 +265,12 @@ class AudioIOData {
   float *mBufI, *mBufO, *mBufB;  // input, output, and aux buffers
   float* mBufT;                  // temporary one channel buffer
   unsigned int mNumI, mNumO, mNumB;       // input, output, and aux channels
- private:
+
+  void resizeBuffer(bool forOutput);
+
+private:
   void operator=(const AudioIOData&);  // Disallow copy
- public:
-  float mGain, mGainPrev;
+
 };
 
 /// Interface for objects which can be registered with an audio IO stream

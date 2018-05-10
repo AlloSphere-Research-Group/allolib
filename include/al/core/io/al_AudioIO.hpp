@@ -194,7 +194,6 @@ class AudioIO : public AudioIOData {
   void processAudio();  ///< Call callback manually
 
   bool autoZeroOut() const { return mAutoZeroOut; }
-  int channels(bool forOutput) const;
   int channelsInDevice()
       const;  ///< Get number of channels opened on input device
   int channelsOutDevice()
@@ -208,24 +207,19 @@ class AudioIO : public AudioIOData {
 
   /// Sets number of effective channels on input or output device depending on
   /// 'forOutput' flag.
-
   /// An effective channel is either a real device channel or virtual channel
   /// depending on how many channels the device supports. Passing in -1 for
   /// the number of channels opens all available channels.
-  void channels(int num, bool forOutput);
+  void channels(int num, bool forOutput) override;
+  void channelsBus(int num) override;  ///< Set number of bus channels
 
-  void channelsIn(int n);     ///< Set number of input channels
-  void channelsOut(int n);    ///< Set number of output channels
-  void channelsBus(int num);  ///< Set number of bus channels
-  void clipOut(bool v) {
-    mClipOut = v;
-  }  ///< Set whether to clip output between -1 and 1
+  void clipOut(bool v);  ///< Set whether to clip output between -1 and 1
   void device(
       const AudioDevice &v);  ///< Set input/output device (must be duplex)
   void deviceIn(const AudioDevice &v);   ///< Set input device
   void deviceOut(const AudioDevice &v);  ///< Set output device
-  void framesPerSecond(double v);        ///< Set number of frames per second
-  void framesPerBuffer(unsigned int n);  ///< Set number of frames per processing buffer
+  virtual void framesPerSecond(double v) override;        ///< Set number of frames per second
+  virtual void framesPerBuffer(unsigned int n) override;  ///< Set number of frames per processing buffer
   void zeroNANs(bool v) {
     mZeroNANs = v;
   }  ///< Set whether to zero NANs in output buffer going to DAC
