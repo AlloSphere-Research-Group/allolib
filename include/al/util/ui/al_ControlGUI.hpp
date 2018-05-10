@@ -107,6 +107,9 @@ public:
     /// Will also register the PolySynth contained within it.
     ControlGUI & operator<< (SynthSequencer &seq) { registerSynthSequencer(seq);  return *this; }
 
+    void registerParameterPose(ParameterPose &pose);
+    ControlGUI & operator<< (ParameterPose &seq) { registerParameterPose(seq);  return *this; }
+
     /**
      * @brief draws the GUI
      */
@@ -174,6 +177,8 @@ private:
     SynthSequencer *mSynthSequencer {nullptr};
     PolySynth *mPolySynth {nullptr};
     Nav *mNav {nullptr};
+
+    std::vector<ParameterPose *> mPoses;
 
     int mX, mY;
     int mId;

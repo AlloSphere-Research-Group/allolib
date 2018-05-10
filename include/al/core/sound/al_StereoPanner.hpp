@@ -21,22 +21,13 @@ public:
 		}
 	}
 
-//	virtual void print() override {
-//		printf("Using Stereo Panning- need to add panner info for print() function\n");
-//	}
-
-	/// Compile is
-	virtual void compile(Listener& listener) override {
-		mListener = &listener;
-	}
-
 	///Per Sample Processing
 	virtual void renderSample(AudioIOData& io, const Pose& listeningPose, const float& sample, const int& frameIndex) override
 	{
 		Vec3d vec = listeningPose.vec();
 		Quatd srcRot = listeningPose.quat();
 		vec = srcRot.rotate(vec);
-		if(numSpeakers == 2 && mEnabled)
+		if(numSpeakers == 2)
 		{
 			float gainL, gainR;
 			equalPowerPan(vec, gainL, gainR);
@@ -58,7 +49,7 @@ public:
 		Vec3d vec = listeningPose.vec();
 		Quatd srcRot = listeningPose.quat();
 		vec = srcRot.rotate(vec);
-		if(numSpeakers == 2 && mEnabled)
+		if(numSpeakers == 2)
 		{
 			float *bufL = io.outBuffer(0);
 			float *bufR = io.outBuffer(1);
@@ -81,9 +72,7 @@ public:
 
 
 private:
-	Listener* mListener;
 	int numSpeakers;
-	std::vector<float> mBuffer;
 
 	void equalPowerPan(const Vec3d& relPos, float &gainL, float &gainR)
 	{

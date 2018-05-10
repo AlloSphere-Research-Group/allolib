@@ -354,11 +354,13 @@ public:
 
 	virtual ~Spatializer(){}
 
-	/// Perform any necessary updates when the listener or speaker layout changes, ex. new speaker triplets for VBAP
-	virtual void compile(Listener& l){}
+	/// Perform any necessary updates when the speaker layout changes, ex. new speaker triplets for VBAP
+	/// Must be called before any calls to prepare(), renderBuffer(), renderSample()
+	/// or perform()
+	virtual void compile(){}
 
 	/// Called once per listener, before sources are rendered. ex. zero ambisonics coefficients
-	virtual void prepare(){}
+	virtual void prepare(AudioIOData& io){}
 
 	/// Render audio buffer in position
 	virtual void renderBuffer(AudioIOData& io,
@@ -382,10 +384,7 @@ public:
 	int numSpeakers() const { return mSpeakers.size(); }
 
 	/// Set number of frames
-	virtual void numFrames(int v){ mNumFrames = v;}
-
-	/// Enable Spatializaion(true by default)
-	void setEnabled(bool _enable) {mEnabled = _enable;}
+	virtual void numFrames(unsigned int v){ mNumFrames = v;}
 
 protected:
 	/// Render each source per sample
@@ -400,11 +399,10 @@ protected:
 	/// Render each source per buffer
 	virtual void perform(AudioIOData& io,
 	                     SoundSource& src,
-	                     Vec3d& reldir,
-	                     float gain
+	                     Vec3d& reldir
 	                     ) {
 		if (mBuffer.size() != io.framesPerBuffer()) {
-			mBuffer.reserve(io.framesPerBuffer());
+			mBuffer.resize(io.framesPerBuffer());
 		}
         for(unsigned int i = 0; i < io.framesPerBuffer(); i++)
 		{
@@ -416,10 +414,9 @@ protected:
 	}
 
 	Speakers mSpeakers;
-	bool mEnabled;
 
 	std::vector<float> mBuffer;	// temporary frame buffer
-	int mNumFrames;
+    unsigned int mNumFrames {0};
 };
 
 

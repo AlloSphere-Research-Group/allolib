@@ -401,9 +401,9 @@ void Vbap::makePhantomChannel(int channelIndex, std::vector<int> assignedOutputs
 	// mPhantomChannels[channelIndex] = assignedOutputs;
 }
 
-void Vbap::compile(Listener& listener){
-	this->mListener = &listener;
-}
+//void Vbap::compile(Listener& listener){
+//	this->mListener = &listener;
+//}
 
 void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose, const float *samples, const int &numFrames)
 {
@@ -559,16 +559,6 @@ void Vbap::renderSample(AudioIOData &io, const Pose &listeningPose, const float 
 		}
 	}
 }
-
-////Per buffer
-//void Vbap::perform(AudioIOData& io,SoundSource& src,Vec3d& relpos,const int& numFrames,float *samples){
-
-//}
-
-////per sample
-//void Vbap::perform(AudioIOData& io, SoundSource& src, Vec3d& relpos, const int& numFrames, int& frameIndex, float& sample){
-
-//}
 
 void Vbap::print() {
 	printf("Number of Triplets: %d\n", (int) mTriplets.size());

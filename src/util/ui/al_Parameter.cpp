@@ -55,7 +55,18 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, Vec4f value)
 		sender->send(OSCaddress, value[0], value[1], value[2], value[3]);
 //		std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
 	}
-	mListenerLock.unlock();
+    mListenerLock.unlock();
+}
+
+void OSCNotifier::notifyListeners(std::string OSCaddress, Pose value)
+{
+    mListenerLock.lock();
+    for(osc::Send *sender: mOSCSenders) {
+        sender->send(OSCaddress, value.pos()[0], value.pos()[1], value.pos()[2],
+                value.quat().w, value.quat().x, value.quat().y, value.quat().z);
+//		std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
+    }
+    mListenerLock.unlock();
 }
 
 // Parameter ------------------------------------------------------------------
@@ -115,46 +126,42 @@ ParameterBool::ParameterBool(std::string parameterName, std::string Group,
                      float max) :
     Parameter(parameterName, Group, defaultValue, prefix, min, max)
 {
-	mFloatValue = defaultValue;
+//	mFloatValue = defaultValue;
 }
 
-float ParameterBool::get()
-{
-	return mFloatValue;
-}
 
-void ParameterBool::setNoCalls(float value, void *blockReceiver)
-{
-	if (value > mMax) value = mMax;
-	if (value < mMin) value = mMin;
-	if (mProcessCallback) {
-		value = mProcessCallback(value, mProcessUdata);
-	}
-	if (blockReceiver) {
-		for(size_t i = 0; i < mCallbacks.size(); ++i) {
-			if (mCallbacks[i]) {
-				mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
-			}
-		}
-	}
+//void ParameterBool::setNoCalls(float value, void *blockReceiver)
+//{
+//	if (value > mMax) value = mMax;
+//	if (value < mMin) value = mMin;
+//	if (mProcessCallback) {
+//		value = mProcessCallback(value, mProcessUdata);
+//	}
+//	if (blockReceiver) {
+//		for(size_t i = 0; i < mCallbacks.size(); ++i) {
+//			if (mCallbacks[i]) {
+//				mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
+//			}
+//		}
+//	}
 
-	mFloatValue = value;
-}
+//	mFloatValue = value;
+//}
 
-void ParameterBool::set(float value)
-{
-	if (value > mMax) value = mMax;
-	if (value < mMin) value = mMin;
-	if (mProcessCallback) {
-		value = mProcessCallback(value, mProcessUdata);
-	}
-	mFloatValue = value;
-	for(size_t i = 0; i < mCallbacks.size(); ++i) {
-		if (mCallbacks[i]) {
-			mCallbacks[i](value, this, mCallbackUdata[i], NULL);
-		}
-	}
-}
+//void ParameterBool::set(float value)
+//{
+//	if (value > mMax) value = mMax;
+//	if (value < mMin) value = mMin;
+//	if (mProcessCallback) {
+//		value = mProcessCallback(value, mProcessUdata);
+//	}
+//	mFloatValue = value;
+//	for(size_t i = 0; i < mCallbacks.size(); ++i) {
+//		if (mCallbacks[i]) {
+//			mCallbacks[i](value, this, mCallbackUdata[i], NULL);
+//		}
+//	}
+//}
 
 // ParameterServer ------------------------------------------------------------
 
@@ -194,14 +201,13 @@ ParameterServer &ParameterServer::registerParameter(Parameter &param)
 
 void ParameterServer::unregisterParameter(Parameter &param)
 {
-	mParameterLock.lock();
+    std::unique_lock<std::mutex> lk(mParameterLock);
 	std::vector<Parameter *>::iterator it = mParameters.begin();
 	for(it = mParameters.begin(); it != mParameters.end(); it++) {
 		if (*it == &param) {
 			mParameters.erase(it);
 		}
-	}
-	mParameterLock.unlock();
+    }
 }
 
 ParameterServer &ParameterServer::registerParameter(ParameterString &param)
@@ -242,14 +248,38 @@ ParameterServer &ParameterServer::registerParameter(ParameterVec3 &param)
 
 void ParameterServer::unregisterParameter(ParameterVec3 &param)
 {
-	mParameterLock.lock();
+    std::unique_lock<std::mutex> lk(mParameterLock);
 	auto it = mVec3Parameters.begin();
 	for(it = mVec3Parameters.begin(); it != mVec3Parameters.end(); it++) {
 		if (*it == &param) {
 			mVec3Parameters.erase(it);
 		}
 	}
-	mParameterLock.unlock();
+    mParameterLock.unlock();
+}
+
+ParameterServer &ParameterServer::registerParameter(ParameterPose &param)
+{
+    mParameterLock.lock();
+    mPoseParameters.push_back(&param);
+    mParameterLock.unlock();
+    mListenerLock.lock();
+    param.registerChangeCallback(ParameterServer::changePoseCallback,
+                                 (void *) this);
+    mListenerLock.unlock();
+    return *this;
+
+}
+
+void ParameterServer::unregisterParameter(ParameterPose &param)
+{
+    std::unique_lock<std::mutex> lk(mParameterLock);
+    auto it = mPoseParameters.begin();
+    for(it = mPoseParameters.begin(); it != mPoseParameters.end(); it++) {
+        if (*it == &param) {
+            mPoseParameters.erase(it);
+        }
+    }
 }
 
 void ParameterServer::onMessage(osc::Message &m)
@@ -259,12 +289,12 @@ void ParameterServer::onMessage(osc::Message &m)
 	if(m.addressPattern() == requestAddress && m.typeTags() == "s") {
 		std::string parameterAddress;
 		m >> parameterAddress;
-	}
-	float val; // TODO: doens't make sense for parameters of different types
-	m >> val;
+    }
 	mParameterLock.lock();
-	for (Parameter *p:mParameters) {
+        for (Parameter *p:mParameters) {
 		if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "f"){
+                    float val;
+                    m >> val;
 			// Extract the data out of the packet
 			p->set(val);
 //			std::cout << "ParameterServer::onMessage" << val << std::endl;
@@ -272,18 +302,49 @@ void ParameterServer::onMessage(osc::Message &m)
 	}
 	for (ParameterVec3 *p:mVec3Parameters) {
 		if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "fff"){
-			float y,z;
-			m >> y >> z;
-			p->set(Vec3f(val,y,z));
+            float x,y,z;
+            m >> x >> y >> z;
+            p->set(Vec3f(x,y,z));
 		}
 	}
 	for (ParameterVec4 *p:mVec4Parameters) {
 		if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "ffff"){
-			float x,y,z;
-			m >> x >> y >> z;
-			p->set(Vec4f(val,x,y,z));
+            float a,b,c,d;
+            m >> a >> b >> c >> d;
+            p->set(Vec4f(a,b,c,d));
 		}
 	}
+    for (ParameterPose *p:mPoseParameters) {
+        if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "fffffff"){
+            float x, y, z, w, qx, qy, qz;
+            m >> x >> y >> z >> w >> qx >> qy >> qz;
+            p->set(Pose(Vec3d(x,y,z), Quatd(w, qx, qy, qz)));
+        } else if(m.addressPattern() == p->getFullAddress() + "/pos" && m.typeTags() == "fff"){
+            float x,y,z;
+            m >> x >> y >> z;
+            Pose currentPose = p->get();
+            currentPose.pos() = Vec3d(x,y,z);
+            p->set(currentPose);
+        } else if(m.addressPattern() == p->getFullAddress() + "/pos/x" && m.typeTags() == "f"){
+            float x;
+            m >> x;
+            Pose currentPose = p->get();
+            currentPose.pos().x = x;
+            p->set(currentPose);
+        } else if(m.addressPattern() == p->getFullAddress() + "/pos/y" && m.typeTags() == "f"){
+            float y;
+            m >> y;
+            Pose currentPose = p->get();
+            currentPose.pos().y = y;
+            p->set(currentPose);
+        } else if(m.addressPattern() == p->getFullAddress() + "/pos/z" && m.typeTags() == "f"){
+            float z;
+            m >> z;
+            Pose currentPose = p->get();
+            currentPose.pos().z= z;
+            p->set(currentPose);
+        }
+    }
 	for (osc::PacketHandler *handler: mPacketHandlers) {
 		m.resetStream();
 		handler->onMessage(m);
@@ -326,7 +387,30 @@ void ParameterServer::notifyAll()
 {
 	for(Parameter *parameter: mParameters) {
 		notifyListeners(parameter->getFullAddress(), parameter->get());
-	}
+        }
+    for (ParameterVec3 *p:mVec3Parameters) {
+        notifyListeners(p->getFullAddress(), p->get());
+    }
+    for (ParameterVec4 *p:mVec4Parameters) {
+        notifyListeners(p->getFullAddress(), p->get());
+    }
+
+}
+
+void ParameterServer::sendAllParameters(std::string IPaddress, int oscPort)
+{
+    osc::Send sender(oscPort, IPaddress.c_str());
+    for(Parameter *parameter: mParameters) {
+        sender.send(parameter->getFullAddress(), parameter->get());
+    }
+    for (ParameterVec3 *p:mVec3Parameters) {
+        Vec3f vec = p->get();
+        sender.send(p->getFullAddress(), vec.x, vec.y, vec.z);
+    }
+    for (ParameterVec4 *p:mVec4Parameters) {
+        Vec4f vec = p->get();
+        sender.send(p->getFullAddress(), vec[0], vec[1], vec[2], vec[3]);
+    }
 }
 
 void ParameterServer::changeCallback(float value, void *sender, void *userData, void *blockThis)
@@ -354,5 +438,12 @@ void ParameterServer::changeVec4Callback(Vec4f value, void *sender, void *userDa
 {
 	ParameterServer *server = static_cast<ParameterServer *>(userData);
 	ParameterVec4 *parameter = static_cast<ParameterVec4 *>(sender);
-	server->notifyListeners(parameter->getFullAddress(), parameter->get());
+    server->notifyListeners(parameter->getFullAddress(), parameter->get());
+}
+
+void ParameterServer::changePoseCallback(Pose value, void *sender, void *userData, void *blockThis)
+{
+    ParameterServer *server = static_cast<ParameterServer *>(userData);
+    ParameterPose *parameter = static_cast<ParameterPose *>(sender);
+    server->notifyListeners(parameter->getFullAddress(), parameter->get());
 }

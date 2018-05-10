@@ -6,8 +6,7 @@
 
 namespace al{
 
-Spatializer::Spatializer(const SpeakerLayout& sl) :
-    mEnabled(true)
+Spatializer::Spatializer(const SpeakerLayout& sl)
 {
 	unsigned numSpeakers = sl.speakers().size();
 	for(unsigned i=0;i<numSpeakers;++i){
@@ -46,7 +45,7 @@ void Listener::updateHistory(int numFrames){
 
 void Listener::compile(){
 	mIsCompiled = true;
-	mSpatializer->compile(*(this));
+	mSpatializer->compile();
 }
 
 
@@ -135,7 +134,7 @@ void AudioScene::render(AudioIOData& io) {
 		Listener& l = *mListeners[il];
 
 		Spatializer* spatializer = l.mSpatializer;
-		spatializer->prepare();
+		spatializer->prepare(io);
 
 		// update listener history data:
 		l.updateHistory(numFrames);

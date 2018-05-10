@@ -157,6 +157,13 @@ public:
 	 */
 	std::vector<double> getColumn(int index);
 
+        /**
+         * @brief get names of the columns in CSV file
+         * @return array with column names
+         *
+         * Must be called after readFile(), otherwise an empty vector is returned.
+         */
+        std::vector<std::string> getColumnNames() {return mColumnNames;}
 
 private:
 

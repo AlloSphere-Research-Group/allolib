@@ -98,8 +98,6 @@ public:
 	///
 	void makePhantomChannel(int channelIndex, std::vector<int> assignedOutputs);
 
-	virtual void compile(Listener& listener) override;
-
 	virtual void renderSample(AudioIOData& io, const Pose& reldir, const float& sample, const int& frameIndex) override;
 	virtual void renderBuffer(AudioIOData& io, const Pose& reldir, const float *samples, const int& numFrames) override;
 
@@ -115,7 +113,7 @@ public:
 private:
 	std::vector<SpeakerTriple> mTriplets;
 	std::map<int, std::vector<int> > mPhantomChannels;
-	Listener* mListener;
+//	Listener* mListener;
 	bool mIs3D;
 
 	//	void setIs3D(bool is3D){mIs3D = is3D;}

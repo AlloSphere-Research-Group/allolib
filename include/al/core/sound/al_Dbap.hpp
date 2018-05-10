@@ -54,7 +54,7 @@ namespace al{
 class Dbap : public Spatializer{
 
 	// do not hide base class functions
-	using Spatializer::perform;
+//	using Spatializer::perform;
 	
 public:
 
@@ -62,13 +62,8 @@ public:
 	/// @param[in] focus	Amplitude focus to nearby speakers
 	Dbap(const SpeakerLayout &sl, float focus = 1.f);
 
-	void compile(Listener& listener);
-
-	///Per Sample Processing
-	void perform(AudioIOData& io, SoundSource& src, Vec3d& relpos, const int& numFrames, int& frameIndex, float& sample);
-
-	/// Per Buffer Processing
-	void perform(AudioIOData& io, SoundSource& src, Vec3d& relpos, const int& numFrames, float *samples);
+	virtual void renderSample(AudioIOData& io, const Pose& listeningPose, const float& sample, const int& frameIndex) override;
+	virtual void renderBuffer(AudioIOData& io, const Pose& listeningPose, const float *samples, const int& numFrames) override;
 
 	/// focus is an exponent determining the amplitude focus to nearby speakers.
 
@@ -76,13 +71,13 @@ public:
 	///A denser speaker layout my benefit from a high focus > 1, and a sparse layout may benefit from focus < 1
 	void setFocus(float focus) { mFocus = focus; }
 
-	void print();
+	void print() override;
 
 private:
-	Listener * mListener;
+//	Listener * mListener;
 	Vec3f mSpeakerVecs[DBAP_MAX_NUM_SPEAKERS];
-	int mDeviceChannels[DBAP_MAX_NUM_SPEAKERS];
-	int mNumSpeakers;
+	unsigned int mDeviceChannels[DBAP_MAX_NUM_SPEAKERS];
+	unsigned int mNumSpeakers;
 	float mFocus;
 };
 

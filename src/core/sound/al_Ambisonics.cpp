@@ -341,39 +341,21 @@ void AmbiDecode::print(FILE * fp, const char * append) const {
 AmbisonicsSpatializer::AmbisonicsSpatializer(
 	SpeakerLayout &sl, int dim, int order, int flavor
 )
-	:	Spatializer(sl), mDecoder(dim, order, sl.numSpeakers(), flavor), mEncoder(dim,order),
-	  mListener(NULL),  mNumFrames(0)
+	:	Spatializer(sl), mDecoder(dim, order, sl.numSpeakers(), flavor), mEncoder(dim,order)
 {
-	setSpeakerLayout(sl);
 };
 
 void AmbisonicsSpatializer::zeroAmbi(){
-	memset(ambiChans(), 0, mAmbiDomainChannels.size()*sizeof(ambiChans()[0]));
+	assert(mAmbiDomainChannels.size() != 0 && "Ambisonics not initiliazed! compile() not called.");
+    memset(ambiChans(), 0, mAmbiDomainChannels.size()*sizeof(ambiChans()[0]));
 }
 
-void AmbisonicsSpatializer::compile(Listener& l){
-    mListener = &l;
-}
+void AmbisonicsSpatializer::compile()
+{
+    mDecoder.setSpeakers(&mSpeakers);
 
-void AmbisonicsSpatializer::numFrames(int v){
-
-	if(mAmbiDomainChannels.size() != (unsigned long)(mDecoder.channels() * v)){
-		mAmbiDomainChannels.resize(mDecoder.channels() * v);
-	}
-}
-
-void AmbisonicsSpatializer::numSpeakers(int num){
-    mDecoder.numSpeakers(num);
-}
-
-void AmbisonicsSpatializer::setSpeakerLayout(const SpeakerLayout& sl){
-	mDecoder.setSpeakers(&mSpeakers);
-
-	mSpeakers.clear();
-	unsigned numSpeakers = sl.speakers().size();
-	for(unsigned i=0;i<numSpeakers;++i){
-		mSpeakers.push_back(sl.speakers()[i]);
-
+	size_t numSpeakers = mSpeakers.size();
+	for(size_t i = 0; i < numSpeakers; i++){
         mDecoder.setSpeakerRadians(
 			i,
 			mSpeakers[i].deviceChannel,
@@ -384,8 +366,27 @@ void AmbisonicsSpatializer::setSpeakerLayout(const SpeakerLayout& sl){
 	}
 }
 
-void AmbisonicsSpatializer::prepare(){
-    zeroAmbi();
+void AmbisonicsSpatializer::numFrames(unsigned int v){
+    mNumFrames = v;
+	if(mAmbiDomainChannels.size() != (unsigned long)(mDecoder.channels() * v)){
+		mAmbiDomainChannels.resize(mDecoder.channels() * v);
+	}
+}
+
+void AmbisonicsSpatializer::numSpeakers(int num){
+    mDecoder.numSpeakers(num);
+}
+
+void AmbisonicsSpatializer::setSpeakerLayout(const Speakers &speakers){
+    mSpeakers = speakers;
+    compile();
+}
+
+void AmbisonicsSpatializer::prepare(AudioIOData& io){
+    if (mNumFrames == 0) { // Allocate buffers once. Assumes buffer size doesn't change
+        numFrames(io.framesPerBuffer());
+    }
+	zeroAmbi();
 }
 
 void AmbisonicsSpatializer::renderBuffer(AudioIOData& io,
@@ -407,6 +408,8 @@ void AmbisonicsSpatializer::renderBuffer(AudioIOData& io,
 //		l.mQuatHistory[i].toVectorZ(axis);
 //		double rf = urel.dot(axis);
 //		//*/
+
+
 	Vec3d direction = listeningPose.vec();
 
 	//Rotate vector according to listener-rotation
