@@ -89,6 +89,9 @@ public:
   /// Unbind buffer
   void unbind() const;
 
+  // size is in bytes, if a std::vector of vec4 with float type is to be sent,
+  // the call should be:
+  // my_buffer.data(my_vector.size() * 4 * sizeof(float), my_vector.data());
   void data(size_t size, void const* src=NULL);
   void subdata(int offset, int size, void const* src);
 
