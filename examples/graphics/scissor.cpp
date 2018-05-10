@@ -55,7 +55,7 @@ struct MyApp : App {
     transform.setIdentity();
     transform *= Matrix4f::rotation(M_PI / 2, 2, 0); // rotate from z to x
     transform *= Matrix4f::translation(0, 0, 0.5);
-    transform *= Matrix4f::scaling(0.1, 0.1, 3); // rotate from z to x
+    transform *= Matrix4f::scaling(0.1, 0.1, 3);
     axis.transform(transform, axis.vertices().size() - num_verts_added);
     for (int i = 0 ; i < num_verts_added; i += 1) {
       axis.color(1, 0, 0);
@@ -66,7 +66,7 @@ struct MyApp : App {
     transform.setIdentity();
     transform *= Matrix4f::rotation(M_PI / 2, 2, 1); // rotate from z to y
     transform *= Matrix4f::translation(0, 0, 0.5);
-    transform *= Matrix4f::scaling(0.1, 0.1, 3); // rotate from z to x
+    transform *= Matrix4f::scaling(0.1, 0.1, 3);
     axis.transform(transform, axis.vertices().size() - num_verts_added);
     for (int i = 0 ; i < num_verts_added; i += 1) {
       axis.color(0, 1, 0);
@@ -76,7 +76,7 @@ struct MyApp : App {
     num_verts_added = addCube(axis);
     transform.setIdentity();
     transform *= Matrix4f::translation(0, 0, 0.5);
-    transform *= Matrix4f::scaling(0.1, 0.1, 3); // rotate from z to x
+    transform *= Matrix4f::scaling(0.1, 0.1, 3);
     axis.transform(transform, axis.vertices().size() - num_verts_added);
     for (int i = 0 ; i < num_verts_added; i += 1) {
       axis.color(0, 0, 1);
