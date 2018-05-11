@@ -67,7 +67,8 @@ public:
 		
 		// Here we activate transparent blending. This mixes source and
 		// destination colors according to the source's alpha value.
-		g.blendTrans();
+		g.blending(true);
+		g.blendModeTrans();
 
 		// Render texture on a rectangle in world space ...
 		g.quad(tex, -1, -1, 2, 2);
@@ -76,7 +77,7 @@ public:
 		// g.quadViewport(tex);
 
 		// Turn off blending
-		g.blendOff();
+		g.blending(false);
 	}
 
 };

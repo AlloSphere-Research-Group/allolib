@@ -317,6 +317,15 @@ class Graphics : public RenderManager {
     return is_omni;
   }
 
+  // deprecated
+  void blendOn() { blending(true); }
+  void blendAdd() {blendModeAdd(); }
+  void blendSub() {blendModeSub(); }
+  void blendScreen() {blendModeScreen(); }
+  void blendMul() {blendModeMul(); }
+  void blendTrans() {blendModeTrans(); }
+  void blendOff() { blending(false); }
+
 private:
   static Color mClearColor;
   static float mClearDepth;

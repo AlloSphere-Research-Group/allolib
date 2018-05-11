@@ -90,8 +90,8 @@ public:
 
 	void onDraw(Graphics& g){
 		g.clear(0);
-		g.blendAdd();
-		// g.nicest();
+		g.blending(true);
+		g.blendModeAdd();
 		g.pointSize(6);
 		g.meshColor();
 		g.draw(mesh);

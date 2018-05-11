@@ -131,7 +131,8 @@ LABEL_DRAW:
     g.clear(0);
     g.polygonMode(Graphics::LINE);
     g.depthTesting(false);
-    g.blendAdd();
+    g.blending(true);
+    g.blendModeAdd();
 
     if (USE_INSTANCING) {
       g.shader(shader_instancing);

@@ -141,7 +141,8 @@ public:
 
 	void onDraw(Graphics& g){
 		g.clear(0);
-		g.blendAdd();
+		g.blending(true);
+		g.blendModeAdd();
 
 		//Draw the triangles
 		g.meshColor();

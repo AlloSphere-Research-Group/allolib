@@ -43,7 +43,8 @@ class MyApp : public App {
     g.camera(Viewpoint::ORTHO_FOR_2D);
 
     // Before rendering text, we must turn on blending
-    g.blendAdd();
+    g.blending(true);
+    g.blendModeAdd();
 
     // Render text in the top-left corner
     g.pushMatrix();
@@ -70,7 +71,7 @@ class MyApp : public App {
     g.popMatrix();
 
     // Turn off blending
-    g.blendOff();
+    g.blending(false);
 
   }
 };

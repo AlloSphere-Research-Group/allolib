@@ -73,7 +73,8 @@ public:
 
     virtual void onProcess(Graphics &g) {
         g.pushMatrix();
-        g.blendOn();
+        g.blending(true);
+        g.blendModeTrans();
         g.translate(mOsc.freq()/500 - 3,  pow(mAmp, 0.3), -8);
         g.scale(1- mDur, mDur, 1);
         g.color(1, mOsc.freq()/1000, mEnvFollow.value());
