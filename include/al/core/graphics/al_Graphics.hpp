@@ -174,27 +174,6 @@ class Graphics : public RenderManager {
   /// Set blend mode to transparent (asymmetric)
   void blendModeTrans() { blendMode(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, FUNC_ADD); }
 
-  /// Turn blending states on (without setting mode)
-  void blendOn() { depthMask(false); blending(true); }
-
-  /// Set states for additive blending
-  void blendAdd() { blendOn(); blendModeAdd(); }
-
-  /// Set states for subtractive blending
-  void blendSub() { blendOn(); blendModeSub(); }
-
-  /// Set states for screen blending
-  void blendScreen() { blendOn(); blendModeScreen(); }
-
-  /// Set states for multiplicative blending
-  void blendMul() { blendOn(); blendModeMul(); }
-
-  /// Set states for transparent blending
-  void blendTrans() { blendOn(); blendModeTrans(); }
-
-  /// Turn blending states off (opaque rendering)
-  void blendOff() { depthMask(true); blending(false); }
-
   void scissor(int left, int bottom, int width, int height);
   
   void setClearColor(float r, float g, float b, float a = 1);
