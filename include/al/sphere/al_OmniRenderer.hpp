@@ -143,6 +143,9 @@ inline void OmniRenderer::draw_using_perprojection_capture() {
       pp_render.set_eye(eye);
       for (int i = 0; i < pp_render.num_projections(); i++) {
         pp_render.set_projection(i);
+        mGraphics.depthTesting(true);
+        mGraphics.depthMask(true);
+        mGraphics.blending(false);
         onDraw(mGraphics);
       }
     }
@@ -151,6 +154,9 @@ inline void OmniRenderer::draw_using_perprojection_capture() {
     pp_render.set_eye(eye_to_render);
     for (int i = 0; i < pp_render.num_projections(); i++) {
       pp_render.set_projection(i);
+      mGraphics.depthTesting(true);
+      mGraphics.depthMask(true);
+      mGraphics.blending(false);
       onDraw(mGraphics);
     }
   }
@@ -159,6 +165,9 @@ inline void OmniRenderer::draw_using_perprojection_capture() {
   // no stereo and no omni when actually displaying sampled result
   mGraphics.omni(false);
   mGraphics.eye(Graphics::MONO_EYE);
+
+  mGraphics.blending(false);
+  mGraphics.depthTesting(false);
 
   // perprojection compositing changes viewport, save it
   mGraphics.pushViewport(0, 0, fbWidth(), fbHeight());

@@ -127,8 +127,8 @@ void main() {
   vec3 p_coord = (R * vec4(dir, 0)).xyz;
   p_coord.xy /= -p_coord.z;
   p_coord.xy /= tanFovDiv2;
-  vec4 sampled_color = texture(color_tex, p_coord.xy / 2.0 + 0.5);
-  frag_color = sampled_color * sample.a;
+  vec3 sampled_color = texture(color_tex, p_coord.xy / 2.0 + 0.5).rgb;
+  frag_color = vec4(sampled_color * sample.a, 1.0);
 }
 )";}
 
@@ -287,9 +287,9 @@ public:
       ProjectionInfo& info = projection_infos_[index];
       info.texture[0].reset(new Texture());
       info.texture[1].reset(new Texture());
-      info.texture[0]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[0]->create2D(res_, res_, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
       info.texture[0]->filter(Texture::LINEAR);
-      info.texture[1]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[1]->create2D(res_, res_, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
       info.texture[1]->filter(Texture::LINEAR);
     }
     rbo_.create(res_, res_);
@@ -315,8 +315,8 @@ public:
       ProjectionInfo& info = projection_infos_[index];
       info.texture[0].reset(new Texture());
       info.texture[1].reset(new Texture());
-      info.texture[0]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
-      info.texture[1]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[0]->create2D(res_, res_, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+      info.texture[1]->create2D(res_, res_, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
       // Determine projection dimensions.
       // First determine the central direction.
       Vec3f direction(0, 0, 0);
@@ -343,11 +343,18 @@ public:
         std::cout << "unable to use per-projection mode, viewport angle too large." << std::endl;
       }
       float fov = std::acos(dot_max) * 2.0f;
-#endif
-      float fov = 2.0f / 3 * M_PI;
       // std::cout << "fov: " <<fov << std::endl;
+#endif
+
+      // value 2/3 * PI is the smallest value that is bigger than fov of
+      // any projector in AlloSphere
+      // setting same sampling fov for all projectors has advantage that
+      // pixels density in terms of OpenGL space dimension remains constant
+      // throughout projectors
+      float fov = 2.0f / 3 * M_PI;
       Vec3f rotation_axis = Vec3f(0, 0, -1).cross(direction);
       rotation_axis = rotation_axis.normalize();
+      // (0, 0, -1) because that is the direction camera is looking at
       float rotation_angle = std::acos(Vec3f(0, 0, -1).dot(direction));
       Mat4f rmat = get_rotation_matrix(rotation_axis, -rotation_angle);
       Mat4f proj;
@@ -417,8 +424,8 @@ public:
       ProjectionInfo& info = projection_infos_[index];
       info.texture[0].reset(new Texture());
       info.texture[1].reset(new Texture());
-      info.texture[0]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
-      info.texture[1]->create2D(res_, res_, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.texture[0]->create2D(res_, res_, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+      info.texture[1]->create2D(res_, res_, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
 
       float fov = 3.1415926535 / 2;
       Mat4f rmat = get_cube_mat(index);
