@@ -1,6 +1,6 @@
 //
 
-#include "al/util/ui/al_SynthSequencer.hpp"
+#include "al/util/scene/al_SynthSequencer.hpp"
 
 using namespace al;
 

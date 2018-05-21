@@ -46,10 +46,10 @@
 
 #include "al/core/io/al_ControlNav.hpp"
 #include "al/util/ui/al_ParameterMIDI.hpp"
-#include "al/util/ui/al_SynthSequencer.hpp"
-#include "al/util/ui/al_SynthRecorder.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/util/ui/al_Preset.hpp"
+#include "al/util/scene/al_SynthSequencer.hpp"
+#include "al/util/scene/al_SynthRecorder.hpp"
 #include "al/util/imgui/al_Imgui.hpp"
 
 

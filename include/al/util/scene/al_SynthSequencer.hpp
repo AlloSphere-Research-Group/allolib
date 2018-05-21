@@ -474,7 +474,7 @@ protected:
         int voicesToTurnOff[16];
         int numVoicesToTurnOff;
         while ( (numVoicesToTurnOff = mVoiceIdsToTurnOff.read((char *) voicesToTurnOff, 16 * sizeof (int))) ) {
-            for (int i = 0; i < numVoicesToTurnOff/sizeof (int); i++) {
+            for (int i = 0; i < numVoicesToTurnOff/int(sizeof (int)); i++) {
                 auto voice = mActiveVoices;
                 while (voice) {
                     if (voice->id() == voicesToTurnOff[i]) {

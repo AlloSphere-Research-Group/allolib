@@ -44,7 +44,9 @@
 
 #include <chrono>
 #include <fstream>
-#include <al/core/io/al_File.hpp>
+
+#include "al/core/io/al_File.hpp"
+#include "al/util/scene/al_SynthSequencer.hpp"
 
 /**
  * @brief The SynthRecorder class records the events arriving at a PolySynth
@@ -83,8 +85,6 @@
  * @endcode
  *
  */
-
-#include "al/util/ui/al_SynthSequencer.hpp"
 
 namespace al {
 
