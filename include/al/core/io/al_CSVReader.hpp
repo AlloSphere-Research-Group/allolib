@@ -120,7 +120,7 @@ public:
 	 * @brief readFile reads the CSV file into internal memory
 	 * @param fileName the csv file name
 	 */
-	void readFile(std::string fileName);
+        bool readFile(std::string fileName);
 
 	/**
 	 * @brief addType
@@ -129,6 +129,10 @@ public:
 	void addType(DataType type) {
 		mDataTypes.push_back(type);
 	}
+
+        void clearTypes() {
+            mDataTypes.clear();
+        }
 
 	/**
 	 * @brief getColumn returns a column from the csv file
@@ -165,6 +169,8 @@ public:
          */
         std::vector<std::string> getColumnNames() {return mColumnNames;}
 
+        void setBasePath(std::string basePath) {mBasePath = basePath;}
+
 private:
 
 	size_t calculateRowLength();
@@ -174,6 +180,8 @@ private:
 	std::vector<std::string> mColumnNames;
 	std::vector<DataType> mDataTypes;
 	std::vector<char *> mData;
+
+        std::string mBasePath;
 };
 
 #endif // INCLUDE_AL_CSVREADER_HPP

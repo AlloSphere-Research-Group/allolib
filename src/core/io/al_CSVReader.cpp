@@ -8,12 +8,22 @@ CSVReader::~CSVReader() {
 	mData.clear();
 }
 
-void CSVReader::readFile(std::string fileName) {
+bool CSVReader::readFile(std::string fileName) {
+    if (mBasePath.size() > 0) {
+        if (mBasePath.back() == '/') {
+            fileName = mBasePath + fileName;
+        } else {
+            fileName = mBasePath + "/" + fileName;
+        }
+    }
 	std::ifstream f(fileName);
 	if (!f.is_open()) {
 		std::cout << "Could not open:" << fileName << std::endl;
-		return;
+                return false;
 	}
+
+        mColumnNames.clear();
+        mData.clear();
 
 	std::string line;
 	size_t rowLength = calculateRowLength();
@@ -24,7 +34,6 @@ void CSVReader::readFile(std::string fileName) {
         while (std::getline(columnNameStream, columnName, ',')) {
             mColumnNames.push_back(columnName);
         }
-
 
 //	std::cout << line << std::endl;
 	while (getline(f, line)) {
@@ -69,10 +78,12 @@ void CSVReader::readFile(std::string fileName) {
 				}
 			}
 		}
-	}
-	if (f.bad()) {
-		std::cout << "Error reading:" << fileName << std::endl;
-	}
+        }
+        f.close();
+//        if (f.bad()) {
+//                std::cout << "Error ____ reading:" << fileName << std::endl;
+//        }
+        return !f.bad();
 }
 
 std::vector<double> CSVReader::getColumn(int index) {
