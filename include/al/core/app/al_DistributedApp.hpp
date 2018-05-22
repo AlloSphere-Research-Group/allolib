@@ -7,6 +7,7 @@
 #include "al/core/app/al_WindowApp.hpp"
 #include "al/core/app/al_AudioApp.hpp"
 #include "al/util/al_DeviceServerApp.hpp"
+#include "al/util/ui/al_Parameter.hpp"
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/core/graphics/al_GLFW.hpp"
 #include "al/core/io/al_Window.hpp"
@@ -62,7 +63,7 @@ public:
 
       MPI_Get_processor_name(processor_name, &name_len);
 
-      mRoleMap["spherez05"] = {ROLE_SIMULATOR, ROLE_INTERFACE};
+      mRoleMap["spherez05"] = {ROLE_SIMULATOR, ROLE_RENDERER};
       mRoleMap["gr01"] = {ROLE_SIMULATOR};
 
       mRoleMap["moxi"] = {ROLE_RENDERER};
@@ -94,12 +95,13 @@ public:
                       mRole = entry.second[0];
                   }
               }
-              std::cout << name() << ":" << world_rank << " set role to " << roleName() << std::endl;
           }
       }
+      std::cout << name() << ":" << world_rank << " set role to " << roleName() << std::endl;
 #else
       mRole = ROLE_SIMULATOR;
 #endif
+
   }
 
   ~DistributedApp() {
@@ -227,6 +229,12 @@ public:
    */
   int newStates() { return mQueuedStates; }
 
+  void log(std::string logText) {
+      std::cout << name() << ":" << logText << std::endl;
+  }
+
+  ParameterServer &parameterServer() { return *mParameterServer; }
+
 private:
 
 #ifdef AL_BUILD_MPI
@@ -244,6 +252,7 @@ private:
   int mQueuedStates {0};
   cuttlebone::Maker<TSharedState> mMaker {"192.168.0.255"};
   cuttlebone::Taker<TSharedState> mTaker;
+  std::shared_ptr<ParameterServer> mParameterServer;
 
 };
 
@@ -253,6 +262,19 @@ private:
 template<class TSharedState>
 inline void DistributedApp<TSharedState>::start() {
   glfw::init(is_verbose);
+
+  uint16_t receiverPort = 9100;
+  if (role() == ROLE_SIMULATOR) {
+      mParameterServer = make_shared<ParameterServer>("", 9010);
+      for (auto member: mRoleMap) {
+          if (std::find(member.second.begin(), member.second.end(), ROLE_RENDERER) != member.second.end()) {
+              mParameterServer->addListener(member.first, receiverPort);
+              continue;
+          }
+      }
+  } else {
+      mParameterServer = make_shared<ParameterServer>("", receiverPort);
+  }
   onInit();
   Window::create(is_verbose);
   preOnCreate();
