@@ -424,7 +424,9 @@ public:
     }
 };
 
-using StdRandom = rnd::Random<StdRnd>;
+using StdRandom = al::rnd::Random<StdRnd>;
+
+namespace rnd {
 
 template<>
 float StdRandom::uniform() {
@@ -475,6 +477,8 @@ void StdRandom::shuffle(T * arr, uint32_t len) {
         arr[j] = t;
     }
 }
+
+} // rnd::
 
 } // al::
 
