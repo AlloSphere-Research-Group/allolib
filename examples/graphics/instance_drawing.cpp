@@ -101,6 +101,12 @@ struct MyApp : App
     shader_instancing.compile(instancing_vert, instancing_frag);
 
     randomize();
+
+    auto& vao = mesh.vao();
+    vao.bind();
+    vao.enableAttrib(1);
+    vao.attribPointer(1, buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribDivisor(1, 1);
   }
 
   void onDraw(Graphics& g) override {
@@ -140,9 +146,6 @@ LABEL_DRAW:
       g.update();
       auto& vao = mesh.vao();
       vao.bind();
-      vao.enableAttrib(1);
-      vao.attribPointer(1, buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
-      glVertexAttribDivisor(1, 1);
       if (mesh.indices().size()){
         mesh.indexBuffer().bind();
         glDrawElementsInstanced(GL_TRIANGLES, mesh.indices().size(), GL_UNSIGNED_INT, 0, positions.size());
