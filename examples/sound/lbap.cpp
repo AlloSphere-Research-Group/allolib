@@ -1,8 +1,9 @@
 #include "al/core.hpp"
 #include "al/core/sound/al_Lbap.hpp"
 #include "al/core/sound/al_Speaker.hpp"
-#include "al/util/al_AlloSphereSpeakerLayout.hpp"
 #include "al/core/math/al_Random.hpp"
+#include "al/util/al_AlloSphereSpeakerLayout.hpp"
+#include "al/util/ui/al_Parameter.hpp"
 
 #include <atomic>
 #include <vector>
@@ -12,175 +13,161 @@ using namespace std;
 
 #define BLOCK_SIZE (512)
 
-static SpeakerLayout speakerLayout;
-static Lbap *panner;
-static float speedMult = 0.03f;
-
-static float srcElev = 0.0f;
-
-static Vec3d srcpos(0.0,0.0,0.0);
-static atomic<float> *mPeaks;
-
-////Currently bypasses al_AudioScene
-
-static void audioCB(AudioIOData& io){
-	// Render scene
-	static unsigned int t = 0;
-	double sec;
-	float srcBuffer[BLOCK_SIZE];
-
-	while (io()) {
-		int i = io.frame();
-		float env = (22050 - (t % 22050))/22050.0;
-		
-		// Signal is computed every sample
-		srcBuffer[i] = 0.5 * rnd::uniform() * env;
-		++t;
-	}
-	sec = (t / io.fps());
-	// But the positions can be computed once per buffer
-	float tta = sec*speedMult*M_2PI + M_2PI;
-	
-	float x = 5.0*cos(tta);
-	float y = 2.0*sin(2.8 * tta);
-	float z = 5.0*sin(tta);
-
-	srcpos = Vec3d(x,y,srcElev + z);
-
-	panner->renderBuffer(io, srcpos, srcBuffer, BLOCK_SIZE);
-
-	// Now compute RMS to display the signal level for each speaker
-	Speakers &speakers = speakerLayout.speakers();
-	for (int i = 0; i < speakers.size(); i++) {
-		mPeaks[i].store(0);
-	}
-	for (int speaker = 0; speaker < speakers.size(); speaker++) {
-		float rms = 0;
-		for (int i = 0; i < io.framesPerBuffer(); i++) {
-			int deviceChannel = speakers[speaker].deviceChannel;
-			if(deviceChannel < io.channelsOut()) {
-				float sample = io.out(speakers[speaker].deviceChannel, i);
-				rms += sample * sample;
-			}
-		}
-		rms = sqrt(rms/io.framesPerBuffer());
-		mPeaks[speaker].store(rms);
-	}
-}
-
 class MyApp : public App
 {
-	Mesh mPoly;
+    Mesh mPoly;
 
-	vector<Mesh> mVec;
+    SpeakerLayout speakerLayout;
+    Lbap *panner {nullptr};
+    float speedMult = 0.04f;
+    double mElapsedTime = 0.0;
 
-	vector<Vec3d> sCoords;
-	vector<int>  sChannels;
-
-	Light mLight;
-
+    ParameterVec3 srcpos {"srcPos", "", {0.0,0.0,0.0}};
+    atomic<float> *mPeaks {nullptr};
 
 public:
-	MyApp()  {
-	}
+    MyApp()  {
+    }
 
-	void onCreate() {
+    ~MyApp() override {
+        if (panner) { free(panner); }
+        if (mPeaks) { free(mPeaks); }
+    }
+
+    void onInit() override {
+
+        speakerLayout = AlloSphereSpeakerLayout();
+
+        panner = new Lbap(speakerLayout);
+        panner->compile();
+        panner->print();
+        panner->prepare(audioIO());
+
+        //Determine number of output channels
+        Speakers allSpeakers = speakerLayout.speakers();
+        int highestChannel = 0;
+        for(Speaker s:allSpeakers){
+            if((int) s.deviceChannel > highestChannel){
+                highestChannel = s.deviceChannel;
+            }
+        }
+
+        audioIO().close();
+        audioIO().channelsOut(highestChannel + 1);
+        audioIO().open();
+
+        mPeaks = new atomic<float>[speakerLayout.speakers().size()]; // Not being freed in this example
+    }
+
+    void onCreate() override {
         addDodecahedron(mPoly);
-		mLight.pos(0,6,0);
+        nav().pos(0, 1, 25);
+    }
 
-		nav().pos(0, 2, 45);
-	}
+    void onAnimate(double dt) override {
+        // Move source position
+        mElapsedTime += dt;
+        float tta = mElapsedTime * speedMult * 2.0 * M_PI;
 
+        float x = 5.0*cos(tta);
+        float y = 3.0*sin(2.8 * tta);
+        float z = 5.0*sin(tta);
 
-	void onDraw(Graphics& g){
-		g.clear(0);
-		g.blending(true);
-		g.blendModeAdd();
+        srcpos = Vec3d(x,y,z);
+    }
 
-		//Draw the source
-		g.pushMatrix();
-		g.translate(srcpos);
-		g.scale(0.4);
-		g.color(1,1, 1, 0.5);
-        g.polygonFill();
-		g.draw(mPoly);
-		g.popMatrix();
+    void onDraw(Graphics& g) override {
+        g.clear(0);
+        g.blending(true);
+        g.blendModeTrans();
+        Vec3d srcPosDraw = srcpos.get();
 
-		//Draw the speakers
-
+        //Draw the speakers
         Speakers sp = speakerLayout.speakers();
-		for(int i = 0; i < sp.size(); ++i){
+        for(int i = 0; i < (int) sp.size(); ++i){
 
-			g.pushMatrix();
-
+            g.pushMatrix();
             float xyz[3];
             sp[i].posCart(xyz);
-			g.translate(-xyz[1], xyz[2], -xyz[0]);
-			float peak = mPeaks[i].load();
-			g.scale(0.02 + 0.06 * peak * 30);
-			g.color(1);
+            g.translate(-xyz[1], xyz[2], -xyz[0]);
+            float peak = mPeaks[i].load();
+            g.scale(0.02 +  peak * 5);
+            g.color(1);
             g.polygonLine();
-			g.draw(mPoly);
-			g.popMatrix();
-		}
+            g.draw(mPoly);
+            g.popMatrix();
+        }
 
-		// Draw line
-		Mesh lineMesh;
-		lineMesh.vertex(0.0,0.0, 0.0);
-		lineMesh.vertex(srcpos.x,0.0, srcpos.z);
-		lineMesh.vertex(srcpos.x,srcpos.y, srcpos.z);
-		lineMesh.index(0);
-		lineMesh.index(1);
-		lineMesh.index(1);
-		lineMesh.index(2);
-		lineMesh.index(2);
-		lineMesh.index(0);
-		lineMesh.primitive(Mesh::LINES);
-		g.draw(lineMesh);
-	}
+        // Draw line
+        Mesh lineMesh;
+        lineMesh.vertex(0.0,0.0, 0.0);
+        lineMesh.vertex(srcPosDraw.x,0.0, srcPosDraw.z);
+        lineMesh.vertex(srcPosDraw.x,srcPosDraw.y, srcPosDraw.z);
+        lineMesh.index(0);
+        lineMesh.index(1);
+        lineMesh.index(1);
+        lineMesh.index(2);
+        lineMesh.index(2);
+        lineMesh.index(0);
+        lineMesh.primitive(Mesh::LINES);
+        g.draw(lineMesh);
+
+        //Draw the source
+        g.pushMatrix();
+        g.translate(srcPosDraw);
+        g.scale(0.8);
+        g.color(1,1, 1, 0.5);
+        g.polygonFill();
+        g.draw(mPoly);
+        g.popMatrix();
+    }
+
+    virtual void onSound(AudioIOData & io) override {
+        static unsigned int t = 0; // overall sample counter
+        float srcBuffer[BLOCK_SIZE];
+
+        // Render signal to be panned
+        while (io()) {
+            int i = io.frame();
+            float env = (22050 - (t % 22050))/22050.0;
+            srcBuffer[i] = 0.5 * rnd::uniform() * env;
+            ++t;
+        }
+        // Pass signal to spatializer
+        Pose pose;
+        pose.pos(srcpos.get());
+        panner->renderBuffer(io, pose, srcBuffer, BLOCK_SIZE);
+
+        // Now compute RMS to display the signal level for each speaker
+        Speakers &speakers = speakerLayout.speakers();
+        for (int speaker = 0; speaker < (int) speakers.size(); speaker++) {
+            float rms = 0;
+            for (int i = 0; i < (int) io.framesPerBuffer(); i++) {
+                int deviceChannel = speakers[speaker].deviceChannel;
+                float sample = io.out(deviceChannel, i);
+                rms += sample * sample;
+            }
+            rms = sqrt(rms/io.framesPerBuffer());
+            mPeaks[speaker].store(rms);
+        }
+    }
 };
 
 
+int main (int argc, char * argv[])
+{
+    MyApp app;
 
-int main (int argc, char * argv[]){
-
-	speakerLayout = AlloSphereSpeakerLayout();
-
-	panner = new Lbap(speakerLayout);
-    panner->compile();
-	panner->print();
-
-	//Determine number of output channels
-	Speakers allSpeakers = speakerLayout.speakers();
-	int highestChannel = 0;
-	for(Speaker s:allSpeakers){
-		if(s.deviceChannel > highestChannel){
-			highestChannel = s.deviceChannel;
-		}
-	}
-
-	mPeaks = new atomic<float>[speakerLayout.speakers().size()];
-
-	int outputChannels = highestChannel + 1;
-
+    // Set up Audio
     AudioDevice::printAll();
-    AudioDevice dev("ECHO X5");
-	AudioIO audioIO;
-    audioIO.init(audioCB, nullptr, BLOCK_SIZE, 44100, outputChannels, 0);
-	audioIO.device(dev);
+    app.initAudio(44100, BLOCK_SIZE, 60, -1,
+                  0);
+    // Use this for sphere
+//    app.initAudio(44100, BLOCK_SIZE, -1, -1,
+//                  AudioDevice("ECHO X5").id());
 
-
-    panner->prepare(audioIO);
-    audioIO.open();
-	audioIO.start();
-
-	MyApp().start();
-	getchar();
-
-	audioIO.stop();
-	delete mPeaks;
-
-	return 0;
+    app.start();
+    return 0;
 }
 
 

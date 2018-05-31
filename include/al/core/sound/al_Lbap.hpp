@@ -47,8 +47,7 @@
 #include "al/core/sound/al_AudioScene.hpp"
 #include "al/core/sound/al_Vbap.hpp"
 
-#define M_2PI 6.283185307179586
-#define DEG_2_RAD_SCALE 229.1831180523293
+#define RAD_2_DEG_SCALE 57.29577951308232  // 360/(2*pi)
 
 namespace al{
 
@@ -132,7 +131,7 @@ public:
         vec = srcRot.rotate(vec);
         vec = Vec4d(-vec.z, -vec.x, vec.y);
 
-        float elev = DEG_2_RAD_SCALE * atan(vec.z/sqrt(vec.x * vec.x + vec.y * vec.y));
+        float elev = RAD_2_DEG_SCALE * atan(vec.z/sqrt(vec.x * vec.x + vec.y * vec.y));
 
         auto it = mRings.begin();
         while (it != mRings.end() && it->elevation > elev) {
