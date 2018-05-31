@@ -58,8 +58,8 @@ public:
 	unsigned int deviceChannel;	///< Index in the output device channels array
 	float gain;					///< Gain of speaker
 	float azimuth;				///< Angle from forward to left vector
-    int group;					///< Group identifier
 	float elevation;			///< Angle from forward-right plane to up vector
+    int group;					///< Group identifier
 	float radius;				///< Distance from center of listening space
 
 	/// @param[in] deviceChan		audio device output channel
@@ -71,7 +71,7 @@ public:
 	:	deviceChannel(deviceChan), gain(gain), azimuth(az), elevation(el), group(group), radius(radius)
 	{}
 
-	/// Set position from Cartesian coordinate
+	/// Get position in Cartesian coordinate (in audio space)
 	template <class T>
 	Speaker& posCart(T * xyz){
 		using namespace std;
