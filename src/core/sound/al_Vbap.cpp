@@ -433,33 +433,34 @@ void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose, const float 
 			auto it3 = mPhantomChannels.find(triple.s3Chan);
 
 			for(int i = 0; i < numFrames; ++i){
+				float sample = samples[i];
 				if (it1 != mPhantomChannels.end()) { // vertex 1 is phantom
 					float splitGain = gains[0] /mPhantomChannels.size();
 					float splitGainSQ = splitGain * splitGain;
 					for(auto const &element : it1->second) { // iterate across all assigned speakers
-						io.out(element, i) += samples[i]*splitGainSQ;
+						io.out(element, i) += sample*splitGainSQ;
 					}
 				} else {
-					outBuff1[i] += samples[i]*gains[0];
+					outBuff1[i] += sample*gains[0];
 				}
 				if (it2 != mPhantomChannels.end()) { // vertex 2 is phantom
 					float splitGain = gains[1] /mPhantomChannels.size();
 					float splitGainSQ = splitGain * splitGain;
 					for(auto const &element : it2->second) {
-						io.out(element, i) += samples[i]*splitGainSQ;
+						io.out(element, i) += sample*splitGainSQ;
 					}
 				} else {
-					outBuff2[i] += samples[i]*gains[1];
+					outBuff2[i] += sample*gains[1];
 				}
 				if(mIs3D){
 					if (it3 != mPhantomChannels.end()) {
 						float splitGain = gains[2] /mPhantomChannels.size();
 						float splitGainSQ = splitGain * splitGain;
 						for(auto const &element : it3->second) {
-							io.out(element, i) += samples[i]*splitGainSQ;
+							io.out(element, i) += sample*splitGainSQ;
 						}
 					} else {
-						outBuff3[i] += samples[i]*gains[2];
+						outBuff3[i] += sample*gains[2];
 					}
 				}
 

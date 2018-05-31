@@ -47,6 +47,9 @@
 #include "al/core/sound/al_AudioScene.hpp"
 #include "al/core/sound/al_Vbap.hpp"
 
+#define M_2PI 6.283185307179586
+#define DEG_2_RAD_SCALE 229.1831180523293
+
 namespace al{
 
 class LdapRing {
@@ -129,7 +132,7 @@ public:
         vec = srcRot.rotate(vec);
         vec = Vec4d(-vec.z, -vec.x, vec.y);
 
-        float elev = 360.0 * atan(vec.z/sqrt(vec.x * vec.x + vec.y * vec.y))/(2.0 * M_PI);
+        float elev = DEG_2_RAD_SCALE * atan(vec.z/sqrt(vec.x * vec.x + vec.y * vec.y));
 
         auto it = mRings.begin();
         while (it != mRings.end() && it->elevation > elev) {
@@ -141,9 +144,9 @@ public:
             mRings.back().vbap->renderBuffer(io, listeningPose, samples, numFrames);
         } else { // Between inner rings
             auto topRingIt = it - 1; // top ring is previous ring
-            float ringsAngle = topRingIt->elevation - it->elevation; // elevation angle between layers
-            float gainTop = sin(0.5 * M_PI *(elev - it->elevation)/ringsAngle);
-            float gainBottom = cos(0.5 * M_PI *(elev - it->elevation)/ringsAngle);
+            float fraction = (elev - it->elevation)/(topRingIt->elevation - it->elevation); // elevation angle between layers
+            float gainTop = sin(M_PI_2 * fraction);
+            float gainBottom = cos(M_PI_2 *fraction);
             for (int i = 0; i < bufferSize; i++) {
                 buffer[i] = samples [i] * gainTop;
                 buffer[i + bufferSize] = samples [i] * gainBottom;

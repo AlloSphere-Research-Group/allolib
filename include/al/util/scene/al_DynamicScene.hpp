@@ -196,7 +196,7 @@ public:
 
     DistAtten<> &distanceAttenuation() {return mDistAtten;}
 
-    void print(ostream &stream) {
+    void print(ostream &stream = std::cout) {
 
         stream << "Distance Attenuation:";
         const char* s = nullptr;
@@ -212,6 +212,8 @@ public:
         stream << "Near clip: " << mDistAtten.nearClip()
                   << "   Far clip: " << mDistAtten.farClip() << std::endl;
         stream << "Far bias: " << mDistAtten.farBias() << std::endl;
+
+        mSpatializer->print(stream);
     }
 
 
