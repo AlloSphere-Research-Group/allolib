@@ -1,3 +1,6 @@
+
+#include "catch.hpp"
+
 #include <math.h>
 
 #include "al/util/al_Spherical.hpp"

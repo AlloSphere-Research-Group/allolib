@@ -1,5 +1,12 @@
 set (test_src
     src/main.cpp
+    src/test_audio.cpp
+    src/test_midi.cpp
+    src/test_math.cpp
+    src/test_mathSpherical.cpp
+    src/test_dynamicScene.cpp
+    src/test_lbap.cpp
+    src/test_vbap.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/catch)

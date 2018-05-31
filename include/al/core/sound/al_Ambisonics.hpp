@@ -48,6 +48,8 @@
 */
 
 #include <stdio.h>
+#include <iostream>
+
 #include "al/core/sound/al_AudioScene.hpp"
 
 //#define MAX_ORDER 3
@@ -119,6 +121,9 @@ public:
 	/// Returns total number of Ambisonic domain (B-format) channels
 	int channels() const { return mChannels; }
 
+    /// Set the number of dimensions
+	void dim(int dim);
+
 	/// Set the order
 	void order(int order);
 
@@ -189,7 +194,7 @@ public:
 	/// Returns number of speakers
 	int numSpeakers() const { return mNumSpeakers; }
 
-	void print(FILE * fp = stdout, const char * append = "\n") const;
+	void print(std::ostream &stream) const;
 
 
 	/// Set decoding algorithm
@@ -204,13 +209,14 @@ public:
 	//void zero();					///< Zeroes out internal ambisonic frame.
 
 	void setSpeakers(Speakers *spkrs);
+    void setSpeakers(Speakers &spkrs);
 
 //	float * azimuths();				///< Returns pointer to speaker azimuths.
 //	float * elevations();			///< Returns pointer to speaker elevations.
 //	float * frame() const;			///< Returns pointer to ambisonic channel frame used by decode(int)
 
 	/// Get speaker
-	Speaker& speaker(int num) { return (*mSpeakers)[num]; }
+	Speaker& speaker(int num) { return mSpeakers[num]; }
 
 	virtual void onChannelsChange();
 
@@ -220,7 +226,7 @@ protected:
 	float * mDecodeMatrix;		// deccoding matrix for each ambi channel & speaker
 								// cols are channels and rows are speakers
 	float mWOrder[5];			// weights for each order
-    Speakers* mSpeakers;
+    Speakers mSpeakers;
     //float * mPositions;		// speakers' azimuths + elevations
 	//float * mFrame;			// an ambisonic channel frame used for decode(int)
 
@@ -277,9 +283,15 @@ public:
 	/// Set spherical direction of source to be encoded
 	void direction(float az, float el);
 
+    /// Set Cartesian direction of source to be encoded
+	/// direction vector must be normalized
+	void direction(Vec3f direction);
+
 	/// Set Cartesian direction of source to be encoded
 	/// (x,y,z unit vector in the listener's coordinate frame)
 	void direction(float x, float y, float z);
+
+    void print(std::ostream &stream);
 };
 
 
@@ -292,6 +304,8 @@ public:
 	AmbisonicsSpatializer(SpeakerLayout &sl, int dim = 2, int order = 1, int flavor=1);
 
 	void zeroAmbi();
+
+    void configure(int dim, int order, int flavor);
 
 	float * ambiChans(unsigned channel=0);
 
@@ -316,6 +330,8 @@ public:
 	                          const int& frameIndex) override;
 
 	virtual void finalize(AudioIOData& io) override;
+
+    virtual void print(std::ostream& stream = std::cout) override;
 
 private:
 	AmbiDecode mDecoder;
@@ -418,7 +434,13 @@ inline void AmbiEncode::direction(float az, float el){
 	AmbiBase::encodeWeightsFuMa(mWeights, mDim, mOrder, az, el);
 }
 
+inline void AmbiEncode::direction(Vec3f vector)
+{
+	AmbiBase::encodeWeightsFuMa(mWeights, mDim, mOrder, vector.x,vector.y,vector.z);
+}
+
 inline void AmbiEncode::direction(float x, float y, float z){
+
 	AmbiBase::encodeWeightsFuMa(mWeights, mDim, mOrder, x,y,z);
 }
 

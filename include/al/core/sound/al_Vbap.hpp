@@ -82,8 +82,16 @@ struct SpeakerTriple{
 class Vbap : public Spatializer{
 public:
 
+    typedef enum {
+        KEEP_SAME_ELEVATION = 0x1, // Don't discard triplets that have the same elevation
+    } VbapOptions;
+
 	/// @param[in] sl	A speaker layout
 	Vbap(const SpeakerLayout &sl, bool is3D = false);
+
+    void setOptions(VbapOptions options) {mOptions = options;}
+
+    virtual void compile() override;
 
 	///
 	/// \brief Make an existing channel a phantom channel
@@ -98,10 +106,15 @@ public:
 	///
 	void makePhantomChannel(int channelIndex, std::vector<int> assignedOutputs);
 
+    /// Set whether VBAP will use 3D (triangles) or 2D (speaker pairs)
+    /// You must call compile after this function to ensure triples are
+    /// recomputed
+    void set3D(bool is3D) {mIs3D = is3D;}
+
 	virtual void renderSample(AudioIOData& io, const Pose& reldir, const float& sample, const int& frameIndex) override;
 	virtual void renderBuffer(AudioIOData& io, const Pose& reldir, const float *samples, const int& numFrames) override;
 
-	virtual void print() override;
+	virtual void print(std::ostream &stream = std::cout) override;
 
 	/// Manually add a triple from indeces to speakers
 	void makeTriple(int s1, int s2, int s3 = -1);
@@ -115,8 +128,7 @@ private:
 	std::map<int, std::vector<int> > mPhantomChannels;
 //	Listener* mListener;
 	bool mIs3D;
-
-	//	void setIs3D(bool is3D){mIs3D = is3D;}
+    VbapOptions mOptions;
 
 	Vec3d computeGains(const Vec3d& vecA, const SpeakerTriple& speak);
 

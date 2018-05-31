@@ -83,17 +83,23 @@ public:
 
     virtual ~DynamicScene () {}
 
+    /// Set a Spatializar to use. If not called, the default is stereo panning
+    /// over two speakers.
     template<class TSpatializer>
-    void setSpatializer(SpeakerLayout &sl) {
+    shared_ptr<TSpatializer> setSpatializer(SpeakerLayout &sl) {
         mSpatializer = make_shared<TSpatializer>(sl);
         mSpatializer->compile();
+        return static_pointer_cast<TSpatializer>(mSpatializer);
     }
 
-    void configureAudio(AudioIOData &io) {
+    /// Prepares internals for run. This function must be called before any
+    /// render() calls
+    void prepare(AudioIOData &io) {
         internalAudioIO.framesPerBuffer(io.framesPerBuffer());
         internalAudioIO.channelsIn(io.channelsIn());
         internalAudioIO.channelsOut(io.channelsOut());
         internalAudioIO.channelsBus(io.channelsBus());
+        mSpatializer->prepare(io);
     }
 
     virtual void cleanup() {
@@ -190,9 +196,9 @@ public:
 
     DistAtten<> &distanceAttenuation() {return mDistAtten;}
 
-    void print() {
+    void print(ostream &stream) {
 
-        std::cout << "Distance Attenuation:";
+        stream << "Distance Attenuation:";
         const char* s = nullptr;
 #define PROCESS_VAL(p) case(p): s = #p; break;
         switch(mDistAtten.law()){
@@ -202,10 +208,10 @@ public:
         PROCESS_VAL(ATTEN_INVERSE_SQUARE);
         }
 #undef PROCESS_VAL
-        std::cout << "Law: " << s << std::endl;
-        std::cout << "Near clip: " << mDistAtten.nearClip()
+        stream << "Law: " << s << std::endl;
+        stream << "Near clip: " << mDistAtten.nearClip()
                   << "   Far clip: " << mDistAtten.farClip() << std::endl;
-        std::cout << "Far bias: " << mDistAtten.farBias() << std::endl;
+        stream << "Far bias: " << mDistAtten.farBias() << std::endl;
     }
 
 

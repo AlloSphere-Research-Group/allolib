@@ -71,7 +71,7 @@ public:
 	///A denser speaker layout my benefit from a high focus > 1, and a sparse layout may benefit from focus < 1
 	void setFocus(float focus) { mFocus = focus; }
 
-	void print() override;
+	void print(std::ostream &stream) override;
 
 private:
 //	Listener * mListener;

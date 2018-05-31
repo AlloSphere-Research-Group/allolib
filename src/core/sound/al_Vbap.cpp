@@ -56,20 +56,6 @@ bool SpeakerTriple::loadVectors(const std::vector<Speaker>& spkrs){
 Vbap::Vbap(const SpeakerLayout &sl, bool is3D)
     :	Spatializer(sl), mIs3D(is3D)
 {
-	//Check if 3D...
-	if(mIs3D){
-		printf("Finding triplets\n");
-		findSpeakerTriplets(mSpeakers);
-	}
-	else{
-		printf("Finding pairs\n");
-		findSpeakerPairs(mSpeakers);
-	}
-
-	if (mTriplets.size() == 0 ){
-		printf("No SpeakerSets found. Check mode setting or speaker layout.\n");
-		throw -1;
-	}
 
 }
 
@@ -115,7 +101,7 @@ void Vbap::findSpeakerPairs(const std::vector<Speaker>& spkrs){
 	// Sort speakers into the map
 	for (unsigned i = 1; i < numSpeakers; i++) {
 		// Only sort speakers that have elevation == 0. Ignore all other.
-		if (spkrs[i].elevation == 0) {
+//		if (spkrs[i].elevation == 0) {
 
 			indexAngle = speakerAngles[i];
 			index = speakerMapping[i];
@@ -129,7 +115,7 @@ void Vbap::findSpeakerPairs(const std::vector<Speaker>& spkrs){
 			}
 			speakerAngles[j] = indexAngle;
 			speakerMapping[j] = index;
-		}
+//		}
 	}
 
 	// Add speaker-pairs
@@ -185,22 +171,23 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker>& spkrs){
 	printf("Speaker-count=%d, Initial triplet-count=%d\n",numSpeakers,(unsigned)triplets.size());
 
 	//RemoveTriangles that have equal elevation
-	int equalElevCounter = 0;
-	for(std::list<SpeakerTriple>::iterator it = triplets.begin(); it != triplets.end();){
-		SpeakerTriple trip = (*it);
-		double a = trip.s1Vec[2];
-		double b = trip.s2Vec[2];
-		double c = trip.s3Vec[2];
+    if (! (mOptions & KEEP_SAME_ELEVATION)) {
+        int equalElevCounter = 0;
+        for(std::list<SpeakerTriple>::iterator it = triplets.begin(); it != triplets.end();){
+            SpeakerTriple trip = (*it);
+            double a = trip.s1Vec[2];
+            double b = trip.s2Vec[2];
+            double c = trip.s3Vec[2];
 
-		if((a==b) && (a == c)){
-			it =  triplets.erase(it);
-			equalElevCounter++;
+            if((a==b) && (a == c)){
+                it =  triplets.erase(it);
+                equalElevCounter++;
 
-		}else{
-			++it;
-		}
-	}
-	printf("Tris removed because equal elev %i\n",equalElevCounter);
+            }else{
+                ++it;
+            }
+        }
+        printf("Tris removed because equal elev %i\n",equalElevCounter);
 
 	//Remove Sides with equal elevation that have a speaker inbetween them
 	std::list<SpeakerTriple>::iterator itA = triplets.begin();
@@ -248,6 +235,8 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker>& spkrs){
 		++itA;
 	}
 	printf("Tris removed because equal elev with spk btw %i\n",equalElevBtwCounter);
+    }
+
 
 
 	// remove too narrow triples
@@ -417,7 +406,7 @@ void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose, const float 
 	//Rotate vector according to listener-rotation
 	Quatd srcRot = listeningPose.quat();
 	vec = srcRot.rotate(vec);
-	vec = Vec4d(vec.x, vec.z, vec.y);
+	vec = Vec4d(-vec.z, -vec.x, vec.y);
 
 	//Silent by default
 	Vec3d gains;
@@ -560,10 +549,16 @@ void Vbap::renderSample(AudioIOData &io, const Pose &listeningPose, const float 
 	}
 }
 
-void Vbap::print() {
-	printf("Number of Triplets: %d\n", (int) mTriplets.size());
+void Vbap::print(std::ostream &stream) {
+	stream << "Number of Groups:" << mTriplets.size() << std::endl;
 	for (unsigned i = 0; i < mTriplets.size(); i++) {
-		printf("Triple #%d: %d,%d,%d \n",i,mTriplets[i].s1Chan,mTriplets[i].s2Chan,mTriplets[i].s3Chan);
+		stream << "Group #" << i << ":"
+               << mTriplets[i].s1Chan << ":" << mTriplets[i].s1Vec << ","
+               << mTriplets[i].s2Chan << ":" << mTriplets[i].s2Vec;
+        if (mIs3D) {
+            stream  << "," << mTriplets[i].s3Chan << ":" << mTriplets[i].s3Vec;
+        }
+        stream << std::endl;
 	}
 }
 
@@ -576,6 +571,24 @@ void Vbap::makeTriple(int s1, int s2, int s3)
 	triple.loadVectors(mSpeakers);
 	addTriple(triple);
 }
+
+void Vbap::compile() {
+    //Check if 3D...
+	if(mIs3D){
+		printf("Finding triplets\n");
+		findSpeakerTriplets(mSpeakers);
+	}
+	else{
+		printf("Finding pairs\n");
+		findSpeakerPairs(mSpeakers);
+	}
+
+	if (mTriplets.size() == 0 ){
+		printf("No SpeakerSets found. Check mode setting or speaker layout.\n");
+		throw -1;
+	}
+}
+
 std::vector<SpeakerTriple> Vbap::triplets() const
 {
 	return mTriplets;

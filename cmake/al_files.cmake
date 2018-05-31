@@ -47,6 +47,7 @@ set(core_headers
   include/al/core/sound/al_Biquad.hpp
   include/al/core/sound/al_Crossover.hpp
   include/al/core/sound/al_Dbap.hpp
+  include/al/core/sound/al_Lbap.hpp
   include/al/core/sound/al_Reverb.hpp
   include/al/core/sound/al_Speaker.hpp
   include/al/core/sound/al_StereoPanner.hpp

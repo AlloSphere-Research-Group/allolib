@@ -1,4 +1,9 @@
+
+#include "catch.hpp"
+
 #include "al/core/io/al_AudioIO.hpp"
+#include "al/core/system/al_Time.hpp"
+
 #include <cmath>
 
 using namespace al;
@@ -9,12 +14,12 @@ TEST_CASE( "Audio Device Enum" ) {
 
 static void callback(AudioIOData &io) {
     static double phase = 0.0;
-    static double phaseInc = M_2PI * 440.0 / io.framesPerSecond();
+    static double phaseInc = 2.0 * M_PI * 440.0 / io.framesPerSecond();
     while (io()) {
         io.out(0) = std::sin(phase);
         phase += phaseInc;
-        if (phase > M_2PI) {
-            phase -= M_2PI;
+        if (phase > 2.0 * M_PI) {
+            phase -= 2.0 * M_PI;
         }
     }
 }

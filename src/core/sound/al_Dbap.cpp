@@ -60,8 +60,8 @@ void Dbap::renderBuffer(AudioIOData &io, const Pose &listeningPose, const float 
     }
 }
 
-void Dbap::print() {
-	printf("Using DBAP Panning- need to add panner info for print function\n");
+void Dbap::print(std::ostream &stream) {
+    stream << "Using DBAP Panning- need to add panner info for print function" << std::endl;
 }
 
 } // al::

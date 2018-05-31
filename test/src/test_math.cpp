@@ -1,5 +1,7 @@
 #include <math.h>
 
+#include "catch.hpp"
+
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/math/al_Quat.hpp"
 #include "al/core/math/al_Mat.hpp"

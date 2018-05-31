@@ -378,7 +378,7 @@ public:
 	virtual void finalize(AudioIOData& io){}
 
 	/// Print out information about spatializer
-	virtual void print(){}
+	virtual void print(std::ostream& stream = std::cout){}
 
 	/// Get number of speakers
 	int numSpeakers() const { return mSpeakers.size(); }

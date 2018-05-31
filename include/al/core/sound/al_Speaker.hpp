@@ -58,6 +58,7 @@ public:
 	unsigned int deviceChannel;	///< Index in the output device channels array
 	float gain;					///< Gain of speaker
 	float azimuth;				///< Angle from forward to left vector
+    int group;					///< Group identifier
 	float elevation;			///< Angle from forward-right plane to up vector
 	float radius;				///< Distance from center of listening space
 
@@ -66,8 +67,8 @@ public:
 	/// @param[in] el				elevation of speaker
 	/// @param[in] radius			radius of speaker
 	/// @param[in] gain				gain of speaker
-	Speaker(int deviceChan=0, float az=0.f, float el=0.f, float radius=1.f, float gain=1.f)
-	:	deviceChannel(deviceChan), gain(gain), azimuth(az), elevation(el), radius(radius)
+	Speaker(int deviceChan=0, float az=0.f, float el=0.f, int group = 0, float radius=1.f, float gain=1.f)
+	:	deviceChannel(deviceChan), gain(gain), azimuth(az), elevation(el), group(group), radius(radius)
 	{}
 
 	/// Set position from Cartesian coordinate
@@ -77,8 +78,8 @@ public:
 		float elr = toRad(elevation);
 		float azr = toRad(azimuth);
 		float cosel = cos(elr);
-		xyz[0] = sin(azr) * cosel * radius;
-		xyz[1] = cos(azr) * cosel * radius;
+		xyz[0] = cos(azr) * cosel * radius;
+		xyz[1] = sin(azr) * cosel * radius;
 		xyz[2] = sin(elr) * radius;
 		return *this;
 	}
@@ -98,8 +99,8 @@ public:
 	Vec3d vec() const {
 		//TODO doxygen style commenting on coordinates like ambisonics
 		double cosel = cos(toRad(elevation));
-		double x = sin(toRad(azimuth)) * cosel * radius;
-		double y = cos(toRad(azimuth)) * cosel * radius;
+		double x = cos(toRad(azimuth)) * cosel * radius;
+		double y = sin(toRad(azimuth)) * cosel * radius;
 		double z = sin(toRad(elevation)) * radius;
 		//Ryan: the standard conversions assume +z is up, these are correct for allocore
 
