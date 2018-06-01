@@ -69,9 +69,9 @@ public:
         mElapsedTime += dt;
         float tta = mElapsedTime * speedMult * 2.0 * M_PI;
 
-        float x = 5.0*cos(tta);
-        float y = 3.0*sin(2.8 * tta);
-        float z = 5.0*sin(tta);
+        float x = 6.0*cos(tta);
+        float y = 5.0*sin(2.8 * tta);
+        float z = 6.0*sin(tta);
 
         srcpos = Vec3d(x,y,z);
     }
@@ -102,7 +102,7 @@ public:
         Mesh lineMesh;
         lineMesh.vertex(0.0,0.0, 0.0);
         lineMesh.vertex(srcPosDraw.x,0.0, srcPosDraw.z);
-        lineMesh.vertex(srcPosDraw.x,srcPosDraw.y, srcPosDraw.z);
+        lineMesh.vertex(srcPosDraw);
         lineMesh.index(0);
         lineMesh.index(1);
         lineMesh.index(1);
@@ -114,10 +114,10 @@ public:
 
         //Draw the source
         g.pushMatrix();
+        g.polygonFill();
         g.translate(srcPosDraw);
         g.scale(0.8);
-        g.color(1,1, 1, 0.5);
-        g.polygonFill();
+        g.color(0.4,0.4, 0.4, 0.5);
         g.draw(mPoly);
         g.popMatrix();
     }

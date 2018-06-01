@@ -149,23 +149,24 @@ TEST_CASE ( "VBAP 3D Allosphere")
     Vbap vbapPanner(sl);
 
     vbapPanner.set3D(true);
-    vbapPanner.compile();
-//    vbapPanner.print();
+//    vbapPanner.compile();
+////    vbapPanner.print();
 
-    AudioIOData audioData;
-    audioData.framesPerBuffer(fpb);
-    audioData.framesPerSecond(44100);
-    audioData.channelsIn(0);
-    audioData.channelsOut(sl.numSpeakers());
+//    AudioIOData audioData;
+//    audioData.framesPerBuffer(fpb);
+//    audioData.framesPerSecond(44100);
+//    audioData.channelsIn(0);
+//    audioData.channelsOut(sl.numSpeakers());
 
-    float samples[fpb];
-    for (int i = 0; i < fpb; i++) {
-        samples[i] = i + 0.5;
-    }
+//    float samples[fpb];
+//    for (int i = 0; i < fpb; i++) {
+//        samples[i] = i + 0.5;
+//    }
 
-    Pose pose;
-    pose.pos(0,4*tan(M_PI/6.0),-4); // Center
-    audioData.zeroOut();
+//    Pose pose;
+//    pose.pos(0,4*tan(M_PI/6.0),-4); // Center
+//    audioData.zeroOut();
+
 //    vbapPanner.renderBuffer(audioData, pose, samples, fpb);
 //    for (int i = 0; i < fpb; i++) {
 //        REQUIRE(almostEqual(audioData.out(0,i) , (i + 0.5) * sin(M_PI*0.25)));

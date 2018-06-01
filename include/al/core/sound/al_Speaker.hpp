@@ -95,7 +95,7 @@ public:
 
 	}
 
-	/// Get position as Cartesian coordinate
+	/// Get position as Cartesian coordinate (in audio space)
 	Vec3d vec() const {
 		//TODO doxygen style commenting on coordinates like ambisonics
 		double cosel = cos(toRad(elevation));
@@ -108,6 +108,21 @@ public:
 		//		double y = sin(toRad(elevation)) * radius;
 		//        double z = -1*cos(toRad(azimuth)) * cosel * radius;
 		return Vec3d(x,y,z);
+	}
+
+    /// Get position as Cartesian coordinate (in graphics space)
+	Vec3d vecGraphics() const {
+		//TODO doxygen style commenting on coordinates like ambisonics
+		double cosel = cos(toRad(elevation));
+		double x = cos(toRad(azimuth)) * cosel * radius;
+		double y = sin(toRad(azimuth)) * cosel * radius;
+		double z = sin(toRad(elevation)) * radius;
+		//Ryan: the standard conversions assume +z is up, these are correct for allocore
+
+		//        double x = sin(toRad(azimuth)) * cosel * radius;
+		//		double y = sin(toRad(elevation)) * radius;
+		//        double z = -1*cos(toRad(azimuth)) * cosel * radius;
+		return Vec3d(-y,z,-x);
 	}
 
 	static double toRad(double d){ return d*M_PI/180.; }
