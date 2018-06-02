@@ -106,7 +106,11 @@ private:
 
 	std::string mRootPath;
 	std::string mNodeJsPath;
+#ifndef AL_WINDOWS
 	pid_t  mPid;
+#else
+	// TODO: Windows equivalent
+#endif
 	int p_stdin[2], p_stdout[2];
 
 	int mInterfaceSendPort; // Interface.js sends OSC on this port
