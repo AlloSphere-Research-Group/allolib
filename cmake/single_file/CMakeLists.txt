@@ -25,6 +25,7 @@ if (IS_DIRECTORY AL_APP_FILE)
   message(FATAL_ERROR "\n[!] pass file to this cmake script\n")
 endif ()
 
+
 if (IS_ABSOLUTE ${AL_APP_FILE})
   get_filename_component(file_full_path ${AL_APP_FILE} ABSOLUTE)
 else ()
@@ -42,6 +43,17 @@ if(EXISTS "${app_path}/flags.cmake")
   endif()
   include(${app_path}/flags.cmake)
 endif()
+
+# TODO find cuttlebone
+set(CUTTLEBONE_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/../../cuttlebone")
+if (EXISTS ${CUTTLEBONE_SRC_DIR})
+    add_subdirectory(${CUTTLEBONE_SRC_DIR} build)
+    list(APPEND app_include_dirs ${CUTTLEBONE_SRC_DIR})
+    list(APPEND app_link_libs cuttlebone)
+else()
+    message("-- Cuttlebone not found. Not building Cuttlebone.")
+endif()
+
 
 if (AL_VERBOSE_OUTPUT)
 	message("binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
