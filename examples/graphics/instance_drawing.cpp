@@ -14,14 +14,23 @@ uniform mat4 P;
 uniform float scale;
 
 layout (location = 0) in vec3 position;
+// attibute at location 1 will be set to have
+// "attribute divisor = 1" which means for given buffer for attibute 1,
+// index for reading that buffer will increase per-instance, not per-vertex
+// divisor = 0 is default value and means per-vertex increase
 layout (location = 1) in vec4 offset; // has w = 1
 
 out float t;
 
 void main()
 {
+  // to multiply position vector with matrices,
+  // 4th component must be 1 (homogeneous coord)
   vec4 p = vec4(scale * position, 0.0) + offset;
   gl_Position = P * MV * p;
+  // we also have access to index of instance,
+  // for example, when drawing 100 instances,
+  // `gl_InstanceID goes 0 to 99
   t = float(gl_InstanceID) / (100000.0 - 1.0);
 }
 )";
@@ -94,19 +103,23 @@ struct MyApp : App
     addTetrahedron(mesh);
     mesh.update();
 
-    buffer.bufferType(GL_ARRAY_BUFFER);
-    buffer.usage(GL_DYNAMIC_DRAW);
+    buffer.bufferType(GL_ARRAY_BUFFER); // array buffer is used for attributes
+    buffer.usage(GL_DYNAMIC_DRAW); // dynamic: changes very frequently
+                                   // draw: used for drawing
     buffer.create();
     positions.resize(num_instances);
     shader_instancing.compile(instancing_vert, instancing_frag);
 
     randomize();
-
+    
+    // attribute 0 will be the vertex positions buffer in VAOMesh object
+    // so per-instance data will be attached at attribute 1
     auto& vao = mesh.vao();
     vao.bind();
     vao.enableAttrib(1);
     vao.attribPointer(1, buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribDivisor(1, 1);
+    // and specified to have attibute divisor 1
+    glVertexAttribDivisor(1, 1); // should be called with target vao bound
   }
 
   void onDraw(Graphics& g) override {
@@ -130,10 +143,13 @@ struct MyApp : App
       z = 20 * sin(wz * t + pz + time);
       positions[i].set(x, y, z, 1);
     }
+    // send per-instance data to buffer
+    // buffer was attached aas attribute in onCreate
+    // so if buffer gets updated vao will use it automatically
     buffer.bind();
     buffer.data(positions.size() * 4 * sizeof(float), positions.data());
-
-LABEL_DRAW:
+  
+    LABEL_DRAW:
     g.clear(0);
     g.polygonMode(Graphics::LINE);
     g.depthTesting(false);
@@ -143,15 +159,23 @@ LABEL_DRAW:
     if (USE_INSTANCING) {
       g.shader(shader_instancing);
       g.shader().uniform("scale", scale);
+      // Graphics::update: send MV, P matrices to shader
+      // in normal cases Graphics::draw calls this inside
+      // but here Graphics::draw is not used and raw OpenGL calls are
+      // so Graphics::update needs to be called explicitly
       g.update();
-      auto& vao = mesh.vao();
-      vao.bind();
+      // just like above, when using Graphics::draw, given vao gets bound
+      // but here it needs to be done manually
+      mesh.vao().bind();
       if (mesh.indices().size()){
+        // when using index buffer, remember to bind it too
         mesh.indexBuffer().bind();
-        glDrawElementsInstanced(GL_TRIANGLES, mesh.indices().size(), GL_UNSIGNED_INT, 0, positions.size());
+        glDrawElementsInstanced(GL_TRIANGLES, mesh.indices().size(),
+                                GL_UNSIGNED_INT, 0, positions.size());
       }
       else {
-        glDrawArraysInstanced(GL_TRIANGLES, 0, mesh.vertices().size(), positions.size());
+        glDrawArraysInstanced(GL_TRIANGLES, 0, mesh.vertices().size(),
+                              positions.size());
       }
     }
     else {
