@@ -105,6 +105,8 @@ public:
   }
 
   ~DistributedApp() {
+      mMaker.stop();
+      mTaker.stop();
 #ifdef AL_BUILD_MPI
       MPI_Finalize();
 #endif
