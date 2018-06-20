@@ -105,8 +105,11 @@ public:
   }
 
   ~DistributedApp() {
-      mMaker.stop();
-      mTaker.stop();
+      if (role() == ROLE_SIMULATOR) {
+          mMaker.stop();
+      } else {
+          mTaker.stop();
+      }
 #ifdef AL_BUILD_MPI
       MPI_Finalize();
 #endif
