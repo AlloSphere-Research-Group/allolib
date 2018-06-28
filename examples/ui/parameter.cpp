@@ -32,7 +32,13 @@ int main(int argc, char *argv[])
 
   // Set the function to be called whenever the value of the "amp"
   // parameter changes
-  amp.setProcessingCallback(ampCallback, nullptr);
+  // amp.setProcessingCallback(ampCallback, nullptr);
+  amp.setProcessingCallback([&](float ampdb){
+    float amp = powf(10.0, ampdb / 20.0);
+    cout << "`ampCallback` called. converting " << ampdb << "db to " << amp
+         << endl;
+    return amp;
+  });
 
   ParameterServer paramServer("127.0.0.1", 9010);
   // You can register parameters through the registerParameter() function

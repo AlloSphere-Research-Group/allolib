@@ -90,12 +90,12 @@ void Parameter::setNoCalls(float value, void *blockReceiver)
 	if (value > mMax) value = mMax;
 	if (value < mMin) value = mMin;
 	if (mProcessCallback) {
-		value = mProcessCallback(value, mProcessUdata);
+		value = (*mProcessCallback)(value); //, mProcessUdata);
 	}
 	if (blockReceiver) {
 		for(size_t i = 0; i < mCallbacks.size(); ++i) {
 			if (mCallbacks[i]) {
-				mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
+				(*mCallbacks[i])(value); //, this, mCallbackUdata[i], blockReceiver);
 			}
 		}
 	}
@@ -108,11 +108,11 @@ void Parameter::set(float value)
 	if (value > mMax) value = mMax;
 	if (value < mMin) value = mMin;
 	if (mProcessCallback) {
-		value = mProcessCallback(value, mProcessUdata);
-        }
+		value = (*mProcessCallback)(value); //, mProcessUdata);
+    }
 	for(size_t i = 0; i < mCallbacks.size(); ++i) {
 		if (mCallbacks[i]) {
-			mCallbacks[i](value, this, mCallbackUdata[i], NULL);
+			(*mCallbacks[i])(value); //, this, mCallbackUdata[i], NULL);
 		}
 	}
         mFloatValue = value;
@@ -168,13 +168,7 @@ ParameterBool::ParameterBool(std::string parameterName, std::string Group,
 ParameterServer::ParameterServer(std::string oscAddress, int oscPort)
     : mServer(nullptr)
 {
-	mServer = new osc::Recv(oscPort, oscAddress.c_str(), 0.001); // Is 1ms wait OK?
-	if (mServer) {
-		mServer->handler(*this);
-		mServer->start();
-	} else {
-		std::cout << "Error starting OSC server." << std::endl;
-	}
+	listen(oscPort, oscAddress);
 }
 
 ParameterServer::~ParameterServer()
@@ -187,14 +181,31 @@ ParameterServer::~ParameterServer()
 	}
 }
 
+void ParameterServer::listen(int oscPort, std::string oscAddress)
+{
+	if (mServer) {
+		mServer->stop();
+		delete mServer;
+		mServer = nullptr;
+	}
+	mServer = new osc::Recv(oscPort, oscAddress.c_str(), 0.001); // Is 1ms wait OK?
+	if (mServer) {
+		mServer->handler(*this);
+		mServer->start();
+	} else {
+		std::cout << "Error starting OSC server." << std::endl;
+	}
+}
+
 ParameterServer &ParameterServer::registerParameter(Parameter &param)
 {
 	mParameterLock.lock();
 	mParameters.push_back(&param);
 	mParameterLock.unlock();
 	mListenerLock.lock();
-	param.registerChangeCallback(ParameterServer::changeCallback,
-	                           (void *) this);
+	param.registerChangeCallback([&](float value){
+		notifyListeners(param.getFullAddress(), value);
+	});
 	mListenerLock.unlock();
 	return *this;
 }
@@ -216,8 +227,9 @@ ParameterServer &ParameterServer::registerParameter(ParameterString &param)
 	mStringParameters.push_back(&param);
 	mParameterLock.unlock();
 	mListenerLock.lock();
-	param.registerChangeCallback(ParameterServer::changeStringCallback,
-	                             (void *) this);
+	param.registerChangeCallback([&](std::string value){
+		notifyListeners(param.getFullAddress(), value);
+	});
 	mListenerLock.unlock();
 	return *this;
 }
@@ -240,8 +252,9 @@ ParameterServer &ParameterServer::registerParameter(ParameterVec3 &param)
 	mVec3Parameters.push_back(&param);
 	mParameterLock.unlock();
 	mListenerLock.lock();
-	param.registerChangeCallback(ParameterServer::changeVec3Callback,
-	                             (void *) this);
+	param.registerChangeCallback([&](Vec3f value){
+		notifyListeners(param.getFullAddress(), value);
+	});
 	mListenerLock.unlock();
 	return *this;
 }
@@ -264,8 +277,9 @@ ParameterServer &ParameterServer::registerParameter(ParameterPose &param)
     mPoseParameters.push_back(&param);
     mParameterLock.unlock();
     mListenerLock.lock();
-    param.registerChangeCallback(ParameterServer::changePoseCallback,
-                                 (void *) this);
+	param.registerChangeCallback([&](Pose value){
+		notifyListeners(param.getFullAddress(), value);
+	});
     mListenerLock.unlock();
     return *this;
 
@@ -308,7 +322,7 @@ void ParameterServer::onMessage(osc::Message &m)
                     m >> val;
 			// Extract the data out of the packet
 			p->set(val);
-//			std::cout << "ParameterServer::onMessage" << val << std::endl;
+			// std::cout << "ParameterServer::onMessage" << val << std::endl;
 		}
 	}
 	for (ParameterVec3 *p:mVec3Parameters) {

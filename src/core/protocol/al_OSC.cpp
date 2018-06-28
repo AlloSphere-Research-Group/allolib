@@ -343,6 +343,7 @@ public:
 };
 
 Send::Send() {}
+Send::Send(int size) : Packet(size) {}
 
 Send::Send(uint16_t port, const char * address, al_sec timeout, int size)
 : Packet(size)

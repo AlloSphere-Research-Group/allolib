@@ -46,6 +46,9 @@
 #include <mutex>
 #include <atomic>
 #include <iostream>
+#include <sstream>
+#include <functional>
+#include <experimental/optional>
 #include <float.h>
 
 #include "al/core/protocol/al_OSC.hpp"
@@ -142,11 +145,11 @@ public:
 //        if (value > mMax) value = mMax;
 //        if (value < mMin) value = mMin;
         if (mProcessCallback) {
-            value = mProcessCallback(value, mProcessUdata);
+            value = (*mProcessCallback)(value); //, mProcessUdata);
         }
         for(size_t i = 0; i < mCallbacks.size(); ++i) {
             if (mCallbacks[i]) {
-                mCallbacks[i](value, this,  mCallbackUdata[i], NULL);
+                (*mCallbacks[i])(value); //, this,  mCallbackUdata[i], NULL);
             }
         }
         setLocking(value);
@@ -166,13 +169,13 @@ public:
 //        if (value > mMax) value = mMax;
 //        if (value < mMin) value = mMin;
         if (mProcessCallback) {
-            value = mProcessCallback(value, mProcessUdata);
+            value = (*mProcessCallback)(value); //, mProcessUdata);
         }
 
         if (blockReceiver) {
             for(size_t i = 0; i < mCallbacks.size(); ++i) {
                 if (mCallbacks[i]) {
-                    mCallbacks[i](value, this, mCallbackUdata[i], blockReceiver);
+                    (*mCallbacks[i])(value); //, this, mCallbackUdata[i], blockReceiver);
                 }
             }
         }
@@ -234,9 +237,12 @@ public:
 	 */
 	std::string getGroup();
 
-    typedef ParameterType (*ParameterProcessCallback)(ParameterType value, void *userData);
-	typedef void (*ParameterChangeCallback)(ParameterType value, void *sender,
-	                                        void *userData, void * blockSender);
+    // typedef ParameterType (*ParameterProcessCallback)(ParameterType value, void *userData);
+	// typedef void (*ParameterChangeCallback)(ParameterType value, void *sender,
+	                                        // void *userData, void * blockSender);
+
+	typedef const std::function<ParameterType (ParameterType)> ParameterProcessCallback;
+	typedef const std::function<void (ParameterType)> ParameterChangeCallback;
 
 	/**
 	 * @brief setProcessingCallback sets a callback to be called whenever the
@@ -313,10 +319,10 @@ protected:
 	std::string mGroup;
 	std::string mPrefix;
 
-	ParameterProcessCallback mProcessCallback;
-	void * mProcessUdata;
-	std::vector<ParameterChangeCallback> mCallbacks;
-	std::vector<void *> mCallbackUdata;
+	std::shared_ptr<ParameterProcessCallback> mProcessCallback;
+	// void * mProcessUdata;
+	std::vector<std::shared_ptr<ParameterChangeCallback> > mCallbacks;
+	// std::vector<void *> mCallbackUdata;
 
 private:
 	std::mutex mMutex;
@@ -375,8 +381,8 @@ public:
    * single float. It realies on float being atomic on the platform so there
    * is no locking. This is a safe assumption for most platforms today.
    */
-    Parameter(std::string parameterName, std::string Group,
-              float defaultValue,
+    Parameter(std::string parameterName, std::string Group = "",
+              float defaultValue = 0,
 	          std::string prefix = "",
 	          float min = -99999.0,
 	          float max = 99999.0
@@ -438,8 +444,8 @@ public:
    * float values for on or off states. It relies on floats being atomic on
    * the platform.
    */
-    ParameterBool(std::string parameterName, std::string Group,
-              float defaultValue,
+    ParameterBool(std::string parameterName, std::string Group = "",
+              float defaultValue = 0,
 	          std::string prefix = "",
 	          float min = 0,
 	          float max = 1.0
@@ -454,8 +460,8 @@ public:
 class ParameterString: public ParameterWrapper<std::string>
 {
 public:
-    ParameterString(std::string parameterName, std::string Group,
-                  std::string  defaultValue,
+    ParameterString(std::string parameterName, std::string Group = "",
+                  std::string  defaultValue = "",
 	              std::string prefix = "") :
 	    ParameterWrapper<std::string>(parameterName, Group, defaultValue, prefix)
 	{ }
@@ -532,9 +538,15 @@ public:
 	paramServer << freq << amp;
 	 @endcode
 	 */
-	ParameterServer(std::string oscAddress = "127.0.0.1", int oscPort = 9010);
+	// ParameterServer() : mServer(nullptr) {};
+	ParameterServer(std::string oscAddress = "", int oscPort = 9010);
 	~ParameterServer();
 	
+	/**
+	 * Open and start receiving osc
+	 */
+	void listen(int oscPort, std::string oscAddress = "");
+
 	/**
 	 * Register a parameter with the server.
 	 */
@@ -646,7 +658,7 @@ protected:
     static void changeVec4Callback(Vec4f value, void *sender, void *userData, void *blockThis);
     static void changePoseCallback(Pose value, void *sender, void *userData, void *blockThis);
 
-private:
+protected:
 	std::vector<osc::PacketHandler *> mPacketHandlers;
 	osc::Recv *mServer;
 	std::vector<Parameter *> mParameters;
@@ -656,6 +668,57 @@ private:
     std::vector<ParameterPose *> mPoseParameters;
     std::mutex mParameterLock;
     bool mVerbose {false};
+};
+
+class FlowParameterServer : public ParameterServer {
+public:
+
+	FlowParameterServer(){}
+	FlowParameterServer(std::string address, int port) : ParameterServer(address,port){}
+
+	void handshake(std::string appName, std::string address, int port=12000){
+		mAppName = appName;
+		mFlowServerAddress = address;
+		osc::Send sender(port, mFlowServerAddress.c_str());
+		sender.send("/handshakeConfig", generateConfig(appName), serverPort());
+	}
+
+	void sendMapping(std::string mappingName, std::string code, int port=12000){
+		osc::Send sender(port, mFlowServerAddress.c_str());
+		sender.send("/runMapping", mappingName, code);
+	}
+
+	std::string generateConfig(std::string appName){
+		std::stringstream ss;
+		ss << "{\n\"io\":{\n\t\"name\":\"" << appName << "\",\n";
+		ss << "\t\"sources\":[\n" << paramsToString() << "\t],\n";
+		ss << "\t\"sinks\":[\n" << paramsToString() << "\t]\n";
+		ss << "},\n";
+		ss << "\t\"defaultMappings\":[]\n";
+		ss << "}";
+		return ss.str();
+	}
+
+	std::string paramsToString(){
+		std::stringstream ss;
+		std::vector<Parameter *>::iterator it = mParameters.begin();
+		for(it = mParameters.begin(); it != mParameters.end(); it++) {
+			ss << "\t\t{\"name\":\"" << (*it)->getName() << "\", \"type\":\"f\"}";
+	    	if(it+1 != mParameters.end() || mPoseParameters.size() > 0) ss << ",";
+	    	ss << "\n";
+	    }
+	    std::vector<ParameterPose *>::iterator p = mPoseParameters.begin();
+		for(p = mPoseParameters.begin(); p != mPoseParameters.end(); p++) {
+			ss << "\t\t{\"name\":\"" << (*p)->getName() << "\", \"type\":\"fffffff\"}";
+	    	if(p+1 != mPoseParameters.end()) ss << ",";
+	    	ss << "\n";
+	    }
+	    return ss.str();	
+	}
+
+private:
+	std::string mAppName;
+	std::string mFlowServerAddress;
 };
 
 // Implementations -----------------------------------------------------------
@@ -715,9 +778,9 @@ ParameterWrapper<ParameterType>::ParameterWrapper(const ParameterWrapper<Paramet
 	mMin = param.mMin;
 	mMax = param.mMax;
 	mProcessCallback = param.mProcessCallback;
-	mProcessUdata = param.mProcessUdata;
+	// mProcessUdata = param.mProcessUdata;
 	mCallbacks = param.mCallbacks;
-	mCallbackUdata = param.mCallbackUdata;
+	// mCallbackUdata = param.mCallbackUdata;
 
 	//TODO: Add better heuristics for slash handling
 	if (mPrefix.length() > 0 && mPrefix.at(0) != '/') {
@@ -777,15 +840,15 @@ std::string ParameterWrapper<ParameterType>::getGroup()
 template<class ParameterType>
 void ParameterWrapper<ParameterType>::setProcessingCallback(ParameterWrapper::ParameterProcessCallback cb, void *userData)
 {
-	mProcessCallback = cb;
-	mProcessUdata = userData;
+	mProcessCallback = std::make_shared<ParameterProcessCallback>(cb);
+	// mProcessUdata = userData;
 }
 
 template<class ParameterType>
 void ParameterWrapper<ParameterType>::registerChangeCallback(ParameterWrapper::ParameterChangeCallback cb, void *userData)
 {
-	mCallbacks.push_back(cb);
-    mCallbackUdata.push_back(userData);
+	mCallbacks.push_back(std::make_shared<ParameterChangeCallback>(cb));
+    // mCallbackUdata.push_back(userData);
 }
 
 }

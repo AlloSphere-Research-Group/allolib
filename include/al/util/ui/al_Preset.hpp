@@ -304,12 +304,9 @@ public:
 		presetHandler.registerPresetCallback(PresetServer::changeCallback,
 		                                       (void *) this);
 
-		presetHandler.registerMorphTimeCallback(
-		            [](float value, void *sender,
-		            void *userData, void * blockSender) {
-			static_cast<PresetServer *>(userData)->notifyListeners(
-			            static_cast<PresetServer *>(userData)->mOSCpath + "/morphTime", value);
-		}, this);
+		presetHandler.registerMorphTimeCallback([&](float value){
+			this->notifyListeners(this->mOSCpath + "/morphTime", value);
+		});
 		return *this;
 	}
 

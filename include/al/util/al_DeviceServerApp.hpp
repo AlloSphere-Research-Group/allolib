@@ -23,7 +23,7 @@ public:
     };
     OSCHandler handler {this};
 
-	virtual const char* address(){ return "interface"; };
+	virtual const char* address(){ return "ar01"; };
 	virtual uint16_t outPort(){ return 12000; };
 	virtual uint16_t inPort(){ return 12001; };
 

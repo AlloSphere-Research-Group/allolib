@@ -279,6 +279,7 @@ class Send : public Packet {
 
 public:
 	Send();
+	Send(int size);
 
 	/// @param[in] port		Port number (valid range is 0-65535)
 	/// @param[in] address	IP address

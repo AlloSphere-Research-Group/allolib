@@ -8,7 +8,7 @@
 #include "al/core/app/al_AudioApp.hpp"
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/core/io/al_ControlNav.hpp"
-#include "al/util/al_DeviceServerApp.hpp"
+#include "al/util/al_FlowParameterServerApp.hpp" //DeviceServerApp.hpp"
 
 #include <iostream>
 #include <cmath>
@@ -17,7 +17,7 @@ namespace al {
 
 class App: public WindowApp,
            public AudioApp,
-           // public DeviceServerApp,
+           public FlowParameterServerApp,
            public osc::PacketHandler
 {
   Nav mNav; // is a Pose itself and also handles manipulation of pose
@@ -29,8 +29,8 @@ public:
   Viewpoint& view() { return mView; }
   const Viewpoint& view() const { return mView; }
 
-  // Nav& nav() override { return mNav; }
-  Nav& nav() { return mNav; }
+  Nav& nav() override { return mNav; }
+  // Nav& nav() { return mNav; }
   const Nav& nav() const { return mNav; }
 
   Pose& pose() { return mNav; }
@@ -39,7 +39,7 @@ public:
   NavInputControl& navControl() { return mNavControl; }
   NavInputControl const& navControl() const { return mNavControl; }
 
-  Lens& lens() { return mView.lens(); }
+  Lens& lens() override { return mView.lens(); }
   Lens const& lens() const { return mView.lens(); }
 
   Graphics& graphics() { return mGraphics; }
@@ -85,7 +85,7 @@ inline void App::start() {
   onCreate();
   AudioApp::beginAudio(); // only begins if `initAudio` was called before
   FPS::startFPS(); // WindowApp (FPS)
-  // initDeviceServer();
+  initFlowApp();
 
   while (!WindowApp::shouldQuit()) {
     // to quit, call WindowApp::quit() or click close button of window,
