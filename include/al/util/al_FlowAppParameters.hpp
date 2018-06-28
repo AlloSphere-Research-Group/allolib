@@ -15,8 +15,9 @@ class FlowUtils {
 public:
 
 	static void handshake(ParameterServer &ps, std::string appName, std::string address, int port){
-		osc::Send sender(port, address.c_str());
-		sender.send("/handshakeConfig", generateConfig(ps, appName), ps.serverPort());
+		std::string config = generateConfig(ps, appName);
+		osc::Send sender(port, address.c_str(), 0, config.length() + 128);
+		sender.send("/handshakeConfig", config, ps.serverPort());
 	}
 
 	static void sendMapping(std::string mappingName, std::string code, std::string address, int port){
