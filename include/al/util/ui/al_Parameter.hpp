@@ -618,6 +618,10 @@ public:
 	 * @brief Get the list of registered parameters.
 	 */
 	std::vector<Parameter *> parameters() {return mParameters;}
+	std::vector<ParameterString *> stringParameters() {return mStringParameters;}
+	std::vector<ParameterVec3 *> vec3Parameters() {return mVec3Parameters;}
+	std::vector<ParameterVec4 *> vec4Parameters() {return mVec4Parameters;}
+	std::vector<ParameterPose *> poseParameters() {return mPoseParameters;}
 
 	/// Register parameter using the streaming operator
     template<class ParameterType>
@@ -668,57 +672,6 @@ protected:
     std::vector<ParameterPose *> mPoseParameters;
     std::mutex mParameterLock;
     bool mVerbose {false};
-};
-
-class FlowParameterServer : public ParameterServer {
-public:
-
-	FlowParameterServer(){}
-	FlowParameterServer(std::string address, int port) : ParameterServer(address,port){}
-
-	void handshake(std::string appName, std::string address, int port=12000){
-		mAppName = appName;
-		mFlowServerAddress = address;
-		osc::Send sender(port, mFlowServerAddress.c_str());
-		sender.send("/handshakeConfig", generateConfig(appName), serverPort());
-	}
-
-	void sendMapping(std::string mappingName, std::string code, int port=12000){
-		osc::Send sender(port, mFlowServerAddress.c_str());
-		sender.send("/runMapping", mappingName, code);
-	}
-
-	std::string generateConfig(std::string appName){
-		std::stringstream ss;
-		ss << "{\n\"io\":{\n\t\"name\":\"" << appName << "\",\n";
-		ss << "\t\"sources\":[\n" << paramsToString() << "\t],\n";
-		ss << "\t\"sinks\":[\n" << paramsToString() << "\t]\n";
-		ss << "},\n";
-		ss << "\t\"defaultMappings\":[]\n";
-		ss << "}";
-		return ss.str();
-	}
-
-	std::string paramsToString(){
-		std::stringstream ss;
-		std::vector<Parameter *>::iterator it = mParameters.begin();
-		for(it = mParameters.begin(); it != mParameters.end(); it++) {
-			ss << "\t\t{\"name\":\"" << (*it)->getName() << "\", \"type\":\"f\"}";
-	    	if(it+1 != mParameters.end() || mPoseParameters.size() > 0) ss << ",";
-	    	ss << "\n";
-	    }
-	    std::vector<ParameterPose *>::iterator p = mPoseParameters.begin();
-		for(p = mPoseParameters.begin(); p != mPoseParameters.end(); p++) {
-			ss << "\t\t{\"name\":\"" << (*p)->getName() << "\", \"type\":\"fffffff\"}";
-	    	if(p+1 != mPoseParameters.end()) ss << ",";
-	    	ss << "\n";
-	    }
-	    return ss.str();	
-	}
-
-private:
-	std::string mAppName;
-	std::string mFlowServerAddress;
 };
 
 // Implementations -----------------------------------------------------------

@@ -8,7 +8,7 @@
 #include "al/core/app/al_AudioApp.hpp"
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/core/io/al_ControlNav.hpp"
-#include "al/util/al_FlowParameterServerApp.hpp" //DeviceServerApp.hpp"
+#include "al/util/al_FlowAppParameters.hpp"
 
 #include <iostream>
 #include <cmath>
@@ -17,12 +17,13 @@ namespace al {
 
 class App: public WindowApp,
            public AudioApp,
-           public FlowParameterServerApp,
+           public FlowAppParameters,
            public osc::PacketHandler
 {
   Nav mNav; // is a Pose itself and also handles manipulation of pose
   Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
   NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse
+  ParameterServer mParameterServer;
 
 public:
 
@@ -41,6 +42,9 @@ public:
 
   Lens& lens() override { return mView.lens(); }
   Lens const& lens() const { return mView.lens(); }
+
+  ParameterServer& parameterServer() override { return mParameterServer; }
+  ParameterServer const& parameterServer() const { return mParameterServer; }
 
   Graphics& graphics() { return mGraphics; }
 

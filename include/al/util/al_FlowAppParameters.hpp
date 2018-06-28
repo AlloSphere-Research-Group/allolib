@@ -1,5 +1,5 @@
-#ifndef INCLUDE_AL_FLOWPARAMETERSERVERAPP_HPP
-#define INCLUDE_AL_FLOWPARAMETERSERVERAPP_HPP
+#ifndef INCLUDE_AL_FLOWAPPPARAMETERS_HPP
+#define INCLUDE_AL_FLOWAPPPARAMETERS_HPP
 
 /*  Tim Wood, 2018, fishuyo@gmail.com
 */
@@ -11,9 +11,52 @@
 
 namespace al {
 
-class FlowParameterServerApp {
+class FlowUtils {
 public:
-	FlowParameterServer parameterServer;
+
+	static void handshake(ParameterServer &ps, std::string appName, std::string address, int port){
+		osc::Send sender(port, address.c_str());
+		sender.send("/handshakeConfig", generateConfig(ps, appName), ps.serverPort());
+	}
+
+	static void sendMapping(std::string mappingName, std::string code, std::string address, int port){
+		osc::Send sender(port, address.c_str());
+		sender.send("/runMapping", mappingName, code);
+	}
+
+	static std::string generateConfig(ParameterServer &ps, std::string appName){
+		std::stringstream ss;
+		ss << "{\n\"io\":{\n\t\"name\":\"" << appName << "\",\n";
+		ss << "\t\"sources\":[\n" << paramsToString(ps) << "\t],\n";
+		ss << "\t\"sinks\":[\n" << paramsToString(ps) << "\t]\n";
+		ss << "},\n";
+		ss << "\t\"defaultMappings\":[]\n";
+		ss << "}";
+		return ss.str();
+	}
+
+	static std::string paramsToString(ParameterServer &ps){
+		std::stringstream ss;
+		for(int i = 0; i < ps.parameters().size(); i++) {
+			ss << "\t\t{\"name\":\"" << ps.parameters()[i]->getName() << "\", \"type\":\"f\"}";
+	    	if(i+1 != ps.parameters().size() || ps.poseParameters().size() > 0) ss << ",";
+	    	ss << "\n";
+	    }
+	    for(int i = 0; i < ps.poseParameters().size(); i++) {
+			ss << "\t\t{\"name\":\"" << ps.poseParameters()[i]->getName() << "\", \"type\":\"fffffff\"}";
+	    	if(i+1 != ps.poseParameters().size()) ss << ",";
+	    	ss << "\n";
+	    }
+	    return ss.str();	
+	}
+
+};
+
+
+
+class FlowAppParameters {
+public:
+	// FlowParameterServer parameterServer;
 	ParameterPose ppose{"pose"}; 
 	Parameter mx{"mx"}, my{"my"}, mz{"mz"}, tx{"tx"}, ty{"ty"}, tz{"tz"};
 	Parameter nearClip{"nearClip"}, farClip{"farClip"};
@@ -22,23 +65,24 @@ public:
 
 public:
 
-	FlowParameterServerApp(){
-		parameterServer.verbose();
-		parameterServer << ppose << mx << my << mz << tx << ty << tz;
-		parameterServer << nearClip << farClip << eyeSeparation << focalLength;
-		parameterServer << fovx << fovy;
-	};
+	FlowAppParameters(){};
 
 	virtual const char* flowAddress(){ return "localhost"; };
 	virtual uint16_t flowPort(){ return 12000; };
-	virtual uint16_t recvPort(){ return 12001; };
+	// virtual uint16_t recvPort(){ return 12001; };
     
     virtual std::string appName(){ return "defaultApp"; };
     
+    virtual ParameterServer& parameterServer() = 0;
     virtual Nav& nav() = 0;
     virtual Lens& lens() = 0;
 
     void initFlowApp(){
+    	// parameterServer().verbose();
+		parameterServer() << ppose << mx << my << mz << tx << ty << tz;
+		parameterServer() << nearClip << farClip << eyeSeparation << focalLength;
+		parameterServer() << fovx << fovy;
+
 		ppose.registerChangeCallback([&](Pose p){ nav().set(p); });
 		
 		mx.registerChangeCallback([&](float x){ nav().moveR(x); });
@@ -55,10 +99,10 @@ public:
 		fovx.registerChangeCallback([&](float x){ lens().fovx(x, 1); });
 		fovy.registerChangeCallback([&](float x){ lens().fovy(x); });
 
-    	parameterServer.listen(recvPort());
-    	parameterServer.handshake(appName(), flowAddress(), flowPort());
-    	parameterServer.sendMapping("lens", lensMapping());
-    	parameterServer.sendMapping("joystickNav", joystickMapping());
+    	// parameterServer().listen(recvPort());
+    	FlowUtils::handshake(parameterServer(), appName(), flowAddress(), flowPort());
+    	FlowUtils::sendMapping("lens", lensMapping(), flowAddress(), flowPort());
+    	FlowUtils::sendMapping("joystickNav", joystickMapping(), flowAddress(), flowPort());
     }
 
     std::string lensMapping(){ 
