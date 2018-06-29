@@ -99,7 +99,7 @@ public:
         internalAudioIO.channelsIn(io.channelsIn());
         internalAudioIO.channelsOut(io.channelsOut());
         internalAudioIO.channelsBus(io.channelsBus());
-        mSpatializer->prepare(io);
+//        mSpatializer->prepare(io);
     }
 
     virtual void cleanup() {
@@ -190,6 +190,26 @@ public:
             cb->onAudioCB(io);
         }
         if (mMasterMode == TIME_MASTER_AUDIO) {
+            processInactiveVoices();
+        }
+    }
+
+    virtual void update(double dt = 0) override {
+        if (mMasterMode == TIME_MASTER_ASYNC) {
+            processVoices();
+            // Turn off voices
+            processVoiceTurnOff();
+        }
+
+        // Update active voices
+        auto voice = mActiveVoices;
+        while (voice) {
+            if (voice->active()) {
+                voice->update(dt);
+            }
+            voice = voice->next;
+        }
+        if (mMasterMode == TIME_MASTER_ASYNC) {
             processInactiveVoices();
         }
     }

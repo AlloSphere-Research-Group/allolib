@@ -132,6 +132,20 @@ public:
     virtual void onProcess(Graphics &g) {}
 
     /**
+     * @brief Override this function to update internal state, e.g. from an asynchronous simulator
+     * 
+     * dt is the delta time elapsed since last update 
+     */
+    virtual void update(double dt = 0) {}
+
+    /**
+     * @brief Override this function to initialize internal data.
+     * 
+     * This function should be called only once upon voice creation.
+     */
+    virtual void init() {}
+
+    /**
     * @brief  Override this function to determine what needs to be done when note/event starts.
     *
     * When a note starts, internal data within the algorithm usually needs to be reset,
@@ -218,7 +232,8 @@ class PolySynth {
 public:
     typedef enum {
         TIME_MASTER_AUDIO,
-        TIME_MASTER_GRAPHICS
+        TIME_MASTER_GRAPHICS,
+        TIME_MASTER_ASYNC
     } TimeMasterMode;
 
     PolySynth(TimeMasterMode masterMode = TIME_MASTER_AUDIO)
@@ -275,6 +290,11 @@ public:
      * @brief render graphics for all active voices
      */
     virtual void render(Graphics &g);
+
+    /**
+     * @brief update internal state for all voices.
+     */
+    virtual void update(double dt = 0);
 
     /**
      * Preallocate a number of voices of a particular TSynthVoice to avoid doing realtime
@@ -979,6 +999,7 @@ TSynthVoice *PolySynth::getVoice() {
         // TODO report current polyphony for more informed allocation of polyphony
         std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
         freeVoice = new TSynthVoice;
+        freeVoice->init();
     }
     freeVoice->userData(mDefaultUserData);
     return static_cast<TSynthVoice *>(freeVoice);

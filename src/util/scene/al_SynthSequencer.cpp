@@ -252,6 +252,25 @@ void PolySynth::render(Graphics &g) {
     }
 }
 
+void PolySynth::update(double dt) {
+    if (mMasterMode == TIME_MASTER_ASYNC) {
+        processVoices();
+        // Turn off voices
+        processVoiceTurnOff();
+    }
+    std::unique_lock<std::mutex> lk(mGraphicsLock);
+    SynthVoice *voice = mActiveVoices;
+    while (voice) {
+        if (voice->active()) {
+            voice->update(dt);
+        }
+        voice = voice->next;
+    }
+    if (mMasterMode == TIME_MASTER_ASYNC) {
+        processInactiveVoices();
+    }
+}
+
 void PolySynth::insertFreeVoice(SynthVoice *voice) {
     std::unique_lock<std::mutex> lk(mFreeVoiceLock);
     SynthVoice *lastVoice = mFreeVoices;
