@@ -42,6 +42,7 @@
 */
 
 #include <string>
+#include <map>
 #include <mutex>
 #include <atomic>
 #include <iostream>
@@ -143,12 +144,12 @@ public:
         if (mProcessCallback) {
             value = mProcessCallback(value, mProcessUdata);
         }
-        setLocking(value);
         for(size_t i = 0; i < mCallbacks.size(); ++i) {
             if (mCallbacks[i]) {
                 mCallbacks[i](value, this,  mCallbackUdata[i], NULL);
             }
         }
+        setLocking(value);
     }
 
 	/**
@@ -282,6 +283,26 @@ public:
 	operator ParameterType() { return this->get();}
 
 	ParameterWrapper<ParameterType> operator= (const ParameterType value) { this->set(value); return *this; }
+
+        void setHint(std::string hintName, float hintValue) {
+            mHints[hintName] = hintValue;
+        }
+
+        float getHint(std::string hintName, bool *exists = nullptr) {
+            float value = 0.0f;
+            if (mHints.find(hintName) != mHints.end()) {
+                value = mHints[hintName];
+                if (exists) {
+                    *exists = true;
+                }
+            } else {
+                if (exists) {
+                    *exists = false;
+                }
+            }
+
+            return value;
+        }
 	
 protected:
 	ParameterType mMin;
@@ -301,6 +322,7 @@ private:
 	std::mutex mMutex;
 	ParameterType mValue;
 	ParameterType mValueCache;
+        std::map<std::string, float> mHints; // Provide hints for
 };
 
 
@@ -613,6 +635,10 @@ public:
 
 	virtual void onMessage(osc::Message& m);
 
+        uint16_t serverPort() {return mServer->port();}
+
+        void verbose(bool verbose= true) { mVerbose = verbose;}
+
 protected:
     static void changeCallback(float value, void *sender, void *userData, void *blockThis);
     static void changeStringCallback(std::string value, void *sender, void *userData, void *blockThis);
@@ -629,6 +655,7 @@ private:
 	std::vector<ParameterVec4 *> mVec4Parameters;
     std::vector<ParameterPose *> mPoseParameters;
     std::mutex mParameterLock;
+    bool mVerbose {false};
 };
 
 // Implementations -----------------------------------------------------------

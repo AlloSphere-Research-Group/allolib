@@ -52,7 +52,7 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, Vec4f value)
 {
 	mListenerLock.lock();
 	for(osc::Send *sender: mOSCSenders) {
-		sender->send(OSCaddress, value[0], value[1], value[2], value[3]);
+                sender->send(OSCaddress, value[0], value[1], value[2], value[3]);
 //		std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
 	}
     mListenerLock.unlock();
@@ -62,8 +62,8 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, Pose value)
 {
     mListenerLock.lock();
     for(osc::Send *sender: mOSCSenders) {
-        sender->send(OSCaddress, value.pos()[0], value.pos()[1], value.pos()[2],
-                value.quat().w, value.quat().x, value.quat().y, value.quat().z);
+        sender->send(OSCaddress, (float) value.pos()[0], (float) value.pos()[1], (float) value.pos()[2],
+                (float) value.quat().w, (float) value.quat().x, (float) value.quat().y, (float) value.quat().z);
 //		std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
     }
     mListenerLock.unlock();
@@ -109,13 +109,13 @@ void Parameter::set(float value)
 	if (value < mMin) value = mMin;
 	if (mProcessCallback) {
 		value = mProcessCallback(value, mProcessUdata);
-	}
-	mFloatValue = value;
+        }
 	for(size_t i = 0; i < mCallbacks.size(); ++i) {
 		if (mCallbacks[i]) {
 			mCallbacks[i](value, this, mCallbackUdata[i], NULL);
 		}
 	}
+        mFloatValue = value;
 }
 
 // ParameterBool ------------------------------------------------------------------
@@ -298,6 +298,9 @@ void ParameterServer::onMessage(osc::Message &m)
             sendAllParameters(m.senderAddress(), port);
         }
     }
+        if (mVerbose) {
+            m.print();
+        }
 	mParameterLock.lock();
         for (Parameter *p:mParameters) {
 		if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "f"){
@@ -425,33 +428,33 @@ void ParameterServer::changeCallback(float value, void *sender, void *userData, 
 {
 	ParameterServer *server = static_cast<ParameterServer *>(userData);
 	Parameter *parameter = static_cast<Parameter *>(sender);
-	server->notifyListeners(parameter->getFullAddress(), parameter->get());
+        server->notifyListeners(parameter->getFullAddress(), value);
 }
 
 void ParameterServer::changeStringCallback(std::string value, void *sender, void *userData, void *blockThis)
 {
 	ParameterServer *server = static_cast<ParameterServer *>(userData);
 	ParameterString *parameter = static_cast<ParameterString *>(sender);
-	server->notifyListeners(parameter->getFullAddress(), parameter->get());
+        server->notifyListeners(parameter->getFullAddress(), value);
 }
 
 void ParameterServer::changeVec3Callback(Vec3f value, void *sender, void *userData, void *blockThis)
 {
 	ParameterServer *server = static_cast<ParameterServer *>(userData);
 	ParameterVec3 *parameter = static_cast<ParameterVec3 *>(sender);
-	server->notifyListeners(parameter->getFullAddress(), parameter->get());
+        server->notifyListeners(parameter->getFullAddress(), value);
 }
 
 void ParameterServer::changeVec4Callback(Vec4f value, void *sender, void *userData, void *blockThis)
 {
 	ParameterServer *server = static_cast<ParameterServer *>(userData);
 	ParameterVec4 *parameter = static_cast<ParameterVec4 *>(sender);
-    server->notifyListeners(parameter->getFullAddress(), parameter->get());
+    server->notifyListeners(parameter->getFullAddress(), value);
 }
 
 void ParameterServer::changePoseCallback(Pose value, void *sender, void *userData, void *blockThis)
 {
     ParameterServer *server = static_cast<ParameterServer *>(userData);
     ParameterPose *parameter = static_cast<ParameterPose *>(sender);
-    server->notifyListeners(parameter->getFullAddress(), parameter->get());
+    server->notifyListeners(parameter->getFullAddress(), value);
 }

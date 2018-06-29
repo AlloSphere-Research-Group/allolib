@@ -169,12 +169,22 @@ void ControlGUI::draw(Graphics &g) {
     for (auto elem: mParameterBools) {
         if(elem.first == "" || ImGui::CollapsingHeader(elem.first.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by default
             for (auto param: elem.second) {
-                bool changed = ImGui::Button(param->getName().c_str());
-                if (changed) {
-                    param->set(1.0);
+
+                bool changed;
+                if (param->getHint("latch") == 1.0) {
+                    bool value = param->get() == 1.0;
+                    changed = ImGui::Checkbox(param->getName().c_str(), &value);
+                    if (changed) {
+                        param->set(value ? 1.0 : 0.0);
+                    }
                 } else {
-                    if (param->get() == 1.0) {
-                        param->set(0.0);
+                    changed = ImGui::Button(param->getName().c_str());
+                    if (changed) {
+                        param->set(1.0);
+                    } else {
+                        if (param->get() == 1.0) {
+                            param->set(0.0);
+                        }
                     }
                 }
             }
