@@ -5,6 +5,7 @@
 #include <stdexcept> // std::runtime_error
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace al {
 
@@ -90,6 +91,16 @@ struct TomlLoader
 
  bool getb(const std::string& table, const std::string& key) {
     return get<bool>(table, key);
+  }
+
+  template<typename T>
+  std::vector<T> getVector(const std::string& key) {
+    auto vals = root->get_array_of<T>(key);
+    std::vector<T> outVector;
+    for (const T &val: *vals) {
+      outVector.push_back(val);
+    }
+    return outVector;
   }
 
 };
