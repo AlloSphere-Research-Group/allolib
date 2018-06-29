@@ -6,7 +6,7 @@
 
 #include "al/core/app/al_WindowApp.hpp"
 #include "al/core/app/al_AudioApp.hpp"
-#include "al/util/al_DeviceServerApp.hpp"
+#include "al/util/al_FlowAppParameters.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/core/graphics/al_GLFW.hpp"
@@ -35,7 +35,7 @@ namespace al {
 template<class TSharedState>
 class DistributedApp: public OmniRenderer,
            public AudioApp,
-           // public DeviceServerApp,
+           public FlowAppParameters,
            public osc::PacketHandler
 {
   Nav mNav; // is a Pose itself and also handles manipulation of pose
@@ -288,6 +288,9 @@ inline void DistributedApp<TSharedState>::start() {
   FPS::startFPS(); // WindowApp (FPS)
   // initDeviceServer();
 
+  if (role() == ROLE_SIMULATOR) {
+      initFlowApp();
+  }
   while (!WindowApp::shouldQuit()) {
     // to quit, call WindowApp::quit() or click close button of window,
     // or press ctrl + q
