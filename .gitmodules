@@ -13,3 +13,6 @@
 [submodule "external/glfw"]
 	path = external/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "external/cpptoml"]
+	path = external/cpptoml
+	url = https://github.com/skystrife/cpptoml.git

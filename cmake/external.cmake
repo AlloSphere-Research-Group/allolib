@@ -12,11 +12,13 @@ set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
 include(${al_path}/cmake/external/oscpack.cmake)
 include(${al_path}/cmake/external/rtmidi.cmake)
 include(${al_path}/cmake/external/imgui.cmake)
+include(${al_path}/cmake/external/cpptoml.cmake)
 
 set(EXTERNAL_INCLUDE_DIRS
   ${OSCPACK_INCLUDE_DIR}
   ${RTMIDI_INCLUDE_DIR}
   ${IMGUI_INCLUDE_DIR}
+  ${CPPTOML_INCLUDE_DIR}
 )
 
 set(EXTERNAL_SRC
