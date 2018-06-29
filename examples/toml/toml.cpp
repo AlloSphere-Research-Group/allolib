@@ -8,12 +8,14 @@ using namespace std;
 // al.toml file needs to be in data folder (in the `bin/data` folder)
 // if not, TOML::get* function will throw runtime exception
 
+// for toml syntax, https://github.com/toml-lang/toml
+
 struct MyApp : App
 {
   void onCreate() override {
     cout << TOML::getd("my_float") << endl;
-    cout << TOML::geti("nested", "my_int") << endl;
-    cout << TOML::gets("nested", "my_str") << endl;
+    cout << TOML::geti("my_table", "my_int") << endl;
+    cout << TOML::gets("my_table", "my_str") << endl;
   }
 
   void onDraw(Graphics& g) override {
