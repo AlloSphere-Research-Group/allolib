@@ -58,9 +58,9 @@ public:
 class FlowAppParameters {
 public:
 	// FlowParameterServer parameterServer;
-	ParameterPose ppose{"pose"}; 
+        ParameterPose ppose{"pose"};
 	Parameter mx{"mx"}, my{"my"}, mz{"mz"}, tx{"tx"}, ty{"ty"}, tz{"tz"};
-	Parameter nearClip{"nearClip"}, farClip{"farClip"};
+        Parameter nearClip{"flownearClip"}, farClip{"flowfarClip"};
 	Parameter eyeSeparation{"eyeSeparation"}, focalLength{"focalLength"};
 	Parameter fovx{"fovx"}, fovy{"fovy"};
 
@@ -93,8 +93,8 @@ public:
 		ty.registerChangeCallback([&](float x){ nav().spinU(x); });
 		tz.registerChangeCallback([&](float x){ nav().spinF(x); });
 
-		nearClip.registerChangeCallback([&](float x){ lens().near(x); });
-		farClip.registerChangeCallback([&](float x){ lens().far(x); });
+                nearClip.registerChangeCallback([&](float x){ lens().near(x); });
+                farClip.registerChangeCallback([&](float x){ lens().far(x); });
 		eyeSeparation.registerChangeCallback([&](float x){ lens().eyeSep(x); });
 		focalLength.registerChangeCallback([&](float x){ lens().focalLength(x); });
 		fovx.registerChangeCallback([&](float x){ lens().fovx(x, 1); });
@@ -111,8 +111,8 @@ public:
     	ss << "import ijs._\n\n";
     	ss << "val app = AppManager(\"" << appName() << "\")\n";
     	ss << "val io = Interface.create(\"lensParams\")\n";
-    	ss << "io += Slider(\"nearClip\", x=0, y=0, w=0.1, h=0.9, min=0.000001, max=2.0)\n";
-		ss << "io += Slider(\"farClip\", x=0.1, y=0, w=0.1, h=0.9, min=1.0, max=100.0)\n";
+        ss << "io += Slider(\"flownearClip\", x=0, y=0, w=0.1, h=0.9, min=0.000001, max=2.0)\n";
+                ss << "io += Slider(\"flowfarClip\", x=0.1, y=0, w=0.1, h=0.9, min=1.0, max=100.0)\n";
 		ss << "io += Slider(\"eyeSeparation\", x=0.2, y=0, w=0.1, h=0.9, min=0.0, max=0.2)\n";
 		ss << "io += Slider(\"focalLength\", x=0.3, y=0, w=0.1, h=0.9, min=1.0, max=100.0)\n";
 		ss << "io += Slider(\"fovx\", x=0.4, y=0, w=0.1, h=0.9, min=30.0, max=100.0)\n";
@@ -129,7 +129,7 @@ public:
 		ss << "val v = 0.15f   // move speed\n";
 		ss << "val w = 0.01f  // turn speed\n";
 
-		ss << "def dd(f:Float) = if(math.abs(f) < 0.06) 0 else f\n";
+                ss << "def dd(f:Float) = if(math.abs(f) < 0.06) 0 else f\n";
 
 		ss << "joy.leftX.map(2 * _ - 1).map(dd).map(_ * v) >> app.sinks(\"mx\")\n";
 		ss << "joy.leftY.map(2 * _ - 1).map(dd).map(_ * -v) >> app.sinks(\"mz\")\n";
