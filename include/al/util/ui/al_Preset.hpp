@@ -65,7 +65,7 @@ class PresetHandler
 {
 public:
 
-	typedef std::map<std::string, float> ParameterStates;
+        typedef std::map<std::string, std::vector<float> > ParameterStates;
 	/**
 	 * @brief PresetHandler contructor
 	 *
@@ -74,8 +74,6 @@ public:
 	 *
 	 */
 	PresetHandler(std::string rootDirectory = "presets", bool verbose = false);
-
-	PresetHandler &registerParameter(Parameter &parameter);
 
 	~PresetHandler();
 
@@ -194,7 +192,18 @@ public:
 	 */
 	void registerMorphTimeCallback(Parameter::ParameterChangeCallback cb, void *userData = nullptr);
 
+
+        PresetHandler &registerParameter(Parameter &parameter);
+
 	PresetHandler &operator << (Parameter &param) { return this->registerParameter(param); }
+
+        PresetHandler &registerParameter(ParameterBool &parameter);
+
+        PresetHandler &operator << (ParameterBool &param) { return this->registerParameter(param); }
+
+        PresetHandler &registerParameter(ParameterPose &parameter);
+
+        PresetHandler &operator << (ParameterPose &param) { return this->registerParameter(param); }
 
 	std::string buildMapPath(std::string mapName, bool useSubDirectory = false);
 
@@ -214,6 +223,58 @@ public:
 	void changeParameterValue(std::string presetName, std::string parameterPath,
 	                          float newValue);
 
+        static int asciiToPresetIndex(int ascii, int offset = 0) {
+            int index = -1;
+
+            switch (ascii) {
+            case '1': index = 0; break;
+            case '2': index = 1; break;
+            case '3': index = 2; break;
+            case '4': index = 3; break;
+            case '5': index = 4; break;
+            case '6': index = 5; break;
+            case '7': index = 6; break;
+            case '8': index = 7; break;
+            case '9': index = 8; break;
+            case '0': index = 9; break;
+            case 'q': index = 10; break;
+            case 'w': index = 11; break;
+            case 'e': index = 12; break;
+            case 'r': index = 13; break;
+            case 't': index = 14; break;
+            case 'y': index = 15; break;
+            case 'u': index = 16; break;
+            case 'i': index = 17; break;
+            case 'o': index = 18; break;
+            case 'p': index = 19; break;
+            case 'a': index = 20; break;
+            case 's': index = 21; break;
+            case 'd': index = 22; break;
+            case 'f': index = 23; break;
+            case 'g': index = 24; break;
+            case 'h': index = 25; break;
+            case 'j': index = 26; break;
+            case 'k': index = 27; break;
+            case 'l': index = 28; break;
+            case ';': index = 29; break;;
+            case 'z': index = 30; break;
+            case 'x': index = 31; break;
+            case 'c': index = 32; break;
+            case 'v': index = 33; break;
+            case 'b': index = 34; break;
+            case 'n': index = 35; break;
+            case 'm': index = 36; break;
+            case ',': index = 37; break;
+            case '.': index = 38; break;
+            case '/': index = 39; break;
+            }
+            if (index >= 0) {
+                index += offset;
+            }
+
+            return index;
+        }
+
 private:
 	void storeCurrentPresetMap();
 
@@ -230,6 +291,8 @@ private:
 	std::string mFileName;
 	std::string mCurrentMapName;
 	std::vector<Parameter *> mParameters;
+        std::vector<ParameterBool *> mParameterBools;
+        std::vector<ParameterPose *> mParameterPoses;
 	std::mutex mFileLock;
 	bool mRunning; // To keep the morphing thread alive
 	// bool mMorph; // To be able to trip and stop morphing at any time.
@@ -240,7 +303,7 @@ private:
 	std::mutex mMorphLock;
 	std::mutex mTargetLock;
 	std::condition_variable mMorphConditionVar;
-	std::map<std::string, float> mTargetValues;
+        ParameterStates mTargetValues;
 
 	std::thread mMorphingThread;
 

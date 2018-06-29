@@ -35,12 +35,6 @@ PresetHandler::~PresetHandler()
 	mMorphLock.unlock();
 }
 
-PresetHandler &PresetHandler::registerParameter(Parameter &parameter)
-{
-	mParameters.push_back(&parameter);
-	return *this;
-}
-
 void PresetHandler::setSubDirectory(std::string directory)
 {
 	std::string path = getRootPath();
@@ -130,10 +124,18 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite)
 			name = "default";
 		}
 	}
-	std::map<std::string, float> values;
+        ParameterStates values;
 	for(Parameter *parameter: mParameters) {
-		values[parameter->getFullAddress()] = parameter->get();
+                values[parameter->getFullAddress()] = std::vector<float>{parameter->get()};
 	}
+        for(ParameterBool *parameter: mParameterBools) {
+                values[parameter->getFullAddress()] = std::vector<float>{parameter->get()};
+        }
+        for(ParameterPose *parameter: mParameterPoses) {
+            Pose value = parameter->get();
+                values[parameter->getFullAddress()] = std::vector<float>{ (float) value.pos()[0], (float) value.pos()[1], (float) value.pos()[2],
+                        (float) value.quat().w, (float) value.quat().x, (float) value.quat().y, (float) value.quat().z};
+        }
 	savePresetValues(values, name, overwrite);
 	mPresetsMap[index] = name;
 	storeCurrentPresetMap();
@@ -183,19 +185,22 @@ void PresetHandler::setInterpolatedPreset(int index1, int index2, double factor)
 	if (presetNameIt1 != mPresetsMap.end()
 	        && presetNameIt2 != mPresetsMap.end()) {
 
-		std::map<std::string, float> values1 = loadPresetValues(presetNameIt1->second);
-		std::map<std::string, float> values2 = loadPresetValues(presetNameIt2->second);
+                ParameterStates values1 = loadPresetValues(presetNameIt1->second);
+                ParameterStates values2 = loadPresetValues(presetNameIt2->second);
 		{
 			if (mMorphRemainingSteps.load() >= 0) {
 				mMorphRemainingSteps.store(-1);
 				std::lock_guard<std::mutex> lk(mTargetLock);
 			}
 			mTargetValues.clear();
-			for(auto value: values1) {
-				if (values2.count(value.first) > 0) {
-					mTargetValues[value.first] = value.second + ((values2[value.first] - value.second)* factor);
-				}
-			}
+                        for(auto value: values1) {
+                            if (values2.count(value.first) > 0) { // if parameter name matches
+                                mTargetValues[value.first] = value.second;
+                                for (unsigned int index = 0; index < value.second.size(); index++) {
+                                    mTargetValues[value.first][index] *= 1.0 + (((values2[value.first][index]/value.second[index]) - 1.0)* factor);
+                                }
+                            }
+                        }
 		}
 		mMorphConditionVar.notify_one();
 	} else {
@@ -255,7 +260,7 @@ void PresetHandler::recallPresetSynchronous(std::string name)
 	}
 	for (Parameter *param: mParameters) {
 		if (mTargetValues.find(param->getFullAddress()) != mTargetValues.end()) {
-			param->set(mTargetValues[param->getFullAddress()]);
+                        param->set(mTargetValues[param->getFullAddress()][0]);
 		}
 	}
 	int index = -1;
@@ -346,6 +351,24 @@ void PresetHandler::print()
 	}
 }
 
+PresetHandler &PresetHandler::registerParameter(Parameter &parameter)
+{
+        mParameters.push_back(&parameter);
+        return *this;
+}
+
+PresetHandler &PresetHandler::registerParameter(ParameterBool &parameter)
+{
+        mParameterBools.push_back(&parameter);
+        return *this;
+}
+
+PresetHandler &PresetHandler::registerParameter(ParameterPose &parameter)
+{
+        mParameterPoses.push_back(&parameter);
+        return *this;
+}
+
 std::map<int, std::string> PresetHandler::readPresetMap(std::string mapName)
 {
 	std::map<int, std::string> presetsMap;
@@ -431,10 +454,10 @@ void PresetHandler::changeParameterValue(std::string presetName,
                                          std::string parameterPath,
                                          float newValue)
 {
-	std::map<std::string, float> parameters = loadPresetValues(presetName);
+        ParameterStates parameters = loadPresetValues(presetName);
 	for (auto &parameter:parameters) {
 		if (parameter.first == parameterPath) {
-			parameter.second = newValue;
+                        parameter.second[0] = newValue;
 		}
 	}
 	savePresetValues(parameters, presetName, true);
@@ -473,7 +496,7 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler)
 			for (Parameter *param: handler->mParameters) {
 				float paramValue = param->get();
 				if (handler->mTargetValues.find(param->getFullAddress()) != handler->mTargetValues.end()) {
-					float difference =  handler->mTargetValues[param->getFullAddress()] - paramValue;
+                                        float difference =  handler->mTargetValues[param->getFullAddress()][0] - paramValue;
 					int steps = handler->mMorphRemainingSteps.load();
 					if (steps > 0) {
 						difference = difference/(steps);
@@ -496,7 +519,7 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler)
 
 PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)
 {
-	std::map<std::string, float> preset;
+        ParameterStates preset;
 	std::lock_guard<std::mutex> lock(mFileLock);
 	std::string path = getCurrentPath();
 	if (path.back() != '/') {
@@ -523,22 +546,53 @@ PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)
 				}
 				bool parameterFound = false;
 				std::stringstream ss(line);
-				std::string address, type, value;
+                                std::string address, type;
+                                std::vector<float> values;
 				std::getline(ss, address, ' ');
 				std::getline(ss, type, ' ');
-				std::getline(ss, value, ' ');
+
+                                std::string value;
+                                while (std::getline(ss, value, ' ')) {
+                                       values.push_back(std::stof(value));
+                                }
+
 				for(Parameter *param: mParameters) {
 					if (mVerbose) {
 						std::cout << "Checking for parameter match: " << param->getFullAddress() << std::endl;
 					}
 					if (param->getFullAddress() == address) {
-						if (type == "f") {
-							preset.insert(std::pair<std::string,float>(address,std::stof(value)));
+                                                if (type == "f") {
+                                                        preset[address] = values;
 							parameterFound = true;
 							break;
 						}
 					}
 				}
+                                for(ParameterBool *param: mParameterBools) {
+                                        if (mVerbose) {
+                                                std::cout << "Checking for parameter bool match: " << param->getFullAddress() << std::endl;
+                                        }
+                                        if (param->getFullAddress() == address) {
+                                                if (type == "f") {
+                                                    preset[address] = values;
+                                                        parameterFound = true;
+                                                        break;
+                                                }
+                                        }
+                                }
+                                for(ParameterPose *param: mParameterPoses) {
+                                        if (mVerbose) {
+                                                std::cout << "Checking for parameter pose match: " << param->getFullAddress() << std::endl;
+                                        }
+                                        if (param->getFullAddress() == address) {
+                                                if (type == "fffffff") {
+                                                    preset[address] = values;
+
+                                                        parameterFound = true;
+                                                        break;
+                                                }
+                                        }
+                                }
 				if (!parameterFound && mVerbose) {
 					std::cout << "Preset in parameter not present: " << address << std::endl;
 				}
@@ -578,8 +632,14 @@ bool PresetHandler::savePresetValues(const ParameterStates &values, std::string 
 	}
 	f << "::" + presetName << std::endl;
 	for(auto value: values) {
-		std::string line = value.first + " f " + std::to_string(value.second);
-		f << line << std::endl;
+            std::string types, valueString;
+            for (float &floatValue: value.second) {
+                types += "f";
+                valueString += std::to_string(floatValue) + " ";
+            }
+            // TODO chop last blank space
+            std::string line = value.first + " " + types + " " + valueString;
+            f << line << std::endl;
 	}
 	f << "::" << std::endl;
 	if (f.bad()) {

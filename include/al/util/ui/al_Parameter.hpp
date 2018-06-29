@@ -451,6 +451,7 @@ public:
 	          float max = 1.0
             );
 
+    bool operator= (const bool value) { this->set(value == 1.0); return value == 1.0; }
 };
 
 // These three types are blocking, should not be used in time-critical contexts
