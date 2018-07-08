@@ -178,8 +178,8 @@ class Texture : public GPUObject {
   Texture();
   virtual ~Texture();
 
-  // TODO
-  // void create1D();
+  void create1D(GLsizei width, GLint internal = GL_RGBA8, GLenum format = GL_RGBA,
+                GLenum type = GL_UNSIGNED_BYTE);
 
   void create2D(unsigned int width, unsigned int height,
                 int internal = GL_RGBA8, unsigned int format = GL_RGBA,
