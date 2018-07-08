@@ -299,10 +299,10 @@ public:
     fbo_.unbind();
   }
 
-  void sphereRadius(float r) {
-    lens_.focalLength(r);
-    if (did_begin) g->lens(lens_);
-  }
+  //void sphereRadius(float r) {
+    //lens_.focalLength(r);
+    //if (did_begin) g->lens(lens_);
+  //}
 
   //void init(float near=0.1, float far=1000, float radius = 1e10)
   void init(const al::Lens& lens)
