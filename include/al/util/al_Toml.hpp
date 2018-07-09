@@ -1,17 +1,24 @@
 #ifndef INCLUDE_AL_TOML_HPP
 #define INCLUDE_AL_TOML_HPP
 
-#include "cpptoml.h"
 #include <stdexcept> // std::runtime_error
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <sstream>
+
+#include "cpptoml.h"
+
+#include "al/core/io/al_File.hpp"
+
 
 namespace al {
 
 struct TomlLoader
 {
   std::shared_ptr<cpptoml::table> root;
+  std::string mFilename;
 
   TomlLoader() {}
 
@@ -20,8 +27,63 @@ struct TomlLoader
   }
 
   void set_file(const std::string& filename) {
+    if (!al::File::exists(filename)) {
+      std::cout << "TomlLoader creating config file: " << filename << std::endl;
+      al::File configFile(filename);
+      if (configFile.open(filename, "w")) {
+        configFile.close();
+      } else {
+        std::cout << "ERROR: Unable to create config file: " << filename << std::endl;
+      }
+    }
     // will throw cpptoml::parse_exception if file is not found
     root = cpptoml::parse_file(filename);
+    mFilename = filename;
+  }
+
+/// Updates file on disk
+  void writeFile(std::string filename = "") {
+    if (filename == "") {
+      filename = mFilename;
+    }
+    al::File configFile(filename, "w");
+    if (configFile.open()) {
+      std::ostringstream ss;
+      ss << (*root);
+      configFile.write(ss.str());
+      configFile.close();
+    } else {
+      std::cout << "ERROR: Opening toml file '" << filename << "' for writing." << std:: endl;
+    }
+    
+  }
+
+  template<typename T>
+  void setDefaultValue(const std::string &keyName, const T &value) {
+    if (!root) {
+      throw std::runtime_error("al::TomlLoader::setDefaultValue, toml file not set");
+    }
+    auto val = root->get_as<T>(keyName);
+    if (!val) {
+      root->insert(keyName, value);
+    }
+  }
+
+  template<typename T>
+  bool hasKey(const std::string &keyName) {
+    auto val = root->get_as<T>(keyName);
+    if (!val) {
+      return false;
+    }
+    return true;
+  }
+
+  template<typename T>
+  void set(const std::string& key, const T &value) {
+    if (!root) {
+      throw std::runtime_error("al::TomlLoader::get, toml file not set");
+    }
+    root->insert(key, value);
   }
 
   // get top level key's value, supported template parameter type are:
