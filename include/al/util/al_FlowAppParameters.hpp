@@ -38,12 +38,12 @@ public:
 
 	static std::string paramsToString(ParameterServer &ps){
 		std::stringstream ss;
-		for(int i = 0; i < ps.parameters().size(); i++) {
+		for(unsigned int i = 0; i < ps.parameters().size(); i++) {
 			ss << "\t\t{\"name\":\"" << ps.parameters()[i]->getName() << "\", \"type\":\"f\"}";
 	    	if(i+1 != ps.parameters().size() || ps.poseParameters().size() > 0) ss << ",";
 	    	ss << "\n";
 	    }
-	    for(int i = 0; i < ps.poseParameters().size(); i++) {
+	    for(unsigned int i = 0; i < ps.poseParameters().size(); i++) {
 			ss << "\t\t{\"name\":\"" << ps.poseParameters()[i]->getName() << "\", \"type\":\"fffffff\"}";
 	    	if(i+1 != ps.poseParameters().size()) ss << ",";
 	    	ss << "\n";
