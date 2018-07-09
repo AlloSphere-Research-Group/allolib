@@ -14,6 +14,7 @@
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/io/al_ControlNav.hpp"
 #include "al/sphere/al_OmniRenderer.hpp"
+#include "al/util/al_Toml.hpp"
 
 #include <iostream>
 #include <map>
@@ -51,6 +52,7 @@ public:
       ROLE_AUDIO,
       ROLE_CONTROL,
       ROLE_INTERFACE, // For interface server
+      ROLE_DESKTOP, // Application runs as single desktop app
       ROLE_USER // User defined roles can add from here (using bitshift to use the higher bits)
   } Role;
 
@@ -89,7 +91,7 @@ public:
               if (entry.second.size() == 1) {
                   mRole = entry.second[0];
               } else {
-                  if (world_rank < entry.second.size()) {
+                  if (world_rank < (int) entry.second.size()) {
                       mRole = entry.second[world_rank];
                   } else {
                       mRole = entry.second[0];
@@ -98,8 +100,18 @@ public:
           }
       }
       std::cout << name() << ":" << world_rank << " set role to " << roleName() << std::endl;
+
+    if (role() == ROLE_SIMULATOR) {
+        configLoader.set_file("distributed_app.toml");
+        if (world_size <= 1) {
+            configLoader.set("mode", "desktop");
+        }
+    }
+
 #else
-      mRole = ROLE_SIMULATOR;
+      mRole = ROLE_DESKTOP;
+      configLoader.set_file("distributed_app.toml");
+      configLoader.set("mode", "desktop");
 #endif
 
   }
@@ -137,6 +149,8 @@ public:
           return "control";
       case ROLE_INTERFACE:
           return "interface";
+      case ROLE_DESKTOP:
+          return "desktop";
       case ROLE_NONE:
           return "none";
       default:
@@ -259,6 +273,8 @@ private:
   cuttlebone::Taker<TSharedState> mTaker;
   std::shared_ptr<ParameterServer> mParameterServer;
 
+  TomlLoader configLoader;
+
 };
 
 
@@ -269,9 +285,10 @@ inline void DistributedApp<TSharedState>::start() {
   glfw::init(is_verbose);
 
   uint16_t receiverPort = 9100;
-  if (role() == ROLE_SIMULATOR) {
+  if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) {
       mParameterServer = make_shared<ParameterServer>("", 9010);
       for (auto member: mRoleMap) {
+          // Relay all parameters to renderers
           if (std::find(member.second.begin(), member.second.end(), ROLE_RENDERER) != member.second.end()) {
               mParameterServer->addListener(member.first, receiverPort);
               continue;
@@ -288,14 +305,16 @@ inline void DistributedApp<TSharedState>::start() {
   FPS::startFPS(); // WindowApp (FPS)
   // initDeviceServer();
 
-  if (role() == ROLE_SIMULATOR) {
+  if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) {
       initFlowApp();
   }
   while (!WindowApp::shouldQuit()) {
     // to quit, call WindowApp::quit() or click close button of window,
     // or press ctrl + q
-
-    if (role() == ROLE_SIMULATOR) {
+    if (role() == ROLE_DESKTOP) {
+      simulate(dt_sec());
+      mQueuedStates = 1;
+    } else if (role() == ROLE_SIMULATOR) {
       simulate(dt_sec());
       mMaker.set(mState);
       mQueuedStates = 1;
