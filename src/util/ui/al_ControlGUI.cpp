@@ -222,7 +222,7 @@ void ControlGUI::init(int x, int y) {
 
 void ControlGUI::begin() {
     string name = "__ControlGUI_" + std::to_string(mId);
-    beginIMGUI_minimal(true, name.c_str(), mX, mY);
+    beginIMGUI_minimal(true, name.c_str(), mX, mY, mGUIBackgroundAlpha);
 }
 
 void ControlGUI::end() {

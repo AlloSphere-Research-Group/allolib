@@ -163,6 +163,20 @@ public:
      */
     bool usingInput() {return imgui_is_using_input();}
 
+    /**
+     * @brief Set background alpha value
+     *
+     * 0 for transparent, 1 for opaque
+     */
+    void backgroundAlpha(float a) { mGUIBackgroundAlpha = a; }
+
+    /**
+     * @brief Get background alpha value
+     *
+     * 0 for transparent, 1 for opaque
+     */
+    float backgroundAlpha() const { return mGUIBackgroundAlpha; }
+
 
 protected:
 
@@ -182,6 +196,8 @@ private:
 
     int mX, mY;
     int mId;
+
+    float mGUIBackgroundAlpha = 0;
 
     bool mStoreButtonOn {false};
     bool mRecordButtonValue {false};

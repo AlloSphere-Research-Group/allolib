@@ -19,7 +19,7 @@ void shutdownIMGUI();
 //                     endIMGUI, passing bool `show` will do/not do rendering of
 //                     the every imgui widgets
 // also see example/imgui/minimal.cpp for usage
-void beginIMGUI_minimal(bool use_input, const char *name = "", int posX = 0, int posY = 0);
+void beginIMGUI_minimal(bool use_input, const char *name = "", int posX = 0, int posY = 0, float alpha = 0);
 void endIMGUI_minimal(bool show);
 
 // returns true if keyboard/mouse input is getting used by imgui

@@ -50,10 +50,10 @@ void al::shutdownIMGUI()
   ImGui::DestroyContext();
 }
 
-void al::beginIMGUI_minimal(bool use_input, const char *name, int posX, int posY)
+void al::beginIMGUI_minimal(bool use_input, const char *name, int posX, int posY, float alpha)
 {
   beginIMGUI();
-  ImGui::SetNextWindowBgAlpha(0);
+  ImGui::SetNextWindowBgAlpha(alpha);
 
   ImGuiWindowFlags window_flags = 0;
   window_flags |= ImGuiWindowFlags_NoTitleBar; // if (no_titlebar)
