@@ -10,6 +10,33 @@ Texture::Texture() {}
 
 Texture::~Texture() { destroy(); }
 
+void Texture::create1D(GLsizei width, GLint internal, GLenum format,
+                       GLenum type)
+{
+  mTarget = GL_TEXTURE_1D;
+  mInternalFormat = internal;
+  mWidth = width;
+  mHeight = 1;
+  mDepth = 1;
+  mFormat = format;
+  mType = type;
+
+  // force sending params
+  mFilterUpdated = true;
+  mWrapUpdated = true;
+  mUsingMipmapUpdated = true;
+
+  glTexImage1D(mTarget, 0,  // level
+               mInternalFormat, mWidth, 0,  // border
+               mFormat, mType, NULL);
+
+  update_filter();
+  update_wrap();
+  // no mipmap update since there's no data yet,
+  // just flagging mUsingMipmapUpdated to be true
+  unbind_temp();
+}
+
 void Texture::create2D(unsigned int width, unsigned int height, int internal,
                        unsigned int format, unsigned int type) {
   mTarget = GL_TEXTURE_2D;
