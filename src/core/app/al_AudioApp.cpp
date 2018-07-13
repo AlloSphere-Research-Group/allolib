@@ -16,6 +16,9 @@ void AudioApp::initAudio(
   mAudioIO.init(AppAudioCB, this, audioBlockSize, audioRate, audioOutputs, audioInputs);
   if (device >= 0) {
        mAudioIO.device(AudioDevice(device));
+       // mAudioIO.device() sets the channels to the device default number
+       mAudioIO.channelsIn(audioInputs);
+       mAudioIO.channelsOut(audioOutputs);
   }
   mAudioIO.open();
 }
