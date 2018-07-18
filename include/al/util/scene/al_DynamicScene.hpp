@@ -293,12 +293,16 @@ public:
                         internalAudioIO.zeroOut();
                         internalAudioIO.frame(0);
                         voice->onProcess(internalAudioIO);
-                        Pose listeningPose;
+                        Vec3d listeningDir;
                         if (dynamic_cast<PositionedVoice *>(voice)) {
                             PositionedVoice *posVoice = static_cast<PositionedVoice *>(voice);
-                            listeningPose = posVoice->pose() * mListenerPose;
+                            Vec3d direction = posVoice->pose().vec() - mListenerPose.vec();
+
+                            //Rotate vector according to listener-rotation
+                            Quatd srcRot = mListenerPose.quat();
+                            listeningDir = srcRot.rotate(direction);
                             if (posVoice->useDistanceAttenuation()) {
-                                float distance = listeningPose.vec().mag();
+                                float distance = listeningDir.mag();
                                 float atten = mDistAtten.attenuation(distance);
                                 internalAudioIO.frame(0);
                                 float *buf = internalAudioIO.outBuffer(0);
@@ -309,9 +313,9 @@ public:
                                 }
                             }
                         } else {
-                            listeningPose = mListenerPose;
+                            listeningDir = mListenerPose;
                         }
-                        mSpatializer->renderBuffer(io, listeningPose, internalAudioIO.outBuffer(0), fpb);
+                        mSpatializer->renderBuffer(io, listeningDir, internalAudioIO.outBuffer(0), fpb);
                     }
                 }
                 voice = voice->next;
@@ -321,7 +325,7 @@ public:
             for (auto& tmap: mThreadMap) {
                 tmap.second.resize(0);
             }
-            int counter = 0;
+            unsigned int counter = 0;
             while (voice) {
                 if (voice->active()) {
                         mThreadMap[counter++].push_back(voice->id());
@@ -468,9 +472,10 @@ private:
                         internalAudioIO.zeroOut();
                         internalAudioIO.frame(0);
                         voice->onProcess(internalAudioIO);
+                        Pose listeningPose;
                         if (dynamic_cast<PositionedVoice *>(voice)) {
                             PositionedVoice *posVoice = static_cast<PositionedVoice *>(voice);
-                            Pose listeningPose = posVoice->pose() * scene->mListenerPose;
+                            listeningPose = posVoice->pose() * scene->mListenerPose;
                             if (posVoice->useDistanceAttenuation()) {
                                 float distance = listeningPose.vec().mag();
                                 float atten = scene->mDistAtten.attenuation(distance);
@@ -482,13 +487,14 @@ private:
                                     buf++;
                                 }
                             }
-                            scene->mSpatializerLock.lock();
-                            io.frame(offset);
-                            scene->mSpatializer->renderBuffer(io, listeningPose, internalAudioIO.outBuffer(0), fpb);
-                            scene->mSpatializerLock.unlock();
                         } else {
+                            listeningPose = scene->mListenerPose;
                             // FIXME what should we do here if voice not a PositionedVoice?
                         }
+                        scene->mSpatializerLock.lock();
+                        io.frame(offset);
+                        scene->mSpatializer->renderBuffer(io, listeningPose, internalAudioIO.outBuffer(0), fpb);
+                        scene->mSpatializerLock.unlock();
                     }
                 }
                 voice = voice->next;
