@@ -52,14 +52,9 @@
 
 #include "al/core/io/al_AudioIO.hpp"
 #include "al/core/types/al_SingleRWRingBuffer.hpp"
-//#include "al/core/types/al_MsgQueue.hpp"
-#include "al/core/protocol/al_OSC.hpp"
-#include "al/core/system/al_Thread.hpp"
+#include "al/core/system/al_Time.hpp"
 
 #include "Gamma/Filter.h"
-
-
-typedef struct BUTTER_ BUTTER;
 
 namespace al {
 
@@ -167,10 +162,7 @@ class OutputMaster : /*public osc::Recv,*/ public al::AudioCallback
      * @param sendPort The port to which messages will be sent
      * @param msg_timeout Time out for the socket listener (see documentation for al::osc::Recv)
      */
-    OutputMaster(unsigned int num_chnls, double sampleRate,
-                 const char * address = "", int inport = 19375,
-                 const char * sendAddress = "localhost", int sendPort = -1,
-                 al_sec msg_timeout = 0);
+    OutputMaster(unsigned int num_chnls, double sampleRate);
     ~OutputMaster() override;
 
     /** Set master output gain. This gain is applied after individual channel gains, and
@@ -294,16 +286,9 @@ private:
     bass_mgmt_mode_t m_BassManagementMode;
     int swIndex[4]; /* support for 4 SW max */
 
-//    MsgQueue m_parameterQueue;
-
     std::vector<float> m_meterMax;
     DoubleBuffering<float> m_meterBuffer;
     int m_meterCounter {0}; /* count samples for level updates */
-    std::string m_sendAddress;
-    int m_sendPort;
-    int m_runMeterThread;
-    al::Thread m_meterThread;
-    std::condition_variable m_meterCond;
 
     /* bass management filters */
     std::vector<gam::Biquad<double>> m_lopass1, m_lopass2, m_hipass1, m_hipass2;
@@ -315,10 +300,6 @@ private:
     void allocateChannels(unsigned int numChnls);
     static void *meterThreadFunc(void *arg);
 
-//    struct OSCHandler : public osc::PacketHandler{
-//        OutputMaster *outputmaster;
-//        void onMessage(osc::Message& m);
-//    } msghandler;
 };
 
 /** @} */

@@ -1,15 +1,12 @@
-// AudioScene example using the Stereo panner class
+// OutputMaster example
 // By Andrés Cabrera mantaraya36@gmail.com
-// March 7 2017 updated March 2018
+// July 2018
 
 #include <iostream>
 
 
 #include "al/core.hpp"
-#include "al/core/sound/al_StereoPanner.hpp"
-#include "al/util/audio/al_OutputMaster.hpp"
-
-#define BLOCK_SIZE 256
+#include "al/util/sound/al_OutputMaster.hpp"
 
 using namespace al;
 
@@ -31,8 +28,8 @@ public:
     void onDraw(Graphics &g) override {
         g.clear(0);
         float values[2];
-        values[0] = mOutputMaster.getCurrentChannelValue(0);
-        values[1] = mOutputMaster.getCurrentChannelValue(1);
+        // Copies the current values to the array passed
+        mOutputMaster.getCurrentValues(values);
         Mesh m;
         addQuad(m, 0.2, 0.2);
 
@@ -58,7 +55,7 @@ int main(int argc, char *argv[])
     app.dimensions(640, 480);
     app.title("Stereo Audio Scene");
     app.fps(30);
-    app.initAudio(44100, BLOCK_SIZE, 2, 2);
+    app.initAudio(44100, 256, 2, 2);
     app.start();
     return 0;
 }

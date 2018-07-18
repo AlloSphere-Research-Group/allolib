@@ -129,7 +129,7 @@ set(util_headers
   include/al/util/scene/al_SynthRecorder.hpp
   include/al/util/scene/al_DynamicScene.hpp
   include/al/util/al_Toml.hpp
-  include/al/util/audio/al_OutputMaster.hpp
+  include/al/util/sound/al_OutputMaster.hpp
 )
 
 set(util_sources
@@ -149,7 +149,7 @@ set(util_sources
   ${al_path}/src/util/scene/al_SynthSequencer.cpp
   ${al_path}/src/util/scene/al_SynthRecorder.cpp
   ${al_path}/src/util/al_Toml.cpp
-  ${al_path}/src/util/audio/al_OutputMaster.cpp
+  ${al_path}/src/util/sound/al_OutputMaster.cpp
 )
 
 set(al_headers
