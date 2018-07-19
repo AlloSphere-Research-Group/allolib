@@ -139,8 +139,8 @@ public:
   int active;
   std::string filepath;
   int width, height;
-  std::vector<Vec3f> warp_data;
-  std::vector<float> blend_data;
+  //std::vector<Vec3f> warp_data;
+  //std::vector<float> blend_data;
   std::vector<Vec4f> warp_and_blend_data;
 };
 
@@ -233,7 +233,7 @@ public:
     std::shared_ptr<Texture> texture[2];
     std::shared_ptr<Texture> warp_texture;
     Mat4f pc_matrix, p_matrix, r_matrix;
-    float tanFovDiv2;
+    float tanFovDiv2; // tan(fov)/2
   };
 
   WarpBlendData warpblend_;
@@ -254,7 +254,7 @@ public:
   int current_eye = 0;
   int current_projection = 0;
 
-  // instead of push/pop
+  // for saving previous settings
   Lens prev_lens_;
   ShaderProgram* prev_shader_;
 
@@ -463,17 +463,29 @@ public:
   }
 
   // use when near and far changed (only use after init)
+  // fov value of lens will not be used in omni drawing
+  // focallength value will be updated when drawing is actually done
+  // by uploading to shader as glsl-uniform value
   void updateLens(const Lens& lens) {
     lens_ = lens;
     float near = lens_.near();
     float far = lens_.far();
     float p10 = (near + far) / (near - far);
     float p14 = (2.0f * near * far) / (near - far);
+    // recall how proj mat was made:
+    //proj.set(
+    //  1.0f / std::tan(fov / 2.0f), 0, 0, 0,
+    //  0, 1.0f / std::tan(fov / 2.0f), 0, 0,
+    //  0, 0, (near + far) / (near - far), (2.0f * near * far) / (near - far),
+    //  0, 0, -1, 0
+    //);
     for(int index = 0; index < projection_infos_.size(); index++) {
       ProjectionInfo& info = projection_infos_[index];
       Mat4f& proj = info.p_matrix;
+      // only update where near and farf was related
       proj[10] = p10;
       proj[14] = p14;
+      // also update precalculated p*r mat
       Mat4f::multiply(info.pc_matrix, proj, info.r_matrix);
     }
 
