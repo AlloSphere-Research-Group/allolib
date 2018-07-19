@@ -148,6 +148,7 @@ set(util_sources
   ${al_path}/src/util/ui/al_ControlGUI.cpp
   ${al_path}/src/util/scene/al_SynthSequencer.cpp
   ${al_path}/src/util/scene/al_SynthRecorder.cpp
+  ${al_path}/src/util/scene/al_DynamicScene.cpp
   ${al_path}/src/util/al_Toml.cpp
   ${al_path}/src/util/sound/al_OutputMaster.cpp
 )
