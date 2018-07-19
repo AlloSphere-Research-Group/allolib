@@ -281,11 +281,14 @@ inline void DistributedApp<TSharedState>::start() {
       mParameterServer = make_shared<ParameterServer>("", receiverPort);
   }
   onInit();
+
   // must do before Window::create, overrides user given window diemnsions
   check_if_in_sphere_and_setup_window_dimensions();
+
   Window::create(is_verbose);
   preOnCreate();
   onCreate();
+
   AudioApp::beginAudio(); // only begins if `initAudio` was called before
   // initDeviceServer();
 
@@ -293,6 +296,7 @@ inline void DistributedApp<TSharedState>::start() {
       initFlowApp();
   }
   FPS::startFPS(); // WindowApp (FPS)
+
   while (!WindowApp::shouldQuit()) {
     // to quit, call WindowApp::quit() or click close button of window,
     // or press ctrl + q
