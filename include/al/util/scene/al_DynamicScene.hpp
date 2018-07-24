@@ -188,7 +188,7 @@ public:
 
     void print(ostream &stream = std::cout);
 
-protected:
+
     /**
      * @brief Determines the number of output channels allocated for the internal AudioIOData objects
      * @param channels
@@ -204,6 +204,23 @@ protected:
      * Always call prepare() after calling this function. The changes are only applied by prepare().
      */
     void setVoiceBusChannels(unsigned int channels) {mVoiceBusChannels = channels;}
+
+
+    typedef const std::function<void (AudioIOData &io, Pose &channelPose)> BusRoutingCallback;
+
+    /**
+     * @brief setBusRoutingCallback
+     * @param cb
+     *
+     * This function will be called after all voices have rendered their output and prior
+     * to the function call to process spatialization. Can be used to route signals to buses.
+     */
+    void setBusRoutingCallback(BusRoutingCallback cb)
+    {
+        mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
+    }
+
+protected:
 
 
 private:
@@ -237,6 +254,7 @@ private:
     int mVoiceMaxOutputChannels = 2;
     int mVoiceMaxInputChannels = 0;
     int mVoiceBusChannels = 0;
+    std::shared_ptr<BusRoutingCallback> mBusRoutingCallback;
 
     static void updateThreadFunc(UpdateThreadFuncData data);
 

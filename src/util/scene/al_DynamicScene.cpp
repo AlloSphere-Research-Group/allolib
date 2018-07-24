@@ -103,6 +103,9 @@ void DynamicScene::prepare(AudioIOData &io) {
     internalAudioIO.channelsIn(mVoiceMaxInputChannels);
     internalAudioIO.channelsOut(mVoiceMaxOutputChannels);
     internalAudioIO.channelsBus(mVoiceBusChannels);
+    if (io.channelsBus() < mVoiceBusChannels) {
+        std::cout << "WARNING: You don't have enough buses in AudioIO object. This is likely to crash." << std::endl;
+    }
     mThreadedAudioData.resize(mAudioThreads.size());
     for (auto &threadio: mThreadedAudioData) {
         threadio.framesPerBuffer(io.framesPerBuffer());
@@ -163,9 +166,10 @@ void DynamicScene::render(AudioIOData &io) {
                         voice->triggerOff(endOffsetFrames);
                     }
                     internalAudioIO.zeroOut();
-                    internalAudioIO.frame(0);
+                    internalAudioIO.frame(offset);
                     voice->onProcess(internalAudioIO);
                     Vec3d listeningDir;
+                    vector<Vec3f> posOffsets;
                     if (dynamic_cast<PositionedVoice *>(voice)) {
                         PositionedVoice *posVoice = static_cast<PositionedVoice *>(voice);
                         Vec3d direction = posVoice->pose().vec() - mListenerPose.vec();
@@ -173,6 +177,8 @@ void DynamicScene::render(AudioIOData &io) {
                         //Rotate vector according to listener-rotation
                         Quatd srcRot = mListenerPose.quat();
                         listeningDir = srcRot.rotate(direction);
+                        posOffsets = posVoice->audioOutOffsets();
+                        assert(posOffsets.size() == 0 || posOffsets.size() == posVoice->numOutChannels());
                         if (posVoice->useDistanceAttenuation()) {
                             float distance = listeningDir.mag();
                             float atten = mDistAtten.attenuation(distance);
@@ -187,7 +193,29 @@ void DynamicScene::render(AudioIOData &io) {
                     } else {
                         listeningDir = mListenerPose;
                     }
-                    mSpatializer->renderBuffer(io, listeningDir, internalAudioIO.outBuffer(0), fpb);
+                    if (mBusRoutingCallback) {
+                        // First call callback to route signals to internal buses
+                        internalAudioIO.frame(offset);
+                        (*mBusRoutingCallback)(internalAudioIO, mListenerPose);
+                        io.frame(offset);
+                        internalAudioIO.frame(offset);
+                        // Then gather all the internal buses into the master AudioIO buses
+                        while (io() && internalAudioIO()) {
+                            for (int i = 0; i < mVoiceBusChannels; i++) {
+                                io.bus(i) += internalAudioIO.bus(i);
+                            }
+                        }
+                    }
+                    for (unsigned int i = 0; i < voice->numOutChannels(); i++) {
+                        io.frame(offset);
+                        internalAudioIO.frame(offset);
+                        Pose offsetPose = mListenerPose;
+                        if (posOffsets.size() > 0) {
+                            offsetPose.vec() += posOffsets[i];
+                        }
+                        mSpatializer->renderBuffer(io, offsetPose, internalAudioIO.outBuffer(i), fpb);
+
+                    }
                 }
             }
             voice = voice->next;
@@ -308,14 +336,21 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
                         voice->triggerOff(endOffsetFrames);
                     }
                     internalAudioIO.zeroOut();
-                    internalAudioIO.frame(0);
+                    internalAudioIO.frame(offset);
                     voice->onProcess(internalAudioIO);
-                    Pose listeningPose;
+                    Vec3d listeningDir;
+                    vector<Vec3f> posOffsets;
                     if (dynamic_cast<PositionedVoice *>(voice)) {
                         PositionedVoice *posVoice = static_cast<PositionedVoice *>(voice);
-                        listeningPose = posVoice->pose() * scene->mListenerPose;
+                        Vec3d direction = posVoice->pose().vec() - scene->mListenerPose.vec();
+
+                        //Rotate vector according to listener-rotation
+                        Quatd srcRot = scene->mListenerPose.quat();
+                        listeningDir = srcRot.rotate(direction);
+                        posOffsets = posVoice->audioOutOffsets();
+                        assert(posOffsets.size() == 0 || posOffsets.size() == posVoice->numOutChannels());
                         if (posVoice->useDistanceAttenuation()) {
-                            float distance = listeningPose.vec().mag();
+                            float distance = scene->mListenerPose.vec().mag();
                             float atten = scene->mDistAtten.attenuation(distance);
                             internalAudioIO.frame(0);
                             float *buf = internalAudioIO.outBuffer(0);
@@ -326,12 +361,32 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
                             }
                         }
                     } else {
-                        listeningPose = scene->mListenerPose;
+                        listeningDir = scene->mListenerPose;
                         // FIXME what should we do here if voice not a PositionedVoice?
                     }
                     scene->mSpatializerLock.lock();
-                    io.frame(offset);
-                    scene->mSpatializer->renderBuffer(io, listeningPose, internalAudioIO.outBuffer(0), fpb);
+                    if (scene->mBusRoutingCallback) {
+                        // First call callback to route signals to internal buses
+                        internalAudioIO.frame(offset);
+                        (*scene->mBusRoutingCallback)(internalAudioIO, scene->mListenerPose);
+                        io.frame(offset);
+                        internalAudioIO.frame(offset);
+                        // Then gather all the internal buses into the master AudioIO buses
+                        while (io() && internalAudioIO()) {
+                            for (int i = 0; i < scene->mVoiceBusChannels; i++) {
+                                io.bus(i) += internalAudioIO.bus(i);
+                            }
+                        }
+                    }
+                    for (unsigned int i = 0; i < voice->numOutChannels(); i++) {
+                        io.frame(offset);
+                        internalAudioIO.frame(offset);
+                        Pose offsetPose = scene->mListenerPose;
+                        if (posOffsets.size() > 0) {
+                            offsetPose.vec() += posOffsets[i];
+                        }
+                        scene->mSpatializer->renderBuffer(io, offsetPose, internalAudioIO.outBuffer(i), fpb);
+                    }
                     scene->mSpatializerLock.unlock();
                 }
             }
