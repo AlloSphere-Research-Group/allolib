@@ -123,8 +123,8 @@ else
 fi
 
 if [ ${RUN_MPI}  != 0 ]; then
-#  echo Running MPI
-  mpirun --hostfile ../../mpi_hosts.txt -n 2 /usr/bin/env DISPLAY=:0 ./"${APP_NAME}${POSTFIX}"
+  echo Running MPI
+  mpirun --mca btl_tcp_if_include enp1s0 --hostfile ../../mpi_hosts.txt /usr/bin/env DISPLAY=:0 ./"${APP_NAME}${POSTFIX}"
 elif [ ${BUILD_TYPE} == "Release" ]; then
   ./"${APP_NAME}${POSTFIX}"
 else

@@ -21,6 +21,7 @@
 
 #ifdef AL_BUILD_MPI
 #include <mpi.h>
+#include <unistd.h>
 #endif
 
 #include "Cuttlebone/Cuttlebone.hpp"
@@ -129,7 +130,7 @@ public:
 //                   MPI_STATUS_IGNORE);
           mRole = ROLE_RENDERER;
       }
-      std::cout << name() << ":" << world_rank << " set role to " << roleName() << std::endl;
+      std::cout << name() << ":" << world_rank << " pid: "<< getpid()<< " set role to " << roleName() << std::endl;
 #endif
   }
 
