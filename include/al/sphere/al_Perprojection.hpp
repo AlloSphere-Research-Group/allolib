@@ -139,8 +139,8 @@ public:
   int active;
   std::string filepath;
   int width, height;
-  std::vector<Vec3f> warp_data;
-  std::vector<float> blend_data;
+  //std::vector<Vec3f> warp_data;
+  //std::vector<float> blend_data;
   std::vector<Vec4f> warp_and_blend_data;
 };
 
@@ -233,7 +233,7 @@ public:
     std::shared_ptr<Texture> texture[2];
     std::shared_ptr<Texture> warp_texture;
     Mat4f pc_matrix, p_matrix, r_matrix;
-    float tanFovDiv2;
+    float tanFovDiv2; // tan(fov)/2
   };
 
   WarpBlendData warpblend_;
@@ -254,7 +254,7 @@ public:
   int current_eye = 0;
   int current_projection = 0;
 
-  // instead of push/pop
+  // for saving previous settings
   Lens prev_lens_;
   ShaderProgram* prev_shader_;
 
@@ -299,14 +299,18 @@ public:
     fbo_.unbind();
   }
 
-  void sphereRadius(float r) {
-    lens_.focalLength(r);
-    if (did_begin) g->lens(lens_);
-  }
+  //void sphereRadius(float r) {
+    //lens_.focalLength(r);
+    //if (did_begin) g->lens(lens_);
+  //}
 
-  void init(float near=0.1, float far=1000, float radius = 1e10)
+  //void init(float near=0.1, float far=1000, float radius = 1e10)
+  void init(const al::Lens& lens)
   {
-    lens_.focalLength(radius);
+    lens_ = lens;
+    float near = lens_.near();
+    float far = lens_.far();
+    //lens_.focalLength(radius);
     viewport_.set(0, 0, res_, res_);
 
     projection_infos_.resize(warpblend_.viewports.size());
@@ -327,6 +331,7 @@ public:
       }
       direction = direction.normalize();
 #if 0
+      // use warp and belnd data to calculate min fov for the projection area
       // Determine the radius.
       float dot_max = 1;
       for(int i = 0; i < vp.width * vp.height; i++) {
@@ -402,7 +407,8 @@ public:
     calibration_loaded = true;
   }
 
-  void load_and_init_as_desktop_config(float near=0.1, float far=1000, float radius = 1e10) {
+  //void load_and_init_as_desktop_config(float near=0.1, float far=1000, float radius = 1e10) {
+  void load_and_init_as_desktop_config(const al::Lens& lens) {
     // add six projection infos that will serve as each face of cubemap
     // https://www.khronos.org/opengl/wiki/Cubemap_Texture
     // 0: GL_TEXTURE_CUBE_MAP_POSITIVE_X
@@ -414,8 +420,11 @@ public:
 
     warpblend_.load_desktop_mode_calibration();
     calibration_loaded = true;
-
-    lens_.focalLength(radius);
+    
+    lens_ = lens;
+    float near = lens_.near();
+    float far = lens_.far();
+    //lens_.focalLength(radius);
     res_ = 256;
     viewport_.set(0, 0, res_, res_);
 
@@ -453,7 +462,39 @@ public:
     texquad.update();
   }
 
-  void begin(Graphics& graphics) {
+  // use when near and far changed (only use after init)
+  // fov value of lens will not be used in omni drawing
+  // focallength value will be updated when drawing is actually done
+  // by uploading to shader as glsl-uniform value
+  void updateLens(const Lens& lens) {
+    lens_ = lens;
+    float near = lens_.near();
+    float far = lens_.far();
+    float p10 = (near + far) / (near - far);
+    float p14 = (2.0f * near * far) / (near - far);
+    // recall how proj mat was made:
+    //proj.set(
+    //  1.0f / std::tan(fov / 2.0f), 0, 0, 0,
+    //  0, 1.0f / std::tan(fov / 2.0f), 0, 0,
+    //  0, 0, (near + far) / (near - far), (2.0f * near * far) / (near - far),
+    //  0, 0, -1, 0
+    //);
+    for(int index = 0; index < projection_infos_.size(); index++) {
+      ProjectionInfo& info = projection_infos_[index];
+      Mat4f& proj = info.p_matrix;
+      // only update where near and farf was related
+      proj[10] = p10;
+      proj[14] = p14;
+      // also update precalculated p*r mat
+      Mat4f::multiply(info.pc_matrix, proj, info.r_matrix);
+    }
+
+  }
+
+  // changing lens and pose after begin does not have effect on omni rendering
+  void begin(Graphics& graphics, const al::Lens& lens, const al::Pose pose) {
+    updateLens(lens);
+    pose_ = pose;
     g = &graphics;
     g->pushFramebuffer(fbo_);
     g->pushViewport(viewport_);
@@ -514,9 +555,9 @@ public:
     did_begin = false;
   }
   
-  void pose(Pose const& p) { pose_ = p; if (did_begin) g->viewMatrix(view_mat(pose_)); }
-  Pose& pose() { return pose_; }
-  Pose const& pose() const { return pose_; }
+  //void pose(Pose const& p) { pose_ = p; if (did_begin) g->viewMatrix(view_mat(pose_)); }
+  //Pose& pose() { return pose_; }
+  //Pose const& pose() const { return pose_; }
 
   void composite(Graphics& g, int eye=0) {
     g.pushCamera(Viewpoint::IDENTITY);
