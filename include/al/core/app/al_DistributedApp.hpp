@@ -213,7 +213,7 @@ public:
 
   Graphics& graphics() { return mGraphics; }
 
-  // overrides WindowApp's start to also initiate AudioApp and etc.
+  // overrides (WindowApp & Omnirenderer)'s start to also initiate AudioApp and etc.
   void start() override;
 
   // interface from WindowApp
@@ -325,7 +325,6 @@ inline void DistributedApp<TSharedState>::start() {
   onInit();
   // must do before Window::create, overrides user given window diemnsions
   check_if_in_sphere_and_setup_window_dimensions();
-//  mGraphics.init();
   Window::create(is_verbose);
   preOnCreate();
 //  std::cout << name() << ":" << roleName()  << " before onCreate" << std::endl;
@@ -333,13 +332,13 @@ inline void DistributedApp<TSharedState>::start() {
 
 //  std::cout << name() << ":" << "before init audio" << std::endl;
   AudioApp::beginAudio(); // only begins if `initAudio` was called before
-  FPS::startFPS(); // WindowApp (FPS)
   // initDeviceServer();
 
 //  std::cout << name() << ":" << roleName() << " before init flow" << std::endl;
   if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) {
       initFlowApp();
   }
+  FPS::startFPS(); // WindowApp (FPS)
   while (!WindowApp::shouldQuit()) {
     // to quit, call WindowApp::quit() or click close button of window,
     // or press ctrl + q
@@ -356,10 +355,7 @@ inline void DistributedApp<TSharedState>::start() {
     preOnAnimate(dt_sec());
     onAnimate(dt_sec());
     if (role() == ROLE_RENDERER && running_in_sphere_renderer) {
-//      draw_using_perprojection_capture();
-      preOnDraw();
-      onDraw(mGraphics);
-      postOnDraw();
+      draw_using_perprojection_capture();
     }
     else {
       preOnDraw();
@@ -390,7 +386,15 @@ inline void DistributedApp<TSharedState>::preOnCreate() {
       mTaker = std::make_unique<cuttlebone::Taker<TSharedState>>();
       mTaker->start();
   }
+
+  window_is_stereo_buffered = Window::displayMode() & Window::STEREO_BUF;
   mGraphics.init();
+  if (role() == ROLE_RENDERER && running_in_sphere_renderer) {
+    load_perprojection_configuration();
+  }
+  if (role() == ROLE_RENDERER) {
+    cursorHide(true);
+  }
 }
 
 template<class TSharedState>

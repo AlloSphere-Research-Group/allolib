@@ -29,8 +29,8 @@ struct OmniRenderer : WindowApp
   void stereo(bool b) { render_stereo = b; }
   void toggleStereo() { render_stereo = !render_stereo; }
   void omniResolution(int res) { pp_render.update_resolution(res); }
-  void sphereRadius(float radius) { pp_render.sphereRadius(radius); }
   int omniResolution() { return pp_render.res_; }
+  //void sphereRadius(float radius) { pp_render.sphereRadius(radius); }
 
   // only for testing with desktop mode, loops (mono -> left -> right)
   void loopEyeForDesktopMode() {
