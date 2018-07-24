@@ -47,13 +47,13 @@ struct OmniRenderer : WindowApp
   }
 
   // getters trying to match al::App interface
-  Graphics &graphics() { return mGraphics; }
-  const Graphics &graphics() const { return mGraphics; }
-  Lens& lens() { return mLens; }
-  const Lens& lens() const { return mLens; }
-  void pose(Pose const &p) { mPose = p; }
-  Pose &pose() { return mPose; }
-  Pose const &pose() const { return mPose; }
+  virtual Graphics &graphics() { return mGraphics; }
+  virtual const Graphics &graphics() const { return mGraphics; }
+  virtual Lens& lens() { return mLens; }
+  virtual const Lens& lens() const { return mLens; }
+  virtual void pose(Pose const &p) { mPose = p; }
+  virtual Pose &pose() { return mPose; }
+  virtual Pose const &pose() const { return mPose; }
 
   // for user to override
   void onInit() override {}
