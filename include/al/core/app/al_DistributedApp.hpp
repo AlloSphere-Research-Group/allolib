@@ -135,11 +135,13 @@ public:
   }
 
   ~DistributedApp() {
+#ifndef AL_WINDOWS
       if (mMaker) {
           mMaker->stop();
       } else if (mTaker){
           mTaker->stop();
       }
+#endif
 #ifdef AL_BUILD_MPI
       MPI_Finalize();
 #endif
@@ -292,8 +294,10 @@ private:
 
   TSharedState mState;
   int mQueuedStates {0};
+#ifndef AL_WINDOWS
   std::unique_ptr<cuttlebone::Maker<TSharedState>> mMaker;
   std::unique_ptr<cuttlebone::Taker<TSharedState>> mTaker;
+#endif
   std::shared_ptr<ParameterServer> mParameterServer;
 
   TomlLoader configLoader;
@@ -346,11 +350,20 @@ inline void DistributedApp<TSharedState>::start() {
     if (role() == ROLE_DESKTOP || role() == ROLE_SIMULATOR) {
       simulate(dt_sec());
       mQueuedStates = 1;
+#ifndef AL_WINDOWS
       if (mMaker) {
           mMaker->set(mState);
       }
-    } else if (mTaker) {
-        mQueuedStates = mTaker->get(mState);
+#endif
+    } else {
+#ifndef AL_WINDOWS
+        if (mTaker) {
+            mQueuedStates = mTaker->get(mState);
+        }
+#else
+        // You shouldn't get here.... No windows support for cuttlebone
+        mQueuedStates = 1;
+#endif
     }
 
     preOnAnimate(dt_sec());
@@ -378,7 +391,7 @@ inline void DistributedApp<TSharedState>::start() {
 template<class TSharedState>
 inline void DistributedApp<TSharedState>::preOnCreate() {
   append(mNavControl);
-
+#ifndef AL_WINDOWS
   if (role() == ROLE_SIMULATOR) {
       std::string broadcastAddress = configLoader.gets("broadcastAddress");
       mMaker = std::make_unique<cuttlebone::Maker<TSharedState>>(broadcastAddress.c_str());
@@ -386,6 +399,7 @@ inline void DistributedApp<TSharedState>::preOnCreate() {
   } else if (role() == ROLE_RENDERER){
       mTaker = std::make_unique<cuttlebone::Taker<TSharedState>>();
       mTaker->start();
+#endif
   }
 
   window_is_stereo_buffered = Window::displayMode() & Window::STEREO_BUF;
