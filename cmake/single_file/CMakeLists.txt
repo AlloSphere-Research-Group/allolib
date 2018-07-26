@@ -47,6 +47,7 @@ endif()
 # TODO find cuttlebone
 set(CUTTLEBONE_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/../../cuttlebone")
 if (EXISTS ${CUTTLEBONE_SRC_DIR})
+    set(CUTTLE_BUILD_TESTS_AND_EXAMPLES OFF CACHE BOOL "Build Cuttlebone extras" FORCE)
     add_subdirectory(${CUTTLEBONE_SRC_DIR} "${app_path}/build/cuttlebone")
     list(APPEND app_include_dirs ${CUTTLEBONE_SRC_DIR})
     list(APPEND app_link_libs cuttlebone)
