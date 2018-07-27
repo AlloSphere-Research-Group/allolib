@@ -175,6 +175,7 @@ public:
         mOffOffsetFrames = offsetFrames; // TODO implement offset frames for trigger off. Currently ignoring and turning off at start of buffer
         onTriggerOff();
     }
+    
     void id(int idValue) {mId = idValue;}
 
     int id() {return mId;}
@@ -205,6 +206,8 @@ public:
 
     void *userData() {return mUserData;}
 
+    unsigned int numOutChannels() { return mNumOutChannels; }
+
     SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
 
 protected:
@@ -219,12 +222,22 @@ protected:
      * by PolySynth.
      */
     void free() {mActive = false; } // Mark this voice as done.
+    /**
+     * @brief Set the number of outputs this SynthVoice generates
+     * @param numOutputs
+     *
+     * If you are using this voice within PolySynth, make sure this number is
+     * less or equal than the number of output channels opened for the audio
+     * device. If using in DynamicScene, make sure
+     */
+    void setNumOutChannels(unsigned int numOutputs) {mNumOutChannels = numOutputs;}
 
 private:
     int mId {-1};
     int mActive {false};
     int mOnOffsetFrames {0};
     int mOffOffsetFrames {0};
+    unsigned int mNumOutChannels {1}; // Set this
     void *mUserData;
 };
 

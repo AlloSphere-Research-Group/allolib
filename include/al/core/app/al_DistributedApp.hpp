@@ -21,6 +21,7 @@
 
 #ifdef AL_BUILD_MPI
 #include <mpi.h>
+#include <unistd.h>
 #endif
 
 #ifndef AL_WINDOWS
@@ -30,6 +31,7 @@
 /*  Keehong Youn, 2017, younkeehong@gmail.com
  *  Andres Cabrera, 2018, mantaraya36@gmail.com
  *
+ * Using this file requires Cuttlebone. MPI is optional.
 */
 
 namespace al {
@@ -58,6 +60,7 @@ public:
   } Role;
 
   DistributedApp() {
+
 #ifdef AL_BUILD_MPI
       MPI_Init(NULL, NULL);
 
@@ -65,64 +68,80 @@ public:
       MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
       MPI_Get_processor_name(processor_name, &name_len);
+#endif
+      if (isMaster()) {
+          configLoader.set_file("distributed_app.toml");
+          configLoader.setDefaultValue("distributed", false);
+          configLoader.setDefaultValue("broadcastAddress", std::string("192.168.0.255"));
+          configLoader.writeFile();
+          if (configLoader.getb("distributed")) {
+              std::cout << name() << ":Running distributed" << std::endl;
+              mRole = ROLE_SIMULATOR;
+              mRunDistributed = true;
+          }
+      }
 
-      mRoleMap["spherez05"] = {ROLE_SIMULATOR, ROLE_RENDERER};
-      mRoleMap["gr01"] = {ROLE_SIMULATOR};
+      if (mRunDistributed) {
 
-      mRoleMap["moxi"] = {ROLE_RENDERER};
-      mRoleMap["gr02"] = {ROLE_RENDERER};
-      mRoleMap["gr03"] = {ROLE_RENDERER};
-      mRoleMap["gr04"] = {ROLE_RENDERER};
-      mRoleMap["gr05"] = {ROLE_RENDERER};
-      mRoleMap["gr06"] = {ROLE_RENDERER};
-      mRoleMap["gr07"] = {ROLE_RENDERER};
-      mRoleMap["gr08"] = {ROLE_RENDERER};
-      mRoleMap["gr09"] = {ROLE_RENDERER};
-      mRoleMap["gr10"] = {ROLE_RENDERER};
-      mRoleMap["gr11"] = {ROLE_RENDERER};
-      mRoleMap["gr12"] = {ROLE_RENDERER};
-      mRoleMap["gr13"] = {ROLE_RENDERER};
-      mRoleMap["gr14"] = {ROLE_RENDERER};
+          mRoleMap["spherez05"] = {ROLE_SIMULATOR, ROLE_RENDERER};
+          mRoleMap["gr01"] = {ROLE_SIMULATOR};
 
-      mRoleMap["audio"] = {ROLE_AUDIO};
-      mRoleMap["ar01"] = {ROLE_AUDIO};
+          mRoleMap["moxi"] = {ROLE_RENDERER};
+          mRoleMap["gr02"] = {ROLE_RENDERER};
+          mRoleMap["gr03"] = {ROLE_RENDERER};
+          mRoleMap["gr04"] = {ROLE_RENDERER};
+          mRoleMap["gr05"] = {ROLE_RENDERER};
+          mRoleMap["gr06"] = {ROLE_RENDERER};
+          mRoleMap["gr07"] = {ROLE_RENDERER};
+          mRoleMap["gr08"] = {ROLE_RENDERER};
+          mRoleMap["gr09"] = {ROLE_RENDERER};
+          mRoleMap["gr10"] = {ROLE_RENDERER};
+          mRoleMap["gr11"] = {ROLE_RENDERER};
+          mRoleMap["gr12"] = {ROLE_RENDERER};
+          mRoleMap["gr13"] = {ROLE_RENDERER};
+          mRoleMap["gr14"] = {ROLE_RENDERER};
 
-      for (auto entry: mRoleMap) {
-          if (strncmp(processor_name, entry.first.c_str(), name_len) == 0) {
-              if (entry.second.size() == 1) {
-                  mRole = entry.second[0];
-              } else {
-                  if (world_rank < (int) entry.second.size()) {
-                      mRole = entry.second[world_rank];
-                  } else {
+          mRoleMap["audio"] = {ROLE_AUDIO};
+          mRoleMap["ar01"] = {ROLE_AUDIO};
+
+//          if (isMaster()) {
+//              int number = 398;
+//              for (int i = 1; i < world_size; i ++) {
+//                  MPI_Send(&number, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
+//              }
+//          }
+          for (auto entry: mRoleMap) {
+              if (strncmp(processor_name, entry.first.c_str(), name_len) == 0) {
+                  if (entry.second.size() == 1) {
                       mRole = entry.second[0];
+                  } else {
+                      if (world_rank < (int) entry.second.size()) {
+                          mRole = entry.second[world_rank];
+                      } else {
+                          mRole = entry.second[0];
+                      }
                   }
               }
           }
+
       }
-      std::cout << name() << ":" << world_rank << " set role to " << roleName() << std::endl;
-
-    if (role() == ROLE_SIMULATOR) {
-        configLoader.set_file("distributed_app.toml");
-        if (world_size <= 1) {
-            configLoader.set("mode", "desktop");
-        }
-    }
-
-#else
-      mRole = ROLE_DESKTOP;
-      configLoader.set_file("distributed_app.toml");
-      configLoader.set("mode", "desktop");
+#ifdef AL_BUILD_MPI
+      if (!isMaster()) {
+//          int number;
+//          MPI_Recv(&number, 1, MPI_INT, 0, 1, MPI_COMM_WORLD,
+//                   MPI_STATUS_IGNORE);
+          mRole = ROLE_RENDERER;
+      }
+      std::cout << name() << ":" << world_rank << " pid: "<< getpid()<< " set role to " << roleName() << std::endl;
 #endif
-
   }
 
   ~DistributedApp() {
 #ifndef AL_WINDOWS
-      if (role() == ROLE_SIMULATOR) {
-          mMaker.stop();
-      } else {
-          mTaker.stop();
+      if (mMaker) {
+          mMaker->stop();
+      } else if (mTaker){
+          mTaker->stop();
       }
 #endif
 #ifdef AL_BUILD_MPI
@@ -185,21 +204,19 @@ public:
   const Viewpoint& view() const { return mView; }
 
   // Nav& nav() override { return mNav; }
-  Nav& nav() { return mNav; }
+  Nav& nav() override { return mNav; }
   const Nav& nav() const { return mNav; }
 
-  Pose& pose() { return mNav; }
-  const Pose& pose() const { return mNav; }
+  Pose& pose() override { return mNav; }
+  const Pose& pose() const override { return mNav; }
 
   NavInputControl& navControl() { return mNavControl; }
   NavInputControl const& navControl() const { return mNavControl; }
 
-  Lens& lens() { return mView.lens(); }
-  Lens const& lens() const { return mView.lens(); }
+  Lens& lens() override { return mView.lens(); }
+  Lens const& lens() const override { return mView.lens(); }
 
-  Graphics& graphics() { return mGraphics; }
-
-  // overrides WindowApp's start to also initiate AudioApp and etc.
+  // overrides (WindowApp & Omnirenderer)'s start to also initiate AudioApp and etc.
   void start() override;
 
   // interface from WindowApp
@@ -251,6 +268,12 @@ public:
    */
   int newStates() { return mQueuedStates; }
 
+  void syncrhonize() {
+#ifdef AL_BUILD_MPI
+      MPI_Barrier(MPI_COMM_WORLD); // Wait for everybody
+#endif
+  }
+
   void log(std::string logText) {
       std::cout << name() << ":" << logText << std::endl;
   }
@@ -266,16 +289,17 @@ private:
   char processor_name[MPI_MAX_PROCESSOR_NAME];
   int name_len;
 #endif
-  Role mRole {ROLE_NONE};
+  bool mRunDistributed {false};
+  Role mRole {ROLE_DESKTOP};
 
   std::map<string, std::vector<Role>> mRoleMap;
 
   TSharedState mState;
   int mQueuedStates {0};
 #ifndef AL_WINDOWS
-  cuttlebone::Maker<TSharedState> mMaker {"192.168.0.255"};
-  cuttlebone::Taker<TSharedState> mTaker;
-#end
+  std::unique_ptr<cuttlebone::Maker<TSharedState>> mMaker;
+  std::unique_ptr<cuttlebone::Taker<TSharedState>> mTaker;
+#endif
   std::shared_ptr<ParameterServer> mParameterServer;
 
   TomlLoader configLoader;
@@ -302,42 +326,58 @@ inline void DistributedApp<TSharedState>::start() {
   } else {
       mParameterServer = make_shared<ParameterServer>("", receiverPort);
   }
+//  std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
   onInit();
+
+  // must do before Window::create, overrides user given window diemnsions
+  check_if_in_sphere_and_setup_window_dimensions();
+
   Window::create(is_verbose);
   preOnCreate();
+//  std::cout << name() << ":" << roleName()  << " before onCreate" << std::endl;
   onCreate();
+
   AudioApp::beginAudio(); // only begins if `initAudio` was called before
-  FPS::startFPS(); // WindowApp (FPS)
   // initDeviceServer();
 
+//  std::cout << name() << ":" << roleName() << " before init flow" << std::endl;
   if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) {
       initFlowApp();
   }
+  FPS::startFPS(); // WindowApp (FPS)
+
   while (!WindowApp::shouldQuit()) {
     // to quit, call WindowApp::quit() or click close button of window,
     // or press ctrl + q
-    if (role() == ROLE_DESKTOP) {
+    if (role() == ROLE_DESKTOP || role() == ROLE_SIMULATOR) {
       simulate(dt_sec());
       mQueuedStates = 1;
-    } else if (role() == ROLE_SIMULATOR) {
-      simulate(dt_sec());
 #ifndef AL_WINDOWS
-      mMaker.set(mState);
+      if (mMaker) {
+ || role() == ROLE_SIMULATOR
+      }
 #endif
-      mQueuedStates = 1;
     } else {
 #ifndef AL_WINDOWS
-      mQueuedStates = mTaker.get(mState);
+        if (mTaker) {
+            mQueuedStates = mTaker->get(mState);
+        }
 #else
-    mQueuedStates = 1;
+        // You shouldn't get here.... No windows support for cuttlebone
+        mQueuedStates = 1;
 #endif
     }
 
     preOnAnimate(dt_sec());
     onAnimate(dt_sec());
-    preOnDraw();
-    onDraw(mGraphics);
-    postOnDraw();
+    if (role() == ROLE_RENDERER && running_in_sphere_renderer) {
+      draw_using_perprojection_capture();
+    }
+    else {
+      preOnDraw();
+      onDraw(mGraphics);
+      postOnDraw();
+    }
     Window::refresh();
     FPS::tickFPS();
   }
@@ -355,12 +395,23 @@ inline void DistributedApp<TSharedState>::preOnCreate() {
   append(mNavControl);
 #ifndef AL_WINDOWS
   if (role() == ROLE_SIMULATOR) {
-      mMaker.start();
-  } else {
-      mTaker.start();
-  }
+      std::string broadcastAddress = configLoader.gets("broadcastAddress");
+      mMaker = std::make_unique<cuttlebone::Maker<TSharedState>>(broadcastAddress.c_str());
+      mMaker->start();
+  } else if (role() == ROLE_RENDERER){
+      mTaker = std::make_unique<cuttlebone::Taker<TSharedState>>();
+      mTaker->start();
 #endif
+  }
+
+  window_is_stereo_buffered = Window::displayMode() & Window::STEREO_BUF;
   mGraphics.init();
+  if (role() == ROLE_RENDERER && running_in_sphere_renderer) {
+    load_perprojection_configuration();
+  }
+  if (role() == ROLE_RENDERER) {
+    cursorHide(true);
+  }
 }
 
 template<class TSharedState>

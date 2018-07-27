@@ -19,6 +19,8 @@ struct OmniRenderer : WindowApp
   bool running_in_sphere_renderer = false;
   bool window_is_stereo_buffered = false;
   int eye_to_render = -1; // -1 for mono, 0: left, 1: right
+  Lens mLens;
+  Pose mPose;
 
   OmniRenderer() : WindowApp() {}
   // `WindowApp()` appends std window controls and itself as event handler
@@ -27,8 +29,8 @@ struct OmniRenderer : WindowApp
   void stereo(bool b) { render_stereo = b; }
   void toggleStereo() { render_stereo = !render_stereo; }
   void omniResolution(int res) { pp_render.update_resolution(res); }
-  void sphereRadius(float radius) { pp_render.sphereRadius(radius); }
   int omniResolution() { return pp_render.res_; }
+  //void sphereRadius(float radius) { pp_render.sphereRadius(radius); }
 
   // only for testing with desktop mode, loops (mono -> left -> right)
   void loopEyeForDesktopMode() {
@@ -45,13 +47,13 @@ struct OmniRenderer : WindowApp
   }
 
   // getters trying to match al::App interface
-  Graphics &graphics() { return mGraphics; }
-  const Graphics &graphics() const { return mGraphics; }
-  Lens &lens() { return pp_render.lens_; }
-  Lens const &lens() const { return pp_render.lens_; }
-  void pose(Pose const &p) { pp_render.pose(p); }
-  Pose &pose() { return pp_render.pose(); }
-  Pose const &pose() const { return pp_render.pose(); }
+  virtual Graphics &graphics() { return mGraphics; }
+  virtual const Graphics &graphics() const { return mGraphics; }
+  virtual Lens& lens() { return mLens; }
+  virtual const Lens& lens() const { return mLens; }
+  virtual void pose(Pose const &p) { mPose = p; }
+  virtual Pose &pose() { return mPose; }
+  virtual Pose const &pose() const { return mPose; }
 
   // for user to override
   void onInit() override {}
@@ -124,19 +126,23 @@ inline void OmniRenderer::load_perprojection_configuration() {
         sphere::config_directory("data").c_str(),   // path
         sphere::renderer_hostname("config").c_str() // hostname
     ); // parameters will be used to look for file ${path}/${hostname}.txt
-    pp_render.init();
+    pp_render.init(lens());
   } else {
     // load fake projection data for desktop rendering
-    pp_render.load_and_init_as_desktop_config();
+    pp_render.load_and_init_as_desktop_config(lens());
   }
 }
 
 inline void OmniRenderer::draw_using_perprojection_capture() {
 
   // start drawing to perprojection fbos
-  mGraphics.omni(true);
-  // pushes fbo, viewport, viewmat, projmat, lens, shader
-  pp_render.begin(mGraphics);
+
+  mGraphics.omni(true); // set true to use omni default shaders when drawing
+  // lens and pose for rendering is set in PerProjectionRender::begin
+  // so updating those in onDraw will not have effect in rendering
+  // will setting up omni rendering,
+  // begin also pushes fbo, viewport, viewmat, projmat, lens, shader
+  pp_render.begin(mGraphics, lens(), pose());
   glDrawBuffer(GL_COLOR_ATTACHMENT0); // for fbo's output
   if (render_stereo) {
     for (int eye = 0; eye < 2; eye += 1) {

@@ -76,7 +76,11 @@ private:
 
 	void equalPowerPan(const Vec3d& relPos, float &gainL, float &gainR)
 	{
-		double panVal = 1.0 - std::fabs(std::atan2(relPos.z, relPos.x)/M_PI);
+		double panVal = 0.5;
+		if (relPos.z != 0 || relPos.x != 0) {
+			panVal = 1.0 - std::fabs(std::atan2(relPos.z, relPos.x)/M_PI);
+		}
+
 		gainL = std::cos((M_PI/2.0)*panVal);
 		gainR = std::sin((M_PI/2.0)*panVal);
 	}

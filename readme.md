@@ -1,11 +1,38 @@
-TODO
+# Installing Allolib
+
+git clone https://github.com/AlloSphere-Research-Group/allolib
+cd allolib
+git submodule init
+git submodule update
+./run.sh examples/graphics/2d.cpp
+
+# Running allolib
+
+## On *nix systems (Linux and Mac OS)
+
+The simplest way to compile and run a single file in allolib is by using the run.sh script:
+
+./run.sh path/to/file.cpp
+
+This will build allolib, and create an executable for the file.cpp called 'file' inside the '''path/to/bin''' directory. It will then run the application.
+
+You can add a file called '''flags.cmake''' in the '''path/to/''' directory which will be added to the build scripts. Here you can add dependencies, include directories, linking and anything else that cmake could be used for. See the example in '''examples/user_flags'''.
+
+For more complex projects follow the example provided in the empty/project directory. This requires writing a CMakeLists.txt to specify sources, dependencies and linkage.
+
+## On Windows systems
+
+Open cmake-gui and create a Visual Studio project for Allolib. Build it. This will create the library you can then use in your project, but you will have to add libraries and directories manually.
+
+The run.sh script will not work for Windows.
+
+An alternative is to use the 'empty_project/' template to start your project by copying it to the directory where allolib/ resides (i.e. move it outside the source tree). Then import the CMakeLists.txt project to visual studio. You will need to install full cmake support in VS. The generated project should build allolib and your project.
+
+#TODO
 
 - fullscreen with specific monitor
-- stereo & omni
-- font loading
-- Parameter class
 
-DEPENDENCIES
+#DEPENDENCIES
 
 - GLFW
 - GLEW
