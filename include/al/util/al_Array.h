@@ -61,7 +61,7 @@ extern "C" {
 #endif
 
 
-#pragma mark AlloTy
+//#pragma mark AlloTy
 /**
 	Unique identifiers for principal types
 		(inspired by SDIF; higher bits represent semantics, lower bits represent size)
@@ -294,7 +294,7 @@ void allo_array_wrapper_release(AlloArrayWrapper *wrap);
  ********* INLINE IMPLEMENTATION BELOW ***********
  *
  */
-#pragma mark -------------------------------------
+//#pragma mark -------------------------------------
 
 static inline size_t allo_type_size(AlloTy ty) {
 	switch(ty) {
