@@ -23,12 +23,13 @@
 #include <mpi.h>
 #endif
 
+#ifndef AL_WINDOWS
 #include "Cuttlebone/Cuttlebone.hpp"
+#endif
 
 /*  Keehong Youn, 2017, younkeehong@gmail.com
  *  Andres Cabrera, 2018, mantaraya36@gmail.com
  *
- * Using this file requires both MPI and Cuttlebone
 */
 
 namespace al {
@@ -117,11 +118,13 @@ public:
   }
 
   ~DistributedApp() {
+#ifndef AL_WINDOWS
       if (role() == ROLE_SIMULATOR) {
           mMaker.stop();
       } else {
           mTaker.stop();
       }
+#endif
 #ifdef AL_BUILD_MPI
       MPI_Finalize();
 #endif
@@ -269,8 +272,10 @@ private:
 
   TSharedState mState;
   int mQueuedStates {0};
+#ifndef AL_WINDOWS
   cuttlebone::Maker<TSharedState> mMaker {"192.168.0.255"};
   cuttlebone::Taker<TSharedState> mTaker;
+#end
   std::shared_ptr<ParameterServer> mParameterServer;
 
   TomlLoader configLoader;
@@ -316,10 +321,16 @@ inline void DistributedApp<TSharedState>::start() {
       mQueuedStates = 1;
     } else if (role() == ROLE_SIMULATOR) {
       simulate(dt_sec());
+#ifndef AL_WINDOWS
       mMaker.set(mState);
+#endif
       mQueuedStates = 1;
     } else {
+#ifndef AL_WINDOWS
       mQueuedStates = mTaker.get(mState);
+#else
+    mQueuedStates = 1;
+#endif
     }
 
     preOnAnimate(dt_sec());
@@ -342,12 +353,13 @@ inline void DistributedApp<TSharedState>::start() {
 template<class TSharedState>
 inline void DistributedApp<TSharedState>::preOnCreate() {
   append(mNavControl);
-
+#ifndef AL_WINDOWS
   if (role() == ROLE_SIMULATOR) {
       mMaker.start();
   } else {
       mTaker.start();
   }
+#endif
   mGraphics.init();
 }
 
