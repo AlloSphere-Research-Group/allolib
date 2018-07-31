@@ -362,7 +362,7 @@ inline void DistributedApp<TSharedState>::start() {
       mQueuedStates = 1;
 #ifndef AL_WINDOWS
       if (mMaker) {
- || role() == ROLE_SIMULATOR
+        mMaker->set(mState);
       }
 #endif
     } else {
