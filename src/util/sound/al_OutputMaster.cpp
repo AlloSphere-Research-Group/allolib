@@ -109,14 +109,12 @@ int OutputMaster::getNumChnls()
 void OutputMaster::onAudioCB(AudioIOData &io)
 {
 	unsigned int nframes = io.framesPerBuffer();
-	double bass_buf[nframes];
 	double filt_out;
 	double filt_low = 0.0;
 	double master_gain;
 
 //	m_parameterQueue.update(0);
 	master_gain = m_masterGain * (m_muteAll ? 0.0 : 1.0);
-	memset(bass_buf, 0, nframes * sizeof(double));
     io.frame(0);
     while (io()) {
         double bassbuf = 0.0; // Accumulate sw signals

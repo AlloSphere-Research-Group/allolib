@@ -113,7 +113,7 @@ public:
 	///							extension.
 	/// @param[in] src			source array containing pixel data
 	/// @param[in] compressFlags level of compression in [0,100] and other flags
-	static bool save(const std::string& filePath, const Array& src, int compressFlags=50);
+	static bool save(const std::string& filePath, const al::Array& src, int compressFlags=50);
 
 	/// Save pixel data to disk
 

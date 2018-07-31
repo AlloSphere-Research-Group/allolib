@@ -6,12 +6,14 @@
 #ifdef AL_WINDOWS
   #define WIN32_LEAN_AND_MEAN
   #define VC_EXTRALEAN
+  #define NOMINMAX
   #include <windows.h> // TCHAR, LPCTSTR
   #include <direct.h> // _getcwd
   #define platform_getcwd _getcwd
   #ifndef PATH_MAX
   #define PATH_MAX 260
   #endif
+  #undef NOMINMAX
 #else
   #include <sys/types.h>
   #include <sys/stat.h>

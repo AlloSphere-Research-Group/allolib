@@ -43,9 +43,12 @@
   Lance Putnam, 2006, putnam.lance@gmail.com
 */
 
-#include "al/core/math/al_Constants.hpp"
 #include <cmath>
+#define NOMINMAX
 #include <algorithm>
+#undef NOMIXMAX
+
+#include "al/core/math/al_Constants.hpp"
 
 namespace al {
 
@@ -235,7 +238,7 @@ template<class T> bool lessAbs(const T& v, const T& eps=T(0.000001));
 /// Returns maximum of three values
 ///
 /// @ingroup allocore
-template<class T> T max(const T& v1, const T& v2, const T& v3);
+template<typename T> T max(const T& v1, const T& v2, const T& v3);
 
 /// Returns mean of two values
 ///

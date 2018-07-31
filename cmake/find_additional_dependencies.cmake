@@ -11,8 +11,23 @@ option(USE_MPI "" ON)
 
 # al_path needs to be set prior to calling this script
 
-if (AL_WINDOWS)
+  # if (USE_APR)
+  #   find_package(PkgConfig REQUIRED)
+  #   pkg_search_module(APR REQUIRED apr-1)
+  # endif (USE_APR)
 
+  # for freeimage, assimp, freetype
+  list(APPEND CMAKE_MODULE_PATH
+    ${al_path}/cmake/find_scripts
+  )
+
+  find_package(FreeImage QUIET)
+  find_package(Assimp QUIET)
+  find_package(Freetype QUIET)
+  
+if (AL_WINDOWS AND (NOT FREEIMAGE_FOUND))
+
+  # This should be moved to the find script
   # if (USE_APR)
   #   set(APR_INCLUDE_DIRS ${al_path}/dependencies/apr/include)
   #   set(APR_LIBRARIES ${al_path}/dependencies/apr/libapr-1.lib)
@@ -34,24 +49,7 @@ if (AL_WINDOWS)
     set (FREEIMAGE_LIBRARY "")
   ENDIF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
 
-else ()
-
-  # if (USE_APR)
-  #   find_package(PkgConfig REQUIRED)
-  #   pkg_search_module(APR REQUIRED apr-1)
-  # endif (USE_APR)
-
-  # for freeimage, assimp, freetype
-  list(APPEND CMAKE_MODULE_PATH
-    ${al_path}/cmake/find_scripts
-  )
-
-  find_package(FreeImage QUIET)
-  find_package(Assimp QUIET)
-  find_package(Freetype QUIET)
-
-
-endif (AL_WINDOWS)
+endif (AL_WINDOWS AND (NOT FREEIMAGE_FOUND))
 
 find_package(MPI QUIET)
 

@@ -24,7 +24,10 @@
 #include <unistd.h>
 #endif
 
+#ifndef AL_WINDOWS
 #include "Cuttlebone/Cuttlebone.hpp"
+
+#endif
 
 /*  Keehong Youn, 2017, younkeehong@gmail.com
  *  Andres Cabrera, 2018, mantaraya36@gmail.com
@@ -34,7 +37,11 @@
 
 namespace al {
 
-template<class TSharedState>
+struct BasicState {
+	Pose pose;
+};
+
+template<class TSharedState = BasicState>
 class DistributedApp: public OmniRenderer,
            public AudioApp,
            public FlowAppParameters,
@@ -109,19 +116,23 @@ public:
 //              }
 //          }
           for (auto entry: mRoleMap) {
-              if (strncmp(processor_name, entry.first.c_str(), name_len) == 0) {
-                  if (entry.second.size() == 1) {
-                      mRole = entry.second[0];
-                  } else {
-                      if (world_rank < (int) entry.second.size()) {
-                          mRole = entry.second[world_rank];
+              if (strncmp(name().c_str(), entry.first.c_str(), name().size()) == 0) {
+				  if (entry.second.size() == 1) {
+					  mRole = entry.second[0];
+				  } else {
+#ifdef AL_BUILD_MPI
+					  int rank = world_rank;
+#else
+					  int rank = 0;
+#endif
+                      if (rank < (int) entry.second.size()) {
+                          mRole = entry.second[rank];
                       } else {
                           mRole = entry.second[0];
                       }
                   }
               }
           }
-
       }
 #ifdef AL_BUILD_MPI
       if (!isMaster()) {
@@ -147,7 +158,7 @@ public:
 #endif
   }
 
-  const char *name() {
+  string name() {
 #ifdef AL_BUILD_MPI
       return processor_name;
 #else
@@ -399,8 +410,8 @@ inline void DistributedApp<TSharedState>::preOnCreate() {
   } else if (role() == ROLE_RENDERER){
       mTaker = std::make_unique<cuttlebone::Taker<TSharedState>>();
       mTaker->start();
-#endif
   }
+#endif
 
   window_is_stereo_buffered = Window::displayMode() & Window::STEREO_BUF;
   mGraphics.init();

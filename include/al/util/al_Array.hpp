@@ -45,6 +45,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+
 #include "al/util/al_Array.h"
 #include "al/core/math/al_Functions.hpp"
 #include "al/core/math/al_Vec.hpp"
@@ -347,18 +348,18 @@ protected:
 /*
 	Type traits by partial specialization:
  */
-template<> inline AlloTy Array::type<uint8_t  >(){ return AlloUInt8Ty; }
-template<> inline AlloTy Array::type<uint16_t >(){ return AlloUInt16Ty; }
-template<> inline AlloTy Array::type<uint32_t >(){ return AlloUInt32Ty; }
-template<> inline AlloTy Array::type<uint64_t >(){ return AlloUInt64Ty; }
-template<> inline AlloTy Array::type<int8_t   >(){ return AlloSInt8Ty; }
-template<> inline AlloTy Array::type<int16_t  >(){ return AlloSInt16Ty; }
-template<> inline AlloTy Array::type<int32_t  >(){ return AlloSInt32Ty; }
-template<> inline AlloTy Array::type<int64_t  >(){ return AlloSInt64Ty; }
-template<> inline AlloTy Array::type<float    >(){ return AlloFloat32Ty; }
-template<> inline AlloTy Array::type<double   >(){ return AlloFloat64Ty; }
-template<> inline AlloTy Array::type<AlloArray>(){ return AlloArrayTy; }
-template<> inline AlloTy Array::type<void *>(){
+template<> inline AlloTy al::Array::type<uint8_t  >(){ return AlloUInt8Ty; }
+template<> inline AlloTy al::Array::type<uint16_t >(){ return AlloUInt16Ty; }
+template<> inline AlloTy al::Array::type<uint32_t >(){ return AlloUInt32Ty; }
+template<> inline AlloTy al::Array::type<uint64_t >(){ return AlloUInt64Ty; }
+template<> inline AlloTy al::Array::type<int8_t   >(){ return AlloSInt8Ty; }
+template<> inline AlloTy al::Array::type<int16_t  >(){ return AlloSInt16Ty; }
+template<> inline AlloTy al::Array::type<int32_t  >(){ return AlloSInt32Ty; }
+template<> inline AlloTy al::Array::type<int64_t  >(){ return AlloSInt64Ty; }
+template<> inline AlloTy al::Array::type<float    >(){ return AlloFloat32Ty; }
+template<> inline AlloTy al::Array::type<double   >(){ return AlloFloat64Ty; }
+template<> inline AlloTy al::Array::type<AlloArray>(){ return AlloArrayTy; }
+template<> inline AlloTy al::Array::type<void *>(){
 	switch(sizeof(void *)) {
 		case 4: return AlloPointer32Ty;
 		case 8: return AlloPointer64Ty;
@@ -465,7 +466,7 @@ template<typename T> inline void Array::read_interp(T * val, double x, double y)
 	}
 }
 
-template<typename T> inline void Array::read_interp(T * val, double x, double y, double z) const {
+template<typename T> inline void al::Array::read_interp(T * val, double x, double y, double z) const {
 	x = wrap<double>(x, (double)header.dim[0], 0.);
 	y = wrap<double>(y, (double)header.dim[1], 0.);
 	z = wrap<double>(z, (double)header.dim[2], 0.);

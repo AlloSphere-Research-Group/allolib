@@ -18,8 +18,9 @@
 */
 /**********************************************************************/
 
-
+#define NOMINMAX
 #include "RtMidi.h"
+#undef NOMINMAX
 
 namespace al{
 

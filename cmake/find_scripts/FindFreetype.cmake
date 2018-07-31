@@ -48,6 +48,7 @@ if((NOT FREETYPE_LIBRARY) OR (NOT FREETYPE_INCLUDE_DIR))
     $ENV{FREETYPE_DIR}
     PATH_SUFFIXES include
     PATHS
+	windows
     /usr/local/Cellar/freetype/2.4.10/include
     /usr/local/X11R6/include
     /usr/local/X11/include
@@ -57,26 +58,12 @@ if((NOT FREETYPE_LIBRARY) OR (NOT FREETYPE_INCLUDE_DIR))
     /usr/freeware/include
     PATH_SUFFIXES freetype freetype2
     )
-
-  FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 config/ftheader.h
-    HINTS
-    $ENV{FREETYPE_DIR}/include/freetype2
-    PATHS
-    /usr/local/Cellar/freetype/2.4.10/include/freetype2
-    /usr/local/X11R6/include
-    /usr/local/X11/include
-    /usr/X11/include
-    /sw/include
-    /opt/local/include
-    /usr/freeware/include
-    PATH_SUFFIXES freetype freetype2
-    )
-
-  IF(NOT FREETYPE_INCLUDE_DIR_freetype2)
+	
   FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h
     HINTS
     $ENV{FREETYPE_DIR}/include/freetype2
     PATHS
+	windows
     /usr/local/Cellar/freetype/2.4.10/include/freetype2
 ∑    /usr/local/X11R6/include
     /usr/local/X11/include
@@ -87,9 +74,26 @@ if((NOT FREETYPE_LIBRARY) OR (NOT FREETYPE_INCLUDE_DIR))
     /usr/freeware/include
     PATH_SUFFIXES freetype freetype2
     )
+  IF(NOT FREETYPE_INCLUDE_DIR_freetype2)
+  FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 config/ftheader.h
+    HINTS
+    $ENV{FREETYPE_DIR}/include/freetype2
+    PATHS
+	windows
+    /usr/local/Cellar/freetype/2.4.10/include/freetype2
+    /usr/local/X11R6/include
+    /usr/local/X11/include
+    /usr/X11/include
+    /sw/include
+    /opt/local/include
+    /usr/freeware/include
+    PATH_SUFFIXES freetype freetype2
+    )
+
   ENDIF(NOT FREETYPE_INCLUDE_DIR_freetype2)
 
   FIND_LIBRARY(FREETYPE_LIBRARY
+	windows
     NAMES freetype libfreetype freetype219
     HINTS
     $ENV{FREETYPE_DIR}
@@ -116,4 +120,3 @@ if((NOT FREETYPE_LIBRARY) OR (NOT FREETYPE_INCLUDE_DIR))
 
   MARK_AS_ADVANCED(FREETYPE_LIBRARY FREETYPE_INCLUDE_DIR_freetype2 FREETYPE_INCLUDE_DIR_ft2build)
 endif((NOT FREETYPE_LIBRARY) OR (NOT FREETYPE_INCLUDE_DIR))
-
