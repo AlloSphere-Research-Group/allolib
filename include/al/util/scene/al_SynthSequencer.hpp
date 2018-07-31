@@ -65,6 +65,7 @@
 #include "al/core/io/al_AudioIOData.hpp"
 #include "al/core/io/al_File.hpp"
 #include "al/util/al_SingleRWRingBuffer.hpp"
+#include "al/util/ui/al_Parameter.hpp"
 
 //#include "Gamma/Domain.h"
 
@@ -99,20 +100,41 @@ public:
      * @param numFields number of fields to process
      * @return true if able to set the fields
      *
-     * You will need to override this function if you want support for
-     * SynthRecorder text sequences.
-     *
      */
-    virtual bool setParamFields(float *pFields, int numFields) {
-        return false;
+    virtual bool setParamFields(float *pFields, int numFields = -1) {
+        if (numFields > (int) mParametersToFields.size()) {
+            return false;
+        }
+        for (int i = 0; i < numFields; i++) {
+            *mParametersToFields[i] = *pFields++;
+        }
+        return true;
     }
 
     /**
      * @brief Get this instance's parameter fields
      * @param pFields a pre-allocated array where the parameter fields will be written.
+     * @param maxParams the maximum number of parameters to process (i.e. the allocated size of pFields)
      * @return the number of parameters written
+     * 
+     * The default behavior is to copy the values from the internal parameters that have been
+     * registered using registerParameterAsField or the << operator. Override
+     * this function in your voice if you need a different behavior.
      */
-    virtual int getParamFields(float *pFields) { return -1;}
+    virtual int getParamFields(float *pFields, int maxParams = -1) {
+        if (maxParams == -1) {
+            maxParams = mParametersToFields.size();
+        }
+        int count = 0;
+        for (auto param: mParametersToFields) {
+            if (count == maxParams) {
+                break;
+            }
+            *pFields++ = *param; 
+            count++;
+        }
+        return count;
+        }
 
     /**
      * @brief Override this function to define audio processing.
@@ -208,6 +230,10 @@ public:
 
     unsigned int numOutChannels() { return mNumOutChannels; }
 
+    SynthVoice& registerParameterAsField(Parameter &param) { mParametersToFields.push_back(&param); return *this;}
+
+    SynthVoice& operator<<(Parameter &param) {return registerParameterAsField(param);}
+
     SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
 
 protected:
@@ -239,6 +265,7 @@ private:
     int mOffOffsetFrames {0};
     unsigned int mNumOutChannels {1}; // Set this
     void *mUserData;
+    std::vector<Parameter *> mParametersToFields;
 };
 
 class PolySynth {
@@ -801,7 +828,7 @@ public:
 
                 SynthVoice *newVoice = mPolySynth.getVoice(name);
                 if (newVoice) {
-                    const int maxPFields = 32;
+                    const int maxPFields = 64;
                     float pFields[maxPFields];
 
                     int numFields = 0;
@@ -854,7 +881,7 @@ public:
                 SynthVoice *newVoice = mPolySynth.getVoice(name);
                 if (newVoice) {
                     newVoice->id(id);
-                    const int maxPFields = 32;
+                    const int maxPFields = 64;
                     float pFields[maxPFields];
 
                     int numFields = 0;
