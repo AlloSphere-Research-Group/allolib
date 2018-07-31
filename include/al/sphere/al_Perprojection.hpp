@@ -479,7 +479,7 @@ public:
     //  0, 0, (near + far) / (near - far), (2.0f * near * far) / (near - far),
     //  0, 0, -1, 0
     //);
-    for(int index = 0; index < projection_infos_.size(); index++) {
+    for(unsigned int index = 0; index < projection_infos_.size(); index++) {
       ProjectionInfo& info = projection_infos_[index];
       Mat4f& proj = info.p_matrix;
       // only update where near and farf was related

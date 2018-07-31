@@ -26,6 +26,7 @@
 
 #ifndef AL_WINDOWS
 #include "Cuttlebone/Cuttlebone.hpp"
+#endif
 
 #endif
 
@@ -363,7 +364,7 @@ inline void DistributedApp<TSharedState>::start() {
       mQueuedStates = 1;
 #ifndef AL_WINDOWS
       if (mMaker) {
-          mMaker->set(mState);
+ || role() == ROLE_SIMULATOR
       }
 #endif
     } else {

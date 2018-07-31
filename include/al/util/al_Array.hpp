@@ -343,7 +343,7 @@ protected:
  ********* INLINE IMPLEMENTATION BELOW ***********
  *
  */
-#pragma mark --------------------------------------
+//#pragma mark --------------------------------------
 
 /*
 	Type traits by partial specialization:
