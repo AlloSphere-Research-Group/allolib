@@ -28,8 +28,6 @@
 #include "Cuttlebone/Cuttlebone.hpp"
 #endif
 
-#endif
-
 /*  Keehong Youn, 2017, younkeehong@gmail.com
  *  Andres Cabrera, 2018, mantaraya36@gmail.com
  *
