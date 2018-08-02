@@ -276,6 +276,8 @@ public:
         TIME_MASTER_ASYNC
     } TimeMasterMode;
 
+    friend class SynthSequencer;
+
     PolySynth(TimeMasterMode masterMode = TIME_MASTER_AUDIO)
         : mMasterMode(masterMode)
     {
@@ -342,6 +344,12 @@ public:
      */
     template<class TSynthVoice>
     void allocatePolyphony(int number);
+
+    /**
+     * Preallocate a number of voices of a voice to avoid doing realtime
+     * allocation. The name must be registered using registerSynthClass()
+     */
+    void allocatePolyphony(std::string name, int number);
 
     /**
      * @brief Use this function to insert a voice allocated externally into the free voice pool
@@ -466,12 +474,17 @@ public:
      * This is needed for remote instantiation and for text sequence playback.
      */
     template<class TSynthVoice>
-    void registerSynthClass(std::string name) {
+    void registerSynthClass(std::string name, bool allowAutoAllocation = true) {
         if (mCreators.find(name) != mCreators.end()) {
             std::cout << "Warning: Overriding registration of SynthVoice: " << name << std::endl;
         }
+        if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
+            mNoAllocationList.push_back(name);
+        }
         mCreators[name] = []() {
-            return new TSynthVoice;
+            TSynthVoice *voice = new TSynthVoice;
+            voice->init();
+            return voice;
         };
     }
 
@@ -621,6 +634,7 @@ protected:
     void *mDefaultUserData {nullptr};
 
     Creators mCreators;
+    std::vector<std::string> mNoAllocationList; // Disallow auto allocation for class name. Set in allocateVoice()
 };
 
 class SynthSequencerEvent {
@@ -720,8 +734,14 @@ class SynthSequencer {
 public:
 
     SynthSequencer(PolySynth::TimeMasterMode masterMode =  PolySynth::TIME_MASTER_AUDIO)
-        : mPolySynth(masterMode), mMasterMode(masterMode)
     {
+        mInternalSynth = std::make_unique<PolySynth>(masterMode);
+        registerSynth(*mInternalSynth.get());
+    }
+
+    SynthSequencer(PolySynth &synth)
+    {
+        registerSynth(synth);
     }
 
     /// Insert this function within the audio callback
@@ -765,7 +785,7 @@ public:
      */
     void print() {
         std::cout << "POLYSYNTH INFO ................." << std::endl;
-        mPolySynth.print();
+        mPolySynth->print();
     }
 
     void setTempo(float tempo) {mNormalizedTempo = tempo/60.f;}
@@ -826,7 +846,7 @@ public:
                 float startTime = std::stof(start);
                 double duration = std::stod(durationText);
 
-                SynthVoice *newVoice = mPolySynth.getVoice(name);
+                SynthVoice *newVoice = mPolySynth->getVoice(name);
                 if (newVoice) {
                     const int maxPFields = 64;
                     float pFields[maxPFields];
@@ -878,7 +898,7 @@ public:
                 float startTime = std::stof(start);
                 int id = std::stoi(idText);
 
-                SynthVoice *newVoice = mPolySynth.getVoice(name);
+                SynthVoice *newVoice = mPolySynth->getVoice(name);
                 if (newVoice) {
                     newVoice->id(id);
                     const int maxPFields = 64;
@@ -994,10 +1014,19 @@ public:
         return sequenceList;
     }
 
-    PolySynth &synth() {return mPolySynth;}
+    PolySynth &synth() {return *mPolySynth;}
+
+    // TODO we should cleanup internal synth if an external one is set
+    void registerSynth(PolySynth &synth) {
+        mPolySynth = &synth;
+        mMasterMode = mPolySynth->mMasterMode;
+    }
+
+    void operator<<(PolySynth &synth) { return registerSynth(synth);}
 
 private:
-    PolySynth mPolySynth;
+    PolySynth *mPolySynth;
+    std::unique_ptr<PolySynth> mInternalSynth;
 
     std::string mDirectory {"."};
 
@@ -1037,6 +1066,7 @@ TSynthVoice *PolySynth::getVoice() {
     }
     if (!freeVoice) { // No free voice in list, so we need to allocate it
         // TODO report current polyphony for more informed allocation of polyphony
+        // TODO check if allocation allowed
         std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
         freeVoice = new TSynthVoice;
         freeVoice->init();
@@ -1066,7 +1096,7 @@ void PolySynth::allocatePolyphony(int number) {
 template<class TSynthVoice>
 TSynthVoice &SynthSequencer::add(double startTime, double duration) {
     std::list<SynthSequencerEvent>::iterator insertedEvent;
-    TSynthVoice *newVoice = mPolySynth.getVoice<TSynthVoice>();
+    TSynthVoice *newVoice = mPolySynth->getVoice<TSynthVoice>();
     std::unique_lock<std::mutex> lk(mEventLock);
     // Insert into event list, sorted.
     auto position = mEvents.begin();

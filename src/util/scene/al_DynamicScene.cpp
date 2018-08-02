@@ -166,6 +166,7 @@ void DynamicScene::render(AudioIOData &io) {
                         voice->triggerOff(endOffsetFrames);
                     }
                     internalAudioIO.zeroOut();
+                    internalAudioIO.zeroBus();
                     internalAudioIO.frame(offset);
                     voice->onProcess(internalAudioIO);
                     Vec3d listeningDir;
@@ -336,6 +337,7 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
                         voice->triggerOff(endOffsetFrames);
                     }
                     internalAudioIO.zeroOut();
+                    internalAudioIO.zeroBus();
                     internalAudioIO.frame(offset);
                     voice->onProcess(internalAudioIO);
                     Vec3d listeningDir;

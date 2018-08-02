@@ -189,10 +189,14 @@ SynthVoice *PolySynth::getVoice(std::string name)
         freeVoice = freeVoice->next;
     }
     if (!freeVoice) { // No free voice in list, so we need to allocate it
-        // TODO report current polyphony for more informed allocation of polyphony
-        freeVoice = allocateVoice(name);
+    //  But only allocate if allocation has not been disabled
+        if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
+             // TODO report current polyphony for more informed allocation of polyphony
+            freeVoice = allocateVoice(name);
+            freeVoice->userData(mDefaultUserData);
+        }
+       
     }
-    freeVoice->userData(mDefaultUserData);
     return freeVoice;
 }
 
@@ -268,6 +272,23 @@ void PolySynth::update(double dt) {
     }
     if (mMasterMode == TIME_MASTER_ASYNC) {
         processInactiveVoices();
+    }
+}
+
+void PolySynth::allocatePolyphony(std::string name, int number)
+{
+    std::unique_lock<std::mutex> lk(mFreeVoiceLock);
+    // Find last voice and add polyphony there
+    SynthVoice *lastVoice = mFreeVoices;
+    if (lastVoice) {
+        while (lastVoice->next) { lastVoice = lastVoice->next; }
+    } else {
+        lastVoice = mFreeVoices = allocateVoice(name);
+        number--;
+    }
+    for(int i = 0; i < number; i++) {
+        lastVoice->next = allocateVoice(name);
+        lastVoice = lastVoice->next;
     }
 }
 
@@ -367,7 +388,7 @@ void SynthSequencer::render(AudioIOData &io) {
         mMasterTime += timeIncrement;
         processEvents(blockStartTime, mNormalizedTempo * io.framesPerSecond());
     }
-    mPolySynth.render(io);
+    mPolySynth->render(io);
 }
 
 void SynthSequencer::render(Graphics &g) {
@@ -377,7 +398,7 @@ void SynthSequencer::render(Graphics &g) {
         mMasterTime += timeIncrement;
         processEvents(blockStartTime, mNormalizedTempo * mFps);
     }
-    mPolySynth.render(g);
+    mPolySynth->render(g);
 }
 
 void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
@@ -388,7 +409,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
             auto event = *iter;
             while (event.startTime <= mMasterTime) {
                 event.offsetCounter = (event.startTime - blockStartTime)*fpsAdjusted;
-                mPolySynth.triggerOn(event.voice, event.offsetCounter);
+                mPolySynth->triggerOn(event.voice, event.offsetCounter);
 //                std::cout << "Event " << mNextEvent << " " << event.startTime << " " << typeid(*event.voice).name() << std::endl;
                 mNextEvent++;
                 iter++;
@@ -404,7 +425,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
 //            }
             double eventTermination = event.startTime + event.duration;
             if (event.voice && event.voice->active() && eventTermination <= mMasterTime) {
-                mPolySynth.triggerOff(event.voice->id());
+                mPolySynth->triggerOff(event.voice->id());
 //                std::cout << "trigger off " <<  event.voice->id() << " " << eventTermination << " " << mMasterTime  << std::endl;
                 event.voice = nullptr; // When an event gives up a voice, it is done.
             }
