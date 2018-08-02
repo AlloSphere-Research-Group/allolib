@@ -241,6 +241,25 @@ public:
 		return s;
 	}
 
+	void zero() {
+		mPreDelay.zero();
+		mAPIn1.zero();
+		mAPIn2.zero();
+		mAPIn3.zero();
+		mAPIn4.zero();
+		mAPDecay11.zero();
+		mAPDecay12.zero();
+		mDly11.zero();
+		mDly12.zero();
+		mAPDecay21.zero();
+		mAPDecay22.zero();
+		mDly21.zero();
+		mDly22.zero();
+		mOPIn.zero();
+		mOP1.zero();
+		mOP2.zero();
+	}
+
 protected:
 
 	class OnePole{
@@ -249,6 +268,7 @@ protected:
 		void damping(T v){ coef(v); }
 		void coef(T v){ mA0=T(1)-std::abs(v); mB1=v; }
 		T operator()(T i0){ return mO1 = i0*mA0 + mO1*mB1; }
+		void zero() {mO1 = 0.0;}
 	protected:
 		T mO1, mA0, mB1;
 	};
