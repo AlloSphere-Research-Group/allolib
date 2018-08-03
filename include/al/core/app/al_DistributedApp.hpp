@@ -24,7 +24,7 @@
 #include <unistd.h>
 #endif
 
-#ifndef AL_WINDOWS
+#ifdef AL_USE_CUTTLEBONE
 #include "Cuttlebone/Cuttlebone.hpp"
 #endif
 
@@ -145,7 +145,7 @@ public:
   }
 
   ~DistributedApp() {
-#ifndef AL_WINDOWS
+#ifdef AL_USE_CUTTLEBONE
       if (mMaker) {
           mMaker->stop();
       } else if (mTaker){
@@ -304,7 +304,7 @@ private:
 
   TSharedState mState;
   int mQueuedStates {0};
-#ifndef AL_WINDOWS
+#ifdef AL_USE_CUTTLEBONE
   std::unique_ptr<cuttlebone::Maker<TSharedState>> mMaker;
   std::unique_ptr<cuttlebone::Taker<TSharedState>> mTaker;
 #endif
@@ -360,18 +360,18 @@ inline void DistributedApp<TSharedState>::start() {
     if (role() == ROLE_DESKTOP || role() == ROLE_SIMULATOR) {
       simulate(dt_sec());
       mQueuedStates = 1;
-#ifndef AL_WINDOWS
+#ifdef AL_USE_CUTTLEBONE
       if (mMaker) {
         mMaker->set(mState);
       }
 #endif
     } else {
-#ifndef AL_WINDOWS
+#ifdef AL_USE_CUTTLEBONE
         if (mTaker) {
             mQueuedStates = mTaker->get(mState);
         }
 #else
-        // You shouldn't get here.... No windows support for cuttlebone
+        // You shouldn't get here if you are relying oncuttlebone for state syncing
         mQueuedStates = 1;
 #endif
     }
@@ -401,7 +401,7 @@ inline void DistributedApp<TSharedState>::start() {
 template<class TSharedState>
 inline void DistributedApp<TSharedState>::preOnCreate() {
   append(mNavControl);
-#ifndef AL_WINDOWS
+#ifdef AL_USE_CUTTLEBONE
   if (role() == ROLE_SIMULATOR) {
       std::string broadcastAddress = configLoader.gets("broadcastAddress");
       mMaker = std::make_unique<cuttlebone::Maker<TSharedState>>(broadcastAddress.c_str());

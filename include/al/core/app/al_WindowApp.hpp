@@ -56,7 +56,8 @@ class WindowApp : public Window, public WindowEventHandler, public FPS {
   virtual void onResize(int w, int h) {}
   virtual void onVisibility(bool v) {}
 
-  // callbacks from window class, wil call user event functions like `on***`
+  // callbacks from window class, will call user event functions like `on***`
+  // return false is the event has been consumed and should not propagate further.
   bool keyDown(const Keyboard& k) final;
   bool keyUp(const Keyboard& k) final;
   bool mouseDown(const Mouse& m) final;
