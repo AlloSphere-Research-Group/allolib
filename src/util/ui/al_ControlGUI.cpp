@@ -156,15 +156,41 @@ void ControlGUI::draw(Graphics &g) {
 //    ImGui::ShowDemoWindow();
     for (auto elem: mParameters) {
         if(elem.first == "" || ImGui::CollapsingHeader(elem.first.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by default
-            string prefix;
+            string suffix;
             if (elem.first.size() > 0){
-                prefix = elem.first + ":";
+                // Needed to separate widgets with the same name
+                // three '#' does this without setting the id
+                // just two will use the postfix as id
+                suffix = "###" + elem.first;
             }
             for (auto param: elem.second) {
-                float value = param->get();
-                bool changed = ImGui::SliderFloat((prefix + param->getName()).c_str(), &value, param->min(), param->max());
-                if (changed) {
-                    param->set(value);
+                 if (param->getHint("intcombo") == 1.0) {
+                    int value = (int) param->get();
+                    vector<string> values;
+                    for (float i = param->min(); i <= param->max(); i++ ) {
+                        // There's got to be a better way...
+                        values.push_back(to_string((int) i));
+                    }
+                    auto vector_getter = [](void* vec, int idx, const char** out_text)
+                    {
+                        auto& vector = *static_cast<std::vector<std::string>*>(vec);
+                        if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
+                        *out_text = vector.at(idx).c_str();
+                        return true;
+                    };
+                    if (!values.empty()) {
+                        bool changed = ImGui::Combo((param->getName() + suffix).c_str(), &value, vector_getter,
+                                        static_cast<void*>(&values), values.size());
+                        if (changed) {
+                            param->set(value);
+                        }
+                    }
+                } else {
+                    float value = param->get();
+                    bool changed = ImGui::SliderFloat((param->getName() + suffix).c_str(), &value, param->min(), param->max());
+                    if (changed) {
+                        param->set(value);
+                    }
                 }
             }
 
