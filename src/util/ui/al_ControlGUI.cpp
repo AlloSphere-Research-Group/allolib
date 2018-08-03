@@ -199,19 +199,19 @@ void ControlGUI::draw(Graphics &g) {
     for (auto elem: mParameterBools) {
         if(elem.first == "" || ImGui::CollapsingHeader(elem.first.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by default
             bool changed;
-            string prefix;
+            string suffix;
             if (elem.first.size() > 0){
-                prefix = elem.first + ":";
+                suffix = "###" + elem.first;
             }
             for (auto param: elem.second) {
                 if (param->getHint("latch") == 1.0) {
                     bool value = param->get() == 1.0;
-                    changed = ImGui::Checkbox((prefix + param->getName()).c_str(), &value);
+                    changed = ImGui::Checkbox((param->getName() + suffix).c_str(), &value);
                     if (changed) {
                         param->set(value ? 1.0 : 0.0);
                     }
                 } else {
-                    changed = ImGui::Button((prefix + param->getName()).c_str());
+                    changed = ImGui::Button((param->getName() + suffix).c_str());
                     if (changed) {
                         param->set(1.0);
                     } else {
