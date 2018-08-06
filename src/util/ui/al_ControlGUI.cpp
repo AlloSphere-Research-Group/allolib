@@ -1,7 +1,7 @@
 #include "al/util/ui/al_ControlGUI.hpp"
 
 using namespace al;
-
+using namespace std;
 
 void ControlGUI::draw(Graphics &g) {
 
