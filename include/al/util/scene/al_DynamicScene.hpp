@@ -53,8 +53,6 @@
 #include "al/core/sound/al_StereoPanner.hpp"
 #include "al/core/spatial/al_DistAtten.hpp"
 
-using namespace std;
-
 namespace al
 {
 
@@ -185,10 +183,10 @@ public:
      *  If not called, the default is stereo panning over two speakers.
      */
     template<class TSpatializer>
-    shared_ptr<TSpatializer> setSpatializer(SpeakerLayout &sl) {
-        mSpatializer = make_shared<TSpatializer>(sl);
+    std::shared_ptr<TSpatializer> setSpatializer(SpeakerLayout &sl) {
+        mSpatializer = std::make_shared<TSpatializer>(sl);
         mSpatializer->compile();
-        return static_pointer_cast<TSpatializer>(mSpatializer);
+        return std::static_pointer_cast<TSpatializer>(mSpatializer);
     }
 
     /**
@@ -227,7 +225,7 @@ public:
 
     DistAtten<> &distanceAttenuation() {return mDistAtten;}
 
-    void print(ostream &stream = std::cout);
+    void print(std::ostream &stream = std::cout);
 
 
     /**
@@ -282,7 +280,7 @@ private:
     bool mThreadedAudio {true};
     std::vector<std::thread> mAudioThreads;
     std::vector<AudioIOData> mThreadedAudioData;
-    std::map<int, vector<int>> mThreadMap; // Defines which threads run which voices. Key is thread id, value is voice ids.
+    std::map<int, std::vector<int>> mThreadMap; // Defines which threads run which voices. Key is thread id, value is voice ids.
     std::condition_variable mThreadTrigger;
     std::condition_variable mAudioThreadDone;
     std::mutex mSpatializerLock;
