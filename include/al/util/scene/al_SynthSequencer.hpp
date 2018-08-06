@@ -102,11 +102,11 @@ public:
      *
      */
     virtual bool setParamFields(float *pFields, int numFields = -1) {
-        if (numFields > (int) mParametersToFields.size()) {
+        if (numFields < (int) mParametersToFields.size()) {
             return false;
         }
-        for (int i = 0; i < numFields; i++) {
-            *mParametersToFields[i] = *pFields++;
+        for (auto &param:mParametersToFields) {
+            *param = *pFields++;
         }
         return true;
     }
@@ -258,6 +258,8 @@ protected:
      */
     void setNumOutChannels(unsigned int numOutputs) {mNumOutChannels = numOutputs;}
 
+    std::vector<Parameter *> mParametersToFields;
+
 private:
     int mId {-1};
     int mActive {false};
@@ -265,7 +267,6 @@ private:
     int mOffOffsetFrames {0};
     unsigned int mNumOutChannels {1}; // Set this
     void *mUserData;
-    std::vector<Parameter *> mParametersToFields;
 };
 
 class PolySynth {
@@ -302,6 +303,7 @@ public:
 
     /**
      * @brief Get a reference to a voice.
+     * @param forceAlloc force allocation of voice even if maximum allowed polyphony is reached
      * @return
      *
      * Returns a free voice from the internal dynamic allocated pool.
@@ -309,10 +311,11 @@ public:
      * chain after setting its properties, otherwise it will be lost.
      */
     template<class TSynthVoice>
-    TSynthVoice *getVoice();
+    TSynthVoice *getVoice(bool forceAlloc = false);
 
     /**
      * @brief Get a reference to a free voice by voice type name
+     * @param forceAlloc force allocation of voice even if maximum allowed polyphony is reached
      * @return
      *
      * Returns a free voice from the internal dynamic allocated pool.
@@ -320,7 +323,7 @@ public:
      * nullptr if the class name and creator have not been registered
      * with registerSynthClass()
      */
-    SynthVoice *getVoice(std::string name);
+    SynthVoice *getVoice(std::string name, bool forceAlloc = false);
 
     /**
      * @brief render all the active voices into the audio buffers
@@ -649,20 +652,21 @@ public:
         EVENT_PFIELDS,
         EVENT_TEMPO
     } EventType;
+
     double startTime {0};
     double duration {-1};
     int offsetCounter {0}; // To offset event within audio buffer
 
+    EventType type {EVENT_VOICE};
+
     typedef struct {
-        int numFields;
-        float *pFields = nullptr;
+        std::string name; // instrument name
+        std::vector<float> pFields;
     } ParamFields;
 
-    union {
-        SynthVoice *voice;
-        ParamFields fields;
-        float tempo;
-    };
+    SynthVoice *voice {nullptr};
+    ParamFields fields;
+    float tempo;
 };
 
 enum SynthEventType {
@@ -802,6 +806,13 @@ public:
 
     void stopSequence() {
         std::unique_lock<std::mutex> lk(mEventLock);
+        for (auto &event: mEvents) {
+            if (event.type == SynthSequencerEvent::EVENT_VOICE) {
+                // Give back allocated voice to synth
+                mPolySynth->insertFreeVoice(event.voice);
+            }
+        }
+        
         mEvents.clear();
         mNextEvent = 0;
     }
@@ -846,48 +857,65 @@ public:
                 float startTime = std::stof(start);
                 double duration = std::stod(durationText);
 
-                SynthVoice *newVoice = mPolySynth->getVoice(name);
-                if (newVoice) {
-                    const int maxPFields = 64;
-                    float pFields[maxPFields];
+                // const int maxPFields = 64;
+                std::vector<float> pFields;
 
-                    int numFields = 0;
-                    std::string field;
+                // int numFields = 0;
+                std::string field;
+                std::getline(ss, field, ' ');
+                while (field != "") {
+                    pFields.push_back(std::stof(field));
                     std::getline(ss, field, ' ');
-                    while (field != "" && numFields < maxPFields) {
-                        pFields[numFields] = std::stof(field);
-                        numFields++;
-                        std::getline(ss, field, ' ');
-                    }
-//                    std::cout << "Pfields: ";
-//                    for (int i = 0; i < numFields; i++) {
-//                        std::cout << pFields[i] << " ";
-//                    }
-//                    std::cout << std::endl;
-
-
-                    if (!newVoice->setParamFields(pFields, numFields)) {
-                        std::cout << "Error setting pFields for voice of type " << name << ". Fields: ";
-                        for (int i = 0; i < numFields; i++) {
-                            std::cout << pFields[i] << " ";
-                        }
-                        std::cout << std::endl;
-                    } else {
-                        std::list<SynthSequencerEvent>::iterator insertedEvent;
-                        double absoluteTime = timeOffset + startTime;
-                        // Insert into event list, sorted.
-                        auto position = events.begin();
-                        while(position != events.end() && position->startTime < absoluteTime) {
-                            position++;
-                        }
-                        insertedEvent = events.insert(position, SynthSequencerEvent());
-                        // Add 0.1 padding to ensure all events play.
-                        insertedEvent->startTime = absoluteTime;
-                        insertedEvent->duration = duration;
-                        insertedEvent->voice = newVoice;
-//                        std::cout << "Inserted event " << events.size() << " at time " << absoluteTime << std::endl;
-                    }
                 }
+                //    std::cout << "Pfields: ";
+                //    for (auto &field: pFields) {
+                //        std::cout << field << " ";
+                //    }
+                //    std::cout << std::endl;
+
+
+                if (false) { // Insert event as EVENT_VOICE. This is not good as it forces preallocating all the events...
+                    SynthVoice *newVoice = mPolySynth->getVoice(name);
+                    if (newVoice) {
+                        if (!newVoice->setParamFields(pFields.data(), pFields.size())) {
+                            std::cout << "Error setting pFields for voice of type " << name << ". Fields: ";
+                            for (auto &field: pFields) {
+                                std::cout << field << " ";
+                            }
+                            std::cout << std::endl;
+                            mPolySynth->insertFreeVoice(newVoice); // Return voice to sequencer.
+                        } else {
+                            double absoluteTime = timeOffset + startTime;
+                            // Insert into event list, sorted.
+                            auto position = events.begin();
+                            while(position != events.end() && position->startTime < absoluteTime) {
+                                position++;
+                            }
+                            auto insertedEvent = events.insert(position, SynthSequencerEvent());
+                            // Add 0.1 padding to ensure all events play.
+                            insertedEvent->type = SynthSequencerEvent::EVENT_VOICE;
+                            insertedEvent->startTime = absoluteTime;
+                            insertedEvent->duration = duration;
+                            insertedEvent->voice = newVoice;
+    //                        std::cout << "Inserted event " << events.size() << " at time " << absoluteTime << std::endl;
+                        }
+                    }
+                } else {
+                    double absoluteTime = timeOffset + startTime;
+                    // Insert into event list, sorted.
+                    auto position = events.begin();
+                    while(position != events.end() && position->startTime < absoluteTime) {
+                        position++;
+                    }
+                    auto insertedEvent = events.insert(position, SynthSequencerEvent());
+                    // Add 0.1 padding to ensure all events play.
+                    insertedEvent->type = SynthSequencerEvent::EVENT_PFIELDS;
+                    insertedEvent->startTime = absoluteTime;
+                    insertedEvent->duration = duration;
+                    insertedEvent->fields.name = name;
+                    insertedEvent->fields.pFields = pFields; // TODO it would be nice not to have to copy here...
+                }
+               
 //                std::cout << "Done reading sequence" << std::endl;
             } else if (command == '+' && ss.get() == ' ') {
                 std::string name, idText, start;
@@ -897,26 +925,26 @@ public:
 
                 float startTime = std::stof(start);
                 int id = std::stoi(idText);
+                const int maxPFields = 64;
+                float pFields[maxPFields];
 
-                SynthVoice *newVoice = mPolySynth->getVoice(name);
-                if (newVoice) {
-                    newVoice->id(id);
-                    const int maxPFields = 64;
-                    float pFields[maxPFields];
-
-                    int numFields = 0;
-                    std::string field;
+                int numFields = 0;
+                std::string field;
+                std::getline(ss, field, ' ');
+                while (field != "" && numFields < maxPFields) {
+                    pFields[numFields] = std::stof(field);
+                    numFields++;
                     std::getline(ss, field, ' ');
-                    while (field != "" && numFields < maxPFields) {
-                        pFields[numFields] = std::stof(field);
-                        numFields++;
-                        std::getline(ss, field, ' ');
-                    }
+                }
 //                    std::cout << "Pfields: ";
 //                    for (int i = 0; i < numFields; i++) {
 //                        std::cout << pFields[i] << " ";
 //                    }
 //                    std::cout << std::endl;
+
+                SynthVoice *newVoice = mPolySynth->getVoice(name);
+                if (newVoice) {
+                    newVoice->id(id);
                     if (!newVoice->setParamFields(pFields, numFields)) {
                         std::cout << "Error setting pFields for voice of type " << name << ". Fields: ";
                         for (int i = 0; i < numFields; i++) {
@@ -1048,7 +1076,7 @@ private:
 //  Implementations -------------
 
 template<class TSynthVoice>
-TSynthVoice *PolySynth::getVoice() {
+TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
     std::unique_lock<std::mutex> lk(mFreeVoiceLock); // Only one getVoice() call at a time
     SynthVoice *freeVoice = mFreeVoices;
     SynthVoice *previousVoice = nullptr;

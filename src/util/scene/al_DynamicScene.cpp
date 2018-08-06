@@ -103,7 +103,7 @@ void DynamicScene::prepare(AudioIOData &io) {
     internalAudioIO.channelsIn(mVoiceMaxInputChannels);
     internalAudioIO.channelsOut(mVoiceMaxOutputChannels);
     internalAudioIO.channelsBus(mVoiceBusChannels);
-    if (io.channelsBus() < mVoiceBusChannels) {
+    if ((int) io.channelsBus() < mVoiceBusChannels) {
         std::cout << "WARNING: You don't have enough buses in AudioIO object. This is likely to crash." << std::endl;
     }
     mThreadedAudioData.resize(mAudioThreads.size());

@@ -77,7 +77,48 @@ public:
      * @param offsets The size of offsets must be equal to the number of outputs
      */
     void audioOutOffsets(const std::vector<Vec3f> &offsets) { mAudioOutPositionOffsets = offsets;}
+    
+    /**
+     * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields
+     */ 
+    virtual bool setParamFields(float *pFields, int numFields = -1) override {
+        bool ok = SynthVoice::setParamFields(pFields, numFields);
+        if (numFields == (int) mParametersToFields.size() + 8) { // If seven extra, it means pose and size are there too
+            pFields += mParametersToFields.size();
+            double x = *pFields++;
+            double y = *pFields++;
+            double z = *pFields++;
+            mPose.vec() = Vec3d(x, y, z);
+            double w = *pFields++;
+            x = *pFields++;
+            y = *pFields++;
+            z = *pFields;
+            mPose.quat() = Quatd(w, x, y, z);
+            mSize = *pFields;
+        } else {
+            ok = false;
+        }
+        return ok;
+    }
 
+    /**
+     * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields
+     */ 
+    virtual int getParamFields(float *pFields, int maxParams = -1) override {
+        int numFields = SynthVoice::getParamFields(pFields, maxParams);
+        pFields += numFields;
+        auto *elems = mPose.vec().elems();
+        *pFields++= *elems++;
+        *pFields++= *elems++;
+        *pFields++= *elems;
+        auto *comps = mPose.quat().components;
+        *pFields++= *comps++;
+        *pFields++= *comps++;
+        *pFields++= *comps++;
+        *pFields++= *comps;
+        *pFields = mSize;
+        return numFields + 8;
+    }
 
 protected:
     Pose mPose;

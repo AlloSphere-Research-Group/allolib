@@ -170,7 +170,7 @@ void PolySynth::allNotesOff()
     mAllNotesOff = true;
 }
 
-SynthVoice *PolySynth::getVoice(std::string name)
+SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc)
 {
     std::unique_lock<std::mutex> lk(mFreeVoiceLock); // Only one getVoice() call at a time
     SynthVoice *freeVoice = mFreeVoices;
@@ -406,17 +406,31 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
         if (mNextEvent < mEvents.size()) {
             auto iter = mEvents.begin();
             std::advance(iter, mNextEvent);
-            auto event = *iter;
-            while (event.startTime <= mMasterTime) {
-                event.offsetCounter = (event.startTime - blockStartTime)*fpsAdjusted;
-                mPolySynth->triggerOn(event.voice, event.offsetCounter);
-//                std::cout << "Event " << mNextEvent << " " << event.startTime << " " << typeid(*event.voice).name() << std::endl;
+            auto event = iter;
+            while (event->startTime <= mMasterTime) {
+                event->offsetCounter = (event->startTime - blockStartTime)*fpsAdjusted;
+                if (event->type == SynthSequencerEvent::EVENT_VOICE) {
+                    mPolySynth->triggerOn(event->voice, event->offsetCounter);
+                    event->voice = nullptr; // Voice has been consumed
+                } else if (event->type == SynthSequencerEvent::EVENT_PFIELDS){
+                    auto *voice = mPolySynth->getVoice(event->fields.name);
+                    if (voice) {
+                        voice->setParamFields(event->fields.pFields.data(), event->fields.pFields.size());
+                        mPolySynth->triggerOn(voice, event->offsetCounter);
+                        event->voice = voice;
+                    } else {
+                        std::cerr << "SynthSequencer::processEvents: Could not get free voice for sequencer!" << std::endl;
+                    }
+                } else if (event->type == SynthSequencerEvent::EVENT_TEMPO){
+                    // TODO support tempo events
+                }
+//                std::cout << "Event " << mNextEvent << " " << event->startTime << " " << typeid(*event->voice).name() << std::endl;
                 mNextEvent++;
                 iter++;
                 if (iter == mEvents.end()) {
                     break;
                 }
-                event = *iter;
+                event = iter;
             }
         }
         for (auto &event : mEvents) {

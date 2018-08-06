@@ -131,10 +131,11 @@ public:
                 rec->mSequenceStart = now;
                 rec->mStartOnEvent = false;
             }
-            float pFields[32];
+            float pFields[128];
             int numFields = voice->getParamFields(pFields);
+            assert(numFields <= 128);
             if (numFields < 0) {
-                std::cout << "SynthVoice '" << demangle(typeid (*voice).name() ) << "' not set up for recording. Implemente get() function." << std::endl;
+                std::cout << "SynthVoice '" << demangle(typeid (*voice).name() ) << "' not set up for recording." << std::endl;
             } else {
                 std::chrono::duration<double> diff = now - rec->mSequenceStart;
                 std::unique_lock<std::mutex> lk(rec->mSequenceLock);
