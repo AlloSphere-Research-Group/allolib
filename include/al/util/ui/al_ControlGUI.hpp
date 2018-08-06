@@ -48,6 +48,7 @@
 #include "al/util/ui/al_ParameterMIDI.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/util/ui/al_Preset.hpp"
+#include "al/util/ui/al_PresetSequencer.hpp"
 #include "al/util/scene/al_SynthSequencer.hpp"
 #include "al/util/scene/al_SynthRecorder.hpp"
 #include "al/util/imgui/al_Imgui.hpp"
@@ -93,6 +94,11 @@ public:
 
     /// Register preset handler using the streaming operator. GUI widgets for preset control are shown.
     ControlGUI &operator << (PresetHandler* ph){ return registerPresetHandler(*ph); }
+
+    ControlGUI &registerPresetSequencer(PresetSequencer &presetSequencer);
+
+    /// Register preset sequencer using the streaming operator. GUI widgets for preset sequencing are shown.
+    ControlGUI &operator << (PresetSequencer& ps){ return registerPresetSequencer(ps); }
 
 
     void registerSynthRecorder(SynthRecorder &recorder);
@@ -187,6 +193,7 @@ private:
     std::map<std::string, std::vector<ParameterVec4 *>> mParameterVec4s;
 
     PresetHandler *mPresetHandler {nullptr};
+    PresetSequencer *mPresetSequencer {nullptr};
     SynthRecorder *mSynthRecorder {nullptr};
     SynthSequencer *mSynthSequencer {nullptr};
     PolySynth *mPolySynth {nullptr};
@@ -205,6 +212,7 @@ private:
     bool mManageIMGUI {true};
 
     int mCurrentSequencerItem {0};
+    int mCurrentPresetSequencerItem {0};
     char** mSequencerItems;
 
 };

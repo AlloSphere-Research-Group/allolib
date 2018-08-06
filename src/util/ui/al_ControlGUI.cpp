@@ -75,6 +75,7 @@ void ControlGUI::draw(Graphics &g) {
             int numColumns = 12;
             int numRows = 4;
             int counter = 0;
+            std::string suffix = "##Preset"; 
             for (int row = 0; row < numRows; row++) {
                 for (int column = 0; column < numColumns; column++) {
                     std::string name = std::to_string(counter);
@@ -83,7 +84,7 @@ void ControlGUI::draw(Graphics &g) {
                     ImGui::PopStyleColor(1);
 
                     bool is_selected = selection == counter;
-                    if (ImGui::Selectable(name.c_str(), is_selected, 0, ImVec2(15, 15)))
+                    if (ImGui::Selectable((name + suffix).c_str(), is_selected, 0, ImVec2(15, 15)))
                     {
                         if (mStoreButtonOn) {
                             mPresetHandler->storePreset(counter, name.c_str());
@@ -100,7 +101,43 @@ void ControlGUI::draw(Graphics &g) {
                     ImGui::PopID();
                 }
             }
-            ImGui::Checkbox("Store", &mStoreButtonOn);
+            ImGui::Checkbox("Store##Presets", &mStoreButtonOn);
+        }
+    }
+    if (mPresetSequencer) {
+        if (ImGui::CollapsingHeader("Preset Sequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+            vector<string> seqList = mPresetSequencer->getSequenceList();
+            if (seqList.size() > 0) {
+                if (seqList.size() > 64) {
+                    seqList.resize(64);
+                    std::cout << "Cropping sequence list to 64 items for display" <<std::endl;
+                }
+                // for (size_t i = 0; i < seqList.size(); i++) {
+                //     strncpy(mSequencerItems[i], seqList[i].c_str(), 32);
+                // }
+                // int items_count = seqList.size();
+
+                auto vector_getter = [](void* vec, int idx, const char** out_text)
+                {
+                    auto& vector = *static_cast<std::vector<std::string>*>(vec);
+                    if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
+                    *out_text = vector.at(idx).c_str();
+                    return true;
+                };
+                ImGui::Combo("Sequences##PresetSequencer", &mCurrentPresetSequencerItem, vector_getter,
+                            static_cast<void*>(&seqList), seqList.size());
+                if (ImGui::Button("Play##PresetSequencer")) {
+                    mPresetSequencer->playSequence(seqList[mCurrentSequencerItem]);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Stop##PresetSequencer")) {
+                    mPresetSequencer->stopSequence();
+                }
+
+                // for (size_t i = 0; i < seqList.size(); i++) {
+                //     //                free(items[i]);
+                // }
+            }
         }
     }
     if (mPolySynth) {
@@ -110,39 +147,33 @@ void ControlGUI::draw(Graphics &g) {
             }
         }
     }
-    if (mSynthRecorder) {
-        if (ImGui::CollapsingHeader("Recorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-            static char buf1[64] = "test"; ImGui::InputText("Record Name", buf1, 64);
-            if (ImGui::Checkbox("Record", &mRecordButtonValue)) {
-                if (mRecordButtonValue) {
-                    mSynthRecorder->startRecord(buf1, mOverwriteButtonValue);
-                } else {
-                    mSynthRecorder->stopRecord();
-                }
-            }
-            ImGui::SameLine();
-            ImGui::Checkbox("Overwrite", &mOverwriteButtonValue);
-        }
-    }
     if (mSynthSequencer) {
-        if (ImGui::CollapsingHeader("Sequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::CollapsingHeader("Event Sequencer##EventSequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
             vector<string> seqList = mSynthSequencer->getSequenceList();
             if (seqList.size() > 0) {
-                if (seqList.size() > 32) {
-                    seqList.resize(32);
+                if (seqList.size() > 64) {
+                    seqList.resize(64);
                     std::cout << "Cropping sequence list to 64 items for display" <<std::endl;
                 }
-                for (size_t i = 0; i < seqList.size(); i++) {
-                    strncpy(mSequencerItems[i], seqList[i].c_str(), 32);
-                }
-                int items_count = seqList.size();
-                ImGui::Combo("Sequences", &mCurrentSequencerItem, mSequencerItems, items_count, 16);
-                if (ImGui::Button("Play")) {
+                // for (size_t i = 0; i < seqList.size(); i++) {
+                //     strncpy(mSequencerItems[i], seqList[i].c_str(), 32);
+                // }
+                auto vector_getter = [](void* vec, int idx, const char** out_text)
+                {
+                    auto& vector = *static_cast<std::vector<std::string>*>(vec);
+                    if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
+                    *out_text = vector.at(idx).c_str();
+                    return true;
+                };
+                // int items_count = seqList.size();
+                ImGui::Combo("Sequences##EventSequencer", &mCurrentSequencerItem, vector_getter,
+                            static_cast<void*>(&seqList), seqList.size());
+                if (ImGui::Button("Play##EventSequencer")) {
                     mSynthSequencer->synth().allNotesOff();
-                    mSynthSequencer->playSequence(mSequencerItems[mCurrentSequencerItem]);
+                    mSynthSequencer->playSequence(seqList[mCurrentSequencerItem]);
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("Stop")) {
+                if (ImGui::Button("Stop##EventSequencer")) {
                     mSynthSequencer->stopSequence();
                     mSynthSequencer->synth().allNotesOff();
                 }
@@ -151,6 +182,20 @@ void ControlGUI::draw(Graphics &g) {
                     //                free(items[i]);
                 }
             }
+        }
+    }
+    if (mSynthRecorder) {
+        if (ImGui::CollapsingHeader("Event Recorder##EventRecorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+            static char buf1[64] = "test"; ImGui::InputText("Record Name", buf1, 64);
+            if (ImGui::Checkbox("Record##EventRecorder", &mRecordButtonValue)) {
+                if (mRecordButtonValue) {
+                    mSynthRecorder->startRecord(buf1, mOverwriteButtonValue);
+                } else {
+                    mSynthRecorder->stopRecord();
+                }
+            }
+            ImGui::SameLine();
+            ImGui::Checkbox("Overwrite", &mOverwriteButtonValue);
         }
     }
 //    ImGui::ShowDemoWindow();
@@ -292,6 +337,11 @@ ControlGUI &ControlGUI::registerNav(Nav &nav)
 
 ControlGUI &ControlGUI::registerPresetHandler(PresetHandler &presetHandler) {
     mPresetHandler = &presetHandler;
+    return *this;
+}
+
+ControlGUI &ControlGUI::registerPresetSequencer(PresetSequencer &presetSequencer) {
+    mPresetSequencer = &presetSequencer;
     return *this;
 }
 
