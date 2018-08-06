@@ -70,21 +70,21 @@ void ControlGUI::draw(Graphics &g) {
             if (ImGui::InputText("test", buf1, 64)) {
                 currentPresetName = buf1;
             }
-//            ImGui::Text("%s", currentPresetName.c_str());
-
+            static int presetHandlerBank = 0;
             int numColumns = 12;
             int numRows = 4;
-            int counter = 0;
+            int counter = presetHandlerBank * (numColumns * numRows) ;
             std::string suffix = "##Preset"; 
             for (int row = 0; row < numRows; row++) {
                 for (int column = 0; column < numColumns; column++) {
                     std::string name = std::to_string(counter);
                     ImGui::PushID(counter);
-                    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.1, 0.1, 0.1, 1.0));
-                    ImGui::PopStyleColor(1);
 
                     bool is_selected = selection == counter;
-                    if (ImGui::Selectable((name + suffix).c_str(), is_selected, 0, ImVec2(15, 15)))
+                    if (is_selected) {
+                        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.1, 0.1, 0.1, 1.0));
+                    }
+                    if (ImGui::Selectable((name + suffix).c_str(), is_selected, 0, ImVec2(18, 15)))
                     {
                         if (mStoreButtonOn) {
                             mPresetHandler->storePreset(counter, name.c_str());
@@ -96,12 +96,22 @@ void ControlGUI::draw(Graphics &g) {
                             }
                         }
                     }
+                    if (is_selected) {
+                        ImGui::PopStyleColor(1);
+                    }
                     if (column < numColumns - 1) ImGui::SameLine();
                     counter++;
                     ImGui::PopID();
                 }
             }
             ImGui::Checkbox("Store##Presets", &mStoreButtonOn);
+            ImGui::SameLine();
+            static std::vector<string> seqList {"1", "2", "3", "4"};
+            ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.25f);
+            ImGui::Combo("Bank##PresetSequencer", &presetHandlerBank, vector_getter, static_cast<void*>(&seqList), seqList.size());
+            ImGui::PopItemWidth();
+//            ImGui::Text("%s", currentPresetName.c_str());
+
         }
     }
     if (mPresetSequencer) {
@@ -117,13 +127,6 @@ void ControlGUI::draw(Graphics &g) {
                 // }
                 // int items_count = seqList.size();
 
-                auto vector_getter = [](void* vec, int idx, const char** out_text)
-                {
-                    auto& vector = *static_cast<std::vector<std::string>*>(vec);
-                    if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
-                    *out_text = vector.at(idx).c_str();
-                    return true;
-                };
                 ImGui::Combo("Sequences##PresetSequencer", &mCurrentPresetSequencerItem, vector_getter,
                             static_cast<void*>(&seqList), seqList.size());
                 if (ImGui::Button("Play##PresetSequencer")) {
@@ -158,13 +161,6 @@ void ControlGUI::draw(Graphics &g) {
                 // for (size_t i = 0; i < seqList.size(); i++) {
                 //     strncpy(mSequencerItems[i], seqList[i].c_str(), 32);
                 // }
-                auto vector_getter = [](void* vec, int idx, const char** out_text)
-                {
-                    auto& vector = *static_cast<std::vector<std::string>*>(vec);
-                    if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
-                    *out_text = vector.at(idx).c_str();
-                    return true;
-                };
                 // int items_count = seqList.size();
                 ImGui::Combo("Sequences##EventSequencer", &mCurrentSequencerItem, vector_getter,
                             static_cast<void*>(&seqList), seqList.size());
@@ -206,7 +202,7 @@ void ControlGUI::draw(Graphics &g) {
                 // Needed to separate widgets with the same name
                 // three '#' does this without setting the id
                 // just two will use the postfix as id
-                suffix = "###" + elem.first;
+                suffix = "##" + elem.first;
             }
             for (auto param: elem.second) {
                  if (param->getHint("intcombo") == 1.0) {
@@ -246,7 +242,7 @@ void ControlGUI::draw(Graphics &g) {
             bool changed;
             string suffix;
             if (elem.first.size() > 0){
-                suffix = "###" + elem.first;
+                suffix = "##" + elem.first;
             }
             for (auto param: elem.second) {
                 if (param->getHint("latch") == 1.0) {
