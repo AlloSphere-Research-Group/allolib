@@ -157,7 +157,7 @@ public:
 #endif
   }
 
-  string name() {
+  std::string name() {
 #ifdef AL_BUILD_MPI
       return processor_name;
 #else
@@ -167,7 +167,7 @@ public:
 
   Role role() {return mRole;}
 
-  string roleName() {
+  std::string roleName() {
       switch (mRole) {
       case ROLE_SIMULATOR:
           return "simulator";
@@ -300,7 +300,7 @@ private:
   bool mRunDistributed {false};
   Role mRole {ROLE_DESKTOP};
 
-  std::map<string, std::vector<Role>> mRoleMap;
+  std::map<std::string, std::vector<Role>> mRoleMap;
 
   TSharedState mState;
   int mQueuedStates {0};
@@ -323,7 +323,7 @@ inline void DistributedApp<TSharedState>::start() {
 
   uint16_t receiverPort = 9100;
   if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) {
-      mParameterServer = make_shared<ParameterServer>("", 9010);
+      mParameterServer = std::make_shared<ParameterServer>("", 9010);
       for (auto member: mRoleMap) {
           // Relay all parameters to renderers
           if (std::find(member.second.begin(), member.second.end(), ROLE_RENDERER) != member.second.end()) {
@@ -332,7 +332,7 @@ inline void DistributedApp<TSharedState>::start() {
           }
       }
   } else {
-      mParameterServer = make_shared<ParameterServer>("", receiverPort);
+      mParameterServer = std::make_shared<ParameterServer>("", receiverPort);
   }
 //  std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
   onInit();
