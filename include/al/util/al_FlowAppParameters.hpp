@@ -16,13 +16,23 @@ public:
 
 	static void handshake(ParameterServer &ps, std::string appName, std::string address, int port){
 		std::string config = generateConfig(ps, appName);
-		osc::Send sender(port, address.c_str(), 0, config.length() + 128);
-		sender.send("/handshakeConfig", config, ps.serverPort());
+		osc::Send sender((int) config.length() + 128);
+		if (sender.open(port, address.c_str())) {
+			sender.send("/handshakeConfig", config, ps.serverPort());
+		}
+		else {
+			std::cout << "Error sending handshake." << std::endl;
+		}
 	}
 
 	static void sendMapping(std::string mappingName, std::string code, std::string address, int port){
-		osc::Send sender(port, address.c_str());
-		sender.send("/runMapping", mappingName, code);
+		osc::Send sender;
+		if (sender.open(port, address.c_str())) {
+			sender.send("/runMapping", mappingName, code);
+		}
+		else {
+			std::cout << "Error sending mapping." << std::endl;
+		}
 	}
 
 	static std::string generateConfig(ParameterServer &ps, std::string appName){

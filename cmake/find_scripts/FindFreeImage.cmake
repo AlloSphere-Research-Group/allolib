@@ -9,12 +9,12 @@
 
 IF (WIN32)
 	FIND_PATH( FREEIMAGE_INCLUDE_PATH FreeImage.h
-		${PROJECT_SOURCE_DIR}/windows/FreeImage/x32
+		windows/FreeImage/x64
 		DOC "The directory where FreeImage.h resides")
 	FIND_LIBRARY( FREEIMAGE_LIBRARY
 		NAMES FreeImage freeimage 
 		PATHS
-		${PROJECT_SOURCE_DIR}/windows/FreeImage/x32
+		windows/FreeImage/x64
 		DOC "The FreeImage library")
 ELSE (WIN32)
 	FIND_PATH( FREEIMAGE_INCLUDE_PATH FreeImage.h
