@@ -116,7 +116,7 @@ target_compile_definitions(al PUBLIC ${definitions})
 
 target_include_directories(al PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
+#  "$<INSTALL_INTERFACE:include>"
 )
 
 # use external include dirs when building,
@@ -151,7 +151,9 @@ install(TARGETS al
   ARCHIVE DESTINATION lib
 )
 
-install(EXPORT al-targets DESTINATION lib/cmake/al)
+# For some reason this line causes an error when including depencies that are inside the source
+# tree on windows.... What does it do anyway...?
+#install(EXPORT al-targets DESTINATION lib/cmake/al)
 install(DIRECTORY ${al_path}/include/al DESTINATION include)
 
 install(DIRECTORY external/oscpack/ip DESTINATION include)

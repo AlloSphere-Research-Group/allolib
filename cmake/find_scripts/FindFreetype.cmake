@@ -42,25 +42,15 @@
 # I'm going to attempt to cut out the middleman and hope
 # everything still works.
 
+
+  message("${FREETYPE_LIBRARY}  --------------- ${FREETYPE_INCLUDE_DIRS}")
 if((NOT FREETYPE_LIBRARY) OR (NOT FREETYPE_INCLUDE_DIR))
-IF (WIN32)
-	FIND_PATH( FREETYPE_INCLUDE_DIR ft2build.h
-		${PROJECT_SOURCE_DIR}/windows/freetype2
-		DOC "The directory where ft2build.h resides")
-	FIND_LIBRARY( FREETYPE_LIBRARY
-		NAMES freetype
-		PATHS
-		${PROJECT_SOURCE_DIR}/windows/freetype2
-		DOC "The Freetype library")
-		
-    SET(FREETYPE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIR})
-ELSE (WIN32)
   FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
     HINTS
     $ENV{FREETYPE_DIR}
     PATH_SUFFIXES include
     PATHS
-	windows
+	${CMAKE_SOURCE_DIR}/windows
     /usr/local/Cellar/freetype/2.4.10/include
     /usr/local/X11R6/include
     /usr/local/X11/include
@@ -75,7 +65,7 @@ ELSE (WIN32)
     HINTS
     $ENV{FREETYPE_DIR}/include/freetype2
     PATHS
-	windows
+	${CMAKE_SOURCE_DIR}/windows
     /usr/local/Cellar/freetype/2.4.10/include/freetype2
     /usr/local/X11R6/include
     /usr/local/X11/include
@@ -91,7 +81,7 @@ ELSE (WIN32)
     HINTS
     $ENV{FREETYPE_DIR}/include/freetype2
     PATHS
-	windows
+	${CMAKE_SOURCE_DIR}/windows
     /usr/local/Cellar/freetype/2.4.10/include/freetype2
     /usr/local/X11R6/include
     /usr/local/X11/include
@@ -104,12 +94,14 @@ ELSE (WIN32)
   ENDIF(NOT FREETYPE_INCLUDE_DIR_freetype2)
 
   FIND_LIBRARY(FREETYPE_LIBRARY
-	windows
+	{CMAKE_SOURCE_DIR}/windows
     NAMES freetype libfreetype freetype219
     HINTS
     $ENV{FREETYPE_DIR}
-    PATH_SUFFIXES lib64 lib
+    PATH_SUFFIXES lib64 lib freetype2
     PATHS
+	
+	${CMAKE_SOURCE_DIR}/windows
     /usr/local/X11R6
     /usr/local/X11
     /usr/X11
@@ -120,7 +112,7 @@ ELSE (WIN32)
   IF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
     SET(FREETYPE_INCLUDE_DIRS "${FREETYPE_INCLUDE_DIR_ft2build};${FREETYPE_INCLUDE_DIR_freetype2}")
   ENDIF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
-ENDIF(WIN32)
+
 
 
   SET(FREETYPE_LIBRARIES "${FREETYPE_LIBRARY}")
@@ -128,7 +120,6 @@ ENDIF(WIN32)
   # all listed variables are TRUE
   INCLUDE(FindPackageHandleStandardArgs)
   FIND_PACKAGE_HANDLE_STANDARD_ARGS(Freetype  DEFAULT_MSG  FREETYPE_LIBRARY  FREETYPE_INCLUDE_DIRS)
-
 
   MARK_AS_ADVANCED(FREETYPE_LIBRARY FREETYPE_INCLUDE_DIR)
 endif((NOT FREETYPE_LIBRARY) OR (NOT FREETYPE_INCLUDE_DIR))

@@ -17,55 +17,13 @@ option(USE_MPI "" ON)
   # endif (USE_APR)
 
   # for freeimage, assimp, freetype
-  list(APPEND CMAKE_MODULE_PATH
-    ${al_path}/cmake/find_scripts
-  )
+list(APPEND CMAKE_MODULE_PATH
+${al_path}/cmake/find_scripts
+)
 
-  find_package(FreeImage QUIET)
-  find_package(Assimp QUIET)
-  find_package(Freetype QUIET)
-  
-if (AL_WINDOWS AND (NOT FREEIMAGE_FOUND))
-
-  # This should be moved to the find script
-  # if (USE_APR)
-  #   set(APR_INCLUDE_DIRS ${al_path}/dependencies/apr/include)
-  #   set(APR_LIBRARIES ${al_path}/dependencies/apr/libapr-1.lib)
-  # endif (USE_APR)
-
-  FIND_PATH(FREEIMAGE_INCLUDE_PATH FreeImage.h
-    ${al_path}/windows/FreeImage/Dist/x64
-    DOC "The directory where FreeImage.h resides")
-  FIND_LIBRARY(FREEIMAGE_LIBRARY
-    NAMES FreeImage freeimage
-    PATHS ${al_path}/windows/FreeImage/Dist/x64
-    DOC "The FreeImage library")
-
-  IF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
-    SET( FREEIMAGE_FOUND TRUE)
-  ELSE (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
-    SET( FREEIMAGE_FOUND FALSE)
-    set (FREEIMAGE_INCLUDE_PATH "")
-    set (FREEIMAGE_LIBRARY "")
-  ENDIF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
-
-endif (AL_WINDOWS AND (NOT FREEIMAGE_FOUND))
-
-if (AL_WINDOWS AND (NOT FREETYPE_FOUND))
-	FIND_PATH( FREETYPE_INCLUDE_DIR ft2build.h
-		${PROJECT_SOURCE_DIR}/windows/freetype2
-		DOC "The directory where ft2build.h resides")
-	FIND_LIBRARY( FREETYPE_LIBRARY
-		NAMES freetype
-		PATHS
-		${PROJECT_SOURCE_DIR}/windows/freetype2
-		DOC "The Freetype library")
-		
-message("Looking for freetype!!!!")
-    SET(FREETYPE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIR})
-
-endif (AL_WINDOWS AND (NOT FREETYPE_FOUND))
-
+find_package(FreeImage QUIET)
+find_package(Assimp QUIET)
+find_package(Freetype QUIET)
 find_package(MPI QUIET)
 
 # NOW ADD OPTIONAL FILES -------------------------------------------------------
