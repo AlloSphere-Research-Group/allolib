@@ -63,29 +63,18 @@ namespace al
  */
 class ControlGUI {
 public:
-    ControlGUI &registerParameter(Parameter &param);
+    ControlGUI &registerParameterMeta(ParameterMeta &param);
 
-    /// Register parameter using the streaming operator. A widget is shown to control it.
-    ControlGUI &operator << (Parameter& newParam){ return registerParameter(newParam); }
+    /// Register parameter using the streaming operator.
+    ControlGUI &operator << (ParameterMeta& newParam){ return registerParameterMeta(newParam); }
 
-    /// Register parameter using the streaming operator. A widget is shown to control it.
-    ControlGUI &operator << (Parameter* newParam){ return registerParameter(*newParam); }
-
-
-    ControlGUI &registerParameterBool(ParameterBool &param);
-
-    /// Register parameter using the streaming operator. A widget is shown to control it.
-    ControlGUI &operator << (ParameterBool& newParam){ return registerParameterBool(newParam); }
-
-    /// Register parameter using the streaming operator. A widget is shown to control it.
-    ControlGUI &operator << (ParameterBool* newParam){ return registerParameterBool(*newParam); }
-
+    /// Register parameter using the streaming operator.
+    ControlGUI &operator << (ParameterMeta* newParam){ return registerParameterMeta(*newParam); }
 
     ControlGUI &registerNav(Nav &nav);
 
     /// Register nav using the streaming operator. A set of widgets are shown to control it.
     ControlGUI &operator << (Nav &nav){ return registerNav(nav); }
-
 
     ControlGUI &registerPresetHandler(PresetHandler &presetHandler);
 
@@ -112,9 +101,6 @@ public:
     /// Register a SynthSequencer. This will display GUI widgets to control it
     /// Will also register the PolySynth contained within it.
     ControlGUI & operator<< (SynthSequencer &seq) { registerSynthSequencer(seq);  return *this; }
-
-    void registerParameterPose(ParameterPose &pose);
-    ControlGUI & operator<< (ParameterPose &seq) { registerParameterPose(seq);  return *this; }
 
     /**
      * @brief draws the GUI
@@ -187,10 +173,12 @@ public:
 protected:
 
 private:
-    std::map<std::string, std::vector<Parameter *>> mParameters;
-    std::map<std::string, std::vector<ParameterBool *>> mParameterBools;
+    //std::map<std::string, std::vector<Parameter *>> mParameters;
+    //std::map<std::string, std::vector<ParameterBool *>> mParameterBools;
     std::map<std::string, std::vector<ParameterVec3 *>> mParameterVec3s;
     std::map<std::string, std::vector<ParameterVec4 *>> mParameterVec4s;
+
+	std::map<std::string, std::vector<ParameterMeta *>> mElements;
 
     PresetHandler *mPresetHandler {nullptr};
     PresetSequencer *mPresetSequencer {nullptr};
@@ -198,8 +186,6 @@ private:
     SynthSequencer *mSynthSequencer {nullptr};
     PolySynth *mPolySynth {nullptr};
     Nav *mNav {nullptr};
-
-    std::vector<ParameterPose *> mPoses;
 
     int mX, mY;
     int mId;
@@ -224,6 +210,11 @@ private:
         return true;
     };
 
+	void drawParameter(Parameter *param, std::string suffix);
+	void drawParameterBool(ParameterBool *param, std::string suffix);
+	void drawParameterPose(ParameterPose *param);
+	void drawNav();
+	void drawMenu(ParameterMenu *param, std::string suffix);
 
 };
 

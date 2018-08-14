@@ -102,8 +102,62 @@ protected:
 private:
 };
 
+class ParameterMeta {
+public:
+	ParameterMeta(std::string parameterName, std::string group = "",
+		std::string prefix = "") :
+		mParameterName(parameterName), mGroup(group), mPrefix(prefix)
+	{
+		//TODO: Add better heuristics for slash handling
+		if (mPrefix.length() > 0 && mPrefix.at(0) != '/') {
+			mFullAddress = "/";
+		}
+		mFullAddress += mPrefix;
+		if (mPrefix.length() > 0 && mPrefix.at(mPrefix.length() - 1) != '/') {
+			mFullAddress += "/";
+		}
+		if (mGroup.length() > 0 && mGroup.at(0) != '/') {
+			mFullAddress += "/";
+		}
+		mFullAddress += mGroup;
+		if (mGroup.length() > 0 && mGroup.at(mGroup.length() - 1) != '/') {
+			mFullAddress += "/";
+		}
+		if (mFullAddress.length() == 0) {
+			mFullAddress = "/";
+		}
+		mFullAddress += mParameterName;
+	}
+
+	virtual ~ParameterMeta() {};
+
+	/**
+	* @brief return the full OSC address for the parameter
+	*
+	* The parameter needs to be registered to a ParameterServer to listen to
+	* OSC values on this address
+	*/
+	std::string getFullAddress() { return mFullAddress; };
+
+	/**
+	* @brief getName returns the name of the parameter
+	*/
+	std::string getName(){ return mParameterName; }
+
+	/**
+	* @brief getGroup returns the name of the group for the parameter
+	*/
+	std::string getGroup() { return mGroup; };
+
+protected:
+	std::string mFullAddress;
+	std::string mParameterName;
+	std::string mGroup;
+	std::string mPrefix;
+};
+
 template<class ParameterType>
-class ParameterWrapper{
+class ParameterWrapper : public ParameterMeta {
 public:
 	/**
 	* @brief ParameterWrapper
@@ -218,24 +272,6 @@ public:
 	 */
 	void max(ParameterType maxValue) {mMax = maxValue;}
 	ParameterType max() {return mMax;}
-	
-	/**
-	 * @brief return the full OSC address for the parameter
-	 * 
-	 * The parameter needs to be registered to a ParameterServer to listen to
-	 * OSC values on this address
-	 */
-	std::string getFullAddress();
-
-	/**
-	 * @brief getName returns the name of the parameter
-	 */
-	std::string getName();
-
-    /**
-	 * @brief getGroup returns the name of the group for the parameter
-	 */
-	std::string getGroup();
 
     // typedef ParameterType (*ParameterProcessCallback)(ParameterType value, void *userData);
 	// typedef void (*ParameterChangeCallback)(ParameterType value, void *sender,
@@ -313,11 +349,6 @@ public:
 protected:
 	ParameterType mMin;
 	ParameterType mMax;
-	
-	std::string mFullAddress;
-	std::string mParameterName;
-	std::string mGroup;
-	std::string mPrefix;
 
 	std::shared_ptr<ParameterProcessCallback> mProcessCallback;
 	// void * mProcessUdata;
@@ -328,7 +359,7 @@ private:
 	std::mutex mMutex;
 	ParameterType mValue;
 	ParameterType mValueCache;
-        std::map<std::string, float> mHints; // Provide hints for
+    std::map<std::string, float> mHints; // Provide hints for behavior
 };
 
 
@@ -513,6 +544,37 @@ public:
 };
 
 
+class ParameterMenu : public ParameterWrapper<int>
+{
+public:
+	ParameterMenu(std::string parameterName, std::string Group = "",
+		int defaultValue = 0,
+		std::string prefix = "") :
+		ParameterWrapper<int>(parameterName, Group, defaultValue, prefix)
+	{ }
+
+	int operator=(const int value) { this->set(value); return *this; }
+
+	void setElements(std::vector<std::string> &elements) {
+		mElements = elements;
+	}
+
+	std::vector<std::string> getElements() { return mElements; }
+
+	std::string getCurrent() {
+		if (mElements.size() > 0) {
+			return mElements[get()];
+		}
+		else {
+			return "";
+		}
+	}
+
+private:
+	std::vector<std::string> mElements;
+};
+
+
 /**
  * @brief The ParameterServer class creates an OSC server to receive parameter values
  * 
@@ -686,27 +748,8 @@ template<class ParameterType>
 ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName, std::string group,
           ParameterType defaultValue,
           std::string prefix) :
-    mParameterName(parameterName), mGroup(group), mPrefix(prefix), mProcessCallback(nullptr)
+	ParameterMeta(parameterName, group, prefix), mProcessCallback(nullptr)
 {
-	//TODO: Add better heuristics for slash handling
-	if (mPrefix.length() > 0 && mPrefix.at(0) != '/') {
-		mFullAddress = "/";
-	}
-	mFullAddress += mPrefix;
-	if (mPrefix.length() > 0 && mPrefix.at(mPrefix.length() - 1) != '/') {
-		mFullAddress += "/";
-	}
-	if (mGroup.length() > 0 && mGroup.at(0) != '/') {
-		mFullAddress += "/";
-	}
-	mFullAddress += mGroup;
-	if (mGroup.length() > 0 && mGroup.at(mGroup.length() - 1) != '/') {
-		mFullAddress += "/";
-	}
-	if (mFullAddress.length() == 0) {
-		mFullAddress = "/";
-	}
-	mFullAddress += mParameterName;
 	mValue = defaultValue;
 	mValueCache = defaultValue;
 }
@@ -724,10 +767,8 @@ ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName, std
 
 template<class ParameterType>
 ParameterWrapper<ParameterType>::ParameterWrapper(const ParameterWrapper<ParameterType> &param)
+	: ParameterMeta(param.mParameterName, param.mGroup, param.mPrefix)
 {
-	mParameterName = param.mParameterName;
-	mGroup = param.mGroup;
-	mPrefix = param.mPrefix;
 	mProcessCallback = param.mProcessCallback;
 	mMin = param.mMin;
 	mMax = param.mMax;
@@ -735,33 +776,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(const ParameterWrapper<Paramet
 	// mProcessUdata = param.mProcessUdata;
 	mCallbacks = param.mCallbacks;
 	// mCallbackUdata = param.mCallbackUdata;
-
-	//TODO: Add better heuristics for slash handling
-	if (mPrefix.length() > 0 && mPrefix.at(0) != '/') {
-		mFullAddress = "/";
-	}
-	mFullAddress += mPrefix;
-	if (mPrefix.length() > 0 && mPrefix.at(mPrefix.length() - 1) != '/') {
-		mFullAddress += "/";
-	}
-	if (mGroup.length() > 0 && mGroup.at(0) != '/') {
-		mFullAddress += "/";
-	}
-	mFullAddress += mGroup;
-	if (mGroup.length() > 0 && mGroup.at(mGroup.length() - 1) != '/') {
-		mFullAddress += "/";
-	}
-	if (mFullAddress.length() == 0) {
-		mFullAddress = "/";
-	}
-	mFullAddress += mParameterName;
 }
-
-
-
-
-
-
 
 template<class ParameterType>
 ParameterType ParameterWrapper<ParameterType>::get()
@@ -771,24 +786,6 @@ ParameterType ParameterWrapper<ParameterType>::get()
 		mMutex.unlock();
 	}
 	return mValueCache;
-}
-
-template<class ParameterType>
-std::string ParameterWrapper<ParameterType>::getFullAddress()
-{
-	return mFullAddress;
-}
-
-template<class ParameterType>
-std::string ParameterWrapper<ParameterType>::getName()
-{
-	return mParameterName;
-}
-
-template<class ParameterType>
-std::string ParameterWrapper<ParameterType>::getGroup()
-{
-    return mGroup;
 }
 
 template<class ParameterType>

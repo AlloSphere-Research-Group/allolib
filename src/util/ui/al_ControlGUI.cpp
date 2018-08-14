@@ -12,51 +12,7 @@ void ControlGUI::draw(Graphics &g) {
 //    ImGui::SetNextWindowPos(ImVec2(mX, mY), ImGuiCond_FirstUseEver);
 //    ImGui::Begin(std::to_string(mId).c_str());
     if (mNav) {
-        if (ImGui::CollapsingHeader("Navigation", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-            Vec3d &currentPos = mNav->pos();
-            float x = currentPos.elems()[0];
-
-            bool changed = ImGui::SliderFloat("X", &x, -10, 10);
-            if (changed) {
-                currentPos.elems()[0] = x;
-            }
-            float y = currentPos.elems()[1];
-            changed = ImGui::SliderFloat("Y", &y, -10, 10);
-            if (changed) {
-                currentPos.elems()[1] = y;
-            }
-            float z = currentPos.elems()[2];
-            changed = ImGui::SliderFloat("Z", &z, -10, 10);
-            if (changed) {
-                currentPos.elems()[2] = z;
-            }
-        }
-        ImGui::Spacing();
-    }
-    if (mPoses.size() > 0 && ImGui::CollapsingHeader("Poses", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-        for (auto *pose: mPoses) {
-            Vec3d &currentPos = pose->get().pos();
-            float x = currentPos.elems()[0];
-
-            bool changed = ImGui::SliderFloat((pose->getName() + ":X").c_str(), &x, -5, 5);
-            if (changed) {
-                currentPos.elems()[0] = x;
-                pose->set(Pose(currentPos, pose->get().quat()));
-            }
-            float y = currentPos.elems()[1];
-            changed = ImGui::SliderFloat((pose->getName() + ":Y").c_str(), &y, -5, 5);
-            if (changed) {
-                currentPos.elems()[1] = y;
-                pose->set(Pose(currentPos, pose->get().quat()));
-            }
-            float z = currentPos.elems()[2];
-            changed = ImGui::SliderFloat((pose->getName() + ":Z").c_str(), &z, -10, 0);
-            if (changed) {
-                currentPos.elems()[2] = z;
-                pose->set(Pose(currentPos, pose->get().quat()));
-            }
-        }
-        ImGui::Spacing();
+		drawNav();
     }
     if (mPresetHandler) {
         if (ImGui::CollapsingHeader("Presets", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -115,7 +71,7 @@ void ControlGUI::draw(Graphics &g) {
         }
     }
     if (mPresetSequencer) {
-        if (ImGui::CollapsingHeader("Preset Sequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::CollapsingHeader("Preset Sequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen )) {
             vector<string> seqList = mPresetSequencer->getSequenceList();
             if (seqList.size() > 0) {
                 if (seqList.size() > 64) {
@@ -195,72 +151,33 @@ void ControlGUI::draw(Graphics &g) {
         }
     }
 //    ImGui::ShowDemoWindow();
-    for (auto elem: mParameters) {
-        if(elem.first == "" || ImGui::CollapsingHeader(elem.first.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by default
+    for (auto elem: mElements) {
+        if(elem.first == "" || ImGui::CollapsingHeader(elem.first.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by 
             string suffix;
             if (elem.first.size() > 0){
-                // Needed to separate widgets with the same name
-                // three '#' does this without setting the id
-                // just two will use the postfix as id
                 suffix = "##" + elem.first;
-            }
-            for (auto param: elem.second) {
-                 if (param->getHint("intcombo") == 1.0) {
-                    int value = (int) param->get();
-                    vector<string> values;
-                    for (float i = param->min(); i <= param->max(); i++ ) {
-                        // There's got to be a better way...
-                        values.push_back(to_string((int) i));
-                    }
-                    auto vector_getter = [](void* vec, int idx, const char** out_text)
-                    {
-                        auto& vector = *static_cast<std::vector<std::string>*>(vec);
-                        if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
-                        *out_text = vector.at(idx).c_str();
-                        return true;
-                    };
-                    if (!values.empty()) {
-                        bool changed = ImGui::Combo((param->getName() + suffix).c_str(), &value, vector_getter,
-                                        static_cast<void*>(&values), values.size());
-                        if (changed) {
-                            param->set(value);
-                        }
-                    }
-                } else {
-                    float value = param->get();
-                    bool changed = ImGui::SliderFloat((param->getName() + suffix).c_str(), &value, param->min(), param->max());
-                    if (changed) {
-                        param->set(value);
-                    }
-                }
             }
 
-        }
-    }
-    for (auto elem: mParameterBools) {
-        if(elem.first == "" || ImGui::CollapsingHeader(elem.first.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by default
-            bool changed;
-            string suffix;
-            if (elem.first.size() > 0){
-                suffix = "##" + elem.first;
-            }
-            for (auto param: elem.second) {
-                if (param->getHint("latch") == 1.0) {
-                    bool value = param->get() == 1.0;
-                    changed = ImGui::Checkbox((param->getName() + suffix).c_str(), &value);
-                    if (changed) {
-                        param->set(value ? 1.0 : 0.0);
-                    }
-                } else {
-                    changed = ImGui::Button((param->getName() + suffix).c_str());
-                    if (changed) {
-                        param->set(1.0);
-                    } else {
-                        if (param->get() == 1.0) {
-                            param->set(0.0);
-                        }
-                    }
-                }
+			for (ParameterMeta *p: elem.second) {
+				// We do a runtime check to determine the type of the parameter to determine how to draw it.
+				if (strcmp(typeid(*p).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
+					ParameterBool *param = dynamic_cast<ParameterBool *>(p);
+
+					drawParameterBool(param, suffix);
+				} else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
+					Parameter *param = dynamic_cast<Parameter *>(p);
+					drawParameter(param, suffix);
+				} else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter
+					ParameterPose *param = dynamic_cast<ParameterPose *>(p);
+					drawParameterPose(param);
+				} else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter
+					ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
+					drawMenu(param, suffix);
+				}
+				else {
+					// TODO this check should be performed on registration
+					std::cout << "Unsupported Parameter type for display" << std::endl;
+				}
             }
 
         }
@@ -306,22 +223,126 @@ void ControlGUI::cleanup() {
     free(mSequencerItems);
 }
 
-ControlGUI &ControlGUI::registerParameter(Parameter &param) {
-    std::string group = param.getGroup();
-    if (mParameters.find(group) == mParameters.end()) {
-        mParameters[group] = std::vector<Parameter *>();
-    }
-    mParameters[group].push_back(&param);
-    return *this;
+void ControlGUI::drawParameter(Parameter * param, string suffix)
+{
+	if (param->getHint("intcombo") == 1.0) {
+		int value = (int)param->get();
+		vector<string> values;
+		for (float i = param->min(); i <= param->max(); i++) {
+			// There's got to be a better way...
+			values.push_back(to_string((int)i));
+		}
+		auto vector_getter = [](void* vec, int idx, const char** out_text)
+		{
+			auto& vector = *static_cast<std::vector<std::string>*>(vec);
+			if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
+			*out_text = vector.at(idx).c_str();
+			return true;
+		};
+		if (!values.empty()) {
+			bool changed = ImGui::Combo((param->getName() + suffix).c_str(), &value, vector_getter,
+				static_cast<void*>(&values), values.size());
+			if (changed) {
+				param->set(value);
+			}
+		}
+	}
+	else {
+		float value = param->get();
+		bool changed = ImGui::SliderFloat((param->getName() + suffix).c_str(), &value, param->min(), param->max());
+		if (changed) {
+			param->set(value);
+		}
+	}
 }
 
-ControlGUI &ControlGUI::registerParameterBool(ParameterBool &param)
+void ControlGUI::drawParameterBool(ParameterBool * param, string suffix)
 {
+	bool changed;
+	if (param->getHint("latch") == 1.0) {
+		bool value = param->get() == 1.0;
+		changed = ImGui::Checkbox((param->getName() + suffix).c_str(), &value);
+		if (changed) {
+			param->set(value ? 1.0 : 0.0);
+		}
+	}
+	else {
+		changed = ImGui::Button((param->getName() + suffix).c_str());
+		if (changed) {
+			param->set(1.0);
+		}
+		else {
+			if (param->get() == 1.0) {
+				param->set(0.0);
+			}
+		}
+	}
+}
+
+void ControlGUI::drawParameterPose(ParameterPose *pose)
+{
+	if (ImGui::CollapsingHeader(("Pose:" + pose->getName()).c_str(), ImGuiTreeNodeFlags_CollapsingHeader)) {
+		Vec3d &currentPos = pose->get().pos();
+		float x = currentPos.elems()[0];
+		if (ImGui::SliderFloat(("X##" + pose->getName()).c_str(), &x, -5, 5)) {
+			currentPos.elems()[0] = x;
+			pose->set(Pose(currentPos, pose->get().quat()));
+		}
+		float y = currentPos.elems()[1];
+		if (ImGui::SliderFloat(("Y##" + pose->getName()).c_str(), &y, -5, 5)) {
+			currentPos.elems()[1] = y;
+			pose->set(Pose(currentPos, pose->get().quat()));
+		}
+		float z = currentPos.elems()[2];
+		if (ImGui::SliderFloat(("Z##" + pose->getName()).c_str(), &z, -10, 0)) {
+			currentPos.elems()[2] = z;
+			pose->set(Pose(currentPos, pose->get().quat()));
+		}
+		ImGui::Spacing();
+	}
+}
+
+void ControlGUI::drawNav()
+{
+	if (ImGui::CollapsingHeader("Navigation##nav", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+		Vec3d &currentPos = mNav->pos();
+		float x = currentPos.elems()[0];
+
+		bool changed = ImGui::SliderFloat("X", &x, -10, 10);
+		if (changed) {
+			currentPos.elems()[0] = x;
+		}
+		float y = currentPos.elems()[1];
+		changed = ImGui::SliderFloat("Y", &y, -10, 10);
+		if (changed) {
+			currentPos.elems()[1] = y;
+		}
+		float z = currentPos.elems()[2];
+		changed = ImGui::SliderFloat("Z", &z, -10, 10);
+		if (changed) {
+			currentPos.elems()[2] = z;
+		}
+		ImGui::Spacing();
+	}
+}
+
+void al::ControlGUI::drawMenu(ParameterMenu * param, std::string suffix)
+{
+	int value = param->get();
+	auto values = param->getElements();
+	bool changed = ImGui::Combo((param->getName() + suffix).c_str(), &value, vector_getter,
+				static_cast<void*>(&values), values.size());
+	if (changed) {
+		param->set(value);
+	}
+}
+
+ControlGUI &ControlGUI::registerParameterMeta(ParameterMeta &param) {
     std::string group = param.getGroup();
-    if (mParameterBools.find(group) == mParameterBools.end()) {
-        mParameterBools[group] = std::vector<ParameterBool *>();
+    if (mElements.find(group) == mElements.end()) {
+		mElements[group] = std::vector<ParameterMeta *>();
     }
-    mParameterBools[group].push_back(&param);
+	mElements[group].push_back(&param);
     return *this;
 }
 
@@ -348,9 +369,4 @@ void ControlGUI::registerSynthRecorder(SynthRecorder &recorder) {
 void ControlGUI::registerSynthSequencer(SynthSequencer &seq) {
     mSynthSequencer = &seq;
     mPolySynth = &seq.synth();
-}
-
-void ControlGUI::registerParameterPose(ParameterPose &pose)
-{
-    mPoses.push_back(&pose);
 }
