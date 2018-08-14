@@ -505,6 +505,24 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler)
 					param->set(newVal);
 				}
 			}
+			for (ParameterBool *param : handler->mParameterBools) { // No interpolation for parameter bool. Should we change exactly in the middle?
+				if (handler->mTargetValues.find(param->getFullAddress()) != handler->mTargetValues.end()) {
+					param->set(handler->mTargetValues[param->getFullAddress()][0]);
+				}
+			}
+			for (ParameterPose *param : handler->mParameterPoses) {
+				// TODO interpolate poses
+				if (handler->mTargetValues.find(param->getFullAddress()) != handler->mTargetValues.end()) {
+					auto& values = handler->mTargetValues[param->getFullAddress()];
+					if (values.size() == 7) {
+						Pose pose(Vec3d(values[0], values[1], values[2]),
+							Quatd(values[3], values[4], values[5], values[6]));
+						param->set(pose);
+					}
+					
+				}
+
+			}
 			al::wait(handler->mMorphInterval);
 		}
 //		// Set final values
