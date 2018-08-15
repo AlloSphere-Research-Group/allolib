@@ -34,9 +34,9 @@ float *create_rand_nums(int num_elements) {
 }
 
 
-class DistributedExampleApp : public DistributedApp {
+class DistributedExampleApp : public DistributedApp<> {
 public:
-    virtual void simulate() override {
+    virtual void simulate(double dt) override {
         unsigned long num_elements_per_proc = 1e6;
         float *rand_nums = NULL;
         rand_nums = create_rand_nums(num_elements_per_proc);
@@ -47,7 +47,7 @@ public:
         for (auto i = 0ul; i < num_elements_per_proc; i++) {
           local_sum += rand_nums[i];
         }
-
+#ifdef AL_BUILD_MPI
         // Print the random numbers on each process
         printf("Local sum for process %d - %f, avg = %f\n",
                world_rank, local_sum, local_sum / num_elements_per_proc);
@@ -62,6 +62,7 @@ public:
           printf("Total sum = %f, avg = %f\n", global_sum,
                  global_sum / (world_size * num_elements_per_proc));
         }
+#endif
     }
 
 };
@@ -75,7 +76,7 @@ int main(){
         if (app.isMaster()) {
             std::cout << " Run " << i << " ---------------" <<std::endl;
         }
-        app.simulate();
+        app.simulate(0);
     }
     return 0;
 }
