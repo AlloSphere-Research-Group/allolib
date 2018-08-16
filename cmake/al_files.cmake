@@ -163,6 +163,10 @@ set(al_sources
   ${util_sources}
 )
 
+set(module_sources
+    modules/img/loadImage.cpp
+)
+
 # OPTIONAL ---------------------------------------------------------------------
 
 set(glv_headers
