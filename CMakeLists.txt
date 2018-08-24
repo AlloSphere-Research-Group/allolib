@@ -44,6 +44,7 @@ set(sources
 
 set(libs_to_link
   ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
+   PARENT_SCOPE
 )
 
 set(definitions
