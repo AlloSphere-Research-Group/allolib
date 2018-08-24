@@ -35,7 +35,7 @@ set(headers
 )
 
 set(sources
-  ${al_sources} ${EXTERNAL_SRC} ${ADDITIONAL_SOURCES}
+  ${al_sources} ${module_sources} ${EXTERNAL_SRC} ${ADDITIONAL_SOURCES}
 )
 
 # set(dirs_to_include

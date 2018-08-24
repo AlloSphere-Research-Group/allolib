@@ -42,5 +42,6 @@ doc/html
 *.db
 x64
 al.dir/
+.vscode
 
 temp
