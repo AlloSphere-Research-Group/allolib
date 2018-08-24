@@ -35,6 +35,47 @@ find_package(MPI QUIET)
 #   list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_SocketAPR.cpp)
 # endif(USE_APR)
 
+if (AL_WINDOWS AND (NOT FREEIMAGE_FOUND))
+
+  # This should be moved to the find script
+  # if (USE_APR)
+  #   set(APR_INCLUDE_DIRS ${al_path}/dependencies/apr/include)
+  #   set(APR_LIBRARIES ${al_path}/dependencies/apr/libapr-1.lib)
+  # endif (USE_APR)
+
+  FIND_PATH(FREEIMAGE_INCLUDE_PATH FreeImage.h
+    ${al_path}/windows/FreeImage/x64
+    DOC "The directory where FreeImage.h resides")
+  FIND_LIBRARY(FREEIMAGE_LIBRARY
+    NAMES FreeImage freeimage
+    PATHS ${al_path}/windows/FreeImage/x64
+    DOC "The FreeImage library")
+
+  IF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
+    SET( FREEIMAGE_FOUND TRUE)
+  ELSE (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
+    SET( FREEIMAGE_FOUND FALSE)
+    set (FREEIMAGE_INCLUDE_PATH "")
+    set (FREEIMAGE_LIBRARY "")
+  ENDIF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
+
+endif (AL_WINDOWS AND (NOT FREEIMAGE_FOUND))
+
+if (AL_WINDOWS AND (NOT FREETYPE_FOUND))
+	FIND_PATH( FREETYPE_INCLUDE_DIR ft2build.h
+		${PROJECT_SOURCE_DIR}/windows/freetype2
+		DOC "The directory where ft2build.h resides")
+	FIND_LIBRARY( FREETYPE_LIBRARY
+		NAMES freetype
+		PATHS
+		${PROJECT_SOURCE_DIR}/windows/freetype2
+		DOC "The Freetype library")
+		
+message("Looking for freetype!!!!")
+    SET(FREETYPE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIR})
+
+endif (AL_WINDOWS AND (NOT FREETYPE_FOUND))
+
 if (FREEIMAGE_FOUND)
   if (AL_VERBOSE_OUTPUT)
     message("found freeimage")
@@ -63,7 +104,6 @@ if (FREETYPE_INCLUDE_DIRS)
   list(APPEND ADDITIONAL_LIBRARIES ${FREETYPE_LIBRARY})
   list(APPEND ADDITIONAL_HEADERS ${al_path}/include/al/util/al_Font.hpp)
   list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_Font.cpp)
-  message("Added!!")
 endif()
 
 if (USE_MPI AND MPI_CXX_FOUND)
