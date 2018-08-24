@@ -38,9 +38,10 @@ set(sources
   ${al_sources} ${module_sources} ${EXTERNAL_SRC} ${ADDITIONAL_SOURCES}
 )
 
-# set(dirs_to_include
-#   ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
-# )
+set(dirs_to_include
+  ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
+   PARENT_SCOPE
+)
 
 set(libs_to_link
   ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}

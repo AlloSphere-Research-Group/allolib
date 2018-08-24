@@ -21,9 +21,7 @@ list(APPEND CMAKE_MODULE_PATH
 ${al_path}/cmake/find_scripts
 )
 
-find_package(FreeImage QUIET)
 find_package(Assimp QUIET)
-find_package(Freetype QUIET)
 find_package(MPI QUIET)
 
 # NOW ADD OPTIONAL FILES -------------------------------------------------------
@@ -35,7 +33,7 @@ find_package(MPI QUIET)
 #   list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_SocketAPR.cpp)
 # endif(USE_APR)
 
-if (AL_WINDOWS AND (NOT FREEIMAGE_FOUND))
+if (AL_WINDOWS)
 
   # This should be moved to the find script
   # if (USE_APR)
@@ -45,11 +43,13 @@ if (AL_WINDOWS AND (NOT FREEIMAGE_FOUND))
 
   FIND_PATH(FREEIMAGE_INCLUDE_PATH FreeImage.h
     ${al_path}/windows/FreeImage/x64
-    DOC "The directory where FreeImage.h resides")
+    DOC "The directory where FreeImage.h resides"
+    NO_DEFAULT_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH ONLY_CMAKE_FIND_ROOT_PATH)
   FIND_LIBRARY(FREEIMAGE_LIBRARY
     NAMES FreeImage freeimage
     PATHS ${al_path}/windows/FreeImage/x64
-    DOC "The FreeImage library")
+    DOC "The FreeImage library"
+    NO_DEFAULT_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH ONLY_CMAKE_FIND_ROOT_PATH)
 
   IF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
     SET( FREEIMAGE_FOUND TRUE)
@@ -59,22 +59,24 @@ if (AL_WINDOWS AND (NOT FREEIMAGE_FOUND))
     set (FREEIMAGE_LIBRARY "")
   ENDIF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
 
-endif (AL_WINDOWS AND (NOT FREEIMAGE_FOUND))
-
-if (AL_WINDOWS AND (NOT FREETYPE_FOUND))
 	FIND_PATH( FREETYPE_INCLUDE_DIR ft2build.h
-		${PROJECT_SOURCE_DIR}/windows/freetype2
-		DOC "The directory where ft2build.h resides")
+		${al_path}/windows/freetype2
+		DOC "The directory where ft2build.h resides"
+        NO_DEFAULT_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH ONLY_CMAKE_FIND_ROOT_PATH)
 	FIND_LIBRARY( FREETYPE_LIBRARY
 		NAMES freetype
 		PATHS
-		${PROJECT_SOURCE_DIR}/windows/freetype2
-		DOC "The Freetype library")
+		${al_path}/windows/freetype2
+		DOC "The Freetype library"
+        NO_DEFAULT_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH ONLY_CMAKE_FIND_ROOT_PATH)
 		
-message("Looking for freetype!!!!")
+message("Looking for freetype!!!! ${FREETYPE_INCLUDE_DIR}")
     SET(FREETYPE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIR})
 
-endif (AL_WINDOWS AND (NOT FREETYPE_FOUND))
+else()
+    find_package(FreeImage QUIET)
+    find_package(Freetype QUIET)
+endif (AL_WINDOWS)
 
 if (FREEIMAGE_FOUND)
   if (AL_VERBOSE_OUTPUT)
