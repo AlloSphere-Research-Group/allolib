@@ -1,3 +1,7 @@
+# Documentation
+
+The API documentation can be found at: https://allosphere-research-group.github.io/allolib-doc/
+
 # Installing Allolib
 
 git clone https://github.com/AlloSphere-Research-Group/allolib
