@@ -1,14 +1,17 @@
+
+[![Build Status](https://travis-ci.org/AlloSphere-Research-Group/allolib.svg?branch=master)](https://travis-ci.org/AlloSphere-Research-Group/allolib)
+
 # Documentation
 
 The API documentation can be found at: https://allosphere-research-group.github.io/allolib-doc/
 
 # Installing Allolib
 
-git clone https://github.com/AlloSphere-Research-Group/allolib
-cd allolib
-git submodule init
-git submodule update
-./run.sh examples/graphics/2d.cpp
+    git clone https://github.com/AlloSphere-Research-Group/allolib
+    cd allolib
+    git submodule init
+    git submodule update
+    ./run.sh examples/graphics/2d.cpp
 
 # Running allolib
 
@@ -16,7 +19,7 @@ git submodule update
 
 The simplest way to compile and run a single file in allolib is by using the run.sh script:
 
-./run.sh path/to/file.cpp
+    ./run.sh path/to/file.cpp
 
 This will build allolib, and create an executable for the file.cpp called 'file' inside the '''path/to/bin''' directory. It will then run the application.
 
