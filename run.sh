@@ -1,10 +1,14 @@
 #!/bin/bash
+usage="$(basename "$0") [-h] [-d] [-n] [-c] [-v] source.cpp
+-- build and run single-file allolib applications.
 
-if [ $# == 0 ]; then
-  echo "pass file to run"
-  echo "ex) ./run.sh src/main.cpp"
-  exit 1
-fi
+where:
+    -h  show this help text
+    -d build debug version and run in debugger
+    -n build only. Don't run.
+    -c clean build
+    -v verbose build. Prints full cmake log and verbose build.
+"
 
 if [ $(uname -s) == "Darwin" ]; then
   CURRENT_OS="MACOS"
@@ -43,7 +47,12 @@ IS_VERBOSE=0
 VERBOSE_FLAG=OFF
 RUN_MPI=0
 
-while getopts "adncv" opt; do
+if [ $# == 0 ]; then
+  echo "$usage"
+  exit 1
+fi
+
+while getopts "adncvh" opt; do
   case "${opt}" in
   a)
     RUN_MPI=1
@@ -61,6 +70,11 @@ while getopts "adncv" opt; do
   v)
     IS_VERBOSE=1
     VERBOSE_FLAG=ON
+  h) echo "$usage"
+  exit
+  ;;
+  \?) echo "$usage" >&2
+    exit 1
     ;;
   esac
 done
