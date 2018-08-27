@@ -16,7 +16,6 @@ struct FontModule {
     font_module::FontData fontData;
     Mesh textMesh {Mesh::TRIANGLES};
     std::unordered_map<int, font_module::CharData> cachedCharData;
-    float fontSize = 0;
     float alignFactorX = 0;
     float alignFactorY = 0;
 
@@ -41,18 +40,17 @@ inline void al::FontModule::load(const char* filename, float size) {
     fontTex.submit(fontData.bitmap.data());
     fontTex.filter(GL_LINEAR);
     fontTex.bind_temp();
-    // make `texture` in glsl return (r, r, r, r)
-    GLint swizzleMask[] = {GL_RED, GL_RED, GL_RED, GL_RED};
+    // make `texture` in glsl return (1, 1, 1, r)
+    GLint swizzleMask[] = {GL_ONE, GL_ONE, GL_ONE, GL_RED};
     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
     fontTex.unbind_temp();
-    fontSize = size;
 }
 
 // mod ver of al::Font::write
 inline void al::FontModule::render(Graphics& g, const char* text, float height) {
     textMesh.reset();
 
-    float scale = height / fontSize;
+    float scale = height / fontData.pixelHeight;
     float xpos = 0;
 
     auto cdata = [this](int c) -> const font_module::CharData& {

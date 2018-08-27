@@ -27,6 +27,7 @@ font_module::FontData font_module::loadFont(const char* filename, float pixelHei
                              reinterpret_cast<stbtt_bakedchar*>(fontData.charData.data())); // no guarantee this fits!
         fontData.width = FONT_BITMAP_SIZE;
         fontData.height = FONT_BITMAP_SIZE;
+        fontData.pixelHeight = pixelHeight;
     }
     else {
         cout << "[font_module::loadFont] could not open font file: " << filename << endl;

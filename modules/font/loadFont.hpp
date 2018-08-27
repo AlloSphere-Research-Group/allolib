@@ -13,7 +13,8 @@ struct FontData {
     }; // to be casted to stbtt_backedchar in the implementation
        // user will not need to use this struct
 
-    int width, height;
+    float pixelHeight;
+    int width, height; // of bitmap pixel data
     std::vector<uint8_t> bitmap; // 1 channel bitmap data
     std::vector<BakedChar> charData;
 };
@@ -27,6 +28,7 @@ struct CharData {
 FontData loadFont(const char* filename, float pixelHeight);
 
 // caching the results of this function might give better performance
+// x0, y0, x1, y1, and xAdvance of returned CharData are in fontData.pixelHeight scale
 CharData getCharData(const FontData& fontData, int charIndex);
 
 }
