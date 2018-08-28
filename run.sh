@@ -71,6 +71,7 @@ while getopts "adncvh" opt; do
     ;;
   v)
     IS_VERBOSE=1
+    VERBOSE_MAKEFILE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
     VERBOSE_FLAG=ON
     ;;
   h) echo "$usage"
@@ -112,7 +113,7 @@ APP_NAME=${APP_FILE%.*} # remove extension (once, assuming .cpp)
   mkdir -p ${BUILD_TYPE}
   cd ${BUILD_TYPE}
 
-  cmake -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} -DAL_RUN_APP=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
+  cmake -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_RUN_APP=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
   cmake --build .
 )
 
