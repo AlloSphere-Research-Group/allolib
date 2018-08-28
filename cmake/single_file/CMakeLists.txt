@@ -152,8 +152,9 @@ if(AL_APP_RUN)
 # TODO debug run
 add_custom_target(${app_name}_run 
                     ${app_name}
-                  DEPENDS app_name
+                  DEPENDS ${app_name}
                   WORKING_DIRECTORY ${app_path}/bin
+                  USES_TERMINAL
                   )
 message("Running target after build")
 endif(AL_APP_RUN)
