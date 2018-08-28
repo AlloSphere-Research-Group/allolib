@@ -37,6 +37,9 @@ if(BUILD_EXAMPLES)
 	set(EXAMPLE_TARGET examples_${dir}_${EXAMPLE_NAME})
       endif()
       add_executable(${EXAMPLE_TARGET} ${example_src})
+      
+      set_target_properties(${EXAMPLE_TARGET} PROPERTIES CXX_STANDARD 14)
+      set_target_properties(${EXAMPLE_TARGET} PROPERTIES CXX_STANDARD_REQUIRED ON)
 
 #     message("Adding target for example: ${example_src}")
       include_directories(${ALLOCORE_INCLUDE_DIR} ${ALLOUTIL_INCLUDE_DIR} ${ALLOGLV_INCLUDE_DIR}
