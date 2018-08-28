@@ -13,11 +13,16 @@ where:
 if [ $(uname -s) == "Darwin" ]; then
   CURRENT_OS="MACOS"
   # echo "running on macOS"
+  # Check if ninja available
+  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; }
 fi
 
 if [ $(uname -s) == "Linux" ]; then
   CURRENT_OS="LINUX"
+  # Check if ninja available
+  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; }
 fi
+
 
 INITIALDIR=${PWD} # gives absolute path
 # echo "Script executed from: ${INITIALDIR}"
@@ -115,7 +120,7 @@ TARGET_NAME=$(basename ${APP_FILE_INPUT} | sed 's/\.[^.]*$//')
   mkdir -p ${BUILD_TYPE}
   cd ${BUILD_TYPE}
 
-  cmake -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
+  cmake ${GENERATOR} -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
   cmake --build . --target ${TARGET_NAME}_run
 )
 
