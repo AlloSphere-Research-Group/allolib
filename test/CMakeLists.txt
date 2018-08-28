@@ -47,6 +47,13 @@ target_link_libraries(al_tests al)
 # endif ()
 target_compile_definitions(al_tests PRIVATE ${definitions})
 
+  if (ALLOLIB_RUN_TESTS)
+    add_custom_command( TARGET al_tests POST_BUILD
+        COMMAND $<TARGET_FILE:al_tests>
+        WORKING_DIRECTORY test/bin )
+
+  endif(ALLOLIB_RUN_TESTS)
+
 # if (WINDOWS)
 # 
 #   set(post_build_command

@@ -12,7 +12,7 @@ struct MyApp : App {
     FontModule font;
 
     void onCreate() override {
-        font.load("data/font.otf", 128);
+        font.load("data/VeraMono.ttf", 128);
         font.align(TEXT_ALIGN::RIGHT);
     }
 
