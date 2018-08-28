@@ -38,7 +38,7 @@ addons:
     # - libfftw3-dev
 script:
     - cmake . -DTRAVIS_BUILD=1 -DBUILD_EXAMPLES=1 -DCMAKE_BUILD_TYPE=Debug -DALLOLIB_BUILD_TESTS=1 -DALLOLIB_RUN_TESTS=1
-    - cmake . --build
+    - cmake --build .
 sudo: false
 notifications:
   email:
