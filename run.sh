@@ -93,6 +93,8 @@ APP_FILE_INPUT="$1" # first argument (assumming we consumed all the options abov
 APP_PATH=$(dirname ${APP_FILE_INPUT})
 APP_FILE=$(basename ${APP_FILE_INPUT})
 APP_NAME=${APP_FILE%.*} # remove extension (once, assuming .cpp)
+TARGET_NAME=$(basename ${APP_FILE_INPUT} | sed 's/\.[^.]*$//')
+
 
 # echo "app path: ${APP_PATH}"
 # echo "app file: ${APP_FILE}"
@@ -113,8 +115,8 @@ APP_NAME=${APP_FILE%.*} # remove extension (once, assuming .cpp)
   mkdir -p ${BUILD_TYPE}
   cd ${BUILD_TYPE}
 
-  cmake -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_RUN_APP=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
-  cmake --build .
+  cmake -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
+  cmake --build . --target ${TARGET_NAME}_run
 )
 
 APP_BUILD_RESULT=$?
