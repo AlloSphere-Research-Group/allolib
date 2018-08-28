@@ -11,8 +11,8 @@ Requirements:
 stereographic rendering
 */
 
-#include "allocore/al_Allocore.hpp"
-#include "allocore/sound/al_Ambisonics.hpp"
+#include "al/core.hpp"
+#include "al/core/sound/al_Ambisonics.hpp"
 #include <Gamma/SoundFile.h>
 #include <iostream>
 #include <cassert>
@@ -46,7 +46,7 @@ void audioCB(AudioIOData& io)
 	assert(AUDIO_BLOCK_SIZE == numFrames);
 	
 	AmbisonicsSpatializer* spatializer = ud->spatializer;
-    spatializer->prepare();
+    spatializer->prepare(io);
 	
 	float * ambiChans = spatializer->ambiChans();
 	
@@ -212,7 +212,10 @@ int main (int argc, char * argv[])
     //listener = scene.createListener(speakerLayout, dbap);
 	
 
-    AudioIO audioIO(AUDIO_BLOCK_SIZE, sr, audioCB, &ud, 60, 0);
+    AudioIO audioIO;
+    
+    audioIO.initWithDefaults(audioCB, &ud, true, true, 256);
+    audioIO.channelsOut(60);
 	audioIO.start();
 
 	while (!ud.done) {

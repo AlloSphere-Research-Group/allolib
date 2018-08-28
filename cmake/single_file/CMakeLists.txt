@@ -16,6 +16,7 @@ cmake_minimum_required(VERSION 3.0)
 # allolib's run.sh script will do above process too
 
 option(AL_VERBOSE_OUTPUT "" OFF)
+option(AL_APP_RUN "" ON)
 
 if (NOT AL_APP_FILE)
   message(FATAL_ERROR "\n[!] app file needs to be provided\n")
@@ -101,8 +102,10 @@ else ()
 endif (AL_WINDOWS)
 
 target_link_libraries(${app_name} al)
-
+get_target_property(al_libs al LINK_LIBRARIES)
+message("***** ${al_libs}")
 target_include_directories(${app_name} PRIVATE ${app_include_dirs})
+message(" ------ ${FREEIMAGE_LIBRARY} ${FREETYPE_LIBRARY}")
 target_link_libraries(${app_name} ${app_link_libs})
 target_compile_definitions(${app_name} PRIVATE ${app_definitions})
 target_compile_options(${app_name} PRIVATE ${app_compile_flags})
@@ -144,3 +147,12 @@ if (AL_WINDOWS)
     COMMAND ${post_build_command}
   )
 endif (AL_WINDOWS)
+
+if(AL_APP_RUN)
+# TODO debug run
+add_custom_command( TARGET ${app_name} POST_BUILD
+        COMMAND $<TARGET_FILE:${app_name}>
+        WORKING_DIRECTORY ${app_path}/bin 
+)
+message("Running target after build")
+endif(AL_APP_RUN)

@@ -3,6 +3,7 @@ project(allolib)
 
 set(al_path ${CMAKE_CURRENT_LIST_DIR})
 option(AL_VERBOSE_OUTPUT "" OFF)
+option(BUILD_EXAMPLES "" ON)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(AL_MACOS 1)
@@ -40,12 +41,10 @@ set(sources
 
 set(dirs_to_include
   ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
-   PARENT_SCOPE
 )
 
 set(libs_to_link
   ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
-   PARENT_SCOPE
 )
 
 set(definitions
@@ -139,6 +138,10 @@ target_link_libraries(al PUBLIC ${libs_to_link} Gamma glfw glew_s)
 if (ALLOLIB_BUILD_TESTS)
   add_subdirectory(test)
 endif()
+
+# ----- Examples -------------------------------------
+
+include("cmake/example_targets.cmake")
 
 # ----- INSTALL ----------------------------------------------------------------
 #

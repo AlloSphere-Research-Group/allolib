@@ -15,6 +15,7 @@ Lance Putnam, Feb. 2015
 */
 #include "al/core.hpp"
 using namespace al;
+using namespace std;
 
 
 class MyApp : public App{

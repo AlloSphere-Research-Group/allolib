@@ -62,7 +62,7 @@ struct MyWindow : App {
 
     g.depthTesting(true);
     g.lighting(true);
-    g.light().dir(1.f, 1.f, 2.f);
+    //g.light().dir(1.f, 1.f, 2.f);
 
     g.pushMatrix();
 

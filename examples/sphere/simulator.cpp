@@ -1,3 +1,4 @@
+#ifndef AL_WINDOWS
 #include "al/core.hpp"
 #include "al/sphere/al_SphereUtils.hpp"
 #include "Cuttlebone/Cuttlebone.hpp"
@@ -50,3 +51,14 @@ int main()
   MySimulatorApp app;
   app.start();
 }
+
+# else
+
+#include <iostream>
+
+int main()
+{
+    std::cout << "Not implemented on Windows!!" << std::endl;
+}
+
+#endif

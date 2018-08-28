@@ -17,6 +17,7 @@ Lance Putnam, Nov. 2015
 #include <cmath>
 
 using namespace al;
+using namespace std;
 
 // A particle with acceleration
 class Particle{

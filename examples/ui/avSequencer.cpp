@@ -12,7 +12,7 @@
 #include "Gamma/Gamma.h"
 
 #include "al/core/io/al_AudioIO.hpp"
-#include "al/util/ui/al_SynthSequencer.hpp"
+#include "al/util/scene/al_SynthSequencer.hpp"
 #include "al/core/app/al_App.hpp"
 #include "al/core/graphics/al_Shapes.hpp"
 

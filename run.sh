@@ -46,6 +46,7 @@ DO_CLEAN=0
 IS_VERBOSE=0
 VERBOSE_FLAG=OFF
 RUN_MPI=0
+RUN_APP=1
 
 if [ $# == 0 ]; then
   echo "$usage"
@@ -56,13 +57,14 @@ while getopts "adncvh" opt; do
   case "${opt}" in
   a)
     RUN_MPI=1
+    RUN_APP=0
     ;;
   d)
     BUILD_TYPE=Debug
     POSTFIX=d # if release, there's no postfix
     ;;
   n)
-    EXIT_AFTER_BUILD=1
+    RUN_APP=0
     ;;
   c)
     DO_CLEAN=1
@@ -110,7 +112,7 @@ APP_NAME=${APP_FILE%.*} # remove extension (once, assuming .cpp)
   mkdir -p ${BUILD_TYPE}
   cd ${BUILD_TYPE}
 
-  cmake -Wno-deprecated -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
+  cmake -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} -DAL_RUN_APP=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
   cmake --build .
 )
 
@@ -119,10 +121,6 @@ APP_BUILD_RESULT=$?
 if [ ${APP_BUILD_RESULT} != 0 ]; then
   echo "app ${APP_NAME} failed to build"
   exit 1
-fi
-
-if [ ${EXIT_AFTER_BUILD} ]; then
-  exit 0
 fi
 
 # run app
@@ -140,8 +138,9 @@ fi
 if [ ${RUN_MPI}  != 0 ]; then
   echo Running MPI
   mpirun --mca btl_tcp_if_include enp1s0 --hostfile ../../mpi_hosts.txt /usr/bin/env DISPLAY=:0 ./"${APP_NAME}${POSTFIX}"
-elif [ ${BUILD_TYPE} == "Release" ]; then
-  ./"${APP_NAME}${POSTFIX}"
-else
-  ${DEBUGGER} ./"${APP_NAME}${POSTFIX}"
 fi
+# elif [ ${BUILD_TYPE} == "Release" ]; then
+#   ./"${APP_NAME}${POSTFIX}"
+# else
+#   ${DEBUGGER} ./"${APP_NAME}${POSTFIX}"
+# fi

@@ -11,7 +11,8 @@ Requirements:
 stereographic rendering
 */
 
-#include "allocore/al_Allocore.hpp"
+#include "al/core.hpp"
+#include "al/core/sound/al_Speaker.hpp"
 #include <Gamma/SoundFile.h>
 #include <iostream>
 #include <vector>
@@ -204,8 +205,10 @@ int main (int argc, char * argv[])
 //    Dbap *dbap;
 //    dbap = new Dbap();
 
-    AudioIO audioIO(AUDIO_BLOCK_SIZE, sr, audioCB, &ud, 60, 0);
-	audioIO.start();
+    AudioIO audioIO;
+    audioIO.initWithDefaults(audioCB, &ud, true, true, 256);
+    audioIO.channelsOut(60);
+    audioIO.start();
 
 	while (!ud.done) {
 		al_sleep(0);
