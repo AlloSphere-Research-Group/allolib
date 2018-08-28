@@ -1,4 +1,11 @@
 
+# Allolib C/C++ Libraries
+Developed by:
+
+AlloSphere Research Group
+
+University of California, Santa Barbara
+
 [![Build Status](https://travis-ci.org/AlloSphere-Research-Group/allolib.svg?branch=master)](https://travis-ci.org/AlloSphere-Research-Group/allolib)
 
 # Documentation
