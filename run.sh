@@ -24,6 +24,10 @@ if [ $(uname -s) == "Linux" ]; then
 fi
 
 
+if [ $(uname -s) == MINGW64* ]; then
+  WINDOWS_FLAGS=-DCMAKE_GENERATOR_PLATFORM=x64
+fi
+
 INITIALDIR=${PWD} # gives absolute path
 # echo "Script executed from: ${INITIALDIR}"
 
@@ -121,7 +125,7 @@ TARGET_NAME=$(basename ${APP_FILE_INPUT} | sed 's/\.[^.]*$//')
   mkdir -p ${BUILD_TYPE}
   cd ${BUILD_TYPE}
 
-  cmake ${GENERATOR} -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
+  cmake ${GENERATOR} ${WINDOWS_FLAGS} -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
   cmake --build . --target ${TARGET_NAME}_run
 )
 
