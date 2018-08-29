@@ -1,4 +1,4 @@
-#ifndef AL_USE_CUTTLEBONE
+#ifdef AL_USE_CUTTLEBONE
 #include "al/core.hpp"
 #include "al/sphere/al_OmniRenderer.hpp"
 #include "Cuttlebone/Cuttlebone.hpp"

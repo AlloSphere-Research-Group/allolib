@@ -1,4 +1,4 @@
-#ifndef AL_USE_CUTTLEBONE
+#ifdef AL_USE_CUTTLEBONE
 #include "al/core.hpp"
 #include "al/sphere/al_SphereUtils.hpp"
 #include "Cuttlebone/Cuttlebone.hpp"
@@ -52,13 +52,13 @@ int main()
   app.start();
 }
 
-# else
+#else
 
 #include <iostream>
 
 int main()
 {
-    std::cout << "Cuttlebone not available!!" << std::endl;
+    std::cerr << " **** ==== **** Cuttlebone not available!!" << std::endl;
 }
 
 #endif

@@ -26,7 +26,7 @@ find_package(MPI QUIET)
 
 # Cuttlebone
 set(CUTTLEBONE_SRC_DIR "${CMAKE_SOURCE_DIR}/../cuttlebone")
-if (EXISTS ${CUTTLEBONE_SRC_DIR} AND NOT AL_WINDOWS)
+if (EXISTS ${CUTTLEBONE_SRC_DIR} AND NOT DEFINED AL_WINDOWS)
     set(CUTTLE_BUILD_TESTS_AND_EXAMPLES OFF CACHE BOOL "Build Cuttlebone extras" FORCE)
     add_subdirectory(${CUTTLEBONE_SRC_DIR} "${CMAKE_SOURCE_DIR}/build/cuttlebone")
 
@@ -84,7 +84,7 @@ if (AL_WINDOWS)
 		DOC "The Freetype library"
         NO_DEFAULT_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH ONLY_CMAKE_FIND_ROOT_PATH)
 		
-message("Looking for freetype!!!! ${FREETYPE_INCLUDE_DIR}")
+#message("Looking for freetype!!!! ${FREETYPE_INCLUDE_DIR}")
     SET(FREETYPE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIR})
 
 else()
