@@ -6,6 +6,7 @@ rm  Makefile
 rm CMakeCache.txt
 rm -rf CMakeFiles/
 
+rm -r build
 rm -r `find examples/ -name build`
 rm -r external/Gamma/build
 rm -r external/glew/build/build

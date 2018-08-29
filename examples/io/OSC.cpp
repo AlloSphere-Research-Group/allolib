@@ -135,22 +135,20 @@ int main(){
 
 		int numTrials = 40;
 		osc::Send s(port, addr);
-		osc::Recv r(port);
+		osc::Recv r;
 
-                if (!r.opened()) {
-                  printf("Failed to open socket on UDP port %d for OSC receipt.\n", port);
-                  printf("Probably another program is already listening on that port; I quit.\n");
-                  exit(1);
-                }
-
-
+        if (!r.open(port)) {
+            printf("Failed to open socket on UDP port %d for OSC receipt.\n", port);
+            printf("Probably another program is already listening on that port; I quit.\n");
+            exit(1);
+        }
 
 		// Assign a handler to the receiver
 		r.handler(handler);
 
 		// Here we launch a background thread that automatically checks the
 		// socket for incoming OSC packets.
-		r.timeout(0.1); // set receiver to block with timeout
+		//r.timeout(0.1); // set receiver to block with timeout
 		r.start();
 
 		for(int i=0; i<numTrials; ++i){
