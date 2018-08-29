@@ -30,7 +30,7 @@ struct MyApp : App {
     Texture tex;
 
     void onCreate() override {
-        auto imageData = img_module::loadImage("data/hubble.jpg");
+        auto imageData = imgModule::loadImage("data/hubble.jpg");
         if (imageData.data.size() == 0) {
             cout << "failed to load image" << endl;
         }
