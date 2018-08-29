@@ -32,4 +32,6 @@ ImageData loadImage(const char* filename);
 
 }
 
+namespace imgModule = img_module;
+
 #endif

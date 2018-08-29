@@ -33,4 +33,6 @@ CharData getCharData(const FontData& fontData, int charIndex);
 
 }
 
+namespace fontModule = font_module;
+
 #endif

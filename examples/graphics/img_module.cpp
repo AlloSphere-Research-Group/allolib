@@ -30,7 +30,7 @@ struct MyApp : App {
     Texture tex;
 
     void onCreate() override {
-        auto imageData = img_module::loadImage("data/img.jpeg");
+        auto imageData = imgModule::loadImage("data/img.jpeg");
         if (imageData.data.size() == 0) {
             cout << "failed to load image" << endl;
         }
@@ -41,6 +41,7 @@ struct MyApp : App {
     }
 
     void onDraw(Graphics& g) override {
+        g.clear(0);
         g.quadViewport(tex, -0.5, -0.5, 1, 1);
     }
 };
