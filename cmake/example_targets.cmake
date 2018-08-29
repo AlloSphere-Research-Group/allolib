@@ -29,7 +29,7 @@ if(BUILD_EXAMPLES)
 
     foreach(example_src ${EXAMPLE_FILES})
       get_filename_component(EXAMPLE_NAME ${example_src} NAME_WE) # Get name w/o extension
-	  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BUILD_ROOT_DIR}/build/bin/examples/${dir}")
+	  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin/examples/${dir}")
 
       if ("${dir}" STREQUAL ".")
 	set(EXAMPLE_TARGET examples_${EXAMPLE_NAME})
@@ -42,11 +42,10 @@ if(BUILD_EXAMPLES)
       set_target_properties(${EXAMPLE_TARGET} PROPERTIES CXX_STANDARD_REQUIRED ON)
 
 #     message("Adding target for example: ${example_src}")
-      include_directories(${ALLOCORE_INCLUDE_DIR} ${ALLOUTIL_INCLUDE_DIR} ${ALLOGLV_INCLUDE_DIR}
-        ${GLV_INCLUDE_DIRS} ${GAMMA_INCLUDE_DIRS} ${ALLOAUDIO_INCLUDE_DIR} ${ALLOSPHERE_INCLUDE_DIR})
+      include_directories(${ALLOCORE_INCLUDE_DIR} ${GAMMA_INCLUDE_DIRS}})
       #    message("Gamma : ${GAMMA_INCLUDE_DIRs}")
-      add_dependencies(${EXAMPLE_TARGET} al)
-      target_link_libraries(${EXAMPLE_TARGET} al)
+      add_dependencies(${EXAMPLE_TARGET} al Gamma)
+      target_link_libraries(${EXAMPLE_TARGET} al Gamma ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES})
 
       list(REMOVE_ITEM EXAMPLE_RES_FILES ${example_src})
 #      add_custom_target("${EXAMPLE_TARGET}_run"

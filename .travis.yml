@@ -37,7 +37,9 @@ addons:
     # - libjsoncpp-dev
     # - libfftw3-dev
 script:
-    - cmake . -DTRAVIS_BUILD=1 -DBUILD_EXAMPLES=1 -DCMAKE_BUILD_TYPE=Debug -DALLOLIB_BUILD_TESTS=1 -DALLOLIB_RUN_TESTS=1
+    - mkdir allolib_build
+    - cd allolib_build
+    - cmake ../allolib -DTRAVIS_BUILD=1 -DBUILD_EXAMPLES=1 -DCMAKE_BUILD_TYPE=Debug -DALLOLIB_BUILD_TESTS=1 -DALLOLIB_RUN_TESTS=1
     - cmake --build .
 sudo: false
 notifications:

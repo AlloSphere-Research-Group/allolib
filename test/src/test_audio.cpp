@@ -1,10 +1,13 @@
 
+// VS compiler needs this for math defines like M_PI
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "catch.hpp"
 
 #include "al/core/io/al_AudioIO.hpp"
 #include "al/core/system/al_Time.hpp"
 
-#include <cmath>
 
 using namespace al;
 

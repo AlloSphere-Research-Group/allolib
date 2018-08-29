@@ -16,22 +16,22 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include ${dirs_to_include})
 # include_directories(${CMAKE_SOURCE_DIR}/external/Gamma)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/rtmidi)
 
-if (AL_WINDOWS)
-  # CMAKE_BINARY_DIR: contains the driectory where cmake is run
-  set(TEST_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_OUTPUT_PATH})
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_OUTPUT_PATH})
-endif (AL_WINDOWS)
+#if (AL_WINDOWS)
+#  # CMAKE_BINARY_DIR: contains the driectory where cmake is run
+#  set(TEST_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
+#  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${TEST_OUTPUT_PATH})
+#  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${TEST_OUTPUT_PATH})
+#endif (AL_WINDOWS)
 
 add_executable(al_tests ${test_src})
 set_target_properties(al_tests PROPERTIES DEBUG_POSTFIX _debug)
 set_target_properties(al_tests PROPERTIES CXX_STANDARD 14)
 set_target_properties(al_tests PROPERTIES CXX_STANDARD_REQUIRED ON)
-set_target_properties(al_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
-set_target_properties(al_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
-set_target_properties(al_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
+set_target_properties(al_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set_target_properties(al_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set_target_properties(al_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
-target_link_libraries(al_tests al)
+target_link_libraries(al_tests al ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES})
 # if (AL_WINDOWS)
 # target_link_libraries(
 #   al_tests
@@ -47,12 +47,12 @@ target_link_libraries(al_tests al)
 # endif ()
 target_compile_definitions(al_tests PRIVATE ${definitions})
 
-  if (ALLOLIB_RUN_TESTS)
-    add_custom_command( TARGET al_tests POST_BUILD
-        COMMAND $<TARGET_FILE:al_tests>
-        WORKING_DIRECTORY test/bin )
+if (ALLOLIB_RUN_TESTS)
+add_custom_command( TARGET al_tests POST_BUILD
+    COMMAND $<TARGET_FILE:al_tests>
+    WORKING_DIRECTORY test/bin )
 
-  endif(ALLOLIB_RUN_TESTS)
+endif(ALLOLIB_RUN_TESTS)
 
 # if (WINDOWS)
 # 

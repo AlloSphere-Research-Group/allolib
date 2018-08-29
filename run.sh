@@ -14,13 +14,13 @@ if [ $(uname -s) == "Darwin" ]; then
   CURRENT_OS="MACOS"
   # echo "running on macOS"
   # Check if ninja available
-  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; }
+  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; export BUILD_DIR_SUFFIX='_ninja'; }
 fi
 
 if [ $(uname -s) == "Linux" ]; then
   CURRENT_OS="LINUX"
   # Check if ninja available
-  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; }
+  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; export BUILD_DIR_SUFFIX='_ninja'; }
 fi
 
 
@@ -112,9 +112,10 @@ TARGET_NAME=$(basename ${APP_FILE_INPUT} | sed 's/\.[^.]*$//')
       echo "cleaning build"
     fi
     rm -r build
+    rm -r build${BUILD_DIR_SUFFIX}
   fi
-  mkdir -p build
-  cd build
+  mkdir -p build${BUILD_DIR_SUFFIX}
+  cd build${BUILD_DIR_SUFFIX}
   mkdir -p ${APP_NAME}
   cd ${APP_NAME}
   mkdir -p ${BUILD_TYPE}

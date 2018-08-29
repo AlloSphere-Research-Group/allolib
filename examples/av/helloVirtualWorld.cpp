@@ -13,6 +13,9 @@ stereographic rendering
 
 #include "al/core.hpp"
 #include "al/core/sound/al_Ambisonics.hpp"
+
+// VS compiler needs this for math defines like M_PI
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <iostream>
 
