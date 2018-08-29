@@ -1,3 +1,4 @@
+#ifndef AL_USE_CUTTLEBONE
 #include "al/core.hpp"
 #include "al/sphere/al_OmniRenderer.hpp"
 #include <iostream>
@@ -79,3 +80,13 @@ int main()
     MyOmniRendererApp app;
     app.start();
 }
+
+# else
+#include <iostream>
+
+int main()
+{
+    std::cout << "Cuttlebone not available!!" << std::endl;
+}
+
+#endif

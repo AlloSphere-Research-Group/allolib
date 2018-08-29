@@ -1,4 +1,4 @@
-#ifndef AL_WINDOWS
+#ifndef AL_USE_CUTTLEBONE
 #include "al/core.hpp"
 #include "al/sphere/al_SphereUtils.hpp"
 #include "Cuttlebone/Cuttlebone.hpp"
@@ -58,7 +58,7 @@ int main()
 
 int main()
 {
-    std::cout << "Not implemented on Windows!!" << std::endl;
+    std::cout << "Cuttlebone not available!!" << std::endl;
 }
 
 #endif

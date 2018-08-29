@@ -24,6 +24,20 @@ ${al_path}/cmake/find_scripts
 find_package(Assimp QUIET)
 find_package(MPI QUIET)
 
+# Cuttlebone
+set(CUTTLEBONE_SRC_DIR "${CMAKE_SOURCE_DIR}/../cuttlebone")
+if (EXISTS ${CUTTLEBONE_SRC_DIR} AND NOT AL_WINDOWS)
+    set(CUTTLE_BUILD_TESTS_AND_EXAMPLES OFF CACHE BOOL "Build Cuttlebone extras" FORCE)
+    add_subdirectory(${CUTTLEBONE_SRC_DIR} "${CMAKE_SOURCE_DIR}/build/cuttlebone")
+
+    add_definitions(-DAL_USE_CUTTLEBONE)
+
+    list(APPEND ADDITIONAL_INCLUDE_DIRS ${CUTTLEBONE_SRC_DIR})
+    list(APPEND ADDITIONAL_LIBRARIES cuttlebone)
+else()
+    message("-- Cuttlebone not found. Not building Cuttlebone.")
+endif()
+
 # NOW ADD OPTIONAL FILES -------------------------------------------------------
 
 # if (USE_APR)
