@@ -44,8 +44,6 @@
 	Ryan McGee, 2012, ryanmichaelmcgee@gmail.com
 */
 
-// VS compiler needs this for math defines like M_PI
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <cstring>
 #include <vector>

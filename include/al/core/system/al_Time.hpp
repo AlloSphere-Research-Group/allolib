@@ -48,8 +48,6 @@
 #include <string>
 #include <climits>
 
-// VS compiler needs this for math defines like M_PI
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 typedef long long int al_nsec; /**< nanoseconds type (accurate to +/- 292.5 years) */

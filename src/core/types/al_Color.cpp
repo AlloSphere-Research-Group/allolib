@@ -1,7 +1,8 @@
+#include <cmath>
+
 #include "al/core/types/al_Color.hpp"
 #include "al/core/math/al_Constants.hpp"
 #include "al/core/math/al_Mat.hpp"
-#include <cmath>
 
 namespace al{
 

@@ -44,8 +44,6 @@
 */
 
 
-// VS compiler needs this for math defines like M_PI
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <stdio.h>
 #include "al/core/math/al_Vec.hpp"

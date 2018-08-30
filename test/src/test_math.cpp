@@ -1,6 +1,4 @@
 
-// VS compiler needs this for math defines like M_PI
-#define _USE_MATH_DEFINES
 #include <math.h>
 
 #include "catch.hpp"

@@ -42,8 +42,6 @@
 	Lance Putnam, 2006, putnam.lance@gmail.com
 */
 
-// VS compiler needs this for math defines like M_PI
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <vector>
 #include "al/core/math/al_Constants.hpp"

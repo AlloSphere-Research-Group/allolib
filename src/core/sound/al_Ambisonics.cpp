@@ -8,7 +8,7 @@
 	#define SIN			gam::scl::sinT7
 	#define WRAP(phase)	phase = gam::scl::wrapPhase(phase)
 #else
-	#include <math.h>
+	#include <cmath>
 	#define COS			cos
 	#define SIN			sin
 	#define WRAP(phase)
