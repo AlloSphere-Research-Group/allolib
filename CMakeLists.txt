@@ -19,6 +19,7 @@ MACRO_ENSURE_OUT_OF_SOURCE_BUILD(
 set(al_path ${CMAKE_CURRENT_LIST_DIR})
 option(AL_VERBOSE_OUTPUT "" OFF)
 option(BUILD_EXAMPLES "" ON)
+option(TRAVIS_BUILD "" OFF)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(AL_MACOS 1)
@@ -35,6 +36,10 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 else ()
   message(FATAL_ERROR "system platform not defined")
 endif ()
+
+if(TRAVIS_BUILD) 
+  add_definitions(-DTRAVIS_BUILD)
+endif(TRAVIS_BUILD)
 
 # include(cmake/find_core_dependencies.cmake)
 # sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES, CORE_LIBRARY_DIRS

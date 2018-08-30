@@ -11,6 +11,8 @@
 
 using namespace al;
 
+#ifndef TRAVIS_BUILD
+
 TEST_CASE( "Audio Device Enum" ) {
     AudioDevice::printAll();
 }
@@ -73,3 +75,6 @@ TEST_CASE("Audio Channels/Virtual Channels") {
     audioIO.close();
 }
 
+#else
+
+#endif // TRAVIS_BUILD
