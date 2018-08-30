@@ -10,7 +10,7 @@ MACRO(SUBDIRLIST result curdir)
   SET(${result} ${dirlist})
 ENDMACRO()
 
-if(${AL_WINDOWS} EQUAL 1 AND BUILD_TRAVIS EQUAL 1) 
+if(${AL_WINDOWS} EQUAL 1 AND APPVEYOR_BUILD EQUAL 1) 
 # Don't build files with dynamic dependencies on Appveyor CI build
 set(EXAMPLES_TO_IGNORE 
     examples/sound/multiFilePlayer.cpp 

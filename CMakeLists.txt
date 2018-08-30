@@ -20,6 +20,7 @@ set(al_path ${CMAKE_CURRENT_LIST_DIR})
 option(AL_VERBOSE_OUTPUT "" OFF)
 option(BUILD_EXAMPLES "" ON)
 option(TRAVIS_BUILD "" OFF)
+option(APPVEYOR_BUILD "" OFF)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(AL_MACOS 1)
