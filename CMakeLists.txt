@@ -52,8 +52,6 @@ include(cmake/external.cmake)
 include(cmake/al_files.cmake)
 # sets: al_headers, al_sources
 
-find_package(OpenGL REQUIRED)
-
 set(headers
   ${al_headers} ${ADDITIONAL_HEADERS}
 )
