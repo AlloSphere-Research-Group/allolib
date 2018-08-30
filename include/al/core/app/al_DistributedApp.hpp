@@ -286,7 +286,7 @@ public:
       std::cout << name() << ":" << logText << std::endl;
   }
 
-  ParameterServer &parameterServer() { return *mParameterServer; }
+  ParameterServer &parameterServer() override { return *mParameterServer; }
 
 private:
 

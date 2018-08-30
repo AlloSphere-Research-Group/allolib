@@ -197,7 +197,8 @@ void DynamicScene::render(AudioIOData &io) {
                     if (mBusRoutingCallback) {
                         // First call callback to route signals to internal buses
                         internalAudioIO.frame(offset);
-                        (*mBusRoutingCallback)(internalAudioIO, mListenerPose);
+                        Pose listeningPose = listeningDir;
+                        (*mBusRoutingCallback)(internalAudioIO, listeningPose);
                         io.frame(offset);
                         internalAudioIO.frame(offset);
                         // Then gather all the internal buses into the master AudioIO buses
@@ -210,8 +211,11 @@ void DynamicScene::render(AudioIOData &io) {
                     for (unsigned int i = 0; i < voice->numOutChannels(); i++) {
                         io.frame(offset);
                         internalAudioIO.frame(offset);
-                        Pose offsetPose = mListenerPose;
+                        Pose offsetPose = listeningDir;
                         if (posOffsets.size() > 0) {
+                            // Is there need to rotate the position according to the quat()?
+                            // It would only really be useful if the source has a direction dependent
+                            // dispersion model...
                             offsetPose.vec() += posOffsets[i];
                         }
                         mSpatializer->renderBuffer(io, offsetPose, internalAudioIO.outBuffer(i), fpb);
