@@ -16,9 +16,9 @@ set(EXAMPLES_TO_IGNORE
     examples/sound/multiFilePlayer.cpp 
     examples/sound/sound_file.cpp 
     examples/sound/ambiPlayer.cpp
-    example/graphics/textureImage.cpp
-    example/graphics/font.cpp
-    example/graphics/asset.cpp
+    examples/graphics/textureImage.cpp
+    examples/graphics/font.cpp
+    examples/graphics/asset.cpp
     )
 endif()
 
