@@ -400,7 +400,7 @@ std::map<int, std::string> PresetHandler::readPresetMap(std::string mapName)
 	}
 	if (f.bad()) {
 		if (mVerbose) {
-			std::cout << "Error while writing preset map file for reading: " << mFileName << std::endl;
+			std::cout << "Error while opening preset map file for reading: " << mFileName << std::endl;
 		}
 	}
 	return presetsMap;
@@ -414,6 +414,7 @@ void PresetHandler::setCurrentPresetMap(std::string mapName, bool autoCreate)
 	        && !File::isDirectory(mapFullPath)) {
 		std::cout << "No preset map. Creating default." << std::endl;
 		std::vector<std::string> presets;
+        // FIXME put back cehcking of directory contents
 		// Dir presetDir(getCurrentPath());
 		// while(presetDir.read()) {
 		// 	FileInfo info = presetDir.entry();
