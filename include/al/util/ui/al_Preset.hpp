@@ -193,17 +193,17 @@ public:
 	void registerMorphTimeCallback(Parameter::ParameterChangeCallback cb, void *userData = nullptr);
 
 
-        PresetHandler &registerParameter(Parameter &parameter);
+    PresetHandler &registerParameter(Parameter &parameter);
 
-	PresetHandler &operator << (Parameter &param) { return this->registerParameter(param); }
+    PresetHandler &operator << (Parameter &param) { return this->registerParameter(param); }
 
-        PresetHandler &registerParameter(ParameterBool &parameter);
+    PresetHandler &registerParameter(ParameterBool &parameter);
 
-        PresetHandler &operator << (ParameterBool &param) { return this->registerParameter(param); }
+    PresetHandler &operator << (ParameterBool &param) { return this->registerParameter(param); }
 
-        PresetHandler &registerParameter(ParameterPose &parameter);
+    PresetHandler &registerParameter(ParameterPose &parameter);
 
-        PresetHandler &operator << (ParameterPose &param) { return this->registerParameter(param); }
+    PresetHandler &operator << (ParameterPose &param) { return this->registerParameter(param); }
 
 	std::string buildMapPath(std::string mapName, bool useSubDirectory = false);
 
@@ -274,6 +274,8 @@ public:
 
             return index;
         }
+
+        void verbose(bool isVerbose = true) { mVerbose = isVerbose; }
 
 private:
 	void storeCurrentPresetMap();
