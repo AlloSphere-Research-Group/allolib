@@ -459,7 +459,10 @@ void Recv::stop() {
 
 void Recv::parse(const char *packet, int size, const char *senderAddr) {
   std::memcpy(&mBuffer[0], packet, size);
-  mHandler->parse(&mBuffer[0], size, 1, senderAddr);
+  for (auto *handler : mHandlers) {
+    handler->parse(&mBuffer[0], size, 1, senderAddr);
+  }
+  
 }
 
 void Recv::loop()

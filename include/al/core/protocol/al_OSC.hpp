@@ -385,7 +385,10 @@ public:
 	void bufferSize(int n){ mBuffer.resize(n); }
 
 	/// Set packet handling routine
-	Recv& handler(PacketHandler& v){ mHandler = &v; return *this; }
+    Recv& handler(PacketHandler& v) { mHandlers.clear(); return appendHandler(v); }
+
+    /// Add a packet handler to list. All handlers get all messages
+    Recv& appendHandler(PacketHandler& v) { mHandlers.push_back(&v); return *this; }
 
 	/// Check for an OSC packet and call handler
 	/// returns bytes read
@@ -405,7 +408,7 @@ public:
 	void loop();
 
 protected:
-	PacketHandler * mHandler = nullptr;
+	std::vector<PacketHandler *> mHandlers;
 	std::vector<char> mBuffer;
 	al::Thread mThread;
 	bool mBackground;
