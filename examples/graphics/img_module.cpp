@@ -19,7 +19,7 @@
 
 #include "al/core.hpp"
 // TODO: figure out how to handle include dirs for modules
-#include "../modules/img/loadImage.hpp"
+#include "module/img/loadImage.hpp"
 
 #include <iostream>
 
