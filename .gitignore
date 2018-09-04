@@ -6,6 +6,7 @@
 !**/bin/data
 
 **/build
+**/build_ninja
 !external/glew/build
 
 # only top level al folder

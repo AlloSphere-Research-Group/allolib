@@ -142,6 +142,8 @@ target_include_directories(al PUBLIC
 #  "$<INSTALL_INTERFACE:include>"
 )
 
+target_include_directories(al PUBLIC ${CMAKE_CURRENT_LIST_DIR}/modules)
+
 # use external include dirs when building,
 # when installed, external headers will be in `include`
 # so only `include` needs to be specified as include directory

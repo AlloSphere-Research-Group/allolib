@@ -1,8 +1,7 @@
 #include "al/core/graphics/al_Mesh.hpp"
 #include "al/core/graphics/al_Texture.hpp"
 #include "al/core/graphics/al_Graphics.hpp"
-// TODO: handle modules include dir
-#include "al/../../modules/font/loadFont.hpp"
+#include "module/font/loadFont.hpp"
 #include <unordered_map>
 
 namespace al {

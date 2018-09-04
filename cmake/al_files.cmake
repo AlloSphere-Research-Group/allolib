@@ -164,8 +164,8 @@ set(al_sources
 )
 
 set(module_sources
-    modules/font/loadFont.cpp
-    modules/img/loadImage.cpp
+    modules/module/font/loadFont.cpp
+    modules/module/img/loadImage.cpp
 )
 
 # OPTIONAL ---------------------------------------------------------------------
