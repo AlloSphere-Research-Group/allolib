@@ -341,10 +341,9 @@ public:
   /// The p-norm is pth root of the sum of the absolute value of the elements
   /// raised to the pth power, (sum |x_n|^p) ^ (1/p).
   T norm(const T& p) const {
-    using namespace std;
-    T r = pow(abs((*this)[0]), p);
-    for(int i=1; i<N; ++i){ r += pow(abs((*this)[i]), p); }
-    return pow(r, T(1)/p);
+    T r = std::pow(std::abs((*this)[0]), p);
+    for(int i=1; i<N; ++i){ r += std::pow(std::abs((*this)[i]), p); }
+    return std::pow(r, T(1)/p);
   }
 
   /// Return 1-norm of elements
