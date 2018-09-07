@@ -241,9 +241,9 @@ inline bool createDir(std::string const& path)
 
 #ifdef ITS_WINDOWS
     // Create all intermediate dirs up to last one
-    for(unsigned i=0; i<path.size(); ++i){
+    for(unsigned i=0; i<path.size() -1; ++i){
         if(path[i] == '/'){
-            if(CreateDirectory(path.substr(0, i+1).c_str(), NULL) != 0){
+            if(CreateDirectory(path.substr(0, i+1).c_str(), NULL) != 0) {
                 if(GetLastError() != ERROR_ALREADY_EXISTS) {
                     std::cout << "[!] [createDir] Error creating directory " << path << std::endl;
                     return false;

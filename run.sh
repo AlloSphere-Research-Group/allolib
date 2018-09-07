@@ -131,7 +131,7 @@ if [ ${RUN_APP} == 1 ]; then
   TARGET_NAME=${TARGET_NAME}_run  
 fi
 
-cmake --build . --target ${TARGET_NAME}
+cmake --build . --target ${TARGET_NAME} --config ${BUILD_TYPE}
 )
 
 APP_BUILD_RESULT=$?
