@@ -269,7 +269,7 @@ inline bool createDir(std::string const& path)
 
     // ALLOSYSTEM CODE
     // recursively create directories
-    for (unsigned i = 0; i < path.size(); ++i) {
+    for (unsigned i = 0; i < path.size() - 1; ++i) {
         if (path[i] == '/') {
             if (mkdir(path.substr(0, i+1).c_str(), mode) != 0) {
                 if (errno != EEXIST) {
