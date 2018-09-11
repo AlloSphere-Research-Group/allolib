@@ -600,7 +600,7 @@ public:
         if (allOn) {
             uint16_t value = 0;
             for (int i = 0; i < elements.size(); i++) {
-                value &= 1 << i;
+                value |= 1 << i;
             }
             set(value);
         }

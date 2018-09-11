@@ -144,6 +144,10 @@ public:
 	 */
 	void setInterpolatedPreset(int index1, int index2, double factor);
 
+    /** 
+     * @brief Interpolate between current values and new values according to factor
+    */
+    void setParameterValues(ParameterMeta *param, std::vector<float> &values, double factor = 1.0);
 
 	void morphTo(ParameterStates &parameterStates, float morphTime);
 	void stopMorph();
@@ -192,18 +196,9 @@ public:
 	 */
 	void registerMorphTimeCallback(Parameter::ParameterChangeCallback cb, void *userData = nullptr);
 
+    PresetHandler &registerParameter(ParameterMeta &parameter);
 
-    PresetHandler &registerParameter(Parameter &parameter);
-
-    PresetHandler &operator << (Parameter &param) { return this->registerParameter(param); }
-
-    PresetHandler &registerParameter(ParameterBool &parameter);
-
-    PresetHandler &operator << (ParameterBool &param) { return this->registerParameter(param); }
-
-    PresetHandler &registerParameter(ParameterPose &parameter);
-
-    PresetHandler &operator << (ParameterPose &param) { return this->registerParameter(param); }
+    PresetHandler &operator << (ParameterMeta &param) { return this->registerParameter(param); }
 
 	std::string buildMapPath(std::string mapName, bool useSubDirectory = false);
 
@@ -292,9 +287,7 @@ private:
 	std::string mSubDir; // Optional sub directory, e.g. for preset map archives
 	std::string mFileName;
 	std::string mCurrentMapName;
-	std::vector<Parameter *> mParameters;
-        std::vector<ParameterBool *> mParameterBools;
-        std::vector<ParameterPose *> mParameterPoses;
+	std::vector<ParameterMeta *> mParameters;
 	std::mutex mFileLock;
 	bool mRunning; // To keep the morphing thread alive
 	// bool mMorph; // To be able to trip and stop morphing at any time.
@@ -305,7 +298,7 @@ private:
 	std::mutex mMorphLock;
 	std::mutex mTargetLock;
 	std::condition_variable mMorphConditionVar;
-        ParameterStates mTargetValues;
+    ParameterStates mTargetValues;
 
 	std::thread mMorphingThread;
 
