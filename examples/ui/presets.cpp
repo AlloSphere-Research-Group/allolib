@@ -96,6 +96,6 @@ int main(int argc, char *argv[]) {
   MyApp app;
   app.dimensions(800, 600);
   app.title("Presets");
-  app.fps(15);
+  app.fps(30);
   app.start();
 }

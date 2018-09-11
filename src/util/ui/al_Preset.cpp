@@ -538,7 +538,8 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler)
 	while(handler->mRunning) {
 		std::unique_lock<std::mutex> lk(handler->mTargetLock);
 		handler->mMorphConditionVar.wait(lk);
-		while (int remainingSteps = std::atomic_fetch_sub(&(handler->mMorphRemainingSteps), 1) > 0) {
+        int remainingSteps;
+		while ((remainingSteps = std::atomic_fetch_sub(&(handler->mMorphRemainingSteps), 1)) > 0) {
             for (ParameterMeta *p : handler->mParameters) {
                 if (handler->mTargetValues.find(p->getFullAddress()) != handler->mTargetValues.end()) {
                     handler->setParameterValues(p, handler->mTargetValues[p->getFullAddress()], 1.0/remainingSteps);

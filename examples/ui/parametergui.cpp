@@ -1,0 +1,74 @@
+
+#include "al/core/app/al_App.hpp"
+#include "al/core/graphics/al_Shapes.hpp"
+#include "al/util/ui/al_ControlGUI.hpp"
+#include "al/util/ui/al_ParameterMIDI.hpp"
+#include "al/util/ui/al_HtmlInterfaceServer.hpp"
+
+using namespace al;
+
+Parameter x("X", "", 0, "", -2.0, 2.0);
+Parameter y("Y", "", 0, "", -2.0, 2.0);
+Parameter z("Z", "", 0, "", -2.0, 2.0);
+
+class MyApp : public App
+{
+public:
+    MyApp()
+    {
+        // Add parameters to GUI
+        mParameterGUI << x << y << z;
+        nav() = Vec3d(0, 0, 2);
+        // Add parameters to OSC server
+        parameterServer() << x << y << z;
+        parameterServer().print();
+
+        // Expose parameter server in html interface
+        //mInterfaceServer << mServer;
+
+        addSphere(mMesh, 0.1);
+        mMesh.primitive(Mesh::LINES);
+
+        // Connect MIDI CC #1 on channel 1 to parameter x
+        mParameterMIDI.connectControl(x, 1, 1);
+
+        // Broadcast parameter changes to localhost por 9011
+        parameterServer().addListener("localhost", 9011);
+
+        // Disable mouse nav to avoid naving while changing gui controls.
+        navControl().useMouse(false);
+    }
+
+    void onCreate()
+    {
+        Light::globalAmbient({ 0.2, 1, 0.2 });
+        mParameterGUI.init();
+    }
+
+    virtual void onDraw(Graphics &g) {
+        g.clear(0);
+        g.pushMatrix();
+        g.translate(x.get(), y.get(), z.get());
+        g.draw(mMesh);
+        g.popMatrix();
+        mParameterGUI.draw(g);
+    }
+
+private:
+    ControlGUI mParameterGUI;
+    ParameterMIDI mParameterMIDI;
+    //HtmlInterfaceServer mInterfaceServer;
+
+    Mesh mMesh;
+};
+
+
+int main(int argc, char *argv[])
+{
+    MyApp app;
+    app.dimensions(800, 600);
+    app.title("Presets GUI");
+    app.fps(30);
+    app.start();
+}
+

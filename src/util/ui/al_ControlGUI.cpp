@@ -23,14 +23,14 @@ void ControlGUI::draw(Graphics &g) {
 
             char buf1[64];
             strncpy(buf1, currentPresetName.c_str(), 64);
-            if (ImGui::InputText("test", buf1, 64)) {
+            if (ImGui::InputText("preset##__Preset", buf1, 64)) {
                 currentPresetName = buf1;
             }
             static int presetHandlerBank = 0;
             int numColumns = 12;
             int numRows = 4;
             int counter = presetHandlerBank * (numColumns * numRows) ;
-            std::string suffix = "##Preset"; 
+            std::string suffix = "##__Preset"; 
             for (int row = 0; row < numRows; row++) {
                 for (int column = 0; column < numColumns; column++) {
                     std::string name = std::to_string(counter);
@@ -60,11 +60,18 @@ void ControlGUI::draw(Graphics &g) {
                     ImGui::PopID();
                 }
             }
-            ImGui::Checkbox("Store##Presets", &mStoreButtonOn);
+            ImGui::Checkbox("Store##__Preset", &mStoreButtonOn);
             ImGui::SameLine();
             static std::vector<string> seqList {"1", "2", "3", "4"};
-            ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.25f);
-            ImGui::Combo("Bank##PresetSequencer", &presetHandlerBank, vector_getter, static_cast<void*>(&seqList), seqList.size());
+            ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.15f);
+            ImGui::Combo("Bank##__Preset", &presetHandlerBank, vector_getter, static_cast<void*>(&seqList), seqList.size());
+            ImGui::SameLine();
+            ImGui::PopItemWidth();
+            ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+            float morphTime = mPresetHandler->getMorphTime();
+            if (ImGui::InputFloat("morph time##__Preset", &morphTime, 0.0f, 20.0f)) {
+                mPresetHandler->setMorphTime(morphTime);
+            }
             ImGui::PopItemWidth();
 //            ImGui::Text("%s", currentPresetName.c_str());
 
