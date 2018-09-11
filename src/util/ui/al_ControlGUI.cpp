@@ -174,6 +174,10 @@ void ControlGUI::draw(Graphics &g) {
 					ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
 					drawMenu(param, suffix);
 				}
+                else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter
+                    ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
+                    drawChoice(param, suffix);
+                }
 				else {
 					// TODO this check should be performed on registration
 					std::cout << "Unsupported Parameter type for display" << std::endl;
@@ -335,6 +339,23 @@ void al::ControlGUI::drawMenu(ParameterMenu * param, std::string suffix)
 	if (changed) {
 		param->set(value);
 	}
+}
+
+void al::ControlGUI::drawChoice(ParameterChoice * param, std::string suffix)
+{
+    uint16_t value = param->get();
+    auto elements = param->getElements();
+    if (ImGui::CollapsingHeader((param->getName() + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        for (int i = 0; i < elements.size(); i++) {
+            bool state = value & (1 << i);
+            if (ImGui::Checkbox((elements[i] + + "##" + suffix + param->getName()).c_str(), &state)) {
+                value ^= (-(state) ^ value) & (1UL << i); // Set an individual bit
+                param->set(value);
+            }
+
+        }
+    }
+
 }
 
 ControlGUI &ControlGUI::registerParameterMeta(ParameterMeta &param) {

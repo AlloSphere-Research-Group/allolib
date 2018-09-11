@@ -215,6 +215,7 @@ private:
 	void drawParameterPose(ParameterPose *param);
 	void drawNav();
 	void drawMenu(ParameterMenu *param, std::string suffix);
+    void drawChoice(ParameterChoice *param, std::string suffix);
 
 };
 

@@ -48,8 +48,8 @@
 #include <iostream>
 #include <sstream>
 #include <functional>
-//#include <experimental/optional>
 #include <float.h>
+#include <cassert>
 
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/core/math/al_Vec.hpp"
@@ -392,7 +392,6 @@ private:
  *
  * The ParameterServer class allows exposing Parameter objects via OSC.
  *
- * @ingroup allocore
  */
 
 class Parameter : public ParameterWrapper<float>
@@ -576,12 +575,63 @@ private:
 
 
 /**
+ * @brief A parameter representing selected items from a list
+ *
+ * The unsigned int value is a bit field, each bit representing
+ * whether an element is selected or not.
+ *
+ */
+class ParameterChoice : public ParameterWrapper<uint16_t>
+{
+public:
+    ParameterChoice(std::string parameterName, std::string Group = "",
+        uint16_t defaultValue = 0,
+        std::string prefix = "") :
+        ParameterWrapper<uint16_t>(parameterName, Group, defaultValue, prefix)
+    { }
+
+    uint16_t operator=(const uint16_t value) { this->set(value); return *this; }
+
+    void setElements(std::vector<std::string> &elements, bool allOn = false) {
+        mElements = elements;
+        min(0);
+        assert((1 << (elements.size() - 1) ) < UINT16_MAX);
+        max(1 << (elements.size() - 1));
+        if (allOn) {
+            uint16_t value = 0;
+            for (int i = 0; i < elements.size(); i++) {
+                value &= 1 << i;
+            }
+            set(value);
+        }
+    }
+
+    std::vector<std::string> getElements() { return mElements; }
+
+    std::vector<std::string> getSelectedElements() {
+        std::vector<std::string> selected;
+        for (unsigned int i = 0; i < mElements.size(); i++) {
+            if (get() & (1 << i)) {
+                if (mElements.size() > i) {
+                    selected.push_back(mElements[i]);
+                }
+                
+            }
+        }
+        return selected;
+    }
+
+private:
+    std::vector<std::string> mElements;
+    };
+
+
+/**
  * @brief The ParameterServer class creates an OSC server to receive parameter values
  * 
  * Parameter objects that are registered with a ParameterServer will receive 
  * incoming messages on their OSC address.
  *
- * @ingroup allocore
  */
 class ParameterServer : public osc::PacketHandler, public OSCNotifier
 {
