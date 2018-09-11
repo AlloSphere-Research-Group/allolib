@@ -353,7 +353,7 @@ void al::ControlGUI::drawChoice(ParameterChoice * param, std::string suffix)
     uint16_t value = param->get();
     auto elements = param->getElements();
     if (ImGui::CollapsingHeader((param->getName() + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-        for (int i = 0; i < elements.size(); i++) {
+        for (unsigned int i = 0; i < elements.size(); i++) {
             bool state = value & (1 << i);
             if (ImGui::Checkbox((elements[i] + + "##" + suffix + param->getName()).c_str(), &state)) {
                 value ^= (-(state) ^ value) & (1UL << i); // Set an individual bit

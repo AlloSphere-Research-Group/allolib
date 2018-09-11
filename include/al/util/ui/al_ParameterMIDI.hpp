@@ -73,7 +73,7 @@ public:
 			mMidiIn.openPort(deviceIndex);
 			printf("ParameterMIDI: Opened port to %s\n", mMidiIn.getPortName(deviceIndex).c_str());
 		}
-		catch (al::MIDIError error) {
+		catch (al::MIDIError &error) {
 			std::cout << "ParameterMIDI Warning: Could not open MIDI port " << deviceIndex << std::endl;
 		}
 	}
@@ -85,7 +85,7 @@ public:
 			mMidiIn.openPort(deviceIndex);
 			printf("ParameterMIDI: Opened port to %s\n", mMidiIn.getPortName(deviceIndex).c_str());
 		}
-		catch (al::MIDIError error) {
+		catch (al::MIDIError &error) {
 			std::cout << "ParameterMIDI Warning: Could not open MIDI port " << deviceIndex << std::endl;
 		}
 	}
