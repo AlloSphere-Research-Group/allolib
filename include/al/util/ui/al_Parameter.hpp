@@ -599,7 +599,7 @@ public:
         max(1 << (elements.size() - 1));
         if (allOn) {
             uint16_t value = 0;
-            for (int i = 0; i < elements.size(); i++) {
+            for (unsigned int i = 0; i < elements.size(); i++) {
                 value |= 1 << i;
             }
             set(value);

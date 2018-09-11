@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstring>
 
 #include "al/util/ui/al_Preset.hpp"
 #include "al/core/io/al_File.hpp"
