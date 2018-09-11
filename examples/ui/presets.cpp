@@ -23,15 +23,23 @@ struct MyApp : App
     nav().setHome();
   }
 
+  void onAnimate(double dt) override {
+      static int counter = 0;
+      counter++;
+      // Update the positions every 15 frames
+      if (counter == 30) {
+          X = rnd::uniform(-1.0, 1.0);
+          Y = rnd::uniform(-1.0, 1.0);
+          Size = rnd::uniform(0.01, 0.6);
+          counter = 0;
+      }
+  }
+
   void onDraw(Graphics &g) override {
   	g.clear(0);
     g.lighting(true);
     g.light(light);
     g.pushMatrix();
-    X = X.get() + rnd::uniform(-0.1, 0.1);
-    Y = Y.get() + rnd::uniform(-0.1, 0.1);
-    Size = Size.get() + rnd::uniform(-0.03, 0.03);
-
     g.translate(X.get(), Y.get(), 0);
     g.scale(Size.get());
     g.draw(m);
