@@ -606,6 +606,21 @@ public:
         }
     }
 
+    void setElementSelected(std::string name, bool selected = true) {
+
+        for (unsigned int i = 0; i < mElements.size(); i++) {
+            if (mElements[i] == name) {
+                uint16_t value = 0;
+                if (selected) {
+                    value |= 1 << i;
+                } else {
+                    value ^= value | 1 << i;
+                }
+                set(value);
+            }
+        }
+    }
+
     std::vector<std::string> getElements() { return mElements; }
 
     std::vector<std::string> getSelectedElements() {
