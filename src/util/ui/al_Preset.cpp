@@ -31,9 +31,9 @@ PresetHandler::~PresetHandler()
 	stopMorph();
 	mRunning = false;
 	mMorphConditionVar.notify_all();
-	mMorphLock.lock();
+	// mMorphLock.lock();
 	mMorphingThread.join();
-	mMorphLock.unlock();
+	// mMorphLock.unlock();
 }
 
 void PresetHandler::setSubDirectory(std::string directory)
@@ -535,7 +535,7 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
 
 void PresetHandler::morphingFunction(al::PresetHandler *handler)
 {
-	handler->mMorphLock.lock();
+	// handler->mMorphLock.lock();
 	while(handler->mRunning) {
 		std::unique_lock<std::mutex> lk(handler->mTargetLock);
 		handler->mMorphConditionVar.wait(lk);
@@ -559,7 +559,7 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler)
 //			}
 //		}
 	}
-	handler->mMorphLock.unlock();
+	// handler->mMorphLock.unlock();
 }
 
 PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)

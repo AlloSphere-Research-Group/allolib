@@ -295,7 +295,7 @@ private:
 	float mMorphInterval;
 	Parameter mMorphTime;
 
-	std::mutex mMorphLock;
+	// std::mutex mMorphLock;
 	std::mutex mTargetLock;
 	std::condition_variable mMorphConditionVar;
     ParameterStates mTargetValues;
