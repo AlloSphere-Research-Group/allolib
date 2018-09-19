@@ -1,6 +1,10 @@
 #ifndef INLCUDE_AL_PERPROJECTION_HPP
 #define INLCUDE_AL_PERPROJECTION_HPP
 
+#include <fstream>
+#include <iostream>
+#include <vector>
+
 #include "al/core/math/al_Matrix4.hpp"
 #include "al/core/graphics/al_Viewpoint.hpp"
 #include "al/core/graphics/al_FBO.hpp"
@@ -10,9 +14,6 @@
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/graphics/al_Shapes.hpp"
 
-#include <fstream>
-#include <iostream>
-#include <vector>
 
 namespace al {
 

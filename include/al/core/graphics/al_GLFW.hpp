@@ -4,12 +4,14 @@
 /*  Keehong Youn, 2017, younkeehong@gmail.com
 */
 
-#include "al/core/graphics/al_GLEW.hpp"
+#include <vector>
+#include <memory>
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include <vector>
-#include <memory>
+#include "al/core/graphics/al_GLEW.hpp"
+
 
 namespace al {
 

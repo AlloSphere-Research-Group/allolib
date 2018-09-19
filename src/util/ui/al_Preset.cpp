@@ -455,7 +455,7 @@ void PresetHandler::setCurrentPresetMap(std::string mapName, bool autoCreate)
 		mCurrentMapName = mapName;
 		storeCurrentPresetMap();
 	} else {
-		std::cout << "Set " << mapName << std::endl;
+		std::cout << "Setting " << mapName << std::endl;
 		mPresetsMap = readPresetMap(mapName);
 		mCurrentMapName = mapName;
 	}

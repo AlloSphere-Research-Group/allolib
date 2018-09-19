@@ -1,9 +1,6 @@
 #ifndef INCLUDE_AL_SPHERE_UTILS_HPP
 #define INCLUDE_AL_SPHERE_UTILS_HPP
 
-#include "al/core/graphics/al_GLFW.hpp"
-#include "al/core/math/al_Constants.hpp"
-
 #include <string>
 #include <vector>
 #include <cmath>
@@ -15,6 +12,8 @@
     #include <unistd.h>
 #endif
 
+#include "al/core/graphics/al_GLFW.hpp"
+#include "al/core/math/al_Constants.hpp"
 
 std::string al_get_hostname()
 {

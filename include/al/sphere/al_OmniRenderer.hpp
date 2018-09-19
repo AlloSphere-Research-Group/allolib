@@ -1,6 +1,8 @@
 #ifndef INCLUDE_OMNIRENDER_HPP
 #define INCLUDE_OMNIRENDER_HPP
 
+#include <iostream>
+
 #include "al/sphere/al_Perprojection.hpp"
 #include "al/sphere/al_SphereUtils.hpp"
 
@@ -8,7 +10,6 @@
 #include "al/core/graphics/al_GLFW.hpp"
 #include "al/core/graphics/al_Graphics.hpp"
 
-#include <iostream>
 
 namespace al {
 

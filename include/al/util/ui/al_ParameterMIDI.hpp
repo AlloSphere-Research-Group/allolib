@@ -43,6 +43,8 @@
 #include "al/core/io/al_MIDI.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 
+#undef min
+#undef max
 namespace al
 {
 
@@ -92,7 +94,7 @@ public:
 
 	void connectControl(Parameter &param, int controlNumber, int channel)
 	{
-		connectControl(param, controlNumber, channel, (float) param.min(), (float) param.max());
+		connectControl(param, controlNumber, channel, param.min(), param.max());
 	}
 
 	void connectControl(Parameter &param, int controlNumber, int channel,
