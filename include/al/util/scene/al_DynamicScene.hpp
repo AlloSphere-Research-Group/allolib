@@ -100,6 +100,15 @@ public:
     }
 
     /**
+     * @brief Set parameter values
+     * @param pFields std::vector<float> containing the values
+     * @return true if able to set the fields
+     */
+    virtual bool setParamFields(std::vector<float> &pFields) {
+        return setParamFields(pFields.data(), pFields.size());
+    }
+
+    /**
      * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields
      */ 
     virtual int getParamFields(float *pFields, int maxParams = -1) override {
@@ -227,6 +236,7 @@ public:
 
     void print(std::ostream &stream = std::cout);
 
+    void showWorldMarker(bool show = true) { mDrawWorldMarker = show;}
 
     /**
      * @brief Determines the number of output channels allocated for the internal AudioIOData objects
@@ -298,6 +308,10 @@ private:
     static void updateThreadFunc(UpdateThreadFuncData data);
 
     static void audioThreadFunc(DynamicScene *scene, int id);
+
+    // World marker
+    bool mDrawWorldMarker;
+    Mesh mWorldMarker;
 
 };
 

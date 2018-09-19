@@ -1,12 +1,5 @@
-
-//#include <memory>
-
-//#include "al/core/spatial/al_Pose.hpp"
-//#include "al/core/sound/al_AudioScene.hpp"
 #include "al/util/scene/al_DynamicScene.hpp"
-
-//#include "al/core/sound/al_StereoPanner.hpp"
-//#include "al/core/spatial/al_DistAtten.hpp"
+#include "al/core/graphics/al_Shapes.hpp"
 
 using namespace std;
 using namespace al;
@@ -72,6 +65,8 @@ void ThreadPool::waitFinished()
     cv_finished.wait(lock, [this](){ return tasks.empty() && (busy == 0); });
 }
 
+// ------------------------------------------------
+
 DynamicScene::DynamicScene (int threadPoolSize)
 {
     SpeakerLayout sl = StereoSpeakerLayout(); // Stereo by default
@@ -84,6 +79,21 @@ DynamicScene::DynamicScene (int threadPoolSize)
         mThreadMap[i] = std::vector<int>();
         mThreadMap[i].reserve(16);
     }
+
+    addSphere(mWorldMarker);
+    mWorldMarker.primitive(Mesh::LINES);
+    mWorldMarker.vertex(0,0,0);
+    mWorldMarker.index(mWorldMarker.vertices().size() -1);
+    mWorldMarker.vertex(0,3,0);
+    mWorldMarker.index(mWorldMarker.vertices().size() -1);
+    mWorldMarker.vertex(0,0,0);
+    mWorldMarker.index(mWorldMarker.vertices().size() -1);
+    mWorldMarker.vertex(3,0,0);
+    mWorldMarker.index(mWorldMarker.vertices().size() -1);
+    mWorldMarker.vertex(0,0,0);
+    mWorldMarker.index(mWorldMarker.vertices().size() -1);
+    mWorldMarker.vertex(0,0,3);
+    mWorldMarker.index(mWorldMarker.vertices().size() -1);
 }
 
 DynamicScene::~DynamicScene() {
@@ -116,6 +126,9 @@ void DynamicScene::prepare(AudioIOData &io) {
 }
 
 void DynamicScene::render(Graphics &g) {
+    if (mDrawWorldMarker) {
+        g.draw(mWorldMarker);
+    }
 
     if (mMasterMode == TIME_MASTER_GRAPHICS) {
         processVoices();
@@ -160,7 +173,7 @@ void DynamicScene::render(AudioIOData &io) {
             if (voice->active()) {
                 int offset = voice->getStartOffsetFrames(fpb);
                 if (offset < fpb) {
-                    io.frame(offset);
+                    // io.frame(offset);
                     int endOffsetFrames = voice->getEndOffsetFrames(fpb);
                     if (endOffsetFrames > 0 && endOffsetFrames <= fpb) {
                         voice->triggerOff(endOffsetFrames);
