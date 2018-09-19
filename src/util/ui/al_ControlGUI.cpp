@@ -4,6 +4,9 @@ using namespace al;
 using namespace std;
 
 void ControlGUI::draw(Graphics &g) {
+    auto separatorAnchor = mSeparatorAnchors.begin();
+    auto groupBeginAnchor = mGroupBeginAnchors.begin();
+    auto groupEndAnchor = mGroupEndAnchors.begin();
 
     if (mManageIMGUI) {
         begin();
@@ -157,7 +160,12 @@ void ControlGUI::draw(Graphics &g) {
             ImGui::Checkbox("Overwrite", &mOverwriteButtonValue);
         }
     }
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.Colors[ImGuiCol_Header]                = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
+
 //    ImGui::ShowDemoWindow();
+    vector<bool> groupsVisibleStack;
     for (auto elem: mElements) {
         if(elem.first == "" || ImGui::CollapsingHeader(elem.first.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by 
             string suffix;
@@ -167,28 +175,49 @@ void ControlGUI::draw(Graphics &g) {
 
 			for (ParameterMeta *p: elem.second) {
 				// We do a runtime check to determine the type of the parameter to determine how to draw it.
-				if (strcmp(typeid(*p).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
-					ParameterBool *param = dynamic_cast<ParameterBool *>(p);
+                if (groupsVisibleStack.size() == 0 || groupsVisibleStack.back() == true) {
+                    if (strcmp(typeid(*p).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
+                        ParameterBool *param = dynamic_cast<ParameterBool *>(p);
 
-					drawParameterBool(param, suffix);
-				} else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
-					Parameter *param = dynamic_cast<Parameter *>(p);
-					drawParameter(param, suffix);
-				} else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter
-					ParameterPose *param = dynamic_cast<ParameterPose *>(p);
-					drawParameterPose(param);
-				} else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter
-					ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
-					drawMenu(param, suffix);
-				}
-                else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter
-                    ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
-                    drawChoice(param, suffix);
+                        drawParameterBool(param, suffix);
+                    } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
+                        Parameter *param = dynamic_cast<Parameter *>(p);
+                        drawParameter(param, suffix);
+                    } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter
+                        ParameterPose *param = dynamic_cast<ParameterPose *>(p);
+                        drawParameterPose(param);
+                    } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter
+                        ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
+                        drawMenu(param, suffix);
+                    }
+                    else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter
+                        ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
+                        drawChoice(param, suffix);
+                    }
+                    else {
+                        // TODO this check should be performed on registration
+                        std::cout << "Unsupported Parameter type for display" << std::endl;
+                    }
+                    if (separatorAnchor != mSeparatorAnchors.end()) {
+                        if (*separatorAnchor == p) {
+                            ImGui::Spacing();
+                            separatorAnchor++;
+                        }
+                    }
+                    if (groupBeginAnchor != mGroupBeginAnchors.end()) {
+                        if (*groupBeginAnchor == p) {
+                            groupsVisibleStack.push_back(ImGui::CollapsingHeader((suffix + "__group_" + p->getName()).c_str() , 
+                                        ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen));
+                            groupBeginAnchor++;
+                        }
+                    }
+                    if (groupEndAnchor != mGroupEndAnchors.end()) {
+                        if (*groupEndAnchor == p) {
+                            groupsVisibleStack.pop_back();
+                            groupEndAnchor++;
+                        }
+                    }
                 }
-				else {
-					// TODO this check should be performed on registration
-					std::cout << "Unsupported Parameter type for display" << std::endl;
-				}
             }
 
         }
@@ -337,7 +366,7 @@ void ControlGUI::drawNav()
 	}
 }
 
-void al::ControlGUI::drawMenu(ParameterMenu * param, std::string suffix)
+void ControlGUI::drawMenu(ParameterMenu * param, std::string suffix)
 {
 	int value = param->get();
 	auto values = param->getElements();
@@ -348,7 +377,7 @@ void al::ControlGUI::drawMenu(ParameterMenu * param, std::string suffix)
 	}
 }
 
-void al::ControlGUI::drawChoice(ParameterChoice * param, std::string suffix)
+void ControlGUI::drawChoice(ParameterChoice * param, std::string suffix)
 {
     uint16_t value = param->get();
     auto elements = param->getElements();
@@ -365,12 +394,18 @@ void al::ControlGUI::drawChoice(ParameterChoice * param, std::string suffix)
 
 }
 
+void ControlGUI::drawDynamicScene(DynamicScene *scene, std::string suffix)
+{
+    
+}
+
 ControlGUI &ControlGUI::registerParameterMeta(ParameterMeta &param) {
     std::string group = param.getGroup();
     if (mElements.find(group) == mElements.end()) {
 		mElements[group] = std::vector<ParameterMeta *>();
     }
 	mElements[group].push_back(&param);
+    mLatestElement = &param;
     return *this;
 }
 
@@ -398,3 +433,22 @@ void ControlGUI::registerSynthSequencer(SynthSequencer &seq) {
     mSynthSequencer = &seq;
     mPolySynth = &seq.synth();
 }
+
+void ControlGUI::registerDynamicScene(DynamicScene &scene) {
+    mScene = &scene;
+}
+
+void ControlGUI::registerMarker(GUIMarker &marker) {
+    switch(marker.getType()) {
+        case GUIMarker::MarkerType::GROUP_BEGIN:
+        mGroupBeginAnchors.push_back(mLatestElement);
+        break;
+        case GUIMarker::MarkerType::GROUP_END:
+        mGroupEndAnchors.push_back(mLatestElement);
+        break;
+        case GUIMarker::MarkerType::SEPARATOR:
+        mSeparatorAnchors.push_back(mLatestElement);
+        break;
+    }
+}
+

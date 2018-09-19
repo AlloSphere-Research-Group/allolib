@@ -51,11 +51,28 @@
 #include "al/util/ui/al_PresetSequencer.hpp"
 #include "al/util/scene/al_SynthSequencer.hpp"
 #include "al/util/scene/al_SynthRecorder.hpp"
+#include "al/util/scene/al_DynamicScene.hpp"
 #include "al/util/imgui/al_Imgui.hpp"
 
 
 namespace al
 {
+
+class GUIMarker
+{
+public:
+    enum class MarkerType {
+        GROUP_BEGIN,
+        GROUP_END,
+        SEPARATOR
+    };
+    GUIMarker(MarkerType type) {mMarkerType = type;}
+
+    MarkerType getType() {return mMarkerType;};
+private:
+    MarkerType mMarkerType;
+};
+
 /**
  * @brief The ControlGUI class
  *
@@ -101,6 +118,19 @@ public:
     /// Register a SynthSequencer. This will display GUI widgets to control it
     /// Will also register the PolySynth contained within it.
     ControlGUI & operator<< (SynthSequencer &seq) { registerSynthSequencer(seq);  return *this; }
+
+
+    void registerDynamicScene(DynamicScene &scene);
+
+    /// Register a SynthSequencer. This will display GUI widgets to control it
+    /// Will also register the PolySynth contained within it.
+    ControlGUI & operator<< (DynamicScene &scene) { registerDynamicScene(scene);  return *this; }
+
+    void registerMarker(GUIMarker &marker);
+
+    /// Register a SynthSequencer. This will display GUI widgets to control it
+    /// Will also register the PolySynth contained within it.
+    ControlGUI & operator<< (GUIMarker marker) { registerMarker(marker);  return *this; }
 
     /**
      * @brief draws the GUI
@@ -169,6 +199,9 @@ public:
      */
     float backgroundAlpha() const { return mGUIBackgroundAlpha; }
 
+    static GUIMarker beginGroup() { return GUIMarker(GUIMarker::MarkerType::GROUP_BEGIN);}
+    static GUIMarker endGroup() { return GUIMarker(GUIMarker::MarkerType::GROUP_END);}
+    static GUIMarker separator() { return GUIMarker(GUIMarker::MarkerType::SEPARATOR);}
 
 protected:
 
@@ -179,12 +212,17 @@ private:
     std::map<std::string, std::vector<ParameterVec4 *>> mParameterVec4s;
 
 	std::map<std::string, std::vector<ParameterMeta *>> mElements;
+    ParameterMeta *mLatestElement {nullptr};
+    std::vector<ParameterMeta *> mGroupBeginAnchors; // refs to the parameters marking beginning and ending of groups
+    std::vector<ParameterMeta *> mGroupEndAnchors; // refs to the parameters marking beginning and ending of groups
+    std::vector<ParameterMeta *> mSeparatorAnchors; 
 
     PresetHandler *mPresetHandler {nullptr};
     PresetSequencer *mPresetSequencer {nullptr};
     SynthRecorder *mSynthRecorder {nullptr};
     SynthSequencer *mSynthSequencer {nullptr};
     PolySynth *mPolySynth {nullptr};
+    DynamicScene *mScene {nullptr};
     Nav *mNav {nullptr};
 
     int mX, mY;
@@ -216,6 +254,7 @@ private:
 	void drawNav();
 	void drawMenu(ParameterMenu *param, std::string suffix);
     void drawChoice(ParameterChoice *param, std::string suffix);
+    void drawDynamicScene(DynamicScene *scene, std::string suffix);
 
 };
 
