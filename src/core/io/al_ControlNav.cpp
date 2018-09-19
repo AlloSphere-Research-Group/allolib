@@ -197,6 +197,7 @@ bool NavInputControl::keyDown(const Keyboard& k){
 }
 
 bool NavInputControl::keyUp(const Keyboard& k) {
+  if (!mActive) return true;
   // keyUp is for stopping, so no need to skip even if mActive is false
   switch(k.key()){
     case Keyboard::UP:
