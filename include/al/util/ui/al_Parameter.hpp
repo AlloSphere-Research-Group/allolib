@@ -149,6 +149,24 @@ public:
 	*/
 	std::string getGroup() { return mGroup; };
 
+	/**
+	 * @brief Generic function to return the value of the parameter as a float.
+	 * 
+	 * If not implemented, it will return 0.
+	 */
+	virtual float toFloat() {
+		return 0.f;
+	}
+	
+	/**
+	 * @brief Generic function to set the parameter from a single float value
+	 * 
+	 * Will only have effect on parameters that have a single internal value and have implemented this function
+	 */
+	virtual void fromFloat(float value) {
+		return;
+	}
+
 protected:
 	std::string mFullAddress;
 	std::string mParameterName;
@@ -451,6 +469,14 @@ public:
 	 */
 	virtual float get() override;
 
+	virtual float toFloat() override {
+		return mFloatValue;
+	}
+
+	virtual void fromFloat(float value) override {
+		mFloatValue = value;
+	}
+
 	float operator= (const float value) { this->set(value); return value; }
 
 private:
@@ -482,6 +508,14 @@ public:
             );
 
     bool operator= (const bool value) { this->set(value == 1.0); return value == 1.0; }
+
+	virtual float toFloat() override {
+		return get();
+	}
+
+	virtual void fromFloat(float value) override {
+		set(value);
+	}
 };
 
 // These three types are blocking, should not be used in time-critical contexts
@@ -497,6 +531,13 @@ public:
 	    ParameterWrapper<std::string>(parameterName, Group, defaultValue, prefix)
 	{ }
 
+	virtual float toFloat() override {
+		return std::stof(get());
+	}
+
+	virtual void fromFloat(float value) override {
+		set(std::to_string(value));
+	}
 };
 
 class ParameterVec3: public ParameterWrapper<al::Vec3f>
@@ -569,6 +610,15 @@ public:
 		}
 	}
 
+	virtual float toFloat() override {
+		return (float) get();
+		// return std::stof(getCurrent());
+	}
+
+	virtual void fromFloat(float value) override {
+		set( (int) value);
+	}
+
 private:
 	std::vector<std::string> mElements;
 };
@@ -636,9 +686,18 @@ public:
         return selected;
     }
 
+	virtual float toFloat() override {
+		return (float) get();
+		// return std::stof(getCurrent());
+	}
+
+	virtual void fromFloat(float value) override {
+		set( (int) value);
+	}
+
 private:
     std::vector<std::string> mElements;
-    };
+};
 
 
 /**

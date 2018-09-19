@@ -103,10 +103,28 @@ public:
      */
     virtual bool setParamFields(float *pFields, int numFields = -1) {
         if (numFields < (int) mParametersToFields.size()) {
+            // std::cout << "Pfield size mismatch. Ignoring all." << std::endl;
             return false;
         }
         for (auto &param:mParametersToFields) {
-            *param = *pFields++;
+            param->fromFloat(*pFields++);
+        }
+        return true;
+    }
+
+    /**
+     * @brief Set parameter values
+     * @param pFields std::vector<float> containing the values
+     * @return true if able to set the fields
+     */
+    virtual bool setParamFields(std::vector<float> &pFields) {
+        if (pFields.size() < mParametersToFields.size()) {
+            // std::cout << "pField count mismatch. Ignoring." << std::endl;
+            return false;
+        }
+        auto it = pFields.begin();
+        for (auto &param:mParametersToFields) {
+            param->fromFloat(*it++);
         }
         return true;
     }
@@ -130,7 +148,8 @@ public:
             if (count == maxParams) {
                 break;
             }
-            *pFields++ = *param; 
+            if (param)
+            *pFields++ = param->toFloat(); 
             count++;
         }
         return count;
@@ -230,9 +249,9 @@ public:
 
     unsigned int numOutChannels() { return mNumOutChannels; }
 
-    SynthVoice& registerParameterAsField(Parameter &param) { mParametersToFields.push_back(&param); return *this;}
+    SynthVoice& registerParameterAsField(ParameterMeta &param) { mParametersToFields.push_back(&param); return *this;}
 
-    SynthVoice& operator<<(Parameter &param) {return registerParameterAsField(param);}
+    SynthVoice& operator<<(ParameterMeta &param) {return registerParameterAsField(param);}
 
     SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
 
@@ -258,15 +277,16 @@ protected:
      */
     void setNumOutChannels(unsigned int numOutputs) {mNumOutChannels = numOutputs;}
 
-    std::vector<Parameter *> mParametersToFields;
+    std::vector<ParameterMeta *> mParametersToFields;
+
 
 private:
     int mId {-1};
     int mActive {false};
     int mOnOffsetFrames {0};
     int mOffOffsetFrames {0};
-    unsigned int mNumOutChannels {1}; // Set this
     void *mUserData;
+    unsigned int mNumOutChannels {1};
 };
 
 class PolySynth {
@@ -512,6 +532,7 @@ protected:
             if (mVoicesToInsert) {
                 // If lock acquired insert queued voices
                 if (mActiveVoices) {
+                    
                     auto voice = mVoicesToInsert;
                     while (voice->next) { // Find last voice to insert
                         voice = voice->next;
@@ -554,7 +575,7 @@ protected:
                 auto voice = mActiveVoices;
                 while (voice) {
                     if (voice->id() == voicesToTurnOff[i]) {
-    //                    std::cout << "Voice off "<<  voice->id() << std::endl;
+                       std::cout << "Voice off "<<  voice->id() << std::endl;
                         voice->triggerOff(); // TODO use offset for turn off
                     }
                     voice = voice->next;
