@@ -23,6 +23,7 @@ void PresetMapper::readEntries(std::string path)
 	// get list of files ending in ".txt"
 	FileList map_list = filterInDir(path, [](const FilePath& f){
 		if (al::checkExtension(f, ".txt")) return true;
+        if (al::checkExtension(f, ".presetMap")) return true;
 		else return false;
 	});
 
