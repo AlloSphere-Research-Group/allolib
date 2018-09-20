@@ -24,10 +24,20 @@ std::string al::demangle(const char* name) {
 
 #else
 
+#if AL_WINDOWS
+
+// does nothing if not g++
+std::string al::demangle(const char* name) {
+    // Windows prepends "class " here, so remove it
+    return std::string(name).substr(6);
+}
+
+#else 
 // does nothing if not g++
 std::string al::demangle(const char* name) {
     return name;
 }
+#endif
 
 #endif
 
@@ -176,8 +186,10 @@ SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc)
     SynthVoice *freeVoice = mFreeVoices;
     SynthVoice *previousVoice = nullptr;
     while (freeVoice) {
+        std::cout << "Comparing  voice '" << demangle(typeid(*freeVoice).name()) << "' to '" << name << "'" << std::endl;
         if (demangle(typeid(*freeVoice).name()) == name
-                || typeid(*freeVoice).name() == name) {
+                || strncmp(typeid(*freeVoice).name(),name.c_str(), name.size()) == 0 ) {
+
             if (previousVoice) {
                 previousVoice->next = freeVoice->next;
             } else {
@@ -194,6 +206,8 @@ SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc)
              // TODO report current polyphony for more informed allocation of polyphony
             freeVoice = allocateVoice(name);
             freeVoice->userData(mDefaultUserData);
+        } else {
+            std::cout << "Automatic allocation disabled for voice:" << name << std::endl;
         }
        
     }
