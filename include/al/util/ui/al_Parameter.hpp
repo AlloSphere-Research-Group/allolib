@@ -595,7 +595,7 @@ public:
 
 	int operator=(const int value) { this->set(value); return *this; }
 
-	void setElements(std::vector<std::string> &elements) {
+	void setElements(std::vector<std::string> elements) {
 		mElements = elements;
 	}
 

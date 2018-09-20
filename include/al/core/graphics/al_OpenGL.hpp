@@ -2,7 +2,7 @@
 #define INCLUDE_AL_OPENGL_HPP
 
 #include "al/core/graphics/al_GLEW.hpp"
-#include "al/core/types/al_Color.hpp"
+// #include "al/core/types/al_Color.hpp"
 
 namespace al {
 
