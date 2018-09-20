@@ -660,7 +660,7 @@ public:
 
         for (unsigned int i = 0; i < mElements.size(); i++) {
             if (mElements[i] == name) {
-                uint16_t value = 0;
+                uint16_t value = get();
                 if (selected) {
                     value |= 1 << i;
                 } else {
