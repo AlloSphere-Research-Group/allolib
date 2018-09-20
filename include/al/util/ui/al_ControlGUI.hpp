@@ -107,30 +107,35 @@ public:
     ControlGUI &operator << (PresetSequencer& ps){ return registerPresetSequencer(ps); }
 
 
-    void registerSynthRecorder(SynthRecorder &recorder);
+    ControlGUI &registerSequenceRecorder(SequenceRecorder &recorder);
+
+    /// Register preset sequencer using the streaming operator. GUI widgets for preset sequencing are shown.
+    ControlGUI &operator << (SequenceRecorder& ps){ return registerSequenceRecorder(ps); }
+
+    ControlGUI & registerSynthRecorder(SynthRecorder &recorder);
 
     /// Register a SynthRecorder. This will display GUI widgets to control it
-    ControlGUI & operator<< (SynthRecorder &recorder) { registerSynthRecorder(recorder);  return *this; }
+    ControlGUI & operator<< (SynthRecorder &recorder) { return registerSynthRecorder(recorder);}
 
 
-    void registerSynthSequencer(SynthSequencer &seq);
-
-    /// Register a SynthSequencer. This will display GUI widgets to control it
-    /// Will also register the PolySynth contained within it.
-    ControlGUI & operator<< (SynthSequencer &seq) { registerSynthSequencer(seq);  return *this; }
-
-
-    void registerDynamicScene(DynamicScene &scene);
+    ControlGUI & registerSynthSequencer(SynthSequencer &seq);
 
     /// Register a SynthSequencer. This will display GUI widgets to control it
     /// Will also register the PolySynth contained within it.
-    ControlGUI & operator<< (DynamicScene &scene) { registerDynamicScene(scene);  return *this; }
+    ControlGUI & operator<< (SynthSequencer &seq) { return registerSynthSequencer(seq); }
 
-    void registerMarker(GUIMarker &marker);
+
+    ControlGUI & registerDynamicScene(DynamicScene &scene);
 
     /// Register a SynthSequencer. This will display GUI widgets to control it
     /// Will also register the PolySynth contained within it.
-    ControlGUI & operator<< (GUIMarker marker) { registerMarker(marker);  return *this; }
+    ControlGUI & operator<< (DynamicScene &scene) { return registerDynamicScene(scene); }
+
+    ControlGUI & registerMarker(GUIMarker &marker);
+
+    /// Register a SynthSequencer. This will display GUI widgets to control it
+    /// Will also register the PolySynth contained within it.
+    ControlGUI & operator<< (GUIMarker marker) { return registerMarker(marker); }
 
     /**
      * @brief draws the GUI
@@ -219,6 +224,7 @@ private:
 
     PresetHandler *mPresetHandler {nullptr};
     PresetSequencer *mPresetSequencer {nullptr};
+    SequenceRecorder *mSequenceRecorder {nullptr};
     SynthRecorder *mSynthRecorder {nullptr};
     SynthSequencer *mSynthSequencer {nullptr};
     PolySynth *mPolySynth {nullptr};
@@ -248,6 +254,8 @@ private:
         return true;
     };
 
+    void drawPresetHandler();
+    void drawSequenceRecorder();
 	void drawParameter(Parameter *param, std::string suffix);
 	void drawParameterBool(ParameterBool *param, std::string suffix);
 	void drawParameterPose(ParameterPose *param);

@@ -1,5 +1,7 @@
 #include "al/util/ui/al_ControlGUI.hpp"
 
+#include "al/util/ui/al_SequenceRecorder.hpp"
+
 using namespace al;
 using namespace std;
 
@@ -14,72 +16,8 @@ void ControlGUI::draw(Graphics &g) {
 //    ImGui::SetNextWindowSize(ImVec2(300, 450), ImGuiCond_FirstUseEver);
 //    ImGui::SetNextWindowPos(ImVec2(mX, mY), ImGuiCond_FirstUseEver);
 //    ImGui::Begin(std::to_string(mId).c_str());
-    if (mNav) {
-		drawNav();
-    }
-    if (mPresetHandler) {
-        if (ImGui::CollapsingHeader("Presets", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-
-            std::map<int, std::string> presets = mPresetHandler->availablePresets();
-            static int selection = -1;
-            std::string currentPresetName = mPresetHandler->getCurrentPresetName();
-
-            char buf1[64];
-            strncpy(buf1, currentPresetName.c_str(), 64);
-            if (ImGui::InputText("preset##__Preset", buf1, 64)) {
-                currentPresetName = buf1;
-            }
-            static int presetHandlerBank = 0;
-            int numColumns = 12;
-            int numRows = 4;
-            int counter = presetHandlerBank * (numColumns * numRows) ;
-            std::string suffix = "##__Preset"; 
-            for (int row = 0; row < numRows; row++) {
-                for (int column = 0; column < numColumns; column++) {
-                    std::string name = std::to_string(counter);
-                    ImGui::PushID(counter);
-
-                    bool is_selected = selection == counter;
-                    if (is_selected) {
-                        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.1, 0.1, 0.1, 1.0));
-                    }
-                    if (ImGui::Selectable((name + suffix).c_str(), is_selected, 0, ImVec2(18, 15)))
-                    {
-                        if (mStoreButtonOn) {
-                            mPresetHandler->storePreset(counter, name.c_str());
-                            selection = counter;
-                            mStoreButtonOn = false;
-                        } else {
-                            if (mPresetHandler->recallPreset(counter) != "") { // Preset is available
-                                selection = counter;
-                            }
-                        }
-                    }
-                    if (is_selected) {
-                        ImGui::PopStyleColor(1);
-                    }
-                    if (column < numColumns - 1) ImGui::SameLine();
-                    counter++;
-                    ImGui::PopID();
-                }
-            }
-            ImGui::Checkbox("Store##__Preset", &mStoreButtonOn);
-            ImGui::SameLine();
-            static std::vector<string> seqList {"1", "2", "3", "4"};
-            ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.15f);
-            ImGui::Combo("Bank##__Preset", &presetHandlerBank, vector_getter, static_cast<void*>(&seqList), seqList.size());
-            ImGui::SameLine();
-            ImGui::PopItemWidth();
-            ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
-            float morphTime = mPresetHandler->getMorphTime();
-            if (ImGui::InputFloat("morph time##__Preset", &morphTime, 0.0f, 20.0f)) {
-                mPresetHandler->setMorphTime(morphTime);
-            }
-            ImGui::PopItemWidth();
-//            ImGui::Text("%s", currentPresetName.c_str());
-
-        }
-    }
+    if (mNav) { drawNav();}
+    if (mPresetHandler) { drawPresetHandler(); }
     if (mPresetSequencer) {
         if (ImGui::CollapsingHeader("Preset Sequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen )) {
             vector<string> seqList = mPresetSequencer->getSequenceList();
@@ -109,6 +47,7 @@ void ControlGUI::draw(Graphics &g) {
             }
         }
     }
+    if (mSequenceRecorder) { drawSequenceRecorder(); }
     if (mPolySynth) {
         if (ImGui::CollapsingHeader("PolySynth", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
             if (ImGui::Button("Panic (All notes off)")) {
@@ -147,9 +86,9 @@ void ControlGUI::draw(Graphics &g) {
         }
     }
     if (mSynthRecorder) {
-        if (ImGui::CollapsingHeader("Event Recorder##EventRecorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-            static char buf1[64] = "test"; ImGui::InputText("Record Name", buf1, 64);
-            if (ImGui::Checkbox("Record##EventRecorder", &mRecordButtonValue)) {
+        if (ImGui::CollapsingHeader("Event Recorder##__EventRecorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+            static char buf1[64] = "test"; ImGui::InputText("Record Name##__EventRecorder", buf1, 64);
+            if (ImGui::Checkbox("Record##__EventRecorder", &mRecordButtonValue)) {
                 if (mRecordButtonValue) {
                     mSynthRecorder->startRecord(buf1, mOverwriteButtonValue);
                 } else {
@@ -261,6 +200,92 @@ void ControlGUI::cleanup() {
         free(mSequencerItems[i]);
     }
     free(mSequencerItems);
+}
+
+void ControlGUI::drawPresetHandler()
+{
+     if (ImGui::CollapsingHeader("Presets", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+
+        std::map<int, std::string> presets = mPresetHandler->availablePresets();
+        static int selection = -1;
+        std::string currentPresetName = mPresetHandler->getCurrentPresetName();
+
+        char buf1[64];
+        strncpy(buf1, currentPresetName.c_str(), 64);
+        if (ImGui::InputText("preset##__Preset", buf1, 64)) {
+            currentPresetName = buf1;
+        }
+        static int presetHandlerBank = 0;
+        int numColumns = 12;
+        int numRows = 4;
+        int counter = presetHandlerBank * (numColumns * numRows) ;
+        std::string suffix = "##__Preset"; 
+        for (int row = 0; row < numRows; row++) {
+            for (int column = 0; column < numColumns; column++) {
+                std::string name = std::to_string(counter);
+                ImGui::PushID(counter);
+
+                bool is_selected = selection == counter;
+                if (is_selected) {
+                    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.1, 0.1, 0.1, 1.0));
+                }
+                if (ImGui::Selectable((name + suffix).c_str(), is_selected, 0, ImVec2(18, 15)))
+                {
+                    if (mStoreButtonOn) {
+                        std::string saveName = currentPresetName;
+                        if (saveName.size() == 0) {
+                            saveName = name;
+                        } 
+                        mPresetHandler->storePreset(counter, name.c_str());
+                        selection = counter;
+                        mStoreButtonOn = false;
+                    } else {
+                        if (mPresetHandler->recallPreset(counter) != "") { // Preset is available
+                            selection = counter;
+                        }
+                    }
+                }
+                if (is_selected) {
+                    ImGui::PopStyleColor(1);
+                }
+                if (column < numColumns - 1) ImGui::SameLine();
+                counter++;
+                ImGui::PopID();
+            }
+        }
+        ImGui::Checkbox("Store##__Preset", &mStoreButtonOn);
+        ImGui::SameLine();
+        static std::vector<string> seqList {"1", "2", "3", "4"};
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.15f);
+        ImGui::Combo("Bank##__Preset", &presetHandlerBank, vector_getter, static_cast<void*>(&seqList), seqList.size());
+        ImGui::SameLine();
+        ImGui::PopItemWidth();
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+        float morphTime = mPresetHandler->getMorphTime();
+        if (ImGui::InputFloat("morph time##__Preset", &morphTime, 0.0f, 20.0f)) {
+            mPresetHandler->setMorphTime(morphTime);
+        }
+        ImGui::PopItemWidth();
+//            ImGui::Text("%s", currentPresetName.c_str());
+
+    }
+}
+
+void ControlGUI::drawSequenceRecorder()
+{
+    if (ImGui::CollapsingHeader("Sequence Recorder##__SequenceRecorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        static char buf_seq_recorder[64] = "test"; ImGui::InputText("Record Name##__SequenceRecorder", buf_seq_recorder, 64);
+        static bool button_seq_recorder_value = false;
+        if (ImGui::Checkbox("Record##__SequenceRecorder", &button_seq_recorder_value)) {
+            if (button_seq_recorder_value) {
+                mSequenceRecorder->startRecord(buf_seq_recorder, mOverwriteButtonValue);
+            } else {
+                mSequenceRecorder->stopRecord();
+            }
+        }
+        ImGui::SameLine();
+        ImGui::Checkbox("Overwrite##__SequenceRecorder", &mOverwriteButtonValue);
+    }
 }
 
 void ControlGUI::drawParameter(Parameter * param, string suffix)
@@ -425,20 +450,29 @@ ControlGUI &ControlGUI::registerPresetSequencer(PresetSequencer &presetSequencer
     return *this;
 }
 
-void ControlGUI::registerSynthRecorder(SynthRecorder &recorder) {
-    mSynthRecorder = &recorder;
+ControlGUI &ControlGUI::registerSequenceRecorder(SequenceRecorder &recorder)
+{
+    mSequenceRecorder = &recorder;
+    return *this;
 }
 
-void ControlGUI::registerSynthSequencer(SynthSequencer &seq) {
+ControlGUI &ControlGUI::registerSynthRecorder(SynthRecorder &recorder) {
+    mSynthRecorder = &recorder;
+    return *this;
+}
+
+ControlGUI &ControlGUI::registerSynthSequencer(SynthSequencer &seq) {
     mSynthSequencer = &seq;
     mPolySynth = &seq.synth();
+    return *this;
 }
 
-void ControlGUI::registerDynamicScene(DynamicScene &scene) {
+ControlGUI &ControlGUI::registerDynamicScene(DynamicScene &scene) {
     mScene = &scene;
+    return *this;
 }
 
-void ControlGUI::registerMarker(GUIMarker &marker) {
+ControlGUI &ControlGUI::registerMarker(GUIMarker &marker) {
     switch(marker.getType()) {
         case GUIMarker::MarkerType::GROUP_BEGIN:
         mGroupBeginAnchors.push_back(mLatestElement);
@@ -450,5 +484,6 @@ void ControlGUI::registerMarker(GUIMarker &marker) {
         mSeparatorAnchors.push_back(mLatestElement);
         break;
     }
+    return *this;
 }
 
