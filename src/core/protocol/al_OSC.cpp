@@ -411,7 +411,7 @@ public:
     recv->parse(data, size, addr);
   }
 
-  void loop() { receiveSocket.RunUntilSigInt(); }
+  void loop() { /*receiveSocket.RunUntilSigInt();*/ receiveSocket.Run(); }
 
   void stop() { receiveSocket.AsynchronousBreak(); }
 };
