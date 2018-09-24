@@ -32,10 +32,11 @@ float *create_rand_nums(int num_elements) {
   }
   return rand_nums;
 }
+
 struct SharedState {
     float value1;
     int value2;
-}
+};
 
 class DistributedExampleApp : public DistributedApp<SharedState> {
 public:
@@ -103,5 +104,6 @@ int main(){
         }
         app.simulate(0);
     }
+    app.start();
     return 0;
 }
