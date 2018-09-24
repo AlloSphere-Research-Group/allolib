@@ -30,6 +30,9 @@ struct ImageData {
 // returns empty object (width and height 0, data empty) if failed to load
 ImageData loadImage(const char* filename);
 
+// returns empty object (width and height 0, data empty) if failed to load
+ImageData loadImage(std::string &filename);
+
 }
 
 namespace imgModule = img_module;

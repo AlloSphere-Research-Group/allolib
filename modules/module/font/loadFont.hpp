@@ -14,8 +14,8 @@ struct FontData {
     }; // to be casted to stbtt_backedchar in the implementation
        // user will not need to use this struct
 
-    float pixelHeight;
-    int width, height; // of bitmap pixel data
+    float pixelHeight = -1;
+    int width = -1, height = -1; // of bitmap pixel data
     std::vector<uint8_t> bitmap; // 1 channel bitmap data
     std::vector<BakedChar> charData;
 };

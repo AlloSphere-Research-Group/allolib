@@ -20,3 +20,7 @@ img_module::ImageData img_module::loadImage(const char* filename) {
     stbi_image_free(data);
     return image_data;
 }
+
+img_module::ImageData img_module::loadImage(std::string &filename) {
+    return img_module::loadImage(filename.c_str());
+}
