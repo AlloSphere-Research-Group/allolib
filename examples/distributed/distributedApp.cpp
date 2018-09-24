@@ -32,10 +32,15 @@ float *create_rand_nums(int num_elements) {
   }
   return rand_nums;
 }
+struct SharedState {
+    float value1;
+    int value2;
+}
 
-
-class DistributedExampleApp : public DistributedApp<> {
+class DistributedExampleApp : public DistributedApp<SharedState> {
 public:
+
+    // The simulate function is only run for the simulator
     virtual void simulate(double dt) override {
         unsigned long num_elements_per_proc = 1e6;
         float *rand_nums = NULL;
@@ -47,13 +52,14 @@ public:
         for (auto i = 0ul; i < num_elements_per_proc; i++) {
           local_sum += rand_nums[i];
         }
+        float global_sum;
 #ifdef AL_BUILD_MPI
         // Print the random numbers on each process
         printf("Local sum for process %d - %f, avg = %f\n",
                world_rank, local_sum, local_sum / num_elements_per_proc);
 
         // Reduce all of the local sums into the global sum
-        float global_sum;
+
         MPI_Reduce(&local_sum, &global_sum, 1, MPI_FLOAT, MPI_SUM, 0,
                    MPI_COMM_WORLD);
 
@@ -62,7 +68,26 @@ public:
           printf("Total sum = %f, avg = %f\n", global_sum,
                  global_sum / (world_size * num_elements_per_proc));
         }
+#else
+    // If MPI not available, just use local sum
+    global_sum = local_sum;
 #endif
+        state().value1 = global_sum;
+        state().value2 = num_elements_per_proc;
+    }
+
+    virtual void onDraw(Graphics &g) override {
+        if (role() == ROLE_RENDERER) {
+            // Renderer will recieve state from simulator
+            std::cout << " Rendered got : " << state().value1 << std::endl;
+        }
+    }
+    
+    virtual void onSound(AudioIOData &io) override {
+        if (role() == ROLE_AUDIO) {
+            // Audio will recieve state from simulator
+            std::cout << " Audio got : " << state().value1 << std::endl;
+        }
     }
 
 };
