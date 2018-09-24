@@ -4,7 +4,8 @@ set (test_src
     src/test_midi.cpp
     src/test_math.cpp
     src/test_mathSpherical.cpp
-    src/test_dynamicScene.cpp
+    src/test_mathSpherical.cpp
+    src/test_osc.cpp
     src/test_lbap.cpp
     src/test_vbap.cpp
 )
