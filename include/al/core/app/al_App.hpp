@@ -20,11 +20,6 @@ class App: public WindowApp,
            public FlowAppParameters,
            public osc::PacketHandler
 {
-  Nav mNav; // is a Pose itself and also handles manipulation of pose
-  Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
-  NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse
-  ParameterServer mParameterServer;
-
 public:
 
   Viewpoint& view() { return mView; }
@@ -75,7 +70,13 @@ public:
   virtual void postOnExit();
 
   // PacketHandler
-  void onMessage(osc::Message& m) override {}
+  void onMessage(osc::Message& m) override { std::cout << "Received unhandled message." <<std::endl; m.print(); }
+
+private:
+  Nav mNav; // is a Pose itself and also handles manipulation of pose
+  Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
+  NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse
+  ParameterServer mParameterServer {"localhost", 9010};
 };
 
 
@@ -90,6 +91,8 @@ inline void App::start() {
   AudioApp::beginAudio(); // only begins if `initAudio` was called before
   FPS::startFPS(); // WindowApp (FPS)
   initFlowApp();
+
+  mParameterServer.registerOSCListener(this); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
 
   while (!WindowApp::shouldQuit()) {
     // to quit, call WindowApp::quit() or click close button of window,

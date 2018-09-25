@@ -352,6 +352,9 @@ inline void DistributedApp<TSharedState>::start() {
   if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) {
       initFlowApp();
   }
+  
+  mParameterServer->registerOSCListener(this); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
+
   FPS::startFPS(); // WindowApp (FPS)
 
   while (!WindowApp::shouldQuit()) {
