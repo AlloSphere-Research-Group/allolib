@@ -34,13 +34,13 @@ public:
 		the server checks for new data on the on the port. You will	want to tune
 		this to rate at which the client is sending packets.*/
 	// :	server(16447, "", 0.05)
-	void onCreate() {
+	void onCreate() override {
 		// Print out our IP address
 		//std::cout << "SERVER: My IP is " << Socket::hostIP() << "\n";
 
 		// port, address, timeout
 		// "" as address for localhost
-		server.open(16447, "", 0.05);
+		server.open(16447, "localhost", 0.05);
 
 		// Register ourself (osc::PacketHandler) with the server so onMessage
 		// gets called.
@@ -53,8 +53,8 @@ public:
 	}
 
 	// This gets called whenever we receive a packet
-	void onMessage(osc::Message& m){
-
+	void onMessage(osc::Message& m) override {
+		m.print();
 		// Check that the address and tags match what we expect
 		if(m.addressPattern() == "/test" && m.typeTags() == "si"){
 
@@ -64,7 +64,7 @@ public:
 			m >> str >> val;
 
 			// Print out the extracted packet data
-			std::cout << "SERVER: recv " << str << " " << val << "\n";
+			std::cout << "SERVER: recv " << str << " " << val << std::endl;
 		}
 	}
 

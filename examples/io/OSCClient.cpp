@@ -41,7 +41,7 @@ int main(){
 		// followed by the packet data.
 		int b = client.send("/test", str, i);
 
-		std::cout << "CLIENT: sent message (" << b << " bytes)\n";
+		std::cout << "CLIENT: sent message (" << b << " bytes)" << std::endl;
 
 		// Wait before sending the next packet, otherwise they will all get
 		// sent at once.
