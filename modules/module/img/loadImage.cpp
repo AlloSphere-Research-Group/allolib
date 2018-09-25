@@ -1,8 +1,10 @@
-#include "loadImage.hpp"
+#include <cstring> // memcpy
+
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_STATIC
 #include "stb_image.h"
-#include <cstring> // memcpy
+
+#include "loadImage.hpp"
 
 using namespace std;
 
@@ -21,6 +23,6 @@ img_module::ImageData img_module::loadImage(const char* filename) {
     return image_data;
 }
 
-img_module::ImageData img_module::loadImage(std::string &filename) {
+img_module::ImageData img_module::loadImage(string &filename) {
     return img_module::loadImage(filename.c_str());
 }
