@@ -66,11 +66,13 @@ public:
         GROUP_END,
         SEPARATOR
     };
-    GUIMarker(MarkerType type) {mMarkerType = type;}
+    GUIMarker(MarkerType type, const char *name = nullptr) {mMarkerType = type; mName = name;}
 
-    MarkerType getType() {return mMarkerType;};
+    MarkerType getType() {return mMarkerType;}
+    const char *getName() {return mName;}
 private:
     MarkerType mMarkerType;
+    const char *mName;
 };
 
 /**
@@ -204,7 +206,7 @@ public:
      */
     float backgroundAlpha() const { return mGUIBackgroundAlpha; }
 
-    static GUIMarker beginGroup() { return GUIMarker(GUIMarker::MarkerType::GROUP_BEGIN);}
+    static GUIMarker beginGroup(const char *groupName = nullptr) { return GUIMarker(GUIMarker::MarkerType::GROUP_BEGIN, groupName);}
     static GUIMarker endGroup() { return GUIMarker(GUIMarker::MarkerType::GROUP_END);}
     static GUIMarker separator() { return GUIMarker(GUIMarker::MarkerType::SEPARATOR);}
 
@@ -219,6 +221,7 @@ private:
 	std::map<std::string, std::vector<ParameterMeta *>> mElements;
     ParameterMeta *mLatestElement {nullptr};
     std::vector<ParameterMeta *> mGroupBeginAnchors; // refs to the parameters marking beginning and ending of groups
+    std::vector<std::string> mGroupNames;
     std::vector<ParameterMeta *> mGroupEndAnchors; // refs to the parameters marking beginning and ending of groups
     std::vector<ParameterMeta *> mSeparatorAnchors; 
 

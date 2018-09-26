@@ -8,6 +8,7 @@ using namespace std;
 void ControlGUI::draw(Graphics &g) {
     auto separatorAnchor = mSeparatorAnchors.begin();
     auto groupBeginAnchor = mGroupBeginAnchors.begin();
+    auto groupNamesIt = mGroupNames.begin();
     auto groupEndAnchor = mGroupEndAnchors.begin();
 
     if (mManageIMGUI) {
@@ -101,7 +102,8 @@ void ControlGUI::draw(Graphics &g) {
     }
 
     ImGuiStyle& style = ImGui::GetStyle();
-    style.Colors[ImGuiCol_Header]                = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
+    style.Colors[ImGuiCol_Header] = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
+    style.Colors[ImGuiCol_Separator] = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
 
 //    ImGui::ShowDemoWindow();
     vector<bool> groupsVisibleStack;
@@ -138,23 +140,34 @@ void ControlGUI::draw(Graphics &g) {
                         std::cout << "Unsupported Parameter type for display" << std::endl;
                     }
                     if (separatorAnchor != mSeparatorAnchors.end()) {
+                        // The spacing's visibility depends on its position,
+                        // So here we show it, but we need to do the increment
+                        // below outside the visibility check
                         if (*separatorAnchor == p) {
-                            ImGui::Spacing();
-                            separatorAnchor++;
+                            ImGui::Separator();
                         }
                     }
-                    if (groupBeginAnchor != mGroupBeginAnchors.end()) {
-                        if (*groupBeginAnchor == p) {
-                            groupsVisibleStack.push_back(ImGui::CollapsingHeader((suffix + "__group_" + p->getName()).c_str() , 
-                                        ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen));
-                            groupBeginAnchor++;
-                        }
+                }
+                if (separatorAnchor != mSeparatorAnchors.end()) {
+                    if (*separatorAnchor == p) {
+                        separatorAnchor++;
                     }
-                    if (groupEndAnchor != mGroupEndAnchors.end()) {
-                        if (*groupEndAnchor == p) {
-                            groupsVisibleStack.pop_back();
-                            groupEndAnchor++;
+                }
+                if (groupBeginAnchor != mGroupBeginAnchors.end()) {
+                    if (*groupBeginAnchor == p || *groupBeginAnchor == nullptr) {
+                        groupsVisibleStack.push_back(ImGui::CollapsingHeader((*groupNamesIt++ + "##" + suffix + "__group_" + p->getName()).c_str() ,
+                                    ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen));
+                        groupBeginAnchor++;
+                    }
+                }
+                if (groupEndAnchor != mGroupEndAnchors.end()) {
+                    if (*groupEndAnchor == p) {
+                        if (groupsVisibleStack.back() == true) {
+                            // If group is visible add a spacing to mark the end of the group
+                            ImGui::Separator();
                         }
+                        groupsVisibleStack.pop_back();
+                        groupEndAnchor++;
                     }
                 }
             }
@@ -409,7 +422,7 @@ void ControlGUI::drawChoice(ParameterChoice * param, std::string suffix)
     if (ImGui::CollapsingHeader((param->getName() + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         for (unsigned int i = 0; i < elements.size(); i++) {
             bool state = value & (1 << i);
-            if (ImGui::Checkbox((elements[i] + + "##" + suffix + param->getName()).c_str(), &state)) {
+            if (ImGui::Checkbox((elements[i] + "##" + suffix + param->getName()).c_str(), &state)) {
                 value ^= (-(state) ^ value) & (1UL << i); // Set an individual bit
                 param->set(value);
             }
@@ -476,6 +489,7 @@ ControlGUI &ControlGUI::registerMarker(GUIMarker &marker) {
     switch(marker.getType()) {
         case GUIMarker::MarkerType::GROUP_BEGIN:
         mGroupBeginAnchors.push_back(mLatestElement);
+        mGroupNames.push_back(marker.getName());
         break;
         case GUIMarker::MarkerType::GROUP_END:
         mGroupEndAnchors.push_back(mLatestElement);
