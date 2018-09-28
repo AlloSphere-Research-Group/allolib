@@ -23,10 +23,10 @@ struct TomlLoader
   TomlLoader() {}
 
   TomlLoader(const std::string& filename) {
-    set_file(filename);
+    setFile(filename);
   }
 
-  void set_file(const std::string& filename) {
+  void setFile(const std::string& filename) {
     if (!al::File::exists(filename)) {
       std::cout << "TomlLoader creating config file: " << filename << std::endl;
       al::File configFile(filename);
@@ -66,6 +66,20 @@ struct TomlLoader
     auto val = root->get_as<T>(keyName);
     if (!val) {
       root->insert(keyName, value);
+    }
+  }
+  template<typename T>
+  void setDefaultValueVector(const std::string &keyName, const std::vector<T> &value) {
+    if (!root) {
+      throw std::runtime_error("al::TomlLoader::setDefaultValue, toml file not set");
+    }
+    auto val = root->get_array_of<T>(keyName);
+    if (!val) {
+      auto array = cpptoml::make_array();
+      for (auto &elem: value) {
+          array->push_back(elem);
+      }
+      root->insert(keyName, array);
     }
   }
 
@@ -168,7 +182,7 @@ struct TomlLoader
 };
 
 namespace TOML {
-  void set_file(const std::string& file);
+  void setFile(const std::string& file);
   double getd(const std::string& key);
   int64_t geti(const std::string& key);
   std::string gets(const std::string& key);

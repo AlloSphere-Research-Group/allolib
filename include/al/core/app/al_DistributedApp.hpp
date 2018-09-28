@@ -74,7 +74,7 @@ public:
       MPI_Get_processor_name(processor_name, &name_len);
 #endif
       if (isMaster()) {
-          configLoader.set_file("distributed_app.toml");
+          configLoader.setFile("distributed_app.toml");
           configLoader.setDefaultValue("distributed", false);
           configLoader.setDefaultValue("broadcastAddress", std::string("192.168.0.255"));
           configLoader.writeFile();
