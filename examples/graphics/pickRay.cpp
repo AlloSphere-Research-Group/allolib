@@ -46,7 +46,7 @@ struct PickRayDemo : App {
   }
 
   virtual void onDraw(Graphics& g) {
-    g.clear(1);
+    g.clear(0);
     g.depthTesting(true);
     g.lighting(true);
 
