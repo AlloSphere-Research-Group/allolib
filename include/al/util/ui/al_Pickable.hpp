@@ -45,7 +45,7 @@ struct PickableBase : virtual PickableState {
     bool child = false;  
     double t = intersect(r);
     if(t > 0.0 || alwaysTestChildren){
-      for(int i=0; i < children.size(); i++){
+      for(unsigned int i=0; i < children.size(); i++){
         Rayd ray = transformRayLocal(r);
         child |= children[i]->point(ray);
       }
@@ -58,7 +58,7 @@ struct PickableBase : virtual PickableState {
     bool child = false;  
     double t = intersect(r);
     if(t > 0.0 || alwaysTestChildren){
-      for(int i=0; i < children.size(); i++){
+      for(unsigned int i=0; i < children.size(); i++){
         Rayd ray = transformRayLocal(r);
         child |= children[i]->pick(ray);
       }
@@ -71,7 +71,7 @@ struct PickableBase : virtual PickableState {
     bool child = false;  
     double t = intersect(r);
     if(t > 0.0 || alwaysTestChildren){
-      for(int i=0; i < children.size(); i++){
+      for(unsigned int i=0; i < children.size(); i++){
         Rayd ray = transformRayLocal(r);
         child |= children[i]->drag(ray);
       }
@@ -84,7 +84,7 @@ struct PickableBase : virtual PickableState {
     bool child = false;  
     double t = intersect(r);
     if(t > 0.0 || alwaysTestChildren){
-      for(int i=0; i < children.size(); i++){
+      for(unsigned int i=0; i < children.size(); i++){
         Rayd ray = transformRayLocal(r);
         child |= children[i]->unpick(ray);
       }
@@ -95,7 +95,7 @@ struct PickableBase : virtual PickableState {
   virtual void draw(Graphics &g){}
   virtual void drawChildren(Graphics &g){
     pushMatrix(g);
-    for(int i=0; i < children.size(); i++){
+    for(unsigned int i=0; i < children.size(); i++){
       children[i]->draw(g);
     }
     popMatrix(g);
@@ -104,7 +104,7 @@ struct PickableBase : virtual PickableState {
   bool intersects(Rayd &r){ return intersect(r) > 0.0; }
   bool intersectsChild(Rayd &r){
     bool child = false;
-    for(int i=0; i < children.size(); i++){
+    for(unsigned int i=0; i < children.size(); i++){
       Rayd ray = transformRayLocal(r);
       child |= children[i]->intersects(ray);
     }
