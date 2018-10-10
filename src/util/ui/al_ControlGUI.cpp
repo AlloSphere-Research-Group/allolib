@@ -124,16 +124,20 @@ void ControlGUI::draw(Graphics &g) {
                     } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
                         Parameter *param = dynamic_cast<Parameter *>(p);
                         drawParameter(param, suffix);
-                    } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter
+                    } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
                         ParameterPose *param = dynamic_cast<ParameterPose *>(p);
                         drawParameterPose(param);
-                    } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter
+                    } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
                         ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
                         drawMenu(param, suffix);
                     }
-                    else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter
+                    else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
                         ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
                         drawChoice(param, suffix);
+                    }
+                    else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
+                        ParameterVec3 *param = dynamic_cast<ParameterVec3 *>(p);
+                        drawVec3(param, suffix);
                     }
                     else {
                         // TODO this check should be performed on registration
@@ -386,17 +390,17 @@ void ControlGUI::drawNav()
 		Vec3d &currentPos = mNav->pos();
 		float x = currentPos.elems()[0];
 
-		bool changed = ImGui::SliderFloat("X", &x, -10, 10);
+        bool changed = ImGui::SliderFloat("X##__nav_", &x, -10, 10);
 		if (changed) {
 			currentPos.elems()[0] = x;
 		}
 		float y = currentPos.elems()[1];
-		changed = ImGui::SliderFloat("Y", &y, -10, 10);
+        changed = ImGui::SliderFloat("Y##__nav_", &y, -10, 10);
 		if (changed) {
 			currentPos.elems()[1] = y;
 		}
 		float z = currentPos.elems()[2];
-		changed = ImGui::SliderFloat("Z", &z, -10, 10);
+        changed = ImGui::SliderFloat("Z##__nav_", &z, -10, 10);
 		if (changed) {
 			currentPos.elems()[2] = z;
 		}
@@ -430,6 +434,35 @@ void ControlGUI::drawChoice(ParameterChoice * param, std::string suffix)
         }
     }
 
+}
+
+void ControlGUI::drawVec3(ParameterVec3 *param, string suffix)
+{
+    if (ImGui::CollapsingHeader((param->getName() + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        Vec3f currentValue = param->get();
+        float x = currentValue.elems()[0];
+        bool updated = false;
+        bool changed = ImGui::SliderFloat(("X##" + suffix + param->getName()).c_str(), &x, -10, 10);
+        if (changed) {
+            currentValue.x = x;
+            updated = true;
+        }
+        float y = currentValue.elems()[1];
+        changed = ImGui::SliderFloat(("Y##" + suffix + param->getName()).c_str(), &y, -10, 10);
+        if (changed) {
+            currentValue.y = y;
+            updated = true;
+        }
+        float z = currentValue.elems()[2];
+        changed = ImGui::SliderFloat(("Z##" + suffix + param->getName()).c_str(), &z, -10, 10);
+        if (changed) {
+            currentValue.z = z;
+            updated = true;
+        }
+        if (updated) {
+            param->set(currentValue);
+        }
+    }
 }
 
 void ControlGUI::drawDynamicScene(DynamicScene *scene, std::string suffix)

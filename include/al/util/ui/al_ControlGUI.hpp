@@ -265,6 +265,7 @@ private:
 	void drawNav();
 	void drawMenu(ParameterMenu *param, std::string suffix);
     void drawChoice(ParameterChoice *param, std::string suffix);
+    void drawVec3(ParameterVec3 *param, std::string suffix);
     void drawDynamicScene(DynamicScene *scene, std::string suffix);
 
 };
