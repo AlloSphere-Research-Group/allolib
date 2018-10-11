@@ -1,9 +1,9 @@
 /*
-Allocore Example: Pickable
+Allocore Example: PickableRotateHandle
 
 Description:
-This example demonstrates how associate a mesh with a pickable
-and interact with it via the mouse
+This example shows how to add a rotation handle as a child 
+to interact with its parent pickable
 
 Author:
 Tim Wood, April 2016
@@ -11,61 +11,57 @@ Tim Wood, April 2016
 
 #include "al/core.hpp"
 #include "al/util/al_Ray.hpp"
-#include "al/util/ui/al_BoundingBox.hpp"
 #include "al/util/ui/al_Pickable.hpp"
+#include "al/util/ui/al_PickableRotateHandle.hpp"
+
 
 using namespace al;
 
 class MyApp : public App {
 public:
 
-  double t;
-  Light light;      
+  Material material; 
   
   Mesh mesh; 
 
   Pickable pickable;
+  // TranslateHandle th;
+  PickableRotateHandle rh;
 
   void onCreate(){
 
     // position camera, disable mouse to look
-    nav().pos(0,0,20);
+    nav().pos(0,0,10);
     navControl().useMouse(false);
 
-    // Create a red spheres mesh
-    addSphere(mesh,1);
-    mesh.translate(-3,3,0);
-    addSphere(mesh,2);
-    mesh.translate(-2.7,2.7,0);
-    addSphere(mesh,0.7);
-    mesh.translate(2.7,-2.7,0);
-
+    // Create a torus mesh
+    addTorus(mesh);
     mesh.generateNormals();
-    mesh.color(RGB(1,0,0));
 
-    // Initialize BoundingBox
+    // Initialize Pickable
     pickable.set(mesh);
-
-  }
-
-  void onAnimate(double dt){
-    // move light in a circle
-    t += dt;
-    light.pos(10*cos(t),0,10*sin(t));
+    
+    // add translate handle as child
+    pickable.addChild(rh);
+    // pickable.addChild(th);
   }
 
   void onDraw(Graphics& g){
 
-    // draw lit mesh
     g.clear(0);
-    g.depthTesting(true);
-    g.lighting(true);
-    g.light(light);
 
+    // draw lit mesh
+    g.lighting(true);
+    // g.light(light);
+    g.color(1,1,1);
     pickable.drawMesh(g);
     
     g.lighting(false);
     pickable.drawBB(g);
+
+    g.depthTesting(false);
+    pickable.drawChildren(g);
+    g.depthTesting(true);
   }
 
   Vec3d unproject(Vec3d screenPos){
