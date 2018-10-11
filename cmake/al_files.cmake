@@ -175,7 +175,7 @@ set(module_sources
 # Header only files produce a lot of warnings from unused functions,
 # So disable these warnings for modules
 foreach(src_file IN LISTS module_sources)
-SET_SOURCE_FILES_PROPERTIES(${src_file} PROPERTIES COMPILE_FLAGS "-Wunused-function -Wunused-variable")
+#SET_SOURCE_FILES_PROPERTIES(${src_file} PROPERTIES COMPILE_FLAGS "-Wunused-function -Wunused-variable")
 endforeach(src_file IN LISTS module_sources)
 
 # OPTIONAL ---------------------------------------------------------------------
