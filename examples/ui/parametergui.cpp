@@ -7,13 +7,14 @@
 
 using namespace al;
 
-Parameter x("X", "", 0, "", -2.0, 2.0);
-Parameter y("Y", "", 0, "", -2.0, 2.0);
-Parameter z("Z", "", 0, "", -2.0, 2.0);
 
 class MyApp : public App
 {
 public:
+    Parameter x{"X", "", 0, "", -2.0, 2.0};
+    Parameter y{"Y", "", 0, "", -2.0, 2.0};
+    Parameter z{"Z", "", 0, "", -2.0, 2.0};
+
     MyApp()
     {
         // Add parameters to GUI

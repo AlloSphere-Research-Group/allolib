@@ -6,6 +6,7 @@
 
 #include "al/core/io/al_ControlNav.hpp"
 #include "al/util/ui/al_Parameter.hpp"
+#include "al/util/ui/al_ParameterServer.hpp"
 
 #include <sstream>
 
@@ -78,11 +79,11 @@ public:
 
 	FlowAppParameters(){};
 
-	virtual const char* flowAddress(){ return "localhost"; };
-	virtual uint16_t flowPort(){ return 12000; };
+    virtual const char* flowAddress(){ return "localhost"; }
+    virtual uint16_t flowPort(){ return 12000; }
 	// virtual uint16_t recvPort(){ return 12001; };
     
-    virtual std::string appName(){ return "defaultApp"; };
+    virtual std::string appName(){ return "defaultApp"; }
     
     virtual ParameterServer& parameterServer() = 0;
     virtual Nav& nav() = 0;

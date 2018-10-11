@@ -8,6 +8,7 @@
 #include "al/core/app/al_AudioApp.hpp"
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/core/io/al_ControlNav.hpp"
+#include "al/util/ui/al_ParameterServer.hpp"
 #include "al/util/al_FlowAppParameters.hpp"
 
 #include <iostream>

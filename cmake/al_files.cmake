@@ -117,6 +117,8 @@ set(util_headers
   include/al/util/imgui/imgui_impl_glfw_gl3.h
   include/al/util/ui/al_Composition.hpp
   include/al/util/ui/al_Parameter.hpp
+  include/al/util/ui/al_ParameterBundle.hpp
+  include/al/util/ui/al_ParameterServer.hpp
   include/al/util/ui/al_ParameterMIDI.hpp
   include/al/util/ui/al_Preset.hpp
   include/al/util/ui/al_HtmlInterfaceServer.hpp
@@ -139,6 +141,8 @@ set(util_sources
   ${al_path}/src/util/imgui/imgui_impl_glfw_gl3.cpp
   ${al_path}/src/util/ui/al_Composition.cpp
   ${al_path}/src/util/ui/al_Parameter.cpp
+  ${al_path}/src/util/ui/al_ParameterBundle.cpp
+  ${al_path}/src/util/ui/al_ParameterServer.cpp
   ${al_path}/src/util/ui/al_Preset.cpp
   ${al_path}/src/util/ui/al_HtmlInterfaceServer.cpp
   ${al_path}/src/util/ui/al_PresetMapper.cpp
@@ -167,6 +171,12 @@ set(module_sources
     modules/module/font/loadFont.cpp
     modules/module/img/loadImage.cpp
 )
+
+# Header only files produce a lot of warnings from unused functions,
+# So disable these warnings for modules
+foreach(src_file IN LISTS module_sources)
+SET_SOURCE_FILES_PROPERTIES(${src_file} PROPERTIES COMPILE_FLAGS "-Wunused-function -Wunused-variable")
+endforeach(src_file IN LISTS module_sources)
 
 # OPTIONAL ---------------------------------------------------------------------
 
