@@ -11,8 +11,12 @@ void ControlGUI::draw(Graphics &g) {
     auto groupNamesIt = mGroupNames.begin();
     auto groupEndAnchor = mGroupEndAnchors.begin();
 
+
     if (mManageIMGUI) {
         begin();
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.Colors[ImGuiCol_Header] = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
+        style.Colors[ImGuiCol_Separator] = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
     }
 //    ImGui::SetNextWindowSize(ImVec2(300, 450), ImGuiCond_FirstUseEver);
 //    ImGui::SetNextWindowPos(ImVec2(mX, mY), ImGuiCond_FirstUseEver);
@@ -101,9 +105,11 @@ void ControlGUI::draw(Graphics &g) {
         }
     }
 
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.Colors[ImGuiCol_Header] = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
-    style.Colors[ImGuiCol_Separator] = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
+    for (auto bundleGroup: mBundles) {
+        std::string suffix = "##_bundle_" + bundleGroup.first;
+        drawBundleGroup(bundleGroup.second, suffix);
+    }
+
 
 //    ImGui::ShowDemoWindow();
     vector<bool> groupsVisibleStack;
@@ -117,32 +123,7 @@ void ControlGUI::draw(Graphics &g) {
 			for (ParameterMeta *p: elem.second) {
 				// We do a runtime check to determine the type of the parameter to determine how to draw it.
                 if (groupsVisibleStack.size() == 0 || groupsVisibleStack.back() == true) {
-                    if (strcmp(typeid(*p).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
-                        ParameterBool *param = dynamic_cast<ParameterBool *>(p);
-
-                        drawParameterBool(param, suffix);
-                    } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
-                        Parameter *param = dynamic_cast<Parameter *>(p);
-                        drawParameter(param, suffix);
-                    } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
-                        ParameterPose *param = dynamic_cast<ParameterPose *>(p);
-                        drawParameterPose(param);
-                    } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
-                        ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
-                        drawMenu(param, suffix);
-                    }
-                    else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
-                        ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
-                        drawChoice(param, suffix);
-                    }
-                    else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
-                        ParameterVec3 *param = dynamic_cast<ParameterVec3 *>(p);
-                        drawVec3(param, suffix);
-                    }
-                    else {
-                        // TODO this check should be performed on registration
-                        std::cout << "Unsupported Parameter type for display" << std::endl;
-                    }
+                    drawParameterMeta(p, suffix);
                     if (separatorAnchor != mSeparatorAnchors.end()) {
                         // The spacing's visibility depends on its position,
                         // So here we show it, but we need to do the increment
@@ -302,6 +283,36 @@ void ControlGUI::drawSequenceRecorder()
         }
         ImGui::SameLine();
         ImGui::Checkbox("Overwrite##__SequenceRecorder", &mOverwriteButtonValue);
+    }
+}
+
+void ControlGUI::drawParameterMeta(ParameterMeta *param, string suffix)
+{
+    if (strcmp(typeid(*param).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
+        ParameterBool *p = dynamic_cast<ParameterBool *>(param);
+
+        drawParameterBool(p, suffix);
+    } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {// Parameter
+        Parameter *p = dynamic_cast<Parameter *>(param);
+        drawParameter(p, suffix);
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
+        ParameterPose *p = dynamic_cast<ParameterPose *>(param);
+        drawParameterPose(p);
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
+        ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
+        drawMenu(p, suffix);
+    }
+    else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
+        ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
+        drawChoice(p, suffix);
+    }
+    else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
+        ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
+        drawVec3(p, suffix);
+    }
+    else {
+        // TODO this check should be performed on registration
+        std::cout << "Unsupported Parameter type for display" << std::endl;
     }
 }
 
@@ -470,6 +481,23 @@ void ControlGUI::drawDynamicScene(DynamicScene *scene, std::string suffix)
     
 }
 
+void ControlGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup, string suffix)
+{
+    std::string name = bundleGroup[0]->name();
+    ImGui::Text(name.c_str());
+    ImGui::SameLine();
+    int index = mCurrentBundle[name];
+    if (ImGui::InputInt(suffix.c_str(), &index)) {
+        if (index > 0 && index < bundleGroup.size()) {
+            mCurrentBundle[name] = index;
+        }
+    }
+    for (ParameterMeta *param: bundleGroup[mCurrentBundle[name]]->parameters()) {
+        drawParameterMeta(param, suffix);
+    }
+
+}
+
 ControlGUI &ControlGUI::registerParameterMeta(ParameterMeta &param) {
     std::string group = param.getGroup();
     if (mElements.find(group) == mElements.end()) {
@@ -477,6 +505,17 @@ ControlGUI &ControlGUI::registerParameterMeta(ParameterMeta &param) {
     }
 	mElements[group].push_back(&param);
     mLatestElement = &param;
+    return *this;
+}
+
+ControlGUI &ControlGUI::registerParameterBundle(ParameterBundle &bundle)
+{
+    std::string bundleName = bundle.name();
+    if (mBundles.find(bundleName) == mBundles.end()) {
+        mBundles[bundleName] = std::vector<ParameterBundle *>();
+        mCurrentBundle[bundleName] = 0;
+    }
+    mBundles[bundleName].push_back(&bundle);
     return *this;
 }
 

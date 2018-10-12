@@ -6,22 +6,28 @@ using namespace al;
 
 int ParameterBundle::mBundleCounter = 0;
 
-ParameterBundle::ParameterBundle(std::string prefix, bool appendCounter) {
-    if (prefix.size() == 0) {
-        mBundlePrefix = "bundle";
+ParameterBundle::ParameterBundle(std::string name) {
+    if (name.size() == 0) {
+        mBundleName = "bundle";
     } else {
-        mBundlePrefix = prefix;
-    }
-    if (appendCounter) {
-        mBundlePrefix += "/" + std::to_string(ParameterBundle::mBundleCounter);
+        mBundleName = name;
     }
     mBundleIndex = mBundleCounter;
     ParameterBundle::mBundleCounter++;
 }
 
-std::string ParameterBundle::bundlePrefix() const
+std::string ParameterBundle::name() const
 {
-    return mBundlePrefix;
+    return mBundleName;
+}
+
+std::string ParameterBundle::bundlePrefix(bool appendCounter) const
+{
+    std::string prefix = "/" + mBundleName;
+    if (appendCounter) {
+        prefix += "/" + std::to_string(ParameterBundle::mBundleCounter);
+    }
+    return prefix;
 }
 
 int ParameterBundle::bundleIndex() const

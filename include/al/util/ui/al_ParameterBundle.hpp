@@ -58,26 +58,41 @@ public:
      * If no prefix is given, each new ParameterBundle gets a different consecutive
      * number with the prefix "bundle_" e.g. bundle_0, bundle_1, etc.
      */
-    ParameterBundle(std::string prefix = "", bool appendCounter = true);
+    ParameterBundle(std::string name = "");
+
+    /**
+     * @brief get the name for this bundle
+     * @return the bundle name
+     */
+    std::string name() const;
 
     /**
      * @brief get the prefix for this bundle
-     * @return the prefix string
+     * @return the prefix string, includes the name and the index e.g. /thing/3
      */
-    std::string bundlePrefix() const;
+    std::string bundlePrefix(bool appendCounter = true) const;
 
     int bundleIndex() const;
 
     void addParameter(ParameterMeta *parameter);
 
+    /**
+     * @brief clear bundle
+     *
+     * Note this function is not thread safe, so it must be called in the same conetext
+     * where the bundle is processed.
+     */
+    void clear() { mParameters.clear();}
+
+    std::vector<ParameterMeta *> &parameters() {return mParameters;}
+
     ParameterBundle &operator <<(ParameterMeta *parameter);
     ParameterBundle &operator <<(ParameterMeta &parameter);
-
 
 private:
     static int mBundleCounter;
     int mBundleIndex = -1;
-    std::string mBundlePrefix;
+    std::string mBundleName;
 
     std::vector<ParameterMeta *> mParameters;
 

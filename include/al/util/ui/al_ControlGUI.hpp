@@ -47,6 +47,7 @@
 #include "al/core/io/al_ControlNav.hpp"
 #include "al/util/ui/al_ParameterMIDI.hpp"
 #include "al/util/ui/al_Parameter.hpp"
+#include "al/util/ui/al_ParameterBundle.hpp"
 #include "al/util/ui/al_Preset.hpp"
 #include "al/util/ui/al_PresetSequencer.hpp"
 #include "al/util/scene/al_SynthSequencer.hpp"
@@ -89,6 +90,14 @@ public:
 
     /// Register parameter using the streaming operator.
     ControlGUI &operator << (ParameterMeta* newParam){ return registerParameterMeta(*newParam); }
+
+    ControlGUI &registerParameterBundle(ParameterBundle &bundle);
+
+    /// Register parameter using the streaming operator.
+    ControlGUI &operator << (ParameterBundle& newBundle){ return registerParameterBundle(newBundle); }
+
+    /// Register parameter using the streaming operator.
+    ControlGUI &operator << (ParameterBundle* newBundle){ return registerParameterBundle(*newBundle); }
 
     ControlGUI &registerNav(Nav &nav);
 
@@ -232,6 +241,7 @@ private:
     SynthSequencer *mSynthSequencer {nullptr};
     PolySynth *mPolySynth {nullptr};
     DynamicScene *mScene {nullptr};
+    std::map<std::string, std::vector<ParameterBundle *>> mBundles;
     Nav *mNav {nullptr};
 
     int mX, mY;
@@ -247,6 +257,7 @@ private:
     int mCurrentSequencerItem {0};
     int mCurrentPresetSequencerItem {0};
     char** mSequencerItems;
+    std::map<std::string, int> mCurrentBundle;
 
     // For use in ImGui::Combo
     static auto vector_getter(void* vec, int idx, const char** out_text)
@@ -259,6 +270,7 @@ private:
 
     void drawPresetHandler();
     void drawSequenceRecorder();
+    void drawParameterMeta(ParameterMeta *param, std::string suffix);
 	void drawParameter(Parameter *param, std::string suffix);
 	void drawParameterBool(ParameterBool *param, std::string suffix);
 	void drawParameterPose(ParameterPose *param);
@@ -267,6 +279,7 @@ private:
     void drawChoice(ParameterChoice *param, std::string suffix);
     void drawVec3(ParameterVec3 *param, std::string suffix);
     void drawDynamicScene(DynamicScene *scene, std::string suffix);
+    void drawBundleGroup(std::vector<ParameterBundle *> bundles, std::string suffix);
 
 };
 
