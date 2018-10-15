@@ -36,7 +36,7 @@ endif ()
 get_filename_component(app_name ${file_full_path} NAME_WE)
 get_filename_component(app_path ${file_full_path} DIRECTORY)
 set(app_files_list ${file_full_path})
-set(al_path ${CMAKE_CURRENT_LIST_DIR}/../../../allolib)
+set(al_path ${CMAKE_CURRENT_SOURCE_DIR}/../../../allolib)
 
 if(EXISTS "${app_path}/flags.cmake")
   if (AL_VERBOSE_OUTPUT)
@@ -134,7 +134,7 @@ if (AL_WINDOWS)
       robocopy ${al_path}/dependencies/FreeImage/Dist/x64 ${app_path}/bin FreeImage.dll &
     )
   endif (FREEIMAGE_FOUND)
-  
+
   list(APPEND post_build_command
     IF %ERRORLEVEL% LEQ 1 exit 0
   )
@@ -148,7 +148,7 @@ endif (AL_WINDOWS)
 
 if(AL_APP_RUN)
 # TODO debug run
-add_custom_target(${app_name}_run 
+add_custom_target(${app_name}_run
                     ${app_name}
                   DEPENDS ${app_name}
                   WORKING_DIRECTORY ${app_path}/bin

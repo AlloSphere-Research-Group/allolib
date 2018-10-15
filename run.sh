@@ -10,20 +10,6 @@ where:
     -v verbose build. Prints full cmake log and verbose build.
 "
 
-if [ $(uname -s) == "Darwin" ]; then
-  CURRENT_OS="MACOS"
-  # echo "running on macOS"
-  # Check if ninja available
-  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; export BUILD_DIR_SUFFIX='_ninja'; }
-fi
-
-if [ $(uname -s) == "Linux" ]; then
-  CURRENT_OS="LINUX"
-  # Check if ninja available
-  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; export BUILD_DIR_SUFFIX='_ninja'; }
-fi
-
-
 if [ $(uname -s) == MINGW64* ]; then
   WINDOWS_FLAGS=-DCMAKE_GENERATOR_PLATFORM=x64
 fi
@@ -62,7 +48,7 @@ if [ $# == 0 ]; then
   exit 1
 fi
 
-while getopts "adncvh" opt; do
+while getopts "adncvhj" opt; do
   case "${opt}" in
   a)
     RUN_MPI=1
@@ -85,6 +71,20 @@ while getopts "adncvh" opt; do
     ;;
   h) echo "$usage"
   exit
+  ;;
+  j)
+if [ $(uname -s) == "Darwin" ]; then
+  CURRENT_OS="MACOS"
+  # echo "running on macOS"
+  # Check if ninja available
+  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; export BUILD_DIR_SUFFIX='_ninja'; }
+fi
+
+if [ $(uname -s) == "Linux" ]; then
+  CURRENT_OS="LINUX"
+  # Check if ninja available
+  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; export BUILD_DIR_SUFFIX='_ninja'; }
+fi
   ;;
   \?) echo "$usage" >&2
     exit 1
