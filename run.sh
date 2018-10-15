@@ -35,6 +35,14 @@ NPROC=$(grep --count ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu |
 # Save one core for the gui.
 PROC_FLAG=$((NPROC - 1))
 
+if [ $(uname -s) == "Darwin" ]; then
+  BUILD_FLAGS=-j${PROC_FLAG}
+fi
+
+if [ $(uname -s) == "Linux" ]; then
+  BUILD_FLAGS=-j${PROC_FLAG}
+fi
+
 # resolve flags
 BUILD_TYPE=Release
 DO_CLEAN=0
@@ -77,13 +85,13 @@ if [ $(uname -s) == "Darwin" ]; then
   CURRENT_OS="MACOS"
   # echo "running on macOS"
   # Check if ninja available
-  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; export BUILD_DIR_SUFFIX='_ninja'; }
+  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; }
 fi
 
 if [ $(uname -s) == "Linux" ]; then
   CURRENT_OS="LINUX"
   # Check if ninja available
-  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; export BUILD_DIR_SUFFIX='_ninja'; }
+  command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; }
 fi
   ;;
   \?) echo "$usage" >&2
@@ -131,7 +139,9 @@ if [ ${RUN_APP} == 1 ]; then
   TARGET_NAME=${TARGET_NAME}_run  
 fi
 
-cmake --build . --target ${TARGET_NAME} --config ${BUILD_TYPE}
+echo cmake --build . --target ${TARGET_NAME} --config ${BUILD_TYPE} -- ${BUILD_FLAGS}
+
+cmake --build . --target ${TARGET_NAME} --config ${BUILD_TYPE} -- ${BUILD_FLAGS}
 )
 
 APP_BUILD_RESULT=$?

@@ -16,7 +16,7 @@ MACRO_ENSURE_OUT_OF_SOURCE_BUILD(
     "${CMAKE_PROJECT_NAME} requires an out of source build. Make a directory and run cmake there."
 )
 
-set(al_path ${CMAKE_CURRENT_LIST_DIR})
+set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
 option(AL_VERBOSE_OUTPUT "" OFF)
 option(BUILD_EXAMPLES "" ON)
 option(TRAVIS_BUILD "" OFF)
