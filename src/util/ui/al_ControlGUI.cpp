@@ -488,7 +488,7 @@ void ControlGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup, str
     ImGui::SameLine();
     int index = mCurrentBundle[name];
     if (ImGui::InputInt(suffix.c_str(), &index)) {
-        if (index > 0 && index < bundleGroup.size()) {
+        if (index >= 0 && index < bundleGroup.size()) {
             mCurrentBundle[name] = index;
         }
     }
