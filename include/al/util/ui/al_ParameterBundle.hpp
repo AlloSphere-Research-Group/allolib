@@ -44,6 +44,7 @@
 #include <vector>
 
 #include "al/util/ui/al_Parameter.hpp"
+#include "al/core/protocol/al_OSC.hpp"
 
 namespace al
 {

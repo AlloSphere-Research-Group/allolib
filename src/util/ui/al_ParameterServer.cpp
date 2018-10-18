@@ -1,4 +1,7 @@
 
+#include <algorithm>
+#include <cstring>
+#include <cctype>
 
 #include "al/util/ui/al_ParameterServer.hpp"
 
@@ -198,6 +201,16 @@ void ParameterServer::unregisterParameter(ParameterPose &param)
     }
 }
 
+ParameterServer &ParameterServer::registerParameterBundle(ParameterBundle &bundle)
+{
+    if (mCurrentActiveBundle.find(bundle.name()) == mCurrentActiveBundle.end()) {
+        mParameterBundles[bundle.name()] = std::vector<ParameterBundle *>();
+        mCurrentActiveBundle[bundle.name()] = 0;
+    }
+    mParameterBundles[bundle.name()].push_back(&bundle);
+    return *this;
+}
+
 void ParameterServer::onMessage(osc::Message &m)
 {
     std::string requestAddress = "/request";
@@ -270,6 +283,80 @@ void ParameterServer::onMessage(osc::Message &m)
             Pose currentPose = p->get();
             currentPose.pos().z= z;
             p->set(currentPose);
+        }
+    }
+    for (auto &bundles:mParameterBundles) {
+       auto oscAddress = m.addressPattern();
+        std::string bundleName = oscAddress.substr(1, oscAddress.find("/", 1) - 1);
+        // TODO there might be a clash if the bundle name matches a parameter name. Should we worry?
+        if (bundleName == bundles.first) { // If OSC address starts with bundle name, we are addressing specific instances of the bundle
+            std::string bundleIndex = oscAddress.substr(bundleName.size() + 2, oscAddress.find("/", bundleName.size() + 3) - (bundleName.size() + 2));
+
+            auto is_number = [](const std::string& s) {
+                return !s.empty() && std::find_if(s.begin(),
+                    s.end(), [](char c) { return !std::isdigit(c); }) == s.end(); };
+            if (is_number(bundleIndex)) {
+                unsigned int index = std::stoul(bundleIndex);
+                if (index < bundles.second.size()) {
+                    std::string subAddress = oscAddress.substr(bundleName.size() + bundleIndex.size() + 2);
+                    for (ParameterMeta *p: bundles.second[index]->parameters()) {
+                        if (p->getFullAddress() == subAddress){
+                            if (strcmp(typeid(*p).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
+                                float value;
+                                m >> value;
+                                static_cast<ParameterBool *>(p)->set(value);
+                            } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
+                                float value;
+                                m >> value;
+                                static_cast<Parameter *>(p)->set(value);
+                            } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
+                            } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
+                            } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
+                            } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
+                            } else {
+//                                 TODO this check should be performed on registration
+                                std::cout << "Unsupported Parameter type for bundle from OSC" << std::endl;
+                            }
+                        }
+                    }
+                }
+            } else if (bundleIndex == "_current") {
+                int index = mCurrentActiveBundle[bundleName];
+                if (m.typeTags() == "i") {
+                    m >> index;
+                } else if (m.typeTags() == "f") {
+                    float value;
+                    m >> value;
+                    index = (int) value;
+                }
+                std::cout << "current " << index << std::endl;
+                if (index >= 0 && index < mParameterBundles[bundleName].size()) {
+                    mCurrentActiveBundle[bundleName] = index;
+                }
+            }
+
+        } else { // We will try to pass the values to the current bundle
+            std::cout << bundleName << " ... " << mCurrentActiveBundle[bundles.first] << " ;;;; " << mParameterBundles[bundles.first].size() << std::endl;
+            for (ParameterMeta *p: mParameterBundles[bundles.first].at(mCurrentActiveBundle[bundles.first])->parameters()) {
+                if (p->getFullAddress() == m.addressPattern()){
+                    if (strcmp(typeid(*p).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
+                        float value;
+                        m >> value;
+                        static_cast<ParameterBool *>(p)->set(value);
+                    } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
+                        float value;
+                        m >> value;
+                        static_cast<Parameter *>(p)->set(value);
+                    } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
+                    } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
+                    } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
+                    } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
+                    } else {
+                        //                                 TODO this check should be performed on registration
+                        std::cout << "Unsupported Parameter type for bundle from OSC" << std::endl;
+                    }
+                }
+            }
         }
     }
     for (osc::PacketHandler *handler: mPacketHandlers) {

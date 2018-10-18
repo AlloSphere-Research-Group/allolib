@@ -8,10 +8,16 @@
 
 using namespace al;
 
+// Create an 'agent' with parameters. For all agents have
+// the same parameters, but each one can have a different
+// value for them
 class Thing {
 public:
     Parameter X {"X", "", 0.0f, "", -1.0f, 1.0f};
     Parameter Y {"Y", "", 0.0f, "", -1.0f, 1.0f};
+    // The name of the bundle is used to group bundles together
+    // i.e. each instance of the bundle is grouped with other instances
+    // with the same name
     ParameterBundle bundle {"thing"};
 
     Thing() {
@@ -38,31 +44,27 @@ private:
 
 class MyApp : public App {
 public:
-    MyApp() {
+    void onCreate() override {
         for (int i = 0; i < 3; i++) {
-            // Create element
-            auto *newThing = new Thing; // This memory is not freed and it should be...
-            things.push_back(newThing);
             // Register its parameter bundle with the ControlGUI
-            gui << newThing->bundle;
+            // The three bundles grouped here are displayed as different instances of the "thing",
+            // allowing control of one at a time
+            gui << things[i].bundle;
         }
         navControl().disable();
-    }
-
-    void onCreate() override {
         gui.init();
     }
 
     void onDraw(Graphics &g) override {
         g.clear();
-        for (Thing *thing: things) {
-            thing->draw(g);
+        for (int i = 0; i < 3; i++) {
+            things[i].draw(g);
         }
         gui.draw(g);
     }
 
 private:
-    std::vector<Thing *> things;
+    Thing things[3];
     ControlGUI gui;
 };
 

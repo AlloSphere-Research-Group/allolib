@@ -42,6 +42,7 @@
 
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/util/ui/al_Parameter.hpp"
+#include "al/util/ui/al_ParameterBundle.hpp"
 
 namespace al
 {
@@ -174,6 +175,11 @@ public:
     void unregisterParameter(ParameterPose &param);
 
     /**
+     * Register a ParameterBundle parameter with the server.
+     */
+    ParameterServer &registerParameterBundle(ParameterBundle &bundle);
+
+    /**
      * @brief print prints information about the server to std::out
      *
      * The print function will print the server configuration (address and port)
@@ -206,6 +212,9 @@ public:
     /// Register parameter using the streaming operator
     template<class ParameterType>
     ParameterServer &operator << (ParameterType* newParam){ return registerParameter(*newParam); }
+
+    /// Register parameter bundle using the streaming operator
+    ParameterServer &operator << (ParameterBundle& bundle){ return registerParameterBundle(bundle); }
 
     /**
      * @brief Append a listener to the osc server.
@@ -246,6 +255,8 @@ protected:
     std::vector<ParameterVec3 *> mVec3Parameters;
     std::vector<ParameterVec4 *> mVec4Parameters;
     std::vector<ParameterPose *> mPoseParameters;
+    std::map<std::string, std::vector<ParameterBundle *>> mParameterBundles;
+    std::map<std::string, int> mCurrentActiveBundle;
     std::mutex mParameterLock;
     bool mVerbose {false};
 };
