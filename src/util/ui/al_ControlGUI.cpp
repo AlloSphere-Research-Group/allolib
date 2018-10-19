@@ -484,17 +484,20 @@ void ControlGUI::drawDynamicScene(DynamicScene *scene, std::string suffix)
 void ControlGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup, string suffix)
 {
     std::string name = bundleGroup[0]->name();
+    ImGui::Separator();
     ImGui::Text(name.c_str());
     ImGui::SameLine();
     int index = mCurrentBundle[name];
     if (ImGui::InputInt(suffix.c_str(), &index)) {
-        if (index >= 0 && index < bundleGroup.size()) {
+        if (index >= 0 && index < (int) bundleGroup.size()) {
             mCurrentBundle[name] = index;
         }
     }
+    suffix += "__index_" + std::to_string(index);
     for (ParameterMeta *param: bundleGroup[mCurrentBundle[name]]->parameters()) {
         drawParameterMeta(param, suffix);
     }
+    ImGui::Separator();
 
 }
 

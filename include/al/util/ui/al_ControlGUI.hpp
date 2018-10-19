@@ -202,6 +202,20 @@ public:
     bool usingInput() {return imgui_is_using_input();}
 
     /**
+     * @brief get currently active index for a parameter bundle registerd with the GUI
+     * @param bundleName
+     * @return current index
+     *
+     * Returns -1 if bundleName is not a registered bundle name
+     */
+    int getBundleCurrent(std::string bundleName) {
+        if (mCurrentBundle.find(bundleName) != mCurrentBundle.end()) {
+            return mCurrentBundle[bundleName];
+        }
+        return -1;
+    }
+
+    /**
      * @brief Set background alpha value
      *
      * 0 for transparent, 1 for opaque
@@ -249,14 +263,15 @@ private:
 
     float mGUIBackgroundAlpha = 0;
 
-    bool mStoreButtonOn {false};
-    bool mRecordButtonValue {false};
-    bool mOverwriteButtonValue {true};
     bool mManageIMGUI {true};
 
     int mCurrentSequencerItem {0};
     int mCurrentPresetSequencerItem {0};
+    bool mStoreButtonOn {false};
+    bool mRecordButtonValue {false};
+    bool mOverwriteButtonValue {true};
     char** mSequencerItems;
+
     std::map<std::string, int> mCurrentBundle;
 
     // For use in ImGui::Combo

@@ -330,7 +330,7 @@ void ParameterServer::onMessage(osc::Message &m)
                     index = (int) value;
                 }
                 std::cout << "current " << index << std::endl;
-                if (index >= 0 && index < mParameterBundles[bundleName].size()) {
+                if (index >= 0 && index < (int) mParameterBundles[bundleName].size()) {
                     mCurrentActiveBundle[bundleName] = index;
                 }
             }
