@@ -127,36 +127,18 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite)
 	}
     ParameterStates values;
 	for(ParameterMeta *p: mParameters) {
-        // We do a runtime check to determine the type of the parameter to determine how to draw it.
-        if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) == 0) { // ParameterBool
-            ParameterBool *param = dynamic_cast<ParameterBool *>(p);
-            values[param->getFullAddress()] = std::vector<float>{ param->get() };
-        }
-        else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
-            Parameter *param = dynamic_cast<Parameter *>(p);
-            values[param->getFullAddress()] = std::vector<float>{ param->get() };
-        }
-        else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter pose
-            ParameterPose *param = dynamic_cast<ParameterPose *>(p);
-            Pose value = param->get();
-            values[param->getFullAddress()] = std::vector<float>{ (float)value.pos()[0], (float)value.pos()[1], (float)value.pos()[2],
-                    (float)value.quat().w, (float)value.quat().x, (float)value.quat().y, (float)value.quat().z };
-        }
-        else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter menu
-            ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
-            // TODO we should store the original int value, but float will do for now
-            values[param->getFullAddress()] = std::vector<float>{ (float) param->get() };
-        }
-        else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter choice
-            ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
-            // TODO we should store the original int value, but float will do for now
-            values[param->getFullAddress()] = std::vector<float>{ (float)param->get() };
-        }
-        else {
-            // TODO this check should be performed on registration
-            std::cout << "Unsupported Parameter type for storage for " << p->getFullAddress() << std::endl;
-        }
+        values[p->getFullAddress()] = getParameterValue(p);
 	}
+    for (auto bundleGroup: mBundles) {
+        std::string bundleName = "/" + bundleGroup.first + "/";
+
+        for(unsigned int i = 0; i < bundleGroup.second.size(); i++) {
+            std::string bundlePrefix = bundleName + std::to_string(i);
+            for(ParameterMeta *p: bundleGroup.second.at(i)->parameters()) {
+                values[bundlePrefix + p->getFullAddress()] = getParameterValue(p);
+            }
+        }
+    }
 
 	savePresetValues(values, name, overwrite);
 	mPresetsMap[index] = name;
@@ -379,6 +361,15 @@ PresetHandler &PresetHandler::registerParameter(ParameterMeta &parameter)
     return *this;
 }
 
+PresetHandler &PresetHandler::registerParameterBundle(ParameterBundle &bundle)
+{
+    if (mBundles.find(bundle.name()) == mBundles.end()) {
+        mBundles[bundle.name()] = std::vector<ParameterBundle *>();
+    }
+    mBundles[bundle.name()].push_back(&bundle);
+    return *this;
+}
+
 std::map<int, std::string> PresetHandler::readPresetMap(std::string mapName)
 {
 	std::map<int, std::string> presetsMap;
@@ -540,7 +531,26 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler)
 		std::unique_lock<std::mutex> lk(handler->mTargetLock);
 		handler->mMorphConditionVar.wait(lk);
         int remainingSteps;
-		while ((remainingSteps = std::atomic_fetch_sub(&(handler->mMorphRemainingSteps), 1)) > 0) {
+        while ((remainingSteps = std::atomic_fetch_sub(&(handler->mMorphRemainingSteps), 1)) > 0) {
+
+            for (auto bundleGroup : handler->mBundles) {
+               const std::string &bundleName = bundleGroup.first;
+               for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
+                   std::string bundlePrefix = "/" + bundleName + "/" + std::to_string(i);
+                   ParameterBundle *bundle = bundleGroup.second[i];
+                   for (ParameterMeta *p : bundle->parameters()) {
+//                       std::cout << bundlePrefix + p->getFullAddress() << std::endl;
+                       if (handler->mTargetValues.find(bundlePrefix + p->getFullAddress()) != handler->mTargetValues.end()) {
+                           handler->setParameterValues(p, handler->mTargetValues[bundlePrefix + p->getFullAddress()], 1.0/remainingSteps);
+                       } else {
+                           if (handler->mVerbose) {
+                               std::cout << "Parameter not found " << bundlePrefix + p->getFullAddress() << std::endl;
+                           }
+                       }
+                   }
+               }
+
+            }
             for (ParameterMeta *p : handler->mParameters) {
                 if (handler->mTargetValues.find(p->getFullAddress()) != handler->mTargetValues.end()) {
                     handler->setParameterValues(p, handler->mTargetValues[p->getFullAddress()], 1.0/remainingSteps);
@@ -601,82 +611,85 @@ PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)
                     values.push_back(std::stof(value));
                 }
 
-                for (ParameterMeta *p : mParameters) {
-                    // We do a runtime check to determine the type of the parameter to determine how to draw it.
-                    if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) == 0) { // ParameterBool
-                        ParameterBool *param = dynamic_cast<ParameterBool *>(p);
-                        // No interpolation for parameter bool. Should we change exactly in the middle?
-                        if (mVerbose) {
-                            std::cout << "Checking for parameter bool match: " << param->getFullAddress() << std::endl;
-                        }
-                        if (param->getFullAddress() == address) {
-                            if (type == "f") {
-                                preset[address] = values;
-                                parameterFound = true;
-                                break;
-                            }
-                        }
-                    } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
-                        Parameter *param = dynamic_cast<Parameter *>(p);
-                        if (mVerbose) {
-                            std::cout << "Checking for parameter match: " << param->getFullAddress() << std::endl;
-                        }
-                        if (param->getFullAddress() == address) {
-                            if (type == "f") {
-                                preset[address] = values;
-                                parameterFound = true;
-                                break;
-                            }
-                        }
-                    } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter Pose
-                        ParameterPose *param = dynamic_cast<ParameterPose *>(p);
-                        if (mVerbose) {
-                            std::cout << "Checking for parameter pose match: " << param->getFullAddress() << std::endl;
-                        }
-                        if (param->getFullAddress() == address) {
-                            if (type == "fffffff") {
-                                preset[address] = values;
-                                parameterFound = true;
-                                break;
-                            }
-                        }
-                    } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter Menu
-                        ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
-                        if (mVerbose) {
-                            std::cout << "Checking for parameter menu match: " << param->getFullAddress() << std::endl;
-                        }
-                        if (param->getFullAddress() == address) {
-                            if (type == "f") {
-                                preset[address] = values;
-                                parameterFound = true;
-                                break;
-                            } else if (type == "i") {
-                                preset[address] = values;
-                                parameterFound = true;
-                                break;
-                            }
-                        }
-                    } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter Choice
-                        ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
-                        if (mVerbose) {
-                            std::cout << "Checking for parameter menu match: " << param->getFullAddress() << std::endl;
-                        }
-                        if (param->getFullAddress() == address) {
-                            if (type == "f") {
-                                preset[address] = values;
-                                parameterFound = true;
-                                break;
-                            } else if (type == "i") {
-                                preset[address] = values;
-                                parameterFound = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!parameterFound && mVerbose) {
-                        std::cout << "Preset in parameter not present: " << address << std::endl;
-                    }
-                }
+                preset[address] = values;
+
+                // No need to validate, right?
+//                for (ParameterMeta *p : mParameters) {
+//                    // We do a runtime check to determine the type of the parameter to determine how to draw it.
+//                    if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) == 0) { // ParameterBool
+//                        ParameterBool *param = dynamic_cast<ParameterBool *>(p);
+//                        // No interpolation for parameter bool. Should we change exactly in the middle?
+//                        if (mVerbose) {
+//                            std::cout << "Checking for parameter bool match: " << param->getFullAddress() << std::endl;
+//                        }
+//                        if (param->getFullAddress() == address) {
+//                            if (type == "f") {
+//                                preset[address] = values;
+//                                parameterFound = true;
+//                                break;
+//                            }
+//                        }
+//                    } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
+//                        Parameter *param = dynamic_cast<Parameter *>(p);
+//                        if (mVerbose) {
+//                            std::cout << "Checking for parameter match: " << param->getFullAddress() << std::endl;
+//                        }
+//                        if (param->getFullAddress() == address) {
+//                            if (type == "f") {
+//                                preset[address] = values;
+//                                parameterFound = true;
+//                                break;
+//                            }
+//                        }
+//                    } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter Pose
+//                        ParameterPose *param = dynamic_cast<ParameterPose *>(p);
+//                        if (mVerbose) {
+//                            std::cout << "Checking for parameter pose match: " << param->getFullAddress() << std::endl;
+//                        }
+//                        if (param->getFullAddress() == address) {
+//                            if (type == "fffffff") {
+//                                preset[address] = values;
+//                                parameterFound = true;
+//                                break;
+//                            }
+//                        }
+//                    } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter Menu
+//                        ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
+//                        if (mVerbose) {
+//                            std::cout << "Checking for parameter menu match: " << param->getFullAddress() << std::endl;
+//                        }
+//                        if (param->getFullAddress() == address) {
+//                            if (type == "f") {
+//                                preset[address] = values;
+//                                parameterFound = true;
+//                                break;
+//                            } else if (type == "i") {
+//                                preset[address] = values;
+//                                parameterFound = true;
+//                                break;
+//                            }
+//                        }
+//                    } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter Choice
+//                        ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
+//                        if (mVerbose) {
+//                            std::cout << "Checking for parameter menu match: " << param->getFullAddress() << std::endl;
+//                        }
+//                        if (param->getFullAddress() == address) {
+//                            if (type == "f") {
+//                                preset[address] = values;
+//                                parameterFound = true;
+//                                break;
+//                            } else if (type == "i") {
+//                                preset[address] = values;
+//                                parameterFound = true;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    if (!parameterFound && mVerbose) {
+//                        std::cout << "Preset in parameter not present: " << address << std::endl;
+//                    }
+//                }
 			}
 		}
 	}
@@ -733,6 +746,39 @@ bool PresetHandler::savePresetValues(const ParameterStates &values, std::string 
 	return ok;
 }
 
+std::vector<float> PresetHandler::getParameterValue(ParameterMeta *p) {
+    // We do a runtime check to determine the type of the parameter to determine how to draw it.
+    if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) == 0) { // ParameterBool
+        ParameterBool *param = dynamic_cast<ParameterBool *>(p);
+        return std::vector<float>{ param->get() };
+    }
+    else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
+        Parameter *param = dynamic_cast<Parameter *>(p);
+        return std::vector<float>{ param->get() };
+    }
+    else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter pose
+        ParameterPose *param = dynamic_cast<ParameterPose *>(p);
+        Pose value = param->get();
+        return std::vector<float>{ (float)value.pos()[0], (float)value.pos()[1], (float)value.pos()[2],
+                    (float)value.quat().w, (float)value.quat().x, (float)value.quat().y, (float)value.quat().z };
+    }
+    else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter menu
+        ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
+        // TODO we should store the original int value, but float will do for now
+        return std::vector<float>{ (float) param->get() };
+    }
+    else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter choice
+        ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
+        // TODO we should store the original int value, but float will do for now
+        return std::vector<float>{ (float) param->get() };
+    }
+    else {
+        // TODO this check should be performed on registration
+        std::cout << "Unsupported Parameter type for storage for " << p->getFullAddress() << std::endl;
+    }
+    return std::vector<float>();
+}
+
 
 // PresetServer ----------------------------------------------------------------
 
@@ -741,16 +787,16 @@ bool PresetHandler::savePresetValues(const ParameterStates &values, std::string 
 PresetServer::PresetServer(std::string oscAddress, int oscPort) :
     mServer(nullptr), mOSCpath("/preset"),
     mAllowStore(true), mStoreMode(false),
-	mNotifyPresetChange(true),
-	mParameterServer(nullptr)
+    mNotifyPresetChange(true),
+    mParameterServer(nullptr)
 {
-	mServer = new osc::Recv(oscPort, oscAddress.c_str(), 0.001); // Is this 1ms wait OK?
-	if (mServer) {
-		mServer->handler(*this);
-		mServer->start();
-	} else {
-		std::cout << "Error starting OSC server." << std::endl;
-	}
+    mServer = new osc::Recv(oscPort, oscAddress.c_str(), 0.001); // Is this 1ms wait OK?
+    if (mServer) {
+        mServer->handler(*this);
+        mServer->start();
+    } else {
+        std::cout << "Error starting OSC server." << std::endl;
+    }
 }
 
 
@@ -759,58 +805,58 @@ PresetServer::PresetServer(ParameterServer &paramServer) :
     mAllowStore(true), mStoreMode(false),
     mNotifyPresetChange(true)
 {
-	paramServer.registerOSCListener(this);
-	mParameterServer = &paramServer;
+    paramServer.registerOSCListener(this);
+    mParameterServer = &paramServer;
 }
 
 PresetServer::~PresetServer()
 {
-//	std::cout << "~PresetServer()" << std::endl;;
-	if (mServer) {
-		mServer->stop();
-		delete mServer;
-		mServer = nullptr;
-	}
+    //	std::cout << "~PresetServer()" << std::endl;;
+    if (mServer) {
+        mServer->stop();
+        delete mServer;
+        mServer = nullptr;
+    }
 }
 
 void PresetServer::onMessage(osc::Message &m)
 {
-	m.resetStream(); // Should be moved to the caller...
-//	std::cout << "PresetServer::onMessage " << std::endl;
-	mPresetChangeLock.lock();
-	mPresetChangeSenderAddr = m.senderAddress();
-	if(m.addressPattern() == mOSCpath && m.typeTags() == "f"){
-		float val;
-		m >> val;
-		if (!this->mStoreMode) {
-			for (PresetHandler *handler: mPresetHandlers) {
-				handler->recallPreset(static_cast<int>(val));
-			}
-		} else {
-			for (PresetHandler *handler: mPresetHandlers) {
-				handler->storePreset(static_cast<int>(val));
-			}
-			this->mStoreMode = false;
-		}
-	} else if(m.addressPattern() == mOSCpath && m.typeTags() == "s"){
-		std::string val;
-		m >> val;
-		if (!this->mStoreMode) {
-			for (PresetHandler *handler: mPresetHandlers) {
-				handler->recallPreset(val);
-			}
-		} else {
-			for (PresetHandler *handler: mPresetHandlers) {
-				handler->storePreset(val);
-			}
-			this->mStoreMode = false;
-		}
-	}  else if(m.addressPattern() == mOSCpath && m.typeTags() == "i"){
-		int val;
-		m >> val;
-		if (!this->mStoreMode) {
-			for (PresetHandler *handler: mPresetHandlers) {
-				handler->recallPreset(val);
+    m.resetStream(); // Should be moved to the caller...
+    //	std::cout << "PresetServer::onMessage " << std::endl;
+    mPresetChangeLock.lock();
+    mPresetChangeSenderAddr = m.senderAddress();
+    if(m.addressPattern() == mOSCpath && m.typeTags() == "f"){
+        float val;
+        m >> val;
+        if (!this->mStoreMode) {
+            for (PresetHandler *handler: mPresetHandlers) {
+                handler->recallPreset(static_cast<int>(val));
+            }
+        } else {
+            for (PresetHandler *handler: mPresetHandlers) {
+                handler->storePreset(static_cast<int>(val));
+            }
+            this->mStoreMode = false;
+        }
+    } else if(m.addressPattern() == mOSCpath && m.typeTags() == "s"){
+        std::string val;
+        m >> val;
+        if (!this->mStoreMode) {
+            for (PresetHandler *handler: mPresetHandlers) {
+                handler->recallPreset(val);
+            }
+        } else {
+            for (PresetHandler *handler: mPresetHandlers) {
+                handler->storePreset(val);
+            }
+            this->mStoreMode = false;
+        }
+    }  else if(m.addressPattern() == mOSCpath && m.typeTags() == "i"){
+        int val;
+        m >> val;
+        if (!this->mStoreMode) {
+            for (PresetHandler *handler: mPresetHandlers) {
+                handler->recallPreset(val);
 			}
 		} else {
 			for (PresetHandler *handler: mPresetHandlers) {

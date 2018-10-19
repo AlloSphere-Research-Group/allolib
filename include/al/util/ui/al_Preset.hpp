@@ -201,6 +201,10 @@ public:
 
     PresetHandler &operator << (ParameterMeta &param) { return this->registerParameter(param); }
 
+    PresetHandler &registerParameterBundle(ParameterBundle &bundle);
+
+    PresetHandler &operator << (ParameterBundle &bundle) { return this->registerParameterBundle(bundle); }
+
 	std::string buildMapPath(std::string mapName, bool useSubDirectory = false);
 
 	std::map<int, std::string> readPresetMap(std::string mapName = "default");
@@ -280,6 +284,8 @@ private:
 	bool savePresetValues(const ParameterStates &values, std::string presetName,
 	                       bool overwrite = true);
 
+    std::vector<float> getParameterValue(ParameterMeta *p);
+
 	static void morphingFunction(PresetHandler *handler);
 
 	bool mVerbose;
@@ -289,6 +295,9 @@ private:
 	std::string mFileName;
 	std::string mCurrentMapName;
 	std::vector<ParameterMeta *> mParameters;
+
+    std::map<std::string, std::vector<ParameterBundle *>> mBundles;
+
 	std::mutex mFileLock;
 	bool mRunning; // To keep the morphing thread alive
 	// bool mMorph; // To be able to trip and stop morphing at any time.
