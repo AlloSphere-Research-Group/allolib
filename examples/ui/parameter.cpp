@@ -1,94 +1,78 @@
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_ParameterServer.hpp".hpp"
-
 #include <iostream>
+
+#include "al/core/app/al_App.hpp"
+#include "al/core/graphics/al_Shapes.hpp"
+#include "al/util/ui/al_Parameter.hpp"
 
 using namespace al;
 using namespace std;
 
-// Parameter declaration
-// Access to these parameters via the get and set functions is competely
-// thread safe
-Parameter freq("Frequency", "", 440.0);
-Parameter amp("Amplitude", "", 0.1);
+class MyApp : public App {
+public:
+    // Parameter declaration
+    // Access to these parameters is competely thread safe
+    // constructor parameters are:
+    // parameterName, Group, defaultValue, prefix, min, max
+    //
+    // parameterName, Group and prefix are used for display and to construct
+    // the OSC path the parameter will listen to (see parameter_server example)
+    //
+    // The parameter will clamp values between min and max
+    Parameter X {"X", "", 0.0, "", -1.0, 1.0};
+    Parameter Y {"Y", "", 0.0, "", -1.0, 1.0};
 
-// will be used for sending values to ParameterServer
-osc::Send sender(9010, "127.0.0.1");
+    Mesh m;
 
-double interval_sec = 1.0; // time between random parameter changes
+    void onCreate() override {
+          // Set the function to be called whenever the value of the "X"
+          // parameter changes
+          X.registerChangeCallback([&](float newX){
+              cout << "X has changed from " << X.get() << " to " << newX << endl;
+          });
 
-// This callback is registered below using the
-// Parameter::setProcessingCallback() function. It is called any time the
-// parameter's value is changed, no matter how that change occured.
-float ampCallback(float ampdb, void *data)
-{
-  float amp = powf(10.0, ampdb / 20.0);
-  cout << "`ampCallback` called. converting " << ampdb << "db to " << amp
-       << endl;
-  return amp;
-}
+          // Have something to draw in a mesh
+          addTorus(m);
+          m.primitive(Mesh::LINE_STRIP);
+          navControl().disable(); // Disable keyboard control of navigation
+    }
+
+    void onDraw(Graphics &g) override {
+        g.clear();
+        g.translate(0.0, 0.0, -6.0); // Draw a reference mesh at 0,0
+        g.draw(m);
+        g.pushMatrix();
+        // You can use the parameters as if they were regular floats (in most cases)
+        g.translate(X, Y, 0.0); // Draw a mesh at X,Y
+        g.draw(m);
+        g.popMatrix();
+    }
+
+    void onKeyDown(const Keyboard &k) override {
+        // Use keyboard to control position of element
+        switch (k.key()) {
+        case 'w':
+            Y = Y + 0.1;
+            break;
+        case 'x':
+            Y = Y - 0.1;
+            break;
+        case 'a':
+            X = X - 0.1;
+            break;
+        case 'd':
+            X = X + 0.1;
+            break;
+        default:
+            break;
+        }
+    }
+};
 
 int main(int argc, char *argv[])
 {
 
-  // Set the function to be called whenever the value of the "amp"
-  // parameter changes
-  // amp.setProcessingCallback(ampCallback, nullptr);
-  amp.setProcessingCallback([&](float ampdb){
-    float amp = powf(10.0, ampdb / 20.0);
-    cout << "`ampCallback` called. converting " << ampdb << "db to " << amp
-         << endl;
-    return amp;
-  });
+    MyApp app;
+    app.start();
 
-  ParameterServer paramServer("127.0.0.1", 9010);
-  // You can register parameters through the registerParameter() function
-  //	paramServer.registerParameter(freq);
-  //	paramServer.registerParameter(amp);
-  // Or you can use the streaming operators:
-  paramServer << freq << amp;
-
-  // Print information about the server. Shows address, port and OSC parameter
-  // addresses
-  cout << "printing parameter server info" << endl;
-  paramServer.print();
-
-  // Try listening for OSC on this port to check that values are being forwarded
-  paramServer.addListener("127.0.0.1", 13560); 
-
-  int count = 0;
-  while (count < 3) {
-    cout << "\n\n" << endl; // separate print statements in ouput terminal
-
-    // set value in c++ program
-    {
-      float newFreq = 440.0 * (1 + count / 2.0);
-      float newAmpDb = -40.0 * count / 2.0;
-      cout << "Setting through C++: Frequency " << newFreq
-                               << " Amplitude " << newAmpDb << endl;
-      freq = newFreq;    // The parameters can be set through C++ assignment:
-      amp.set(newAmpDb); // or setter
-      cout << "check values set: freq = " << freq.get()
-                            << ", amp = " << amp.get() << '\n' << endl;
-      al_sleep(interval_sec);
-    }
-
-    // Now do it through OSC:
-    {
-      float newFreq = 440.0 * (1 + (2 - count) / 2.0);
-      float newAmpDb = -40.0 * (2 - count) / 2.0;
-      cout << "Setting through OSC: Frequency " << newFreq <<
-                                  " Amplitude " << newAmpDb << endl;
-
-      sender.send("/Frequency", newFreq);
-      sender.send("/Amplitude", newAmpDb);
-      al_sleep(0.1); // wait for short time so param server can get message
-      cout << "check values set: freq = " << freq.get()
-                            << ", amp = " << amp.get() << '\n' << endl;
-      al_sleep(interval_sec);
-    }
-
-    count += 1; // count to repeat 3 times and exit
-  }
-
-} // main
+    return 0;
+}
