@@ -104,7 +104,7 @@ public:
     /// Register nav using the streaming operator. A set of widgets are shown to control it.
     ControlGUI &operator << (Nav &nav){ return registerNav(nav); }
 
-    ControlGUI &registerPresetHandler(PresetHandler &presetHandler);
+    ControlGUI &registerPresetHandler(PresetHandler &presetHandler, int numRows = -1, int numColumns = -1);
 
     /// Register preset handler using the streaming operator. GUI widgets for preset control are shown.
     ControlGUI &operator << (PresetHandler& ph){ return registerPresetHandler(ph); }
@@ -249,6 +249,7 @@ private:
     std::vector<ParameterMeta *> mSeparatorAnchors; 
 
     PresetHandler *mPresetHandler {nullptr};
+    int mPresetColumns, mPresetRows;
     PresetSequencer *mPresetSequencer {nullptr};
     SequenceRecorder *mSequenceRecorder {nullptr};
     SynthRecorder *mSynthRecorder {nullptr};

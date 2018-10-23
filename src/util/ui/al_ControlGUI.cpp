@@ -205,21 +205,30 @@ void ControlGUI::drawPresetHandler()
      if (ImGui::CollapsingHeader("Presets", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
 
         std::map<int, std::string> presets = mPresetHandler->availablePresets();
-        static int selection = -1;
+        int selection = -1;
         std::string currentPresetName = mPresetHandler->getCurrentPresetName();
+        for (auto preset: presets) {
+            if (preset.second == currentPresetName) {
+                selection = preset.first;
+                break;
+            }
+        }
 
+        static std::string enteredText;
         char buf1[64];
-        strncpy(buf1, currentPresetName.c_str(), 64);
+        if (enteredText.size() == 0) {
+            strncpy(buf1, currentPresetName.c_str(), 63);
+        } else {
+            strncpy(buf1, enteredText.c_str(), 63);
+        }
         if (ImGui::InputText("preset##__Preset", buf1, 64)) {
-            currentPresetName = buf1;
+            enteredText = buf1;
         }
         static int presetHandlerBank = 0;
-        int numColumns = 12;
-        int numRows = 4;
-        int counter = presetHandlerBank * (numColumns * numRows) ;
+        int counter = presetHandlerBank * (mPresetColumns * mPresetRows) ;
         std::string suffix = "##__Preset"; 
-        for (int row = 0; row < numRows; row++) {
-            for (int column = 0; column < numColumns; column++) {
+        for (int row = 0; row < mPresetRows; row++) {
+            for (int column = 0; column < mPresetColumns; column++) {
                 std::string name = std::to_string(counter);
                 ImGui::PushID(counter);
 
@@ -230,13 +239,14 @@ void ControlGUI::drawPresetHandler()
                 if (ImGui::Selectable((name + suffix).c_str(), is_selected, 0, ImVec2(18, 15)))
                 {
                     if (mStoreButtonOn) {
-                        std::string saveName = currentPresetName;
+                        std::string saveName = enteredText;
                         if (saveName.size() == 0) {
                             saveName = name;
                         } 
-                        mPresetHandler->storePreset(counter, name.c_str());
+                        mPresetHandler->storePreset(counter, saveName.c_str());
                         selection = counter;
                         mStoreButtonOn = false;
+                        enteredText.clear();
                     } else {
                         if (mPresetHandler->recallPreset(counter) != "") { // Preset is available
                             selection = counter;
@@ -246,7 +256,7 @@ void ControlGUI::drawPresetHandler()
                 if (is_selected) {
                     ImGui::PopStyleColor(1);
                 }
-                if (column < numColumns - 1) ImGui::SameLine();
+                if (column < mPresetColumns - 1) ImGui::SameLine();
                 counter++;
                 ImGui::PopID();
             }
@@ -559,8 +569,19 @@ ControlGUI &ControlGUI::registerNav(Nav &nav)
     return *this;
 }
 
-ControlGUI &ControlGUI::registerPresetHandler(PresetHandler &presetHandler) {
+ControlGUI &ControlGUI::registerPresetHandler(PresetHandler &presetHandler, int numRows, int numColumns) {
     mPresetHandler = &presetHandler;
+    if (numRows == -1) {
+        mPresetRows = 4;
+    } else {
+        mPresetRows = numRows;
+    }
+
+    if (numColumns == -1) {
+        mPresetColumns = 12;
+    } else {
+        mPresetColumns = numColumns;
+    }
     return *this;
 }
 
