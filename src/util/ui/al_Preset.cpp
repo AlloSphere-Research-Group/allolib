@@ -510,6 +510,8 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
             Pose pose(Vec3d(values[0], values[1], values[2]),
                 Quatd(values[3], values[4], values[5], values[6]));
             param->set(pose);
+        } else {
+            std::cout << "Unexpected number of values for " << param->getFullAddress() << std::endl;
         }
     } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter
         ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
@@ -517,6 +519,14 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
     } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter
         ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
         param->set(values[0]);
+    }  else if (strcmp(typeid(*p).name(), typeid(ParameterColor).name()) == 0) {// Parameter
+        ParameterColor *param = dynamic_cast<ParameterColor *>(p);
+        //TODO: Add interpolation for ParameterColor
+        if (values.size() == 4) {
+            param->set(Color(values[0], values[1], values[2], values[3]));
+        } else {
+            std::cout << "Unexpected number of values for " << param->getFullAddress() << std::endl;
+        }
     } else {
         // TODO this check should be performed on registration
         std::cout << "Unsupported Parameter " << p->getFullAddress() << std::endl;
@@ -760,18 +770,19 @@ std::vector<float> PresetHandler::getParameterValue(ParameterMeta *p) {
         Pose value = param->get();
         return std::vector<float>{ (float)value.pos()[0], (float)value.pos()[1], (float)value.pos()[2],
                     (float)value.quat().w, (float)value.quat().x, (float)value.quat().y, (float)value.quat().z };
-    }
-    else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter menu
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter menu
         ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
         // TODO we should store the original int value, but float will do for now
         return std::vector<float>{ (float) param->get() };
-    }
-    else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter choice
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter choice
         ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
         // TODO we should store the original int value, but float will do for now
         return std::vector<float>{ (float) param->get() };
-    }
-    else {
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterColor).name()) == 0) {// Parameter choice
+        ParameterColor *param = dynamic_cast<ParameterColor *>(p);
+        // TODO we should store the original int value, but float will do for now
+        return std::vector<float>{ param->get().r, param->get().g, param->get().b, param->get().a };
+    }  else {
         // TODO this check should be performed on registration
         std::cout << "Unsupported Parameter type for storage for " << p->getFullAddress() << std::endl;
     }

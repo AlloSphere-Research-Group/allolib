@@ -66,7 +66,7 @@ class PresetHandler
 {
 public:
 
-        typedef std::map<std::string, std::vector<float> > ParameterStates;
+    typedef std::map<std::string, std::vector<float> > ParameterStates;
 	/**
 	 * @brief PresetHandler contructor
 	 *
