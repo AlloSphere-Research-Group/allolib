@@ -371,7 +371,7 @@ void Window::implSetFullScreen() {
 #endif
 }
 
-void Window::implSetTitle() {}
+void Window::implSetTitle() { glfwSetWindowTitle(mImpl->mGLFWwindow, mTitle.c_str());	}
 
 // See: https://www.opengl.org/wiki/Swap_Interval
 void Window::implSetVSync() { glfwSwapInterval(mVSync ? 1 : 0); }
