@@ -62,10 +62,9 @@ void PresetHandler::registerStoreCallback(std::function<void (int, std::string, 
 	mStoreCallbackUdata.push_back(userData);
 }
 
-void PresetHandler::registerMorphTimeCallback(Parameter::ParameterChangeCallback cb,
-                                              void *userData)
+void PresetHandler::registerMorphTimeCallback(Parameter::ParameterChangeCallback cb)
 {
-	mMorphTime.registerChangeCallback(cb, userData);
+    mMorphTime.registerChangeCallback(cb);
 }
 
 std::string PresetHandler::buildMapPath(std::string mapName, bool useSubDirectory)

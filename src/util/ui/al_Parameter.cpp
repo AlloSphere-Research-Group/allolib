@@ -29,14 +29,12 @@ void Parameter::setNoCalls(float value, void *blockReceiver)
 	if (value > mMax) value = mMax;
 	if (value < mMin) value = mMin;
 	if (mProcessCallback) {
-		value = (*mProcessCallback)(value); //, mProcessUdata);
+        value = (*mProcessCallback)(value); //, mProcessUdata);
 	}
-	if (blockReceiver) {
-		for(size_t i = 0; i < mCallbacks.size(); ++i) {
-			if (mCallbacks[i]) {
-				(*mCallbacks[i])(value); //, this, mCallbackUdata[i], blockReceiver);
-			}
-		}
+    if (blockReceiver) {
+        for(auto cb:mCallbacks) {
+            (*cb)(value);
+        }
 	}
 
 	mFloatValue = value;
@@ -46,15 +44,13 @@ void Parameter::set(float value)
 {
 	if (value > mMax) value = mMax;
 	if (value < mMin) value = mMin;
-	if (mProcessCallback) {
-		value = (*mProcessCallback)(value); //, mProcessUdata);
+    if (mProcessCallback) {
+        value = (*mProcessCallback)(value); //, mProcessUdata);
     }
-	for(size_t i = 0; i < mCallbacks.size(); ++i) {
-		if (mCallbacks[i]) {
-			(*mCallbacks[i])(value); //, this, mCallbackUdata[i], NULL);
-		}
-	}
-        mFloatValue = value;
+    for(auto cb:mCallbacks) {
+        (*cb)(value);
+    }
+    mFloatValue = value;
 }
 
 // ParameterBool ------------------------------------------------------------------

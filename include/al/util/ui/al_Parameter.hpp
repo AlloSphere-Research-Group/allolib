@@ -55,6 +55,7 @@
 
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/spatial/al_Pose.hpp"
+#include "al/core/types/al_Color.hpp"
 
 namespace al
 {
@@ -169,10 +170,8 @@ public:
         if (mProcessCallback) {
             value = (*mProcessCallback)(value); //, mProcessUdata);
         }
-        for(size_t i = 0; i < mCallbacks.size(); ++i) {
-            if (mCallbacks[i]) {
-                (*mCallbacks[i])(value); //, this,  mCallbackUdata[i], NULL);
-            }
+        for(auto cb:mCallbacks) {
+            (*cb)(value);
         }
         setLocking(value);
     }
@@ -195,10 +194,8 @@ public:
         }
 
         if (blockReceiver) {
-            for(size_t i = 0; i < mCallbacks.size(); ++i) {
-                if (mCallbacks[i]) {
-                    (*mCallbacks[i])(value); //, this, mCallbackUdata[i], blockReceiver);
-                }
+            for(auto cb:mCallbacks) {
+                (*cb)(value);
             }
         }
         setLocking(value);
@@ -259,24 +256,21 @@ public:
 	 * parameter.
 	 * Only one callback may be registered here.
 	 *
-	 * @param cb The callback function
-	 * @param userData user data that is passed to the callback function
+     * @param cb The callback function
 	 *
 	 * @return the transformed value
 	 */
-	void setProcessingCallback(ParameterProcessCallback cb,
-	                           void *userData = nullptr);
+    void setProcessingCallback(ParameterProcessCallback cb);
+
 	/**
 	 * @brief registerChangeCallback adds a callback to be called when the value changes
 	 *
 	 * This function appends the callback to a list of callbacks to be called
 	 * whenever a value changes.
 	 *
-	 * @param cb
-	 * @param userData
+     * @param cb
 	 */
-	void registerChangeCallback(ParameterChangeCallback cb,
-	                           void *userData = nullptr);
+    void registerChangeCallback(ParameterChangeCallback cb);
 
 	std::vector<ParameterWrapper<ParameterType> *> operator<< (ParameterWrapper<ParameterType> &newParam)
 	{ std::vector<ParameterWrapper<ParameterType> *> paramList;
@@ -284,7 +278,7 @@ public:
 		return paramList; }
 
 	std::vector<ParameterWrapper<ParameterType> *> &operator<< (std::vector<ParameterWrapper<ParameterType> *> &paramVector)
-	{ paramVector.push_back(this);
+    { paramVector.push_back(this);
 		return paramVector;
 	}
 
@@ -318,9 +312,9 @@ protected:
 	ParameterType mMin;
 	ParameterType mMax;
 
-	std::shared_ptr<ParameterProcessCallback> mProcessCallback;
+    std::shared_ptr<ParameterProcessCallback> mProcessCallback;
 	// void * mProcessUdata;
-	std::vector<std::shared_ptr<ParameterChangeCallback> > mCallbacks;
+    std::vector<std::shared_ptr<ParameterChangeCallback>> mCallbacks;
 	// std::vector<void *> mCallbackUdata;
 
 private:
@@ -649,6 +643,18 @@ private:
     std::vector<std::string> mElements;
 };
 
+class ParameterColor: public ParameterWrapper<al::Color>
+{
+public:
+    ParameterColor(std::string parameterName, std::string Group = "",
+                  al::Color defaultValue = al::Color(),
+                  std::string prefix = "") :
+        ParameterWrapper<al::Color>(parameterName, Group, defaultValue, prefix)
+    { }
+
+    ParameterColor operator=(const al::Color vec) {this->set(vec); return *this;}
+};
+
 
 // Implementations -----------------------------------------------------------
 
@@ -661,7 +667,7 @@ template<class ParameterType>
 ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName, std::string group,
           ParameterType defaultValue,
           std::string prefix) :
-	ParameterMeta(parameterName, group, prefix), mProcessCallback(nullptr)
+    ParameterMeta(parameterName, group, prefix), mProcessCallback(nullptr)
 {
 	mValue = defaultValue;
 	mValueCache = defaultValue;
@@ -682,7 +688,6 @@ template<class ParameterType>
 ParameterWrapper<ParameterType>::ParameterWrapper(const ParameterWrapper<ParameterType> &param)
 	: ParameterMeta(param.mParameterName, param.mGroup, param.mPrefix)
 {
-	mProcessCallback = param.mProcessCallback;
 	mMin = param.mMin;
 	mMax = param.mMax;
 	mProcessCallback = param.mProcessCallback;
@@ -702,16 +707,16 @@ ParameterType ParameterWrapper<ParameterType>::get()
 }
 
 template<class ParameterType>
-void ParameterWrapper<ParameterType>::setProcessingCallback(ParameterWrapper::ParameterProcessCallback cb, void *userData)
+void ParameterWrapper<ParameterType>::setProcessingCallback(ParameterWrapper::ParameterProcessCallback cb)
 {
-	mProcessCallback = std::make_shared<ParameterProcessCallback>(cb);
+    mProcessCallback = std::make_shared<ParameterProcessCallback>(cb);
 	// mProcessUdata = userData;
 }
 
 template<class ParameterType>
-void ParameterWrapper<ParameterType>::registerChangeCallback(ParameterWrapper::ParameterChangeCallback cb, void *userData)
+void ParameterWrapper<ParameterType>::registerChangeCallback(ParameterWrapper::ParameterChangeCallback cb)
 {
-	mCallbacks.push_back(std::make_shared<ParameterChangeCallback>(cb));
+    mCallbacks.push_back(std::make_shared<ParameterChangeCallback>(cb));
     // mCallbackUdata.push_back(userData);
 }
 

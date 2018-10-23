@@ -195,7 +195,7 @@ public:
 	 * @param cb The callback function
 	 * @param userData data to be passed to the callback
 	 */
-	void registerMorphTimeCallback(Parameter::ParameterChangeCallback cb, void *userData = nullptr);
+    void registerMorphTimeCallback(Parameter::ParameterChangeCallback cb);
 
     PresetHandler &registerParameter(ParameterMeta &parameter);
 

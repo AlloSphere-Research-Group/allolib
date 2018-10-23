@@ -15,13 +15,17 @@ public:
     Parameter y{"Y", "", 0, "", -2.0, 2.0};
     Parameter z{"Z", "", 0, "", -2.0, 2.0};
 
+    ParameterColor color {"Color"};
+
     MyApp()
     {
         // Add parameters to GUI
-        mParameterGUI << x << y << z;
+        // You can pipe any Parameter type (ParameterColor, ParameterVec3f, ParameterBool, etc.) and the
+        // GUI will generate the appropriate controls
+        mParameterGUI << x << y << z << color;
         nav() = Vec3d(0, 0, 2);
         // Add parameters to OSC server
-        parameterServer() << x << y << z;
+        parameterServer() << x << y << z << color;
         parameterServer().print();
 
         // Expose parameter server in html interface
@@ -49,7 +53,8 @@ public:
     virtual void onDraw(Graphics &g) {
         g.clear(0);
         g.pushMatrix();
-        g.translate(x.get(), y.get(), z.get());
+        g.translate(x, y, z);
+        g.color(color);
         g.draw(mMesh);
         g.popMatrix();
         mParameterGUI.draw(g);
@@ -58,7 +63,6 @@ public:
 private:
     ControlGUI mParameterGUI;
     ParameterMIDI mParameterMIDI;
-    //HtmlInterfaceServer mInterfaceServer;
 
     Mesh mMesh;
 };

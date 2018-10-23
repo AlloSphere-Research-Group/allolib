@@ -289,6 +289,7 @@ private:
 	void drawParameter(Parameter *param, std::string suffix);
 	void drawParameterBool(ParameterBool *param, std::string suffix);
 	void drawParameterPose(ParameterPose *param);
+    void drawParameterColor(ParameterColor *param, std::string suffix);
 	void drawNav();
 	void drawMenu(ParameterMenu *param, std::string suffix);
     void drawChoice(ParameterChoice *param, std::string suffix);

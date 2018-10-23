@@ -40,6 +40,8 @@
 	Andrés Cabrera mantaraya36@gmail.com
 */
 
+#include <mutex>
+
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/util/ui/al_ParameterBundle.hpp"
@@ -78,6 +80,7 @@ public:
      */
     void notifyListeners(std::string OSCaddress, float value);
 
+    void notifyListeners(std::string OSCaddress, int value);
     void notifyListeners(std::string OSCaddress, std::string value);
     void notifyListeners(std::string OSCaddress, Vec3f value);
     void notifyListeners(std::string OSCaddress, Vec4f value);
@@ -127,52 +130,12 @@ public:
     /**
      * Register a parameter with the server.
      */
-    ParameterServer &registerParameter(Parameter &param);
+    ParameterServer &registerParameter(ParameterMeta &param);
 
     /**
      * Remove a parameter from the server.
      */
-    void unregisterParameter(Parameter &param);
-
-    /**
-     * Register a string parameter with the server.
-     */
-    ParameterServer &registerParameter(ParameterString &param);
-
-    /**
-     * Remove a string parameter from the server.
-     */
-    void unregisterParameter(ParameterString &param);
-
-    /**
-     * Register a Vec3 parameter with the server.
-     */
-    ParameterServer &registerParameter(ParameterVec3 &param);
-
-    /**
-     * Remove a Vec3 parameter from the server.
-     */
-    void unregisterParameter(ParameterVec3 &param);
-
-    /**
-     * Register a Vec4 parameter with the server.
-     */
-    ParameterServer &registerParameter(ParameterVec4 &param);
-
-    /**
-     * Remove a Vec4 parameter from the server.
-     */
-    void unregisterParameter(ParameterVec4 &param);
-
-    /**
-     * Register a Pose parameter with the server.
-     */
-    ParameterServer &registerParameter(ParameterPose &param);
-
-    /**
-     * Remove a Vec4 parameter from the server.
-     */
-    void unregisterParameter(ParameterPose &param);
+    void unregisterParameter(ParameterMeta &param);
 
     /**
      * Register a ParameterBundle parameter with the server.
@@ -199,11 +162,11 @@ public:
     /**
      * @brief Get the list of registered parameters.
      */
-    std::vector<Parameter *> parameters() {return mParameters;}
-    std::vector<ParameterString *> stringParameters() {return mStringParameters;}
-    std::vector<ParameterVec3 *> vec3Parameters() {return mVec3Parameters;}
-    std::vector<ParameterVec4 *> vec4Parameters() {return mVec4Parameters;}
-    std::vector<ParameterPose *> poseParameters() {return mPoseParameters;}
+    std::vector<Parameter *> parameters();
+    std::vector<ParameterString *> stringParameters();
+    std::vector<ParameterVec3 *> vec3Parameters();
+    std::vector<ParameterVec4 *> vec4Parameters();
+    std::vector<ParameterPose *> poseParameters();
 
     /// Register parameter using the streaming operator
     template<class ParameterType>
@@ -250,11 +213,12 @@ protected:
 protected:
     std::vector<osc::PacketHandler *> mPacketHandlers;
     osc::Recv *mServer;
-    std::vector<Parameter *> mParameters;
-    std::vector<ParameterString *> mStringParameters;
-    std::vector<ParameterVec3 *> mVec3Parameters;
-    std::vector<ParameterVec4 *> mVec4Parameters;
-    std::vector<ParameterPose *> mPoseParameters;
+//    std::vector<Parameter *> mParameters;
+//    std::vector<ParameterString *> mStringParameters;
+//    std::vector<ParameterVec3 *> mVec3Parameters;
+//    std::vector<ParameterVec4 *> mVec4Parameters;
+//    std::vector<ParameterPose *> mPoseParameters;
+    std::vector<ParameterMeta *> mParameters;
     std::map<std::string, std::vector<ParameterBundle *>> mParameterBundles;
     std::map<std::string, int> mCurrentActiveBundle;
     std::mutex mParameterLock;

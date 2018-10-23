@@ -301,14 +301,15 @@ void ControlGUI::drawParameterMeta(ParameterMeta *param, string suffix)
     } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
         ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
         drawMenu(p, suffix);
-    }
-    else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
         ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
         drawChoice(p, suffix);
-    }
-    else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
         ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
         drawVec3(p, suffix);
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) == 0) {// ParameterVec3
+        ParameterColor *p = dynamic_cast<ParameterColor *>(param);
+        drawParameterColor(p, suffix);
     }
     else {
         // TODO this check should be performed on registration
@@ -392,7 +393,37 @@ void ControlGUI::drawParameterPose(ParameterPose *pose)
 			pose->set(Pose(currentPos, pose->get().quat()));
 		}
 		ImGui::Spacing();
-	}
+    }
+}
+
+void ControlGUI::drawParameterColor(ParameterColor *param, std::string suffix)
+{
+    Color c = param->get();
+    ImVec4 color = ImColor(c.r, c.g, c.b, c.a);
+
+    static bool alpha_preview = true;
+    static bool alpha_half_preview = false;
+    static bool drag_and_drop = true;
+    static bool options_menu = true;
+    static bool hdr = false;
+
+    bool showAlpha = param->getHint("showAlpha");
+    bool showHsv = param->getHint("hsv");
+
+    int misc_flags = (!showAlpha ? ImGuiColorEditFlags_NoAlpha : 0) | (hdr ? ImGuiColorEditFlags_HDR : 0)
+            | (drag_and_drop ? 0 : ImGuiColorEditFlags_NoDragDrop)
+            | (alpha_half_preview ? ImGuiColorEditFlags_AlphaPreviewHalf : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0))
+            | (options_menu ? 0 : ImGuiColorEditFlags_NoOptions)
+            | (!showHsv ? 0 : ImGuiColorEditFlags_HSV);
+
+//    ImGui::Text("Color widget HSV with Alpha:");
+    if (ImGui::ColorEdit4((param->getName() + suffix).c_str(), (float*)&color, misc_flags)) {
+        c.r = color.x;
+        c.g = color.y;
+        c.b = color.z;
+        c.a = color.w;
+        param->set(c);
+    }
 }
 
 void ControlGUI::drawNav()
