@@ -146,13 +146,21 @@ if (AL_WINDOWS)
   )
 endif (AL_WINDOWS)
 
-if(AL_APP_RUN)
-# TODO debug run
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set (DEBUGGER "gdb" "-ex" "run")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set (DEBUGGER "lldb" "-o run" "-ex ")
+endif()
+
 add_custom_target(${app_name}_run
-                    ${app_name}
-                  DEPENDS ${app_name}
-                  WORKING_DIRECTORY ${app_path}/bin
-                  USES_TERMINAL
-                  )
-message("Running target after build")
-endif(AL_APP_RUN)
+    ./${app_name}
+    DEPENDS ${app_name}
+    WORKING_DIRECTORY ${app_path}/bin
+    USES_TERMINAL
+    )
+add_custom_target(${app_name}_run_debug
+    ${DEBUGGER} ./${app_name}d
+    DEPENDS ${app_name}
+    WORKING_DIRECTORY ${app_path}/bin
+    USES_TERMINAL
+    )

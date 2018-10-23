@@ -138,6 +138,9 @@ TARGET_NAME=$(basename ${APP_FILE_INPUT} | sed 's/\.[^.]*$//')
 if [ ${RUN_APP} == 1 ]; then
   TARGET_NAME=${TARGET_NAME}_run  
 fi
+if [ ${BUILD_TYPE} == "Debug" ]; then
+  TARGET_NAME=${TARGET_NAME}_debug
+fi
 
 echo cmake --build . --target ${TARGET_NAME} --config ${BUILD_TYPE} -- ${BUILD_FLAGS}
 
@@ -157,18 +160,12 @@ fi
 cd ${INITIALDIR}
 cd ${APP_PATH}/bin
 
-if [ "${CURRENT_OS}" = "MACOS" ]; then
-  DEBUGGER="lldb -o run -ex "
-else
-  DEBUGGER="gdb -ex run "
-fi
-
 if [ ${RUN_MPI}  != 0 ]; then
   echo Running MPI
   mpirun --mca btl_tcp_if_include enp1s0 --hostfile ../../mpi_hosts.txt /usr/bin/env DISPLAY=:0 ./"${APP_NAME}${POSTFIX}"
+#elif [ ${BUILD_TYPE} == "Debug" ]; then
+#echo "Running in debugger ${DEBUGGER}"
+#${DEBUGGER} ./"${APP_NAME}${POSTFIX}"
+#else
+#./"${APP_NAME}${POSTFIX}"
 fi
-# elif [ ${BUILD_TYPE} == "Release" ]; then
-#   ./"${APP_NAME}${POSTFIX}"
-# else
-#   ${DEBUGGER} ./"${APP_NAME}${POSTFIX}"
-# fi
