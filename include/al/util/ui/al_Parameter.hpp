@@ -582,7 +582,7 @@ public:
         uint16_t defaultValue = 0,
         std::string prefix = "") :
         ParameterWrapper<uint16_t>(parameterName, Group, defaultValue, prefix)
-    { }
+    {set(0); }
 
     uint16_t operator=(const uint16_t value) { this->set(value); return *this; }
 

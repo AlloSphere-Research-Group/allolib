@@ -124,7 +124,7 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param)
             notifyListeners(p->getFullAddress(), value);
         });
     } else if (strcmp(typeid(param).name(), typeid(Parameter).name()) == 0) {// Parameter
-        std::cout << "Regisnter parameter " << param.getName() << std::endl;
+//        std::cout << "Register parameter " << param.getName() << std::endl;
         Parameter *p = dynamic_cast<Parameter *>(&param);
         p->registerChangeCallback([this, p](float value){
             notifyListeners(p->getFullAddress(), value);
