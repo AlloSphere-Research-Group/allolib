@@ -148,7 +148,7 @@ public:
     /** 
      * @brief Interpolate between current values and new values according to factor
     */
-    void setParameterValues(ParameterMeta *param, std::vector<float> &values, double factor = 1.0);
+    static void setParameterValues(ParameterMeta *param, std::vector<float> &values, double factor = 1.0);
 
 	void morphTo(ParameterStates &parameterStates, float morphTime);
 	void stopMorph();

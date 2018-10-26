@@ -493,7 +493,9 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
     if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) == 0) { // ParameterBool
         ParameterBool *param = dynamic_cast<ParameterBool *>(p);
         // No interpolation for parameter bool. Should we change exactly in the middle?
-        param->set(values[0]);
+        if (factor == 0.0) {
+            param->set(values[0]);
+        }
     } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
         Parameter *param = dynamic_cast<Parameter *>(p);
         float paramValue = param->get();
@@ -502,48 +504,84 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
         if (factor > 0) {
             difference = difference * factor;
         }
-        float newVal = paramValue + difference;
-        param->set(newVal);
+        if (difference != 0.0) {
+            float newVal = paramValue + difference;
+            param->set(newVal);
+        }
     } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter pose
         ParameterPose *param = dynamic_cast<ParameterPose *>(p);
-        //TODO: Add interpolation for ParameterPose
         if (values.size() == 7) {
-            Pose pose(Vec3d(values[0], values[1], values[2]),
-                Quatd(values[3], values[4], values[5], values[6]));
-            param->set(pose);
+            Pose paramValue = param->get();
+            Pose difference;
+           // TODO better interpolation of quaternion
+            Vec3d differenceVec = Vec3d(values[0],values[1],values[2]) - paramValue.vec();
+            Quatd differenceQuat = Quatd(values[3],values[4],values[5],values[6]) - paramValue.quat();
+            //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
+            if (factor > 0) {
+                differenceVec = differenceVec * factor;
+                differenceQuat = differenceQuat * factor;
+            }
+            if (differenceVec != Vec4f() && differenceQuat != Quatd()) {
+                param->set(Pose(paramValue.vec() + differenceVec, paramValue.quat() + differenceQuat));
+            }
         } else {
             std::cout << "Unexpected number of values for " << param->getFullAddress() << std::endl;
         }
     } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter
         ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
-        param->set(values[0]);
+        if (factor == 0) {
+            param->set(values[0]);
+        }
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter
+        ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
+        if (factor == 0) {
+            param->set((uint16_t) values[0]);
+        }
     } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) == 0) {// Parameter
         ParameterVec3 *param = dynamic_cast<ParameterVec3 *>(p);
         if (values.size() == 3) {
-            param->set(Vec3f(values[0], values[1], values[2]));
+            Vec3f paramValue = param->get();
+            Vec3f difference = Vec3f((float *)values.data()) - paramValue;
+            //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
+            if (factor > 0) {
+                difference = difference * factor;
+            }
+            param->set(paramValue + difference);
         } else {
             std::cout << "Unexpected number of values for " << param->getFullAddress() << std::endl;
         }
     }  else if (strcmp(typeid(*p).name(), typeid(ParameterVec4).name()) == 0) {// Parameter
         ParameterVec4 *param = dynamic_cast<ParameterVec4 *>(p);
         if (values.size() == 4) {
-            param->set(Vec4f(values[0], values[1], values[2], values[3]));
+            Vec4f paramValue = param->get();
+            Vec4f difference = Vec4f((float *)values.data()) - paramValue;
+            //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
+            if (factor > 0) {
+                difference = difference * factor;
+            }
+            param->set(paramValue + difference);
         } else {
             std::cout << "Unexpected number of values for " << param->getFullAddress() << std::endl;
         }
     } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter
         ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
-        param->set(values[0]);
+        if (factor == 0) {
+            param->set(values[0]);
+        }
     }  else if (strcmp(typeid(*p).name(), typeid(ParameterColor).name()) == 0) {// Parameter
         ParameterColor *param = dynamic_cast<ParameterColor *>(p);
-        //TODO: Add interpolation for ParameterColor
         if (values.size() == 4) {
-            param->set(Color(values[0], values[1], values[2], values[3]));
+            Color paramValue = param->get();
+            Color difference = Color(values[0],values[1],values[2],values[3]) - paramValue;
+            //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
+            if (factor > 0) {
+                difference = difference * factor;
+            }
+            param->set(paramValue + difference);
         } else {
             std::cout << "Unexpected number of values for " << param->getFullAddress() << std::endl;
         }
     } else {
-        // TODO this check should be performed on registration
         std::cout << "Unsupported Parameter " << p->getFullAddress() << std::endl;
     }
 }
