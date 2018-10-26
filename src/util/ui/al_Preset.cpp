@@ -493,9 +493,7 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
     if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) == 0) { // ParameterBool
         ParameterBool *param = dynamic_cast<ParameterBool *>(p);
         // No interpolation for parameter bool. Should we change exactly in the middle?
-        if (factor == 0.0) {
-            param->set(values[0]);
-        }
+        param->set(values[0]);
     } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
         Parameter *param = dynamic_cast<Parameter *>(p);
         float paramValue = param->get();
