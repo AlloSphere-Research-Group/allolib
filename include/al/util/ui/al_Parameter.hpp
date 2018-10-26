@@ -114,11 +114,33 @@ public:
 		return;
 	}
 
+    void setHint(std::string hintName, float hintValue) {
+        mHints[hintName] = hintValue;
+    }
+
+    float getHint(std::string hintName, bool *exists = nullptr) {
+        float value = 0.0f;
+        if (mHints.find(hintName) != mHints.end()) {
+            value = mHints[hintName];
+            if (exists) {
+                *exists = true;
+            }
+        } else {
+            if (exists) {
+                *exists = false;
+            }
+        }
+
+        return value;
+    }
+
 protected:
 	std::string mFullAddress;
 	std::string mParameterName;
 	std::string mGroup;
 	std::string mPrefix;
+
+    std::map<std::string, float> mHints; // Provide hints for behavior
 };
 
 
@@ -287,26 +309,6 @@ public:
 	operator ParameterType() { return this->get();}
 
 	ParameterWrapper<ParameterType> operator= (const ParameterType value) { this->set(value); return *this; }
-
-        void setHint(std::string hintName, float hintValue) {
-            mHints[hintName] = hintValue;
-        }
-
-        float getHint(std::string hintName, bool *exists = nullptr) {
-            float value = 0.0f;
-            if (mHints.find(hintName) != mHints.end()) {
-                value = mHints[hintName];
-                if (exists) {
-                    *exists = true;
-                }
-            } else {
-                if (exists) {
-                    *exists = false;
-                }
-            }
-
-            return value;
-        }
 	
 protected:
 	ParameterType mMin;
@@ -320,8 +322,7 @@ protected:
 private:
 	std::mutex mMutex;
 	ParameterType mValue;
-	ParameterType mValueCache;
-    std::map<std::string, float> mHints; // Provide hints for behavior
+    ParameterType mValueCache;
 };
 
 

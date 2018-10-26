@@ -216,6 +216,17 @@ public:
     }
 
     /**
+     * @brief Returns true if global controls is enabled for bundle
+     * @param bundleName name of the bundle to query
+     */
+    bool getBundleIsGlobal(std::string bundleName) {
+        if (mBundleGlobal.find(bundleName) != mBundleGlobal.end()) {
+            return mBundleGlobal[bundleName];
+        }
+        return false;
+    }
+
+    /**
      * @brief Set background alpha value
      *
      * 0 for transparent, 1 for opaque
