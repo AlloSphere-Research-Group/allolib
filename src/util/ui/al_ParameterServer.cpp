@@ -308,9 +308,17 @@ void ParameterServer::onMessage(osc::Message &m)
                 p->set(val);
                 // std::cout << "ParameterServer::onMessage" << val << std::endl;
             }
+            // notifyListeners(p->getFullAddress(), p->get());
         } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {// Parameter
             Parameter *p = dynamic_cast<Parameter *>(param);
-            notifyListeners(p->getFullAddress(), p->get());
+            if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "f"){
+                float val;
+                m >> val;
+                // Extract the data out of the packet
+                p->set(val);
+                // std::cout << "ParameterServer::onMessage" << val << std::endl;
+            }
+            // notifyListeners(p->getFullAddress(), p->get());
         } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
             ParameterPose *p = dynamic_cast<ParameterPose *>(param);
             if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "fffffff"){
