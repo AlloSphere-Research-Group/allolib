@@ -159,7 +159,7 @@ void HtmlInterfaceServer::writeHtmlFile(std::vector<Parameter *> parameters, std
 	float height = 0.92;
     for(size_t i = 0; i < parameters.size(); ++i) {
 		code += "var widget_" + std::to_string(i) + " = new Interface.Slider({\n";
-		code += "label: '" + parameters.at(i)->getName() + "',\n";
+        code += "label: '" + parameters.at(i)->displayName() + "',\n";
 		code += "bounds: [" + std::to_string(padding + (i * (padding + width))) + ",";
 		code += std::to_string(padding) + ",";
 		code += std::to_string(width) + ",";

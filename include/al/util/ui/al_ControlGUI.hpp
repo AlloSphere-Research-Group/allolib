@@ -244,6 +244,28 @@ public:
     static GUIMarker endGroup() { return GUIMarker(GUIMarker::MarkerType::GROUP_END);}
     static GUIMarker separator() { return GUIMarker(GUIMarker::MarkerType::SEPARATOR);}
 
+    static void drawParameterMeta(ParameterMeta *param, std::string suffix);
+    static void drawParameter(Parameter *param, std::string suffix);
+    static void drawParameterBool(ParameterBool *param, std::string suffix);
+    static void drawParameterPose(ParameterPose *param, std::string suffix);
+    static void drawParameterColor(ParameterColor *param, std::string suffix);
+    static void drawMenu(ParameterMenu *param, std::string suffix);
+    static void drawChoice(ParameterChoice *param, std::string suffix);
+    static void drawVec3(ParameterVec3 *param, std::string suffix);
+    static void drawVec4(ParameterVec4 *param, std::string suffix);
+
+    static void drawParameterMeta(std::vector<ParameterMeta *> params, std::string suffix, int index = 0);
+    static void drawParameter(std::vector<Parameter *> params, std::string suffix, int index = 0);
+    static void drawParameterBool(std::vector<ParameterBool *> params, std::string suffix, int index = 0);
+    static void drawParameterPose(std::vector<ParameterPose *> params, std::string suffix, int index = 0);
+    static void drawParameterColor(std::vector<ParameterColor *> params, std::string suffix, int index = 0);
+    static void drawMenu(std::vector<ParameterMenu *> params, std::string suffix, int index = 0);
+    static void drawChoice(std::vector<ParameterChoice *> params, std::string suffix, int index = 0);
+    static void drawVec3(std::vector<ParameterVec3 *> params, std::string suffix, int index = 0);
+    static void drawVec4(std::vector<ParameterVec4 *> params, std::string suffix, int index = 0);
+
+    static void drawDynamicScene(DynamicScene *scene, std::string suffix);
+
 protected:
 
 private:
@@ -294,34 +316,14 @@ private:
         if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
         *out_text = vector.at(idx).c_str();
         return true;
-    };
+    }
 
     void drawPresetHandler();
     void drawSequenceRecorder();
 
-    void drawParameterMeta(ParameterMeta *param, std::string suffix);
-	void drawParameter(Parameter *param, std::string suffix);
-	void drawParameterBool(ParameterBool *param, std::string suffix);
-    void drawParameterPose(ParameterPose *param, std::string suffix);
-    void drawParameterColor(ParameterColor *param, std::string suffix);
-    void drawMenu(ParameterMenu *param, std::string suffix);
-    void drawChoice(ParameterChoice *param, std::string suffix);
-    void drawVec3(ParameterVec3 *param, std::string suffix);
-    void drawVec4(ParameterVec4 *param, std::string suffix);
-
-    void drawParameterMeta(std::vector<ParameterMeta *> params, std::string suffix);
-    void drawParameter(std::vector<Parameter *> params, std::string suffix);
-    void drawParameterBool(std::vector<ParameterBool *> params, std::string suffix);
-    void drawParameterPose(std::vector<ParameterPose *> params, std::string suffix);
-    void drawParameterColor(std::vector<ParameterColor *> params, std::string suffix);
-    void drawMenu(std::vector<ParameterMenu *> params, std::string suffix);
-    void drawChoice(std::vector<ParameterChoice *> params, std::string suffix);
-    void drawVec3(std::vector<ParameterVec3 *> params, std::string suffix);
-    void drawVec4(std::vector<ParameterVec4 *> params, std::string suffix);
+    void drawBundleGroup(std::vector<ParameterBundle *> bundles, std::string suffix);
 
     void drawNav();
-    void drawDynamicScene(DynamicScene *scene, std::string suffix);
-    void drawBundleGroup(std::vector<ParameterBundle *> bundles, std::string suffix);
 
 };
 

@@ -466,7 +466,8 @@ void ParameterServer::print()
     std::cout << "Parameter server listening on " << mServer->address()
               << ":" << mServer->port() << std::endl;
     for (ParameterMeta *p:mParameters) {
-        std::cout << "Parameter " << p->getName() << "(" << typeid(*p).name() << ") : " <<  p->getFullAddress() << std::endl;
+        std::cout << "Parameter " << p->getName() << "(" << p->displayName() << ")"
+                  << "[" << typeid(*p).name() << "] : " <<  p->getFullAddress() << std::endl;
     }
     if (mOSCSenders.size() > 0) {
         std::cout << "Registered listeners: " << std::endl;

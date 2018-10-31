@@ -123,4 +123,5 @@ ParameterMeta::ParameterMeta(std::string parameterName, std::string group, std::
         mFullAddress = "/";
     }
     mFullAddress += mParameterName;
+    mDisplayName = mParameterName;
 }
