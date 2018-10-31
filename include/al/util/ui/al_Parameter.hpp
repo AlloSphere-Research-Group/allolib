@@ -91,6 +91,16 @@ public:
 	*/
 	std::string getName(){ return mParameterName; }
 
+    /**
+    * @brief returns the text that should accompany parameters when displayed
+    */
+    std::string displayName(){ return mDisplayName; }
+
+    /**
+    * @brief sets the text that should accompany parameters when displayed
+    */
+    void displayName(std::string displayName){ mDisplayName = displayName; }
+
 	/**
 	* @brief getGroup returns the name of the group for the parameter
 	*/
@@ -110,7 +120,7 @@ public:
 	 * 
 	 * Will only have effect on parameters that have a single internal value and have implemented this function
 	 */
-	virtual void fromFloat(float value) {
+    virtual void fromFloat(float value) {
 		return;
 	}
 
@@ -137,6 +147,7 @@ public:
 protected:
 	std::string mFullAddress;
 	std::string mParameterName;
+    std::string mDisplayName;
 	std::string mGroup;
 	std::string mPrefix;
 
@@ -177,7 +188,7 @@ public:
 	
 	ParameterWrapper(const ParameterWrapper& param);
 
-	virtual ~ParameterWrapper();
+    virtual ~ParameterWrapper();
 	
 	/**
 	 * @brief set the parameter's value
@@ -228,9 +239,9 @@ public:
 	 */
 	inline void setLocking(ParameterType value)
 	{
-		mMutex.lock();
+        mMutex->lock();
 		mValue = value;
-		mMutex.unlock();
+        mMutex->unlock();
 	}
 
 	/**
@@ -320,7 +331,7 @@ protected:
 	// std::vector<void *> mCallbackUdata;
 
 private:
-	std::mutex mMutex;
+    std::mutex *mMutex; // pointer to avoid having to explicitly declare copy/move
 	ParameterType mValue;
     ParameterType mValueCache;
 };
@@ -662,6 +673,7 @@ public:
 template<class ParameterType>
 ParameterWrapper<ParameterType>::~ParameterWrapper()
 {
+    delete mMutex;
 }
 
 template<class ParameterType>
@@ -672,6 +684,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName, std
 {
 	mValue = defaultValue;
 	mValueCache = defaultValue;
+    mMutex = new std::mutex;
 }
 
 
@@ -683,6 +696,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName, std
 {
 	mMin = min;
 	mMax = max;
+    mMutex = new std::mutex;
 }
 
 template<class ParameterType>
@@ -694,15 +708,16 @@ ParameterWrapper<ParameterType>::ParameterWrapper(const ParameterWrapper<Paramet
 	mProcessCallback = param.mProcessCallback;
 	// mProcessUdata = param.mProcessUdata;
 	mCallbacks = param.mCallbacks;
+    mMutex = new std::mutex;
 	// mCallbackUdata = param.mCallbackUdata;
 }
 
 template<class ParameterType>
 ParameterType ParameterWrapper<ParameterType>::get()
 {
-	if (mMutex.try_lock()) {
+    if (mMutex->try_lock()) {
 		mValueCache = mValue;
-		mMutex.unlock();
+        mMutex->unlock();
 	}
 	return mValueCache;
 }
