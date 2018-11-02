@@ -52,6 +52,7 @@ public:
 			if(h.hit && p == h.p) p->hover = true;
 			else p->hover = false;
 		}
+                return true;
 	}
 	bool pick(Rayd &r){
 		Hit h = intersect(r);
@@ -63,6 +64,7 @@ public:
 				selectOffset = p->pose.pos() - r(h.t)*p->scale;
 			} else p->selected = false;
 		}
+                return true;
 	}
 	bool drag(Rayd &r, int dy){
 		// Hit h = intersect(r);
@@ -87,11 +89,13 @@ public:
 		    	} 
 			}
 		}
+                return true;
 	}
 	bool unpick(Rayd &r){
 		for(Pickable *p : mPickables){
 			if(!p->hover) p->selected = false;
 		}
+                return true;
 	}
 
 	void onMouseMove(Graphics &g, const Mouse& m, int w, int h){
