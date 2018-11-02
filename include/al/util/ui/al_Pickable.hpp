@@ -273,18 +273,18 @@ struct Pickable : PickableBase {
   }
 
   /// intersect ray with pickable BoundingBox
-  double intersectBB(Rayd &ray){
+  double intersectBB(Rayd ray){
     Rayd r = transformRayLocal(ray);
     return r.intersectBox(bb.cen, bb.dim);
   }
 
   /// intersect ray with pickable AxisAlignedBoundingBox
-  double intersectAABB(Rayd &ray){
+  double intersectAABB(Rayd ray){
     return ray.intersectBox(aabb.cen, aabb.dim);
   }
 
   /// intersect ray with bounding sphere
-  float intersectBoundingSphere(Rayd &ray){
+  float intersectBoundingSphere(Rayd ray){
     return ray.intersectSphere( transformVecWorld(bb.cen), (bb.dim*scale).mag()/2.0);
   }
 
