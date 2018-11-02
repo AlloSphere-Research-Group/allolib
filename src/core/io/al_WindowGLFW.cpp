@@ -96,10 +96,10 @@ class WindowImpl {
         button = Mouse::LEFT;
         break;
       case GLFW_MOUSE_BUTTON_RIGHT:
-        button = Mouse::MIDDLE;
+        button = Mouse::RIGHT;
         break;
       case GLFW_MOUSE_BUTTON_MIDDLE:
-        button = Mouse::RIGHT;
+        button = Mouse::MIDDLE;
         break;
       default:
         button = Mouse::EXTRA;  // unrecognized button
