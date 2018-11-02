@@ -103,10 +103,14 @@ public:
 		pick(r);
 	}
 	void onMouseDrag(Graphics &g, const Mouse& m, int w, int h){
+            if (m.right()) mRotating = true;
+            else if (m.middle()) mScaling = true;
 		Rayd r = getPickRay(g, m.x(), m.y(), w, h);
 		drag(r,m.dy());
 	}
 	void onMouseUp(Graphics &g, const Mouse& m, int w, int h){
+            mRotating = false;
+            mScaling = false;
 		Rayd r = getPickRay(g, m.x(), m.y(), w, h);
 		unpick(r);
 	}
@@ -114,18 +118,18 @@ public:
 	void onKeyDown(const Keyboard &k){
 		switch (k.key()) {
           // case 't': mTranslating = true; break;
-          case 'r': mRotating = true; break;
+//          case 'r': mRotating = true; break;
           case 'z': mZooming = true; break;
-          case 's': mScaling = true; break;
+//          case 's': mScaling = true; break;
           default: break;
     	}
 	}
 	void onKeyUp(const Keyboard &k){
 		switch (k.key()) {
           // case 't': mTranslating = false; break;
-          case 'r': mRotating = false; break;
+//          case 'r': mRotating = false; break;
           case 'z': mZooming = false; break;
-          case 's': mScaling = false; break;
+//          case 's': mScaling = false; break;
           default: break;
     	}
 	}
