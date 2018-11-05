@@ -108,7 +108,7 @@ foreach(include_dir IN LISTS app_include_dirs)
     if (IS_ABSOLUTE ${include_dir})
         target_include_directories(${app_name} PRIVATE ${include_dir})
     else()
-        target_include_directories(${app_name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../../../${include_dir})
+        target_include_directories(${app_name} PRIVATE ${app_path}/${include_dir})
     endif()
 endforeach(include_dir IN app_include_dirs)
 

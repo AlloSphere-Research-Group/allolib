@@ -1,5 +1,14 @@
 
-message("Flags. cmake")
+# Other useful variable available are:
+
+message("binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
+message("file full path: ${file_full_path}")
+message("app path: ${app_path}")
+message("app name: ${app_name}")
+message("al path: ${al_path}")
+
+# You can set verbose cmake messages:
+set(AL_VERBOSE_OUTPUT 1)
 
 # other directories to include. You can use relative paths to the
 # source file being built.
