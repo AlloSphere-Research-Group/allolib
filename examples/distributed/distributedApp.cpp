@@ -57,7 +57,7 @@ public:
 #ifdef AL_BUILD_MPI
         // Print the random numbers on each process
         printf("Local sum for process %d - %f, avg = %f\n",
-               world_rank, local_sum, local_sum / num_elements_per_proc);
+               rank(), local_sum, local_sum / num_elements_per_proc);
 
         // Reduce all of the local sums into the global sum
 
@@ -65,9 +65,9 @@ public:
                    MPI_COMM_WORLD);
 
         // Print the result
-        if (world_rank == 0) {
+        if (isMaster()) {
           printf("Total sum = %f, avg = %f\n", global_sum,
-                 global_sum / (world_size * num_elements_per_proc));
+                 global_sum / (rank() * num_elements_per_proc));
         }
 #else
     // If MPI not available, just use local sum

@@ -167,6 +167,14 @@ public:
 
   Role role() {return mRole;}
 
+  int rank() {
+#ifdef AL_BUILD_MPI
+      return world_rank;
+#else
+      return 0;
+#endif
+  }
+
   std::string roleName() {
       switch (mRole) {
       case ROLE_SIMULATOR:
