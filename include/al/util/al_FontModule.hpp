@@ -31,6 +31,16 @@ struct FontModule {
     // TODO: vertical align? might need to change font_module implementation
     //       to advanved interface of stbtt
     void align(TEXT_ALIGN horizontalAlign);
+
+    void loadDefault(float size) {
+#ifdef AL_WINDOWS
+        load("C:/Windows/Fonts/arial.ttf", size);
+#elif defined(AL_OSX)
+        load("/Library/Fonts/arial.ttf", size);
+#elif defined (AL_LINUX)
+        load("/usr/share/fonts/truetype/freefont/FreeSans.ttf", size);
+#endif
+    }
 };
 
 }
