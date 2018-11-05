@@ -22,16 +22,15 @@ using namespace al;
 class MyApp : public App {
 public:
 
-    void onCreate () {
+    void onCreate ()  override {
         drawing.init();
     }
 
-    void onAnimate(double dt) {
+    void onAnimate(double dt) override {
         drawing.tick(width(), height());
     }
 
-    void onDraw (Graphics& g)
-    {
+    void onDraw (Graphics& g) override {
         // This unused variable will not report a warning because of the
         // compiler flags passed in app_compile_flags
         int unused = 42;
