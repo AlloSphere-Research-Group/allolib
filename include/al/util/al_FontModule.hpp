@@ -22,6 +22,8 @@ struct FontModule {
     //       not all chars fitting in the font texture >> TODO
     bool load(const char* filename, float size = 128); 
 
+    bool load(std::string &filename, float size = 128); 
+
     void render(Graphics& g, const std::string text, float height = 1);
 
     // height: height of text in OpenGL space units
@@ -59,6 +61,10 @@ inline bool al::FontModule::load(const char* filename, float size) {
     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
     fontTex.unbind_temp();
     return true;
+}
+
+inline bool al::FontModule::load(std::string &filename, float size) {
+    return al::FontModule::load(filename.c_str());
 }
 
 inline void al::FontModule::render(Graphics& g, const std::string text, float height) {
