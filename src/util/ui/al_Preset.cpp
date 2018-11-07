@@ -306,32 +306,45 @@ std::string PresetHandler::getPresetName(int index)
 	return mPresetsMap[index];
 }
 
+int PresetHandler::getCurrentPresetIndex() {
+    std::map<int, std::string> presets = availablePresets();
+    int current = -1;
+    std::string currentPresetName = getCurrentPresetName();
+    for (auto preset: presets) {
+        if (preset.second == currentPresetName) {
+            current = preset.first;
+            break;
+        }
+    }
+    return current;
+}
+
 float PresetHandler::getMorphTime()
 {
-	return mMorphTime.get();
+    return mMorphTime.get();
 }
 
 void PresetHandler::setMorphTime(float time)
 {
-	mMorphTime.set(time);
+    mMorphTime.set(time);
 }
 
 void PresetHandler::stopMorph()
 {
-	{
-		if (mMorphRemainingSteps.load() >= 0) {
-			mMorphRemainingSteps.store(-1);
-		}
-	}
-	{
-		std::lock_guard<std::mutex> lk(mTargetLock);
-		mMorphConditionVar.notify_all();
-	}
+    {
+        if (mMorphRemainingSteps.load() >= 0) {
+            mMorphRemainingSteps.store(-1);
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lk(mTargetLock);
+        mMorphConditionVar.notify_all();
+    }
 }
 
 std::string PresetHandler::getCurrentPath()
 {
-	std::string relPath = getRootPath() + mSubDir;
+    std::string relPath = getRootPath() + mSubDir;
 	if (relPath.back() != '/') {
 		relPath += "/";
 	}

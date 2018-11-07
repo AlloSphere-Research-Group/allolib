@@ -157,6 +157,8 @@ public:
 	std::string getPresetName(int index);
 	std::string getCurrentPresetName() {return mCurrentPresetName; }
 
+    int getCurrentPresetIndex();
+
 	float getMorphTime();
 	void setMorphTime(float time);
 
