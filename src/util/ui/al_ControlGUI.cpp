@@ -204,15 +204,8 @@ void ControlGUI::drawPresetHandler()
 {
      if (ImGui::CollapsingHeader("Presets", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
 
-        std::map<int, std::string> presets = mPresetHandler->availablePresets();
-        int selection = -1;
-        std::string currentPresetName = mPresetHandler->getCurrentPresetName();
-        for (auto preset: presets) {
-            if (preset.second == currentPresetName) {
-                selection = preset.first;
-                break;
-            }
-        }
+        int selection = mPresetHandler->getCurrentPresetIndex();
+        std::string currentPresetName =mPresetHandler->getCurrentPresetName();
 
         static std::string enteredText;
         char buf1[64];
@@ -419,7 +412,7 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
 void ControlGUI::drawParameter(std::vector<Parameter *> params, string suffix, int index)
 {
     if (params.size() == 0) return;
-    assert(index < params.size());
+    assert(index < (int) params.size());
     auto &param = params[index];
     if (param->getHint("intcombo") == 1.0) {
         int value = (int)param->get();
@@ -459,7 +452,7 @@ void ControlGUI::drawParameter(std::vector<Parameter *> params, string suffix, i
 void ControlGUI::drawParameterBool(std::vector<ParameterBool *> params, string suffix, int index)
 {
     if (params.size() == 0) return;
-    assert(index < params.size());
+    assert(index < (int) params.size());
     auto &param = params[index];
     bool changed;
     if (param->getHint("latch") == 1.0) {
@@ -488,7 +481,7 @@ void ControlGUI::drawParameterBool(std::vector<ParameterBool *> params, string s
 void ControlGUI::drawParameterPose(std::vector<ParameterPose *> params, std::string suffix, int index)
 {
     if (params.size() == 0) return;
-    assert(index < params.size());
+    assert(index < (int) params.size());
     auto &pose = params[index];
     if (ImGui::CollapsingHeader(("Pose:" + pose->displayName()).c_str(), ImGuiTreeNodeFlags_CollapsingHeader)) {
         Vec3d currentPos = pose->get().pos();
@@ -520,7 +513,7 @@ void ControlGUI::drawParameterPose(std::vector<ParameterPose *> params, std::str
 void ControlGUI::drawParameterColor(std::vector<ParameterColor *> params, string suffix, int index)
 {
     if (params.size() == 0) return;
-    assert(index < params.size());
+    assert(index < (int) params.size());
     auto &param = params[index];
     Color c = param->get();
     ImVec4 color = ImColor(c.r, c.g, c.b, c.a);
@@ -555,7 +548,7 @@ void ControlGUI::drawParameterColor(std::vector<ParameterColor *> params, string
 void ControlGUI::drawMenu(std::vector<ParameterMenu *> params, string suffix, int index)
 {
     if (params.size() == 0) return;
-    assert(index < params.size());
+    assert(index < (int) params.size());
     auto &param = params[index];
     int value = param->get();
     auto values = param->getElements();
@@ -571,7 +564,7 @@ void ControlGUI::drawMenu(std::vector<ParameterMenu *> params, string suffix, in
 void ControlGUI::drawChoice(std::vector<ParameterChoice *> params, string suffix, int index)
 {
     if (params.size() == 0) return;
-    assert(index < params.size());
+    assert(index < (int) params.size());
     auto &param = params[index];
     uint16_t value = param->get();
     auto elements = param->getElements();
@@ -593,7 +586,7 @@ void ControlGUI::drawChoice(std::vector<ParameterChoice *> params, string suffix
 void ControlGUI::drawVec3(std::vector<ParameterVec3 *> params, string suffix, int index)
 {
     if (params.size() == 0) return;
-    assert(index < params.size());
+    assert(index < (int) params.size());
     auto &param = params[index];
     if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         Vec3f currentValue = param->get();
@@ -647,7 +640,7 @@ void ControlGUI::drawVec3(std::vector<ParameterVec3 *> params, string suffix, in
 void ControlGUI::drawVec4(std::vector<ParameterVec4 *> params, string suffix, int index)
 {
     if (params.size() == 0) return;
-    assert(index < params.size());
+    assert(index < (int) params.size());
     auto &param = params[index];
     if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         Vec4f currentValue = param->get();
