@@ -78,6 +78,16 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, Pose value)
     mListenerLock.unlock();
 }
 
+void OSCNotifier::notifyListeners(std::string OSCaddress, Color value)
+{
+    mListenerLock.lock();
+    for(osc::Send *sender: mOSCSenders) {
+        sender->send(OSCaddress, float(value.r), float(value.g), float(value.b));
+//		std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
+    }
+    mListenerLock.unlock();
+}
+
 // ParameterServer ------------------------------------------------------------
 
 ParameterServer::ParameterServer(std::string oscAddress, int oscPort)
@@ -306,7 +316,7 @@ void ParameterServer::onMessage(osc::Message &m)
     for (auto &bundles:mParameterBundles) {
        auto oscAddress = m.addressPattern();
         std::string bundleName = oscAddress.substr(1, oscAddress.find("/", 1) - 1);
-        std::cout << "For bundle " << bundleName << " checking " << bundles.first <<std::endl;
+//        std::cout << "For bundle " << bundleName << " checking " << bundles.first <<std::endl;
         // TODO there might be a clash if the bundle name matches a parameter name. Should we worry?
         if (bundleName == bundles.first) { // If OSC address starts with bundle name, we are addressing specific instances of the bundle
             std::string bundleIndex = oscAddress.substr(bundleName.size() + 2, oscAddress.find("/", bundleName.size() + 3) - (bundleName.size() + 2));
@@ -314,17 +324,17 @@ void ParameterServer::onMessage(osc::Message &m)
             auto is_number = [](const std::string& s) {
                 return !s.empty() && std::find_if(s.begin(),
                     s.end(), [](char c) { return !std::isdigit(c); }) == s.end(); };
-            std::cout << "Addressing bundle index " << bundleIndex << std::endl;
+//            std::cout << "Addressing bundle index " << bundleIndex << std::endl;
             if (is_number(bundleIndex)) {
                 unsigned int index = std::stoul(bundleIndex);
 
                 if (index >= 0 && index < bundles.second.size()) {
                     std::string subAddress = oscAddress.substr(bundleName.size() + bundleIndex.size() + 2);
-                    std::cout << "Address for bundle " << bundleName <<  " sub addr " << subAddress << std::endl;
+//                    std::cout << "Address for bundle " << bundleName <<  " sub addr " << subAddress << std::endl;
                     for (ParameterMeta *p: bundles.second[index]->parameters()) {
                         if (setParameterValueFromMessage(p, subAddress, m)) {
                             m.resetStream();
-                            std::cout << " match " << p->getFullAddress() <<std::endl;
+//                            std::cout << " match " << p->getFullAddress() <<std::endl;
                         }
                     }
                 }
@@ -344,7 +354,7 @@ void ParameterServer::onMessage(osc::Message &m)
             }
 
         } else { // We will try to pass the values directly to the current bundle
-            std::cout << bundleName << " ... " << mCurrentActiveBundle[bundles.first] << " ;;;; " << mParameterBundles[bundles.first].size() << std::endl;
+//            std::cout << bundleName << " ... " << mCurrentActiveBundle[bundles.first] << " ;;;; " << mParameterBundles[bundles.first].size() << std::endl;
             for (ParameterMeta *p: mParameterBundles[bundles.first].at(mCurrentActiveBundle[bundles.first])->parameters()) {
 
                 if (setParameterValueFromMessage(p, m.addressPattern(), m)) {
@@ -456,31 +466,14 @@ void ParameterServer::registerOSCListener(osc::PacketHandler *handler)
 void ParameterServer::notifyAll()
 {
     for(ParameterMeta *param: mParameters) {
-        if (strcmp(typeid(*param).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
-            ParameterBool *p = dynamic_cast<ParameterBool *>(param);
-            notifyListeners(p->getFullAddress(), p->get());
-        } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {// Parameter
-            Parameter *p = dynamic_cast<Parameter *>(param);
-            notifyListeners(p->getFullAddress(), p->get());
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
-//            ParameterPose *p = dynamic_cast<ParameterPose *>(param);
-
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
-//            ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
-
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
-//            ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
-
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
-//            ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
-
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) == 0) {// ParameterVec3
-//            ParameterColor *p = dynamic_cast<ParameterColor *>(param);
-
-        }
-        else {
-            // TODO this check should be performed on registration
-            std::cout << "Unsupported Parameter type for display" << std::endl;
+        notifyAll(param, param->getFullAddress());
+    }
+    for(auto bundleGroup: mParameterBundles) {
+        for (ParameterBundle *bundle: bundleGroup.second) {
+            std::string prefix = bundle->bundlePrefix();
+            for (ParameterMeta *param: bundle->parameters()) {
+                notifyAll(param, prefix + param->getFullAddress());
+            }
         }
     }
 }
@@ -495,21 +488,32 @@ void ParameterServer::sendAllParameters(std::string IPaddress, int oscPort)
         } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {// Parameter
             Parameter *p = dynamic_cast<Parameter *>(param);
             sender.send(p->getFullAddress(), p->get());
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
-//            ParameterPose *p = dynamic_cast<ParameterPose *>(param);
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
+            ParameterPose *p = dynamic_cast<ParameterPose *>(param);
+            Pose pose = p->get();
+            Quatd &q = pose.quat();
+            sender.send(p->getFullAddress(), float(pose.x()), float(pose.y()), float(pose.z()),
+                        float(q.w), float(q.x), float(q.y), float(q.z));
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
+            ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
+            sender.send(p->getFullAddress(), int(p->get()));
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
+            ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
+            sender.send(p->getFullAddress(), int(p->get()));
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
+            ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
+            Vec3f vec = p->get();
+            sender.send(p->getFullAddress(), vec.x, vec.y, vec.z);
 
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
-//            ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
+        }  else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
+            ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
+            Vec4f vec = p->get();
+            sender.send(p->getFullAddress(), vec.x, vec.y, vec.z, vec.w);
 
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
-//            ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
-
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
-//            ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
-
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) == 0) {// ParameterVec3
-//            ParameterColor *p = dynamic_cast<ParameterColor *>(param);
-
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) == 0) {// ParameterColor
+            ParameterColor *p = dynamic_cast<ParameterColor *>(param);
+            Color c = p->get();
+            sender.send(p->getFullAddress(), c.r, c.g, c.b);
         }
         else {
             // TODO this check should be performed on registration
@@ -666,4 +670,37 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param, std::st
         std::cout << "Unsupported registered Parameter on message " << typeid(*param).name() << std::endl;
     }
     return false;
+}
+
+void ParameterServer::notifyAll(ParameterMeta *param, std::string address)
+{
+    if (strcmp(typeid(*param).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
+        ParameterBool *p = dynamic_cast<ParameterBool *>(param);
+        notifyListeners(address, p->get());
+    } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {// Parameter
+        Parameter *p = dynamic_cast<Parameter *>(param);
+        notifyListeners(address, p->get());
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
+        ParameterPose *p = dynamic_cast<ParameterPose *>(param);
+        notifyListeners(address, p->get());
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
+        ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
+        notifyListeners(address, p->get());
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
+        ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
+        notifyListeners(address, p->get());
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
+        ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
+        notifyListeners(address, p->get());
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterVec4).name()) == 0) {// ParameterVec4
+        ParameterVec4 *p = dynamic_cast<ParameterVec4 *>(param);
+        notifyListeners(address, p->get());
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) == 0) {// ParameterColor
+        ParameterColor *p = dynamic_cast<ParameterColor *>(param);
+        notifyListeners(address, p->get());
+    }
+    else {
+        // TODO this check should be performed on registration
+        std::cout << "Unsupported Parameter type for display" << std::endl;
+    }
 }

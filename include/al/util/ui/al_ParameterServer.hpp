@@ -85,6 +85,7 @@ public:
     void notifyListeners(std::string OSCaddress, Vec3f value);
     void notifyListeners(std::string OSCaddress, Vec4f value);
     void notifyListeners(std::string OSCaddress, Pose value);
+    void notifyListeners(std::string OSCaddress, Color value);
 
 protected:
     std::mutex mListenerLock;
@@ -211,6 +212,8 @@ protected:
     static void changePoseCallback(Pose value, void *sender, void *userData, void *blockThis);
 
     bool setParameterValueFromMessage(ParameterMeta *param, std::string address, osc::Message &m);
+
+    void notifyAll(ParameterMeta *param, std::string address);
 
 protected:
     std::vector<osc::PacketHandler *> mPacketHandlers;

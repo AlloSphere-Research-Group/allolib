@@ -51,7 +51,7 @@ void ParameterBundle::addParameter(ParameterMeta *parameter) {
         std::cout << "Register parameter " << parameter->getName() << std::endl;
         Parameter *p = dynamic_cast<Parameter *>(parameter);
         p->registerChangeCallback([this, p](float value){
-            std::cout << "Changed  " << p->getName() << std::endl;
+//            std::cout << "Changed  " << p->getName() << std::endl;
             for (OSCNotifier *n: mNotifiers) {
                 n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
             }
