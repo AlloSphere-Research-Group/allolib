@@ -169,15 +169,30 @@ struct TomlLoader
     return get<bool>(table, key);
   }
 
-  template<typename T>
-  std::vector<T> getVector(const std::string& key) {
-    auto vals = root->get_array_of<T>(key);
-    std::vector<T> outVector;
-    for (const T &val: *vals) {
-      outVector.push_back(val);
-    }
-    return outVector;
-  }
+ template<typename T>
+ std::vector<T> getVector(const std::string& key) {
+     if (!root) {
+         throw std::runtime_error("al::TomlLoader::get, toml file not set");
+     }
+     auto vals = root->get_array_of<T>(key);
+     std::vector<T> outVector;
+     for (const T &val: *vals) {
+         outVector.push_back(val);
+     }
+     return outVector;
+ }
+
+ template<typename T>
+void setVector(const std::string& key, const std::vector<T> &vec) {
+     if (!root) {
+         throw std::runtime_error("al::TomlLoader::get, toml file not set");
+     }
+     auto array = cpptoml::make_array();
+     for (auto &elem: vec) {
+         array->push_back(elem);
+     }
+     root->insert(key, array);
+ }
 
 };
 
