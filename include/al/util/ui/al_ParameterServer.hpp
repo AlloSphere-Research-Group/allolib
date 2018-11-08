@@ -210,6 +210,8 @@ protected:
     static void changeVec4Callback(Vec4f value, void *sender, void *userData, void *blockThis);
     static void changePoseCallback(Pose value, void *sender, void *userData, void *blockThis);
 
+    bool setParameterValueFromMessage(ParameterMeta *param, std::string address, osc::Message &m);
+
 protected:
     std::vector<osc::PacketHandler *> mPacketHandlers;
     osc::Recv *mServer;
