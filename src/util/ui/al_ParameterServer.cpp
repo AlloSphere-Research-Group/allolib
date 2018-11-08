@@ -163,10 +163,8 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param)
             notifyListeners(p->getFullAddress(), valueVec);
         });
     } else {
-        // TODO this check should be performed on registration
-        std::cout << "Unsupported Parameter type for display" << std::endl;
+        std::cout << "Unsupported Parameter type for server on registration" << std::endl;
     }
-
 
     mListenerLock.unlock();
     return *this;
@@ -179,6 +177,8 @@ ParameterServer &ParameterServer::registerParameterBundle(ParameterBundle &bundl
         mCurrentActiveBundle[bundle.name()] = 0;
     }
     mParameterBundles[bundle.name()].push_back(&bundle);
+    bundle.addNotifer(this);
+
     return *this;
 }
 
@@ -350,12 +350,20 @@ void ParameterServer::onMessage(osc::Message &m)
                 currentPose.pos().z= z;
                 p->set(currentPose);
             }
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
-//            ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
-
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
-//            ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
-
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
+            ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
+            if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "i"){
+                int value;
+                m >> value;
+                p->set(value);
+            }
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
+            ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
+            if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "i"){
+                int value;
+                m >> value;
+                p->set(value);
+            }
         } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
             ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
             if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "fff"){
@@ -370,17 +378,22 @@ void ParameterServer::onMessage(osc::Message &m)
                 m >> a >> b >> c >> d;
                 p->set(Vec4f(a,b,c,d));
             }
-//        } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) == 0) {// ParameterColor
-//            ParameterColor *p = dynamic_cast<ParameterColor *>(param);
-
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) == 0) {// ParameterColor
+            ParameterColor *p = dynamic_cast<ParameterColor *>(param);
+            if(m.addressPattern() == p->getFullAddress() && m.typeTags() == "ffff"){
+                float a,b,c,d;
+                m >> a >> b >> c >> d;
+                p->set(Color(a,b,c,d));
+            }
         } else {
             // TODO this check should be performed on registration
-            std::cout << "Unsupported Parameter type for display" << std::endl;
+            std::cout << "Unsupported registered Parameter on message " << typeid(*param).name() << std::endl;
         }
     }
     for (auto &bundles:mParameterBundles) {
        auto oscAddress = m.addressPattern();
         std::string bundleName = oscAddress.substr(1, oscAddress.find("/", 1) - 1);
+        std::cout << "For bundle " << bundleName << " checking " << bundles.first <<std::endl;
         // TODO there might be a clash if the bundle name matches a parameter name. Should we worry?
         if (bundleName == bundles.first) { // If OSC address starts with bundle name, we are addressing specific instances of the bundle
             std::string bundleIndex = oscAddress.substr(bundleName.size() + 2, oscAddress.find("/", bundleName.size() + 3) - (bundleName.size() + 2));
@@ -388,10 +401,13 @@ void ParameterServer::onMessage(osc::Message &m)
             auto is_number = [](const std::string& s) {
                 return !s.empty() && std::find_if(s.begin(),
                     s.end(), [](char c) { return !std::isdigit(c); }) == s.end(); };
+            std::cout << "Addressing bundle index " << bundleIndex << std::endl;
             if (is_number(bundleIndex)) {
                 unsigned int index = std::stoul(bundleIndex);
-                if (index < bundles.second.size()) {
+
+                if (index >= 0 && index < bundles.second.size()) {
                     std::string subAddress = oscAddress.substr(bundleName.size() + bundleIndex.size() + 2);
+                    std::cout << "Address for bundle " << bundleName <<  " sub addr " << subAddress << std::endl;
                     for (ParameterMeta *p: bundles.second[index]->parameters()) {
                         if (p->getFullAddress() == subAddress){
                             if (strcmp(typeid(*p).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
@@ -400,11 +416,13 @@ void ParameterServer::onMessage(osc::Message &m)
                                 static_cast<ParameterBool *>(p)->set(value);
                             } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
                                 float value;
+                                m.print();
                                 m >> value;
                                 static_cast<Parameter *>(p)->set(value);
                             } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
                             } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
                             } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
+                            } else if (strcmp(typeid(*p).name(), typeid(ParameterVec4).name()) == 0) {// ParameterVec3
                             } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
                             } else {
 //                                 TODO this check should be performed on registration

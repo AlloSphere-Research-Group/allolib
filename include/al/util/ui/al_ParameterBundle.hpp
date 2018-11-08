@@ -49,6 +49,8 @@
 namespace al
 {
 
+class OSCNotifier;
+
 class ParameterBundle
 {
 public:
@@ -90,12 +92,16 @@ public:
     ParameterBundle &operator <<(ParameterMeta *parameter);
     ParameterBundle &operator <<(ParameterMeta &parameter);
 
+    void addNotifer(OSCNotifier *notifier) {mNotifiers.push_back(notifier);}
+
 private:
+
     static int mBundleCounter;
     int mBundleIndex = -1;
     std::string mBundleName;
 
     std::vector<ParameterMeta *> mParameters;
+    std::vector<OSCNotifier *> mNotifiers;
 
 };
 
