@@ -161,7 +161,8 @@ cd ${INITIALDIR}
 cd ${APP_PATH}/bin
 
 if [ ${RUN_MPI}  != 0 ]; then
-  echo Running MPI
+  echo Running MPI at: `pwd`
+
   mpirun --mca btl_tcp_if_include enp1s0 --hostfile ../../mpi_hosts.txt /usr/bin/env DISPLAY=:0 ./"${APP_NAME}${POSTFIX}"
 #elif [ ${BUILD_TYPE} == "Debug" ]; then
 #echo "Running in debugger ${DEBUGGER}"

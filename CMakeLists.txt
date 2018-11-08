@@ -21,6 +21,7 @@ option(AL_VERBOSE_OUTPUT "" OFF)
 option(BUILD_EXAMPLES "" ON)
 option(TRAVIS_BUILD "" OFF)
 option(APPVEYOR_BUILD "" OFF)
+option(ALLOLIB_BUILD_TESTS "" OFF)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(AL_MACOS 1)

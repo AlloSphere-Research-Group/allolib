@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
   // Or you can use the streaming operators:
   paramServer << freq << amp;
 
+  paramServer.verbose();
   // Print information about the server. Shows address, port and OSC parameter
   // addresses
   paramServer.print();
