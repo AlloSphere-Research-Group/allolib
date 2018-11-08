@@ -6,19 +6,24 @@
 
 #include "al/util/al_Ray.hpp"
 #include "al/util/ui/al_BoundingBox.hpp"
+#include "al/util/ui/al_Parameter.hpp"
 
 namespace al {
 
 
 struct PickableState {
-  bool hover, selected;
-  Pose pose;
-  Vec3f scale;
-  
+  ParameterBool hover{"hover"}, selected{"selected"};
+  ParameterPose pose{"pose"};
+  ParameterVec3 scale{"scale"};
+
+  ParameterBundle bundle {"pickable"}; 
+
   PickableState(){
     pose = Pose();
     scale = Vec3f(1);
-    hover = selected = false;
+    hover = false;
+    selected = false;
+    bundle << hover << selected << pose << scale;
   }
 };
 
@@ -119,9 +124,9 @@ struct PickableBase : virtual PickableState {
   /// apply pickable pose transforms
   inline void pushMatrix(Graphics &g){
     g.pushMatrix();
-    g.translate(pose.pos());
-    g.rotate(pose.quat());
-    g.scale(scale);
+    g.translate(pose.get().pos());
+    g.rotate(pose.get().quat());
+    g.scale(scale.get());
   }
   /// pop matrix.
   inline void popMatrix(Graphics &g){
@@ -131,7 +136,7 @@ struct PickableBase : virtual PickableState {
   /// transform a ray in world space to local space
   Rayd transformRayLocal(const Rayd &ray){
     Matrix4d t,r,s;
-    Matrix4d model = t.translation(pose.pos()) * r.fromQuat(pose.quat()) * s.scaling(scale);
+    Matrix4d model = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scale.get());
     Matrix4d invModel = Matrix4d::inverse(model);
     Vec4d o = invModel.transform(Vec4d(ray.o, 1));
     Vec4d d = invModel.transform(Vec4d(ray.d, 0));
@@ -141,14 +146,14 @@ struct PickableBase : virtual PickableState {
   /// transfrom a vector in local space to world space
   Vec3f transformVecWorld(const Vec3f &v, float w=1){
     Matrix4d t,r,s;
-    Matrix4d model = t.translation(pose.pos()) * r.fromQuat(pose.quat()) * s.scaling(scale);
+    Matrix4d model = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scale.get());
     Vec4d o = model.transform(Vec4d(v, w));
     return Vec3f(o.sub<3>(0));
   }  
   /// transfrom a vector in world space to local space
   Vec3f transformVecLocal(const Vec3f &v, float w=1){
     Matrix4d t,r,s;
-    Matrix4d invModel = t.translation(pose.pos()) * r.fromQuat(pose.quat()) * s.scaling(scale);
+    Matrix4d invModel = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scale.get());
     Vec4d o = invModel.transform(Vec4d(v, w));
     return Vec3f(o.sub<3>(0));
   }
@@ -187,7 +192,7 @@ struct Pickable : PickableBase {
         hover = true;
       }
     } else hover = false;
-    return hover || child;
+    return hover.get() || child;
   }
 
   bool onPick(Rayd &r, double t, bool child){
@@ -195,22 +200,22 @@ struct Pickable : PickableBase {
       if(child){
         selected = false;
       } else {
-        prevPose.set(pose);
+        prevPose.set(pose.get());
         selectDist = t;
-        selectOffset = pose.pos() - r(t)*scale;
+        selectOffset = pose.get().pos() - r(t)*scale.get();
         selected = true;
       }
     } else selected = false;
-    return selected || child;
+    return selected.get() || child;
   }
   
   bool onDrag(Rayd &r, double t, bool child){
     // if(t > 0.0){
       if(child){
         return true;
-      } else if(selected){
-        Vec3f newPos = r(selectDist)*scale + selectOffset;
-        pose.pos().set(newPos);
+      } else if(selected.get()){
+        Vec3f newPos = r(selectDist)*scale.get() + selectOffset;
+        pose = Pose(newPos, pose.get().quat());
         return true;
       }
     // }
@@ -218,7 +223,7 @@ struct Pickable : PickableBase {
   }
 
   bool onUnpick(Rayd &r, double t, bool child){
-    if(!hover) selected = false;
+    if(!hover.get()) selected = false;
     return false;
   }
 
@@ -228,8 +233,8 @@ struct Pickable : PickableBase {
     // glPushAttrib(GL_CURRENT_BIT);
     if(mesh) g.draw(*mesh);
 
-    if(selected) g.color(0,1,1);
-    else if(hover) g.color(1,1,1);
+    if(selected.get()) g.color(0,1,1);
+    else if(hover.get()) g.color(1,1,1);
     bb.draw(g, false);
 
     // glPopAttrib();
@@ -244,11 +249,11 @@ struct Pickable : PickableBase {
     popMatrix(g);
   }
   void drawBB(Graphics &g){
-    if(!selected && !hover) return;
+    if(!selected.get() && !hover.get()) return;
     pushMatrix(g);
     // glPushAttrib(GL_CURRENT_BIT);
-    if(selected) g.color(0,1,1);
-    else if(hover) g.color(1,1,1);
+    if(selected.get()) g.color(0,1,1);
+    else if(hover.get()) g.color(1,1,1);
     bb.draw(g, false);
     // g.draw(bb.mesh);
     // g.draw(bb.tics);
@@ -259,8 +264,8 @@ struct Pickable : PickableBase {
   /// set the pickable's center position
   void setCenter(Vec3f& pos){
     updateAABB();
-    Vec3f offset = aabb.cen - pose.pos();
-    pose.pos().set(pos - offset);
+    Vec3f offset = aabb.cen - pose.get().pos();
+    pose = Pose(pos - offset, pose.get().quat());
   }
 
   /// set pickable's orientation maintaining same center position
@@ -268,7 +273,7 @@ struct Pickable : PickableBase {
     updateAABB();
     Vec3f cen;
     cen.set(aabb.cen);
-    pose.quat().set(q);
+    pose = Pose(pose.get().pos(), q);
     setCenter(cen);
   }
 
@@ -285,14 +290,14 @@ struct Pickable : PickableBase {
 
   /// intersect ray with bounding sphere
   float intersectBoundingSphere(Rayd ray){
-    return ray.intersectSphere( transformVecWorld(bb.cen), (bb.dim*scale).mag()/2.0);
+    return ray.intersectSphere( transformVecWorld(bb.cen), (bb.dim*scale.get()).mag()/2.0);
   }
 
   /// calculate Axis aligned bounding box from mesh bounding box and current transforms
   void updateAABB(){
     // thanks to http://zeuxcg.org/2010/10/17/aabb-from-obb-with-component-wise-abs/
     Matrix4d t,r,s;
-    Matrix4d model = t.translation(pose.pos()) * r.fromQuat(pose.quat()) * s.scaling(scale);
+    Matrix4d model = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scale.get());
     Matrix4d absModel(model);
     for(int i=0; i<16; i++) absModel[i] = std::abs(absModel[i]);
     Vec4d cen = model.transform(Vec4d(bb.cen, 1));

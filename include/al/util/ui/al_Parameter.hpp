@@ -536,6 +536,8 @@ public:
 
     al::Pose operator=(const al::Pose vec) {this->set(vec); return *this;}
 
+    void setPos(const al::Vec3d v){ this->set(al::Pose(v,this->get().quat())); }
+    void setQuat(const al::Quatd q){ this->set(al::Pose(this->get().pos(),q)); }
 //    float operator[](size_t index) { Pose vec = this->get(); return vec[index];}
 };
 

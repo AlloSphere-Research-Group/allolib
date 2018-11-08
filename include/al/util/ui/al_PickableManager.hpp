@@ -59,9 +59,9 @@ public:
 		for(Pickable *p : mPickables){
 			if(h.hit && p == h.p){
 				p->selected = true;
-				p->prevPose.set(p->pose);
+				p->prevPose.set(p->pose.get());
 				lastSelect = h;
-				selectOffset = p->pose.pos() - r(h.t)*p->scale;
+				selectOffset = p->pose.get().pos() - r(h.t)*p->scale.get();
 			} else p->selected = false;
 		}
                 return true;
@@ -71,21 +71,23 @@ public:
 		for(Pickable *p : mPickables){
 			if(p->selected){
 				if(mZooming){
-			        p->pose.pos().z += dy*0.04; // should move along dir to camera instead
+			        Vec3f v = p->pose.get().pos();
+			        v.z += dy * 0.04;
+			        p->pose.setPos(v); // should move along dir to camera instead
 		    	} else if(mRotating){
 		    		Vec3f dir = r(lastSelect.t) - lastSelect.ray(lastSelect.t);
 		    		Quatf q = Quatf().fromEuler(dir.x*0.01f, -dir.y*0.01f, 0);
 
 		            Vec3f p1 = p->transformVecWorld(p->bb.cen);
-		    		p->pose.quat() = q*p->prevPose.quat();
+		    		p->pose.setQuat(q*p->prevPose.quat());
 		            Vec3f p2 = p->transformVecWorld(p->bb.cen);
-		            p->pose.pos() += p1-p2;
+		            p->pose.setPos(p->pose.get().pos() + p1-p2);
 
 		    	} else if(mScaling){
-			        p->scale += Vec3f(-dy*0.0005); // should move along dir to camera instead
+			        p->scale = p->scale.get() + Vec3f(-dy*0.0005); // should move along dir to camera instead
 		    	} else if(mTranslating){
-			        Vec3f newPos = r(lastSelect.t)*p->scale + selectOffset;
-			        p->pose.pos().set(newPos);
+			        Vec3f newPos = r(lastSelect.t)*p->scale.get() + selectOffset;
+			        p->pose.setPos(newPos);
 		    	} 
 			}
 		}
@@ -93,9 +95,22 @@ public:
 	}
 	bool unpick(Rayd &r){
 		for(Pickable *p : mPickables){
-			if(!p->hover) p->selected = false;
+			if(!p->hover.get()) p->selected = false;
 		}
                 return true;
+	}
+
+	void onPoint(Rayd r, int id){
+		point(r);
+	}
+	void onPick(Rayd r, int id, int button){
+		pick(r);
+	}
+	void onDrag(Rayd r, int id, int button, Vec3f motion){
+		drag(r, motion.y);
+	}
+	void onUnpick(Rayd r, int id, int button){
+		unpick(r);
 	}
 
 	void onMouseMove(Graphics &g, const Mouse& m, int w, int h){
