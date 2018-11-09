@@ -343,6 +343,8 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
         for(auto *p: params) {
             if (p->getHint("hide") == 0.0) {
                 bools.push_back(dynamic_cast<ParameterBool *>(p));
+            } else {
+                index--;
             }
         }
         drawParameterBool(bools, suffix, index);
@@ -351,6 +353,8 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
         for(auto *p: params) {
             if (p->getHint("hide") == 0.0) {
                 ps.push_back(dynamic_cast<Parameter *>(p));
+            } else {
+                index--;
             }
         }
         drawParameter(ps, suffix, index);
@@ -359,6 +363,8 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
         for(auto *p: params) {
             if (p->getHint("hide") == 0.0) {
                 poses.push_back(dynamic_cast<ParameterPose *>(p));
+            } else {
+                index--;
             }
         }
         drawParameterPose(poses, suffix, index);
@@ -366,7 +372,9 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
         std::vector<ParameterMenu *> menus;
         for(auto *p: params) {
             if (p->getHint("hide") == 0.0) {
-            menus.push_back(dynamic_cast<ParameterMenu *>(p));
+                menus.push_back(dynamic_cast<ParameterMenu *>(p));
+            } else {
+                index--;
             }
         }
         drawMenu(menus, suffix, index);
@@ -374,7 +382,9 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
         std::vector<ParameterChoice *> choices;
         for(auto *p: params) {
             if (p->getHint("hide") == 0.0) {
-            choices.push_back(dynamic_cast<ParameterChoice *>(p));
+                choices.push_back(dynamic_cast<ParameterChoice *>(p));
+            } else {
+                index--;
             }
         }
         drawChoice(choices, suffix, index);
@@ -382,7 +392,9 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
         std::vector<ParameterVec3 *> vec3s;
         for(auto *p: params) {
             if (p->getHint("hide") == 0.0) {
-            vec3s.push_back(dynamic_cast<ParameterVec3 *>(p));
+                vec3s.push_back(dynamic_cast<ParameterVec3 *>(p));
+            } else {
+                index--;
             }
         }
         drawVec3(vec3s, suffix, index);
@@ -390,7 +402,9 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
         std::vector<ParameterVec4 *> vec4s;
         for(auto *p: params) {
             if (p->getHint("hide") == 0.0) {
-            vec4s.push_back(dynamic_cast<ParameterVec4 *>(p));
+                vec4s.push_back(dynamic_cast<ParameterVec4 *>(p));
+            } else {
+                index--;
             }
         }
         drawVec4(vec4s, suffix, index);
@@ -398,7 +412,9 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
         std::vector<ParameterColor *> colors;
         for(auto *p: params) {
             if (p->getHint("hide") == 0.0) {
-            colors.push_back(dynamic_cast<ParameterColor *>(p));
+                colors.push_back(dynamic_cast<ParameterColor *>(p));
+            } else {
+                index--;
             }
         }
         drawParameterColor(colors, suffix, index);
