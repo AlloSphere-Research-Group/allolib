@@ -12,18 +12,19 @@ namespace al {
 
 
 struct PickableState {
-  ParameterBool hover{"hover"}, selected{"selected"};
-  ParameterPose pose{"pose"};
-  ParameterVec3 scale{"scale"};
+  std::string name;
+  ParameterBool hover{"hover", name}, selected{"selected", name};
+  ParameterPose pose{"pose", name};
+  ParameterVec3 scale{"scale", name};
 
-  ParameterBundle bundle {"pickable"}; 
+//  ParameterBundle bundle {"pickable"};
 
   PickableState(){
     pose = Pose();
     scale = Vec3f(1);
     hover = false;
     selected = false;
-    bundle << hover << selected << pose << scale;
+//    bundle << hover << selected << pose << scale;
   }
 };
 
@@ -170,7 +171,7 @@ struct Pickable : PickableBase {
   Vec3f selectOffset;
   float selectDist;
 
-  Pickable(){}
+  Pickable(std::string name = ""){ PickableState::name = name;}
   Pickable(Mesh &m){set(m);}
 
   /// initialize bounding box;
