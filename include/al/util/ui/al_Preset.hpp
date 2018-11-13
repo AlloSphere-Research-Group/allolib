@@ -287,10 +287,10 @@ private:
 	                       bool overwrite = true);
 
     std::vector<float> getParameterValue(ParameterMeta *p);
-
+    void setParametersInBundle(ParameterBundle *bundle, std::string bundlePrefix, PresetHandler *handler, float factor = 1.0);
 	static void morphingFunction(PresetHandler *handler);
 
-    std::string getBundleText(ParameterBundle *bundle, std::string prefix);
+    ParameterStates getBundleStates(ParameterBundle *bundle, std::string id);
 
 	bool mVerbose;
 	bool mUseCallbacks;

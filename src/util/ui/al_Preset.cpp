@@ -136,6 +136,13 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite)
             for(ParameterMeta *p: bundleGroup.second.at(i)->parameters()) {
                 values[bundlePrefix + p->getFullAddress()] = getParameterValue(p);
             }
+            for(auto subBundle: bundleGroup.second.at(i)->bundles()) {
+                auto bundleStates = getBundleStates(subBundle.second, subBundle.first);
+                for (auto &bundleValues: bundleStates) {
+                    values[bundlePrefix  + "/" + bundleValues.first] = bundleValues.second;
+
+                }
+            }
         }
     }
 
@@ -197,7 +204,7 @@ void PresetHandler::setInterpolatedPreset(int index1, int index2, double factor)
 				std::lock_guard<std::mutex> lk(mTargetLock);
 			}
 			mTargetValues.clear();
-                        for(auto value: values1) {
+            for(auto value: values1) {
                             if (values2.count(value.first) > 0) { // if parameter name matches
                                 mTargetValues[value.first] = value.second;
                                 for (unsigned int index = 0; index < value.second.size(); index++) {
@@ -596,6 +603,22 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
         std::cout << "Unsupported Parameter " << p->getFullAddress() << std::endl;
     }
 }
+void PresetHandler::setParametersInBundle(ParameterBundle *bundle, std::string bundlePrefix, PresetHandler *handler, float factor) {
+    for (ParameterMeta *p : bundle->parameters()) {
+//                       std::cout << bundlePrefix + p->getFullAddress() << std::endl;
+        if (handler->mTargetValues.find(bundlePrefix + p->getFullAddress()) != handler->mTargetValues.end()) {
+            handler->setParameterValues(p, handler->mTargetValues[bundlePrefix + p->getFullAddress()], factor);
+        } else {
+            if (handler->mVerbose) {
+                std::cout << "Parameter not found " << bundlePrefix + p->getFullAddress() << std::endl;
+            }
+        }
+    }
+    for (auto subBundle: bundle->bundles()) {
+        std::string subBundlePrefix = bundlePrefix + "/" + subBundle.second->name() + "/" + subBundle.first;
+        handler->setParametersInBundle(subBundle.second, subBundlePrefix, handler, factor);
+    }
+}
 
 void PresetHandler::morphingFunction(al::PresetHandler *handler)
 {
@@ -606,24 +629,6 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler)
         int remainingSteps;
         while ((remainingSteps = std::atomic_fetch_sub(&(handler->mMorphRemainingSteps), 1)) > 0) {
 
-            for (auto bundleGroup : handler->mBundles) {
-               const std::string &bundleName = bundleGroup.first;
-               for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
-                   std::string bundlePrefix = "/" + bundleName + "/" + std::to_string(i);
-                   ParameterBundle *bundle = bundleGroup.second[i];
-                   for (ParameterMeta *p : bundle->parameters()) {
-//                       std::cout << bundlePrefix + p->getFullAddress() << std::endl;
-                       if (handler->mTargetValues.find(bundlePrefix + p->getFullAddress()) != handler->mTargetValues.end()) {
-                           handler->setParameterValues(p, handler->mTargetValues[bundlePrefix + p->getFullAddress()], 1.0/remainingSteps);
-                       } else {
-                           if (handler->mVerbose) {
-                               std::cout << "Parameter not found " << bundlePrefix + p->getFullAddress() << std::endl;
-                           }
-                       }
-                   }
-               }
-
-            }
             for (ParameterMeta *p : handler->mParameters) {
                 if (handler->mTargetValues.find(p->getFullAddress()) != handler->mTargetValues.end()) {
                     handler->setParameterValues(p, handler->mTargetValues[p->getFullAddress()], 1.0/remainingSteps);
@@ -632,6 +637,15 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler)
                         std::cout << "Parameter not found " << p->getFullAddress() << std::endl;
                     }
                 }
+            }
+            for (auto bundleGroup : handler->mBundles) {
+               const std::string &bundleName = bundleGroup.first;
+               for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
+                   std::string bundlePrefix = "/" + bundleName + "/" + std::to_string(i);
+                   ParameterBundle *bundle = bundleGroup.second[i];
+                   handler->setParametersInBundle(bundle, bundlePrefix, handler, 1.0/remainingSteps);
+               }
+
             }
 			al::wait(handler->mMorphInterval);
 		}
@@ -645,9 +659,20 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler)
     // handler->mMorphLock.unlock();
 }
 
-std::string PresetHandler::getBundleText(ParameterBundle *bundle, std::string prefix)
+PresetHandler::ParameterStates PresetHandler::getBundleStates(ParameterBundle *bundle, std::string id)
 {
-
+    ParameterStates values;
+    std::string bundlePrefix = bundle->name() + "/" + id;
+    for(ParameterMeta *p: bundle->parameters()) {
+        values[bundlePrefix + p->getFullAddress()] = getParameterValue(p);
+    }
+    for(auto b: bundle->bundles()) {
+        auto subBundleValues = getBundleStates(b.second, b.first);
+        for (auto bundleValue: subBundleValues) {
+            values[bundlePrefix + "/" + bundleValue.first ] = bundleValue.second;
+        }
+    }
+    return values;
 }
 
 PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)
