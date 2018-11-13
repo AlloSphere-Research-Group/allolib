@@ -290,6 +290,8 @@ private:
 
 	static void morphingFunction(PresetHandler *handler);
 
+    std::string getBundleText(ParameterBundle *bundle, std::string prefix);
+
 	bool mVerbose;
 	bool mUseCallbacks;
 	std::string mRootDir;

@@ -7,6 +7,7 @@
 #include "al/util/al_Ray.hpp"
 #include "al/util/ui/al_BoundingBox.hpp"
 #include "al/util/ui/al_Parameter.hpp"
+#include "al/util/ui/al_ParameterBundle.hpp"
 
 namespace al {
 
@@ -15,16 +16,25 @@ struct PickableState {
   std::string name;
   ParameterBool hover{"hover", name}, selected{"selected", name};
   ParameterPose pose{"pose", name};
-  ParameterVec3 scale{"scale", name};
+  ParameterVec3 scaleVec{"scaleVec", name};
+  Parameter scale{"scale", name, 1.0f, "", 0.0f, 10.0f};
 
-//  ParameterBundle bundle {"pickable"};
+  ParameterBundle bundle {"pickable"};
 
   PickableState(){
     pose = Pose();
-    scale = Vec3f(1);
+    scaleVec = Vec3f(1);
     hover = false;
     selected = false;
-//    bundle << hover << selected << pose << scale;
+    bundle << hover << selected << pose << scale << scaleVec;
+    hover.setHint("latch", 1.0);
+    selected.setHint("latch", 1.0);
+    scale.registerChangeCallback([this](float value) {
+        scaleVec.set(Vec3f(value, value, value));
+    });
+    hover.setHint("hide", 1.0);
+    selected.setHint("hide", 1.0);
+    scaleVec.setHint("hide", 1.0); // We want to show the single value scale by default.
   }
 };
 
@@ -127,7 +137,7 @@ struct PickableBase : virtual PickableState {
     g.pushMatrix();
     g.translate(pose.get().pos());
     g.rotate(pose.get().quat());
-    g.scale(scale.get());
+    g.scale(scaleVec.get());
   }
   /// pop matrix.
   inline void popMatrix(Graphics &g){
@@ -137,7 +147,7 @@ struct PickableBase : virtual PickableState {
   /// transform a ray in world space to local space
   Rayd transformRayLocal(const Rayd &ray){
     Matrix4d t,r,s;
-    Matrix4d model = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scale.get());
+    Matrix4d model = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scaleVec.get());
     Matrix4d invModel = Matrix4d::inverse(model);
     Vec4d o = invModel.transform(Vec4d(ray.o, 1));
     Vec4d d = invModel.transform(Vec4d(ray.d, 0));
@@ -147,14 +157,14 @@ struct PickableBase : virtual PickableState {
   /// transfrom a vector in local space to world space
   Vec3f transformVecWorld(const Vec3f &v, float w=1){
     Matrix4d t,r,s;
-    Matrix4d model = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scale.get());
+    Matrix4d model = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scaleVec.get());
     Vec4d o = model.transform(Vec4d(v, w));
     return Vec3f(o.sub<3>(0));
   }  
   /// transfrom a vector in world space to local space
   Vec3f transformVecLocal(const Vec3f &v, float w=1){
     Matrix4d t,r,s;
-    Matrix4d invModel = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scale.get());
+    Matrix4d invModel = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scaleVec.get());
     Vec4d o = invModel.transform(Vec4d(v, w));
     return Vec3f(o.sub<3>(0));
   }
@@ -203,7 +213,7 @@ struct Pickable : PickableBase {
       } else {
         prevPose.set(pose.get());
         selectDist = t;
-        selectOffset = pose.get().pos() - r(t)*scale.get();
+        selectOffset = pose.get().pos() - r(t)*scaleVec.get();
         selected = true;
       }
     } else selected = false;
@@ -215,7 +225,7 @@ struct Pickable : PickableBase {
       if(child){
         return true;
       } else if(selected.get()){
-        Vec3f newPos = r(selectDist)*scale.get() + selectOffset;
+        Vec3f newPos = r(selectDist)*scaleVec.get() + selectOffset;
         pose = Pose(newPos, pose.get().quat());
         return true;
       }
@@ -291,14 +301,14 @@ struct Pickable : PickableBase {
 
   /// intersect ray with bounding sphere
   float intersectBoundingSphere(Rayd ray){
-    return ray.intersectSphere( transformVecWorld(bb.cen), (bb.dim*scale.get()).mag()/2.0);
+    return ray.intersectSphere( transformVecWorld(bb.cen), (bb.dim*scaleVec.get()).mag()/2.0);
   }
 
   /// calculate Axis aligned bounding box from mesh bounding box and current transforms
   void updateAABB(){
     // thanks to http://zeuxcg.org/2010/10/17/aabb-from-obb-with-component-wise-abs/
     Matrix4d t,r,s;
-    Matrix4d model = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scale.get());
+    Matrix4d model = t.translation(pose.get().pos()) * r.fromQuat(pose.get().quat()) * s.scaling(scaleVec.get());
     Matrix4d absModel(model);
     for(int i=0; i<16; i++) absModel[i] = std::abs(absModel[i]);
     Vec4d cen = model.transform(Vec4d(bb.cen, 1));

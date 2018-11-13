@@ -1,5 +1,6 @@
 
 #include <cstring>
+#include <string>
 
 
 #include "al/util/ui/al_ParameterBundle.hpp"
@@ -105,6 +106,22 @@ void ParameterBundle::addParameter(ParameterMeta *parameter) {
         // TODO this check should be performed on registration
         std::cout << "Unsupported Parameter type for bundle OSC dsitribution" << std::endl;
     }
+}
+
+void ParameterBundle::addParameter(ParameterMeta &parameter)
+{
+    addParameter(&parameter);
+}
+
+void ParameterBundle::addBundle(ParameterBundle &bundle, std::string id)
+{
+    if (id.size() == 0) {
+        id = std::to_string(mBundles.size());
+    }
+    if (mBundles.find(id) != mBundles.end()) {
+        std::cerr << "ERROR: Overwriting bundle id: " << id << std::endl;
+    }
+    mBundles[id] = &bundle;
 }
 
 ParameterBundle &ParameterBundle::operator <<(ParameterMeta *parameter) {

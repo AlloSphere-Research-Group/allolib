@@ -61,7 +61,7 @@ public:
 				p->selected = true;
 				p->prevPose.set(p->pose.get());
 				lastSelect = h;
-				selectOffset = p->pose.get().pos() - r(h.t)*p->scale.get();
+				selectOffset = p->pose.get().pos() - r(h.t)*p->scaleVec.get();
 			} else p->selected = false;
 		}
                 return true;
@@ -84,9 +84,9 @@ public:
 		            p->pose.setPos(p->pose.get().pos() + p1-p2);
 
 		    	} else if(mScaling){
-			        p->scale = p->scale.get() + Vec3f(-dy*0.0005); // should move along dir to camera instead
+                    p->scale = p->scale -dy*0.0005; // should move along dir to camera instead
 		    	} else if(mTranslating){
-			        Vec3f newPos = r(lastSelect.t)*p->scale.get() + selectOffset;
+			        Vec3f newPos = r(lastSelect.t)*p->scaleVec.get() + selectOffset;
 			        p->pose.setPos(newPos);
 		    	} 
 			}

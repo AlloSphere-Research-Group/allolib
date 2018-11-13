@@ -765,6 +765,14 @@ void ControlGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup, str
             for (ParameterMeta *param: bundleGroup[mCurrentBundle[name]]->parameters()) {
                 drawParameterMeta(param, suffix);
             }
+            for (auto bundle: bundleGroup[mCurrentBundle[name]]->bundles()) {
+                std::string subBundleName = bundle.first;
+                if (ImGui::CollapsingHeader((subBundleName + "##" + name + subBundleName + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader)) {
+                   for (auto *param: bundle.second->parameters()) {
+                       drawParameterMeta({param}, suffix + subBundleName, 0);
+                   }
+                }
+            }
         }
         ImGui::Separator();
     }

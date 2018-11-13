@@ -642,7 +642,12 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler)
 //			}
 //		}
 	}
-	// handler->mMorphLock.unlock();
+    // handler->mMorphLock.unlock();
+}
+
+std::string PresetHandler::getBundleText(ParameterBundle *bundle, std::string prefix)
+{
+
 }
 
 PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)

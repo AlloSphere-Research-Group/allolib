@@ -78,6 +78,9 @@ public:
     int bundleIndex() const;
 
     void addParameter(ParameterMeta *parameter);
+    void addParameter(ParameterMeta &parameter);
+
+    void addBundle(ParameterBundle &bundle, std::string id = "");
 
     /**
      * @brief clear bundle
@@ -88,6 +91,8 @@ public:
     void clear() { mParameters.clear();}
 
     std::vector<ParameterMeta *> &parameters() {return mParameters;}
+
+    std::map<std::string, ParameterBundle *> &bundles() {return mBundles;}
 
     ParameterBundle &operator <<(ParameterMeta *parameter);
     ParameterBundle &operator <<(ParameterMeta &parameter);
@@ -101,6 +106,7 @@ private:
     std::string mBundleName;
 
     std::vector<ParameterMeta *> mParameters;
+    std::map<std::string, ParameterBundle *> mBundles;
     std::vector<OSCNotifier *> mNotifiers;
 
 };
