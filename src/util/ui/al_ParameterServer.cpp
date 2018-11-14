@@ -187,7 +187,7 @@ ParameterServer &ParameterServer::registerParameterBundle(ParameterBundle &bundl
         mCurrentActiveBundle[bundle.name()] = 0;
     }
     mParameterBundles[bundle.name()].push_back(&bundle);
-    bundle.addNotifer(this);
+    bundle.addNotifier(this);
 
     return *this;
 }

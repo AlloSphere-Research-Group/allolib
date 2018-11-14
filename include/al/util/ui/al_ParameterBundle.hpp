@@ -97,7 +97,7 @@ public:
     ParameterBundle &operator <<(ParameterMeta *parameter);
     ParameterBundle &operator <<(ParameterMeta &parameter);
 
-    void addNotifer(OSCNotifier *notifier) {mNotifiers.push_back(notifier);}
+    void addNotifier(OSCNotifier *notifier);
 
 private:
 

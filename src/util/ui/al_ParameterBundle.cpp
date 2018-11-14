@@ -141,3 +141,10 @@ ParameterBundle &ParameterBundle::operator <<(ParameterMeta &parameter)
     addParameter(&parameter);
     return *this;
 }
+
+void ParameterBundle::addNotifier(OSCNotifier *notifier) {
+    mNotifiers.push_back(notifier);
+    for (auto subBundleGroup: bundles()) {
+        subBundleGroup.second->addNotifier(notifier);
+    }
+}
