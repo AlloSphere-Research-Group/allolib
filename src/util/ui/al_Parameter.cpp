@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <regex>
 
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/core/io/al_File.hpp"
@@ -105,23 +106,20 @@ ParameterMeta::ParameterMeta(std::string parameterName, std::string group, std::
     mParameterName(parameterName), mGroup(group), mPrefix(prefix)
 {
     //TODO: Add better heuristics for slash handling
-    if (mPrefix.length() > 0 && mPrefix.at(0) != '/') {
-        mFullAddress = "/";
-    }
-    mFullAddress += mPrefix;
-    if (mPrefix.length() > 0 && mPrefix.at(mPrefix.length() - 1) != '/') {
-        mFullAddress += "/";
-    }
-    if (mGroup.length() > 0 && mGroup.at(0) != '/') {
-        mFullAddress += "/";
-    }
-    mFullAddress += mGroup;
-    if (mGroup.length() > 0 && mGroup.at(mGroup.length() - 1) != '/') {
-        mFullAddress += "/";
-    }
-    if (mFullAddress.length() == 0) {
-        mFullAddress = "/";
-    }
-    mFullAddress += mParameterName;
+
+  using namespace std;
+
+  // remove leading and trailing shashes
+  regex re(R"((\w(?:[\w/]*\w)?))");
+  auto _parameterName =
+      sregex_iterator(parameterName.begin(), parameterName.end(), re);
+  auto _group = sregex_iterator(group.begin(), group.end(), re);
+  auto _prefix = sregex_iterator(prefix.begin(), prefix.end(), re);
+  auto none = sregex_iterator();
+  if (_prefix != none) mFullAddress += "/" + _prefix->str();
+  if (_group != none) mFullAddress += "/" + _group->str();
+  assert(_parameterName != none);
+  mFullAddress += "/" + _parameterName->str();
+
     mDisplayName = mParameterName;
 }
