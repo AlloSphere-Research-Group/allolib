@@ -8,7 +8,7 @@
 
 using namespace al;
 
-int ParameterBundle::mBundleCounter = 0;
+std::map<std::string, int> ParameterBundle::mBundleCounter = std::map<std::string, int>();
 
 ParameterBundle::ParameterBundle(std::string name) {
     if (name.size() == 0) {
@@ -16,8 +16,11 @@ ParameterBundle::ParameterBundle(std::string name) {
     } else {
         mBundleName = name;
     }
-    mBundleIndex = mBundleCounter;
-    ParameterBundle::mBundleCounter++;
+    if (mBundleCounter.find(name) == mBundleCounter.end()) {
+        mBundleCounter[name] = 0;
+    };
+    mBundleIndex = mBundleCounter[name];
+    mBundleCounter[name]++;
 }
 
 std::string ParameterBundle::name() const
@@ -25,11 +28,13 @@ std::string ParameterBundle::name() const
     return mBundleName;
 }
 
-std::string ParameterBundle::bundlePrefix(bool appendCounter) const
+std::string ParameterBundle::bundlePrefix() const
 {
-    std::string prefix = "/" + mBundleName;
-    if (appendCounter) {
+    std::string prefix = mParentPrefix + "/" + mBundleName;
+    if (mBundleId.size() == 0) {
         prefix += "/" + std::to_string(mBundleIndex);
+    } else {
+        prefix += "/" + mBundleId;
     }
     return prefix;
 }
@@ -122,6 +127,8 @@ void ParameterBundle::addBundle(ParameterBundle &bundle, std::string id)
         std::cerr << "ERROR: Overwriting bundle id: " << id << std::endl;
     }
     mBundles[id] = &bundle;
+    bundle.mBundleId = id;
+    bundle.mParentPrefix = bundlePrefix();
 }
 
 ParameterBundle &ParameterBundle::operator <<(ParameterMeta *parameter) {

@@ -71,9 +71,9 @@ public:
 
     /**
      * @brief get the prefix for this bundle
-     * @return the prefix string, includes the name and the index e.g. /thing/3
+     * @return the prefix string, includes the name and the index or id e.g. /thing/3
      */
-    std::string bundlePrefix(bool appendCounter = true) const;
+    std::string bundlePrefix() const;
 
     int bundleIndex() const;
 
@@ -101,9 +101,11 @@ public:
 
 private:
 
-    static int mBundleCounter;
+    static std::map<std::string, int> mBundleCounter;
     int mBundleIndex = -1;
     std::string mBundleName;
+    std::string mParentPrefix;
+    std::string mBundleId; // If this is set, it will be used instead of bundle index to identify bundle.
 
     std::vector<ParameterMeta *> mParameters;
     std::map<std::string, ParameterBundle *> mBundles;

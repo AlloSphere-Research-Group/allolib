@@ -313,55 +313,9 @@ void ParameterServer::onMessage(osc::Message &m)
             m.resetStream();
         }
     }
-    for (auto &bundles:mParameterBundles) {
-       auto oscAddress = m.addressPattern();
-        std::string bundleName = oscAddress.substr(1, oscAddress.find("/", 1) - 1);
-//        std::cout << "For bundle " << bundleName << " checking " << bundles.first <<std::endl;
-        // TODO there might be a clash if the bundle name matches a parameter name. Should we worry?
-        if (bundleName == bundles.first) { // If OSC address starts with bundle name, we are addressing specific instances of the bundle
-            std::string bundleIndex = oscAddress.substr(bundleName.size() + 2, oscAddress.find("/", bundleName.size() + 3) - (bundleName.size() + 2));
-
-            auto is_number = [](const std::string& s) {
-                return !s.empty() && std::find_if(s.begin(),
-                    s.end(), [](char c) { return !std::isdigit(c); }) == s.end(); };
-//            std::cout << "Addressing bundle index " << bundleIndex << std::endl;
-            if (is_number(bundleIndex)) {
-                unsigned int index = std::stoul(bundleIndex);
-
-                if (index >= 0 && index < bundles.second.size()) {
-                    std::string subAddress = oscAddress.substr(bundleName.size() + bundleIndex.size() + 2);
-//                    std::cout << "Address for bundle " << bundleName <<  " sub addr " << subAddress << std::endl;
-                    for (ParameterMeta *p: bundles.second[index]->parameters()) {
-                        if (setParameterValueFromMessage(p, subAddress, m)) {
-                            m.resetStream();
-//                            std::cout << " match " << p->getFullAddress() <<std::endl;
-                        }
-                    }
-                }
-            } else if (bundleIndex == "_current") {
-                int index = mCurrentActiveBundle[bundleName];
-                if (m.typeTags() == "i") {
-                    m >> index;
-                } else if (m.typeTags() == "f") {
-                    float value;
-                    m >> value;
-                    index = (int) value;
-                }
-                std::cout << "current " << index << std::endl;
-                if (index >= 0 && index < (int) mParameterBundles[bundleName].size()) {
-                    mCurrentActiveBundle[bundleName] = index;
-                }
-            }
-
-        } else { // We will try to pass the values directly to the current bundle
-//            std::cout << bundleName << " ... " << mCurrentActiveBundle[bundles.first] << " ;;;; " << mParameterBundles[bundles.first].size() << std::endl;
-            for (ParameterMeta *p: mParameterBundles[bundles.first].at(mCurrentActiveBundle[bundles.first])->parameters()) {
-
-                if (setParameterValueFromMessage(p, m.addressPattern(), m)) {
-                    m.resetStream();
-                }
-            }
-        }
+    for (auto &bundleGroup:mParameterBundles) {
+        auto oscAddress = m.addressPattern();
+        setValuesForBundleGroup(m, bundleGroup.second, oscAddress);
     }
     for (osc::PacketHandler *handler: mPacketHandlers) {
         m.resetStream();
@@ -375,8 +329,13 @@ void ParameterServer::print()
     std::cout << "Parameter server listening on " << mServer->address()
               << ":" << mServer->port() << std::endl;
     for (ParameterMeta *p:mParameters) {
-        std::cout << "Parameter " << p->getName() << "(" << p->displayName() << ")"
-                  << "[" << typeid(*p).name() << "] : " <<  p->getFullAddress() << std::endl;
+        printParameterInfo(p);
+    }
+    for (auto bundleGroup: mParameterBundles) {
+        std::cout << " --- Bundle " << bundleGroup.first << std::endl;
+        for (auto bundle: bundleGroup.second) {
+            printBundleInfo(bundle, bundleGroup.first);
+        }
     }
     if (mOSCSenders.size() > 0) {
         std::cout << "Registered listeners: " << std::endl;
@@ -702,5 +661,45 @@ void ParameterServer::notifyAll(ParameterMeta *param, std::string address)
     else {
         // TODO this check should be performed on registration
         std::cout << "Unsupported Parameter type for display" << std::endl;
+    }
+}
+
+void ParameterServer::printParameterInfo(ParameterMeta *p) {
+    std::cout << "Parameter " << p->getName() << "(" << p->displayName() << ")"
+              << "[" << typeid(*p).name() << "] : " <<  p->getFullAddress() << std::endl;
+}
+
+void ParameterServer::printBundleInfo(ParameterBundle *bundle, std::string id, int depth)
+{
+    for (int i = 0; i < depth; i++) std::cout << "  ";
+    std::cout << "--- Bundle: " << bundle->name() << " id: " << id << " index "<< bundle->bundleIndex() << " prefix " << bundle->bundlePrefix() << std::endl;
+    depth++;
+    for(auto *p: bundle->parameters()) {
+        for (int i = 0; i < depth; i++) std::cout << "  ";
+        printParameterInfo(p);
+    }
+    for (auto bundleGroup: bundle->bundles()) {
+        printBundleInfo(bundleGroup.second, bundleGroup.first, depth);
+    }
+    for (int i = 0; i < depth - 1; i++) std::cout << "  ";
+    std::cout << "--- End Bundle: " << bundle->name() << " id: " << id << std::endl;
+}
+
+void ParameterServer::setValuesForBundleGroup(osc::Message &m, std::vector<ParameterBundle *> bundleGroup, std::string rootAddress) {
+    for (auto bundle: bundleGroup) {
+        std::string bundlePrefix = bundle->bundlePrefix();
+        if (rootAddress.compare(0, bundlePrefix.size(), bundlePrefix) == 0) {
+            for (ParameterMeta *p: bundle->parameters()) {
+                std::string subAddress = rootAddress.substr(bundlePrefix.size());
+                if (setParameterValueFromMessage(p, subAddress, m)) {
+                    m.resetStream();
+                    //                            std::cout << " match " << p->getFullAddress() <<std::endl;
+                    continue;
+                }
+            }
+            for (auto subBundleGroups: bundle->bundles()) {
+                setValuesForBundleGroup(m, {subBundleGroups.second}, rootAddress);
+            }
+        }
     }
 }

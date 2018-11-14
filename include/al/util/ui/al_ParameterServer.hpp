@@ -215,14 +215,14 @@ protected:
 
     void notifyAll(ParameterMeta *param, std::string address);
 
-protected:
+    void printParameterInfo(ParameterMeta *p);
+
+    void printBundleInfo(ParameterBundle *bundle, std::string id, int depth = 0);
+
+    void setValuesForBundleGroup(osc::Message &m, std::vector<ParameterBundle *> bundleGroup, std::string rootAddress);
+
     std::vector<osc::PacketHandler *> mPacketHandlers;
     osc::Recv *mServer;
-//    std::vector<Parameter *> mParameters;
-//    std::vector<ParameterString *> mStringParameters;
-//    std::vector<ParameterVec3 *> mVec3Parameters;
-//    std::vector<ParameterVec4 *> mVec4Parameters;
-//    std::vector<ParameterPose *> mPoseParameters;
     std::vector<ParameterMeta *> mParameters;
     std::map<std::string, std::vector<ParameterBundle *>> mParameterBundles;
     std::map<std::string, int> mCurrentActiveBundle;
