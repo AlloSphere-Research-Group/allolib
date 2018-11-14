@@ -77,7 +77,7 @@ private:
   Nav mNav; // is a Pose itself and also handles manipulation of pose
   Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
   NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse
-  ParameterServer mParameterServer {"localhost", 9010};
+  ParameterServer mParameterServer {"0.0.0.0", 9010};
 };
 
 
