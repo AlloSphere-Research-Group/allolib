@@ -49,8 +49,13 @@ public:
 	bool point(Rayd &r){
 		Hit h = intersect(r);
 		for(Pickable *p : mPickables){
-			if(h.hit && p == h.p) p->hover = true;
-			else p->hover = false;
+            bool newHoverValue = false;
+            if(h.hit && p == h.p) {
+                newHoverValue = true;
+            }
+            if (p->hover != newHoverValue) {
+                p->hover = newHoverValue; // Only set if changed as this triggers the changed callback
+            }
 		}
                 return true;
 	}

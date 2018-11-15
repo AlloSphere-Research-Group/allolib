@@ -196,27 +196,32 @@ struct Pickable : PickableBase {
   }
 
   bool onPoint(Rayd &r, double t, bool child){
+    bool hoverValue = false;
     if(t > 0.0){
-      if(child){
-        hover = false;
-      } else {
-        hover = true;
+      if(!child){
+        hoverValue = true;
       }
-    } else hover = false;
+    }
+    if (hover.get() != hoverValue) {
+        hover = hoverValue; // setting value propagates via OSC, so only set if there is a change
+    }
+
     return hover.get() || child;
   }
 
   bool onPick(Rayd &r, double t, bool child){
+    bool selectedValue = false;
     if(t > 0.0){
-      if(child){
-        selected = false;
-      } else {
+      if(!child){
         prevPose.set(pose.get());
         selectDist = t;
         selectOffset = pose.get().pos() - r(t)*scaleVec.get();
-        selected = true;
+        selectedValue = true;
       }
-    } else selected = false;
+    }
+    if (selected != selectedValue) {
+        selected = selectedValue; // to avoid triggering change callback if no change
+    }
     return selected.get() || child;
   }
   
@@ -234,7 +239,7 @@ struct Pickable : PickableBase {
   }
 
   bool onUnpick(Rayd &r, double t, bool child){
-    if(!hover.get()) selected = false;
+    if(!hover && selected) selected = false;
     return false;
   }
 
