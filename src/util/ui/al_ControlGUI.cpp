@@ -299,6 +299,11 @@ void ControlGUI::drawParameter(Parameter * param, std::string suffix)
     drawParameter(std::vector<Parameter *>{param}, suffix);
 }
 
+void ControlGUI::drawParameterString(ParameterString *param, string suffix)
+{
+    drawParameterString(std::vector<ParameterString *>{param}, suffix);
+}
+
 void ControlGUI::drawParameterBool(ParameterBool * param, std::string suffix)
 {
     drawParameterBool(std::vector<ParameterBool *>{param}, suffix);
@@ -358,6 +363,16 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
             }
         }
         drawParameter(ps, suffix, index);
+    } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterString).name()) == 0) {// ParameterString
+        std::vector<ParameterString *> ps;
+        for(auto *p: params) {
+            if (p->getHint("hide") == 0.0) {
+                ps.push_back(dynamic_cast<ParameterString *>(p));
+            } else {
+                index--;
+            }
+        }
+        drawParameterString(ps, suffix, index);
     } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
         std::vector<ParameterPose *> poses;
         for(auto *p: params) {
@@ -463,6 +478,17 @@ void ControlGUI::drawParameter(std::vector<Parameter *> params, string suffix, i
             }
         }
     }
+}
+
+void ControlGUI::drawParameterString(std::vector<ParameterString *> params, string suffix, int index)
+{
+    if (params.size() == 0) return;
+    assert(index < (int) params.size());
+    auto &param = params[index];
+    ImGui::Text((param->displayName() + ":").c_str());
+    ImGui::SameLine();
+    ImGui::Text((param->get()).c_str());
+
 }
 
 void ControlGUI::drawParameterBool(std::vector<ParameterBool *> params, string suffix, int index)
