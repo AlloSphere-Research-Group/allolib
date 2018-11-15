@@ -65,19 +65,19 @@ public:
 			if(h.hit && p == h.p){
 				p->selected = true;
 				p->prevPose.set(p->pose.get());
+				p->prevScale.set(p->scaleVec.get());
 				lastSelect = h;
 				selectOffset = p->pose.get().pos() - r(h.t)*p->scaleVec.get();
 			} else p->selected = false;
 		}
                 return true;
 	}
-	bool drag(Rayd &r, int dy){
-		// Hit h = intersect(r);
+	bool drag(Rayd &r, Vec3f dv){
 		for(Pickable *p : mPickables){
 			if(p->selected){
 				if(mZooming){
 			        Vec3f v = p->pose.get().pos();
-			        v.z += dy * 0.04;
+			        v.z += dv.y * 0.04;
 			        p->pose.setPos(v); // should move along dir to camera instead
 		    	} else if(mRotating){
 		    		Vec3f dir = r(lastSelect.t) - lastSelect.ray(lastSelect.t);
@@ -89,7 +89,7 @@ public:
 		            p->pose.setPos(p->pose.get().pos() + p1-p2);
 
 		    	} else if(mScaling){
-                    p->scale = p->scale -dy*0.0005; // should move along dir to camera instead
+                    p->scale = p->scale - dv.y*0.0005; 
 		    	} else if(mTranslating){
 			        Vec3f newPos = r(lastSelect.t)*p->scaleVec.get() + selectOffset;
 			        p->pose.setPos(newPos);
@@ -104,6 +104,39 @@ public:
 		}
                 return true;
 	}
+	void rotate(Rayd &r){
+		for(Pickable *p : mPickables){
+			if(p->selected){
+	    		Vec3f dir = r(lastSelect.t) - lastSelect.ray(lastSelect.t);
+	    		Quatf q = Quatf().fromEuler(dir.x*0.01f, -dir.y*0.01f, 0);
+
+	            Vec3f p1 = p->transformVecWorld(p->bb.cen);
+	    		p->pose.setQuat(q*p->prevPose.quat());
+	            Vec3f p2 = p->transformVecWorld(p->bb.cen);
+	            p->pose.setPos(p->pose.get().pos() + p1-p2);
+			}
+		}
+	}
+	void scale(Rayd &r, float amt){
+		for(Pickable *p : mPickables){
+			if(p->selected) 
+                p->scale = p->prevScale.x + amt; 
+		}
+	}
+	void translate(Rayd &r, bool relative=false, Vec3f motion=Vec3f()){
+		for(Pickable *p : mPickables){
+			if(p->selected){
+		        if(relative){
+		        	Vec3f newPos = p->prevPose.pos() + motion;
+		        	p->pose.setPos(newPos);
+		        }else {
+			        Vec3f newPos = r(lastSelect.t)*p->scaleVec.get() + selectOffset;
+			        p->pose.setPos(newPos);
+			    }
+			}
+		}
+	}
+
 
 	void onPoint(Rayd r, int id){
 		point(r);
@@ -112,7 +145,7 @@ public:
 		pick(r);
 	}
 	void onDrag(Rayd r, int id, int button, Vec3f motion){
-		drag(r, motion.y);
+		drag(r, motion);
 	}
 	void onUnpick(Rayd r, int id, int button){
 		unpick(r);
@@ -127,14 +160,14 @@ public:
 		pick(r);
 	}
 	void onMouseDrag(Graphics &g, const Mouse& m, int w, int h){
-            if (m.right()) mRotating = true;
-            else if (m.middle()) mScaling = true;
+        if (m.right()) mRotating = true;
+        else if (m.middle()) mScaling = true;
 		Rayd r = getPickRay(g, m.x(), m.y(), w, h);
-		drag(r,m.dy());
+		drag(r,Vec3f(0,m.dy(),0));
 	}
 	void onMouseUp(Graphics &g, const Mouse& m, int w, int h){
-            mRotating = false;
-            mScaling = false;
+        mRotating = false;
+        mScaling = false;
 		Rayd r = getPickRay(g, m.x(), m.y(), w, h);
 		unpick(r);
 	}
@@ -157,6 +190,11 @@ public:
           default: break;
     	}
 	}
+
+	void translating(bool b){ mTranslating = b; }
+	void rotating(bool b){ mRotating = b; }
+	void zooming(bool b){ mZooming = b; }
+	void scaling(bool b){ mScaling = b; }
 
 protected:
 	std::vector<Pickable *> mPickables;
