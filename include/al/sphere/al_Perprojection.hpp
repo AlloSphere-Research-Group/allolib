@@ -100,8 +100,8 @@ public:
 
 inline std::string perprojection_samplevert() { return R"(
 #version 330
-uniform mat4 MV;
-uniform mat4 P;
+uniform mat4 al_ModelViewMatrix;
+uniform mat4 al_ProjectionMatrix;
 
 layout (location = 0) in vec3 position;
 layout (location = 2) in vec2 texcoord;
@@ -109,7 +109,7 @@ layout (location = 2) in vec2 texcoord;
 out vec2 texcoord_;
 
 void main() {
-  gl_Position = P * MV * vec4(position, 1.0);
+  gl_Position = al_ProjectionMatrix * al_ModelViewMatrix * vec4(position, 1.0);
   texcoord_ = texcoord;
 }
 )";}

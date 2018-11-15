@@ -118,12 +118,12 @@ void RenderManager::shader(ShaderProgram& s) {
 
   auto mv_search = modelviewLocs.find(mShaderPtr->id());
   if (mv_search == modelviewLocs.end()) {
-    modelviewLocs[mShaderPtr->id()] = mShaderPtr->getUniformLocation("MV");
+    modelviewLocs[mShaderPtr->id()] = mShaderPtr->getUniformLocation("al_ModelViewMatrix");
   }
 
   auto pr_search = projLocs.find(mShaderPtr->id());
   if (pr_search == projLocs.end()) {
-    projLocs[mShaderPtr->id()] = mShaderPtr->getUniformLocation("P");
+    projLocs[mShaderPtr->id()] = mShaderPtr->getUniformLocation("al_ProjectionMatrix");
   }
 }
 

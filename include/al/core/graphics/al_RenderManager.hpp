@@ -35,8 +35,8 @@
         - or gpu-stored al::VAOMesh
     
     !. writing shader for al::RenderManager
-        - modelview matrix:  uniform mat4 MV;
-        - projection matrix: uniform mat4 P;
+        - modelview matrix:  uniform mat4 al_ModelViewMatrix;
+        - projection matrix: uniform mat4 al_ProjectionMatrix;
         - vertex position    layout (location = 0) in vec3 position;
         - vertex color:      layout (location = 1) in vec4 color;
         - vertex texcoord:   layout (location = 2) in vec2 texcoord;

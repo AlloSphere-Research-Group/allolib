@@ -41,7 +41,7 @@ lighting_shader_uniforms al_get_lighting_uniform_locations(al::ShaderProgram& s,
             or if name starts with the reserved prefix "gl_".
     */
     u.global_ambient = glGetUniformLocation(s.id(), "light_global_ambient");
-    u.normal_matrix = glGetUniformLocation(s.id(), "N");
+    u.normal_matrix = glGetUniformLocation(s.id(), "al_NormalMatrix");
     for (int i = 0; i < al_max_num_lights(); i += 1) {
         per_light_uniform_locations l;
         auto light_i = "light"s + std::to_string(i); // light0, light1, ...
@@ -111,9 +111,9 @@ void compileDefaultShader(ShaderProgram& s, ShaderType type, bool is_omni)
 std::string multilight_vert_header_common()
 {
     return R"(
-uniform mat4 MV;
-uniform mat4 P;
-uniform mat4 N; // normal matrix: transpose of inverse of MV
+uniform mat4 al_ModelViewMatrix;
+uniform mat4 al_ProjectionMatrix;
+uniform mat4 al_NormalMatrix; // normal matrix: transpose of inverse of al_ModelViewMatrix
 uniform float eye_sep;
 uniform float foc_len;
 layout (location = 0) in vec3 position;
@@ -162,14 +162,14 @@ std::string multilight_vert_body_begin()
     return R"(
 void main()
 {
-    vec4 vert_eye = MV * vec4(position, 1.0);
+    vec4 vert_eye = al_ModelViewMatrix * vec4(position, 1.0);
     if (eye_sep == 0) {
-        gl_Position = P * MV * vec4(position, 1.0);
+        gl_Position = al_ProjectionMatrix * al_ModelViewMatrix * vec4(position, 1.0);
     }
     else {
-        gl_Position = P * stereo_displace(MV * vec4(position, 1.0), eye_sep, foc_len);
+        gl_Position = al_ProjectionMatrix * stereo_displace(al_ModelViewMatrix * vec4(position, 1.0), eye_sep, foc_len);
     }
-    normal_eye = (N * vec4(normalize(normal), 0.0)).xyz;
+    normal_eye = (al_NormalMatrix * vec4(normalize(normal), 0.0)).xyz;
     eye_dir = -vert_eye.xyz;
 )"; // does not close main function
 }

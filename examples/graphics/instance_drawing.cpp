@@ -9,8 +9,8 @@ using namespace std;
 const string instancing_vert = R"(
 #version 330
 
-uniform mat4 MV;
-uniform mat4 P;
+uniform mat4 al_ModelViewMatrix;
+uniform mat4 al_ProjectionMatrix;
 uniform float scale;
 
 layout (location = 0) in vec3 position;
@@ -27,7 +27,7 @@ void main()
   // to multiply position vector with matrices,
   // 4th component must be 1 (homogeneous coord)
   vec4 p = vec4(scale * position, 0.0) + offset;
-  gl_Position = P * MV * p;
+  gl_Position = al_ProjectionMatrix * al_ModelViewMatrix * p;
   // we also have access to index of instance,
   // for example, when drawing 100 instances,
   // `gl_InstanceID goes 0 to 99
@@ -159,9 +159,9 @@ struct MyApp : App
     if (USE_INSTANCING) {
       g.shader(shader_instancing);
       g.shader().uniform("scale", scale);
-      // Graphics::update: send MV, P matrices to shader
-      // in normal cases Graphics::draw calls this inside
-      // but here Graphics::draw is not used and raw OpenGL calls are
+      // Graphics::update: send al_ModelViewMatrix, al_ProjectionMatrix to shader
+      // in normal cases Graphics::draw calls Graphics::update inside
+      // but here Graphics::draw is not used and raw OpenGL calls are used
       // so Graphics::update needs to be called explicitly
       g.update();
       // just like above, when using Graphics::draw, given vao gets bound
