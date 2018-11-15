@@ -32,7 +32,7 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, int value)
     mListenerLock.lock();
     for(osc::Send *sender: mOSCSenders) {
         sender->send(OSCaddress, value);
-//		std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
+        std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
     }
     mListenerLock.unlock();
 }
@@ -548,6 +548,17 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param, std::st
             return true;
         }
         // notifyListeners(p->getFullAddress(), p->get());
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) == 0) {// Parameter
+        ParameterString *p = dynamic_cast<ParameterString *>(param);
+        if(address == p->getFullAddress() && m.typeTags() == "s"){
+            std::string val;
+            m >> val;
+            // Extract the data out of the packet
+            p->set(val);
+            // std::cout << "ParameterServer::onMessage" << val << std::endl;
+            return true;
+        }
+        // notifyListeners(p->getFullAddress(), p->get());
     } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
         ParameterPose *p = dynamic_cast<ParameterPose *>(param);
         if(address == p->getFullAddress() && m.typeTags() == "fffffff"){
@@ -638,6 +649,9 @@ void ParameterServer::notifyAll(ParameterMeta *param, std::string address)
         notifyListeners(address, p->get());
     } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {// Parameter
         Parameter *p = dynamic_cast<Parameter *>(param);
+        notifyListeners(address, p->get());
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) == 0) {// ParameterString
+        ParameterString *p = dynamic_cast<ParameterString *>(param);
         notifyListeners(address, p->get());
     } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
         ParameterPose *p = dynamic_cast<ParameterPose *>(param);

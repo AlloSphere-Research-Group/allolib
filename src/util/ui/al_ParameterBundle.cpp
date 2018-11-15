@@ -62,6 +62,15 @@ void ParameterBundle::addParameter(ParameterMeta *parameter) {
                 n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
             }
         });
+    } else if (strcmp(typeid(*parameter).name(), typeid(ParameterString).name()) == 0) {// ParameterString
+        std::cout << "Register parameter " << parameter->getName() << std::endl;
+        ParameterString *p = dynamic_cast<ParameterString *>(parameter);
+        p->registerChangeCallback([this, p](std::string value){
+//            std::cout << "Changed  " << p->getName() << std::endl;
+            for (OSCNotifier *n: mNotifiers) {
+                n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
+            }
+        });
     } else if (strcmp(typeid(*parameter).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
         ParameterPose *p = dynamic_cast<ParameterPose *>(parameter);
         p->registerChangeCallback([this, p](al::Pose value){
