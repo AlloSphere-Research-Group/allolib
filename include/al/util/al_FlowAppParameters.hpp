@@ -89,7 +89,7 @@ public:
     virtual Nav& nav() = 0;
     virtual Lens& lens() = 0;
 
-    void initFlowApp(){
+    void initFlowApp(bool handshake=false){
     	// parameterServer().verbose();
 		parameterServer() << ppose << mx << my << mz << tx << ty << tz;
 		parameterServer() << nearClip << farClip << eyeSeparation << focalLength;
@@ -112,9 +112,11 @@ public:
 		fovy.registerChangeCallback([&](float x){ lens().fovy(x); });
 
     	// parameterServer().listen(recvPort());
-    	FlowUtils::handshake(parameterServer(), appName(), flowAddress(), flowPort());
-    	FlowUtils::sendMapping("lens", lensMapping(), flowAddress(), flowPort());
-    	FlowUtils::sendMapping("joystickNav", joystickMapping(), flowAddress(), flowPort());
+    	if(handshake){
+    		FlowUtils::handshake(parameterServer(), appName(), flowAddress(), flowPort());
+	    	FlowUtils::sendMapping("lens", lensMapping(), flowAddress(), flowPort());
+	    	FlowUtils::sendMapping("joystickNav", joystickMapping(), flowAddress(), flowPort());  
+    	}
     }
 
     std::string lensMapping(){ 

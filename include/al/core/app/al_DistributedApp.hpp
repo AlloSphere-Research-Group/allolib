@@ -357,9 +357,8 @@ inline void DistributedApp<TSharedState>::start() {
   // initDeviceServer();
 
 //  std::cout << name() << ":" << roleName() << " before init flow" << std::endl;
-  if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) {
-      initFlowApp();
-  }
+  if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) initFlowApp(true);
+  else initFlowApp(false);
   
   mParameterServer->registerOSCListener(this); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
 
