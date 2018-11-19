@@ -10,7 +10,7 @@ where:
     -v verbose build. Prints full cmake log and verbose build.
 "
 
-if [ $(uname -s) == MINGW64* ]; then
+if [ $(uname -s) != MINGW64* ]; then
   WINDOWS_FLAGS=-DCMAKE_GENERATOR_PLATFORM=x64
 fi
 
@@ -36,11 +36,11 @@ NPROC=$(grep --count ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu |
 PROC_FLAG=$((NPROC - 1))
 
 if [ $(uname -s) == "Darwin" ]; then
-  BUILD_FLAGS=-j${PROC_FLAG}
+  BUILD_FLAGS=${BUILD_FLAGS} -j${PROC_FLAG}
 fi
 
 if [ $(uname -s) == "Linux" ]; then
-  BUILD_FLAGS=-j${PROC_FLAG}
+  BUILD_FLAGS=${BUILD_FLAGS} -j${PROC_FLAG}
 fi
 
 # resolve flags
