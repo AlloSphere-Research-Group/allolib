@@ -17,6 +17,19 @@ void ControlGUI::draw(Graphics &g) {
         ImGuiStyle& style = ImGui::GetStyle();
         style.Colors[ImGuiCol_Header] = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
         style.Colors[ImGuiCol_Separator] = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
+    } else {
+        ImGui::SetNextWindowSize(ImVec2(0, 0));
+        ImGui::SetNextWindowPos(ImVec2(mX, mY));
+        ImGuiWindowFlags window_flags = 0;
+        window_flags |= ImGuiWindowFlags_NoTitleBar; // if (no_titlebar)
+        // window_flags |= ImGuiWindowFlags_NoScrollbar; // if (no_scrollbar)
+        // window_flags |= ImGuiWindowFlags_MenuBar; // if (!no_menu)
+        window_flags |= ImGuiWindowFlags_NoMove; // if (no_move)
+        window_flags |= ImGuiWindowFlags_NoResize; // if (no_resize)
+        window_flags |= ImGuiWindowFlags_NoCollapse; // if (no_collapse)
+        window_flags |= ImGuiWindowFlags_NoNav; // if (no_nav)
+
+        ImGui::Begin(mName.c_str() , nullptr, window_flags);
     }
 //    ImGui::SetNextWindowSize(ImVec2(300, 450), ImGuiCond_FirstUseEver);
 //    ImGui::SetNextWindowPos(ImVec2(mX, mY), ImGuiCond_FirstUseEver);
@@ -162,14 +175,18 @@ void ControlGUI::draw(Graphics &g) {
 //    ImGui::End(); // End the window
     if (mManageIMGUI) {
         end();
+    } else {
+
+        ImGui::End();
     }
 }
 
-void ControlGUI::init(int x, int y) {
-    static int id = 0;
-    mId = id++;
+void ControlGUI::init(int x, int y, bool manageImgui) {
+    static int winCounter = 0;
     mX = x;
     mY = y;
+    mManageIMGUI = manageImgui;
+    mName = "__ControlGUI_" + std::to_string(winCounter++);
 
     mSequencerItems = (char **) malloc(32 * sizeof(char *));
     for (size_t i = 0; i < 32; i++) {
@@ -182,8 +199,7 @@ void ControlGUI::init(int x, int y) {
 }
 
 void ControlGUI::begin() {
-    string name = "__ControlGUI_" + std::to_string(mId);
-    beginIMGUI_minimal(true, name.c_str(), mX, mY, mGUIBackgroundAlpha);
+    beginIMGUI_minimal(true, mName.c_str(), mX, mY, mGUIBackgroundAlpha);
 }
 
 void ControlGUI::end() {

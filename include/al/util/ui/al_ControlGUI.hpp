@@ -166,20 +166,13 @@ public:
      * @brief initialize ImGUI.
      * @param x x position for the control window
      * @param y y position for the control window
+     * @param manageImgui call imgui initialization and cleanup functions
      *
-     * This function must be called before anu call to begin() or draw()
+     * This function must be called before anu call to begin() or draw().
+     * If you want to use mulitple ControlGUI objects, you need to set manageImgui
+     * to false, and perform the ImGui initialization and cleanup manually
      */
-    void init(int x = 5, int y = 5);
-
-    /**
-     * @brief Call begin() at the start of the outer draw call, if not managing ImGUI
-     */
-    void begin();
-
-    /**
-     * @brief Call begin() at the end of the outer draw call, if not managing ImGUI
-     */
-    void end();
+    void init(int x = 5, int y = 5, bool manageImgui = true);
 
     void cleanup();
 
@@ -294,8 +287,8 @@ private:
     std::map<std::string, std::vector<ParameterBundle *>> mBundles;
     Nav *mNav {nullptr};
 
+    std::string mName;
     int mX, mY;
-    int mId;
 
     float mGUIBackgroundAlpha = 0;
 
@@ -319,6 +312,9 @@ private:
         *out_text = vector.at(idx).c_str();
         return true;
     }
+
+    void begin();
+    void end();
 
     void drawPresetHandler();
     void drawSequenceRecorder();
