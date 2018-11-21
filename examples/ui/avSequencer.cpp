@@ -29,7 +29,7 @@ public:
 
     SineEnv()
     {
-        set (6.5, 60, 0.3, 1, 2);
+        set (6.5, 60, 0.3, 0.1, 2);
         mAmpEnv.curve(0); // make segments lines
         mAmpEnv.levels(0,1,1,0);
 
@@ -71,7 +71,7 @@ public:
         if(mAmpEnv.done() && (mEnvFollow.value() < 0.001f)) free();
     }
 
-    virtual void onProcess(Graphics &g) {
+    virtual void onProcess(Graphics &g) override {
         g.pushMatrix();
         g.blending(true);
         g.blendModeTrans();
@@ -111,7 +111,7 @@ public:
     }
 
     virtual void onDraw(Graphics &g) override {
-        s.print(); // Prints information on active and free voices
+//        s.print(); // Prints information on active and free voices
         g.clear();
         s.render(g); // Render graphics
     }
@@ -124,7 +124,12 @@ void makeLine(SynthSequencer &s, float startTime, int number,
               float duration, float startFreq, float endFreq, float amp) {
 
     for (int i = 0; i < number; i++) {
-        s.add<SineEnv>(startTime + i*duration).freq(startFreq + ((i/(float) number) * (endFreq - startFreq))).dur(duration*2).decay(duration).amp(amp);
+        s.add<SineEnv>(startTime + i*duration)
+                .freq(startFreq + ((i/float(number)) * (endFreq - startFreq)))
+                .attack(duration/2)
+                .decay(duration/2)
+                .dur(duration)
+                .amp(amp);
     }
 
 }
@@ -143,13 +148,13 @@ int main(){
     makeLine(app.s, 13, 80, 0.1, 220, 880, 0.12);
     makeLine(app.s, 18, 180, 0.05, 220, 440, 0.19);
     makeLine(app.s, 20, 10, 0.1, 880, 1600, 0.2);
-    makeLine(app.s, 20, 10, 0.1, 880, 1600, 0.3);
-    makeLine(app.s, 21, 10, 0.1, 440, 1600, 0.4);
-    makeLine(app.s, 22, 20, 0.05, 220, 3000, 0.2);
-    makeLine(app.s, 25, 30, 0.1, 3000, 1500, 0.19);
-    makeLine(app.s, 27, 50, 0.2, 4000, 1000, 0.18);
-    makeLine(app.s, 30, 80, 0.2, 3000, 500, 0.17);
-    makeLine(app.s, 31, 10, 0.1, 880, 440, 0.1);
+    makeLine(app.s, 20, 10, 0.2, 880, 1600, 0.3);
+    makeLine(app.s, 21, 10, 0.3, 440, 1600, 0.4);
+    makeLine(app.s, 22, 20, 0.1, 220, 3000, 0.2);
+    makeLine(app.s, 25, 30, 0.4, 3000, 1500, 0.19);
+    makeLine(app.s, 27, 30, 0.5, 4000, 1000, 0.18);
+    makeLine(app.s, 30, 50, 0.6, 3000, 500, 0.17);
+    makeLine(app.s, 31, 10, 1.0, 880, 440, 0.1);
 
     // Start everything
     app.initAudio(44100., 256, 2, 0);
