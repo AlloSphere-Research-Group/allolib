@@ -10,9 +10,6 @@ where:
     -v verbose build. Prints full cmake log and verbose build.
 "
 
-if [ $(uname -s) != MINGW64* ]; then
-  WINDOWS_FLAGS=-DCMAKE_GENERATOR_PLATFORM=x64
-fi
 
 INITIALDIR=${PWD} # gives absolute path
 # echo "Script executed from: ${INITIALDIR}"
@@ -37,10 +34,10 @@ PROC_FLAG=$((NPROC - 1))
 
 if [ $(uname -s) == "Darwin" ]; then
   BUILD_FLAGS=${BUILD_FLAGS} -j${PROC_FLAG}
-fi
-
-if [ $(uname -s) == "Linux" ]; then
+elif [ $(uname -s) == "Linux" ]; then
   BUILD_FLAGS=${BUILD_FLAGS} -j${PROC_FLAG}
+elif [ $(uname -s) != MINGW64* ]; then
+  WINDOWS_FLAGS=-DCMAKE_GENERATOR_PLATFORM=x64
 fi
 
 # resolve flags
