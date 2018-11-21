@@ -12,6 +12,8 @@ using namespace std;
 Parameter freq("Frequency", "", 440.0);
 Parameter amp("Amplitude", "", 0.1);
 
+Parameter naming("Name", "Group/0", 0.1, "Pre/fix");
+
 // will be used for sending values to ParameterServer
 osc::Send sender(9010, "127.0.0.1");
 
@@ -25,7 +27,7 @@ int main(int argc, char *argv[])
   //	paramServer.registerParameter(freq);
   //	paramServer.registerParameter(amp);
   // Or you can use the streaming operators:
-  paramServer << freq << amp;
+  paramServer << freq << amp << naming;
 
   paramServer.verbose();
   // Print information about the server. Shows address, port and OSC parameter
