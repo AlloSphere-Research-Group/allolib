@@ -2,13 +2,12 @@
 
 Example: Point Cloud using Geometry Shader and Texture Sprite
 
-Description: The goal of this example is to show how to make a "point cloud", a
-common request from users. It is also an example of how to use a texture to
-render each point in the mesh, a scheme knowns as "point sprites". We do not use
-the old OpenGL "fixed pipeline"; Instead, adapted shaders from the _OpenGL 4.0
-Shading Language Cookbook_ so this is also an example of one way to use a
-"geometry shader". Additionally, this provides an example of how to color data
-through the geometry shader using GLSL structs.
+Description: The goal of this example is to show how to make a "point cloud". It
+is also an example of how to use a texture in the rendering of each point in a
+mesh, a scheme known as "point sprites". We do not use the old OpenGL "fixed
+pipeline"; Instead, we adapt shaders from the _OpenGL 4.0 Shading Language
+Cookbook_ so this is also an example of using a "geometry shader". In addition,
+we use GLSL structs to pass color data through the geometry shader.
 
 Tags: point cloud, texture sprite, geometry shader, GLSL version 400
 
@@ -54,7 +53,8 @@ uniform sampler2D alphaTexture;
 layout (location = 0) out vec4 fragmentColor;
 
 void main() {
-  // use the first 3 components of the color (xyz is rgb) with the texture value for alpha
+  // use the first 3 components of the color (xyz is rgb), but take the alpha value from the texture
+  //
   fragmentColor = vec4(fragment.color.xyz, texture(alphaTexture, fragment.textureCoordinate));
 }
 )";
@@ -62,11 +62,16 @@ void main() {
 const char* geometry = R"(
 #version 400
 
+// take in a point and output a triangle strip with 4 vertices (aka a "quad")
+//
 layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 
-uniform float halfSize;  // Half the width of the quad
 uniform mat4 al_ProjectionMatrix;
+
+// this uniform is *not* passed in automatically by AlloLib; do it manually
+//
+uniform float halfSize;
 
 in Vertex {
   vec4 color;
@@ -78,7 +83,7 @@ out Fragment {
 } fragment;
 
 void main() {
-  mat4 m = al_ProjectionMatrix;
+  mat4 m = al_ProjectionMatrix; // rename to make lines shorter
   vec4 v = gl_in[0].gl_Position; // al_ModelViewMatrix * gl_Position
 
   gl_Position = m * (v + vec4(-halfSize, -halfSize, 0.0, 0.0));
@@ -123,7 +128,8 @@ struct AlloApp : App {
       for (int i = 0; i < Nx; ++i) {
         float x = float(i) / (Nx - 1) * 2 - 1;
         float m = exp(-13 * (x * x + y * y));
-        alpha[j * Nx + i] = m * 32000;
+        m *= pow(2, 15) - 1;  // scale by the largest positive short int
+        alpha[j * Nx + i] = m;
       }
     }
     texture.submit(&alpha[0]);
@@ -132,7 +138,7 @@ struct AlloApp : App {
     //
     shader.compile(vertex, fragment, geometry);
 
-    // create a mesh of points scattered randomly
+    // create a mesh of points scattered randomly with random colors
     //
     pointMesh.primitive(Mesh::POINTS);
     for (int i = 0; i < N; i++) {
@@ -143,10 +149,14 @@ struct AlloApp : App {
     }
   }
 
+  // animate the size of each sprite
+  //
   float phase = 0;
+  float halfSize = 0;
   void onAnimate(double dt) override {
     phase += dt;
     if (phase > 3) phase -= 3;
+    halfSize = 0.2 * phase / 3;
   }
 
   void onDraw(Graphics& g) override {
@@ -158,9 +168,7 @@ struct AlloApp : App {
 
     texture.bind();
     g.shader(shader);
-    float halfSize = 0.2 * phase / 3;
-    halfSize = halfSize < 0.05 ? 0.05 : halfSize;
-    g.shader().uniform("halfSize", halfSize);
+    g.shader().uniform("halfSize", halfSize < 0.05 ? 0.05 : halfSize);
     g.draw(pointMesh);
     texture.unbind();
   }
