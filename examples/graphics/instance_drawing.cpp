@@ -1,3 +1,20 @@
+/*
+
+Example: Instanced Rendering
+
+Description: Draw a mesh multiple time efficiently
+             while modifying certain attribute
+             such as position. Instancing can be efficient
+             since it can reduce the number of draw calls.
+             But it will involve writing a custom shader for
+             one's purpose.
+
+Tags: Instanced Rendering
+
+Author: Keehong Youn, 2018
+
+*/
+
 #include "al/core.hpp"
 #include <iostream>
 #include <vector>
@@ -18,7 +35,7 @@ layout (location = 0) in vec3 position;
 // "attribute divisor = 1" which means for given buffer for attibute 1,
 // index for reading that buffer will increase per-instance, not per-vertex
 // divisor = 0 is default value and means per-vertex increase
-layout (location = 1) in vec4 offset; // has w = 1
+layout (location = 1) in vec3 offset;
 
 out float t;
 
@@ -26,11 +43,11 @@ void main()
 {
   // to multiply position vector with matrices,
   // 4th component must be 1 (homogeneous coord)
-  vec4 p = vec4(scale * position, 0.0) + offset;
+  vec4 p = vec4(scale * position + offset, 1.0);
   gl_Position = al_ProjectionMatrix * al_ModelViewMatrix * p;
   // we also have access to index of instance,
   // for example, when drawing 100 instances,
-  // `gl_InstanceID goes 0 to 99
+  // `gl_InstanceID` goes 0 to 99
   t = float(gl_InstanceID) / (100000.0 - 1.0);
 }
 )";
@@ -45,31 +62,19 @@ void main()
 }
 )";
 
-const char* gl_error_string() {
-  unsigned int e = glGetError();
-  switch (e) {
-  case GL_INVALID_ENUM: return "GL_INVALID_ENUM";
-  case GL_INVALID_VALUE: return "GL_INVALID_VALUE";
-  case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
-  case GL_INVALID_FRAMEBUFFER_OPERATION: return "GL_INVALID_FRAMEBUFFER_OPERATION";
-  case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
-  case GL_NO_ERROR: return "GL_NO_ERROR";
-  default: return "UNKNOWN_ERROR";
-  }
-}
-
-struct Float4
-{
-  float data[4] = {};
-  void set(float x, float y, float z, float w) {
-    data[0] = x; data[1] = y; data[2] = z; data[3] = w;
+// Not only al::Vec, any user defined data type can be used
+// Here a custom 3D vector is used
+struct Float3 {
+  float data[3] = {};
+  void set(float x, float y, float z) {
+    data[0] = x; data[1] = y; data[2] = z;
   }
   float operator[](size_t i) const { return data[i]; }
   float& operator[](size_t i) { return data[i]; }
 };
 
-struct MyApp : App
-{
+struct MyApp : App {
+
   const size_t num_instances = 100000;
   float wx = 0;
   float px = 0;
@@ -83,7 +88,7 @@ struct MyApp : App
   bool PAUSE = false;
   VAOMesh mesh;
   BufferObject buffer;
-  vector<Float4> positions;
+  vector<Float3> positions;
   ShaderProgram shader_instancing;
 
   void randomize() {
@@ -117,7 +122,7 @@ struct MyApp : App
     auto& vao = mesh.vao();
     vao.bind();
     vao.enableAttrib(1);
-    vao.attribPointer(1, buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    vao.attribPointer(1, buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
     // and specified to have attibute divisor 1
     glVertexAttribDivisor(1, 1); // should be called with target vao bound
   }
@@ -125,31 +130,32 @@ struct MyApp : App
   void onDraw(Graphics& g) override {
     static float time = 0;
 
-    if (PAUSE) goto LABEL_DRAW;
+    if (!PAUSE) {
 
-    time += 0.01;
+        time += 0.01;
 
-    if (rnd::uniform() > 0.99) {
-      time = 0;
-      randomize();
+        if (rnd::uniform() > 0.99) {
+            time = 0;
+            randomize();
+        }
+
+        float t, x, y, z;
+        for (size_t i = 0; i < positions.size(); i += 1) {
+            t = i / float(positions.size() - 1);
+            t *= loops;
+            x = 20 * sin(wx * t + px + time);
+            y = 20 * sin(wy * t + py + time);
+            z = 20 * sin(wz * t + pz + time);
+            positions[i].set(x, y, z);
+        }
+        // send per-instance data to buffer
+        // buffer was attached aas attribute in onCreate
+        // so if buffer gets updated vao will use it automatically
+        buffer.bind();
+        buffer.data(positions.size() * 3 * sizeof(float), positions.data());
+
     }
 
-    float t, x, y, z;
-    for (size_t i = 0; i < positions.size(); i += 1) {
-      t = i / float(positions.size() - 1);
-      t *= loops;
-      x = 20 * sin(wx * t + px + time);
-      y = 20 * sin(wy * t + py + time);
-      z = 20 * sin(wz * t + pz + time);
-      positions[i].set(x, y, z, 1);
-    }
-    // send per-instance data to buffer
-    // buffer was attached aas attribute in onCreate
-    // so if buffer gets updated vao will use it automatically
-    buffer.bind();
-    buffer.data(positions.size() * 4 * sizeof(float), positions.data());
-  
-    LABEL_DRAW:
     g.clear(0);
     g.polygonMode(Graphics::LINE);
     g.depthTesting(false);
@@ -179,6 +185,9 @@ struct MyApp : App
       }
     }
     else {
+      // Note that we call draw as many times as
+      // number of times we want to draw the mesh,
+      // compared to one draw call in instancing case
       g.color(1);
       for (size_t i = 0; i < positions.size(); i += 1) {
         const auto& p = positions[i];
@@ -190,7 +199,7 @@ struct MyApp : App
       }
     }
 
-  } // onDraw
+  }
 
   void onKeyDown(const Keyboard& k) override {
     if (k.key() == ' ') {
@@ -204,8 +213,7 @@ struct MyApp : App
 
 };
 
-int main()
-{
+int main() {
   MyApp app;
   app.start();
 }

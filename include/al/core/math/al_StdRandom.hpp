@@ -24,11 +24,11 @@ public:
     std::uniform_int_distribution<int> distribution;
 
     rand_uniformi();
-    rand_uniformi(unsigned int const seed);
-    void seed(unsigned int const seed);
+    rand_uniformi(unsigned int seed);
+    void seed(unsigned int seed);
     int operator()();
-    int operator()(int const b);
-    int operator()(int const a, int const b);
+    int operator()(int b);
+    int operator()(int a, int b);
 };
 
 // give: interval [a, b)
@@ -40,11 +40,11 @@ public:
     std::uniform_real_distribution<float> distribution;
 
     rand_uniformf();
-    rand_uniformf(unsigned int const seed);
-    void seed(unsigned int const seed);
+    rand_uniformf(unsigned int seed);
+    void seed(unsigned int seed);
     float operator()();
-    float operator()(float const b);
-    float operator()(float const a, float const b);
+    float operator()(float b);
+    float operator()(float a, float b);
 };
 
 // give: mean of number of times an event happening in certain interval
@@ -56,10 +56,10 @@ public:
     std::poisson_distribution<int> distribution;
 
     rand_poisson();
-    rand_poisson(unsigned int const seed);
-    void seed(unsigned int const seed);
+    rand_poisson(unsigned int seed);
+    void seed(unsigned int seed);
     int operator()();
-    int operator()(float const m);
+    int operator()(float m);
 };
 
 // give: rate of an event happening in unit interval
@@ -71,10 +71,10 @@ public:
     std::exponential_distribution<float> distribution;
 
     rand_exponential();
-    rand_exponential(unsigned int const seed);
-    void seed(unsigned int const seed);
+    rand_exponential(unsigned int seed);
+    void seed(unsigned int seed);
     float operator()();
-    float operator()(float const r);
+    float operator()(float r);
 };
 
 // give: mean and standard deviation
@@ -86,11 +86,12 @@ public:
     std::normal_distribution<float> distribution;
    
     rand_normal();
-    rand_normal(unsigned int const seed);
-    void seed(unsigned int const seed);
+    rand_normal(unsigned int seed);
+    void seed(unsigned int seed);
     float operator()();
-    float operator()(float const mean, float const stdev);
+    float operator()(float mean, float stdev);
 };
+
 
 namespace rnd {
 
@@ -103,7 +104,14 @@ rand_uniformi& global_ui();
 inline int uniformi(int high) { return global_ui()(high); }
 
 // [low, high]
-inline int uniformi(int low, int high) { return global_ui()(low, high); }
+inline int uniformi(int low, int high) {
+    if (high < low) {
+        global_ui()(high, low);
+    }
+    else {
+        global_ui()(low, high);
+    }
+}
 
 /// Returns uniform random in [0, 1)
 inline float uniform(){ return global()(); }
@@ -115,7 +123,12 @@ inline T uniform(const T& hi){ return global()(0.0f, float(hi)); }
 /// Returns uniform random in [lo, hi)
 template <class T>
 inline T uniform(const T& hi, const T& lo){
-    return global()(float(lo), float(hi));
+    if (hi < lo) {
+        return global()(float(hi), float(lo));
+    }
+    else {
+        return global()(float(lo), float(hi));
+    }
 }
 
 /// Returns signed uniform random in (-1, 1)
