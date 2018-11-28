@@ -111,20 +111,21 @@ public:
     /**
      * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields
      */ 
-    virtual int getParamFields(float *pFields, int maxParams = -1) override {
-        int numFields = SynthVoice::getParamFields(pFields, maxParams);
-        pFields += numFields;
-        auto *elems = mPose.vec().elems();
-        *pFields++= *elems++;
-        *pFields++= *elems++;
-        *pFields++= *elems;
+    virtual std::vector<float> getParamFields() override {
+
+        std::vector<float> pFields = SynthVoice::getParamFields();
+        pFields.reserve(pFields.size() + 8);
+        pFields.insert(pFields.end(), mPose.vec().begin(), mPose.vec().end());
+
         auto *comps = mPose.quat().components;
-        *pFields++= *comps++;
-        *pFields++= *comps++;
-        *pFields++= *comps++;
-        *pFields++= *comps;
-        *pFields = mSize;
-        return numFields + 8;
+
+        pFields.push_back(*comps++);
+        pFields.push_back(*comps++);
+        pFields.push_back(*comps++);
+        pFields.push_back(*comps);
+
+        pFields.push_back(mSize);
+        return pFields;
     }
 
 protected:

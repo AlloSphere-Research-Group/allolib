@@ -135,25 +135,43 @@ public:
      * @param maxParams the maximum number of parameters to process (i.e. the allocated size of pFields)
      * @return the number of parameters written
      * 
+     * Copy the values from the internal parameters that have been
+     * registered using registerParameterAsField or the << operator.
+     */
+    int getParamFields(float *pFields, int maxParams = -1) {
+        std::vector<float> pFieldsVector = getParamFields();
+        if (maxParams == -1) {
+            maxParams = pFieldsVector.size();
+        }
+        int count = 0;
+        for (auto param: pFieldsVector) {
+            if (count == maxParams) {
+                break;
+            }
+            *pFields++ = param;
+            count++;
+        }
+        return count;
+    }
+
+    /**
+     * @brief Get this instance's parameter fields
+     * @return pFields a pre-allocated array where the parameter fields will be written.
+     *
      * The default behavior is to copy the values from the internal parameters that have been
      * registered using registerParameterAsField or the << operator. Override
      * this function in your voice if you need a different behavior.
      */
-    virtual int getParamFields(float *pFields, int maxParams = -1) {
-        if (maxParams == -1) {
-            maxParams = mParametersToFields.size();
-        }
-        int count = 0;
+    virtual std::vector<float> getParamFields() {
+        std::vector<float> pFields;
+        pFields.reserve(mParametersToFields.size());
         for (auto param: mParametersToFields) {
-            if (count == maxParams) {
-                break;
+            if (param) {
+                pFields.push_back(param->toFloat());
             }
-            if (param)
-            *pFields++ = param->toFloat(); 
-            count++;
         }
-        return count;
-        }
+        return pFields;
+    }
 
     /**
      * @brief Override this function to define audio processing.
@@ -254,6 +272,8 @@ public:
     SynthVoice& operator<<(ParameterMeta &param) {return registerParameterAsField(param);}
 
     SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
+
+    std::vector<ParameterMeta *> parameters() {return mParametersToFields;}
 
 protected:
 
@@ -461,7 +481,7 @@ public:
      * Warning: this function is not thread safe and might crash if the audio
      * or graphics is running. Only use for temporary debugging.
      */
-    void print();
+    void print(std::ostream &stream = std::cout);
 
     /**
      * @brief Set audio output gain
@@ -478,7 +498,7 @@ public:
     /**
      * @brief register a callback to be notified of a trigger on event
      */
-    void registerTriggerOnCallback(std::function<void(SynthVoice *voice, int offsetFrames, int id, void *userData)> cb, void *userData) {
+    void registerTriggerOnCallback(std::function<void(SynthVoice *voice, int offsetFrames, int id, void *userData)> cb, void *userData = nullptr) {
         TriggerOnCallback cbNode(cb, userData);
         mTriggerOnCallbacks.push_back(cbNode);
     }
@@ -486,9 +506,17 @@ public:
     /**
      * @brief register a callback to be notified of a trigger off event
      */
-    void registerTriggerOffCallback(std::function<void(int id, void *userData)> cb, void *userData) {
+    void registerTriggerOffCallback(std::function<void(int id, void *userData)> cb, void *userData = nullptr) {
         TriggerOffCallback cbNode(cb, userData);
         mTriggerOffCallbacks.push_back(cbNode);
+    }
+
+    /**
+     * @brief register a callback to be notified of allocation of a voice.
+     */
+    void registerAllocateCallback(std::function<void(SynthVoice *voice, void *)> cb, void *userData = nullptr) {
+        AllocationCallback cbNode(cb, userData);
+        mAllocationCallbacks.push_back(cbNode);
     }
 
     /**
@@ -497,12 +525,17 @@ public:
      * This is needed for remote instantiation and for text sequence playback.
      */
     template<class TSynthVoice>
-    void registerSynthClass(std::string name, bool allowAutoAllocation = true) {
+    void registerSynthClass(std::string name = "", bool allowAutoAllocation = true) {
+        if (name.size() == 0) {
+            name = demangle(typeid(TSynthVoice).name());
+        }
         if (mCreators.find(name) != mCreators.end()) {
             std::cout << "Warning: Overriding registration of SynthVoice: " << name << std::endl;
         }
-        if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
-            mNoAllocationList.push_back(name);
+        if (!allowAutoAllocation) {
+            if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
+                mNoAllocationList.push_back(name);
+            }
         }
         mCreators[name] = []() {
             TSynthVoice *voice = new TSynthVoice;
@@ -514,7 +547,11 @@ public:
     SynthVoice *allocateVoice(std::string name) {
         if (mCreators.find(name) != mCreators.end()) {
             std::cout << "Allocating (from name) voice of type " << name << "." << std::endl;
-            return mCreators[name]();
+            SynthVoice *voice = mCreators[name]();
+            for(auto allocCb: mAllocationCallbacks) {
+                allocCb.first(voice, allocCb.second);
+            }
+            return voice;
         } else {
             std::cout << "Can't allocate voice of type " << name << ". Voice not registered and no polyphony." << std::endl;
         }
@@ -542,6 +579,8 @@ protected:
                 } else {
                     mActiveVoices = mVoicesToInsert;
                 }
+                std::cout << "Voice on "<<  mVoicesToInsert->id() << std::endl;
+
                 mVoicesToInsert = nullptr;
             }
             mVoiceToInsertLock.unlock();
@@ -645,6 +684,10 @@ protected:
 
     typedef std::pair<std::function<void(int id, void *)>, void *> TriggerOffCallback;
     std::vector<TriggerOffCallback> mTriggerOffCallbacks;
+
+    typedef std::pair<std::function<void(SynthVoice *voice, void *)>, void *> AllocationCallback;
+
+    std::vector<AllocationCallback> mAllocationCallbacks;
 
     float mAudioGain {1.0};
 
@@ -1119,6 +1162,9 @@ TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
         std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
         freeVoice = new TSynthVoice;
         freeVoice->init();
+        for(auto allocCb: mAllocationCallbacks) {
+            allocCb.first(freeVoice, allocCb.second);
+        }
     }
     freeVoice->userData(mDefaultUserData);
     return static_cast<TSynthVoice *>(freeVoice);
@@ -1132,10 +1178,18 @@ void PolySynth::allocatePolyphony(int number) {
         while (lastVoice->next) { lastVoice = lastVoice->next; }
     } else {
         lastVoice = mFreeVoices = new TSynthVoice;
+        lastVoice->init();
+        for(auto allocCb: mAllocationCallbacks) {
+            allocCb.first(lastVoice, allocCb.second);
+        }
         number--;
     }
     for(int i = 0; i < number; i++) {
         lastVoice->next = new TSynthVoice;
+        lastVoice->init();
+        for(auto allocCb: mAllocationCallbacks) {
+            allocCb.first(lastVoice, allocCb.second);
+        }
         lastVoice = lastVoice->next;
     }
 }

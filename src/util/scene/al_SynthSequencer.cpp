@@ -359,14 +359,14 @@ PolySynth &PolySynth::remove(AudioCallback &v) {
     return *this;
 }
 
-void PolySynth::print() {
+void PolySynth::print(std::ostream &stream) {
     {
         std::unique_lock<std::mutex> lk(mFreeVoiceLock);
         auto voice = mFreeVoices;
         int counter = 0;
-        std::cout << " ---- Free Voices ----" << std:: endl;
+        stream << " ---- Free Voices ----" << std:: endl;
         while(voice) {
-            std::cout << "Voice " << counter++ << " " << voice->id() << " : " <<  typeid(voice).name() << " " << voice << std::endl;
+            stream << "Voice " << counter++ << " " << voice->id() << " : " <<  typeid(voice).name() << " " << voice << std::endl;
             voice = voice->next;
         }
     }
@@ -374,9 +374,9 @@ void PolySynth::print() {
     {
         auto voice = mActiveVoices;
         int counter = 0;
-        std::cout << " ---- Active Voices ----" << std:: endl;
+        stream << " ---- Active Voices ----" << std:: endl;
         while(voice) {
-            std::cout << "Voice " << counter++ << " " << voice->id() << " : " <<  typeid(voice).name() << " " << voice  << std::endl;
+            stream << "Voice " << counter++ << " " << voice->id() << " : " <<  typeid(voice).name() << " " << voice  << std::endl;
             voice = voice->next;
         }
     }
@@ -385,9 +385,9 @@ void PolySynth::print() {
         std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
         auto voice = mVoicesToInsert;
         int counter = 0;
-        std::cout << " ---- Queued Voices ----" << std:: endl;
+        stream << " ---- Queued Voices ----" << std:: endl;
         while(voice) {
-            std::cout << "Voice " << counter++ << " " << voice->id() << " : " <<  typeid(voice).name() << " " << voice  << std::endl;
+            stream << "Voice " << counter++ << " " << voice->id() << " : " <<  typeid(voice).name() << " " << voice  << std::endl;
             voice = voice->next;
         }
     }

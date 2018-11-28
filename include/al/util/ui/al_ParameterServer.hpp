@@ -149,7 +149,7 @@ public:
      * The print function will print the server configuration (address and port)
      * and will list the parameters with their addresses.
      */
-    void print();
+    void print(std::ostream &stream = std::cout);
 
     /**
      * @brief stopServer stops the OSC server thread. Calling this function

@@ -127,6 +127,7 @@ void DynamicScene::prepare(AudioIOData &io) {
 
 void DynamicScene::render(Graphics &g) {
     if (mDrawWorldMarker) {
+        g.color(0.7);
         g.draw(mWorldMarker);
     }
 
@@ -158,6 +159,7 @@ void DynamicScene::render(Graphics &g) {
 
 void DynamicScene::render(AudioIOData &io) {
     assert(mSpatializer && "ERROR: call setSpatializer before starting audio");
+    io.frame(0);
     mSpatializer->prepare(io);
     if (mMasterMode == TIME_MASTER_AUDIO) {
         processVoices();
@@ -322,6 +324,8 @@ void DynamicScene::print(ostream &stream) {
     stream << "Far bias: " << mDistAtten.farBias() << std::endl;
 
     mSpatializer->print(stream);
+
+    PolySynth::print(stream);
 }
 
 void DynamicScene::updateThreadFunc(UpdateThreadFuncData data) {

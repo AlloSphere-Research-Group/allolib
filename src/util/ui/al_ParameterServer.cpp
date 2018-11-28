@@ -32,7 +32,7 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, int value)
     mListenerLock.lock();
     for(osc::Send *sender: mOSCSenders) {
         sender->send(OSCaddress, value);
-        std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
+//        std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
     }
     mListenerLock.unlock();
 }
@@ -42,7 +42,7 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, std::string value)
     mListenerLock.lock();
     for(osc::Send *sender: mOSCSenders) {
         sender->send(OSCaddress, value);
-//		std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
+        std::cout << "Notifying " << sender->address() << ":" << sender->port() << " -- " << OSCaddress << std::endl;
     }
     mListenerLock.unlock();
 }
@@ -113,10 +113,15 @@ void ParameterServer::listen(int oscPort, std::string oscAddress)
         delete mServer;
         mServer = nullptr;
     }
-    mServer = new osc::Recv(oscPort, oscAddress.c_str(), 0.001); // Is 1ms wait OK?
+    mServer = new osc::Recv();
     if (mServer) {
-        mServer->handler(*this);
-        mServer->start();
+        if (mServer->open(oscPort, oscAddress.c_str())) {
+            mServer->handler(*this);
+            mServer->start();
+        } else {
+            delete mServer;
+            mServer = nullptr;
+        }
     } else {
         std::cout << "Error starting OSC server." << std::endl;
     }
@@ -203,91 +208,6 @@ void ParameterServer::unregisterParameter(ParameterMeta &param)
     }
 }
 
-//ParameterServer &ParameterServer::registerParameter(ParameterString &param)
-//{
-//    mParameterLock.lock();
-//    mStringParameters.push_back(&param);
-//    mParameterLock.unlock();
-//    mListenerLock.lock();
-//    param.registerChangeCallback([&](std::string value){
-//        notifyListeners(param.getFullAddress(), value);
-//    });
-//    mListenerLock.unlock();
-//    return *this;
-//}
-
-//void ParameterServer::unregisterParameter(ParameterString &param)
-//{
-//    mParameterLock.lock();
-//    auto it = mStringParameters.begin();
-//    for(it = mStringParameters.begin(); it != mStringParameters.end(); it++) {
-//        if (*it == &param) {
-//            mStringParameters.erase(it);
-//        }
-//    }
-//    mParameterLock.unlock();
-//}
-
-//ParameterServer &ParameterServer::registerParameter(ParameterVec3 &param)
-//{
-//    mParameterLock.lock();
-//    mVec3Parameters.push_back(&param);
-//    mParameterLock.unlock();
-//    mListenerLock.lock();
-//    param.registerChangeCallback([&](Vec3f value){
-//        notifyListeners(param.getFullAddress(), value);
-//    });
-//    mListenerLock.unlock();
-//    return *this;
-//}
-
-//void ParameterServer::unregisterParameter(ParameterVec3 &param)
-//{
-//    std::unique_lock<std::mutex> lk(mParameterLock);
-//    auto it = mVec3Parameters.begin();
-//    for(it = mVec3Parameters.begin(); it != mVec3Parameters.end(); it++) {
-//        if (*it == &param) {
-//            mVec3Parameters.erase(it);
-//        }
-//    }
-//    mParameterLock.unlock();
-//}
-
-//ParameterServer &ParameterServer::registerParameter(ParameterPose &param)
-//{
-//    mParameterLock.lock();
-//    mPoseParameters.push_back(&param);
-//    mParameterLock.unlock();
-//    mListenerLock.lock();
-//    param.registerChangeCallback([&](Pose value){
-//        notifyListeners(param.getFullAddress(), value);
-//    });
-//    mListenerLock.unlock();
-//    return *this;
-
-//}
-
-//void ParameterServer::unregisterParameter(ParameterPose &param)
-//{
-//    std::unique_lock<std::mutex> lk(mParameterLock);
-//    auto it = mPoseParameters.begin();
-//    for(it = mPoseParameters.begin(); it != mPoseParameters.end(); it++) {
-//        if (*it == &param) {
-//            mPoseParameters.erase(it);
-//        }
-//    }
-//}
-
-//ParameterServer &ParameterServer::registerParameterBundle(ParameterBundle &bundle)
-//{
-//    if (mCurrentActiveBundle.find(bundle.name()) == mCurrentActiveBundle.end()) {
-//        mParameterBundles[bundle.name()] = std::vector<ParameterBundle *>();
-//        mCurrentActiveBundle[bundle.name()] = 0;
-//    }
-//    mParameterBundles[bundle.name()].push_back(&bundle);
-//    return *this;
-//}
-
 void ParameterServer::onMessage(osc::Message &m)
 {
     std::string requestAddress = "/request";
@@ -324,23 +244,27 @@ void ParameterServer::onMessage(osc::Message &m)
     mParameterLock.unlock();
 }
 
-void ParameterServer::print()
+void ParameterServer::print(std::ostream &stream)
 {
-    std::cout << "Parameter server listening on " << mServer->address()
+    if (!mServer) {
+        stream << "Parameter server not running." << std::endl;
+        return;
+    }
+    stream << "Parameter server listening on " << mServer->address()
               << ":" << mServer->port() << std::endl;
     for (ParameterMeta *p:mParameters) {
         printParameterInfo(p);
     }
     for (auto bundleGroup: mParameterBundles) {
-        std::cout << " --- Bundle " << bundleGroup.first << std::endl;
+        stream << " --- Bundle " << bundleGroup.first << std::endl;
         for (auto bundle: bundleGroup.second) {
             printBundleInfo(bundle, bundleGroup.first);
         }
     }
     if (mOSCSenders.size() > 0) {
-        std::cout << "Registered listeners: " << std::endl;
+        stream << "Registered listeners: " << std::endl;
         for (auto sender:mOSCSenders) {
-            std::cout << sender->address() << ":" << sender->port() << std::endl;
+            stream << sender->address() << ":" << sender->port() << std::endl;
         }
     }
 }
