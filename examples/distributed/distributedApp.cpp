@@ -99,7 +99,7 @@ int main(){
     app.startFPS();
     app.print();
     for (int i = 0; i < 10; i++) {
-        if (app.isMaster()) {
+        if (app.isPrimary()) {
             std::cout << " Run " << i << " ---------------" <<std::endl;
         }
         app.simulate(0);

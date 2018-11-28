@@ -252,7 +252,6 @@ public:
 	void parse(const char *packet, int size, TimeTag timeTag, const char *senderAddr);
 };
 
-// FIXME: These two classes should be merged...
 /// Interface for classes that can consume OSC messages
 /// When you write a class that inherits from PacketHandler, you might want to add a
 /// method to register MessageConsumer objects. This allows writing classes that can consume

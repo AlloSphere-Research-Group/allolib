@@ -421,7 +421,7 @@ Recv::Recv(): mBuffer(1024), mBackground(false) {}
 Recv::Recv(uint16_t port, const char *address, al_sec timeout)
   : mBuffer(1024), mBackground(false)
 {
-  open(port, address);
+  open(port, address, timeout);
 }
 
 Recv::~Recv() { stop(); }
@@ -434,7 +434,7 @@ bool Recv::open(uint16_t port, const char * address, al_sec timeout) {
     mPort = port;
   }
   catch (const std::runtime_error& e) {
-    std::cout << "run time exception at Recv::open: " << e.what() << std::endl;
+    std::cout << "run time exception at Recv::open: " << e.what() << " " << address << ":" << port << std::endl;
     return false;
   }
   return true;

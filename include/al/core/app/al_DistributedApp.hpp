@@ -60,6 +60,7 @@ public:
       ROLE_CONTROL,
       ROLE_INTERFACE, // For interface server
       ROLE_DESKTOP, // Application runs as single desktop app
+      ROLE_DESKTOP_REPLICA, // Application runs as single desktop app
       ROLE_USER // User defined roles can add from here (using bitshift to use the higher bits)
   } Role;
 
@@ -73,7 +74,7 @@ public:
 
       MPI_Get_processor_name(processor_name, &name_len);
 #endif
-      if (isMaster()) {
+      if (isPrimary()) {
           configLoader.setFile("distributed_app.toml");
           configLoader.setDefaultValue("distributed", false);
           configLoader.setDefaultValue("broadcastAddress", std::string("192.168.0.255"));
@@ -207,11 +208,11 @@ public:
 #endif
   }
 
-  bool isMaster() {
+  bool isPrimary() {
 #ifdef AL_BUILD_MPI
       return world_rank == 0;
 #else
-      return true;
+      return role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP;
 #endif
   }
 
@@ -329,18 +330,36 @@ template<class TSharedState>
 inline void DistributedApp<TSharedState>::start() {
   glfw::init(is_verbose);
 
+
+  uint16_t sendPort = 9010;
   uint16_t receiverPort = 9100;
   if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) {
-      mParameterServer = std::make_shared<ParameterServer>("", 9010);
-      for (auto member: mRoleMap) {
-          // Relay all parameters to renderers
-          if (std::find(member.second.begin(), member.second.end(), ROLE_RENDERER) != member.second.end()) {
-              mParameterServer->addListener(member.first, receiverPort);
-              continue;
+      mParameterServer = std::make_shared<ParameterServer>("0.0.0.0", sendPort);
+      if (mParameterServer->serverRunning()) {
+          mParameterServer->addListener("127.0.0.1", 9100);
+          for (auto member: mRoleMap) {
+              // Relay all parameters to renderers
+              if (std::find(member.second.begin(), member.second.end(), ROLE_RENDERER) != member.second.end()) {
+                  mParameterServer->addListener(member.first, receiverPort);
+                  continue;
+              }
+          }
+      } else {
+          int portOffset = 0;
+          int maxInstances = 64;
+          while (!mParameterServer->serverRunning() && portOffset < maxInstances) {
+              mParameterServer->listen(receiverPort + portOffset++, "0.0.0.0");
+          }
+          if (mParameterServer->serverRunning()) {
+              mRole = ROLE_DESKTOP_REPLICA;
+              std::cout << "Application is replica on port: " << mParameterServer->serverPort() << std::endl;
+          } else {
+              std::cerr << "Warning: Application has no network role." << std::endl;
+              mRole = ROLE_NONE;
           }
       }
   } else {
-      mParameterServer = std::make_shared<ParameterServer>("", receiverPort);
+      mParameterServer = std::make_shared<ParameterServer>("0.0.0.0", receiverPort);
   }
 //  std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
   onInit();
@@ -360,7 +379,10 @@ inline void DistributedApp<TSharedState>::start() {
   if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) initFlowApp(true);
   else initFlowApp(false);
   
-  mParameterServer->registerOSCListener(this); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
+  if (mParameterServer) {
+      mParameterServer->registerOSCListener(this); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
+      std::cout << "Registered paramter server" <<std::endl;
+  }
 
   FPS::startFPS(); // WindowApp (FPS)
 
