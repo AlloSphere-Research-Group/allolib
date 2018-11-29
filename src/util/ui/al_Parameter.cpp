@@ -54,6 +54,51 @@ void Parameter::set(float value)
     mFloatValue = value;
 }
 
+// ParameterInt ------------------------------------------------------------------
+ParameterInt::ParameterInt(std::string parameterName, std::string Group,
+                     int32_t defaultValue,
+                     std::string prefix,
+                     int32_t min,
+                     int32_t max) :
+    ParameterWrapper<int32_t>(parameterName, Group, defaultValue, prefix, min, max)
+{
+	mIntValue = defaultValue;
+}
+
+int32_t ParameterInt::get()
+{
+	return mIntValue;
+}
+
+void ParameterInt::setNoCalls(int32_t value, void *blockReceiver)
+{
+	if (value > mMax) value = mMax;
+	if (value < mMin) value = mMin;
+	if (mProcessCallback) {
+        value = (*mProcessCallback)(value); //, mProcessUdata);
+	}
+    if (blockReceiver) {
+        for(auto cb:mCallbacks) {
+            (*cb)(value);
+        }
+	}
+
+	mIntValue = value;
+}
+
+void ParameterInt::set(int32_t value)
+{
+	if (value > mMax) value = mMax;
+	if (value < mMin) value = mMin;
+    if (mProcessCallback) {
+        value = (*mProcessCallback)(value); //, mProcessUdata);
+    }
+    for(auto cb:mCallbacks) {
+        (*cb)(value);
+    }
+    mIntValue = value;
+}
+
 // ParameterBool ------------------------------------------------------------------
 ParameterBool::ParameterBool(std::string parameterName, std::string Group,
                      float defaultValue,

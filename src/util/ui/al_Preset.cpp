@@ -526,6 +526,18 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
             float newVal = paramValue + difference;
             param->set(newVal);
         }
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) == 0) {// ParameterInt
+        ParameterInt *param = dynamic_cast<ParameterInt *>(p);
+        int32_t paramValue = param->get();
+        int32_t difference = values[0] - paramValue;
+        //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
+        if (factor > 0) {
+            difference = difference * factor;
+        }
+        if (difference != 0.0) {
+            int32_t newVal = paramValue + difference;
+            param->set(newVal);
+        }
     } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter pose
         ParameterPose *param = dynamic_cast<ParameterPose *>(p);
         if (values.size() == 7) {
@@ -778,6 +790,9 @@ std::vector<float> PresetHandler::getParameterValue(ParameterMeta *p) {
     } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
         Parameter *param = dynamic_cast<Parameter *>(p);
         return std::vector<float>{ param->get() };
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) == 0) {// ParameterInt
+        ParameterInt *param = dynamic_cast<ParameterInt *>(p);
+        return std::vector<float>{ float(param->get()) };
     } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter pose
         ParameterPose *param = dynamic_cast<ParameterPose *>(p);
         Pose value = param->get();

@@ -439,6 +439,79 @@ private:
 	float mFloatValue;
 };
 
+
+class ParameterInt : public ParameterWrapper<int32_t>
+{
+public:
+	/**
+	* @brief ParameterInt
+   *
+   * @param parameterName The name of the parameter
+   * @param Group The group the parameter belongs to
+   * @param defaultValue The initial value for the parameter
+   * @param prefix An address prefix that is prepended to the parameter's OSC address
+   * @param min Minimum value for the parameter
+   * @param max Maximum value for the parameter
+   *
+   * This Parameter class is designed for parameters that can be expressed as a
+   * single 32 bit integer number. It realies on float being atomic on the
+   * platform so there is no locking. This is a safe assumption for most
+   * desktop platforms today.
+   */
+    ParameterInt(std::string parameterName, std::string Group = "",
+              int32_t defaultValue = 0,
+	          std::string prefix = "",
+	          int32_t min = 0,
+	          int32_t max = 127
+	        );
+
+	ParameterInt(const al::ParameterInt& param) :
+	    ParameterWrapper<int32_t>(param)
+	{
+		mIntValue = param.mIntValue;
+	}
+
+	/**
+	 * @brief set the parameter's value
+	 *
+	 * This function is thread-safe and can be called from any number of threads
+     * It does not block and relies on the atomicity of float.
+	 */
+	virtual void set(int32_t value) override;
+
+	/**
+	 * @brief set the parameter's value without calling callbacks
+	 *
+	 * This function is thread-safe and can be called from any number of threads.
+	 * The processing callback is called, but the callbacks registered with
+	 * registerChangeCallback() are not called. This is useful to avoid infinite
+	 * recursion when a widget sets the parameter that then sets the widget.
+	 */
+	virtual void setNoCalls(int32_t value, void *blockReceiver = NULL) override;
+
+	/**
+	 * @brief get the parameter's value
+	 *
+	 * This function is thread-safe and can be called from any number of threads
+	 *
+	 * @return the parameter value
+	 */
+	virtual int32_t get() override;
+
+	virtual float toFloat() override {
+		return mIntValue;
+	}
+
+	virtual void fromFloat(float value) override {
+		mIntValue = value;
+	}
+
+	float operator= (const int32_t value) { this->set(value); return value; }
+
+private:
+	int32_t mIntValue;
+};
+
 class ParameterBool : public Parameter
 {
 public:

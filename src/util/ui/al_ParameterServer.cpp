@@ -139,9 +139,15 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param)
             notifyListeners(p->getFullAddress(), value);
         });
     } else if (strcmp(typeid(param).name(), typeid(Parameter).name()) == 0) {// Parameter
+        //        std::cout << "Register parameter " << param.getName() << std::endl;
+                Parameter *p = dynamic_cast<Parameter *>(&param);
+                p->registerChangeCallback([this, p](float value){
+                    notifyListeners(p->getFullAddress(), value);
+                });
+    } else if (strcmp(typeid(param).name(), typeid(ParameterInt).name()) == 0) {// ParameterInt
 //        std::cout << "Register parameter " << param.getName() << std::endl;
-        Parameter *p = dynamic_cast<Parameter *>(&param);
-        p->registerChangeCallback([this, p](float value){
+        ParameterInt *p = dynamic_cast<ParameterInt *>(&param);
+        p->registerChangeCallback([this, p](int32_t value){
             notifyListeners(p->getFullAddress(), value);
         });
     } else if (strcmp(typeid(param).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
@@ -465,6 +471,17 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param, std::st
         Parameter *p = dynamic_cast<Parameter *>(param);
         if(address == p->getFullAddress() && m.typeTags() == "f"){
             float val;
+            m >> val;
+            // Extract the data out of the packet
+            p->set(val);
+            // std::cout << "ParameterServer::onMessage" << val << std::endl;
+            return true;
+        }
+        // notifyListeners(p->getFullAddress(), p->get());
+    } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name()) == 0) {// ParameterInt
+        ParameterInt *p = dynamic_cast<ParameterInt *>(param);
+        if(address == p->getFullAddress() && m.typeTags() == "i"){
+            int32_t val;
             m >> val;
             // Extract the data out of the packet
             p->set(val);

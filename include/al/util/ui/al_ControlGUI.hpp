@@ -240,6 +240,7 @@ public:
     static void drawParameterMeta(ParameterMeta *param, std::string suffix);
     static void drawParameter(Parameter *param, std::string suffix);
     static void drawParameterString(ParameterString *param, std::string suffix);
+    static void drawParameterInt(ParameterInt *param, std::string suffix);
     static void drawParameterBool(ParameterBool *param, std::string suffix);
     static void drawParameterPose(ParameterPose *param, std::string suffix);
     static void drawParameterColor(ParameterColor *param, std::string suffix);
@@ -251,6 +252,7 @@ public:
     static void drawParameterMeta(std::vector<ParameterMeta *> params, std::string suffix, int index = 0);
     static void drawParameter(std::vector<Parameter *> params, std::string suffix, int index = 0);
     static void drawParameterString(std::vector<ParameterString *> params, std::string suffix, int index = 0);
+    static void drawParameterInt(std::vector<ParameterInt *> params, std::string suffix, int index = 0);
     static void drawParameterBool(std::vector<ParameterBool *> params, std::string suffix, int index = 0);
     static void drawParameterPose(std::vector<ParameterPose *> params, std::string suffix, int index = 0);
     static void drawParameterColor(std::vector<ParameterColor *> params, std::string suffix, int index = 0);

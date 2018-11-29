@@ -320,6 +320,11 @@ void ControlGUI::drawParameterString(ParameterString *param, string suffix)
     drawParameterString(std::vector<ParameterString *>{param}, suffix);
 }
 
+void ControlGUI::drawParameterInt(ParameterInt *param, string suffix)
+{
+    drawParameterInt(std::vector<ParameterInt *>{param}, suffix);
+}
+
 void ControlGUI::drawParameterBool(ParameterBool * param, std::string suffix)
 {
     drawParameterBool(std::vector<ParameterBool *>{param}, suffix);
@@ -389,6 +394,16 @@ void ControlGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string s
             }
         }
         drawParameterString(ps, suffix, index);
+    } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterInt).name()) == 0) {// ParameterInt
+        std::vector<ParameterInt *> ps;
+        for(auto *p: params) {
+            if (p->getHint("hide") == 0.0) {
+                ps.push_back(dynamic_cast<ParameterInt *>(p));
+            } else {
+                index--;
+            }
+        }
+        drawParameterInt(ps, suffix, index);
     } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
         std::vector<ParameterPose *> poses;
         for(auto *p: params) {
@@ -492,6 +507,20 @@ void ControlGUI::drawParameter(std::vector<Parameter *> params, string suffix, i
             for (auto *p: params) {
                 p->set(value);
             }
+        }
+    }
+}
+
+void ControlGUI::drawParameterInt(std::vector<ParameterInt *> params, string suffix, int index)
+{
+    if (params.size() == 0) return;
+    assert(index < (int) params.size());
+    auto &param = params[index];
+    int value = param->get();
+    bool changed = ImGui::SliderInt((param->displayName() + suffix).c_str(), &value, param->min(), param->max());
+    if (changed) {
+        for (auto *p: params) {
+            p->set(value);
         }
     }
 }
