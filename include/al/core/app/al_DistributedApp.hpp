@@ -135,7 +135,7 @@ public:
           }
       }
 #ifdef AL_BUILD_MPI
-      if (!isMaster()) {
+      if (!isPrimary()) {
 //          int number;
 //          MPI_Recv(&number, 1, MPI_INT, 0, 1, MPI_COMM_WORLD,
 //                   MPI_STATUS_IGNORE);

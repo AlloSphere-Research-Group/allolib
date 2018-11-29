@@ -65,7 +65,7 @@ public:
                    MPI_COMM_WORLD);
 
         // Print the result
-        if (isMaster()) {
+        if (isPrimary()) {
           printf("Total sum = %f, avg = %f\n", global_sum,
                  global_sum / (rank() * num_elements_per_proc));
         }
