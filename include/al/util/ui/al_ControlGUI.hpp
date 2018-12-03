@@ -45,6 +45,7 @@
 #include <map>
 
 #include "al/core/io/al_ControlNav.hpp"
+#include "al/util/ui/al_ParameterGUI.hpp"
 #include "al/util/ui/al_ParameterMIDI.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/util/ui/al_ParameterBundle.hpp"
@@ -237,32 +238,6 @@ public:
     static GUIMarker endGroup() { return GUIMarker(GUIMarker::MarkerType::GROUP_END);}
     static GUIMarker separator() { return GUIMarker(GUIMarker::MarkerType::SEPARATOR);}
 
-    static void drawParameterMeta(ParameterMeta *param, std::string suffix);
-    static void drawParameter(Parameter *param, std::string suffix);
-    static void drawParameterString(ParameterString *param, std::string suffix);
-    static void drawParameterInt(ParameterInt *param, std::string suffix);
-    static void drawParameterBool(ParameterBool *param, std::string suffix);
-    static void drawParameterPose(ParameterPose *param, std::string suffix);
-    static void drawParameterColor(ParameterColor *param, std::string suffix);
-    static void drawMenu(ParameterMenu *param, std::string suffix);
-    static void drawChoice(ParameterChoice *param, std::string suffix);
-    static void drawVec3(ParameterVec3 *param, std::string suffix);
-    static void drawVec4(ParameterVec4 *param, std::string suffix);
-
-    static void drawParameterMeta(std::vector<ParameterMeta *> params, std::string suffix, int index = 0);
-    static void drawParameter(std::vector<Parameter *> params, std::string suffix, int index = 0);
-    static void drawParameterString(std::vector<ParameterString *> params, std::string suffix, int index = 0);
-    static void drawParameterInt(std::vector<ParameterInt *> params, std::string suffix, int index = 0);
-    static void drawParameterBool(std::vector<ParameterBool *> params, std::string suffix, int index = 0);
-    static void drawParameterPose(std::vector<ParameterPose *> params, std::string suffix, int index = 0);
-    static void drawParameterColor(std::vector<ParameterColor *> params, std::string suffix, int index = 0);
-    static void drawMenu(std::vector<ParameterMenu *> params, std::string suffix, int index = 0);
-    static void drawChoice(std::vector<ParameterChoice *> params, std::string suffix, int index = 0);
-    static void drawVec3(std::vector<ParameterVec3 *> params, std::string suffix, int index = 0);
-    static void drawVec4(std::vector<ParameterVec4 *> params, std::string suffix, int index = 0);
-
-    static void drawDynamicScene(DynamicScene *scene, std::string suffix);
-
 protected:
 
 private:
@@ -277,6 +252,8 @@ private:
     std::vector<std::string> mGroupNames;
     std::vector<ParameterMeta *> mGroupEndAnchors; // refs to the parameters marking beginning and ending of groups
     std::vector<ParameterMeta *> mSeparatorAnchors; 
+
+    ParameterGUI mParameterGUI;
 
     PresetHandler *mPresetHandler {nullptr};
     int mPresetColumns, mPresetRows;
@@ -306,24 +283,8 @@ private:
     std::map<std::string, int> mCurrentBundle;
     std::map<std::string, bool> mBundleGlobal;
 
-    // For use in ImGui::Combo
-    static auto vector_getter(void* vec, int idx, const char** out_text)
-    {
-        auto& vector = *static_cast<std::vector<std::string>*>(vec);
-        if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
-        *out_text = vector.at(idx).c_str();
-        return true;
-    }
-
     void begin();
     void end();
-
-    void drawPresetHandler();
-    void drawSequenceRecorder();
-
-    void drawBundleGroup(std::vector<ParameterBundle *> bundles, std::string suffix);
-
-    void drawNav();
 
 };
 
