@@ -103,18 +103,20 @@ public:
         return true;
     }
 
-    static void beginPanel(std::string name, float x = -1, float y = -1, float width = 0, float height = 0,
+    static void beginPanel(std::string name, float x = -1, float y = -1, float width = -1, float height = -1,
                       ImGuiWindowFlags window_flags = 0) {
         if (x >= 0 || y >= 0) {
-            ImGui::SetNextWindowSize(ImVec2(width, height));
+            ImGui::SetNextWindowPos(ImVec2(x, y));
+            window_flags |= ImGuiWindowFlags_NoMove; // if (no_move)
         }
-        ImGui::SetNextWindowPos(ImVec2(x, y));
+        if (width >= 0 || height >=0) {
+            ImGui::SetNextWindowSize(ImVec2(width, height));
+            window_flags |= ImGuiWindowFlags_NoResize; // if (no_resize)
+        }
 //        ImGuiWindowFlags window_flags = 0;
 //        window_flags |= ImGuiWindowFlags_NoTitleBar; // if (no_titlebar)
         // window_flags |= ImGuiWindowFlags_NoScrollbar; // if (no_scrollbar)
         // window_flags |= ImGuiWindowFlags_MenuBar; // if (!no_menu)
-//        window_flags |= ImGuiWindowFlags_NoMove; // if (no_move)
-//        window_flags |= ImGuiWindowFlags_NoResize; // if (no_resize)
 //        window_flags |= ImGuiWindowFlags_NoCollapse; // if (no_collapse)
 //        window_flags |= ImGuiWindowFlags_NoNav; // if (no_nav)
 
