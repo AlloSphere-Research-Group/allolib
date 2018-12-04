@@ -56,6 +56,7 @@
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/spatial/al_Pose.hpp"
 #include "al/core/types/al_Color.hpp"
+#include "al/core/protocol/al_OSC.hpp"
 
 namespace al
 {
@@ -142,6 +143,10 @@ public:
         }
 
         return value;
+    }
+
+    virtual void sendValue(osc::Send &sender) {
+        std::cout << "sendValue function not implemented for " << typeid(*this).name() << std::endl;
     }
 
 protected:
@@ -435,6 +440,10 @@ public:
 
 	float operator= (const float value) { this->set(value); return value; }
 
+    virtual void sendValue(osc::Send &sender) override {
+        sender.send(getFullAddress(), get());
+    }
+
 private:
 	float mFloatValue;
 };
@@ -508,6 +517,10 @@ public:
 
 	float operator= (const int32_t value) { this->set(value); return value; }
 
+    virtual void sendValue(osc::Send &sender) override {
+        sender.send(getFullAddress(), get());
+    }
+
 private:
 	int32_t mIntValue;
 };
@@ -567,6 +580,10 @@ public:
 	virtual void fromFloat(float value) override {
 		set(std::to_string(value));
 	}
+
+    virtual void sendValue(osc::Send &sender) override {
+        sender.send(getFullAddress(), get());
+    }
 };
 
 class ParameterVec3: public ParameterWrapper<al::Vec3f>
@@ -581,6 +598,11 @@ public:
 	ParameterVec3 operator=(const Vec3f vec) {this->set(vec); return *this;}
 
 	float operator[](size_t index) { Vec3f vec = this->get(); return vec[index];}
+
+    virtual void sendValue(osc::Send &sender) override {
+        Vec3f vec = get();
+        sender.send(getFullAddress(), vec.x, vec.y, vec.z);
+    }
 };
 
 class ParameterVec4: public ParameterWrapper<al::Vec4f>
@@ -595,6 +617,11 @@ public:
 	ParameterVec4 operator=(const Vec4f vec) {this->set(vec); return *this;}
 
 	float operator[](size_t index) { Vec4f vec = this->get(); return vec[index];}
+
+    virtual void sendValue(osc::Send &sender) override {
+        Vec4f vec = get();
+        sender.send(getFullAddress(), vec.x, vec.y, vec.z, vec.w);
+    }
 };
 
 
@@ -608,6 +635,14 @@ public:
     { }
 
     al::Pose operator=(const al::Pose vec) {this->set(vec); return *this;}
+
+
+    virtual void sendValue(osc::Send &sender) override {
+        Pose pose = get();
+        Quatd q = pose.quat();
+        sender.send(getFullAddress(), float(pose.x()), float(pose.y()), float(pose.z()),
+                    float(q.w), float(q.x), float(q.y), float(q.z));
+    }
 
     void setPos(const al::Vec3d v){ this->set(al::Pose(v,this->get().quat())); }
     void setQuat(const al::Quatd q){ this->set(al::Pose(this->get().pos(),q)); }
@@ -649,6 +684,10 @@ public:
 	virtual void fromFloat(float value) override {
 		set( (int) value);
 	}
+
+    virtual void sendValue(osc::Send &sender) override {
+        sender.send(getFullAddress(), get());
+    }
 
 private:
 	std::vector<std::string> mElements;
@@ -725,6 +764,9 @@ public:
 	virtual void fromFloat(float value) override {
 		set( (int) value);
 	}
+    virtual void sendValue(osc::Send &sender) override {
+        sender.send(getFullAddress(), get());
+    }
 
 private:
     std::vector<std::string> mElements;
@@ -740,6 +782,11 @@ public:
     { }
 
     ParameterColor operator=(const al::Color vec) {this->set(vec); return *this;}
+
+    virtual void sendValue(osc::Send &sender) override {
+        Color c = get();
+        sender.send(getFullAddress(), c.r, c.g, c.b, c.a);
+    }
 };
 
 

@@ -15,6 +15,7 @@
 #include "al/core/io/al_ControlNav.hpp"
 #include "al/sphere/al_OmniRenderer.hpp"
 #include "al/util/al_Toml.hpp"
+#include "al/util/scene/al_DynamicScene.hpp"
 
 #include <iostream>
 #include <map>
@@ -297,6 +298,20 @@ public:
 
   ParameterServer &parameterServer() override { return *mParameterServer; }
 
+
+  void registerDynamicScene(DynamicScene &scene) {
+
+      if (isPrimary()) {
+          if (dynamic_cast<DistributedScene *>(&scene)) {
+              dynamic_cast<DistributedScene *>(&scene)->registerNotifier(parameterServer());
+
+          }
+      } else {
+          parameterServer().registerOSCConsumer(
+                      dynamic_cast<DistributedScene *>(&scene), "");
+      }
+      scene.prepare(audioIO());
+  }
 private:
 
 #ifdef AL_BUILD_MPI
@@ -333,10 +348,12 @@ inline void DistributedApp<TSharedState>::start() {
 
   uint16_t sendPort = 9010;
   uint16_t receiverPort = 9100;
+  std::string defaultAddress = "0.0.0.0";
   if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) {
-      mParameterServer = std::make_shared<ParameterServer>("0.0.0.0", sendPort);
+      mParameterServer = std::make_shared<ParameterServer>(defaultAddress, sendPort);
       if (mParameterServer->serverRunning()) {
-          mParameterServer->addListener("127.0.0.1", 9100);
+//          mParameterServer->addListener("127.0.0.1", 9100);
+          mParameterServer->startHandshakeServer(defaultAddress);
           for (auto member: mRoleMap) {
               // Relay all parameters to renderers
               if (std::find(member.second.begin(), member.second.end(), ROLE_RENDERER) != member.second.end()) {
@@ -348,9 +365,11 @@ inline void DistributedApp<TSharedState>::start() {
           int portOffset = 0;
           int maxInstances = 64;
           while (!mParameterServer->serverRunning() && portOffset < maxInstances) {
-              mParameterServer->listen(receiverPort + portOffset++, "0.0.0.0");
+              mParameterServer->listen(receiverPort + portOffset++, defaultAddress);
           }
           if (mParameterServer->serverRunning()) {
+
+              mParameterServer->startCommandListener(defaultAddress);
               mRole = ROLE_DESKTOP_REPLICA;
               std::cout << "Application is replica on port: " << mParameterServer->serverPort() << std::endl;
           } else {
@@ -359,7 +378,7 @@ inline void DistributedApp<TSharedState>::start() {
           }
       }
   } else {
-      mParameterServer = std::make_shared<ParameterServer>("0.0.0.0", receiverPort);
+      mParameterServer = std::make_shared<ParameterServer>(defaultAddress, receiverPort);
   }
 //  std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
   onInit();
@@ -381,7 +400,7 @@ inline void DistributedApp<TSharedState>::start() {
   
   if (mParameterServer) {
       mParameterServer->registerOSCListener(this); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
-      std::cout << "Registered paramter server" <<std::endl;
+      std::cout << "Registered parameter server with Distributed App network socket" <<std::endl;
   }
 
   FPS::startFPS(); // WindowApp (FPS)
