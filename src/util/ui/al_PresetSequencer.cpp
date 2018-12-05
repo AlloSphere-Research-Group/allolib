@@ -166,6 +166,7 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
 	sequencer->mSequenceLock.lock();
 	auto sequenceStart = std::chrono::high_resolution_clock::now();
 	auto targetTime = sequenceStart;
+    float timeAccumulator = 0.0f;
 	while(sequencer->running() && sequencer->mSteps.size() > 0) {
 		Step &step = sequencer->mSteps.front();
 		if (step.type == PRESET) {
@@ -184,6 +185,11 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
 				//std::cout << std::chrono::high_resolution_clock::to_time_t(targetTime)
 				//	    << "---" << std::chrono::high_resolution_clock::to_time_t(std::chrono::high_resolution_clock::now()) << std::endl;
 				std::this_thread::sleep_for(std::chrono::milliseconds(granularity));
+                timeAccumulator += granularity;
+                if (timeAccumulator >= sequencer->mTimeChangeMinTimeDelta * 1000) {
+                    timeAccumulator -= sequencer->mTimeChangeMinTimeDelta * 1000;
+                    sequencer->mTimeChangeCallback(1.0e-9 * std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - sequenceStart).count());
+                }
 				if (sequencer->mRunning == false) {
 					targetTime = std::chrono::high_resolution_clock::now();
 					break;
@@ -313,7 +319,13 @@ void PresetSequencer::registerEndCallback(std::function<void (bool, al::PresetSe
 	// FIXME this data needs to be protected with a mutex
 	mEndCallback = endCallback;
 	mEndCallbackData = userData;
-	mEndCallbackEnabled = true;
+    mEndCallbackEnabled = true;
+}
+
+void PresetSequencer::registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec)
+{
+    mTimeChangeMinTimeDelta = minTimeDeltaSec;
+    mTimeChangeCallback = func;
 }
 
 float PresetSequencer::getSequenceTotalDuration(std::string sequenceName)

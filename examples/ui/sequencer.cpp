@@ -100,6 +100,8 @@ int main(int argc, char* argv[])
 	sequencer << presetHandler; // Register preset handler with sequencer
 	sequencerServer << sequencer; // Register sequencer with sequence server
 	sequencerServer.print();
+
+    sequencer.registerTimeChangeCallback([] (float time) { std::cout << time << std::endl;}, 0.5);
 	MyApp().start();
 }
 

@@ -244,6 +244,8 @@ public:
 	void enableEndCallback(bool enable) { mEndCallbackEnabled = enable; }
 	void toggleEnableEndCallback() { mEndCallbackEnabled = !mEndCallbackEnabled; }
 
+    void registerTimeChangeCallback(std::function<void(float)> func, float minTimeDeltaSec = 0);
+
 	float getSequenceTotalDuration(std::string sequenceName);
 
 	void clearSteps();
@@ -279,6 +281,8 @@ private:
 	void *mEndCallbackData;
 
 	std::vector<EventCallback> mEventCallbacks;
+    std::function<void(float)> mTimeChangeCallback;
+    float mTimeChangeMinTimeDelta = 0;
 };
 
 
