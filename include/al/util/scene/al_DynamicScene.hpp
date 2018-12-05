@@ -181,7 +181,7 @@ void ThreadPool::enqueue(F&& f, UpdateThreadFuncData &data)
 class DynamicScene : public PolySynth
 {
 public:
-    DynamicScene (int threadPoolSize = 0);
+    DynamicScene (int threadPoolSize = 0, TimeMasterMode masterMode = TIME_MASTER_AUDIO);
 
     virtual ~DynamicScene ();
 

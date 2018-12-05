@@ -67,7 +67,8 @@ void ThreadPool::waitFinished()
 
 // ------------------------------------------------
 
-DynamicScene::DynamicScene (int threadPoolSize)
+DynamicScene::DynamicScene (int threadPoolSize, TimeMasterMode masterMode)
+    : PolySynth(masterMode)
 {
     SpeakerLayout sl = StereoSpeakerLayout(); // Stereo by default
     setSpatializer<StereoPanner>(sl);

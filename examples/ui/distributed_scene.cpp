@@ -103,7 +103,8 @@ public:
 
             // Trigger one voice manually
             auto *freeVoice = scene.getVoice<SimpleVoice>();
-            freeVoice->setParamFields(std::vector<float>{440.0f});
+            std::vector<float> params{440.0f}; 
+            freeVoice->setParamFields(params);
             freeVoice->pose().vec().z = -10.0;
             scene.triggerOn(freeVoice);
         } else {
@@ -145,13 +146,14 @@ public:
     virtual void onKeyDown(Keyboard const &k) override {
         if (k.key() == ' ') {
             auto *freeVoice = scene.getVoice<SimpleVoice>();
-            freeVoice->setParamFields(std::vector<float>{440.0f});
+            std::vector<float> params{440.0f}; 
+            freeVoice->setParamFields(params);
             freeVoice->pose().vec().z = -10.0;
             scene.triggerOn(freeVoice);
         }
     }
 
-    DistributedScene scene;
+    DistributedScene scene{PolySynth::TIME_MASTER_CPU};
 };
 
 int main(){
