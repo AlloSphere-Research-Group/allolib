@@ -216,9 +216,9 @@ void ParameterGUI::drawParameterString(std::vector<ParameterString *> params, st
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &param = params[index];
-    ImGui::Text((param->displayName() + ":").c_str());
+    ImGui::Text("%s", (param->displayName() + ":").c_str());
     ImGui::SameLine();
-    ImGui::Text((param->get()).c_str());
+    ImGui::Text("%s", (param->get()).c_str());
 
 }
 

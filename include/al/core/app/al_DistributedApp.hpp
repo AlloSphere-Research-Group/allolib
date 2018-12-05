@@ -140,7 +140,9 @@ public:
 //          int number;
 //          MPI_Recv(&number, 1, MPI_INT, 0, 1, MPI_COMM_WORLD,
 //                   MPI_STATUS_IGNORE);
-          mRole = ROLE_RENDERER;
+        if(getenv("OMPI_COMM_WORLD_RANK")) {
+              mRole = ROLE_RENDERER;
+        }
       }
       std::cout << name() << ":" << world_rank << " pid: "<< getpid()<< " set role to " << roleName() << std::endl;
 #endif
@@ -171,7 +173,11 @@ public:
 
   int rank() {
 #ifdef AL_BUILD_MPI
-      return world_rank;
+      if(getenv("OMPI_COMM_WORLD_RANK")) {
+          return world_rank;
+      } else {
+          return 0;
+      }
 #else
       return 0;
 #endif
@@ -211,7 +217,11 @@ public:
 
   bool isPrimary() {
 #ifdef AL_BUILD_MPI
-      return world_rank == 0;
+      if(getenv("OMPI_COMM_WORLD_RANK")) {
+          return world_rank == 0;
+      } else {
+          return role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP;
+      }
 #else
       return role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP;
 #endif
