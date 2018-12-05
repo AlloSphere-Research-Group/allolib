@@ -56,6 +56,7 @@
 #include <algorithm>
 #include <functional>
 #include <atomic>
+#include <thread>
 
 #include <typeinfo> // For class name instrospection
 #include <typeindex>
@@ -314,7 +315,8 @@ public:
     typedef enum {
         TIME_MASTER_AUDIO,
         TIME_MASTER_GRAPHICS,
-        TIME_MASTER_ASYNC
+        TIME_MASTER_ASYNC,
+        TIME_MASTER_CPU
     } TimeMasterMode;
 
     friend class SynthSequencer;
@@ -322,6 +324,32 @@ public:
     PolySynth(TimeMasterMode masterMode = TIME_MASTER_AUDIO)
         : mMasterMode(masterMode)
     {
+        if (mMasterMode == TIME_MASTER_CPU) {
+            std::cout << "Starting CPU clock thread" << std::endl;
+            mCpuClockThread = std::make_unique<std::thread>([this]() {
+                using namespace std::chrono;
+                while(mRunCPUClock) {
+                    high_resolution_clock::time_point startTime = high_resolution_clock::now();
+                    std::chrono::milliseconds waitTime(int(mCpuGranularitySec * 1000));
+
+                    high_resolution_clock::time_point futureTime = startTime + waitTime;
+                    std::this_thread::sleep_until(futureTime);
+                    // FIXME this will generate some jitter and drift, fix.
+
+                    processVoices();
+                    // Turn off voices
+                    processVoiceTurnOff();
+                    processInactiveVoices();
+                }
+        });
+        }
+    }
+
+    virtual ~PolySynth() {
+        if (mCpuClockThread) {
+            mRunCPUClock = false;
+            mCpuClockThread->join();
+        }
     }
 
     /**
@@ -563,6 +591,10 @@ public:
         return mActiveVoices;
     }
 
+    void setCpuClockGranularity(double timeSecs) {
+        mCpuGranularitySec = timeSecs;
+    }
+
 protected:
     inline void processVoices() {
         if (mVoiceToInsertLock.try_lock()) {
@@ -702,6 +734,10 @@ protected:
 
     Creators mCreators;
     std::vector<std::string> mNoAllocationList; // Disallow auto allocation for class name. Set in allocateVoice()
+
+    bool mRunCPUClock {true};
+    double mCpuGranularitySec = 0.001; // 1ms
+    std::unique_ptr<std::thread> mCpuClockThread;
 };
 
 class SynthSequencerEvent {
