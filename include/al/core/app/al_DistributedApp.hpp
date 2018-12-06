@@ -16,6 +16,7 @@
 #include "al/sphere/al_OmniRenderer.hpp"
 #include "al/util/al_Toml.hpp"
 #include "al/util/scene/al_DynamicScene.hpp"
+#include "al/util/scene/al_DistributedScene.hpp"
 
 #include <iostream>
 #include <map>
