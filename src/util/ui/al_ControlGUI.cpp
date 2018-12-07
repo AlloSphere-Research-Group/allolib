@@ -24,8 +24,8 @@ void ControlGUI::draw(Graphics &g) {
 //    ImGui::SetNextWindowSize(ImVec2(300, 450), ImGuiCond_FirstUseEver);
 //    ImGui::SetNextWindowPos(ImVec2(mX, mY), ImGuiCond_FirstUseEver);
 //    ImGui::Begin(std::to_string(mId).c_str());
-    if (mNav) { mParameterGUI.drawNav(mNav, mName);}
-    if (mPresetHandler) { mParameterGUI.drawPresetHandler(mPresetHandler, mPresetColumns,
+    if (mNav) { ParameterGUI::drawNav(mNav, mName);}
+    if (mPresetHandler) { ParameterGUI::drawPresetHandler(mPresetHandler, mPresetColumns,
                                                           mPresetRows, mStoreButtonOn); }
     if (mPresetSequencer) {
         if (ImGui::CollapsingHeader("Preset Sequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen )) {
@@ -56,7 +56,7 @@ void ControlGUI::draw(Graphics &g) {
             }
         }
     }
-    if (mSequenceRecorder) { mParameterGUI.drawSequenceRecorder(mSequenceRecorder,
+    if (mSequenceRecorder) { ParameterGUI::drawSequenceRecorder(mSequenceRecorder,
                                                                 mOverwriteButtonValue); }
     if (mPolySynth) {
         if (ImGui::CollapsingHeader("PolySynth", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -111,9 +111,9 @@ void ControlGUI::draw(Graphics &g) {
     }
 
     for (auto bundleGroup: mBundles) {
-        std::string suffix = "##_bundle_" + bundleGroup.first;
-        mParameterGUI.drawBundleGroup(bundleGroup.second, suffix,
-                                      mCurrentBundle, mBundleGlobal);
+        bundleGroup.second->drawBundleGUI();
+//        mParameterGUI.drawBundleGroup(bundleGroup.second, suffix,
+//                                      mCurrentBundle[bundleGroup.first], mBundleGlobal[bundleGroup.first]);
     }
 
 
@@ -129,7 +129,7 @@ void ControlGUI::draw(Graphics &g) {
 			for (ParameterMeta *p: elem.second) {
 				// We do a runtime check to determine the type of the parameter to determine how to draw it.
                 if (groupsVisibleStack.size() == 0 || groupsVisibleStack.back() == true) {
-                    mParameterGUI.drawParameterMeta(p, suffix);
+                    ParameterGUI::drawParameterMeta(p, suffix);
                     if (separatorAnchor != mSeparatorAnchors.end()) {
                         // The spacing's visibility depends on its position,
                         // So here we show it, but we need to do the increment
@@ -223,11 +223,9 @@ ControlGUI &ControlGUI::registerParameterBundle(ParameterBundle &bundle)
 {
     std::string bundleName = bundle.name();
     if (mBundles.find(bundleName) == mBundles.end()) {
-        mBundles[bundleName] = std::vector<ParameterBundle *>();
-        mCurrentBundle[bundleName] = 0;
-        mBundleGlobal[bundleName] = false;
+        mBundles[bundleName] = new BundleGUIManager;
     }
-    mBundles[bundleName].push_back(&bundle);
+    mBundles[bundleName]->registerParameterBundle(bundle);
     return *this;
 }
 

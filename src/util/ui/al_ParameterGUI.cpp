@@ -592,27 +592,30 @@ void ParameterGUI::drawSequenceRecorder(SequenceRecorder *sequenceRecorder,
 
 void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
                                    string suffix,
-                                   std::map<std::string, int> &currentBundle,
-                                   std::map<std::string, bool> &bundleGlobal)
+                                   int &currentBundle,
+                                   bool &bundleGlobal)
 {
+    if (bundleGroup.size() == 0) {
+        return;
+    }
     std::string name = bundleGroup[0]->name();
-    int index = currentBundle[name];
+    int index = currentBundle;
 
 //    ImGui::Separator();
 
     if (ImGui::CollapsingHeader(("Bundle:" + name + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (!bundleGlobal[name]) {
+        if (!bundleGlobal) {
 //            ImGui::SameLine();
             if (ImGui::InputInt(suffix.c_str(), &index)) {
                 if (index >= 0 && index < (int) bundleGroup.size()) {
-                    currentBundle[name] = index;
+                    currentBundle = index;
                 }
             }
             ImGui::SameLine();
         }
-        ImGui::Checkbox("Global", &bundleGlobal[name]);
+        ImGui::Checkbox("Global", &bundleGlobal);
         suffix += "__index_" + std::to_string(index);
-        if (bundleGlobal[name]) {
+        if (bundleGlobal) {
             // We will try to match parameters in order to the first bundle
             // Perhaps we should try to do better matching to match parameter names,
             // but for now we assume that parameters have exactly the same
@@ -630,10 +633,10 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
             }
 
         } else {
-            for (ParameterMeta *param: bundleGroup[currentBundle[name]]->parameters()) {
+            for (ParameterMeta *param: bundleGroup[currentBundle]->parameters()) {
                 drawParameterMeta(param, suffix);
             }
-            for (auto bundle: bundleGroup[currentBundle[name]]->bundles()) {
+            for (auto bundle: bundleGroup[currentBundle]->bundles()) {
                 std::string subBundleName = bundle.first;
                 if (ImGui::CollapsingHeader((subBundleName + "##" + name + subBundleName + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader)) {
                    for (auto *param: bundle.second->parameters()) {
@@ -644,5 +647,14 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
         }
         ImGui::Separator();
     }
+}
 
+void ParameterGUI::drawBundleManager(BundleGUIManager *manager)
+{
+
+    std::string suffix = "##_bundle_" + manager->name();
+    ParameterGUI::drawBundleGroup(manager->bundles(),
+                                  suffix,
+                                  manager->currentBundle(),
+                                  manager->bundleGlobal());
 }
