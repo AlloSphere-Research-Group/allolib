@@ -25,39 +25,17 @@ void ControlGUI::draw(Graphics &g) {
 //    ImGui::SetNextWindowPos(ImVec2(mX, mY), ImGuiCond_FirstUseEver);
 //    ImGui::Begin(std::to_string(mId).c_str());
     if (mNav) { ParameterGUI::drawNav(mNav, mName);}
-    if (mPresetHandler) { ParameterGUI::drawPresetHandler(mPresetHandler, mPresetColumns,
-                                                          mPresetRows, mStoreButtonOn); }
-    if (mPresetSequencer) {
-        if (ImGui::CollapsingHeader("Preset Sequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen )) {
-            vector<string> seqList = mPresetSequencer->getSequenceList();
-            if (seqList.size() > 0) {
-                if (seqList.size() > 64) {
-                    seqList.resize(64);
-                    std::cout << "Cropping sequence list to 64 items for display" <<std::endl;
-                }
-                // for (size_t i = 0; i < seqList.size(); i++) {
-                //     strncpy(mSequencerItems[i], seqList[i].c_str(), 32);
-                // }
-                // int items_count = seqList.size();
-
-                ImGui::Combo("Sequences##PresetSequencer", &mCurrentPresetSequencerItem, ParameterGUI::vector_getter,
-                            static_cast<void*>(&seqList), seqList.size());
-                if (ImGui::Button("Play##PresetSequencer")) {
-                    mPresetSequencer->playSequence(seqList[mCurrentSequencerItem]);
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Stop##PresetSequencer")) {
-                    mPresetSequencer->stopSequence();
-                }
-
-                // for (size_t i = 0; i < seqList.size(); i++) {
-                //     //                free(items[i]);
-                // }
-            }
-        }
+    if (mPresetHandler) {
+        ParameterGUI::drawPresetHandler(mPresetHandler, mPresetColumns,
+                                        mPresetRows, mStoreButtonOn);
     }
-    if (mSequenceRecorder) { ParameterGUI::drawSequenceRecorder(mSequenceRecorder,
-                                                                mOverwriteButtonValue); }
+    if (mPresetSequencer) {
+        ParameterGUI::drawPresetSequencer(mPresetSequencer, mCurrentPresetSequencerItem);
+    }
+    if (mSequenceRecorder) {
+        ParameterGUI::drawSequenceRecorder(mSequenceRecorder,
+                                           mOverwriteButtonValue);
+    }
     if (mPolySynth) {
         if (ImGui::CollapsingHeader("PolySynth", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
             if (ImGui::Button("Panic (All notes off)")) {

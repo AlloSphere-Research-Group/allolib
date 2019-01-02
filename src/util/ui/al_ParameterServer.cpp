@@ -421,43 +421,6 @@ void ParameterServer::sendAllParameters(std::string IPaddress, int oscPort)
 {
     osc::Send sender(oscPort, IPaddress.c_str());
     for(ParameterMeta *param: mParameters) {
-        //        if (strcmp(typeid(*param).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
-        //            ParameterBool *p = dynamic_cast<ParameterBool *>(param);
-        //            sender.send(p->getFullAddress(), p->get());
-        //        } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {// Parameter
-        //            Parameter *p = dynamic_cast<Parameter *>(param);
-        //            sender.send(p->getFullAddress(), p->get());
-        //        } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
-        //            ParameterPose *p = dynamic_cast<ParameterPose *>(param);
-        //            Pose pose = p->get();
-        //            Quatd &q = pose.quat();
-        //            sender.send(p->getFullAddress(), float(pose.x()), float(pose.y()), float(pose.z()),
-        //                        float(q.w), float(q.x), float(q.y), float(q.z));
-        //        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
-        //            ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
-        //            sender.send(p->getFullAddress(), int(p->get()));
-        //        } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
-        //            ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
-        //            sender.send(p->getFullAddress(), int(p->get()));
-        //        } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
-        //            ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
-        //            Vec3f vec = p->get();
-        //            sender.send(p->getFullAddress(), vec.x, vec.y, vec.z);
-
-        //        }  else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
-        //            ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
-        //            Vec4f vec = p->get();
-        //            sender.send(p->getFullAddress(), vec.x, vec.y, vec.z, vec.w);
-
-        //        } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) == 0) {// ParameterColor
-        //            ParameterColor *p = dynamic_cast<ParameterColor *>(param);
-        //            Color c = p->get();
-        //            sender.send(p->getFullAddress(), c.r, c.g, c.b);
-        //        }
-        //        else {
-        //            // TODO this check should be performed on registration
-        //            std::cout << "Unsupported Parameter type for display" << std::endl;
-        //        }
         param->sendValue(sender);
     }
 }

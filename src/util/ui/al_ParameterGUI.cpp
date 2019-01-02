@@ -60,112 +60,38 @@ void ParameterGUI::drawVec4(ParameterVec4 *param, string suffix)
     drawVec4(std::vector<ParameterVec4 *>{param}, suffix);
 }
 
+void ParameterGUI::drawTrigger(Trigger *param, string suffix)
+{
+    drawTrigger(std::vector<Trigger *>{param}, suffix);
+}
+
 void ParameterGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string suffix, int index)
 {
     assert(params.size() > 0);
 
     if (strcmp(typeid(*params[index]).name(), typeid(ParameterBool).name() ) == 0) { // ParameterBool
-        std::vector<ParameterBool *> bools;
-        for(auto *p: params) {
-            if (p->getHint("hide") == 0.0) {
-                bools.push_back(dynamic_cast<ParameterBool *>(p));
-            } else {
-                index--;
-            }
-        }
-        drawParameterBool(bools, suffix, index);
+        drawParameterBool(dynamic_cast<ParameterBool *>(params[index]), suffix);
     } else if (strcmp(typeid(*params[index]).name(), typeid(Parameter).name()) == 0) {// Parameter
-        std::vector<Parameter *> ps;
-        for(auto *p: params) {
-            if (p->getHint("hide") == 0.0) {
-                ps.push_back(dynamic_cast<Parameter *>(p));
-            } else {
-                index--;
-            }
-        }
-        drawParameter(ps, suffix, index);
+        drawParameter(dynamic_cast<Parameter *>(params[index]), suffix);
     } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterString).name()) == 0) {// ParameterString
-        std::vector<ParameterString *> ps;
-        for(auto *p: params) {
-            if (p->getHint("hide") == 0.0) {
-                ps.push_back(dynamic_cast<ParameterString *>(p));
-            } else {
-                index--;
-            }
-        }
-        drawParameterString(ps, suffix, index);
+        drawParameterString(dynamic_cast<ParameterString *>(params[index]), suffix);
     } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterInt).name()) == 0) {// ParameterInt
-        std::vector<ParameterInt *> ps;
-        for(auto *p: params) {
-            if (p->getHint("hide") == 0.0) {
-                ps.push_back(dynamic_cast<ParameterInt *>(p));
-            } else {
-                index--;
-            }
-        }
-        drawParameterInt(ps, suffix, index);
+        drawParameterInt(dynamic_cast<ParameterInt *>(params[index]), suffix);
     } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterPose).name()) == 0) {// ParameterPose
-        std::vector<ParameterPose *> poses;
-        for(auto *p: params) {
-            if (p->getHint("hide") == 0.0) {
-                poses.push_back(dynamic_cast<ParameterPose *>(p));
-            } else {
-                index--;
-            }
-        }
-        drawParameterPose(poses, suffix, index);
+        drawParameterPose(dynamic_cast<ParameterPose *>(params[index]), suffix);
     } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterMenu).name()) == 0) {// ParameterMenu
-        std::vector<ParameterMenu *> menus;
-        for(auto *p: params) {
-            if (p->getHint("hide") == 0.0) {
-                menus.push_back(dynamic_cast<ParameterMenu *>(p));
-            } else {
-                index--;
-            }
-        }
-        drawMenu(menus, suffix, index);
+        drawMenu(dynamic_cast<ParameterMenu *>(params[index]), suffix);
     } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterChoice).name()) == 0) {// ParameterChoice
-        std::vector<ParameterChoice *> choices;
-        for(auto *p: params) {
-            if (p->getHint("hide") == 0.0) {
-                choices.push_back(dynamic_cast<ParameterChoice *>(p));
-            } else {
-                index--;
-            }
-        }
-        drawChoice(choices, suffix, index);
+        drawChoice(dynamic_cast<ParameterChoice *>(params[index]), suffix);
     } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterVec3).name()) == 0) {// ParameterVec3
-        std::vector<ParameterVec3 *> vec3s;
-        for(auto *p: params) {
-            if (p->getHint("hide") == 0.0) {
-                vec3s.push_back(dynamic_cast<ParameterVec3 *>(p));
-            } else {
-                index--;
-            }
-        }
-        drawVec3(vec3s, suffix, index);
+        drawVec3(dynamic_cast<ParameterVec3 *>(params[index]), suffix);
     }  else if (strcmp(typeid(*params[index]).name(), typeid(ParameterVec4).name()) == 0) {// ParameterVec4
-        std::vector<ParameterVec4 *> vec4s;
-        for(auto *p: params) {
-            if (p->getHint("hide") == 0.0) {
-                vec4s.push_back(dynamic_cast<ParameterVec4 *>(p));
-            } else {
-                index--;
-            }
-        }
-        drawVec4(vec4s, suffix, index);
+        drawVec4(dynamic_cast<ParameterVec4 *>(params[index]), suffix);
     } else if (strcmp(typeid(*params[index]).name(), typeid(ParameterColor).name()) == 0) {// ParameterColor
-        std::vector<ParameterColor *> colors;
-        for(auto *p: params) {
-            if (p->getHint("hide") == 0.0) {
-                colors.push_back(dynamic_cast<ParameterColor *>(p));
-            } else {
-                index--;
-            }
-        }
-        drawParameterColor(colors, suffix, index);
-    }
-    else {
+        drawParameterColor(dynamic_cast<ParameterColor *>(params[index]), suffix);
+    } else if (strcmp(typeid(*params[index]).name(), typeid(Trigger).name()) == 0) {// ParameterColor
+        drawTrigger(dynamic_cast<Trigger *>(params[index]), suffix);
+    } else {
         // TODO this check should be performed on registration
         std::cout << "Unsupported Parameter type for display" << std::endl;
     }
@@ -176,6 +102,7 @@ void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix,
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &param = params[index];
+    if (param->getHint("hide") == 1.0) return;
     if (param->getHint("intcombo") == 1.0) {
         int value = (int)param->get();
         vector<string> values;
@@ -216,6 +143,7 @@ void ParameterGUI::drawParameterString(std::vector<ParameterString *> params, st
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &param = params[index];
+    if (param->getHint("hide") == 1.0) return;
     ImGui::Text("%s", (param->displayName() + ":").c_str());
     ImGui::SameLine();
     ImGui::Text("%s", (param->get()).c_str());
@@ -228,6 +156,7 @@ void ParameterGUI::drawParameterInt(std::vector<ParameterInt *> params, string s
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &param = params[index];
+    if (param->getHint("hide") == 1.0) return;
     int value = param->get();
     bool changed = ImGui::SliderInt((param->displayName() + suffix).c_str(), &value, param->min(), param->max());
     if (changed) {
@@ -242,28 +171,29 @@ void ParameterGUI::drawParameterBool(std::vector<ParameterBool *> params, string
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &param = params[index];
+    if (param->getHint("hide") == 1.0) return;
     bool changed;
-    if (param->getHint("latch") == 1.0) {
-        bool value = param->get() == 1.0;
-        changed = ImGui::Checkbox((param->displayName() + suffix).c_str(), &value);
-        if (changed) {
-            param->set(value ? 1.0 : 0.0);
-        }
+//    if (param->getHint("latch") == 1.0) {
+    bool value = param->get() == 1.0;
+    changed = ImGui::Checkbox((param->displayName() + suffix).c_str(), &value);
+    if (changed) {
+      param->set(value ? 1.0 : 0.0);
     }
-    else {
-        changed = ImGui::Button((param->displayName() + suffix).c_str());
-        if (changed) {
-            for (auto *p: params) {
-                p->set(1.0);
-            }
-        } else {
-            if (param->get() == 1.0) {
-                for (auto *p: params) {
-                    p->set(0.0);
-                }
-            }
-        }
-    }
+//    }
+//    else {
+//        changed = ImGui::Button((param->displayName() + suffix).c_str());
+//        if (changed) {
+//            for (auto *p: params) {
+//                p->set(1.0);
+//            }
+//        } else {
+//            if (param->get() == 1.0) {
+//                for (auto *p: params) {
+//                    p->set(0.0);
+//                }
+//            }
+//        }
+//    }
 }
 
 void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params, std::string suffix, int index)
@@ -271,6 +201,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params, std::s
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &pose = params[index];
+    if (pose->getHint("hide") == 1.0) return;
     if (ImGui::CollapsingHeader(("Pose:" + pose->displayName()).c_str(), ImGuiTreeNodeFlags_CollapsingHeader)) {
         Vec3d currentPos = pose->get().pos();
         float x = currentPos.x;
@@ -303,6 +234,7 @@ void ParameterGUI::drawParameterColor(std::vector<ParameterColor *> params, stri
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &param = params[index];
+    if (param->getHint("hide") == 1.0) return;
     Color c = param->get();
     ImVec4 color = ImColor(c.r, c.g, c.b, c.a);
 
@@ -338,6 +270,7 @@ void ParameterGUI::drawMenu(std::vector<ParameterMenu *> params, string suffix, 
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &param = params[index];
+    if (param->getHint("hide") == 1.0) return;
     int value = param->get();
     auto values = param->getElements();
     bool changed = ImGui::Combo((param->displayName() + suffix).c_str(), &value, vector_getter,
@@ -354,6 +287,7 @@ void ParameterGUI::drawChoice(std::vector<ParameterChoice *> params, string suff
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &param = params[index];
+    if (param->getHint("hide") == 1.0) return;
     uint16_t value = param->get();
     auto elements = param->getElements();
     if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -376,6 +310,7 @@ void ParameterGUI::drawVec3(std::vector<ParameterVec3 *> params, string suffix, 
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &param = params[index];
+    if (param->getHint("hide") == 1.0) return;
     if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         Vec3f currentValue = param->get();
         float x = currentValue.elems()[0];
@@ -430,6 +365,7 @@ void ParameterGUI::drawVec4(std::vector<ParameterVec4 *> params, string suffix, 
     if (params.size() == 0) return;
     assert(index < (int) params.size());
     auto &param = params[index];
+    if (param->getHint("hide") == 1.0) return;
     if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         Vec4f currentValue = param->get();
         float x = currentValue.elems()[0];
@@ -466,6 +402,27 @@ void ParameterGUI::drawVec4(std::vector<ParameterVec4 *> params, string suffix, 
             }
         }
     }
+}
+
+void ParameterGUI::drawTrigger(std::vector<Trigger *> params, string suffix, int index)
+{
+    if (params.size() == 0) return;
+    assert(index < (int) params.size());
+    auto &param = params[index];
+    if (param->getHint("hide") == 1.0) return;
+    bool changed;
+    changed = ImGui::Button((param->displayName() + suffix).c_str());
+    if (changed) {
+        for (auto *p: params) {
+            p->set(true);
+        }
+    }/* else {
+        if (param->get() == 1.0) {
+            for (auto *p: params) {
+                p->set(0.0);
+            }
+        }
+    }*/
 }
 
 void ParameterGUI::drawNav(Nav *mNav, std::string suffix)
@@ -571,6 +528,47 @@ void ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetCol
     }
 }
 
+void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &currentPresetSequencerItem) {
+    if (ImGui::CollapsingHeader("Preset Sequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen )) {
+        vector<string> seqList = presetSequencer->getSequenceList();
+        if (seqList.size() > 0) {
+            if (seqList.size() > 64) {
+                seqList.resize(64);
+                std::cout << "Cropping sequence list to 64 items for display" <<std::endl;
+            }
+            // for (size_t i = 0; i < seqList.size(); i++) {
+            //     strncpy(mSequencerItems[i], seqList[i].c_str(), 32);
+            // }
+            // int items_count = seqList.size();
+
+            static float currentTime = 0.0;
+            static float totalDuration = 0.0;
+            if (ImGui::Combo("Sequences##PresetSequencer", &currentPresetSequencerItem, ParameterGUI::vector_getter,
+                             static_cast<void*>(&seqList), seqList.size())) {
+                std::cout << currentPresetSequencerItem <<std::endl;
+                totalDuration = presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
+            }
+            if (ImGui::Button("Play##PresetSequencer")) {
+                presetSequencer->stopSequence();
+                presetSequencer->registerTimeChangeCallback([&](float currTime) {currentTime = currTime;} );
+                presetSequencer->playSequence(seqList[currentPresetSequencerItem]);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Stop##PresetSequencer")) {
+                presetSequencer->stopSequence();
+            }
+            float time = currentTime;
+            if (ImGui::SliderFloat("Position#__seq__", &time, 0.0f, totalDuration)) {
+                std::cout << "Requested time:" << time << std::endl;
+            }
+
+            // for (size_t i = 0; i < seqList.size(); i++) {
+            //     //                free(items[i]);
+            // }
+        }
+    }
+}
+
 void ParameterGUI::drawSequenceRecorder(SequenceRecorder *sequenceRecorder,
                                         bool &overwriteButtonValue)
 {
@@ -601,7 +599,7 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
     std::string name = bundleGroup[0]->name();
     int index = currentBundle;
 
-//    ImGui::Separator();
+    //    ImGui::Separator();
 
     if (ImGui::CollapsingHeader(("Bundle:" + name + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         if (!bundleGlobal) {

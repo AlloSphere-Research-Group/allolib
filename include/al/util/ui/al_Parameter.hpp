@@ -560,6 +560,34 @@ public:
 	}
 };
 
+// Symbolizes a distributed action that
+// has no value per se, but that can be used to trigger actions
+class Trigger: public ParameterWrapper<bool>
+{
+public:
+    Trigger(std::string parameterName, std::string Group = "",
+            std::string prefix = "") :
+        ParameterWrapper<bool>(parameterName, Group, false, prefix)
+    {
+    }
+
+    virtual float toFloat() override {
+        return get() ? 1.0f: 0.0f;
+    }
+
+    virtual void fromFloat(float value) override {
+        set(value != 0.0f);
+    }
+
+    virtual void sendValue(osc::Send &sender) override {
+        sender.send(getFullAddress());
+    }
+
+    void trigger() {
+        set(true);
+    }
+};
+
 // These three types are blocking, should not be used in time-critical contexts
 // like the audio callback. The classes were explicitly defined to overcome
 // the issues related to the > and < operators needed when validating minumum

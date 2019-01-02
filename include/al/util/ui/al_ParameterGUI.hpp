@@ -71,6 +71,7 @@ public:
     static void drawChoice(ParameterChoice *param, std::string suffix = "");
     static void drawVec3(ParameterVec3 *param, std::string suffix = "");
     static void drawVec4(ParameterVec4 *param, std::string suffix = "");
+    static void drawTrigger(Trigger *param, std::string suffix = "");
 
     // Display for al types
     static void drawNav(Nav *mNav, std::string suffix = "");
@@ -88,10 +89,12 @@ public:
     static void drawChoice(std::vector<ParameterChoice *> params, std::string suffix, int index = 0);
     static void drawVec3(std::vector<ParameterVec3 *> params, std::string suffix, int index = 0);
     static void drawVec4(std::vector<ParameterVec4 *> params, std::string suffix, int index = 0);
+    static void drawTrigger(std::vector<Trigger *> params, std::string suffix, int index = 0);
 
     // These functions require additional state that is passed as reference
 
     static void drawPresetHandler(PresetHandler *presetHandler, int presetColumns, int presetRows, bool &storeButtonOn);
+    static void drawPresetSequencer(PresetSequencer *presetSequencer, int &currentPresetSequencerItem);
     static void drawSequenceRecorder(SequenceRecorder *sequenceRecorder, bool &overwriteButtonValue);
 
     static void drawBundleGroup(std::vector<ParameterBundle *> bundles, std::string suffix, int &currentBundle, bool &bundleGlobal);

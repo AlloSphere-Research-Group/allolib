@@ -54,7 +54,7 @@ void ParameterBundle::addParameter(ParameterMeta *parameter) {
             }
         });
     } else if (strcmp(typeid(*parameter).name(), typeid(Parameter).name()) == 0) {// Parameter
-        std::cout << "Register parameter " << parameter->getName() << std::endl;
+//        std::cout << "Register parameter " << parameter->getName() << std::endl;
         Parameter *p = dynamic_cast<Parameter *>(parameter);
         p->registerChangeCallback([this, p](float value){
 //            std::cout << "Changed  " << p->getName() << std::endl;
@@ -63,7 +63,7 @@ void ParameterBundle::addParameter(ParameterMeta *parameter) {
             }
         });
     } else if (strcmp(typeid(*parameter).name(), typeid(ParameterString).name()) == 0) {// ParameterString
-        std::cout << "Register parameter " << parameter->getName() << std::endl;
+//        std::cout << "Register parameter " << parameter->getName() << std::endl;
         ParameterString *p = dynamic_cast<ParameterString *>(parameter);
         p->registerChangeCallback([this, p](std::string value){
 //            std::cout << "Changed  " << p->getName() << std::endl;
@@ -72,7 +72,7 @@ void ParameterBundle::addParameter(ParameterMeta *parameter) {
             }
         });
     } else if (strcmp(typeid(*parameter).name(), typeid(ParameterInt).name()) == 0) {// Parameter
-        std::cout << "Register parameter " << parameter->getName() << std::endl;
+//        std::cout << "Register parameter " << parameter->getName() << std::endl;
         ParameterInt *p = dynamic_cast<ParameterInt *>(parameter);
         p->registerChangeCallback([this, p](int32_t value){
 //            std::cout << "Changed  " << p->getName() << std::endl;

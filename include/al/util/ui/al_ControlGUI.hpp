@@ -274,7 +274,7 @@ private:
     bool mManageIMGUI {true};
 
     int mCurrentSequencerItem {0};
-    int mCurrentPresetSequencerItem {0};
+    int mCurrentPresetSequencerItem {-1};
     bool mStoreButtonOn {false};
     bool mRecordButtonValue {false};
     bool mOverwriteButtonValue {true};
