@@ -106,10 +106,10 @@ inline int uniformi(int high) { return global_ui()(high); }
 // [low, high]
 inline int uniformi(int low, int high) {
     if (high < low) {
-        global_ui()(high, low);
+        return global_ui()(high, low);
     }
     else {
-        global_ui()(low, high);
+        return global_ui()(low, high);
     }
 }
 

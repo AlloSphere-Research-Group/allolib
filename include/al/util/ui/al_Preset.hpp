@@ -145,6 +145,8 @@ public:
 	 */
 	void setInterpolatedPreset(int index1, int index2, double factor);
 
+    void setInterpolatedPreset(std::string presetName1, std::string presetName2, double factor);
+
     /** 
      * @brief Interpolate between current values and new values according to factor
     */

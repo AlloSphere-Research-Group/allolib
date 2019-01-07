@@ -189,31 +189,35 @@ void PresetHandler::recallPreset(std::string name)
 	}
 }
 
+void PresetHandler::setInterpolatedPreset(std::string presetName1, std::string presetName2, double factor)
+{
+    ParameterStates values1 = loadPresetValues(presetName1);
+    ParameterStates values2 = loadPresetValues(presetName2);
+    {
+        if (mMorphRemainingSteps.load() >= 0) {
+            mMorphRemainingSteps.store(-1);
+            std::lock_guard<std::mutex> lk(mTargetLock);
+        }
+        mTargetValues.clear();
+        for(auto value: values1) {
+            if (values2.count(value.first) > 0) { // if parameter name matches
+                mTargetValues[value.first] = value.second;
+                for (unsigned int index = 0; index < value.second.size(); index++) {
+                    mTargetValues[value.first][index] *= 1.0 + (((values2[value.first][index]/value.second[index]) - 1.0)* factor);
+                }
+            }
+        }
+    }
+    mMorphConditionVar.notify_one();
+}
+
 void PresetHandler::setInterpolatedPreset(int index1, int index2, double factor)
 {
 	auto presetNameIt1 = mPresetsMap.find(index1);
 	auto presetNameIt2 = mPresetsMap.find(index2);
 	if (presetNameIt1 != mPresetsMap.end()
 	        && presetNameIt2 != mPresetsMap.end()) {
-
-                ParameterStates values1 = loadPresetValues(presetNameIt1->second);
-                ParameterStates values2 = loadPresetValues(presetNameIt2->second);
-		{
-			if (mMorphRemainingSteps.load() >= 0) {
-				mMorphRemainingSteps.store(-1);
-				std::lock_guard<std::mutex> lk(mTargetLock);
-			}
-			mTargetValues.clear();
-            for(auto value: values1) {
-                            if (values2.count(value.first) > 0) { // if parameter name matches
-                                mTargetValues[value.first] = value.second;
-                                for (unsigned int index = 0; index < value.second.size(); index++) {
-                                    mTargetValues[value.first][index] *= 1.0 + (((values2[value.first][index]/value.second[index]) - 1.0)* factor);
-                                }
-                            }
-                        }
-		}
-		mMorphConditionVar.notify_one();
+        setInterpolatedPreset(presetNameIt1->second, presetNameIt2->second, factor);
 	} else {
 		std::cout << "Invalid indeces for preset interpolation: " << index1 << "," << index2 << std::endl;
 	}
@@ -528,16 +532,18 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
         }
     } else if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) == 0) {// ParameterInt
         ParameterInt *param = dynamic_cast<ParameterInt *>(p);
-        int32_t paramValue = param->get();
-        int32_t difference = values[0] - paramValue;
-        //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
-        if (factor > 0) {
-            difference = difference * factor;
-        }
-        if (difference != 0.0) {
-            int32_t newVal = paramValue + difference;
-            param->set(newVal);
-        }
+//        int32_t paramValue = param->get();
+//        double difference = values[0] - paramValue;
+//        //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
+//        if (factor > 0) {
+//            difference = difference * factor;
+//        }
+//        if (difference != 0.0) {
+//            int32_t newVal = std::round(paramValue + difference);
+//            param->set(newVal);
+//        }
+        // The interpolation above is broken, no easy way to fix for things as they are now...
+        param->set(int(values[0]));
     } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter pose
         ParameterPose *param = dynamic_cast<ParameterPose *>(p);
         if (values.size() == 7) {

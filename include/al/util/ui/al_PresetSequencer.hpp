@@ -48,6 +48,7 @@
 #include <condition_variable>
 #include <utility>
 #include <functional>
+#include <atomic>
 
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/util/ui/al_Preset.hpp"
@@ -99,13 +100,13 @@ public:
 	PresetSequencer() :
 	    mSequencerActive(true),
 	    mRunning(false),
-	    mSequencerThread(NULL),
+	    mSequencerThread(nullptr),
 	    mBeginCallbackEnabled(false),
 	    mEndCallbackEnabled(false)
 	{
 	}
 
-	~PresetSequencer()
+	~PresetSequencer() override
 	{
 		mSequencerActive = false;
 		stopSequence(false);
@@ -122,8 +123,8 @@ public:
 	struct Step {
 		StepType type = PRESET;
 		std::string presetName;
-		float delta; // The time to get to the preset
-		float duration; // The time to stay in the preset before the next step
+		float morphTime; // The time to get to the preset
+		float waitTime; // The time to stay in the preset before the next step
 		std::vector<float> params;
 	};
 
@@ -144,6 +145,14 @@ public:
 	void playSequence(std::string sequenceName);
 
 	void stopSequence(bool triggerCallbacks = true);
+
+    /**
+     * @brief Set time into the current sequence.
+     * @param time
+     *
+     * Will load the state at the time position for the currently playing se
+     */
+    void setTime(double time);
 
 	/**
 	 * @brief Stores a copy of a sequence with its associated presets
@@ -204,7 +213,6 @@ public:
 
 	std::string currentSequence() { return mCurrentSequence; }
 
-
 	/**
 	 * @brief registerEventCommand registers a function associated with an event command
 	 *
@@ -248,6 +256,7 @@ public:
 
 	float getSequenceTotalDuration(std::string sequenceName);
 
+    // For programmatic control of the sequencer:
 	void clearSteps();
 
 	void appendStep(Step &newStep);
@@ -261,6 +270,7 @@ private:
 	std::string buildFullPath(std::string sequenceName);
 
 	std::queue<Step> mSteps;
+    std::queue<Step> mMostRecentSequence;  // Steps from last sequence loaded from disk
 	std::string mDirectory;
 	PresetHandler *mPresetHandler {nullptr};
 	std::string mOSCsubPath;
@@ -269,6 +279,8 @@ private:
 	std::mutex mSequenceLock;
 	std::mutex mPlayWaitLock;
 	std::condition_variable mPlayWaitVariable;
+
+    std::atomic<float> mTimeRequest {0}; // Request setting the current time. Passes info to playback thread
 
 	bool mSequencerActive;
 	bool mRunning;

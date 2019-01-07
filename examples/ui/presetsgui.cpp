@@ -60,7 +60,7 @@ public:
     }
 
 private:
-    Parameter Number{ "Number", "", 1.0, "", 0.0, 16 };
+    ParameterInt Number{ "Number", "", 1, "", 0, 16 };
     Parameter Size{ "Size", "", 0.3, "", 0.1, 2.0 };
     Parameter Red{ "Red", "Color", 0.5, "", 0.0, 1.0 };
     Parameter Green{ "Green", "Color", 1.0, "", 0.0, 1.0 };
