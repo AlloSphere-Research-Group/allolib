@@ -203,8 +203,8 @@ public:
      * Returns -1 if bundleName is not a registered bundle name
      */
     int getBundleCurrent(std::string bundleName) {
-        if (mCurrentBundle.find(bundleName) != mCurrentBundle.end()) {
-            return mCurrentBundle[bundleName];
+        if (mBundles.find(bundleName) != mBundles.end()) {
+            return mBundles[bundleName]->currentBundle();
         }
         return -1;
     }
@@ -214,8 +214,8 @@ public:
      * @param bundleName name of the bundle to query
      */
     bool getBundleIsGlobal(std::string bundleName) {
-        if (mBundleGlobal.find(bundleName) != mBundleGlobal.end()) {
-            return mBundleGlobal[bundleName];
+        if (mBundles.find(bundleName) != mBundles.end()) {
+            return mBundles[bundleName]->bundleGlobal();
         }
         return false;
     }
@@ -263,7 +263,7 @@ private:
     SynthSequencer *mSynthSequencer {nullptr};
     PolySynth *mPolySynth {nullptr};
     DynamicScene *mScene {nullptr};
-    std::map<std::string, std::vector<ParameterBundle *>> mBundles;
+    std::map<std::string, BundleGUIManager *> mBundles;
     Nav *mNav {nullptr};
 
     std::string mName;
@@ -274,7 +274,7 @@ private:
     bool mManageIMGUI {true};
 
     int mCurrentSequencerItem {0};
-    int mCurrentPresetSequencerItem {0};
+    int mCurrentPresetSequencerItem {-1};
     bool mStoreButtonOn {false};
     bool mRecordButtonValue {false};
     bool mOverwriteButtonValue {true};

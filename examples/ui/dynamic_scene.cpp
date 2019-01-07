@@ -113,7 +113,8 @@ public:
             // First get a free voice of type SimpleVoice
             auto *freeVoice = scene.getVoice<SimpleVoice>();
             // Then set its parameters (this voice only has one parameter Freq)
-            freeVoice->setParamFields(std::vector<float>{880.0f});
+            auto params = std::vector<float>{880.0f};
+            freeVoice->setParamFields(params);
             // Set a position for it
             // Trigger it (this inserts it into the chain)
             scene.triggerOn(freeVoice);

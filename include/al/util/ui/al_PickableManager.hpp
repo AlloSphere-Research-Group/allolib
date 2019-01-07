@@ -104,6 +104,13 @@ public:
 		}
                 return true;
 	}
+
+    void unhighlightAll() {
+        for(Pickable *p : mPickables){
+            p->hover = false;
+        }
+    }
+
 	void rotate(Rayd &r){
 		for(Pickable *p : mPickables){
 			if(p->selected){

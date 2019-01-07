@@ -188,7 +188,9 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
                 timeAccumulator += granularity;
                 if (timeAccumulator >= sequencer->mTimeChangeMinTimeDelta * 1000) {
                     timeAccumulator -= sequencer->mTimeChangeMinTimeDelta * 1000;
-                    sequencer->mTimeChangeCallback(1.0e-9 * std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - sequenceStart).count());
+                    if (sequencer->mTimeChangeCallback) {
+                        sequencer->mTimeChangeCallback(1.0e-9 * std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - sequenceStart).count());
+                    }
                 }
 				if (sequencer->mRunning == false) {
 					targetTime = std::chrono::high_resolution_clock::now();
@@ -324,8 +326,13 @@ void PresetSequencer::registerEndCallback(std::function<void (bool, al::PresetSe
 
 void PresetSequencer::registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec)
 {
-    mTimeChangeMinTimeDelta = minTimeDeltaSec;
-    mTimeChangeCallback = func;
+    if (mSequenceLock.try_lock()) {
+        mTimeChangeMinTimeDelta = minTimeDeltaSec;
+        mTimeChangeCallback = func;
+        mSequenceLock.unlock();
+    } else {
+        std::cerr << "ERROR: Failed to set time change callback. Sequencer running" <<std::endl;
+    }
 }
 
 float PresetSequencer::getSequenceTotalDuration(std::string sequenceName)

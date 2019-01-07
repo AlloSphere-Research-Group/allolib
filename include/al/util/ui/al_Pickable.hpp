@@ -27,8 +27,6 @@ struct PickableState {
     hover = false;
     selected = false;
     bundle << hover << selected << pose << scale << scaleVec;
-    hover.setHint("latch", 1.0);
-    selected.setHint("latch", 1.0);
     scale.registerChangeCallback([this](float value) {
         scaleVec.set(Vec3f(value, value, value));
     });
