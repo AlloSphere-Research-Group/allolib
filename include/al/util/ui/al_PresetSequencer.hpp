@@ -252,7 +252,7 @@ public:
 	void enableEndCallback(bool enable) { mEndCallbackEnabled = enable; }
 	void toggleEnableEndCallback() { mEndCallbackEnabled = !mEndCallbackEnabled; }
 
-    void registerTimeChangeCallback(std::function<void(float)> func, float minTimeDeltaSec = 0);
+    void registerTimeChangeCallback(std::function<void(float)> func, float minTimeDeltaSec = 0.05f);
 
 	float getSequenceTotalDuration(std::string sequenceName);
 

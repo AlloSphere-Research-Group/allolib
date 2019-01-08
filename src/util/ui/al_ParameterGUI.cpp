@@ -529,6 +529,20 @@ void ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetCol
 }
 
 void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &currentPresetSequencerItem) {
+    struct SequencerState {
+        float currentTime;
+        float totalDuration;
+    };
+    static std::map<PresetSequencer *, SequencerState> stateMap;
+    if(stateMap.find(presetSequencer) == stateMap.end()) {
+        stateMap[presetSequencer] = SequencerState{0.0, 0.0};
+        float *currentTime = &(stateMap[presetSequencer].currentTime);
+        presetSequencer->registerTimeChangeCallback( [currentTime](float currTime)
+            {*currentTime = currTime;}, 0.1);
+        presetSequencer->registerBeginCallback([&](PresetSequencer *sender, void *userData) {stateMap[presetSequencer].totalDuration = sender->getSequenceTotalDuration(sender->currentSequence());});
+    }
+    SequencerState &state = stateMap[presetSequencer];
+
     if (ImGui::CollapsingHeader("Preset Sequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen )) {
         vector<string> seqList = presetSequencer->getSequenceList();
         if (seqList.size() > 0) {
@@ -536,35 +550,30 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
                 seqList.resize(64);
                 std::cout << "Cropping sequence list to 64 items for display" <<std::endl;
             }
-            // for (size_t i = 0; i < seqList.size(); i++) {
-            //     strncpy(mSequencerItems[i], seqList[i].c_str(), 32);
-            // }
-            // int items_count = seqList.size();
 
-            static float currentTime = 0.0;
-            static float totalDuration = 0.0;
             if (ImGui::Combo("Sequences##PresetSequencer", &currentPresetSequencerItem, ParameterGUI::vector_getter,
                              static_cast<void*>(&seqList), seqList.size())) {
                 std::cout << currentPresetSequencerItem <<std::endl;
-                totalDuration = presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
+//                state.totalDuration = presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
             }
             if (ImGui::Button("Play##PresetSequencer")) {
                 presetSequencer->stopSequence();
-                presetSequencer->registerTimeChangeCallback([&](float currTime) {currentTime = currTime;} );
-                presetSequencer->playSequence(seqList[currentPresetSequencerItem]);
+                if (currentPresetSequencerItem >= 0) {
+                    presetSequencer->playSequence(seqList[currentPresetSequencerItem]);
+                } else {
+                    std::cout << "No sequence selected for playback." << std::endl;
+                }
             }
             ImGui::SameLine();
             if (ImGui::Button("Stop##PresetSequencer")) {
                 presetSequencer->stopSequence();
             }
-            float time = currentTime;
-            if (ImGui::SliderFloat("Position#__seq__", &time, 0.0f, totalDuration)) {
-                std::cout << "Requested time:" << time << std::endl;
-            }
-
-            // for (size_t i = 0; i < seqList.size(); i++) {
-            //     //                free(items[i]);
-            // }
+        }
+        float time = state.currentTime;
+//        std::cout << time << std::endl;
+        if (ImGui::SliderFloat("Position#__seq__", &time, 0.0f, state.totalDuration)) {
+//            std::cout << "Requested time:" << time << std::endl;
+            presetSequencer->setTime(time);
         }
     }
 }

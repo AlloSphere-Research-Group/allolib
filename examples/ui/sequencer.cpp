@@ -3,31 +3,41 @@
 #include "al/util/ui/al_PresetSequencer.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/util/ui/al_Preset.hpp"
+#include "al/util/ui/al_ControlGUI.hpp"
 
 #include <fstream>
 
 using namespace al;
 using namespace std;
 
-Parameter X("x", "", 0.0, "", -2, 2);
-Parameter Y("y", "", 0.0, "", -2, 2);
 
-PresetHandler presetHandler("sequencerDir", true);
-PresetSequencer sequencer;
-// The sequencer server triggers sequences when it receives a valid sequence
-// name on OSC path /sequence
-// If you send a message using a command like:
-// oscsend 127.0.0.1 9012 /sequence s "seq"
-// You will trigger the sequence
-SequenceServer sequencerServer; // Send OSC to 127.0.0.1:9011
 
 struct MyApp : App
 {
 	Mesh m;
 
+    Parameter X{"x", "", 0.0, "", -2, 2};
+    Parameter Y{"y", "", 0.0, "", -2, 2};
+
+    PresetHandler presetHandler{"sequencerDir", true};
+    PresetSequencer sequencer;
+    // The sequencer server triggers sequences when it receives a valid sequence
+    // name on OSC path /sequence
+    // If you send a message using a command like:
+    // oscsend 127.0.0.1 9012 /sequence s "seq"
+    // You will trigger the sequence
+    SequenceServer sequencerServer; // Send OSC to 127.0.0.1:9011
+
 	void onCreate() override {
 		addSphere(m, 0.2);
 		nav().pullBack(4);
+
+        presetHandler << X << Y; // Register parameters with preset handler
+        sequencer << presetHandler; // Register preset handler with sequencer
+        sequencerServer << sequencer; // Register sequencer with sequence server
+        sequencerServer.print();
+
+        sequencer.registerTimeChangeCallback([] (float time) { std::cout << time << std::endl;}, 0.5);
 	}
 
 	void onDraw(Graphics &g) override {
@@ -96,12 +106,6 @@ preset2:1.5:2.0
 int main(int argc, char* argv[])
 {
 	writeExamplePresets();
-	presetHandler << X << Y; // Register parameters with preset handler
-	sequencer << presetHandler; // Register preset handler with sequencer
-	sequencerServer << sequencer; // Register sequencer with sequence server
-	sequencerServer.print();
-
-    sequencer.registerTimeChangeCallback([] (float time) { std::cout << time << std::endl;}, 0.5);
 	MyApp().start();
 }
 
