@@ -16,7 +16,7 @@ using namespace al;
 PresetHandler::PresetHandler(std::string rootDirectory, bool verbose) :
 	mVerbose(verbose), mUseCallbacks(true), mRootDir(rootDirectory),
     mRunning(true), mMorphRemainingSteps(-1),
-    mMorphInterval(0.05), mMorphTime("morphTime", "", 0.0, "", 0.0, 20.0), mMorphingThread(PresetHandler::morphingFunction, this)
+    mMorphInterval(0.05f), mMorphTime("morphTime", "", 0.0, "", 0.0, 20.0), mMorphingThread(PresetHandler::morphingFunction, this)
 {
 	if (!File::exists(rootDirectory)) {
 		if (!Dir::make(rootDirectory)) {
@@ -169,7 +169,7 @@ void PresetHandler::recallPreset(std::string name)
 			std::lock_guard<std::mutex> lk(mTargetLock);
 		}
 		mTargetValues = loadPresetValues(name);
-		mMorphRemainingSteps.store(1 + ceil(mMorphTime.get() / mMorphInterval));
+		mMorphRemainingSteps.store(1.0f + ceilf(mMorphTime.get() / mMorphInterval));
 	}
 	mMorphConditionVar.notify_one();
 	int index = -1;
@@ -189,21 +189,36 @@ void PresetHandler::recallPreset(std::string name)
 	}
 }
 
-void PresetHandler::setInterpolatedPreset(std::string presetName1, std::string presetName2, double factor)
+void PresetHandler::setInterpolatedPreset(std::string presetName1, std::string presetName2, double factor, bool synchronous)
 {
     ParameterStates values1 = loadPresetValues(presetName1);
     ParameterStates values2 = loadPresetValues(presetName2);
-    {
+    if (synchronous) {
+        for(auto value: values1) {
+            if (values2.count(value.first) > 0) { // if para std::cout << meter name match exists
+                mTargetValues[value.first] = value.second;
+                for (ParameterMeta *param: mParameters) {
+                    if (param->getFullAddress() == value.first) {
+                        std::vector<float> newValues;
+                        for (unsigned int index = 0; index < value.second.size(); index++) {
+                            newValues.push_back(value.second[index] + (values2[value.first][index] - value.second[index])* factor);
+                        }
+                        setParameterValues(param, newValues);
+                    }
+                }
+            }
+        }
+    } else {
         if (mMorphRemainingSteps.load() >= 0) {
             mMorphRemainingSteps.store(-1);
-            std::lock_guard<std::mutex> lk(mTargetLock);
+            std::lock_guard<std::mutex> lk(mTargetLock); // Wait for morph function loop to process
         }
         mTargetValues.clear();
         for(auto value: values1) {
-            if (values2.count(value.first) > 0) { // if parameter name matches
+            if (values2.count(value.first) > 0) { // if para std::cout << meter name match exists
                 mTargetValues[value.first] = value.second;
                 for (unsigned int index = 0; index < value.second.size(); index++) {
-                    mTargetValues[value.first][index] *= 1.0 + (((values2[value.first][index]/value.second[index]) - 1.0)* factor);
+                    mTargetValues[value.first][index] = value.second[index] + (values2[value.first][index] - value.second[index])* factor;
                 }
             }
         }
@@ -211,13 +226,13 @@ void PresetHandler::setInterpolatedPreset(std::string presetName1, std::string p
     mMorphConditionVar.notify_one();
 }
 
-void PresetHandler::setInterpolatedPreset(int index1, int index2, double factor)
+void PresetHandler::setInterpolatedPreset(int index1, int index2, double factor, bool synchronous)
 {
 	auto presetNameIt1 = mPresetsMap.find(index1);
 	auto presetNameIt2 = mPresetsMap.find(index2);
 	if (presetNameIt1 != mPresetsMap.end()
 	        && presetNameIt2 != mPresetsMap.end()) {
-        setInterpolatedPreset(presetNameIt1->second, presetNameIt2->second, factor);
+        setInterpolatedPreset(presetNameIt1->second, presetNameIt2->second, factor, synchronous);
 	} else {
 		std::cout << "Invalid indeces for preset interpolation: " << index1 << "," << index2 << std::endl;
 	}

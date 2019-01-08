@@ -139,13 +139,14 @@ public:
 	 * @param index1 index of the first preset
 	 * @param index2 index of the second preset
 	 * @param factor A value between 0-1 to determine interpolation
+     * @param synchronous The values are set instantly and synchronous to this call
 	 *
 	 * A factor of 0 uses preset 1 and a factor of 1 uses preset 2. Values
 	 * in between result in linear interpolation of the values.
 	 */
-	void setInterpolatedPreset(int index1, int index2, double factor);
+	void setInterpolatedPreset(int index1, int index2, double factor, bool synchronous = true);
 
-    void setInterpolatedPreset(std::string presetName1, std::string presetName2, double factor);
+    void setInterpolatedPreset(std::string presetName1, std::string presetName2, double factor, bool synchronous = true);
 
     /** 
      * @brief Interpolate between current values and new values according to factor
@@ -294,8 +295,8 @@ private:
 
     ParameterStates getBundleStates(ParameterBundle *bundle, std::string id);
 
-	bool mVerbose;
-	bool mUseCallbacks;
+    bool mVerbose {false};
+	bool mUseCallbacks {false};
 	std::string mRootDir;
 	std::string mSubDir; // Optional sub directory, e.g. for preset map archives
 	std::string mFileName;
@@ -305,7 +306,7 @@ private:
     std::map<std::string, std::vector<ParameterBundle *>> mBundles;
 
 	std::mutex mFileLock;
-	bool mRunning; // To keep the morphing thread alive
+	bool mRunning {false}; // To keep the morphing thread alive
 	// bool mMorph; // To be able to trip and stop morphing at any time.
 	std::atomic<int> mMorphRemainingSteps;
 	float mMorphInterval;
