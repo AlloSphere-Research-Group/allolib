@@ -358,6 +358,20 @@ std::string PresetHandler::getPresetName(int index)
 	return mPresetsMap[index];
 }
 
+void PresetHandler::skipParameter(std::string parameterAddr, bool skip) {
+    std::unique_lock<std::mutex> lk(mSkipParametersLock);
+    if (skip) {
+        if (std::find(mSkipParameters.begin(), mSkipParameters.end(), parameterAddr) == mSkipParameters.end()) {
+            mSkipParameters.push_back(parameterAddr);
+        }
+    } else {
+        auto position = std::find(mSkipParameters.begin(), mSkipParameters.end(), parameterAddr);
+        if (position != mSkipParameters.end()) {
+            mSkipParameters.erase(position);
+        }
+    }
+}
+
 int PresetHandler::getCurrentPresetIndex() {
     std::map<int, std::string> presets = availablePresets();
     int current = -1;
@@ -402,10 +416,7 @@ std::string PresetHandler::getCurrentPath()
 
 std::string al::PresetHandler::getRootPath()
 {
-	std::string relPath = mRootDir;
-	if (relPath.back() != '/') {
-		relPath += "/";
-	}
+	std::string relPath = File::conformDirectory(mRootDir);
 	return relPath;
 }
 
@@ -734,7 +745,8 @@ PresetHandler::ParameterStates PresetHandler::getBundleStates(ParameterBundle *b
 PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)
 {
     ParameterStates preset;
-	std::lock_guard<std::mutex> lock(mFileLock);
+	std::lock_guard<std::mutex> lock(mFileLock); // Protect loading and saving
+    std::lock_guard<std::mutex> lock2(mSkipParametersLock); // Protect skip list
 	std::string path = getCurrentPath();
 	if (path.back() != '/') {
 		path += "/";
@@ -759,17 +771,23 @@ PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)
 					break;
                 }
 				std::stringstream ss(line);
-                                std::string address, type;
-                                std::vector<float> values;
+                std::string address, type;
+                std::vector<float> values;
 				std::getline(ss, address, ' ');
-				std::getline(ss, type, ' ');
+
+                std::getline(ss, type, ' ');
+
 
                 std::string value;
                 while (std::getline(ss, value, ' ')) {
                     values.push_back(std::stof(value));
                 }
-                // Should we make sure the address corresponds to an existing preset?
-                preset[address] = values;
+
+                if (std::find(mSkipParameters.begin(), mSkipParameters.end(), address) == mSkipParameters.end()) {
+                    // Address is not in ignore list, so add to values loaded
+                    // Should we make sure the address corresponds to an existing preset?
+                    preset[address] = values;
+                }
 			}
 		}
 	}

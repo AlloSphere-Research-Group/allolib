@@ -66,7 +66,7 @@ public:
     static void endDraw() { endIMGUI(); }
 
     // These functions require no state other than the parameter itself
-    static void drawVectorParamaters(std::vector<ParameterMeta *> params, std::string suffix = "");
+    static void drawVectorParameters(std::vector<ParameterMeta *> params, std::string suffix = "");
     static void drawParameterMeta(ParameterMeta *param, std::string suffix = "");
     static void drawParameter(Parameter *param, std::string suffix = "");
     static void drawParameterString(ParameterString *param, std::string suffix = "");
@@ -100,7 +100,19 @@ public:
 
     // These functions require additional state that is passed as reference
 
-    static void drawPresetHandler(PresetHandler *presetHandler, int presetColumns, int presetRows, bool &storeButtonOn);
+
+    struct PresetHandlerState {
+        std::string currentBank;
+        int currentBankIndex = 0;
+        std::vector<std::string> mapList;
+        int presetHandlerBank = 0;
+        bool newMap = false;
+        std::string enteredText;
+        std::string newMapText;
+        bool storeButtonState;
+    };
+
+    static PresetHandlerState &drawPresetHandler(PresetHandler *presetHandler, int presetColumns, int presetRows);
     static void drawPresetSequencer(PresetSequencer *presetSequencer, int &currentPresetSequencerItem);
     static void drawSequenceRecorder(SequenceRecorder *sequenceRecorder, bool &overwriteButtonValue);
 

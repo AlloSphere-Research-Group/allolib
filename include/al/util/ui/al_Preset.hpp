@@ -48,6 +48,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <functional>
+#include <algorithm>
 
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/util/ui/al_Parameter.hpp"
@@ -159,6 +160,16 @@ public:
 	std::map<int, std::string> availablePresets();
 	std::string getPresetName(int index);
 	std::string getCurrentPresetName() {return mCurrentPresetName; }
+
+    /**
+     * @brief Add or remove a parameter address from group that will be skipped when recalling presets
+     * @param parameter address of parameter to skip
+     * @param skip set to false if you want to remove from skip list
+     *
+     * This is used within loadPresetValues(), so it will affect both synchronous and
+     * asynchronous recall.
+     */
+    void skipParameter(std::string parameterAddr, bool skip = true);
 
     int getCurrentPresetIndex();
 
@@ -304,6 +315,8 @@ private:
 	std::string mFileName;
 	std::string mCurrentMapName;
 	std::vector<ParameterMeta *> mParameters;
+    std::vector<std::string> mSkipParameters;
+    std::mutex mSkipParametersLock;
 
     std::map<std::string, std::vector<ParameterBundle *>> mBundles;
 

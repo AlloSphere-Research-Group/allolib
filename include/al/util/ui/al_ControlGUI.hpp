@@ -275,7 +275,6 @@ private:
 
     int mCurrentSequencerItem {0};
     int mCurrentPresetSequencerItem {0};
-    bool mStoreButtonOn {false};
     bool mRecordButtonValue {false};
     bool mOverwriteButtonValue {true};
     char** mSequencerItems;

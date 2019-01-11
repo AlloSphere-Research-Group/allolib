@@ -5,7 +5,7 @@
 using namespace al;
 using namespace std;
 
-void ParameterGUI::drawVectorParamaters(std::vector<ParameterMeta *> params, string suffix)
+void ParameterGUI::drawVectorParameters(std::vector<ParameterMeta *> params, string suffix)
 {
     for (auto *param: params) {
         drawParameterMeta(std::vector<ParameterMeta *>{param}, suffix);
@@ -461,21 +461,12 @@ void ParameterGUI::drawDynamicScene(DynamicScene *scene, std::string suffix)
     
 }
 
-void ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
-                                     int presetRows, bool &storeButtonOn)
+ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
+                                                                  int presetRows)
 {
-    struct PresetHandlerState {
-        string currentBank;
-        int currentBankIndex = 0;
-        vector<string> mapList;
-        int presetHandlerBank = 0;
-        bool newMap = false;
-        std::string enteredText;
-        std::string newMapText;
-    };
-
     static std::map<PresetHandler *, PresetHandlerState> stateMap;
     if(stateMap.find(presetHandler) == stateMap.end()) {
+        std::cout << "Created state for " << (unsigned long) presetHandler << std::endl;
         stateMap[presetHandler] = PresetHandlerState{"", 0, presetHandler->availablePresetMaps()};
         if (stateMap[presetHandler].mapList.size() > 0) {
             stateMap[presetHandler].currentBank = stateMap[presetHandler].mapList[0];
@@ -485,7 +476,7 @@ void ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetCol
     PresetHandlerState &state = stateMap[presetHandler];
 
 
-    if (ImGui::CollapsingHeader("Presets", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::CollapsingHeader(("Presets " + presetHandler->getCurrentPath()).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
 
         int selection = presetHandler->getCurrentPresetIndex();
         std::string currentPresetName = presetHandler->getCurrentPresetName();
@@ -512,14 +503,14 @@ void ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetCol
                 }
                 if (ImGui::Selectable((name + suffix).c_str(), is_selected, 0, ImVec2(18, 15)))
                 {
-                    if (storeButtonOn) {
+                    if (state.storeButtonState) {
                         std::string saveName = state.enteredText;
                         if (saveName.size() == 0) {
                             saveName = name;
                         }
                         presetHandler->storePreset(counter, saveName.c_str());
                         selection = counter;
-                        storeButtonOn = false;
+                        state.storeButtonState = false;
                         state.enteredText.clear();
                     } else {
                         if (presetHandler->recallPreset(counter) != "") { // Preset is available
@@ -538,7 +529,7 @@ void ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetCol
                 ImGui::PopID();
             }
         }
-        ImGui::Checkbox("Store##__Preset", &storeButtonOn);
+        ImGui::Checkbox("Store##__Preset", &state.storeButtonState);
         ImGui::SameLine();
         if (ImGui::Button("<-##__Preset")) {
             state.presetHandlerBank -= 1;
@@ -549,7 +540,7 @@ void ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetCol
         ImGui::SameLine();
         if (ImGui::Button("->##__Preset")) {
             state.presetHandlerBank += 1;
-            if (state.presetHandlerBank > 4) {
+            if (state.presetHandlerBank > state.storeButtonState) {
                 state.presetHandlerBank = 0;
             }
         }
@@ -610,6 +601,7 @@ void ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetCol
 //            ImGui::Text("%s", currentPresetName.c_str());
 
     }
+    return state;
 }
 
 void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &currentPresetSequencerItem) {

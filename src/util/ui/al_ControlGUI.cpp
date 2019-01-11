@@ -26,8 +26,7 @@ void ControlGUI::draw(Graphics &g) {
 //    ImGui::Begin(std::to_string(mId).c_str());
     if (mNav) { ParameterGUI::drawNav(mNav, mName);}
     if (mPresetHandler) {
-        ParameterGUI::drawPresetHandler(mPresetHandler, mPresetColumns,
-                                        mPresetRows, mStoreButtonOn);
+        ParameterGUI::drawPresetHandler(mPresetHandler, mPresetColumns, mPresetRows);
     }
     if (mPresetSequencer) {
         ParameterGUI::drawPresetSequencer(mPresetSequencer, mCurrentPresetSequencerItem);
