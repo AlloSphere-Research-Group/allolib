@@ -509,7 +509,7 @@ FilePath searchFileFromDir(std::string const& filename, std::string const& dir) 
   return FilePath();
 }
 
-FileList filterInDir(std::string const& dir, bool(*f)(FilePath const&)) {
+FileList filterInDir(std::string const& dir, std::function<bool(FilePath const&)> f) {
 	FileList filtered;
 	auto dir_ = File::conformDirectory(dir);
 	std::vector<std::string> children;

@@ -85,7 +85,33 @@ std::string PresetHandler::buildMapPath(std::string mapName, bool useSubDirector
 		mapName = mapName + ".presetMap";
 	}
 
-	return currentPath + mapName;
+    return currentPath + mapName;
+}
+
+std::vector<std::string> PresetHandler::availablePresetMaps()
+{
+    std::vector<std::string> mapList;
+    std::string path = getCurrentPath();
+
+    // get list of files ending in ".presetMap"
+    static const std::string extension = ".presetMap";
+    FileList sequence_files = filterInDir(path, [](const FilePath& f){
+        if (al::checkExtension(f, extension)) return true;
+        else return false;
+    });
+
+    // store found preset files
+    for (int i = 0; i < sequence_files.count(); i += 1) {
+        const FilePath& path = sequence_files[i];
+        const std::string& name = path.file();
+        // exclude extension when adding to sequence list
+        std::string entryName = name.substr(0, name.size()-extension.size());
+        if (std::find(mapList.begin(), mapList.end(), entryName)== mapList.end()) {
+            mapList.push_back(entryName);
+        }
+    }
+
+    return mapList;
 }
 
 void PresetHandler::storePreset(std::string name)
@@ -370,10 +396,7 @@ void PresetHandler::stopMorph()
 
 std::string PresetHandler::getCurrentPath()
 {
-    std::string relPath = getRootPath() + mSubDir;
-	if (relPath.back() != '/') {
-		relPath += "/";
-	}
+    std::string relPath = File::conformDirectory(getRootPath() + mSubDir);
 	return relPath;
 }
 

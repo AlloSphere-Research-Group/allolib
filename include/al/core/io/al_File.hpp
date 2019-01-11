@@ -49,6 +49,7 @@
 #include <list>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 #ifndef AL_FILE_DELIMITER_STR
 	#ifdef AL_WINDOWS
@@ -504,7 +505,7 @@ FileList fileListFromDir(std::string const& dir);
 FilePath searchFileFromDir(std::string const& filename, std::string const& dir);
 
 // pass lambda with given signature, returns list of files that f(file) is true
-FileList filterInDir(std::string const& dir, bool(*f)(FilePath const&));
+FileList filterInDir(std::string const& dir, std::function<bool(FilePath const&)> f);
 
 // returns true if given file name/path ends in extension
 bool checkExtension(std::string const& filename, std::string const& extension);

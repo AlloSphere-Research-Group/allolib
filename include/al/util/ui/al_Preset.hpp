@@ -212,6 +212,8 @@ public:
 
 	std::string buildMapPath(std::string mapName, bool useSubDirectory = false);
 
+    std::vector<std::string> availablePresetMaps();
+
 	std::map<int, std::string> readPresetMap(std::string mapName = "default");
 
 	void setCurrentPresetMap(std::string mapName = "default", bool autoCreate = false);

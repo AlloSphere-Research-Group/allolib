@@ -193,7 +193,7 @@ public:
      * then the data is likely to be one frame late. This is often not a big issue
      * and simplifies the code.
      */
-    bool usingInput() {return imgui_is_using_input();}
+    bool usingInput() {return ParameterGUI::usingInput();}
 
     /**
      * @brief get currently active index for a parameter bundle registerd with the GUI

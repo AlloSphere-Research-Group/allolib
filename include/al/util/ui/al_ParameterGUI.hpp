@@ -59,7 +59,14 @@ class BundleGUIManager;
 class ParameterGUI {
 public:
 
+    static void initialize() { initIMGUI(); }
+    static void cleanup() { shutdownIMGUI(); }
+
+    static void beginDraw() { beginIMGUI(); }
+    static void endDraw() { endIMGUI(); }
+
     // These functions require no state other than the parameter itself
+    static void drawVectorParamaters(std::vector<ParameterMeta *> params, std::string suffix = "");
     static void drawParameterMeta(ParameterMeta *param, std::string suffix = "");
     static void drawParameter(Parameter *param, std::string suffix = "");
     static void drawParameterString(ParameterString *param, std::string suffix = "");
