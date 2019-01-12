@@ -43,58 +43,16 @@ void ControlGUI::draw(Graphics &g) {
         }
     }
     if (mSynthSequencer) {
-        if (ImGui::CollapsingHeader("Event Sequencer##EventSequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-            vector<string> seqList = mSynthSequencer->getSequenceList();
-            if (seqList.size() > 0) {
-                if (seqList.size() > 64) {
-                    seqList.resize(64);
-                    std::cout << "Cropping sequence list to 64 items for display" <<std::endl;
-                }
-                // for (size_t i = 0; i < seqList.size(); i++) {
-                //     strncpy(mSequencerItems[i], seqList[i].c_str(), 32);
-                // }
-                // int items_count = seqList.size();
-                ImGui::Combo("Sequences##EventSequencer", &mCurrentSequencerItem, ParameterGUI::vector_getter,
-                            static_cast<void*>(&seqList), seqList.size());
-                if (ImGui::Button("Play##EventSequencer")) {
-                    mSynthSequencer->synth().allNotesOff();
-                    mSynthSequencer->playSequence(seqList[mCurrentSequencerItem]);
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Stop##EventSequencer")) {
-                    mSynthSequencer->stopSequence();
-                    mSynthSequencer->synth().allNotesOff();
-                }
-
-                for (size_t i = 0; i < seqList.size(); i++) {
-                    //                free(items[i]);
-                }
-            }
-        }
+        ParameterGUI::drawSynthSequencer(mSynthSequencer);
     }
     if (mSynthRecorder) {
-        if (ImGui::CollapsingHeader("Event Recorder##__EventRecorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-            static char buf1[64] = "test"; ImGui::InputText("Record Name##__EventRecorder", buf1, 64);
-            if (ImGui::Checkbox("Record##__EventRecorder", &mRecordButtonValue)) {
-                if (mRecordButtonValue) {
-                    mSynthRecorder->startRecord(buf1, mOverwriteButtonValue);
-                } else {
-                    mSynthRecorder->stopRecord();
-                }
-            }
-            ImGui::SameLine();
-            ImGui::Checkbox("Overwrite", &mOverwriteButtonValue);
-        }
+        ParameterGUI::drawSynthRecorder(mSynthRecorder);
     }
 
     for (auto bundleGroup: mBundles) {
         bundleGroup.second->drawBundleGUI();
-//        mParameterGUI.drawBundleGroup(bundleGroup.second, suffix,
-//                                      mCurrentBundle[bundleGroup.first], mBundleGlobal[bundleGroup.first]);
     }
 
-
-//    ImGui::ShowDemoWindow();
     vector<bool> groupsVisibleStack;
     for (auto elem: mElements) {
         if(elem.first == "" || ImGui::CollapsingHeader(elem.first.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by 
@@ -102,7 +60,6 @@ void ControlGUI::draw(Graphics &g) {
             if (elem.first.size() > 0){
                 suffix = "##" + elem.first;
             }
-
 			for (ParameterMeta *p: elem.second) {
 				// We do a runtime check to determine the type of the parameter to determine how to draw it.
                 if (groupsVisibleStack.size() == 0 || groupsVisibleStack.back() == true) {

@@ -685,6 +685,62 @@ void ParameterGUI::drawSequenceRecorder(SequenceRecorder *sequenceRecorder,
     }
 }
 
+void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
+    struct SynthSequencerState {
+        int currentItem;
+    };
+    static std::map<SynthSequencer *, SynthSequencerState> stateMap;
+    if(stateMap.find(synthSequencer) == stateMap.end()) {
+        stateMap[synthSequencer] = SynthSequencerState{0};
+    }
+    SynthSequencerState &state = stateMap[synthSequencer];
+
+    if (ImGui::CollapsingHeader("Event Sequencer##EventSequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        std::vector<std::string> seqList = synthSequencer->getSequenceList();
+        if (seqList.size() > 0) {
+            if (seqList.size() > 64) {
+                seqList.resize(64);
+                std::cout << "Cropping sequence list to 64 items for display" <<std::endl;
+            }
+            ImGui::Combo("Sequences##SynthSequencer", &state.currentItem, ParameterGUI::vector_getter,
+                         static_cast<void*>(&seqList), seqList.size());
+            if (ImGui::Button("Play##EventSequencer")) {
+                synthSequencer->synth().allNotesOff();
+                synthSequencer->playSequence(seqList[state.currentItem]);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Stop##EventSequencer")) {
+                synthSequencer->stopSequence();
+                synthSequencer->synth().allNotesOff();
+            }
+        }
+    }
+}
+
+void ParameterGUI::drawSynthRecorder(SynthRecorder *synthRecorder) {
+    struct SynthRecorderState {
+        bool recordButton;
+        bool overrideButton;
+    };
+    static std::map<SynthRecorder *, SynthRecorderState> stateMap;
+    if(stateMap.find(synthRecorder) == stateMap.end()) {
+        stateMap[synthRecorder] = SynthRecorderState{0, false};
+    }
+    SynthRecorderState &state = stateMap[synthRecorder];
+
+    if (ImGui::CollapsingHeader("Event Recorder##__EventRecorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        static char buf1[64] = "test"; ImGui::InputText("Record Name##__EventRecorder", buf1, 64);
+        if (ImGui::Checkbox("Record##__EventRecorder", &state.recordButton)) {
+            if (state.recordButton) {
+                synthRecorder->startRecord(buf1, state.overrideButton);
+            } else {
+                synthRecorder->stopRecord();
+            }
+        }
+        ImGui::SameLine();
+        ImGui::Checkbox("Overwrite", &state.overrideButton);
+    }
+}
 
 void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
                                    string suffix,
@@ -701,7 +757,7 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
 
     if (ImGui::CollapsingHeader(("Bundle:" + name + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         if (!bundleGlobal) {
-//            ImGui::SameLine();
+            //            ImGui::SameLine();
             if (ImGui::InputInt(suffix.c_str(), &index)) {
                 if (index >= 0 && index < (int) bundleGroup.size()) {
                     currentBundle = index;

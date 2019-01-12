@@ -115,6 +115,8 @@ public:
     static PresetHandlerState &drawPresetHandler(PresetHandler *presetHandler, int presetColumns, int presetRows);
     static void drawPresetSequencer(PresetSequencer *presetSequencer, int &currentPresetSequencerItem);
     static void drawSequenceRecorder(SequenceRecorder *sequenceRecorder, bool &overwriteButtonValue);
+    static void drawSynthSequencer(SynthSequencer *synthSequencer);
+    static void drawSynthRecorder(SynthRecorder *synthRecorder);
 
     static void drawBundleGroup(std::vector<ParameterBundle *> bundles, std::string suffix, int &currentBundle, bool &bundleGlobal);
     static void drawBundleManager(BundleGUIManager *manager);
