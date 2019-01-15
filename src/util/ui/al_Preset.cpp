@@ -69,15 +69,9 @@ void PresetHandler::registerMorphTimeCallback(Parameter::ParameterChangeCallback
 
 std::string PresetHandler::buildMapPath(std::string mapName, bool useSubDirectory)
 {
-	std::string currentPath = getRootPath();
-	if (currentPath.back() != '/') {
-		currentPath += "/";
-	}
+	std::string currentPath = File::conformDirectory(getRootPath());
 	if (useSubDirectory) {
-		currentPath += mSubDir;
-	}
-	if (currentPath.back() != '/') {
-		currentPath += "/";
+		currentPath += File::conformDirectory(mSubDir);
 	}
 	if ( !(mapName.size() > 4 && mapName.substr(mapName.size() - 4) == ".txt")
 	     && !(mapName.size() > 10 && mapName.substr(mapName.size() - 10) == ".presetMap")
@@ -538,9 +532,12 @@ void PresetHandler::changeParameterValue(std::string presetName,
 	savePresetValues(parameters, presetName, true);
 }
 
-void PresetHandler::storeCurrentPresetMap()
+void PresetHandler::storeCurrentPresetMap(std::string mapName, bool useSubDirectory)
 {
-	std::string mapFullPath = buildMapPath(mCurrentMapName);
+    if (mapName.size() > 0) {
+        mCurrentMapName = mapName;
+    }
+	std::string mapFullPath = buildMapPath(mCurrentMapName, useSubDirectory);
 	std::ofstream f(mapFullPath);
 	if (!f.is_open()) {
 		if (mVerbose) {

@@ -221,6 +221,7 @@ public:
 
     PresetHandler &operator << (ParameterBundle &bundle) { return this->registerParameterBundle(bundle); }
 
+
 	std::string buildMapPath(std::string mapName, bool useSubDirectory = false);
 
     std::vector<std::string> availablePresetMaps();
@@ -228,6 +229,10 @@ public:
 	std::map<int, std::string> readPresetMap(std::string mapName = "default");
 
 	void setCurrentPresetMap(std::string mapName = "default", bool autoCreate = false);
+
+    void setPresetMap(std::map<int, std::string> presetsMap) {mPresetsMap = presetsMap;}
+
+    void storeCurrentPresetMap(std::string mapName = "", bool useSubDirectory = false);
 
 	/**
 	 * @brief useCallbacks determines whether to call the internal callbacks
@@ -241,66 +246,77 @@ public:
 	void changeParameterValue(std::string presetName, std::string parameterPath,
 	                          float newValue);
 
-        static int asciiToPresetIndex(int ascii, int offset = 0) {
-            int index = -1;
+    static int asciiToPresetIndex(int ascii, int offset = 0) {
+        int index = -1;
 
-            switch (ascii) {
-            case '1': index = 0; break;
-            case '2': index = 1; break;
-            case '3': index = 2; break;
-            case '4': index = 3; break;
-            case '5': index = 4; break;
-            case '6': index = 5; break;
-            case '7': index = 6; break;
-            case '8': index = 7; break;
-            case '9': index = 8; break;
-            case '0': index = 9; break;
-            case 'q': index = 10; break;
-            case 'w': index = 11; break;
-            case 'e': index = 12; break;
-            case 'r': index = 13; break;
-            case 't': index = 14; break;
-            case 'y': index = 15; break;
-            case 'u': index = 16; break;
-            case 'i': index = 17; break;
-            case 'o': index = 18; break;
-            case 'p': index = 19; break;
-            case 'a': index = 20; break;
-            case 's': index = 21; break;
-            case 'd': index = 22; break;
-            case 'f': index = 23; break;
-            case 'g': index = 24; break;
-            case 'h': index = 25; break;
-            case 'j': index = 26; break;
-            case 'k': index = 27; break;
-            case 'l': index = 28; break;
-            case ';': index = 29; break;;
-            case 'z': index = 30; break;
-            case 'x': index = 31; break;
-            case 'c': index = 32; break;
-            case 'v': index = 33; break;
-            case 'b': index = 34; break;
-            case 'n': index = 35; break;
-            case 'm': index = 36; break;
-            case ',': index = 37; break;
-            case '.': index = 38; break;
-            case '/': index = 39; break;
-            }
-            if (index >= 0) {
-                index += offset;
-            }
-
-            return index;
+        switch (ascii) {
+        case '1': index = 0; break;
+        case '2': index = 1; break;
+        case '3': index = 2; break;
+        case '4': index = 3; break;
+        case '5': index = 4; break;
+        case '6': index = 5; break;
+        case '7': index = 6; break;
+        case '8': index = 7; break;
+        case '9': index = 8; break;
+        case '0': index = 9; break;
+        case 'q': index = 10; break;
+        case 'w': index = 11; break;
+        case 'e': index = 12; break;
+        case 'r': index = 13; break;
+        case 't': index = 14; break;
+        case 'y': index = 15; break;
+        case 'u': index = 16; break;
+        case 'i': index = 17; break;
+        case 'o': index = 18; break;
+        case 'p': index = 19; break;
+        case 'a': index = 20; break;
+        case 's': index = 21; break;
+        case 'd': index = 22; break;
+        case 'f': index = 23; break;
+        case 'g': index = 24; break;
+        case 'h': index = 25; break;
+        case 'j': index = 26; break;
+        case 'k': index = 27; break;
+        case 'l': index = 28; break;
+        case ';': index = 29; break;;
+        case 'z': index = 30; break;
+        case 'x': index = 31; break;
+        case 'c': index = 32; break;
+        case 'v': index = 33; break;
+        case 'b': index = 34; break;
+        case 'n': index = 35; break;
+        case 'm': index = 36; break;
+        case ',': index = 37; break;
+        case '.': index = 38; break;
+        case '/': index = 39; break;
+        }
+        if (index >= 0) {
+            index += offset;
         }
 
-        void verbose(bool isVerbose = true) { mVerbose = isVerbose; }
+        return index;
+    }
 
-private:
-	void storeCurrentPresetMap();
+    void verbose(bool isVerbose = true) { mVerbose = isVerbose; }
 
-	ParameterStates loadPresetValues(std::string name);
+    /**
+     * @brief load preset into parameter states data structure without setting values
+     * @param name name of the preset to load
+     * @return the state of the parameters in the loaded prese
+     */
+    ParameterStates loadPresetValues(std::string name);
+
+    /**
+     * @brief save list of parameter states into text preset file
+     * @param values the values of parameters to store
+     * @param presetName name of preset to store
+     * @param overwrite true overwrites otherwise append unique number
+     * @return true if no errors.
+     */
 	bool savePresetValues(const ParameterStates &values, std::string presetName,
 	                       bool overwrite = true);
+private:
 
     std::vector<float> getParameterValue(ParameterMeta *p);
     void setParametersInBundle(ParameterBundle *bundle, std::string bundlePrefix, PresetHandler *handler, float factor = 1.0);
