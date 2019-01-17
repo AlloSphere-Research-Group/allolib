@@ -81,3 +81,9 @@ bool al::imgui_is_using_input()
   auto& io = ImGui::GetIO();
   return io.WantCaptureMouse | io.WantCaptureKeyboard | io.WantTextInput;
 }
+
+bool al::imgui_is_using_keyboard()
+{
+  auto& io = ImGui::GetIO();
+  return io.WantTextInput;
+}

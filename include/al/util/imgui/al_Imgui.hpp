@@ -25,6 +25,7 @@ void endIMGUI_minimal(bool show);
 // returns true if keyboard/mouse input is getting used by imgui
 // can be used to disable other interactions if needed
 bool imgui_is_using_input();
+bool imgui_is_using_keyboard();
 
 } // namespace al
 
