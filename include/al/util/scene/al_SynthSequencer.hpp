@@ -211,6 +211,8 @@ public:
             } else if (it->type() == ParameterField::STRING) {
                 if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
                     static_cast<ParameterString *>(param)->set(it->get<std::string>());
+                } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+                    static_cast<ParameterMenu *>(param)->setCurrent(it->get<std::string>());
                 } else {
                     std::cerr << "ERROR: p-field string not setting ParameterString" << std::endl;
                 }
@@ -264,6 +266,8 @@ public:
             if (param) {
                 if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
                     pFields.push_back(static_cast<ParameterString *>(param)->get());
+                } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+                    pFields.push_back(static_cast<ParameterMenu *>(param)->getCurrent());
                 } else {
                     pFields.push_back(param->toFloat());
                 }

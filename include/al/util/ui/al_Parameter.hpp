@@ -52,6 +52,7 @@
 #include <cassert>
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 #include "al/core/math/al_Vec.hpp"
 #include "al/core/spatial/al_Pose.hpp"
@@ -602,7 +603,14 @@ public:
 	{ }
 
 	virtual float toFloat() override {
-		return std::stof(get());
+        float value = 0.0;
+        try {
+            value = std::stof(get());
+        }
+        catch (...) {
+            // ignore
+        }
+        return value;
 	}
 
 	virtual void fromFloat(float value) override {
@@ -703,6 +711,15 @@ public:
 			return "";
 		}
 	}
+
+    void setCurrent(std::string element) {
+        auto position = std::find(mElements.begin(), mElements.end(), element);
+        if (position != mElements.end()) {
+            set(std::distance(mElements.begin(), position));
+        } else {
+            std::cerr << "ERROR: Could not find element: " << element << std::endl;
+        }
+    }
 
 	virtual float toFloat() override {
 		return (float) get();
