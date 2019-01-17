@@ -193,17 +193,16 @@ class AudioIO : public AudioIOData {
   bool stop();   ///< Stops the audio IO.
   void processAudio();  ///< Call callback manually
 
+  bool isOpen(); ///< Returns true if device has been opened
+  bool isRunning(); ///< Returns true if audio is running
+
   bool autoZeroOut() const { return mAutoZeroOut; }
-  int channelsInDevice()
-      const;  ///< Get number of channels opened on input device
-  int channelsOutDevice()
-      const;  ///< Get number of channels opened on output device
+  int channelsInDevice() const;  ///< Get number of channels opened on input device
+  int channelsOutDevice() const;  ///< Get number of channels opened on output device
   bool clipOut() const { return mClipOut; }  ///< Returns clipOut setting
   double cpu() const;  ///< Returns current CPU usage of audio thread
-  bool supportsFPS(
-      double fps);  ///< Return true if fps supported, otherwise false
-  bool zeroNANs()
-      const;  ///< Returns whether to zero NANs in output buffer going to DAC
+  bool supportsFPS(double fps);  ///< Return true if fps supported, otherwise false
+  bool zeroNANs() const;  ///< Returns whether to zero NANs in output buffer going to DAC
 
   /// Sets number of effective channels on input or output device depending on
   /// 'forOutput' flag.
@@ -214,8 +213,7 @@ class AudioIO : public AudioIOData {
   void channelsBus(int num) override;  ///< Set number of bus channels
 
   void clipOut(bool v);  ///< Set whether to clip output between -1 and 1
-  void device(
-      const AudioDevice &v);  ///< Set input/output device (must be duplex)
+  void device(const AudioDevice &v);  ///< Set input/output device (must be duplex)
   void deviceIn(const AudioDevice &v);   ///< Set input device
   void deviceOut(const AudioDevice &v);  ///< Set output device
   virtual void framesPerSecond(double v) override;        ///< Set number of frames per second
@@ -228,8 +226,7 @@ class AudioIO : public AudioIOData {
   static const char *errorText(int errNum);  ///< Returns error string.
 
   double time() const;  ///< Get current stream time in seconds
-  double time(
-      int frame) const;  ///< Get current stream time in seconds of frame
+  double time(int frame) const;  ///< Get current stream time in seconds of frame
 
   /// Add an AudioCallback handler (internal callback is always called first)
   AudioIO &append(AudioCallback &v);

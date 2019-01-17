@@ -79,6 +79,70 @@ int asciiToIndex(int asciiKey, int offset = 0);
 
 int asciiToMIDI(int asciiKey, int offset = 0);
 
+class ParameterField {
+public:
+    typedef enum {FLOAT, STRING} ParameterDataType;
+
+    ParameterField(const float value) {
+        mType = FLOAT;
+        mData = new float;
+        *static_cast<float *>(mData) = value;
+    }
+
+    ParameterField(const std::string value) {
+        mType = STRING;
+        mData = new std::string;
+        *static_cast<std::string *>(mData) = value;
+    }
+
+    ParameterField(const char *value) {
+        mType = STRING;
+        mData = new std::string;
+        *static_cast<std::string *>(mData) = value;
+    }
+
+    ParameterField(const ParameterField &paramField) : mType(paramField.mType){
+        switch (mType) {
+        case FLOAT:
+            mData = new float;
+            *static_cast<float *>(mData) = *static_cast<float *>(paramField.mData);
+            break;
+        case STRING:
+            mData = new std::string;
+            *static_cast<std::string *>(mData) = *static_cast<std::string *>(paramField.mData);
+            break;
+        }
+    }
+
+    virtual ~ParameterField() {
+        switch (mType) {
+        case FLOAT:
+            delete static_cast<float *>(mData);
+            break;
+        case STRING:
+            delete static_cast<std::string *>(mData);
+            break;
+        }
+    }
+
+    ParameterDataType type() {return mType;}
+
+//    float get() {
+//        assert(mType == FLOAT);
+//        return *static_cast<float *>(mData);
+//    }
+
+    template<typename type>
+    type get() {
+//        assert(mType == STRING);
+        return *static_cast<type *>(mData);
+    }
+
+private:
+    ParameterDataType mType;
+    void *mData;
+};
+
 /**
  * @brief The SynthVoice class
  *
@@ -131,6 +195,32 @@ public:
     }
 
     /**
+     * @brief Set parameter values
+     * @param pFields std::vector<float> containing the values
+     * @return true if able to set the fields
+     */
+    virtual bool setParamFields(std::vector<ParameterField> pFields) {
+        if (pFields.size() < mParametersToFields.size()) {
+            // std::cout << "pField count mismatch. Ignoring." << std::endl;
+            return false;
+        }
+        auto it = pFields.begin();
+        for (auto &param:mParametersToFields) {
+            if (it->type() == ParameterField::FLOAT) {
+                param->fromFloat(it->get<float>());
+            } else if (it->type() == ParameterField::STRING) {
+                if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+                    static_cast<ParameterString *>(param)->set(it->get<std::string>());
+                } else {
+                    std::cerr << "ERROR: p-field string not setting ParameterString" << std::endl;
+                }
+            }
+            it++;
+        }
+        return true;
+    }
+
+    /**
      * @brief Get this instance's parameter fields
      * @param pFields a pre-allocated array where the parameter fields will be written.
      * @param maxParams the maximum number of parameters to process (i.e. the allocated size of pFields)
@@ -140,7 +230,7 @@ public:
      * registered using registerParameterAsField or the << operator.
      */
     int getParamFields(float *pFields, int maxParams = -1) {
-        std::vector<float> pFieldsVector = getParamFields();
+        std::vector<ParameterField> pFieldsVector = getParamFields();
         if (maxParams == -1) {
             maxParams = pFieldsVector.size();
         }
@@ -149,7 +239,11 @@ public:
             if (count == maxParams) {
                 break;
             }
-            *pFields++ = param;
+            if (param.type() == ParameterField::FLOAT) {
+                *pFields++ = param.get<float>();
+            } else {
+                *pFields++ = 0.0f; // Ignore strings...
+            }
             count++;
         }
         return count;
@@ -163,12 +257,16 @@ public:
      * registered using registerParameterAsField or the << operator. Override
      * this function in your voice if you need a different behavior.
      */
-    virtual std::vector<float> getParamFields() {
-        std::vector<float> pFields;
+    virtual std::vector<ParameterField> getParamFields() {
+        std::vector<ParameterField> pFields;
         pFields.reserve(mParametersToFields.size());
         for (auto param: mParametersToFields) {
             if (param) {
-                pFields.push_back(param->toFloat());
+                if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+                    pFields.push_back(static_cast<ParameterString *>(param)->get());
+                } else {
+                    pFields.push_back(param->toFloat());
+                }
             }
         }
         return pFields;
@@ -743,6 +841,7 @@ protected:
 class SynthSequencerEvent {
 public:
     SynthSequencerEvent () {}
+
     ~SynthSequencerEvent() {
 
     }
@@ -761,7 +860,7 @@ public:
 
     typedef struct {
         std::string name; // instrument name
-        std::vector<float> pFields;
+        std::vector<ParameterField> pFields;
     } ParamFields;
 
     SynthVoice *voice {nullptr};
@@ -780,7 +879,7 @@ struct SynthEvent {
     double time;
     int id;
     double duration = -1;
-    std::vector<float> pFields;
+    std::vector<ParameterField> pFields;
     SynthEventType type;
 };
 
@@ -958,13 +1057,31 @@ public:
                 double duration = std::stod(durationText);
 
                 // const int maxPFields = 64;
-                std::vector<float> pFields;
+                std::vector<ParameterField> pFields;
 
                 // int numFields = 0;
                 std::string field;
                 std::getline(ss, field, ' ');
+                bool processingString = false;
+                std::string stringAccum;
                 while (field != "") {
-                    pFields.push_back(std::stof(field));
+                    if (field.size() > 0 && field[0] == '"') {
+                        processingString = true;
+                        stringAccum = field.substr(1);
+                        if (stringAccum.back() == '"') {
+                            stringAccum = stringAccum.substr(0, stringAccum.size() -1);
+                            processingString = false;
+                            pFields.push_back(stringAccum);
+                        }
+                    } else if (processingString) {
+                        if (field.size() > 0 && field.back() == '"') {
+                            stringAccum += field.substr(0, field.size() - 1);
+                            processingString = false;
+                            pFields.push_back(stringAccum);
+                        }
+                    } else {
+                        pFields.push_back(stof(field));
+                    }
                     std::getline(ss, field, ' ');
                 }
                 //    std::cout << "Pfields: ";
@@ -977,10 +1094,10 @@ public:
                 if (false) { // Insert event as EVENT_VOICE. This is not good as it forces preallocating all the events...
                     SynthVoice *newVoice = mPolySynth->getVoice(name);
                     if (newVoice) {
-                        if (!newVoice->setParamFields(pFields.data(), pFields.size())) {
+                        if (!newVoice->setParamFields(pFields)) {
                             std::cout << "Error setting pFields for voice of type " << name << ". Fields: ";
                             for (auto &field: pFields) {
-                                std::cout << field << " ";
+                                std::cout << field.type() << " ";
                             }
                             std::cout << std::endl;
                             mPolySynth->insertFreeVoice(newVoice); // Return voice to sequencer.

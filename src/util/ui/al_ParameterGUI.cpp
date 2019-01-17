@@ -542,7 +542,7 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler 
         ImGui::SameLine();
         if (ImGui::Button("->")) {
             state.presetHandlerBank += 1;
-            if (state.presetHandlerBank > state.storeButtonState) {
+            if (state.presetHandlerBank > 4) {
                 state.presetHandlerBank = 0;
             }
         }
@@ -712,6 +712,7 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
             ImGui::Combo("Sequences##SynthSequencer", &state.currentItem, ParameterGUI::vector_getter,
                          static_cast<void*>(&seqList), seqList.size());
             if (ImGui::Button("Play##EventSequencer")) {
+                synthSequencer->stopSequence();
                 synthSequencer->synth().allNotesOff();
                 synthSequencer->playSequence(seqList[state.currentItem]);
             }
@@ -747,6 +748,156 @@ void ParameterGUI::drawSynthRecorder(SynthRecorder *synthRecorder) {
         ImGui::SameLine();
         ImGui::Checkbox("Overwrite", &state.overrideButton);
     }
+}
+
+void ParameterGUI::drawParameterMIDI(ParameterMIDI *parameterMidi)
+{
+    struct ParameterMIDIState {
+        std::vector<std::string> devices;
+        int currentDevice;
+    };
+    auto updateDevices = [](ParameterMIDIState& state) {
+        RtMidiIn in;
+        state.devices.clear();
+        unsigned int numDevices = in.getPortCount();
+        for(unsigned int i = 0; i < numDevices; i++) {
+            state.devices.push_back(in.getPortName(i));
+        }
+    };
+    static std::map<ParameterMIDI *, ParameterMIDIState> stateMap;
+    if(stateMap.find(parameterMidi) == stateMap.end()) {
+        stateMap[parameterMidi] = ParameterMIDIState();
+        updateDevices(stateMap[parameterMidi]);
+    }
+    ParameterMIDIState &state = stateMap[parameterMidi];
+
+    ImGui::PushID(std::to_string((unsigned long) parameterMidi).c_str());
+    if (ImGui::CollapsingHeader("Paramter MIDI", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (parameterMidi->isOpen()) {
+            std::string noteBindings;
+            noteBindings += "MIDI Note -> Channel, Value";
+//            for (auto &binding: parameterMidi->getCurrentNoteBindings()) {
+//                noteBindings += std::to_string(binding.noteNumber) + " -> ";
+//                noteBindings += std::to_string(binding.channel) + ":" + std::to_string(binding.value);
+//                noteBindings += "\n";
+//            }
+            ImGui::Text("%s",noteBindings.c_str());
+            if (ImGui::Button("Stop")) {
+                parameterMidi->close();
+            }
+        } else {
+
+            if (ImGui::Combo("Device", &state.currentDevice, ParameterGUI::vector_getter,
+                             static_cast<void*>(&state.devices), state.devices.size())) {
+                // TODO adjust valid number of channels.
+            }
+            if (ImGui::Button("Start")) {
+                parameterMidi->open(state.currentDevice);
+            }
+        }
+    }
+    ImGui::PopID();
+}
+
+void ParameterGUI::drawPresetMIDI(PresetMIDI *presetMidi)
+{
+    struct PresetMIDIState {
+        std::vector<std::string> devices;
+        int currentDevice;
+    };
+    auto updateDevices = [](PresetMIDIState& state) {
+        RtMidiIn in;
+        state.devices.clear();
+        unsigned int numDevices = in.getPortCount();
+        for(unsigned int i = 0; i < numDevices; i++) {
+            state.devices.push_back(in.getPortName(i));
+        }
+    };
+    static std::map<PresetMIDI *, PresetMIDIState> stateMap;
+    if(stateMap.find(presetMidi) == stateMap.end()) {
+        stateMap[presetMidi] = PresetMIDIState();
+        updateDevices(stateMap[presetMidi]);
+    }
+    PresetMIDIState &state = stateMap[presetMidi];
+
+    ImGui::PushID(std::to_string((unsigned long) presetMidi).c_str());
+    if (ImGui::CollapsingHeader("Preset MIDI", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (presetMidi->isOpen()) {
+            std::string noteBindings;
+            noteBindings += "MIDI Note -> Channel, Preset Index";
+//            for (auto &binding: presetMidi->getCurrentNoteBindings()) {
+//                noteBindings += std::to_string(binding.noteNumber) + " -> ";
+//                noteBindings += std::to_string(binding.channel) + ":" + std::to_string(binding.presetIndex);
+//                noteBindings += "\n";
+//            }
+            ImGui::Text("%s",noteBindings.c_str());
+            if (ImGui::Button("Stop")) {
+                presetMidi->close();
+            }
+        } else {
+
+            if (ImGui::Combo("Device", &state.currentDevice, ParameterGUI::vector_getter,
+                             static_cast<void*>(&state.devices), state.devices.size())) {
+                // TODO adjust valid number of channels.
+            }
+            if (ImGui::Button("Start")) {
+                presetMidi->open(state.currentDevice);
+            }
+        }
+    }
+    ImGui::PopID();
+}
+
+void ParameterGUI::drawAudioIO(AudioIO *io)
+{
+    struct AudioIOState {
+        int currentSr = 0;
+        int currentDevice = 0;
+        std::vector<std::string> devices;
+    };
+    auto updateDevices = [&](AudioIOState& state) {
+        state.devices.clear();
+        int numDevices = AudioDevice::numDevices();
+        for (int i = 0; i < numDevices; i++) {
+            state.devices.push_back(AudioDevice(i).name());
+        }
+    };
+    static std::map<AudioIO *, AudioIOState> stateMap;
+    if(stateMap.find(io) == stateMap.end()) {
+        stateMap[io] = AudioIOState();
+        updateDevices(stateMap[io]);
+    }
+    AudioIOState &state = stateMap[io];
+    ImGui::PushID(std::to_string((unsigned long) io).c_str());
+    if (ImGui::CollapsingHeader("Audio", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (io->isOpen()) {
+            std::string text = "Sampling Rate: " + std::to_string(io->fps()) + "\nin chnls: " + std::to_string(io->channelsIn());
+            text += "\nout chnls:" + std::to_string(io->channelsOut());
+            ImGui::Text("%s", text.c_str());
+            if (ImGui::Button("Stop")) {
+                io->stop();
+                io->close();
+            }
+        } else {
+            if (ImGui::Button("Update Devices")) {
+                updateDevices(state);
+            }
+            if (ImGui::Combo("Device", &state.currentDevice, ParameterGUI::vector_getter,
+                             static_cast<void*>(&state.devices), state.devices.size())) {
+                // TODO adjust valid number of channels.
+            }
+            std::vector<std::string> samplingRates {"44100", "48000", "88100", "96000"};
+            ImGui::Combo("Sampling Rate", &state.currentSr, ParameterGUI::vector_getter,
+                         static_cast<void*>(&samplingRates), samplingRates.size());
+            if (ImGui::Button("Start")) {
+                io->framesPerSecond(std::stof(samplingRates[state.currentSr]));
+                io->device(AudioDevice(state.currentDevice));
+                io->open();
+                io->start();
+            }
+        }
+    }
+    ImGui::PopID();
 }
 
 void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,

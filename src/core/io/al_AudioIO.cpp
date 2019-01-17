@@ -1182,6 +1182,16 @@ void AudioIO::processAudio() {
   }
 }
 
+bool AudioIO::isOpen()
+{
+    return mBackend->isOpen();
+}
+
+bool AudioIO::isRunning()
+{
+    return mBackend->isRunning();
+}
+
 double AudioIO::cpu() const { return mBackend->cpu(); }
 bool AudioIO::zeroNANs() const { return mZeroNANs; }
 

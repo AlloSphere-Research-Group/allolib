@@ -80,8 +80,14 @@ public:
 		}
 	}
 
+    // Deprecated. Use open()
 	void init(int deviceIndex = 0, bool verbose = false) {
-		MIDIMessageHandler::bindTo(mMidiIn);
+        open(deviceIndex, verbose);
+	}
+
+    void open(int deviceIndex = 0, bool verbose = false) {
+
+        MIDIMessageHandler::bindTo(mMidiIn);
 		mVerbose = verbose;
 		try {
 			mMidiIn.openPort(deviceIndex);
@@ -90,7 +96,12 @@ public:
 		catch (al::MIDIError &error) {
 			std::cout << "ParameterMIDI Warning: Could not open MIDI port " << deviceIndex << std::endl;
 		}
-	}
+    }
+
+    void close() {
+        mMidiIn.closePort();
+        MIDIMessageHandler::clearBindings();
+    }
 
 	void connectControl(Parameter &param, int controlNumber, int channel)
 	{
@@ -157,6 +168,8 @@ public:
 		mIncrementBindings.push_back(newBinding);
 	}
 
+    bool isOpen() { return mMidiIn.isPortOpen();}
+
 	virtual void onMIDIMessage(const MIDIMessage& m) override {
 		if (m.type() & MIDIByte::CONTROL_CHANGE ) {
 			for(ControlBinding binding: mControlBindings) {
@@ -209,9 +222,7 @@ public:
 		}
 	}
 
-private:
-
-	struct ControlBinding {
+    struct ControlBinding {
 		int controlNumber;
 		int channel;
 		Parameter *param;
@@ -238,6 +249,11 @@ private:
 		float increment;
 		Parameter *param;
 	};
+
+    std::vector<ControlBinding> getCurrentControlBindings() {return mControlBindings;}
+    std::vector<NoteBinding> getCurrentNoteBindings() {return mNoteBindings;}
+
+private:
 
 	MIDIIn mMidiIn;
 	bool mVerbose;

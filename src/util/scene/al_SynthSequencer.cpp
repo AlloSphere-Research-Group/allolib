@@ -429,7 +429,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
                 } else if (event->type == SynthSequencerEvent::EVENT_PFIELDS){
                     auto *voice = mPolySynth->getVoice(event->fields.name);
                     if (voice) {
-                        voice->setParamFields(event->fields.pFields.data(), event->fields.pFields.size());
+                        voice->setParamFields(event->fields.pFields);
                         mPolySynth->triggerOn(voice, event->offsetCounter);
                         event->voice = voice;
                     } else {

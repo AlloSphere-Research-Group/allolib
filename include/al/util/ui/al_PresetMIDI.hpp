@@ -80,36 +80,47 @@ public:
 	}
 
 	void init(int deviceIndex, PresetHandler &presetHandler) {
-		MIDIMessageHandler::bindTo(mMidiIn);
-		try {
-			mMidiIn.openPort(deviceIndex);
-			printf("PresetMIDI: Opened port to %s\n", mMidiIn.getPortName(deviceIndex).c_str());
-		}
-		catch (al::MIDIError error) {
-			std::cout << "PresetMIDI Warning: Could not open MIDI port " << deviceIndex << std::endl;
-		}
+		open(deviceIndex, presetHandler);
+	}
+
+    void open(int deviceIndex, PresetHandler &presetHandler) {
+        open(deviceIndex);
 		setPresetHandler(presetHandler);
 	}
+
+    void open(int deviceIndex) {
+		MIDIMessageHandler::bindTo(mMidiIn);
+
+        if (mMidiIn.isPortOpen()) {
+            mMidiIn.closePort();
+        }
+		try {
+            if (deviceIndex >= 0 && deviceIndex < mMidiIn.getPortCount()) {
+                mMidiIn.openPort(deviceIndex);
+                printf("PresetMIDI: Opened port to %s\n", mMidiIn.getPortName(deviceIndex).c_str());
+            } else {
+                std::cerr << "PresetMIDI Warning: Could not open MIDI port " << deviceIndex << std::endl;
+            }
+		}
+		catch (al::MIDIError error) {
+			std::cerr << "PresetMIDI Warning: Could not open MIDI port " << deviceIndex << std::endl;
+		}
+	}
+
+    void close() {
+        mMidiIn.closePort();
+        MIDIMessageHandler::clearBindings();
+    }
+
+
+
+    bool isOpen() { return mMidiIn.isPortOpen();}
 
 	void setPresetHandler(PresetHandler &presetHandler) {
 		mPresetHandler = &presetHandler;
 	}
 
-	void connectNoteToPreset(int channel,
-	                         float presetLow, int noteLow,
-	                         float presetHigh = -1, int noteHigh = -1);
-
-	void connectProgramToPreset(int channel,
-	                            float presetLow, int programLow,
-	                            float presetHigh = -1, int programHigh = -1);
-
-	void setMorphControl(int controlNumber, int channel, float min, float max);
-
-	virtual void onMIDIMessage(const MIDIMessage& m) override;
-
-private:
-
-	struct NoteBinding {
+    struct NoteBinding {
 		int noteNumber;
 		int channel;
 		int presetIndex;
@@ -128,12 +139,28 @@ private:
 		float max;
 	};
 
+	void connectNoteToPreset(int channel,
+	                         float presetLow, int noteLow,
+	                         float presetHigh = -1, int noteHigh = -1);
+
+	void connectProgramToPreset(int channel,
+	                            float presetLow, int programLow,
+	                            float presetHigh = -1, int programHigh = -1);
+
+	void setMorphControl(int controlNumber, int channel, float min, float max);
+
+	virtual void onMIDIMessage(const MIDIMessage& m) override;
+
+    std::vector<NoteBinding> getCurrentNoteBindings() {return mNoteBindings;}
+    std::vector<ProgramBinding> getCurrentProgramBindings() {return mProgramBindings;}
+private:
+
 	MorphBinding mMorphBinding;
 
 	PresetHandler *mPresetHandler;
 
 	MIDIIn mMidiIn;
-	std::vector<NoteBinding> mBindings;
+	std::vector<NoteBinding> mNoteBindings;
 	std::vector<ProgramBinding> mProgramBindings;
 
 };

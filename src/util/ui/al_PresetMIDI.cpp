@@ -17,7 +17,7 @@ void PresetMIDI::connectNoteToPreset(int channel, float presetLow, int noteLow, 
 		newBinding.channel = channel - 1;
 		newBinding.noteNumber = num;
 		newBinding.presetIndex = presetLow - noteLow + num;
-		mBindings.push_back(newBinding);
+		mNoteBindings.push_back(newBinding);
 		//			std::cout << channel << " " << num << " " << newBinding.presetIndex << std::endl;
 	}
 }
@@ -53,7 +53,7 @@ void PresetMIDI::setMorphControl(int controlNumber, int channel, float min, floa
 void PresetMIDI::onMIDIMessage(const MIDIMessage &m) {
 	if (m.type() == MIDIByte::NOTE_ON
 	        && m.velocity() > 0 ) {
-		for(NoteBinding binding: mBindings) {
+		for(NoteBinding binding: mNoteBindings) {
 			//				std::cout << binding.channel << " " << binding.noteNumber << " " << binding.presetIndex << std::endl;
 			//				std::cout << (int) m.channel() << std::endl;
 			if (m.channel() == binding.channel

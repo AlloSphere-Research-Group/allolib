@@ -126,31 +126,23 @@ public:
     {
         std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
         SynthRecorder *rec = static_cast<SynthRecorder *>(userData);
+        std::chrono::duration<double> diff = now - rec->mSequenceStart;
         if (rec->mRecording) {
             if (rec->mStartOnEvent) {
                 rec->mSequenceStart = now;
                 rec->mStartOnEvent = false;
             }
-            float pFields[128];
-            int numFields = voice->getParamFields(pFields);
-            assert(numFields <= 128);
-            if (numFields < 0) {
-                std::cout << "SynthVoice '" << demangle(typeid (*voice).name() ) << "' not set up for recording." << std::endl;
-            } else {
-                std::chrono::duration<double> diff = now - rec->mSequenceStart;
-                std::unique_lock<std::mutex> lk(rec->mSequenceLock);
+            std::vector<ParameterField> pFields = voice->getParamFields();
+            std::unique_lock<std::mutex> lk(rec->mSequenceLock);
 
-                SynthEvent event;
-                event.type = SynthEventType::TRIGGER_ON;
-                event.id = voice->id();
-                event.time = diff.count();
-                event.synthName = demangle(typeid (*voice).name() );
-                event.duration = -1;
-                for (int i = 0; i < numFields; i++) {
-                    event.pFields.push_back(pFields[i]);
-                }
-                rec->mSequence.push_back(event);
-            }
+            SynthEvent event;
+            event.type = SynthEventType::TRIGGER_ON;
+            event.id = voice->id();
+            event.time = diff.count();
+            event.synthName = demangle(typeid (*voice).name() );
+            event.duration = -1;
+            event.pFields = pFields;
+            rec->mSequence.push_back(event);
         }
     }
 

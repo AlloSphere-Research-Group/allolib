@@ -43,8 +43,10 @@
 #include "al/core/io/al_ControlNav.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/util/ui/al_Preset.hpp"
+#include "al/util/ui/al_PresetMIDI.hpp"
 #include "al/util/ui/al_PresetSequencer.hpp"
 #include "al/util/ui/al_ParameterBundle.hpp"
+#include "al/util/ui/al_ParameterMIDI.hpp"
 #include "al/util/ui/al_PresetSequencer.hpp"
 #include "al/util/ui/al_SequenceRecorder.hpp"
 #include "al/util/scene/al_SynthSequencer.hpp"
@@ -117,6 +119,10 @@ public:
     static void drawSequenceRecorder(SequenceRecorder *sequenceRecorder, bool &overwriteButtonValue);
     static void drawSynthSequencer(SynthSequencer *synthSequencer);
     static void drawSynthRecorder(SynthRecorder *synthRecorder);
+
+    static void drawAudioIO(AudioIO *io);
+    static void drawParameterMIDI(ParameterMIDI *io);
+    static void drawPresetMIDI(PresetMIDI *presetMidi);
 
     static void drawBundleGroup(std::vector<ParameterBundle *> bundles, std::string suffix, int &currentBundle, bool &bundleGlobal);
     static void drawBundleManager(BundleGUIManager *manager);

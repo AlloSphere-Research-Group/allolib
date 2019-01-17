@@ -15,6 +15,9 @@
 #include "al/util/scene/al_DynamicScene.hpp"
 #include "al/core/app/al_App.hpp"
 #include "al/core/graphics/al_Shapes.hpp"
+#include "al/util/ui/al_ControlGUI.hpp"
+#include "al/util/scene/al_SynthRecorder.hpp"
+#include "al/util/scene/al_SynthSequencer.hpp"
 
 using namespace gam;
 using namespace al;
@@ -32,6 +35,7 @@ class SimpleVoice : public PositionedVoice {
 public:
     SimpleVoice()
     {
+        mAmpEnv.sustainPoint(1);
         addTorus(mMesh);
         mMesh.primitive(Mesh::LINE_STRIP);
 
@@ -39,7 +43,7 @@ public:
         // parameters registered this way can be set through
         // the setParamFields(), and will also allow their
         // values to be stored when using SynthSequencer
-        *this << mFreq;
+        *this << mFreq << mText;
 
         // The Freq parameter will drive changes in the
         // internal oscillator
@@ -60,7 +64,7 @@ public:
         while(io()){
             io.out(0) += mOsc() * mAmpEnv() * 0.05;
         }
-        if(mAmpEnv.done()) { free();}
+        if(mAmpEnv.done()) { std::cout << "free" << std::endl; free();}
     }
 
     virtual void onProcess(Graphics &g) override {
@@ -75,12 +79,16 @@ public:
         pose().vec() = {mFreq/440.0 , 0.0, -10.0};
         mAmpEnv.reset();
     }
+    virtual void onTriggerOff() override {
+        mAmpEnv.release();
+    }
 
 protected:
     Parameter mFreq {"Freq"};
+    ParameterString mText {"Text"};
 
     Sine<> mOsc;
-    AD<> mAmpEnv {2.0f, 2.0f};
+    AD<> mAmpEnv {3.0f, 3.0f};
 
     Mesh mMesh;
 };
@@ -92,37 +100,27 @@ protected:
 class MyApp : public App
 {
 public:
-
     virtual void onCreate() override {
 
+        navControl().disable();
         scene.showWorldMarker(false);
         scene.registerSynthClass<SimpleVoice>();
         // Preallocate 300 voices
-        scene.allocatePolyphony("SimpleVoice", 300);
+        scene.allocatePolyphony("SimpleVoice", 30);
         scene.prepare(audioIO());
+        gui.init();
+        gui << recorder;
+        gui << sequencer;
+        recorder << scene;
+        sequencer << scene;
     }
 
     virtual void onAnimate(double dt) override {
-        static double timeAccum = 0.1;
-        timeAccum += dt;
-        if (timeAccum > 0.1) {
-        // Trigger one new voice every 0.05 seconds
-            // First get a free voice of type SimpleVoice
-            auto *freeVoice = scene.getVoice<SimpleVoice>();
-            // Then set its parameters (this voice only has one parameter Freq)
-            auto params = std::vector<float>{880.0f};
-            freeVoice->setParamFields(params);
-            // Set a position for it
-            // Trigger it (this inserts it into the chain)
-            scene.triggerOn(freeVoice);
-            timeAccum -= 0.1;
-        }
-
         scene.update(dt); // Update all nodes in the scene
     }
 
     virtual void onSound(AudioIOData &io) override {
-        scene.render(io); // Render audio
+        sequencer.render(io); // Render audio
     }
 
     virtual void onDraw(Graphics &g) override {
@@ -130,12 +128,34 @@ public:
         g.clear();
         // Render scene on the left
         g.pushMatrix();
-        scene.render(g); // Render graphics
+        sequencer.render(g); // Render graphics
         g.popMatrix();
+        gui.draw(g);
     }
 
+    virtual void onKeyDown(const Keyboard &k) override {
+
+        // Trigger one new voice every 0.05 seconds
+            // First get a free voice of type SimpleVoice
+            auto *freeVoice = scene.getVoice<SimpleVoice>();
+            std::string text = std::to_string(char(k.key()));
+            freeVoice->setParamFields({440.f, text});
+            // Set a position for it
+            // Trigger it (this inserts it into the chain)
+            scene.triggerOn(freeVoice, 0, k.key());
+    }
+
+    virtual void onKeyUp(const Keyboard &k) {
+        scene.triggerOff(k.key());
+    }
+
+
     // The number passed to the construtor indicates how many threads are used to compute the scene
-    DynamicScene scene {8};
+    DynamicScene scene {4};
+    SynthRecorder recorder;
+    SynthSequencer sequencer;
+
+    ControlGUI gui;
 };
 
 int main(){
@@ -143,7 +163,7 @@ int main(){
     MyApp app;
 
     // Start everything
-    app.initAudio(44100., 512, 2,2);
+    app.initAudio(44100., 256, 2,2);
     Domain::master().spu(app.audioIO().framesPerSecond());
     app.start();
 }

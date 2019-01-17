@@ -104,16 +104,41 @@ public:
      * @param pFields std::vector<float> containing the values
      * @return true if able to set the fields
      */
-    virtual bool setParamFields(std::vector<float> &pFields) {
+    virtual bool setParamFields(std::vector<float> &pFields) override {
         return setParamFields(pFields.data(), pFields.size());
+    }
+
+    /**
+     * @brief Set parameter values
+     * @param pFields std::vector<float> containing the values
+     * @return true if able to set the fields
+     */
+    virtual bool setParamFields(std::vector<ParameterField> pFields) override {
+        bool ok = SynthVoice::setParamFields(pFields);
+        if (pFields.size() == (int) mParametersToFields.size() + 8) { // If seven extra, it means pose and size are there too
+            size_t index = mParametersToFields.size();
+            double x = pFields[index++].get<float>();
+            double y = pFields[index++].get<float>();
+            double z = pFields[index++].get<float>();
+            mPose.vec() = Vec3d(x, y, z);
+            double w = pFields[index++].get<float>();
+            x = pFields[index++].get<float>();
+            y = pFields[index++].get<float>();
+            z = pFields[index++].get<float>();
+            mPose.quat() = Quatd(w, x, y, z);
+            mSize = pFields[index++].get<float>();
+        } else {
+            ok = false;
+        }
+        return true;
     }
 
     /**
      * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields
      */ 
-    virtual std::vector<float> getParamFields() override {
+    virtual std::vector<ParameterField> getParamFields() override {
 
-        std::vector<float> pFields = SynthVoice::getParamFields();
+        std::vector<ParameterField> pFields = SynthVoice::getParamFields();
         pFields.reserve(pFields.size() + 8);
         pFields.insert(pFields.end(), mPose.vec().begin(), mPose.vec().end());
 
@@ -288,7 +313,7 @@ private:
     bool mThreadedUpdate {true};
 
     // For threaded audio
-    bool mThreadedAudio {true};
+    bool mThreadedAudio {false};
     std::vector<std::thread> mAudioThreads;
     std::vector<AudioIOData> mThreadedAudioData;
     std::map<int, std::vector<int>> mThreadMap; // Defines which threads run which voices. Key is thread id, value is voice ids.

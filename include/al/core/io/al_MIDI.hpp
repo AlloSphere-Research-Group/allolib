@@ -188,6 +188,13 @@ public:
 	/// Bind handler to a MIDI input
 	void bindTo(RtMidiIn& midiIn, unsigned port=0);
 
+    void clearBindings() {
+        for (auto &binding: mBindings) {
+            binding.midiIn->cancelCallback();
+        }
+        mBindings.clear();
+    }
+
 protected:
 	struct Binding{
 		RtMidiIn * midiIn;

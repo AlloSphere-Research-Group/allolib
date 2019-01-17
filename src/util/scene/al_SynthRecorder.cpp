@@ -35,10 +35,14 @@ void SynthRecorder::stopRecord() {
         return;
     }
     if (mFormat == CPP_FORMAT) {
-        for (SynthEvent event: mSequence) {
+        for (SynthEvent &event: mSequence) {
             f << "s.add<" << event.synthName << ">("  << event.time << ").set(";
             for (unsigned int i = 0; i < event.pFields.size(); i++) {
-                f <<  event.pFields[i];
+                if (event.pFields[i].type() == ParameterField::STRING) {
+                    f << "\"" << event.pFields[i].get<std::string>()<< "\"" ;
+                } else {
+                    f  << event.pFields[i].get<float>();
+                }
                 if (i <  event.pFields.size() - 1) {
                     f << ", ";
                 }
@@ -47,7 +51,7 @@ void SynthRecorder::stopRecord() {
         }
     } else if (mFormat == SEQUENCER_EVENT) {
         std::map<int, SynthEvent> eventStack;
-        for (SynthEvent event: mSequence) {
+        for (SynthEvent &event: mSequence) {
             if (event.type == SynthEventType::TRIGGER_ON) {
                 eventStack[event.id] = event;
             } else if (event.type == SynthEventType::TRIGGER_OFF) {
@@ -56,7 +60,11 @@ void SynthRecorder::stopRecord() {
                     double duration = event.time - idMatch->second.time;
                     f << "@ " << idMatch->second.time << " " << duration << " " << idMatch->second.synthName << " ";
                     for (auto field : idMatch->second.pFields) {
-                        f <<  field << " ";
+                        if (field.type() == ParameterField::STRING) {
+                            f << "\"" << field.get<std::string>()<< "\" " ;
+                        } else {
+                            f  << field.get<float>()<< " ";
+                        }
                     }
                     f << std::endl;
                 }
@@ -68,17 +76,25 @@ void SynthRecorder::stopRecord() {
 
 
     } else if (mFormat == SEQUENCER_TRIGGERS) {
-        for (SynthEvent event: mSequence) {
+        for (SynthEvent &event: mSequence) {
             if (event.type == SynthEventType::TRIGGER_ON) {
                 f << "+ " << event.time << " " << event.id << " " << event.synthName << " ";
                 for (auto field : event.pFields) {
-                    f <<  field << " ";
+                    if (field.type() == ParameterField::STRING) {
+                        f << "\"" << field.get<std::string>()<< "\"" ;
+                    } else {
+                        f  << field.get<float>()<< " ";
+                    }
                 }
                 f << std::endl;
             } else if (event.type == SynthEventType::TRIGGER_OFF) {
                 f << "- " << event.time << " " << event.id << " ";
                 for (unsigned int i = 0; i < event.pFields.size(); i++) {
-                    f <<  event.pFields[i] << " ";
+                    if (event.pFields[i].type() == ParameterField::STRING) {
+                        f << "\"" << event.pFields[i].get<std::string>()<< "\" " ;
+                    } else {
+                        f  << event.pFields[i].get<float>() << " ";
+                    }
                 }
                 f << std::endl;
             }

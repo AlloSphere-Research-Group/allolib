@@ -50,7 +50,11 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
         p<<voiceName;
         auto fields = voice->getParamFields();
         for (auto field: fields) {
-            p << field;
+            if (field.type() == ParameterField::FLOAT) {
+                p << field.get<float>();
+            } else {
+                p << field.get<std::string>();
+            }
         }
         p.endMessage();
 
