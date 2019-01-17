@@ -88,46 +88,56 @@ public:
 
     /// Register parameter using the streaming operator.
     ControlGUI &operator << (ParameterMeta& newParam){ return registerParameterMeta(newParam); }
+    ControlGUI& add(ParameterMeta& newParam){ return registerParameterMeta(newParam); }
 
     /// Register parameter using the streaming operator.
     ControlGUI &operator << (ParameterMeta* newParam){ return registerParameterMeta(*newParam); }
+    ControlGUI& add(ParameterMeta* newParam){ return registerParameterMeta(*newParam); }
 
     ControlGUI &registerParameterBundle(ParameterBundle &bundle);
 
     /// Register parameter using the streaming operator.
     ControlGUI &operator << (ParameterBundle& newBundle){ return registerParameterBundle(newBundle); }
+    ControlGUI& add(ParameterBundle& newBundle){ return registerParameterBundle(newBundle); }
 
     /// Register parameter using the streaming operator.
     ControlGUI &operator << (ParameterBundle* newBundle){ return registerParameterBundle(*newBundle); }
+    ControlGUI& add(ParameterBundle* newBundle){ return registerParameterBundle(*newBundle); }
 
     ControlGUI &registerNav(Nav &nav);
 
     /// Register nav using the streaming operator. A set of widgets are shown to control it.
     ControlGUI &operator << (Nav &nav){ return registerNav(nav); }
+    ControlGUI& add(Nav &nav){ return registerNav(nav); }
 
     ControlGUI &registerPresetHandler(PresetHandler &presetHandler, int numRows = -1, int numColumns = -1);
 
     /// Register preset handler using the streaming operator. GUI widgets for preset control are shown.
     ControlGUI &operator << (PresetHandler& ph){ return registerPresetHandler(ph); }
+    ControlGUI& add(PresetHandler& ph){ return registerPresetHandler(ph); }
 
     /// Register preset handler using the streaming operator. GUI widgets for preset control are shown.
     ControlGUI &operator << (PresetHandler* ph){ return registerPresetHandler(*ph); }
+    ControlGUI& add(PresetHandler* ph){ return registerPresetHandler(*ph); }
 
     ControlGUI &registerPresetSequencer(PresetSequencer &presetSequencer);
 
     /// Register preset sequencer using the streaming operator. GUI widgets for preset sequencing are shown.
     ControlGUI &operator << (PresetSequencer& ps){ return registerPresetSequencer(ps); }
+    ControlGUI& add(PresetSequencer& ps){ return registerPresetSequencer(ps); }
 
 
     ControlGUI &registerSequenceRecorder(SequenceRecorder &recorder);
 
     /// Register preset sequencer using the streaming operator. GUI widgets for preset sequencing are shown.
     ControlGUI &operator << (SequenceRecorder& ps){ return registerSequenceRecorder(ps); }
+    ControlGUI& add(SequenceRecorder& ps){ return registerSequenceRecorder(ps); }
 
     ControlGUI & registerSynthRecorder(SynthRecorder &recorder);
 
     /// Register a SynthRecorder. This will display GUI widgets to control it
     ControlGUI & operator<< (SynthRecorder &recorder) { return registerSynthRecorder(recorder);}
+    ControlGUI& add(SynthRecorder &recorder) { return registerSynthRecorder(recorder);}
 
 
     ControlGUI & registerSynthSequencer(SynthSequencer &seq);
@@ -135,6 +145,7 @@ public:
     /// Register a SynthSequencer. This will display GUI widgets to control it
     /// Will also register the PolySynth contained within it.
     ControlGUI & operator<< (SynthSequencer &seq) { return registerSynthSequencer(seq); }
+    ControlGUI& add(SynthSequencer &seq) { return registerSynthSequencer(seq); }
 
 
     ControlGUI & registerDynamicScene(DynamicScene &scene);
@@ -142,12 +153,14 @@ public:
     /// Register a SynthSequencer. This will display GUI widgets to control it
     /// Will also register the PolySynth contained within it.
     ControlGUI & operator<< (DynamicScene &scene) { return registerDynamicScene(scene); }
+    ControlGUI& add(DynamicScene &scene) { return registerDynamicScene(scene); }
 
     ControlGUI & registerMarker(GUIMarker &marker);
 
     /// Register a SynthSequencer. This will display GUI widgets to control it
     /// Will also register the PolySynth contained within it.
     ControlGUI & operator<< (GUIMarker marker) { return registerMarker(marker); }
+    ControlGUI& add(GUIMarker marker) { return registerMarker(marker); }
 
     /**
      * @brief draws the GUI
