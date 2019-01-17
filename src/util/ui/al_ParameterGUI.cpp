@@ -466,12 +466,13 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler 
 {
     static std::map<PresetHandler *, PresetHandlerState> stateMap;
     if(stateMap.find(presetHandler) == stateMap.end()) {
-        std::cout << "Created state for " << (unsigned long) presetHandler << std::endl;
+//        std::cout << "Created state for " << (unsigned long) presetHandler << std::endl;
         stateMap[presetHandler] = PresetHandlerState{"", 0, presetHandler->availablePresetMaps()};
         if (stateMap[presetHandler].mapList.size() > 0) {
             stateMap[presetHandler].currentBank = stateMap[presetHandler].mapList[0];
             stateMap[presetHandler].currentBankIndex = 0;
         }
+        presetHandler->registerPresetMapCallback([&](std::string mapName) { stateMap[presetHandler].currentBank = mapName;});
     }
     PresetHandlerState &state = stateMap[presetHandler];
 

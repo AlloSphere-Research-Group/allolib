@@ -67,6 +67,11 @@ void PresetHandler::registerMorphTimeCallback(Parameter::ParameterChangeCallback
     mMorphTime.registerChangeCallback(cb);
 }
 
+void PresetHandler::registerPresetMapCallback(PresetMapCallback cb)
+{
+    mPresetsMapCbs.push_back(cb);
+}
+
 std::string PresetHandler::buildMapPath(std::string mapName, bool useSubDirectory)
 {
 	std::string currentPath = File::conformDirectory(getRootPath());
@@ -104,6 +109,12 @@ std::vector<std::string> PresetHandler::availablePresetMaps()
             mapList.push_back(entryName);
         }
     }
+
+    std::sort(mapList.begin(), mapList.end(), [](const auto& lhs, const auto& rhs){
+        const auto result = mismatch(lhs.cbegin(), lhs.cend(), rhs.cbegin(), rhs.cend(), [](const auto& lhs, const auto& rhs){return tolower(lhs) == tolower(rhs);});
+
+        return result.second != rhs.cend() && (result.first == lhs.cend() || tolower(*result.first) < tolower(*result.second));
+    });
 
     return mapList;
 }
@@ -517,6 +528,11 @@ void PresetHandler::setCurrentPresetMap(std::string mapName, bool autoCreate)
 		mPresetsMap = readPresetMap(mapName);
 		mCurrentMapName = mapName;
 	}
+
+    std::cout << "Setting " << mapName << std::endl;
+    for (auto cb:mPresetsMapCbs) {
+        cb(mapName);
+    }
 }
 
 void PresetHandler::changeParameterValue(std::string presetName,

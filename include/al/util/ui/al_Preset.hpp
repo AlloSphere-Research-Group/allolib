@@ -209,9 +209,16 @@ public:
 	/**
 	 * @brief Register a callback to be notified when morph time parameter is changed
 	 * @param cb The callback function
-	 * @param userData data to be passed to the callback
 	 */
     void registerMorphTimeCallback(Parameter::ParameterChangeCallback cb);
+
+
+    typedef const std::function<void (std::string)> PresetMapCallback;
+    /**
+	 * @brief Register a callback to be notified when preset map cahges
+	 * @param cb The callback function
+	 */
+    void registerPresetMapCallback(PresetMapCallback cb);
 
     PresetHandler &registerParameter(ParameterMeta &parameter);
 
@@ -230,7 +237,9 @@ public:
 
 	void setCurrentPresetMap(std::string mapName = "default", bool autoCreate = false);
 
-    void setPresetMap(std::map<int, std::string> presetsMap) {mPresetsMap = presetsMap;}
+    void setPresetMap(std::map<int, std::string> presetsMap) {
+        mPresetsMap = presetsMap;
+    }
 
     void storeCurrentPresetMap(std::string mapName = "", bool useSubDirectory = false);
 
@@ -354,6 +363,7 @@ private:
 	std::vector<void *> mCallbackUdata;
 	std::vector<std::function<void(int index, std::string name, void *userData)>> mStoreCallbacks;
 	std::vector<void *> mStoreCallbackUdata;
+    std::vector<std::function<void (std::string)>> mPresetsMapCbs;
 
 	std::map<int, std::string> mPresetsMap;
 	std::string mCurrentPresetName;
