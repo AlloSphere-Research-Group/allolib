@@ -527,6 +527,9 @@ public:
     /**
      * @brief Use this function to insert a voice allocated externally into the free voice pool
      * @param voice the new voice to be added to the free voice pool
+     *
+     * You can also use this function to return to the polysynth a voice
+     * requested that will not be used.
      */
     void insertFreeVoice(SynthVoice *voice);
 
@@ -1247,7 +1250,7 @@ public:
             Dir::make(path);
         }
 
-        // get list of files ending in ".sequence"
+        // get list of files ending in ".synthSequence"
         FileList sequence_files = filterInDir(path, [](const FilePath& f){
             if (al::checkExtension(f, ".synthSequence")) return true;
             else return false;
@@ -1260,6 +1263,14 @@ public:
             // exclude extension when adding to sequence list
             sequenceList.push_back(name.substr(0, name.size()-14));
         }
+
+
+        std::sort(sequenceList.begin(), sequenceList.end(), [](const auto& lhs, const auto& rhs){
+            const auto result = mismatch(lhs.cbegin(), lhs.cend(), rhs.cbegin(), rhs.cend(), [](const auto& lhs, const auto& rhs){return tolower(lhs) == tolower(rhs);});
+
+            return result.second != rhs.cend() && (result.first == lhs.cend() || tolower(*result.first) < tolower(*result.second));
+        });
+
         return sequenceList;
     }
 
