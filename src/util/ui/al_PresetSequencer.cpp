@@ -360,7 +360,7 @@ std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(std::string sequ
 			step.params.push_back(std::stof(next));
 			steps.push(step);
 //			 std::cout << name  << ":" << delta << ":" << duration << std::endl;
-		} else if (name.size() > 0 && name[0] != '#') {
+		} else if (name.size() > 0 && name[0] != '#' && name[0] != '\r') {
 			Step step;
 			step.presetName = name;
 			step.morphTime = std::stof(delta);
