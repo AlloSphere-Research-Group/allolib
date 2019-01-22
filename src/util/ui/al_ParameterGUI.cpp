@@ -550,7 +550,7 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler 
 
         vector<string> mapList = presetHandler->availablePresetMaps();
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.15f);
-        if (ImGui::BeginCombo("Preset Bank", state.currentBank.data())) {
+        if (ImGui::BeginCombo("Preset Map", state.currentBank.data())) {
             stateMap[presetHandler].mapList = presetHandler->availablePresetMaps();
             for (auto mapName : stateMap[presetHandler].mapList ) {
                 bool isSelected = (state.currentBank == mapName);
