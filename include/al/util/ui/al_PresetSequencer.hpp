@@ -117,7 +117,8 @@ public:
 
 	typedef enum {
 		PRESET,
-		EVENT
+		EVENT,
+        PARAMETER
 	} StepType;
 
 	struct Step {
@@ -194,6 +195,11 @@ public:
 
 	inline bool running() { return mRunning; }
 
+    /**
+     * @brief Register PresetHandler through the << operator
+     * @param presetHandler
+     * @return reference to this object
+     */
 	PresetSequencer &operator<< (PresetHandler &presetHandler)
 	{
 		mPresetHandler = &presetHandler;
@@ -201,6 +207,14 @@ public:
 //		std::cout << "Path set to:" << mDirectory << std::endl;
 		return *this;
 	}
+
+    PresetSequencer &operator<< (ParameterMeta &param) { return registerParameter(param); }
+
+    PresetSequencer &registerParameter(ParameterMeta &param) {
+        mParameters.push_back(&param);
+        return *this;
+    }
+
 	/**
 	 * @brief Load steps from a sequence file
 	 * @param sequenceName The name of the sequence
@@ -273,6 +287,7 @@ private:
     std::queue<Step> mMostRecentSequence;  // Steps from last sequence loaded from disk
 	std::string mDirectory;
 	PresetHandler *mPresetHandler {nullptr};
+    std::vector<ParameterMeta *> mParameters;
 	std::string mOSCsubPath;
 	std::string mCurrentSequence;
 

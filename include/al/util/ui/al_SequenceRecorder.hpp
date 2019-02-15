@@ -42,6 +42,7 @@
 */
 
 #include <string>
+#include <cstring>
 #include <queue>
 #include <thread>
 #include <mutex>
@@ -93,6 +94,8 @@ public:
 	void startRecord(std::string name = "", bool overwrite = false);
 	void stopRecord();
 
+    bool recording() {return  mRecording;};
+
 	void setMaxRecordTime(al_sec maxTime) { mMaxRecordTime = maxTime; }
 
 	std::string lastSequenceName();
@@ -107,6 +110,10 @@ public:
 		mPresetHandler->registerPresetCallback(SequenceRecorder::presetChanged, (void *) this);
 	}
 
+    SequenceRecorder & operator<< (ParameterMeta &param) { registerParameter(param);  return *this; }
+
+	void registerParameter(ParameterMeta &p);
+
 protected:
 	virtual bool consumeMessage(osc::Message &m, std::string rootOSCPath) override;
 
@@ -115,15 +122,16 @@ private:
 	static void presetChanged(int index, void *sender, void *userData);
 	static void recorderFunction(SequenceRecorder *recorder, std::string sequenceName);
 
-	struct Step {
-		std::string presetName;
-		float delta; // The time to get to the preset
-		float duration; // The time to stay in the preset before the next step
-	};
+//	struct Step {
+//		std::string presetName;
+//		float delta; // The time to get to the preset
+//		float duration; // The time to stay in the preset before the next step
+//	};
 
 	std::string mDirectory;
 	PresetHandler *mPresetHandler;
-	std::string mPresetName;
+    std::vector<ParameterMeta *> mParameters;
+//	std::string mPresetName;
 	bool mOverwrite;
 	std::string mLastSequenceName;
 	std::string mLastSequenceSubDir;
@@ -134,7 +142,9 @@ private:
 	bool mRecording;
 	std::thread *mRecorderThread;
 
-	al_sec mMaxRecordTime;
+    PresetSequencer::Step mStepToInsert;
+
+    al_sec mMaxRecordTime;
 };
 
 

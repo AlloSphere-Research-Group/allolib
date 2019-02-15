@@ -86,7 +86,7 @@ void SequenceRecorder::startRecord(std::string name, bool overwrite)
 	if (mRecorderThread) {
 		stopRecord();
 	}
-	mPresetName = "";
+//	mPresetName = "";
 	mOverwrite = overwrite;
 	mRecording = true;
 	mRecorderThread = new std::thread(SequenceRecorder::recorderFunction, this, name);
@@ -108,14 +108,28 @@ void SequenceRecorder::presetChanged(int index, void *sender, void *userData)
 	SequenceRecorder *recorder = static_cast<SequenceRecorder *>(userData);
 	PresetHandler *presets = static_cast<PresetHandler *>(sender);
 	std::lock_guard<std::mutex> lk(recorder->mSequenceLock);
-	recorder->mPresetName = presets->getCurrentPresetName();
+//	recorder->mPresetName = presets->getCurrentPresetName();
+    recorder->mStepToInsert.type = PresetSequencer::PRESET;
+    recorder->mStepToInsert.presetName = presets->getCurrentPresetName();
+    recorder->mStepToInsert.morphTime =  recorder->mPresetHandler->getMorphTime();
+    recorder->mStepToInsert.waitTime = 0.0;
 	recorder->mSequenceConditionVar.notify_one();
 }
 
 void SequenceRecorder::recorderFunction(SequenceRecorder *recorder, std::string sequenceName)
 {
-	std::vector<Step> steps;
+	std::vector<PresetSequencer::Step> steps;
 	al_sec startTime = al::timeNow();
+
+    for (auto *param: recorder->mParameters) {
+        PresetSequencer::Step step;
+        step.type = PresetSequencer::PARAMETER;
+        step.presetName = param->getFullAddress();
+        step.waitTime = 0.0f;
+        step.morphTime = 0.0f;
+        step.params = { param->toFloat() };
+        steps.push_back(step);
+    }
 	while(recorder->mRecording && (al::timeNow() - startTime) < recorder->mMaxRecordTime) {
 		al_sec previousTime = al::timeNow();
 		{
@@ -128,14 +142,21 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder, std::string 
 		al_sec currentTime = al::timeNow();
 		al_sec timeDelta = currentTime - previousTime;
 		if (steps.size() > 0) {
-			Step &previousStep = steps.back();
-			previousStep.duration = timeDelta - previousStep.delta;
-		}
-		Step step;
-		step.presetName = recorder->mPresetName;
-		step.delta =  recorder->mPresetHandler->getMorphTime();
-		step.duration = 0.0;
-		steps.push_back(step);
+			PresetSequencer::Step &previousStep = steps.back();
+            if (previousStep.type == PresetSequencer::PRESET) {
+                previousStep.waitTime = timeDelta - previousStep.morphTime;
+            }
+            if (recorder->mStepToInsert.type == PresetSequencer::PRESET) {
+
+            } else if (recorder->mStepToInsert.type == PresetSequencer::PARAMETER) {
+                recorder->mStepToInsert.waitTime = timeDelta - previousStep.morphTime;
+            }
+        } else {
+            if (recorder->mStepToInsert.type == PresetSequencer::PARAMETER) {
+                recorder->mStepToInsert.waitTime = timeDelta;
+            }
+        }
+		steps.push_back(recorder->mStepToInsert);
 //		std::cout << step.presetName << ":" << step.duration << std::endl;
 	}
 	if (steps.size() < 2) {
@@ -145,14 +166,18 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder, std::string 
 		sequenceName = "new_seq";
 	}
 	std::string fileText;
-	for(Step step: steps) {
-		fileText += step.presetName + ":" +  std::to_string(step.delta) + ":" + std::to_string(step.duration) + "\n";
+	for(PresetSequencer::Step step: steps) {
+        if (step.type == PresetSequencer::PRESET) {
+            fileText += step.presetName + ":" +  std::to_string(step.morphTime) + ":" + std::to_string(step.waitTime) + "\n";
+        } else {
+            fileText += "+" + std::to_string(step.waitTime) + ":" + step.presetName + ":" + std::to_string(step.params[0]) + "\n";
+        }
 	}
 
-	std::string path = recorder->mPresetHandler->getCurrentPath();
-	if (path.back() != '/') {
-		path += "/";
-	}
+	std::string path;
+    if (recorder->mPresetHandler) {
+        path = File::conformDirectory(recorder->mPresetHandler->getCurrentPath());
+    }
 	std::string fileName = path + sequenceName + ".sequence";
 
 	std::string newSequenceName = sequenceName;
@@ -178,7 +203,9 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder, std::string 
 
 	std::cout << "Recorded: " << fileName << std::endl;
 	recorder->mLastSequenceName = newSequenceName;
-	recorder->mLastSequenceSubDir = recorder->mPresetHandler->getSubDirectory();
+    if (recorder->mPresetHandler) {
+        recorder->mLastSequenceSubDir = recorder->mPresetHandler->getSubDirectory();
+    }
 }
 
 
@@ -193,19 +220,46 @@ std::string SequenceRecorder::lastSequenceSubDir()
 	return mLastSequenceSubDir;
 }
 
+void SequenceRecorder::registerParameter(ParameterMeta &p) {
+    if (strcmp(typeid(p).name(), typeid(ParameterBool).name()) == 0) { // ParameterBool
+        ParameterBool *param = dynamic_cast<ParameterBool *>(&p);
+        param->registerChangeCallback([&, param](float value) {
+                std::lock_guard<std::mutex> lk(mSequenceLock);
+                mStepToInsert.type = PresetSequencer::PARAMETER;
+                mStepToInsert.presetName = param->getFullAddress();
+                mStepToInsert.params = {param->toFloat()};
+                mSequenceConditionVar.notify_one();
+            }
+        );
+
+    } else if (strcmp(typeid(p).name(), typeid(Parameter).name()) == 0) {
+        Parameter *param = dynamic_cast<Parameter *>(&p);
+        param->registerChangeCallback([&, param](float value) {
+                std::lock_guard<std::mutex> lk(mSequenceLock);
+                mStepToInsert.type = PresetSequencer::PARAMETER;
+                mStepToInsert.presetName = param->getFullAddress();
+                mStepToInsert.params = {param->get()};
+                mSequenceConditionVar.notify_one();
+            }
+        );
+
+    }
+    mParameters.push_back(&p);
+}
+
 bool SequenceRecorder::consumeMessage(osc::Message &m, std::string rootOSCPath)
 {
-	if(m.addressPattern() == rootOSCPath + "/startRecord" && m.typeTags() == "s"){
-		std::string val;
-		m >> val;
-		std::cout << "/startRecord" << val << std::endl;
-		startRecord(val);
-		return true;
-	} else if(m.addressPattern() == rootOSCPath + "/stopRecord") {
-		std::cout << "/stopRecord" << std::endl;
-		stopRecord();
-		return true;
-	} else if(m.addressPattern() == rootOSCPath + "/record" && m.typeTags() == "f"){
+    if(m.addressPattern() == rootOSCPath + "/startRecord" && m.typeTags() == "s"){
+        std::string val;
+        m >> val;
+        std::cout << "/startRecord" << val << std::endl;
+        startRecord(val);
+        return true;
+    } else if(m.addressPattern() == rootOSCPath + "/stopRecord") {
+        std::cout << "/stopRecord" << std::endl;
+        stopRecord();
+        return true;
+    } else if(m.addressPattern() == rootOSCPath + "/record" && m.typeTags() == "f"){
 		float val;
 		m >> val;
 //		std::cout << "record sequence " << val << std::endl;

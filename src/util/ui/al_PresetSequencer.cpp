@@ -213,6 +213,7 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
 	sequencer->mSequenceLock.lock();
 	auto sequenceStart = std::chrono::high_resolution_clock::now();
 	auto targetTime = sequenceStart;
+    auto paramTargetTime = sequenceStart;
     float timeAccumulator = 0.0f;
 	while(sequencer->running() && sequencer->mSteps.size() > 0) {
 		Step step = sequencer->mSteps.front();
@@ -224,13 +225,15 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
 			} else {
 				std::cerr << "No preset handler registered. Ignoring preset change." << std::endl;
 			}
-		}
+        } else if (step.type == PARAMETER) {
+            paramTargetTime += std::chrono::microseconds((int)(step.waitTime*1.0e6));
+        }
 
         float totalWaitTime = step.morphTime + step.waitTime;
         targetTime += std::chrono::microseconds((int) (totalWaitTime*1.0e6 - (granularity * 1.5 * 1.0e3)));
 
         auto now = std::chrono::high_resolution_clock::now();
-        while (now < targetTime) { // Granularity to allow more responsive stopping of composition playback
+        while (now < targetTime && now < paramTargetTime) { // Granularity to allow more responsive stopping of composition playback
             //std::cout << std::chrono::high_resolution_clock::to_time_t(targetTime)
             //	    << "---" << std::chrono::high_resolution_clock::to_time_t(std::chrono::high_resolution_clock::now()) << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(granularity));
@@ -289,7 +292,15 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
             }
             now = std::chrono::high_resolution_clock::now();
         }
-        if (step.type == EVENT) { // After event is triggered, call callback
+        if (step.type == PARAMETER) {
+            if (sequencer->mRunning) {
+                for (auto *param: sequencer->mParameters) {
+                    if (param->getFullAddress() == step.presetName) {
+                        param->fromFloat(step.params[0]);
+                    }
+                }
+            }
+        } else if (step.type == EVENT) { // After event is triggered, call callback
             if (sequencer->mRunning) {
                 for (auto eventCallback: sequencer->mEventCallbacks) {
                     if (eventCallback.eventName == step.presetName) {
@@ -360,8 +371,17 @@ std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(std::string sequ
 			step.params.push_back(std::stof(next));
 			steps.push(step);
 //			 std::cout << name  << ":" << delta << ":" << duration << std::endl;
+		} else if (name.size() > 0 && name[0] == '+') {
+            Step step;
+            step.type = PARAMETER;
+			step.presetName = delta;
+			step.waitTime = std::stof(name.substr(1));
+            step.params = {std::stof(duration)};
+			steps.push(step);
+			// std::cout << name  << ":" << delta << ":" << duration << std::endl;
 		} else if (name.size() > 0 && name[0] != '#' && name[0] != '\r') {
 			Step step;
+            step.type = PRESET;
 			step.presetName = name;
 			step.morphTime = std::stof(delta);
 			step.waitTime = std::stof(duration);
@@ -473,10 +493,7 @@ std::string PresetSequencer::buildFullPath(std::string sequenceName)
 {
 	std::string fullName = mDirectory;
 	if (mPresetHandler) {
-		fullName = mPresetHandler->getCurrentPath();
-	}
-	if (fullName.back() != '/') {
-		fullName += "/";
+		fullName = File::conformDirectory(mPresetHandler->getCurrentPath());
 	}
 	if (sequenceName.size() < 9 || sequenceName.substr(sequenceName.size() - 9) != ".sequence") {
 		sequenceName += ".sequence";
