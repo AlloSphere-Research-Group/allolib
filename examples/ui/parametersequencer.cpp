@@ -15,26 +15,32 @@ struct MyApp : App
 
     Parameter X{"x", "", 0.0, "", -2, 2};
     Parameter Y{"y", "", 0.0, "", -2, 2};
+    Parameter Z{"z", "", 0.0, "", -2, 2};
     ControlGUI gui;
 
-    PresetHandler presetHandler{"sequencerDir", true};
+    PresetHandler presetHandler;
     PresetSequencer sequencer;
     SequenceRecorder recorder;
 
 	void onCreate() override {
 		addSphere(m, 0.2);
 		nav().pullBack(4);
+        navControl().disable();
 
-        sequencer << X << Y; // Register parameters with sequencer
-        recorder << X << Y; // Register parameters with recorder
+        sequencer.setDirectory("presets");
+
+        sequencer << presetHandler<< Z; // Register parameters with sequencer
+        recorder << presetHandler << Z; // Register preset handler and parameters with recorder
+        presetHandler << X << Y;
 
         gui.init();
-        gui << X << Y;
+        gui << X << Y << Z;
+        gui << presetHandler;
 	}
 
 	void onDraw(Graphics &g) override {
 		g.clear(0);
-        g.translate(X.get(), Y.get(), 0);
+        g.translate(X, Y, Z);
         if (recorder.recording()) {
 			g.color(1.0,0.0,0.0);
 		} else if (sequencer.running()) {

@@ -29,6 +29,7 @@ void SynthRecorder::stopRecord() {
         }
         fileName = newFileName;
     }
+    std::vector<std::string> usedInstruments;
     std::ofstream f(fileName);
     if (!f.is_open()) {
         std::cout << "Error while opening sequence file: " << fileName << std::endl;
@@ -48,6 +49,9 @@ void SynthRecorder::stopRecord() {
                 }
             }
             f << ");" << std::endl;
+            if (std::find(usedInstruments.begin(), usedInstruments.end(), event.synthName) == usedInstruments.end()) {
+                usedInstruments.push_back(event.synthName);
+            }
         }
     } else if (mFormat == SEQUENCER_EVENT) {
         std::map<int, SynthEvent> eventStack;
@@ -68,6 +72,9 @@ void SynthRecorder::stopRecord() {
                     }
                     f << std::endl;
                 }
+            }
+            if (std::find(usedInstruments.begin(), usedInstruments.end(), event.synthName) == usedInstruments.end()) {
+                usedInstruments.push_back(event.synthName);
             }
         }
         if (eventStack.size() > 0) {
@@ -98,11 +105,24 @@ void SynthRecorder::stopRecord() {
                 }
                 f << std::endl;
             }
+            if (std::find(usedInstruments.begin(), usedInstruments.end(), event.synthName) == usedInstruments.end()) {
+                usedInstruments.push_back(event.synthName);
+            }
         }
     }
 
     if (f.bad()) {
         std::cout << "Error while writing sequence file: " << fileName << std::endl;
+    }
+    for (auto &instr: usedInstruments) {
+        f << "# " << instr << " ";
+        // Hack to get the parameter names. Get a voice from the polysynth and then check the parameters. Should there be a better way?
+        auto *voice = mPolySynth->getVoice(instr);
+        for (auto p: voice->parameters()) {
+            f << p->getName() << " ";
+        }
+        f << std::endl;
+        mPolySynth->insertFreeVoice(voice);
     }
     f.close();
 

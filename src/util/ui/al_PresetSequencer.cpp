@@ -215,29 +215,66 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
 	auto targetTime = sequenceStart;
     auto paramTargetTime = sequenceStart;
     float timeAccumulator = 0.0f;
+    std::queue<Step> parameterList;
+    bool playStandaloneParameters = false;
+    float playStandaloneTime = 0.0f;
+    while (sequencer->mSteps.size() > 1 && sequencer->mSteps.front().type == PARAMETER) {
+        parameterList.push(sequencer->mSteps.front());
+//        std::cout << "queued " << step.presetName << ":" << step.params[0] <<std::endl;
+        playStandaloneTime += sequencer->mSteps.front().waitTime;
+        sequencer->mSteps.pop();
+        playStandaloneParameters = true;
+    }
 	while(sequencer->running() && sequencer->mSteps.size() > 0) {
 		Step step = sequencer->mSteps.front();
-        sequencer->mSteps.pop();
-		if (step.type == PRESET) {
+        auto now = std::chrono::high_resolution_clock::now();
+		if (step.type == PRESET && !playStandaloneParameters) {
 			if (sequencer->mPresetHandler) {
 				sequencer->mPresetHandler->setMorphTime(step.morphTime);
 				sequencer->mPresetHandler->recallPreset(step.presetName);
+//                std::cout << "recalling " << step.presetName << std::endl;
 			} else {
-				std::cerr << "No preset handler registered. Ignoring preset change." << std::endl;
+				std::cerr << "No preset handler registered with PresetSequencer. Ignoring preset change." << std::endl;
 			}
-        } else if (step.type == PARAMETER) {
-            paramTargetTime += std::chrono::microseconds((int)(step.waitTime*1.0e6));
+            sequencer->mSteps.pop();
+            while (!parameterList.empty()) {
+                parameterList.pop();
+            }
+            while (sequencer->mSteps.size() > 0 && sequencer->mSteps.front().type == PARAMETER) {
+                parameterList.push(sequencer->mSteps.front());
+//                std::cout << "queued " << sequencer->mSteps.front().presetName << ":" << sequencer->mSteps.front().params[0] <<std::endl;
+                sequencer->mSteps.pop();
+            }
+            float totalWaitTime = step.morphTime + step.waitTime;
+            targetTime += std::chrono::microseconds((int) (totalWaitTime*1.0e6 - (granularity * 1.5 * 1.0e3)));
+        }
+        if (parameterList.size() > 0) {
+            paramTargetTime = now + std::chrono::microseconds((int)(parameterList.front().waitTime*1.0e6));
+//            std::cout << "setting param wait " << parameterList.front().waitTime << std::endl;
+        }
+        if (playStandaloneParameters) {
+            targetTime = now + std::chrono::microseconds((int) (playStandaloneTime*1e06));
         }
 
-        float totalWaitTime = step.morphTime + step.waitTime;
-        targetTime += std::chrono::microseconds((int) (totalWaitTime*1.0e6 - (granularity * 1.5 * 1.0e3)));
-
-        auto now = std::chrono::high_resolution_clock::now();
-        while (now < targetTime && now < paramTargetTime) { // Granularity to allow more responsive stopping of composition playback
+        while (now < targetTime || parameterList.size() > 0) { // Granularity to allow more responsive stopping of composition playback
             //std::cout << std::chrono::high_resolution_clock::to_time_t(targetTime)
             //	    << "---" << std::chrono::high_resolution_clock::to_time_t(std::chrono::high_resolution_clock::now()) << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(granularity));
             timeAccumulator += granularity;
+            if (now > paramTargetTime && parameterList.size() > 0) {
+                if (sequencer->mRunning) {
+                    std::string name = parameterList.front().presetName;
+                    for (auto *param: sequencer->mParameters) {
+                        if (param->getFullAddress() == name) {
+                            param->fromFloat(parameterList.front().params[0]);
+                        }
+                    }
+                }
+                parameterList.pop();
+                if (parameterList.size() > 0) {
+                    paramTargetTime += std::chrono::microseconds((int)(parameterList.front().waitTime*1.0e6));
+                }
+            }
             if (timeAccumulator >= sequencer->mTimeChangeMinTimeDelta * 1000) {
                 timeAccumulator -= sequencer->mTimeChangeMinTimeDelta * 1000;
                 if (sequencer->mTimeChangeCallback) {
@@ -253,15 +290,18 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
                 sequencer->mSteps = sequencer->mMostRecentSequence;
                 currentTime = 0;
                 sequenceStart = now;
+//                paramTargetTime = now;
                 targetTime = now;
                 if (currentTime < timeRequest) {
                     std::string previousPreset = sequencer->mSteps.front().presetName;
                     while (currentTime < timeRequest && sequencer->mSteps.size() > 0) {
                         step = sequencer->mSteps.front();
-                        currentTime += step.morphTime + step.waitTime;
-                        std::cout << "Skipping: " << step.presetName << " " << step.morphTime << ":" << step.waitTime << std::endl;
-                        if (currentTime < timeRequest) {
-                            previousPreset = sequencer->mSteps.front().presetName;
+                        if (step.type == PRESET) {
+                            currentTime += step.morphTime + step.waitTime;
+                            std::cout << "Skipping: " << step.presetName << " " << step.morphTime << ":" << step.waitTime << std::endl;
+                            if (currentTime < timeRequest) {
+                                previousPreset = sequencer->mSteps.front().presetName;
+                            }
                         }
                         sequencer->mSteps.pop();
                     }
@@ -292,15 +332,8 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
             }
             now = std::chrono::high_resolution_clock::now();
         }
-        if (step.type == PARAMETER) {
-            if (sequencer->mRunning) {
-                for (auto *param: sequencer->mParameters) {
-                    if (param->getFullAddress() == step.presetName) {
-                        param->fromFloat(step.params[0]);
-                    }
-                }
-            }
-        } else if (step.type == EVENT) { // After event is triggered, call callback
+        playStandaloneParameters = false;
+        if (step.type == EVENT) { // After event is triggered, call callback
             if (sequencer->mRunning) {
                 for (auto eventCallback: sequencer->mEventCallbacks) {
                     if (eventCallback.eventName == step.presetName) {

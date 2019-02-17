@@ -228,6 +228,7 @@ public:
 
     PresetHandler &operator << (ParameterBundle &bundle) { return this->registerParameterBundle(bundle); }
 
+    std::vector<ParameterMeta *> parameters() { return  mParameters;}
 
 	std::string buildMapPath(std::string mapName, bool useSubDirectory = false);
 

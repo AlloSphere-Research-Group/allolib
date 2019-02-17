@@ -119,7 +119,10 @@ void SequenceRecorder::presetChanged(int index, void *sender, void *userData)
 void SequenceRecorder::recorderFunction(SequenceRecorder *recorder, std::string sequenceName)
 {
 	std::vector<PresetSequencer::Step> steps;
-	al_sec startTime = al::timeNow();
+//    FIXME: Change to use high resolution clock. See PresetSequencer playback function
+ 	al_sec startTime = al_steady_time();
+    al_sec lastPresetTime = al_steady_time();
+    long lastPresetIndex = -1;
 
     for (auto *param: recorder->mParameters) {
         PresetSequencer::Step step;
@@ -130,8 +133,8 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder, std::string 
         step.params = { param->toFloat() };
         steps.push_back(step);
     }
-	while(recorder->mRecording && (al::timeNow() - startTime) < recorder->mMaxRecordTime) {
-		al_sec previousTime = al::timeNow();
+	while(recorder->mRecording && (al_steady_time() - startTime) < recorder->mMaxRecordTime) {
+		al_sec previousTime = al_steady_time();
 		{
 			std::unique_lock<std::mutex> lk(recorder->mSequenceLock);
 			recorder->mSequenceConditionVar.wait(lk);
@@ -139,25 +142,22 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder, std::string 
 				break; // Don't write a step when closing or stopping record.
 			}
 		}
-		al_sec currentTime = al::timeNow();
+		al_sec currentTime = al_steady_time();
 		al_sec timeDelta = currentTime - previousTime;
-		if (steps.size() > 0) {
-			PresetSequencer::Step &previousStep = steps.back();
-            if (previousStep.type == PresetSequencer::PRESET) {
-                previousStep.waitTime = timeDelta - previousStep.morphTime;
-            }
-            if (recorder->mStepToInsert.type == PresetSequencer::PRESET) {
+        if (recorder->mStepToInsert.type == PresetSequencer::PRESET) {
+            if (lastPresetIndex >= 0) {
+                steps[lastPresetIndex].waitTime = currentTime - lastPresetTime - steps[lastPresetIndex].morphTime;
 
-            } else if (recorder->mStepToInsert.type == PresetSequencer::PARAMETER) {
-                recorder->mStepToInsert.waitTime = timeDelta - previousStep.morphTime;
+                std::cout << currentTime << ":" << lastPresetTime << ":" << steps[lastPresetIndex].morphTime << std::endl;
             }
-        } else {
-            if (recorder->mStepToInsert.type == PresetSequencer::PARAMETER) {
-                recorder->mStepToInsert.waitTime = timeDelta;
-            }
+            lastPresetIndex = (long) steps.size();
+            lastPresetTime = currentTime;
+        } else if (recorder->mStepToInsert.type == PresetSequencer::PARAMETER) {
+            recorder->mStepToInsert.waitTime = timeDelta;
         }
 		steps.push_back(recorder->mStepToInsert);
-//		std::cout << step.presetName << ":" << step.duration << std::endl;
+
+//		std::cout << recorder->mStepToInsert.presetName << ":" << recorder->mStepToInsert.waitTime << std::endl;
 	}
 	if (steps.size() < 2) {
 		return;
@@ -245,6 +245,14 @@ void SequenceRecorder::registerParameter(ParameterMeta &p) {
 
     }
     mParameters.push_back(&p);
+    if (mPresetHandler) {
+        for (auto *presetParam: mPresetHandler->parameters()) {
+            if (presetParam->getFullAddress() == p.getFullAddress()) {
+                std::cerr << "ERROR: Parameters registered with sequence recorder must not be part of registered presets: " << p.getFullAddress() << std::endl;
+            }
+        }
+
+    }
 }
 
 bool SequenceRecorder::consumeMessage(osc::Message &m, std::string rootOSCPath)

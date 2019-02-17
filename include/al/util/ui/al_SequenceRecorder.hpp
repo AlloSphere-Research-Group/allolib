@@ -107,7 +107,16 @@ public:
 
 	void registerPresetHandler(PresetHandler &handler) {
 		mPresetHandler = &handler;
-		mPresetHandler->registerPresetCallback(SequenceRecorder::presetChanged, (void *) this);
+        if (mPresetHandler) {
+            for (auto *presetParam: mPresetHandler->parameters()) {
+                for (auto *p: mParameters) {
+                    if (presetParam->getFullAddress() == p->getFullAddress()) {
+                        std::cerr << "ERROR: Parameters registered with sequence recorder must not be part of registered presets: " << p->getFullAddress() << std::endl;
+                    }
+                }
+            }
+            mPresetHandler->registerPresetCallback(SequenceRecorder::presetChanged, (void *) this);
+        }
 	}
 
     SequenceRecorder & operator<< (ParameterMeta &param) { registerParameter(param);  return *this; }
