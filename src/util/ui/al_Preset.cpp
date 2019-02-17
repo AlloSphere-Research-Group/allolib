@@ -777,6 +777,9 @@ PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)
 				std::cout << "Found preset : " << line << std::endl;
 			}
 			while (getline(f, line)) {
+                if (line.size() < 2) {
+                    continue;
+                }
 				if (line.substr(0, 2) == "::") {
 					if (mVerbose) {
 						std::cout << "End preset."<< std::endl;
@@ -787,16 +790,14 @@ PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)
                 std::string address, type;
                 std::vector<float> values;
 				std::getline(ss, address, ' ');
-
                 std::getline(ss, type, ' ');
-
-
                 std::string value;
                 while (std::getline(ss, value, ' ')) {
                     values.push_back(std::stof(value));
                 }
 
-                if (std::find(mSkipParameters.begin(), mSkipParameters.end(), address) == mSkipParameters.end()) {
+                if (address.size() > 0 && address[0] != '#' && type.size() > 0
+                        && std::find(mSkipParameters.begin(), mSkipParameters.end(), address) == mSkipParameters.end()) {
                     // Address is not in ignore list, so add to values loaded
                     // Should we make sure the address corresponds to an existing preset?
                     preset[address] = values;
