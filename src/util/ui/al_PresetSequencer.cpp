@@ -218,7 +218,7 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
     std::queue<Step> parameterList;
     bool playStandaloneParameters = false;
     float playStandaloneTime = 0.0f;
-    while (sequencer->mSteps.size() > 1 && sequencer->mSteps.front().type == PARAMETER) {
+    while (sequencer->mSteps.size() > 0 && sequencer->mSteps.front().type == PARAMETER) {
         parameterList.push(sequencer->mSteps.front());
 //        std::cout << "queued " << step.presetName << ":" << step.params[0] <<std::endl;
         playStandaloneTime += sequencer->mSteps.front().waitTime;
