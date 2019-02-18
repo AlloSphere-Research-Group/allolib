@@ -150,6 +150,13 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder, std::string 
 
                 std::cout << currentTime << ":" << lastPresetTime << ":" << steps[lastPresetIndex].morphTime << std::endl;
             }
+            if (steps.front().type == PresetSequencer::PARAMETER) {
+                PresetSequencer::Step fillerStep;
+                fillerStep.type = PresetSequencer::PARAMETER;
+                fillerStep.presetName = "_";
+                fillerStep.params = {0.0f};
+                steps.push_back(fillerStep);
+            }
             lastPresetIndex = (long) steps.size();
             lastPresetTime = currentTime;
         } else if (recorder->mStepToInsert.type == PresetSequencer::PARAMETER) {
