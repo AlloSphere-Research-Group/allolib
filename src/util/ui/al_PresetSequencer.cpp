@@ -171,31 +171,20 @@ std::vector<std::string> al::PresetSequencer::getSequenceList()
         Dir::make(path);
     }
 
-	// Dir presetDir(path);
-	// while(presetDir.read()) {
-	// 	FileInfo info = presetDir.entry();
-	// 	if (info.type() == FileInfo::REG) {
-	// 		std::string fileName = info.name();
-	// 		if (fileName.find(".sequence") == fileName.size() - 9) {
-	// 			// Should do better checks, what if '.sequence' is not at the end...
-	// 			sequenceList.push_back(fileName.substr(0, fileName.size() - 9));
-	// 		}
-	// 	}
-	// }
-
 	// get list of files ending in ".sequence"
-		FileList sequence_files = filterInDir(path, [](const FilePath& f){
-			if (al::checkExtension(f, ".sequence")) return true;
-			else return false;
-		});
+    FileList sequence_files = filterInDir(path, [](const FilePath& f){
+        if (al::checkExtension(f, ".sequence")) return true;
+        else return false;
+    });
 
-		// store found preset files
-		for (int i = 0; i < sequence_files.count(); i += 1) {
-			const FilePath& path = sequence_files[i];
-			const std::string& name = path.file();
-			// exclude extension when adding to sequence list
-			sequenceList.push_back(name.substr(0, name.size()-9));
-		}
+    // store found preset files
+    for (int i = 0; i < sequence_files.count(); i += 1) {
+        const FilePath& path = sequence_files[i];
+        const std::string& name = path.file();
+        // exclude extension when adding to sequence list
+        sequenceList.push_back(name.substr(0, name.size()-9));
+    }
+    std::sort(sequenceList.begin(), sequenceList.end());
 
 	return sequenceList;
 }
@@ -348,6 +337,7 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
 		// std::this_thread::sleep_for(std::chrono::duration<float>(totalWaitTime));
 	}
 	if (sequencer->mPresetHandler) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Give a little time to process any pending preset changes.
 		sequencer->mPresetHandler->stopMorph();
 	}
 //	std::cout << "Sequence finished." << std::endl;
