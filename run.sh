@@ -95,9 +95,9 @@ done
 shift $(expr $OPTIND - 1 )
 
 if [ $(uname -s) == "Darwin" ]; then
-  BUILD_FLAGS=${BUILD_FLAGS} -j${PROC_FLAG}
+  BUILD_FLAGS="${BUILD_FLAGS} -j${PROC_FLAG}"
 elif [ $(uname -s) == "Linux" ]; then
-  BUILD_FLAGS=${BUILD_FLAGS} -j${PROC_FLAG}
+  BUILD_FLAGS="${BUILD_FLAGS} -j${PROC_FLAG}"
 elif [ $(uname -s) != MINGW64* ] && [ "${GENERATOR_PLATFORM}" != "x86" ]; then
   WINDOWS_FLAGS=-DCMAKE_GENERATOR_PLATFORM=x64
 fi
