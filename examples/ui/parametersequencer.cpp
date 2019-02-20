@@ -29,7 +29,7 @@ struct MyApp : App
 
         sequencer.setDirectory("presets");
 
-        sequencer << presetHandler<< Z; // Register parameters with sequencer
+        sequencer << presetHandler<< Z; // Register preset handler and parameters with sequencer
         recorder << presetHandler << Z; // Register preset handler and parameters with recorder
         presetHandler << X << Y;
 

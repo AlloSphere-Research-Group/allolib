@@ -115,7 +115,7 @@ public:
      */
     virtual bool setParamFields(std::vector<ParameterField> pFields) override {
         bool ok = SynthVoice::setParamFields(pFields);
-        if (pFields.size() == (int) mParametersToFields.size() + 8) { // If seven extra, it means pose and size are there too
+        if (pFields.size() == mParametersToFields.size() + 8) { // If seven extra, it means pose and size are there too
             size_t index = mParametersToFields.size();
             double x = pFields[index++].get<float>();
             double y = pFields[index++].get<float>();
@@ -130,7 +130,7 @@ public:
         } else {
             ok = false;
         }
-        return true;
+        return ok;
     }
 
     /**

@@ -95,7 +95,7 @@ public:
             mMidiIn.closePort();
         }
 		try {
-            if (deviceIndex >= 0 && deviceIndex < mMidiIn.getPortCount()) {
+            if (deviceIndex >= 0 && deviceIndex < (int) mMidiIn.getPortCount()) {
                 mMidiIn.openPort(deviceIndex);
                 printf("PresetMIDI: Opened port to %s\n", mMidiIn.getPortName(deviceIndex).c_str());
             } else {
