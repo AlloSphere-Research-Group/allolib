@@ -509,14 +509,14 @@ public:
 	virtual int32_t get() override;
 
 	virtual float toFloat() override {
-		return mIntValue;
+        return float(mIntValue);
 	}
 
 	virtual void fromFloat(float value) override {
-		mIntValue = value;
+        mIntValue = int32_t(value);
 	}
 
-	float operator= (const int32_t value) { this->set(value); return value; }
+    float operator= (const int32_t value) { this->set(value); return float(value); }
 
     virtual void sendValue(osc::Send &sender) override {
         sender.send(getFullAddress(), get());
@@ -890,14 +890,14 @@ ParameterType ParameterWrapper<ParameterType>::get()
 }
 
 template<class ParameterType>
-void ParameterWrapper<ParameterType>::setProcessingCallback(ParameterWrapper::ParameterProcessCallback cb)
+void ParameterWrapper<ParameterType>::setProcessingCallback(typename ParameterWrapper::ParameterProcessCallback cb)
 {
     mProcessCallback = std::make_shared<ParameterProcessCallback>(cb);
 	// mProcessUdata = userData;
 }
 
 template<class ParameterType>
-void ParameterWrapper<ParameterType>::registerChangeCallback(ParameterWrapper::ParameterChangeCallback cb)
+void ParameterWrapper<ParameterType>::registerChangeCallback(typename ParameterWrapper::ParameterChangeCallback cb)
 {
     mCallbacks.push_back(std::make_shared<ParameterChangeCallback>(cb));
     // mCallbackUdata.push_back(userData);
