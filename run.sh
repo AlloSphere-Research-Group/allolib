@@ -32,14 +32,6 @@ NPROC=$(grep --count ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu |
 # Save one core for the gui.
 PROC_FLAG=$((NPROC - 1))
 
-if [ $(uname -s) == "Darwin" ]; then
-  BUILD_FLAGS="${BUILD_FLAGS} -j${PROC_FLAG}"
-elif [ $(uname -s) == "Linux" ]; then
-  BUILD_FLAGS="${BUILD_FLAGS} -j${PROC_FLAG}"
-elif [ $(uname -s) != MINGW64* ]; then
-  WINDOWS_FLAGS=-DCMAKE_GENERATOR_PLATFORM=x64
-fi
-
 # resolve flags
 BUILD_TYPE=Release
 DO_CLEAN=0
@@ -53,7 +45,7 @@ if [ $# == 0 ]; then
   exit 1
 fi
 
-while getopts "adncvhj" opt; do
+while getopts "adncvhjx" opt; do
   case "${opt}" in
   a)
     RUN_MPI=1
@@ -91,6 +83,9 @@ if [ $(uname -s) == "Linux" ]; then
   command -v ninja >/dev/null 2>&1 && { echo "Using Ninja"; export GENERATOR='-G Ninja'; }
 fi
   ;;
+  x) 
+  GENERATOR_PLATFORM=x86
+    ;;
   \?) echo "$usage" >&2
     exit 1
     ;;
@@ -98,6 +93,14 @@ fi
 done
 # consume options that were parsed
 shift $(expr $OPTIND - 1 )
+
+if [ $(uname -s) == "Darwin" ]; then
+  BUILD_FLAGS=${BUILD_FLAGS} -j${PROC_FLAG}
+elif [ $(uname -s) == "Linux" ]; then
+  BUILD_FLAGS=${BUILD_FLAGS} -j${PROC_FLAG}
+elif [ $(uname -s) != MINGW64* ] && [ "${GENERATOR_PLATFORM}" != "x86" ]; then
+  WINDOWS_FLAGS=-DCMAKE_GENERATOR_PLATFORM=x64
+fi
 
 if [ ${IS_VERBOSE} == 1 ]; then
   echo "BUILD TYPE: ${BUILD_TYPE}"
@@ -129,6 +132,8 @@ TARGET_NAME=$(basename ${APP_FILE_INPUT} | sed 's/\.[^.]*$//')
   cd ${APP_NAME}
   mkdir -p ${BUILD_TYPE}
   cd ${BUILD_TYPE}
+
+  echo cmake ${GENERATOR} ${WINDOWS_FLAGS} -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file
 
   cmake ${GENERATOR} ${WINDOWS_FLAGS} -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
 
