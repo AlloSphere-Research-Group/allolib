@@ -509,7 +509,7 @@ FilePath searchFileFromDir(std::string const& filename, std::string const& dir) 
   return FilePath();
 }
 
-FileList filterInDir(std::string const& dir, std::function<bool(FilePath const&)> f) {
+FileList filterInDir(std::string const& dir, std::function<bool(FilePath const&)> f, bool recursive) {
 	FileList filtered;
 	auto dir_ = File::conformDirectory(dir);
 	std::vector<std::string> children;
@@ -518,10 +518,12 @@ FileList filterInDir(std::string const& dir, std::function<bool(FilePath const&)
 		if (c == "." || c == "..") {
 			continue;
 		}
-		if (minFileSys::isPathDir(dir_ + c)) {
-			filtered.add(filterInDir(dir_ + c, f));
-			continue;
-		}
+        if (recursive) {
+            if (minFileSys::isPathDir(dir_ + c)) {
+                filtered.add(filterInDir(dir_ + c, f));
+                continue;
+            }
+        }
 		auto fp = FilePath{c, dir_};
 		if (f(fp)) {
 			filtered.add(fp);
