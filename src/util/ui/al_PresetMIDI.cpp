@@ -51,6 +51,7 @@ void PresetMIDI::setMorphControl(int controlNumber, int channel, float min, floa
 }
 
 void PresetMIDI::onMIDIMessage(const MIDIMessage &m) {
+    if (!mEnabled) {return;}
 	if (m.type() == MIDIByte::NOTE_ON
 	        && m.velocity() > 0 ) {
 		for(NoteBinding binding: mNoteBindings) {

@@ -79,6 +79,9 @@ public:
 		setPresetHandler(*mPresetHandler);
 	}
 
+    void enable() {mEnabled = true;}
+    void disable() {mEnabled = false;}
+
 	void init(int deviceIndex, PresetHandler &presetHandler) {
 		open(deviceIndex, presetHandler);
 	}
@@ -155,6 +158,7 @@ public:
     std::vector<ProgramBinding> getCurrentProgramBindings() {return mProgramBindings;}
 private:
 
+    bool mEnabled {true};
 	MorphBinding mMorphBinding;
 
 	PresetHandler *mPresetHandler;
