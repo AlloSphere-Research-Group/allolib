@@ -1,5 +1,5 @@
 #include "al/core.hpp"
-#include "al/openvr/al_OpenVRWrapper.hpp"
+#include "module/openvr/al_OpenVRWrapper.hpp"
 
 using namespace al;
 
