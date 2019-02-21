@@ -23,6 +23,8 @@ set(EXAMPLES_TO_IGNORE
     examples/graphics/font.cpp
     examples/graphics/asset.cpp
     examples/user_flags/main.cpp
+    examples/openvr/openvr.cpp
+    examples/openvr/openvr-app.cpp
     )
 endif()
 
