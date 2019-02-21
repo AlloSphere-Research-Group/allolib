@@ -132,6 +132,7 @@ set(util_headers
   include/al/util/scene/al_SynthRecorder.hpp
   include/al/util/scene/al_DynamicScene.hpp
   include/al/util/scene/al_DistributedScene.hpp
+  include/al/util/scene/al_SequencerMIDI.hpp
   include/al/util/al_Toml.hpp
   include/al/util/sound/al_OutputMaster.hpp
 )
