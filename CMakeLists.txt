@@ -166,7 +166,9 @@ endif()
 
 # ----- Examples -------------------------------------
 
-include("cmake/example_targets.cmake")
+if (NOT NO_EXAMPLES)
+  include("cmake/example_targets.cmake")
+endif()
 
 # ----- INSTALL ----------------------------------------------------------------
 #
