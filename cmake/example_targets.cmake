@@ -10,8 +10,11 @@ MACRO(SUBDIRLIST result curdir)
   SET(${result} ${dirlist})
 ENDMACRO()
 
-# This example is designed to be run from the run script only
-set(EXAMPLES_TO_IGNORE  examples/user_flags/main.cpp)
+# Ignore examples that wont work in CI
+set(EXAMPLES_TO_IGNORE  examples/user_flags/main.cpp
+    examples/openvr/openvr.cpp
+    examples/openvr/openvr-app.cpp
+    )
 
 if(AL_WINDOWS EQUAL 1 AND APPVEYOR_BUILD EQUAL 1) 
 # Don't build files with dynamic dependencies on Appveyor CI build
