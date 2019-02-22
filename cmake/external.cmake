@@ -10,12 +10,7 @@ set(AudioAPI "rtaudio" CACHE STRING "Library for Audio IO")
 set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
 
 include(${al_path}/cmake/external/oscpack.cmake)
-
-find_library(FOUND_RT_MIDI_SYSTEM_INSTALL rtmidi)
-message("FOUND_RT_MIDI_SYSTEM_INSTALL=${FOUND_RT_MIDI_SYSTEM_INSTALL}")
-if(NOT FOUND_RT_MIDI_SYSTEM_INSTALL)
-  include(${al_path}/cmake/external/rtmidi.cmake)
-endif()
+include(${al_path}/cmake/external/rtmidi.cmake)
 include(${al_path}/cmake/external/imgui.cmake)
 include(${al_path}/cmake/external/cpptoml.cmake)
 
@@ -45,30 +40,26 @@ set(EXTERNAL_DEFINITIONS
 # Use rtaudio by default
 
 if(AudioAPI STREQUAL "rtaudio")
-  find_library(FOUND_RT_AUDIO_SYSTEM_INSTALL rtaudio)
-  message("FOUND_RT_AUDIO_SYSTEM_INSTALL = ${FOUND_RT_AUDIO_SYSTEM_INSTALL}")
-  if(NOT FOUND_RT_AUDIO_SYSTEM_INSTALL)
-    include(${al_path}/cmake/external/rtaudio.cmake)
+  include(${al_path}/cmake/external/rtaudio.cmake)
 
-    list(APPEND EXTERNAL_INCLUDE_DIRS
-      ${RTAUDIO_INCLUDE_DIR}
-      )
+  list(APPEND EXTERNAL_INCLUDE_DIRS
+    ${RTAUDIO_INCLUDE_DIR}
+    )
 
-    list(APPEND EXTERNAL_LIBRARIES
-      ${RTAUDIO_LIBRARIES}
-      )
+  list(APPEND EXTERNAL_LIBRARIES
+    ${RTAUDIO_LIBRARIES}
+    )
 
-    list(APPEND EXTERNAL_SRC
-      ${RTAUDIO_SRC}
-      )
+  list(APPEND EXTERNAL_SRC
+    ${RTAUDIO_SRC}
+    )
 
-    list(APPEND EXTERNAL_DEFINITIONS
-      ${RTAUDIO_DEFINITIONS}
-      -DAL_AUDIO_RTAUDIO
-      )
-  endif()
+  list(APPEND EXTERNAL_DEFINITIONS
+    ${RTAUDIO_DEFINITIONS}
+    -DAL_AUDIO_RTAUDIO
+    )
 
-elseif(AudioAPI STREQUAL "portaudio") 
+elseif(AudioAPI STREQUAL "portaudio")
   if (AL_WINDOWS)
       set(PORTAUDIO_INCLUDE_DIRS ${al_path}/dependencies/portaudio/include)
       set(PORTAUDIO_LIBRARIES ${al_path}/dependencies/portaudio/portaudio_x64.lib)
