@@ -1104,6 +1104,7 @@ public:
                             } else {
                                 pFields.push_back(stringAccum);
                             }
+//                            std::cout << stringAccum << std::endl;
                             stringAccum.clear();
                         }
                     } else { // Accumulate character
@@ -1111,11 +1112,13 @@ public:
                     }
                     currentIndex++;
                 }
-                //    std::cout << "Pfields: ";
-                //    for (auto &field: pFields) {
-                //        std::cout << field << " ";
-                //    }
-                //    std::cout << std::endl;
+                if (stringAccum.size() > 0) {
+                    if (isFloat(stringAccum)) {
+                        pFields.push_back(stof(stringAccum));
+                    } else {
+                        pFields.push_back(stringAccum);
+                    }
+                }
 
 
                 if (false) { // Insert event as EVENT_VOICE. This is not good as it forces preallocating all the events...
