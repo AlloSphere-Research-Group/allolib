@@ -114,25 +114,23 @@ public:
      * @return true if able to set the fields
      */
     virtual bool setParamFields(std::vector<ParameterField> pFields) override {
+        bool ok = SynthVoice::setParamFields(pFields);
         if (pFields.size() == mParametersToFields.size() + 8) { // If seven extra, it means pose and size are there too
-            bool ok = SynthVoice::setParamFields(pFields);
-            if (ok) {
-                size_t index = mParametersToFields.size();
-                double x = pFields[index++].get<float>();
-                double y = pFields[index++].get<float>();
-                double z = pFields[index++].get<float>();
-                mPose.vec() = Vec3d(x, y, z);
-                double w = pFields[index++].get<float>();
-                x = pFields[index++].get<float>();
-                y = pFields[index++].get<float>();
-                z = pFields[index++].get<float>();
-                mPose.quat() = Quatd(w, x, y, z);
-                mSize = pFields[index++].get<float>();
-            }
+            size_t index = mParametersToFields.size();
+            double x = pFields[index++].get<float>();
+            double y = pFields[index++].get<float>();
+            double z = pFields[index++].get<float>();
+            mPose.vec() = Vec3d(x, y, z);
+            double w = pFields[index++].get<float>();
+            x = pFields[index++].get<float>();
+            y = pFields[index++].get<float>();
+            z = pFields[index++].get<float>();
+            mPose.quat() = Quatd(w, x, y, z);
+            mSize = pFields[index++].get<float>();
         } else {
-            std::cout << "ERROR: setParamFields() wrong number of p-fields. Expecting " << mParametersToFields.size() + 8 << " got " << pFields.size() << std::endl;
+//            std::cout << "Not setting position for voice" << std::endl;
         }
-        return true;
+        return ok;
     }
 
     /**
