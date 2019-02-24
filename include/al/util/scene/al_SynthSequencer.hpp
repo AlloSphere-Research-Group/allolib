@@ -1067,29 +1067,49 @@ public:
                 std::vector<ParameterField> pFields;
 
                 // int numFields = 0;
-                std::string field;
-                std::getline(ss, field, ' ');
+                std::string fieldsString;
+
+                std::getline(ss, fieldsString);
                 bool processingString = false;
                 std::string stringAccum;
-                while (field != "") {
-                    if (field.size() > 0 && field[0] == '"') {
-                        processingString = true;
-                        stringAccum = field.substr(1);
-                        if (stringAccum.back() == '"') {
-                            stringAccum = stringAccum.substr(0, stringAccum.size() -1);
-                            processingString = false;
+                size_t currentIndex = 0;
+
+                auto isFloat = []( std::string myString ) {
+                    std::istringstream iss(myString);
+                    float f;
+                    iss >> std::noskipws >> f; // noskipws considers leading whitespace invalid
+                    // Check the entire string was consumed and if either failbit or badbit is set
+                    return iss.eof() && !iss.fail();
+                };
+
+                while(currentIndex < fieldsString.size()) {
+                    if (fieldsString[currentIndex] == '"') {
+                        if (processingString) { // String end
                             pFields.push_back(stringAccum);
-                        }
-                    } else if (processingString) {
-                        if (field.size() > 0 && field.back() == '"') {
-                            stringAccum += field.substr(0, field.size() - 1);
+                            stringAccum.clear();
                             processingString = false;
-                            pFields.push_back(stringAccum);
+                        } else { // String begin
+                            processingString = true;
                         }
-                    } else {
-                        pFields.push_back(stof(field));
+                    } else if (fieldsString[currentIndex] == ' '
+                            || fieldsString[currentIndex] == '\t'
+                            || fieldsString[currentIndex] == '\n'
+                            || fieldsString[currentIndex] == '\r'
+                            ) {
+                        if (processingString) {
+                            stringAccum += fieldsString[currentIndex];
+                        } else if (stringAccum.size() > 0) { // accumulate
+                            if (isFloat(stringAccum)) {
+                                pFields.push_back(stof(stringAccum));
+                            } else {
+                                pFields.push_back(stringAccum);
+                            }
+                            stringAccum.clear();
+                        }
+                    } else { // Accumulate character
+                        stringAccum += fieldsString[currentIndex];
                     }
-                    std::getline(ss, field, ' ');
+                    currentIndex++;
                 }
                 //    std::cout << "Pfields: ";
                 //    for (auto &field: pFields) {
