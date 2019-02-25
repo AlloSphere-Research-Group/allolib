@@ -103,6 +103,16 @@ void PresetSequencer::setTime(double time)
     }
 }
 
+void PresetSequencer::rewind()
+{
+    if (mSequenceLock.try_lock()) {
+        mSteps = mMostRecentSequence;
+        mSequenceLock.unlock();
+    } else { // If lock can't be acquired, request time change
+        setTime(0.0);
+    }
+}
+
 bool PresetSequencer::archiveSequence(std::string sequenceName, bool overwrite)
 {
 	bool ok = true;

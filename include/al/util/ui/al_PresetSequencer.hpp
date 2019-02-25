@@ -155,6 +155,11 @@ public:
      */
     void setTime(double time);
 
+    /**
+     * @brief Load sequence an prepare for playback
+     */
+    void rewind();
+
 	/**
 	 * @brief Stores a copy of a sequence with its associated presets
 	 * @param sequenceName Name of sequence without extension. Searched for in mDirectory
