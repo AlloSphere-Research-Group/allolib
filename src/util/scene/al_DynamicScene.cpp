@@ -147,6 +147,8 @@ void DynamicScene::render(Graphics &g) {
                 PositionedVoice *posVoice = static_cast<PositionedVoice *>(voice);
                 Pose &pose = posVoice->pose();
                 g.translate(pose.x(), pose.y(), pose.z());
+                g.rotate(pose.quat());
+                g.scale(posVoice->size());
             }
             voice->onProcess(g);
             g.popMatrix();
