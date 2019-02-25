@@ -160,6 +160,8 @@ public:
      */
     void rewind();
 
+    bool playbackFinished() {return mSteps.size() == 0;}
+
 	/**
 	 * @brief Stores a copy of a sequence with its associated presets
 	 * @param sequenceName Name of sequence without extension. Searched for in mDirectory
@@ -300,7 +302,7 @@ private:
 	std::mutex mPlayWaitLock;
 	std::condition_variable mPlayWaitVariable;
 
-    std::atomic<float> mTimeRequest {0}; // Request setting the current time. Passes info to playback thread
+    std::atomic<float> mTimeRequest {-1.0f}; // Request setting the current time. Passes info to playback thread
 
 	bool mSequencerActive;
 	bool mRunning;

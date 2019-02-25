@@ -652,6 +652,9 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
             }
             if (ImGui::Button("Play")) {
                 presetSequencer->stopSequence();
+                if (presetSequencer->playbackFinished()) {
+                    presetSequencer->setTime(0.0);
+                }
                 if (currentPresetSequencerItem >= 0) {
                     double sliderTime = state.currentTime;
                     presetSequencer->playSequence(seqList[currentPresetSequencerItem]);
