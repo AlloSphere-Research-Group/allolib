@@ -661,8 +661,13 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
                 }
             }
             ImGui::SameLine();
+            if (ImGui::Button("Pause")) {
+                presetSequencer->stopSequence();
+            }
+            ImGui::SameLine();
             if (ImGui::Button("Stop")) {
                 presetSequencer->stopSequence();
+                presetSequencer->rewind();
             }
         }
         float time = state.currentTime;
