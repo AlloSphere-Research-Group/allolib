@@ -1037,7 +1037,7 @@ public:
         return fullName;
     }
 
-    std::list<SynthSequencerEvent> loadSequence(std::string sequenceName, double timeOffset = 0) {
+    std::list<SynthSequencerEvent> loadSequence(std::string sequenceName, double timeOffset = 0, double timeScale = 1.0f) {
         std::unique_lock<std::mutex> lk(mLoadingLock);
         std::list<SynthSequencerEvent> events;
         std::string fullName = buildFullPath(sequenceName);
@@ -1060,8 +1060,8 @@ public:
                 std::getline(ss, durationText, ' ');
                 std::getline(ss, name, ' ');
 
-                float startTime = std::stof(start);
-                double duration = std::stod(durationText);
+                float startTime = std::stof(start) * timeScale;
+                double duration = std::stod(durationText) * timeScale;
 
                 // const int maxPFields = 64;
                 std::vector<ParameterField> pFields;
@@ -1170,7 +1170,7 @@ public:
                 std::getline(ss, idText, ' ');
                 std::getline(ss, name, ' ');
 
-                float startTime = std::stof(start);
+                float startTime = std::stof(start) * timeScale;
                 int id = std::stoi(idText);
                 const int maxPFields = 64;
                 float pFields[maxPFields];
@@ -1223,7 +1223,7 @@ public:
                 std::getline(ss, time, ' ');
                 std::getline(ss, idText, ' ');
                 int id = std::stoi(idText);
-                double eventTime = std::stod(time);
+                double eventTime = std::stod(time) * timeScale;
                 for (SynthSequencerEvent &event: events) {
                     if (event.voice->id() == id && event.duration < 0) {
                         double duration = eventTime - event.startTime + timeOffset;
@@ -1240,7 +1240,7 @@ public:
                 std::getline(ss, time, ' ');
                 std::getline(ss, idText, ' ');
                 int id = std::stoi(idText);
-                double eventTime = std::stod(time);
+                double eventTime = std::stod(time) * timeScale;
                 for (SynthSequencerEvent &event: events) {
                     if (event.voice->id() == id && event.duration < 0) {
                         double duration = eventTime - event.startTime + timeOffset;

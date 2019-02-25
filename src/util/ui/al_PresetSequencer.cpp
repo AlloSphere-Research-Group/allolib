@@ -11,7 +11,7 @@
 
 using namespace al;
 
-void PresetSequencer::playSequence(std::string sequenceName)
+void PresetSequencer::playSequence(std::string sequenceName, double timeScale)
 {
 	stopSequence();
 	mSequenceLock.lock();
@@ -19,7 +19,7 @@ void PresetSequencer::playSequence(std::string sequenceName)
 	//			mSteps.pop();
 	//		}
 	if (sequenceName.size() > 0) {
-		std::queue<Step> steps = loadSequence(sequenceName);
+		std::queue<Step> steps = loadSequence(sequenceName, timeScale);
 		mSteps = steps;
 	}
 	mRunning = true;
@@ -370,7 +370,7 @@ void PresetSequencer::setHandlerSubDirectory(std::string subDir)
 	}
 }
 
-std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(std::string sequenceName)
+std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(std::string sequenceName, double timeScale)
 {
 	std::queue<Step> steps;
 	std::string fullName = buildFullPath(sequenceName);
@@ -396,8 +396,8 @@ std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(std::string sequ
 			Step step;
 			step.type = EVENT;
 			step.presetName = name.substr(1); // chop initial '@'
-			step.morphTime = std::stof(delta);
-			step.waitTime = std::stof(duration);
+			step.morphTime = std::stof(delta) * timeScale;
+			step.waitTime = std::stof(duration) * timeScale;
 
 			//FIXME allow any number or parameters
 			std::string next;
@@ -409,16 +409,16 @@ std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(std::string sequ
             Step step;
             step.type = PARAMETER;
 			step.presetName = delta;
-			step.waitTime = std::stof(name.substr(1));
-            step.params = {std::stof(duration)};
+			step.waitTime = std::stof(name.substr(1)) * timeScale;
+            step.params = { float(std::stod(duration) *timeScale)};
 			steps.push(step);
 			// std::cout << name  << ":" << delta << ":" << duration << std::endl;
 		} else if (name.size() > 0 && name[0] != '#' && name[0] != '\r') {
 			Step step;
             step.type = PRESET;
 			step.presetName = name;
-			step.morphTime = std::stof(delta);
-			step.waitTime = std::stof(duration);
+			step.morphTime = std::stof(delta)* timeScale;
+			step.waitTime = std::stof(duration)* timeScale;
 			steps.push(step);
 			// std::cout << name  << ":" << delta << ":" << duration << std::endl;
 		}

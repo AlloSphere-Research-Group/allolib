@@ -138,12 +138,13 @@ public:
 	/**
 	 * @brief Start playing the sequence specified
 	 * @param sequenceName
+	 * @param timeScale Times in sequence are multiplied by this factor
 	 *
 	 * There is a single sequencer engine in the PresetSequencer class, so if
 	 * a sequence is playing when this command is issued, the current playback
 	 * is interrupted and the new sequence requested starts immediately.
 	 */
-	void playSequence(std::string sequenceName);
+	void playSequence(std::string sequenceName, double timeScale = 1.0f);
 
 	void stopSequence(bool triggerCallbacks = true);
 
@@ -225,12 +226,13 @@ public:
 	/**
 	 * @brief Load steps from a sequence file
 	 * @param sequenceName The name of the sequence
+	 * @param timeScale The times in the sequence are multiplied by this factor
 	 * @return the steps
 	 *
 	 * The sequence is searched in the PresetHandler current path or the
 	 *  PresetSequencer's directory if PresetHandler not registered.
 	 */
-	std::queue<Step> loadSequence(std::string sequenceName);
+	std::queue<Step> loadSequence(std::string sequenceName, double timeScale = 1.0f);
 
 	std::string currentSequence() { return mCurrentSequence; }
 
