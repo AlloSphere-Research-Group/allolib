@@ -63,7 +63,7 @@ void SynthRecorder::stopRecord() {
                 if (idMatch != eventStack.end()) {
                     double duration = event.time - idMatch->second.time;
                     f << "@ " << idMatch->second.time << " " << duration << " " << idMatch->second.synthName << " ";
-                    for (auto field : idMatch->second.pFields) {
+                    for (auto &field : idMatch->second.pFields) {
                         if (field.type() == ParameterField::STRING) {
                             f << "\"" << field.get<std::string>()<< "\" " ;
                         } else {
