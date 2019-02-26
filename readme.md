@@ -24,9 +24,8 @@ On a bash shell on Windows, Linx and OS X do:
 
     git clone https://github.com/AlloSphere-Research-Group/allolib
     cd allolib
-    git submodule init
-    git submodule update
-    ./run.sh examples/graphics/2d.cpp
+    git submodule update --recursive --init
+    ./run.sh examples/graphics/2D.cpp
 
 # Running allolib
 
