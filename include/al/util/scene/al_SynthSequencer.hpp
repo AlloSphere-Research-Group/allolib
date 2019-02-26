@@ -1235,7 +1235,26 @@ public:
                         break;
                     }
                 }
-            }  else if (command == 't' && ss.get() == ' ') {
+            } else if (command == '=' && ss.get() == ' ') {
+                std::string time, sequenceName, timeScale;
+                std::getline(ss, time, ' ');
+                std::getline(ss, sequenceName, ' ');
+                std::getline(ss, timeScale, ' ');
+                if (sequenceName.at(0) == '"') {
+                    sequenceName = sequenceName.substr(1);
+                }
+                if (sequenceName.back() == '"') {
+                    sequenceName = sequenceName.substr(0, sequenceName.size() - 1);
+                }
+                lk.unlock();
+                auto newEvents = loadSequence(sequenceName, stod(time) + timeOffset, stod(timeScale));
+                lk.lock();
+                events.insert(events.end(), newEvents.begin(), newEvents.end());
+            } else if (command == '>' && ss.get() == ' ') {
+                std::string time, sequenceName;
+                std::getline(ss, time);
+                timeOffset += std::stod(time);
+            } else if (command == 't' && ss.get() == ' ') {
                 std::string time, idText;
                 std::getline(ss, time, ' ');
                 std::getline(ss, idText, ' ');
