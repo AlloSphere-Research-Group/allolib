@@ -284,7 +284,7 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
 
             }
             double timeRequest = sequencer->mTimeRequest.exchange(-1.0f);
-            if (timeRequest >= 0.0) {
+            if (timeRequest > 0.0) {
                 double currentTime = 1.0e-9 * std::chrono::duration_cast<std::chrono::nanoseconds>(now - sequenceStart).count();
                 // Bring back previous steps
                 sequencer->mSteps = sequencer->mMostRecentSequence;
