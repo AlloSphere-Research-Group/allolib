@@ -83,7 +83,11 @@ public:
     }
 
     virtual void onTriggerOn() override {
+        std::cout << "------- " << mDur << std::endl;
         mAmpEnv.totalLength(mDur, 1);
+        if (mAmpEnv.lengths()[1] < 0.0f) {
+            mAmpEnv.lengths()[1] = 0.0f;
+        }
         mAmpEnv.reset();
     }
 
