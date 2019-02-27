@@ -429,7 +429,12 @@ Recv::~Recv() { stop(); }
 bool Recv::open(uint16_t port, const char * address, al_sec timeout) {
   try {
     // unique pointer assignment releases and deletes previously owned object
-    socketReceiver = std::make_unique<SocketReceiver>(port, address, this);
+    if (*address == '\0') {
+      socketReceiver = std::make_unique<SocketReceiver>(port, "localhost", this);
+    } else {
+      socketReceiver = std::make_unique<SocketReceiver>(port, address, this);
+    }
+    
     mAddress = address;
     mPort = port;
   }

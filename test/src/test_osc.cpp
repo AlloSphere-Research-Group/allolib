@@ -66,6 +66,17 @@ TEST_CASE( "OSC multiple receivers" ) {
     REQUIRE(handler1.inString == "world1");
     REQUIRE(handler2.address == "/hello2");
     REQUIRE(handler2.inString == "world2");
+    
+
+    osc::Send(10810, "localhost").send("/hello3", "world3");
+    osc::Send(10820, "localhost").send("/hello4", "world4");
+
+    al_sleep(0.5);
+
+    REQUIRE(handler1.address == "/hello3");
+    REQUIRE(handler1.inString == "world3");
+    REQUIRE(handler2.address == "/hello4");
+    REQUIRE(handler2.inString == "world4");
 }
 
 // #endif
