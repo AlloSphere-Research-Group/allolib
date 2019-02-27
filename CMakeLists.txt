@@ -81,31 +81,6 @@ endif ()
 
 # --- NOW WE ARE READY TO SETUP THE LIBRARY TARGET ---------------------
 
-# first build dependencies
-
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(BUILD_UTILS OFF CACHE BOOL "" FORCE) # for glew
-
-set(ext_path ${al_path}/external)
-
-if (DEFINED CMAKE_CONFIGURATION_TYPES)
-  add_subdirectory(${ext_path}/Gamma ${CMAKE_CURRENT_BINARY_DIR}/Gamma)
-  add_subdirectory(${ext_path}/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
-  add_subdirectory(${ext_path}/glew/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/glew)
-else()
-  if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-    add_subdirectory(${ext_path}/Gamma ${CMAKE_CURRENT_BINARY_DIR}/Gamma)
-    add_subdirectory(${ext_path}/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
-    add_subdirectory(${ext_path}/glew/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/glew)
-  else()
-    add_subdirectory(${ext_path}/Gamma ${CMAKE_CURRENT_BINARY_DIR}/Gamma)
-    add_subdirectory(${ext_path}/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
-    add_subdirectory(${ext_path}/glew/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/glew)
-  endif()
-endif ()
-
 # then allolib library
 add_library(al STATIC ${headers} ${sources})
 
@@ -154,7 +129,7 @@ foreach (dir ${EXTERNAL_INCLUDE_DIRS})
   )
 endforeach (dir)
 
-target_include_directories(al PUBLIC ${ADDITIONAL_INCLUDE_DIRS})
+target_include_directories(al PUBLIC ${dirs_to_include})
 
 # libs
 target_link_libraries(al PUBLIC ${libs_to_link} Gamma glfw glew_s)

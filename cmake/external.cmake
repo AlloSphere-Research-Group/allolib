@@ -9,6 +9,30 @@
 set(AudioAPI "rtaudio" CACHE STRING "Library for Audio IO")
 set_property(CACHE AudioAPI PROPERTY STRINGS rtaudio portaudio dummy)
 
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(BUILD_UTILS OFF CACHE BOOL "" FORCE) # for glew
+
+set(ext_path ${al_path}/external)
+
+if (DEFINED CMAKE_CONFIGURATION_TYPES)
+  add_subdirectory(${ext_path}/Gamma ${CMAKE_CURRENT_BINARY_DIR}/Gamma)
+  add_subdirectory(${ext_path}/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
+  add_subdirectory(${ext_path}/glew/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/glew)
+else()
+  if (${CMAKE_BUILD_TYPE} MATCHES Debug)
+    add_subdirectory(${ext_path}/Gamma ${CMAKE_CURRENT_BINARY_DIR}/Gamma)
+    add_subdirectory(${ext_path}/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
+    add_subdirectory(${ext_path}/glew/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/glew)
+  else()
+    add_subdirectory(${ext_path}/Gamma ${CMAKE_CURRENT_BINARY_DIR}/Gamma)
+    add_subdirectory(${ext_path}/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
+    add_subdirectory(${ext_path}/glew/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/glew)
+  endif()
+endif ()
+
+# ---------
 include(${al_path}/cmake/external/oscpack.cmake)
 include(${al_path}/cmake/external/rtmidi.cmake)
 include(${al_path}/cmake/external/imgui.cmake)
@@ -19,6 +43,7 @@ set(EXTERNAL_INCLUDE_DIRS
   ${RTMIDI_INCLUDE_DIR}
   ${IMGUI_INCLUDE_DIR}
   ${CPPTOML_INCLUDE_DIR}
+  ${ext_path}/Gamma
 )
 
 set(EXTERNAL_SRC

@@ -43,8 +43,8 @@
   Lance Putnam, 2006, putnam.lance@gmail.com
 */
 
-#include <cmath>
 #define NOMINMAX
+#include <cmath>
 #include <algorithm>
 #undef NOMIXMAX
 
