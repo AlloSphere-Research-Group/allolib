@@ -9,7 +9,7 @@
 #include "al/core/graphics/al_GLFW.hpp"
 #include "al/core/graphics/al_Graphics.hpp"
 
-#include "al/openvr/al_OpenVRWrapper.hpp"
+#include "module/openvr/al_OpenVRWrapper.hpp"
 
 #include <iostream>
 #include <functional>

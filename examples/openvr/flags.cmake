@@ -5,7 +5,7 @@ set(allolib_directory allolib)
 set (OPENVR_ROOT "C:/Users/Mengyu/source/repos/openvr")
 
 set(OPENVR_INCLUDE_DIR "${OPENVR_ROOT}/headers")
-set(OPENVR_LIB "${OPENVR_ROOT}/lib/win32/openvr_api.lib")
+set(OPENVR_LIB "${OPENVR_ROOT}/lib/win64/openvr_api.lib")
 
 if("${CMAKE_GENERATOR_PLATFORM}" EQUAL "x64")
   message(ABORT Building 64 bit binaries not tested to work. Use -x flag in run script)
