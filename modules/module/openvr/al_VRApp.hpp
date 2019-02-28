@@ -73,6 +73,7 @@ inline void VRApp::start() {
   }
 
   onCreate();
+  AudioApp::beginAudio(); // only begins if `initAudio` was called before
   FPS::startFPS();
   while (!shouldQuit()) {
     //openVR update
@@ -99,6 +100,7 @@ inline void VRApp::start() {
   }
   onExit();
   openVR->close();
+  AudioApp::endAudio();
   Window::destroy();
   glfw::terminate(is_verbose);
 }
