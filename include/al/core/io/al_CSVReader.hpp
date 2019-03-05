@@ -67,121 +67,124 @@
  *
  * \code
 typedef struct {
-	char s[32];
-	double val1, val2, val3;
-	bool b;
+    char s[32];
+    double val1, val2, val3;
+    bool b;
 } RowTypes;
 
 int main(int argc, char *argv[]) {
 
-	CSVReader reader;
-	reader.addType(CSVReader::STRING);
-	reader.addType(CSVReader::REAL);
-	reader.addType(CSVReader::REAL);
-	reader.addType(CSVReader::REAL);
-	reader.addType(CSVReader::BOOLEAN);
-	reader.readFile("examples/csv/I13893-gm-21DIV-0001.csv");
+    CSVReader reader;
+    reader.addType(CSVReader::STRING);
+    reader.addType(CSVReader::REAL);
+    reader.addType(CSVReader::REAL);
+    reader.addType(CSVReader::REAL);
+    reader.addType(CSVReader::BOOLEAN);
+    reader.readFile("examples/csv/I13893-gm-21DIV-0001.csv");
 
-	std::vector<RowTypes> rows = reader.copyToStruct<RowTypes>();
-	for(auto row: rows) {
-		std::cout << std::string(row.s) << " : "
-		          << row.val1 << "   "
-		          << row.val2 << "   "
-		          << row.val3 << "   "
-		          << (row.b ? "+" : "-")
-		          << std::endl;
-	}
+    std::vector<RowTypes> rows = reader.copyToStruct<RowTypes>();
+    for(auto row: rows) {
+        std::cout << std::string(row.s) << " : "
+                  << row.val1 << "   "
+                  << row.val2 << "   "
+                  << row.val3 << "   "
+                  << (row.b ? "+" : "-")
+                  << std::endl;
+    }
 
-	std::vector<double> column1 = reader.getColumn(1);
-	for(auto value: column1) {
-		std::cout << value << std::endl;
-	}
-	std::cout << " Num rows:" << rows.size() << std::endl;
-	return 0;
-	\endcode
+    std::vector<double> column1 = reader.getColumn(1);
+    for(auto value: column1) {
+        std::cout << value << std::endl;
+    }
+    std::cout << " Num rows:" << rows.size() << std::endl;
+    return 0;
+}
+    \endcode
  */
 class CSVReader {
 public:
-	typedef enum {
-		STRING,
-		REAL,
-		INTEGER,
-		BOOLEAN,
-		NONE
-	} DataType;
+  typedef enum {
+    STRING,
+    REAL,
+    INTEGER,
+    BOOLEAN,
+    IGNORE
+  } DataType;
 
-	CSVReader() {
-		// TODO We could automatically add types by trying to parse the file
-	}
+  CSVReader() {
+    // TODO We could automatically add types by trying to parse the file
+  }
 
-	~CSVReader();
+  ~CSVReader();
 
-	/**
-	 * @brief readFile reads the CSV file into internal memory
-	 * @param fileName the csv file name
-	 */
-        bool readFile(std::string fileName);
+  /**
+     * @brief readFile reads the CSV file into internal memory
+     * @param fileName the csv file name
+     * @param hasColumnNames if true, the first line in the file is interpreted as column names
+     */
+  bool readFile(std::string fileName, bool hasColumnNames = true);
 
-	/**
-	 * @brief addType
-	 * @param type
-	 */
-	void addType(DataType type) {
-		mDataTypes.push_back(type);
-	}
+  /**
+     * @brief addType
+     * @param type
+     */
+  void addType(DataType type) {
+    mDataTypes.push_back(type);
+  }
 
-        void clearTypes() {
-            mDataTypes.clear();
-        }
+  void clearTypes() {
+    mDataTypes.clear();
+  }
 
-	/**
-	 * @brief getColumn returns a column from the csv file
-	 * @param index column index
-	 * @return vector with the data
-	 */
-	template<class DataStruct>
-	std::vector<DataStruct> copyToStruct() {
-		std::vector<DataStruct> output;
-		if (sizeof(DataStruct) < calculateRowLength()) {
-			return output;
-		}
-		for (auto row: mData) {
-			DataStruct newValues;
-			memcpy(&newValues, row, sizeof(newValues));
-			output.push_back(newValues);
-		}
+  /**
+     * @brief getColumn returns a column from the csv file
+     * @param index column index
+     * @return vector with the data
+     */
+  template<class DataStruct>
+  std::vector<DataStruct> copyToStruct() {
+    std::vector<DataStruct> output;
+    if (sizeof(DataStruct) < calculateRowLength()) {
+      return output;
+    }
+    for (auto row: mData) {
+      DataStruct newValues;
+      memset(&newValues, 0, sizeof(DataStruct));
+      memcpy(&newValues, row, sizeof(newValues));
+      output.push_back(newValues);
+    }
 
-		return output;
-	}
+    return output;
+  }
 
-	/**
-	 * @brief getColumn returns a column from the csv file
-	 * @param index column index
-	 * @return vector with the data
-	 */
-	std::vector<double> getColumn(int index);
+  /**
+     * @brief getColumn returns a column from the csv file
+     * @param index column index
+     * @return vector with the data
+     */
+  std::vector<double> getColumn(int index);
 
-        /**
+  /**
          * @brief get names of the columns in CSV file
          * @return array with column names
          *
          * Must be called after readFile(), otherwise an empty vector is returned.
          */
-        std::vector<std::string> getColumnNames() {return mColumnNames;}
+  std::vector<std::string> getColumnNames() {return mColumnNames;}
 
-        void setBasePath(std::string basePath) {mBasePath = basePath;}
+  void setBasePath(std::string basePath) {mBasePath = basePath;}
 
 private:
 
-	size_t calculateRowLength();
+  size_t calculateRowLength();
 
-	const size_t maxStringSize = 32;
+  const size_t maxStringSize = 32;
 
-	std::vector<std::string> mColumnNames;
-	std::vector<DataType> mDataTypes;
-	std::vector<char *> mData;
+  std::vector<std::string> mColumnNames;
+  std::vector<DataType> mDataTypes;
+  std::vector<char *> mData;
 
-        std::string mBasePath;
+  std::string mBasePath;
 };
 
 #endif // INCLUDE_AL_CSVREADER_HPP
