@@ -67,18 +67,18 @@ struct SimpleVoice : public PositionedVoice {
     }
 
     // Write your audio code inside this function
-    // It is very important that you add to the exisiting output signal
-    // by doing: io.out(0) += instead of io.out(0) =
-    // If you replace the signal, you will only hear the very last agent in the
-    // scene
+    // A Positioned voice is provided its own audio buffer,
+    // so overwriting is not a problem. But you must make
+    // sure to call setVoiceMaxOutputChannels() if your
+    // voice produces more than two channels of output.
     virtual void onProcess(AudioIOData& io) override {
         while(io()){
-            io.out(0) += mOsc() * mAmpEnv() * 0.05f;
+            io.out(0) = mOsc() * mAmpEnv() * 0.05f;
         }
         if(mAmpEnv.done()) { free();}
     }
 
-    // Write your draw code here. You do not need o do the translation and
+    // Write your draw code here. You do not need to do the translation and
     // scaling, as this will be done for you. Only use translations if you
     // want to translate relative to the agent's position.
     virtual void onProcess(Graphics &g) override {
