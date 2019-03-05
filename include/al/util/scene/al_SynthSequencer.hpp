@@ -1048,6 +1048,7 @@ public:
         }
 
         std::string line;
+        double tempoFactor = 1.0;
         while (getline(f, line)) {
             if (line.substr(0, 2) == "::") {
                 break;
@@ -1060,8 +1061,8 @@ public:
                 std::getline(ss, durationText, ' ');
                 std::getline(ss, name, ' ');
 
-                float startTime = std::stof(start) * timeScale;
-                double duration = std::stod(durationText) * timeScale;
+                float startTime = std::stof(start) * timeScale * tempoFactor;
+                double duration = std::stod(durationText) * timeScale * tempoFactor;
 
                 // const int maxPFields = 64;
                 std::vector<ParameterField> pFields;
@@ -1170,7 +1171,7 @@ public:
                 std::getline(ss, idText, ' ');
                 std::getline(ss, name, ' ');
 
-                float startTime = std::stof(start) * timeScale;
+                float startTime = std::stof(start) * timeScale * tempoFactor;
                 int id = std::stoi(idText);
                 const int maxPFields = 64;
                 float pFields[maxPFields];
@@ -1221,9 +1222,9 @@ public:
             } else if (command == '-' && ss.get() == ' ') {
                 std::string time, idText;
                 std::getline(ss, time, ' ');
-                std::getline(ss, idText, ' ');
+                std::getline(ss, idText);
                 int id = std::stoi(idText);
-                double eventTime = std::stod(time) * timeScale;
+                double eventTime = std::stod(time) * timeScale * tempoFactor;
                 for (SynthSequencerEvent &event: events) {
                     if (event.voice->id() == id && event.duration < 0) {
                         double duration = eventTime - event.startTime + timeOffset;
@@ -1236,10 +1237,10 @@ public:
                     }
                 }
             } else if (command == '=' && ss.get() == ' ') {
-                std::string time, sequenceName, timeScale;
+                std::string time, sequenceName, timeScaleInFile;
                 std::getline(ss, time, ' ');
                 std::getline(ss, sequenceName, ' ');
-                std::getline(ss, timeScale, ' ');
+                std::getline(ss, timeScaleInFile);
                 if (sequenceName.at(0) == '"') {
                     sequenceName = sequenceName.substr(1);
                 }
@@ -1247,7 +1248,7 @@ public:
                     sequenceName = sequenceName.substr(0, sequenceName.size() - 1);
                 }
                 lk.unlock();
-                auto newEvents = loadSequence(sequenceName, stod(time) + timeOffset, stod(timeScale));
+                auto newEvents = loadSequence(sequenceName, stod(time) + timeOffset, stod(timeScaleInFile) * tempoFactor);
                 lk.lock();
                 events.insert(events.end(), newEvents.begin(), newEvents.end());
             } else if (command == '>' && ss.get() == ' ') {
@@ -1255,22 +1256,9 @@ public:
                 std::getline(ss, time);
                 timeOffset += std::stod(time);
             } else if (command == 't' && ss.get() == ' ') {
-                std::string time, idText;
-                std::getline(ss, time, ' ');
-                std::getline(ss, idText, ' ');
-                int id = std::stoi(idText);
-                double eventTime = std::stod(time) * timeScale;
-                for (SynthSequencerEvent &event: events) {
-                    if (event.voice->id() == id && event.duration < 0) {
-                        double duration = eventTime - event.startTime + timeOffset;
-                        if (duration < 0) {
-                            duration = 0;
-                        }
-                        event.duration = duration;
-//                        std::cout << "Set event duration " << id << " to " << duration << std::endl;
-                        break;
-                    }
-                }
+                std::string tempo;
+                std::getline(ss, tempo);
+                tempoFactor = 60.0/std::stod(tempo);
             } else {
                 if (command > 0) {
                     std::cout << "Line ignored. Command: " << command << std::endl;
