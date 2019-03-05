@@ -1,17 +1,16 @@
-/*    Gamma - Generic processing library
-    See COPYRIGHT file for authors and license information
+// Example of how to use DynamicScene
+//
+// A DynamicScene manages the insertion and removal of PositionedVoice nodes in
+// its rendering graph. A DynamicScene has three rendering contexts: The
+// update() or simulation context, where state and internal changes should be
+// computed, and the onProcess() contexts for audio and graphics.
+//
+// By: Andres Cabrera January 2019
+//
 
-    Example:
-    Description:
-*/
+#include "Gamma/Oscillator.h"
+#include "Gamma/Envelope.h"
 
-#include <cstdio>               // for printing to stdout
-#define GAMMA_H_INC_ALL         // define this to include all header files
-#define GAMMA_H_NO_IO           // define this to avoid bringing AudioIO from Gamma
-
-#include "Gamma/Gamma.h"
-
-//#include "al/core/io/al_AudioIO.hpp"
 #include "al/util/scene/al_DynamicScene.hpp"
 #include "al/core/app/al_App.hpp"
 #include "al/core/graphics/al_Shapes.hpp"
@@ -28,8 +27,14 @@ using namespace al;
 
 // The DynamicScene will contain "SimpleVoice" agents that
 // inherit from PositionedVoice
-class SimpleVoice : public PositionedVoice {
-public:
+struct SimpleVoice : public PositionedVoice {
+
+    Parameter mFreq {"Freq"};
+
+    Sine<> mOsc;
+    AD<> mAmpEnv {2.0f, 2.0f};
+
+    Mesh mMesh;
     SimpleVoice()
     {
         addTorus(mMesh);
@@ -48,21 +53,35 @@ public:
         });
     }
 
-    // The update function will change the position of the
+    // The update function will change the position of the agent
+    // and decrease the oscillator frequency.
+    // It is called before onProcess(AudioIOData& io) and
+    // onProcess(Graphics &g), but it can also be run threaded
+    // if the DynamicScene is configured to do that.
+    // Currently it is tied to the graphics thread (i.e.
+    // it runs right before rendering a graphics frame),
+    // but this is likely to be made more flexible in the future.
     virtual void update(double dt) override {
-
-        mFreq = mFreq * 0.995;
+        mFreq = mFreq * 0.995f;
         pose().vec().y = mAmpEnv.value()*3;
         pose().vec().x = mFreq/440.0;
     }
 
+    // Write your audio code inside this function
+    // It is very important that you add to the exisiting output signal
+    // by doing: io.out(0) += instead of io.out(0) =
+    // If you replace the signal, you will only hear the very last agent in the
+    // scene
     virtual void onProcess(AudioIOData& io) override {
         while(io()){
-            io.out(0) += mOsc() * mAmpEnv() * 0.05;
+            io.out(0) += mOsc() * mAmpEnv() * 0.05f;
         }
         if(mAmpEnv.done()) { free();}
     }
 
+    // Write your draw code here. You do not need o do the translation and
+    // scaling, as this will be done for you. Only use translations if you
+    // want to translate relative to the agent's position.
     virtual void onProcess(Graphics &g) override {
         HSV c;
         c.h = mAmpEnv.value();
@@ -70,28 +89,23 @@ public:
         g.draw(mMesh);
     }
 
+    // This function will be called every time the agent is inserted in the
+    // DynamicScene. Since the agent's memory is recycled, use this function
+    // to initialize and reset data
     virtual void onTriggerOn() override {
-
         pose().vec() = {mFreq/440.0 , 0.0, -10.0};
         mAmpEnv.reset();
     }
-
-protected:
-    Parameter mFreq {"Freq"};
-
-    Sine<> mOsc;
-    AD<> mAmpEnv {2.0f, 2.0f};
-
-    Mesh mMesh;
 };
 
 
 // make an app that contains a SynthSequencer class
 // use the render() functions from the SynthSequencer to produce audio and
 // graphics in the corresponding callback
-class MyApp : public App
+struct MyApp : public App
 {
-public:
+    // The number passed to the construtor indicates how many threads are used to compute the scene
+    DynamicScene scene {8};
 
     virtual void onCreate() override {
 
@@ -133,9 +147,6 @@ public:
         scene.render(g); // Render graphics
         g.popMatrix();
     }
-
-    // The number passed to the construtor indicates how many threads are used to compute the scene
-    DynamicScene scene {8};
 };
 
 int main(){
