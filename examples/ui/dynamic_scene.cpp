@@ -58,9 +58,8 @@ struct SimpleVoice : public PositionedVoice {
     // It is called before onProcess(AudioIOData& io) and
     // onProcess(Graphics &g), but it can also be run threaded
     // if the DynamicScene is configured to do that.
-    // Currently it is tied to the graphics thread (i.e.
-    // it runs right before rendering a graphics frame),
-    // but this is likely to be made more flexible in the future.
+    // It is called below inside the onAnimate function,
+    // i.e. once every frame
     virtual void update(double dt) override {
         mFreq = mFreq * 0.995f;
         pose().vec().y = mAmpEnv.value()*3;
@@ -136,24 +135,18 @@ struct MyApp : public App
     }
 
     virtual void onSound(AudioIOData &io) override {
-        scene.render(io); // Render audio
+        scene.render(io);
     }
 
     virtual void onDraw(Graphics &g) override {
-//        s.print(); // Prints information on active and free voices
         g.clear();
-        // Render scene on the left
-        g.pushMatrix();
-        scene.render(g); // Render graphics
-        g.popMatrix();
+        scene.render(g);
     }
 };
 
 int main(){
-    // Create app instance
     MyApp app;
-
-    // Start everything
+    // tell Gamma the sample rate
     app.initAudio(44100., 512, 2,2);
     Domain::master().spu(app.audioIO().framesPerSecond());
     app.start();
