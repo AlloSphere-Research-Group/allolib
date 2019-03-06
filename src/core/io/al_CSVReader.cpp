@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cctype>
 
 #include "al/core/io/al_CSVReader.hpp"
 
