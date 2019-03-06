@@ -54,7 +54,7 @@ endif()
 
 if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../../cuttlebone")
   set(CUTTLEBONE_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../cuttlebone")
-elif (EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../cuttlebone")
+elseif (EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../cuttlebone")
   set(CUTTLEBONE_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/../../cuttlebone")
 endif()
 
