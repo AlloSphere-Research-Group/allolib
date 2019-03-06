@@ -52,8 +52,12 @@ if(EXISTS "${app_path}/app_config.cmake")
   include(${app_path}/app_config.cmake)
 endif()
 
-# TODO find cuttlebone
-set(CUTTLEBONE_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/../../cuttlebone")
+if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../../cuttlebone")
+  set(CUTTLEBONE_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../cuttlebone")
+elif (EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../cuttlebone")
+  set(CUTTLEBONE_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/../../cuttlebone")
+endif()
+
 if (EXISTS ${CUTTLEBONE_SRC_DIR})
     set(CUTTLE_BUILD_TESTS_AND_EXAMPLES OFF CACHE BOOL "Build Cuttlebone extras" FORCE)
     add_subdirectory(${CUTTLEBONE_SRC_DIR} "${app_path}/build/cuttlebone")
