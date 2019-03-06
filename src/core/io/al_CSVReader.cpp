@@ -90,8 +90,8 @@ bool CSVReader::readFile(std::string fileName, bool hasColumnNames) {
             break;
           case INTEGER:
             intValue = std::atoi(field.data());
-            std::memcpy(data, &intValue, sizeof (int32_t));
-            byteCount += sizeof (int32_t);
+            std::memcpy(data, &intValue, sizeof (int64_t));
+            byteCount += sizeof (int64_t);
             break;
           case REAL:
             doubleValue = std::atof(field.data());
@@ -143,8 +143,8 @@ bool CSVReader::readFile(std::string fileName, bool hasColumnNames) {
           break;
         case INTEGER:
           intValue = std::atoi(field.data());
-          std::memcpy(data, &intValue, sizeof (int32_t));
-          byteCount += sizeof (int32_t);
+          std::memcpy(data, &intValue, sizeof (int64_t));
+          byteCount += sizeof (int64_t);
           break;
         case REAL:
           doubleValue = std::atof(field.data());
@@ -178,7 +178,7 @@ std::vector<double> CSVReader::getColumn(int index) {
 			offset += maxStringSize * sizeof (char);
 			break;
 		case INTEGER:
-			offset += sizeof (int32_t);
+			offset += sizeof (int64_t);
 			break;
 		case REAL:
 			offset += sizeof (double);
@@ -206,7 +206,7 @@ size_t CSVReader::calculateRowLength() {
 			len += maxStringSize * sizeof (char);
 			break;
 		case INTEGER:
-			len += sizeof (int32_t);
+			len += sizeof (int64_t);
 			break;
 		case REAL:
 			len += sizeof (double);

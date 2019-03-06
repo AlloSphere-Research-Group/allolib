@@ -9,7 +9,7 @@ typedef struct {
 
 typedef struct {
   char s[32];
-  double intVal;
+  int64_t intVal;
   double val1, val2, val3, val4;
 } RowTypes2;
 
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
   reader.clearTypes();
 
   reader.addType(CSVReader::STRING);
-  reader.addType(CSVReader::REAL);
+  reader.addType(CSVReader::INTEGER);
   reader.addType(CSVReader::REAL);
   reader.addType(CSVReader::REAL);
   reader.addType(CSVReader::REAL);
