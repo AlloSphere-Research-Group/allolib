@@ -53,6 +53,8 @@ include(cmake/external.cmake)
 #       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
 include(cmake/al_files.cmake)
 # sets: al_headers, al_sources
+include(cmake/extensions.cmake)
+# sets: EXTENSIONS_LIBRARIES, EXTENSIONS_INCLUDE_DIRS
 
 set(headers
   ${al_headers} ${ADDITIONAL_HEADERS}
@@ -63,11 +65,11 @@ set(sources
 )
 
 set(dirs_to_include
-  ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS}
+  ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS} ${EXTENSIONS_INCLUDE_DIRS}
 )
 
 set(libs_to_link
-  ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES}
+  ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES} ${EXTENSIONS_LIBRARIES}
 )
 
 set(definitions
@@ -133,6 +135,8 @@ target_include_directories(al PUBLIC ${dirs_to_include})
 
 # libs
 target_link_libraries(al PUBLIC ${libs_to_link} Gamma glfw glew_s)
+
+set_target_properties(al PROPERTIES AL_LINK_LIBRARIES "${libs_to_link}")
 
 # --- Testing -----------------------------------------
 if (ALLOLIB_BUILD_TESTS)
