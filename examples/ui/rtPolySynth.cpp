@@ -12,7 +12,7 @@
 #include "Gamma/Gamma.h"
 
 #include "al/core/io/al_AudioIO.hpp"
-#include "al/util/scene/al_SynthSequencer.hpp"
+#include "al/util/scene/al_PolySynth.hpp"
 #include "al/core/app/al_App.hpp"
 #include "al/core/graphics/al_Shapes.hpp"
 
@@ -32,7 +32,8 @@ public:
 
     SineEnv()
     {
-        set (1.5, 60, 0.3, 1, 2);
+      attack(0.5);
+      decay(2.0);
         mAmpEnv.curve(0); // make segments lines
         mAmpEnv.levels(0,1,1,0);
         mAmpEnv.sustainPoint(2);
@@ -40,7 +41,8 @@ public:
         mSpatialEnv.domain(graphicsDomain); // This envelope runs in the graphics domain
         mSpatialEnv.levels(0, 3, 2.5, 0);
         mSpatialEnv.sustainPoint(2);
-        addSphere(mMesh, 0.2, 30, 30);
+        mSpatialEnv.totalLength(3);
+        addSphere(mMesh, 0.5, 30, 30);
     }
 
     // Note parameters
@@ -55,25 +57,12 @@ public:
         return *this;
     }
 
-    SineEnv& dur(float v){ mDur=v; return *this; }
-
-    SineEnv& pan(float v){ mPan.pos(v); return *this; }
-
-    SineEnv& set(
-        float a, float b, float c, float d, float e, float f=0
-    ){
-        return dur(a).freq(b).amp(c).attack(d).decay(e).pan(f);
-    }
-
-    //
     virtual void onProcess(AudioIOData& io) override {
         while(io()){
             float s1 = mOsc() * mAmpEnv() * mAmp;
-            float s2;
             mEnvFollow(s1);
-            mPan(s1, s1,s2);
             io.out(0) += s1;
-            io.out(1) += s2;
+            io.out(1) += s1;
         }
         if(mAmpEnv.done() && (mEnvFollow.value() < 0.001f)) free();
     }
@@ -83,17 +72,14 @@ public:
         g.pushMatrix();
         g.blending(true);
         g.blendModeTrans();
-        g.translate(mOsc.freq()/500 - 3,  pow(mAmp, 0.3) + spatialEnv - 2, -8);
-        g.scale(1- mDur, mDur, 1);
-        g.color(mSpatialEnv(), mOsc.freq()/1000, mEnvFollow.value());
+        g.translate(mOsc.freq()/250 - 3,  pow(mAmp, 0.3) + spatialEnv - 2, -8);
+        g.color(mSpatialEnv(), mOsc.freq()/1000, mEnvFollow.value(), mAmpEnv.value());
         g.draw(mMesh);
         g.popMatrix();
     }
 
     virtual void onTriggerOn() override {
-        mAmpEnv.totalLength(mDur, 1);
         mAmpEnv.reset();
-        mSpatialEnv.totalLength(mDur);
         mSpatialEnv.reset();
     }
 
@@ -103,10 +89,8 @@ public:
     }
 
 protected:
-
-    float mAmp;
-    float mDur;
-    Pan<> mPan;
+    float mAmp {0.2f};
+    float mDur {1.5f};
     Sine<> mOsc;
     Env<3> mAmpEnv;
     EnvFollow<> mEnvFollow;
