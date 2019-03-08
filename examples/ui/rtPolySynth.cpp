@@ -1,15 +1,6 @@
-/*    Gamma - Generic processing library
-    See COPYRIGHT file for authors and license information
 
-    Example:
-    Description:
-*/
-
-#include <cstdio>               // for printing to stdout
-#define GAMMA_H_INC_ALL         // define this to include all header files
-#define GAMMA_H_NO_IO           // define this to avoid bringing AudioIO from Gamma
-
-#include "Gamma/Gamma.h"
+#include "Gamma/Oscillator.h"
+#include "Gamma/Envelope.h"
 
 #include "al/core/io/al_AudioIO.hpp"
 #include "al/util/scene/al_PolySynth.hpp"
@@ -19,101 +10,81 @@
 using namespace gam;
 using namespace al;
 
-
-Domain graphicsDomain; // This determines the clock for graphics processors
-
-// Create a sub class of SynthVoice to determine what each voice should do
+// Inherit from SynthVoice to determine what each voice should do
 // in the onProcess() audio and video callbacks.
 // Add functions to set voice parameters (per instance parameters)
 // Don't forget to define an onTriggerOn() function to reset envelopes or
-// values for each triggering
+// values for each triggering and an onTriggerOff() function to
+// determine what the note should do when it is deactivated
 class SineEnv : public SynthVoice {
 public:
 
     SineEnv()
     {
-      attack(0.5);
-      decay(2.0);
         mAmpEnv.curve(0); // make segments lines
-        mAmpEnv.levels(0,1,1,0);
         mAmpEnv.sustainPoint(2);
 
-        mSpatialEnv.domain(graphicsDomain); // This envelope runs in the graphics domain
-        mSpatialEnv.levels(0, 3, 2.5, 0);
-        mSpatialEnv.sustainPoint(2);
-        mSpatialEnv.totalLength(3);
         addSphere(mMesh, 0.5, 30, 30);
     }
 
     // Note parameters
     SineEnv& freq(float v){ mOsc.freq(v); return *this; }
-    SineEnv& amp(float v){ mAmp=v; return *this; }
-    SineEnv& attack(float v){
-        mAmpEnv.lengths()[0] = v;
-        return *this;
-    }
-    SineEnv& decay(float v){
-        mAmpEnv.lengths()[2] = v;
-        return *this;
-    }
 
-    virtual void onProcess(AudioIOData& io) override {
+    // Audio processing function
+    void onProcess(AudioIOData& io) override {
         while(io()){
-            float s1 = mOsc() * mAmpEnv() * mAmp;
-            mEnvFollow(s1);
-            io.out(0) += s1;
-            io.out(1) += s1;
+            float s = mOsc() * mAmpEnv() * mAmp;
+            io.out(0) += s;
+            io.out(1) += s;
         }
-        if(mAmpEnv.done() && (mEnvFollow.value() < 0.001f)) free();
+        if(mAmpEnv.done()) free();
     }
 
-    virtual void onProcess(Graphics &g) {
-        float spatialEnv = mSpatialEnv();
+    // Graphics processing function
+    void onProcess(Graphics &g) override {
+        float spatialEnv =  mAmpEnv.value();
         g.pushMatrix();
         g.blending(true);
         g.blendModeTrans();
-        g.translate(mOsc.freq()/250 - 3,  pow(mAmp, 0.3) + spatialEnv - 2, -8);
-        g.color(mSpatialEnv(), mOsc.freq()/1000, mEnvFollow.value(), mAmpEnv.value());
+        g.translate(mOsc.freq()/250 - 3,  spatialEnv* 2 - 1, -8);
+        g.color(spatialEnv, mOsc.freq()/1000, spatialEnv, spatialEnv);
         g.draw(mMesh);
         g.popMatrix();
     }
 
-    virtual void onTriggerOn() override {
+    void onTriggerOn() override {
         mAmpEnv.reset();
-        mSpatialEnv.reset();
     }
 
-    virtual void onTriggerOff() override {
+    void onTriggerOff() override {
         mAmpEnv.release();
-        mSpatialEnv.release();
     }
 
 protected:
     float mAmp {0.2f};
     float mDur {1.5f};
     Sine<> mOsc;
-    Env<3> mAmpEnv;
-    EnvFollow<> mEnvFollow;
+    Env<3> mAmpEnv {0.f, 0.5f, 1.f, 1.0f, 1.f, 2.0f, 0.f};
 
-    Env<3> mSpatialEnv;
     Mesh mMesh;
 };
 
 
 // We will use PolySynth to handle voice triggering and allocation
-class MyApp : public App
+struct  MyApp : public App
 {
-public:
-    virtual void onSound(AudioIOData &io) override {
+  PolySynth pSynth;
+
+    void onSound(AudioIOData &io) override {
         pSynth.render(io); // Render audio
     }
 
-    virtual void onDraw(Graphics &g) override {
+    void onDraw(Graphics &g) override {
         g.clear();
         pSynth.render(g);
     }
 
-    virtual void onKeyDown(Keyboard const& k) override {
+    void onKeyDown(Keyboard const& k) override {
         int midiNote = asciiToMIDI(k.key());
         if (midiNote > 0) {
             float frequency = ::pow(2., (midiNote - 69.)/12.) * 440.;
@@ -122,15 +93,13 @@ public:
             pSynth.triggerOn(voice, 0, midiNote);
         }
     }
-    virtual void onKeyUp(Keyboard const& k) override {
+    void onKeyUp(Keyboard const& k) override {
         int midiNote = asciiToMIDI(k.key());
         if (midiNote > 0) {
             pSynth.triggerOff(midiNote);
         }
     }
 
-
-    PolySynth pSynth;
 };
 
 
@@ -144,12 +113,11 @@ int main(){
 
     app.navControl().active(false); // Disable navigation via keyboard, since we will be using keyboard for note triggering
 
-    // Start everything
+    // Start audio
     app.initAudio(44100., 256, 2, 0);
 
-    // Set up processing domains
+    // Set up sampling rate for Gamma objects
     Domain::master().spu(app.audioIO().framesPerSecond());
-    graphicsDomain.spu(app.fpsWanted());
 
     app.start();
 }
