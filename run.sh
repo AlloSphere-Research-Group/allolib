@@ -133,9 +133,10 @@ TARGET_NAME=$(basename ${APP_FILE_INPUT} | sed 's/\.[^.]*$//')
   mkdir -p ${BUILD_TYPE}
   cd ${BUILD_TYPE}
 
-  echo cmake ${GENERATOR} ${WINDOWS_FLAGS} -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} -DUSE_MPI=${USE_MPI} ${AL_LIB_PATH}/cmake/single_file
-
-  cmake ${GENERATOR} ${WINDOWS_FLAGS} -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
+# set -x enters debug mode and prints the command
+set -x
+cmake ${GENERATOR} ${WINDOWS_FLAGS} -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} -DUSE_MPI=${RUN_MPI} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
+set +x
 
 if [ ${RUN_APP} == 1 ]; then
   TARGET_NAME=${TARGET_NAME}_run  
@@ -146,7 +147,10 @@ fi
 
 echo cmake --build . --target ${TARGET_NAME} --config ${BUILD_TYPE} -- ${BUILD_FLAGS}
 
+# set -x enters debug mode and prints the command
+set -x
 cmake --build . --target ${TARGET_NAME} --config ${BUILD_TYPE} -- ${BUILD_FLAGS}
+set +x
 )
 
 APP_BUILD_RESULT=$?
