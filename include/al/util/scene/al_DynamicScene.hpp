@@ -336,7 +336,7 @@ private:
     static void audioThreadFunc(DynamicScene *scene, int id);
 
     // World marker
-    bool mDrawWorldMarker;
+    bool mDrawWorldMarker {false};
     Mesh mWorldMarker;
 
 };
