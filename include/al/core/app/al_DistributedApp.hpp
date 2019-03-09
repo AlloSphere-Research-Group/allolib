@@ -15,6 +15,7 @@
 #include "al/core/io/al_ControlNav.hpp"
 #include "al/sphere/al_OmniRenderer.hpp"
 #include "al/util/al_Toml.hpp"
+#include "al/util/al_Socket.hpp"
 #include "al/util/scene/al_DynamicScene.hpp"
 #include "al/util/scene/al_DistributedScene.hpp"
 
@@ -63,7 +64,7 @@ public:
       ROLE_INTERFACE, // For interface server
       ROLE_DESKTOP, // Application runs as single desktop app
       ROLE_DESKTOP_REPLICA, // Application runs as single desktop app
-      ROLE_USER // User defined roles can add from here (using bitshift to use the higher bits)
+      ROLE_USER // User defined roles can add from here
   } Role;
 
   DistributedApp() {
@@ -166,7 +167,11 @@ public:
 #ifdef AL_BUILD_MPI
       return processor_name;
 #else
+    if (mRunDistributed) {
+      return al_get_hostname();
+    } else {
       return "localhost";
+    }
 #endif
   }
 
