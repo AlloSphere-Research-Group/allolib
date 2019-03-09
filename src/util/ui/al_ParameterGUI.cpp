@@ -622,7 +622,7 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
         presetSequencer->registerBeginCallback([&](PresetSequencer *sender, void *userData) {stateMap[presetSequencer].totalDuration = sender->getSequenceTotalDuration(sender->currentSequence());});
         vector<string> seqList = presetSequencer->getSequenceList();
         std::cout << seqList[currentPresetSequencerItem] <<std::endl;
-        if (currentPresetSequencerItem >= 0 && currentPresetSequencerItem < seqList.size()) {
+        if (currentPresetSequencerItem >= 0 && currentPresetSequencerItem < (int) seqList.size()) {
             presetSequencer->loadSequence(seqList[currentPresetSequencerItem]);
             stateMap[presetSequencer].totalDuration = presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
         }
@@ -644,7 +644,7 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
                              static_cast<void*>(&seqList), seqList.size())) {
                 std::cout << currentPresetSequencerItem <<std::endl;
                 vector<string> seqList = presetSequencer->getSequenceList();
-                if (currentPresetSequencerItem >= 0 && currentPresetSequencerItem < seqList.size()) {
+                if (currentPresetSequencerItem >= 0 && currentPresetSequencerItem < (int) seqList.size()) {
                     presetSequencer->loadSequence(seqList[currentPresetSequencerItem]);
                     state.totalDuration = presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
                 }
