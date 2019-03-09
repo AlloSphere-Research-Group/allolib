@@ -103,7 +103,6 @@ public:
     virtual void onCreate() override {
 
         navControl().disable();
-        scene.showWorldMarker(false);
         scene.registerSynthClass<SimpleVoice>();
         // Preallocate 300 voices
         scene.allocatePolyphony("SimpleVoice", 30);
