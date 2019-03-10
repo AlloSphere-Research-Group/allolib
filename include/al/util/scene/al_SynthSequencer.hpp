@@ -478,6 +478,13 @@ public:
                 auto newEvents = loadSequence(sequenceName, stod(time) + timeOffset, stod(timeScaleInFile) * tempoFactor);
                 lk.lock();
                 events.insert(events.end(), newEvents.begin(), newEvents.end());
+                // FIXME: This sorting only works if both the existing sequence and
+                // the incoming sequence use absolute event times. Sorting
+                // anything else results in chaos... This should be detected
+                // and acted on
+                events.sort([](const SynthSequencerEvent &a, const SynthSequencerEvent &b) {
+                      return a.startTime < b.startTime;
+                });
             } else if (command == '>' && ss.get() == ' ') {
                 std::string time, sequenceName;
                 std::getline(ss, time);
