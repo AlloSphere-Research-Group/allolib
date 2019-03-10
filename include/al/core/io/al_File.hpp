@@ -284,7 +284,7 @@ public:
 
 	/// The directory part of the path is everything up through (and  including)
 	/// the last slash in it. If the path contains no slash, the directory part
-	/// is the string ‘./’. E.g., /usr/bin/man -> /usr/bin/.
+	/// is the string './'. E.g., /usr/bin/man -> /usr/bin/.
 	static std::string directory(const std::string& path);
 
 	/// Returns extension of file name.
