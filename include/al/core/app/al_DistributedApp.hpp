@@ -445,13 +445,37 @@ inline void DistributedApp<TSharedState>::start() {
 
     preOnAnimate(dt_sec());
     onAnimate(dt_sec());
-    if (role() == ROLE_RENDERER && running_in_sphere_renderer) {
+    bool forceOmni = false;
+    bool drawOmni = (role() == ROLE_RENDERER && running_in_sphere_renderer) || forceOmni;
+    if (drawOmni) {
       draw_using_perprojection_capture();
     }
     else {
-      preOnDraw();
-      onDraw(mGraphics);
-      postOnDraw();
+      if (render_stereo)
+      {
+
+        preOnDraw();
+        // check stereo window and do below to render in stereo when not in sphere
+        glDrawBuffer(GL_BACK_LEFT);
+        mGraphics.eye(Graphics::LEFT_EYE);
+        onDraw(mGraphics);
+        postOnDraw();
+
+        preOnDraw();
+        glDrawBuffer(GL_BACK_RIGHT);
+        mGraphics.eye(Graphics::RIGHT_EYE);
+        onDraw(mGraphics);
+        postOnDraw();
+        glDrawBuffer(GL_BACK_LEFT);
+        mGraphics.eye(Graphics::MONO_EYE);
+        
+      }
+      else
+      {
+        preOnDraw();
+        onDraw(mGraphics);
+        postOnDraw();
+      }
     }
     Window::refresh();
     FPS::tickFPS();
