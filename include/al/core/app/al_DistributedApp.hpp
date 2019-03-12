@@ -101,6 +101,7 @@ public:
           mRoleMap["gr14"] = ROLE_RENDERER;
 
           mRoleMap["audio"] = (Role) (ROLE_AUDIO | ROLE_SIMULATOR);
+          mRoleMap["audio.10g"] = (Role) (ROLE_AUDIO | ROLE_SIMULATOR);
           mRoleMap["ar01"] = ROLE_AUDIO;
 
 //          if (isMaster()) {
@@ -340,7 +341,7 @@ public:
     std::vector<std::string> distributedNodes =
     { "gr01", "gr02", "gr03", "gr04", "gr05", "gr06", "gr07", "gr08", "gr09",
       "gr10", "gr11", "gr12", "gr13", "gr14",
-      "audio.10g", "ar01", "spherez05", "interface", "control"};
+      "audio", "audio.10g", "ar01", "spherez05", "interface", "control"};
     for (auto nodeName: distributedNodes) {
       if (al_get_hostname() == nodeName) {
         return true;
