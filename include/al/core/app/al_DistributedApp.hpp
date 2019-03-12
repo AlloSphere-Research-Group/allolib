@@ -113,8 +113,8 @@ public:
           mRole = ROLE_NONE;
           for (auto entry: mRoleMap) {
               if (strncmp(name().c_str(), entry.first.c_str(), name().size()) == 0) {
-                std::cout << name() << ":Running distributed as " << roleName() << std::endl;
                 mRole = entry.second;
+                std::cout << name() << ":Running distributed as " << roleName() << std::endl;
               }
           }
           if (hasRole(ROLE_SIMULATOR)) {
@@ -423,8 +423,9 @@ inline void DistributedApp<TSharedState>::start() {
 //  std::cout << name() << ":" << roleName()  << " before onCreate" << std::endl;
   onCreate();
 
-  AudioApp::beginAudio(); // only begins if `initAudio` was called before
-  // initDeviceServer();
+  if(hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) || hasRole(ROLE_DESKTOP_REPLICA)) {
+    AudioApp::beginAudio(); // only begins if `initAudio` was called before
+  }
 
 //  std::cout << name() << ":" << roleName() << " before init flow" << std::endl;
   if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) initFlowApp(true);
@@ -466,10 +467,8 @@ inline void DistributedApp<TSharedState>::start() {
     if (drawOmni) {
       draw_using_perprojection_capture();
     }
-    else {
-      if (render_stereo)
-      {
-
+    else { // Not Omni
+      if (render_stereo) {
         preOnDraw();
         // check stereo window and do below to render in stereo when not in sphere
         glDrawBuffer(GL_BACK_LEFT);
@@ -485,9 +484,7 @@ inline void DistributedApp<TSharedState>::start() {
         glDrawBuffer(GL_BACK_LEFT);
         mGraphics.eye(Graphics::MONO_EYE);
         
-      }
-      else
-      {
+      } else {
         preOnDraw();
         onDraw(mGraphics);
         postOnDraw();
@@ -499,7 +496,9 @@ inline void DistributedApp<TSharedState>::start() {
 
   onExit(); // user defined
   postOnExit();
-  AudioApp::endAudio(); // AudioApp
+  if(hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) || hasRole(ROLE_DESKTOP_REPLICA)) {
+    AudioApp::endAudio(); // AudioApp
+  }
   Window::destroy();
   glfw::terminate(is_verbose);
 
