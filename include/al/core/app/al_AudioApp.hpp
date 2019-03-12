@@ -20,7 +20,7 @@ public:
   /// @param[in] outputChannels. Number of output channels to open. -1 for all
   /// @param[in] inputChannels. Number of input channels to open. -1 for all
   /// @param[in] device. Hardware device to use. -1 for default device
-  void initAudio(
+  virtual void initAudio(
     double audioRate, int audioBlockSize,
     int audioOutputs, int audioInputs,
     int device = -1
@@ -33,14 +33,13 @@ public:
       OUT_ONLY = 0b10,
       IN_AND_OUT = 0b11
   };
-  void initAudio(AudioIOConfig config = OUT_ONLY);
+  virtual void initAudio(AudioIOConfig config = OUT_ONLY);
 
+  virtual void onSound(AudioIOData& io) {}
 
   bool usingAudio() const;
   void beginAudio();
   void endAudio();
-
-  virtual void onSound(AudioIOData& io) {}
     
 };
 

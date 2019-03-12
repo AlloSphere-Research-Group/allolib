@@ -238,6 +238,23 @@ public:
 #endif
   }
 
+  virtual void initAudio (double audioRate, int audioBlockSize,
+                          int audioOutputs, int audioInputs,
+                          int device = -1) override {
+    if (hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) ||  hasRole(ROLE_DESKTOP_REPLICA)) {
+      AudioApp::initAudio(audioRate, audioBlockSize, audioOutputs, audioInputs, device);
+    } else {
+      std::cout << "Audio disabled on this node.";
+    }
+  }
+
+  virtual void initAudio (AudioIOConfig config = OUT_ONLY) override {
+    if (hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) ||  hasRole(ROLE_DESKTOP_REPLICA)) {
+      AudioApp::initAudio(config);
+    } else {
+      std::cout << "Audio disabled on this node.";
+    }
+  }
 
   Viewpoint& view() { return mView; }
   const Viewpoint& view() const { return mView; }
