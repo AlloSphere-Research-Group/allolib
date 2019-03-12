@@ -1,7 +1,8 @@
 #ifndef INCLUDE_AL_DISTRIBUTEDAPP_HPP
 #define INCLUDE_AL_DISTRIBUTEDAPP_HPP
 
-/*  Keehong Youn, 2017, younkeehong@gmail.com
+/* Keehong Youn, 2017, younkeehong@gmail.com
+ * Andres Cabrera, 2018, 2019, mantaraya36@gmail.com
 */
 
 #include "al/core/app/al_WindowApp.hpp"
@@ -31,19 +32,17 @@
 #include "Cuttlebone/Cuttlebone.hpp"
 #endif
 
-/*  Keehong Youn, 2017, younkeehong@gmail.com
- *  Andres Cabrera, 2018, mantaraya36@gmail.com
- *
- * Using this file requires Cuttlebone. MPI is optional.
+/*
+ * MPI and cuttlebone are optional.
 */
 
 namespace al {
 
-struct BasicState {
+struct DefaultState {
 	Pose pose;
 };
 
-template<class TSharedState = BasicState>
+template<class TSharedState = DefaultState>
 class DistributedApp: public OmniRenderer,
            public AudioApp,
            public FlowAppParameters,
@@ -57,17 +56,17 @@ public:
 
   typedef enum {
       ROLE_NONE = 0,
-      ROLE_SIMULATOR,
-      ROLE_RENDERER,
-      ROLE_AUDIO,
-      ROLE_CONTROL,
-      ROLE_INTERFACE, // For interface server
-      ROLE_DESKTOP, // Application runs as single desktop app
-      ROLE_DESKTOP_REPLICA, // Application runs as single desktop app
-      ROLE_USER // User defined roles can add from here
+      ROLE_SIMULATOR = 1 << 1,
+      ROLE_RENDERER = 1 << 2,
+      ROLE_AUDIO = 1 << 3,
+      ROLE_CONTROL = 1 << 4,
+      ROLE_INTERFACE = 1 << 5, // For interface server
+      ROLE_DESKTOP = 1 << 6, // Application runs as single desktop app
+      ROLE_DESKTOP_REPLICA = 1 << 7, // Application runs as single desktop app
+      ROLE_USER  = 1 << 8 // User defined roles can add from here through bitshifting
   } Role;
 
-  DistributedApp() {
+  DistributedApp(bool runDistributed = DistributedApp::shouldRunDistributed()) {
 
 #ifdef AL_BUILD_MPI
       MPI_Init(NULL, NULL);
@@ -77,40 +76,32 @@ public:
 
       MPI_Get_processor_name(processor_name, &name_len);
 #endif
-      if (isPrimary()) {
-          configLoader.setFile("distributed_app.toml");
-          configLoader.setDefaultValue("distributed", false);
-          configLoader.setDefaultValue("broadcastAddress", std::string("192.168.0.255"));
-          configLoader.writeFile();
-          if (configLoader.getb("distributed")) {
-              std::cout << name() << ":Running distributed" << std::endl;
-              mRole = ROLE_SIMULATOR;
-              mRunDistributed = true;
-          }
+      if (runDistributed) {
+        mRunDistributed = true;
       }
 
       if (mRunDistributed) {
 
-          mRoleMap["spherez05"] = {ROLE_SIMULATOR, ROLE_RENDERER};
-          mRoleMap["gr01"] = {ROLE_SIMULATOR};
+          mRoleMap["spherez05"] = ROLE_SIMULATOR;
+          mRoleMap["gr01"] = ROLE_SIMULATOR;
 
-          mRoleMap["moxi"] = {ROLE_RENDERER};
-          mRoleMap["gr02"] = {ROLE_RENDERER};
-          mRoleMap["gr03"] = {ROLE_RENDERER};
-          mRoleMap["gr04"] = {ROLE_RENDERER};
-          mRoleMap["gr05"] = {ROLE_RENDERER};
-          mRoleMap["gr06"] = {ROLE_RENDERER};
-          mRoleMap["gr07"] = {ROLE_RENDERER};
-          mRoleMap["gr08"] = {ROLE_RENDERER};
-          mRoleMap["gr09"] = {ROLE_RENDERER};
-          mRoleMap["gr10"] = {ROLE_RENDERER};
-          mRoleMap["gr11"] = {ROLE_RENDERER};
-          mRoleMap["gr12"] = {ROLE_RENDERER};
-          mRoleMap["gr13"] = {ROLE_RENDERER};
-          mRoleMap["gr14"] = {ROLE_RENDERER};
+          mRoleMap["moxi"] = ROLE_RENDERER;
+          mRoleMap["gr02"] = ROLE_RENDERER;
+          mRoleMap["gr03"] = ROLE_RENDERER;
+          mRoleMap["gr04"] = ROLE_RENDERER;
+          mRoleMap["gr05"] = ROLE_RENDERER;
+          mRoleMap["gr06"] = ROLE_RENDERER;
+          mRoleMap["gr07"] = ROLE_RENDERER;
+          mRoleMap["gr08"] = ROLE_RENDERER;
+          mRoleMap["gr09"] = ROLE_RENDERER;
+          mRoleMap["gr10"] = ROLE_RENDERER;
+          mRoleMap["gr11"] = ROLE_RENDERER;
+          mRoleMap["gr12"] = ROLE_RENDERER;
+          mRoleMap["gr13"] = ROLE_RENDERER;
+          mRoleMap["gr14"] = ROLE_RENDERER;
 
-          mRoleMap["audio"] = {ROLE_AUDIO};
-          mRoleMap["ar01"] = {ROLE_AUDIO};
+          mRoleMap["audio"] = (Role) (ROLE_AUDIO | ROLE_SIMULATOR);
+          mRoleMap["ar01"] = ROLE_AUDIO;
 
 //          if (isMaster()) {
 //              int number = 398;
@@ -118,25 +109,23 @@ public:
 //                  MPI_Send(&number, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
 //              }
 //          }
+
+          mRole = ROLE_NONE;
           for (auto entry: mRoleMap) {
               if (strncmp(name().c_str(), entry.first.c_str(), name().size()) == 0) {
-				  if (entry.second.size() == 1) {
-					  mRole = entry.second[0];
-				  } else {
-#ifdef AL_BUILD_MPI
-					  int rank = world_rank;
-#else
-					  int rank = 0;
-#endif
-                      if (rank < (int) entry.second.size()) {
-                          mRole = entry.second[rank];
-                      } else {
-                          mRole = entry.second[0];
-                      }
-                  }
+                std::cout << name() << ":Running distributed as " << roleName() << std::endl;
+                mRole = entry.second;
               }
           }
+          if (hasRole(ROLE_SIMULATOR)) {
+              configLoader.setFile("distributed_app.toml");
+              configLoader.setDefaultValue("broadcastAddress", std::string("192.168.0.255"));
+              configLoader.writeFile();
+              std::cout << "Primary: " << name() << ":Running distributed" << std::endl;
+          }
       }
+
+
 #ifdef AL_BUILD_MPI
       if (!isPrimary()) {
 //          int number;
@@ -175,7 +164,9 @@ public:
 #endif
   }
 
-  Role role() {return mRole;}
+  Role role() { return mRole;}
+
+  bool hasRole(Role role) { return mRole & role;}
 
   int rank() {
 #ifdef AL_BUILD_MPI
@@ -190,24 +181,38 @@ public:
   }
 
   std::string roleName() {
-      switch (mRole) {
-      case ROLE_SIMULATOR:
-          return "simulator";
-      case ROLE_AUDIO:
-          return "audio";
-      case ROLE_RENDERER:
-          return "renderer";
-      case ROLE_CONTROL:
-          return "control";
-      case ROLE_INTERFACE:
-          return "interface";
-      case ROLE_DESKTOP:
-          return "desktop";
-      case ROLE_NONE:
-          return "none";
-      default:
-          return "[user role]";
-      }
+    std::string name;
+    if (mRole & ROLE_SIMULATOR) {
+      name += "simulator+";
+    }
+    if (mRole & ROLE_RENDERER) {
+      name += "renderer+";
+    }
+    if (mRole & ROLE_AUDIO) {
+      name += "audio+";
+    }
+    if (mRole & ROLE_CONTROL) {
+      name += "control+";
+    }
+    if (mRole & ROLE_INTERFACE) {
+      name += "interface+";
+    }
+    if (mRole & ROLE_DESKTOP) {
+      name += "desktop+";
+    }
+    if (mRole & ROLE_DESKTOP_REPLICA) {
+      name += "replica+";
+    }
+    if (name.size() == 0 && mRole != ROLE_NONE) {
+      // TODO show user role index (amount of bitshift from ROLE_USER)
+      name += "[user role]+";
+    }
+    if (name.size() > 0) {
+      name = name.substr(0, name.size() -1);
+    } else {
+      name = "none";
+    }
+    return name;
   }
 
   void print() {
@@ -226,10 +231,10 @@ public:
       if(getenv("OMPI_COMM_WORLD_RANK")) {
           return world_rank == 0;
       } else {
-          return role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP;
+          return role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP;
       }
 #else
-      return role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP;
+      return role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP;
 #endif
   }
 
@@ -289,10 +294,10 @@ public:
    * @brief get current shared state
    * @return reference to shared state.
    *
-   * State can be modified if role() == ROLE_SIMULATOR
+   * State should only be modified if hasRole(ROLE_SIMULATOR)
    * Otherwise any changes made to state will not propagate.
    */
-  TSharedState &state() { return mState;}
+  TSharedState &state() { assert(hasRole(ROLE_SIMULATOR)); return mState;}
   /**
    * @brief returns the number of states received
    *
@@ -314,6 +319,18 @@ public:
 
   ParameterServer &parameterServer() override { return *mParameterServer; }
 
+  static bool shouldRunDistributed() {
+    std::vector<std::string> distributedNodes =
+    { "gr01", "gr02", "gr03", "gr04", "gr05", "gr06", "gr07", "gr08", "gr09",
+      "gr10", "gr11", "gr12", "gr13", "gr14",
+      "audio", "ar01", "spherez05", "interface", "control"};
+    for (auto nodeName: distributedNodes) {
+      if (al_get_hostname() == nodeName) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   void registerDynamicScene(DynamicScene &scene) {
 
@@ -340,7 +357,7 @@ private:
   bool mRunDistributed {false};
   Role mRole {ROLE_DESKTOP};
 
-  std::map<std::string, std::vector<Role>> mRoleMap;
+  std::map<std::string, Role> mRoleMap;
 
   TSharedState mState;
   int mQueuedStates {0};
@@ -361,18 +378,17 @@ template<class TSharedState>
 inline void DistributedApp<TSharedState>::start() {
   glfw::init(is_verbose);
 
-
   uint16_t sendPort = 9010;
   uint16_t receiverPort = 9100;
   std::string defaultAddress = "0.0.0.0";
-  if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) {
+  if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) {
       mParameterServer = std::make_shared<ParameterServer>(defaultAddress, sendPort);
       if (mParameterServer->serverRunning()) {
 //          mParameterServer->addListener("127.0.0.1", 9100);
           mParameterServer->startHandshakeServer(defaultAddress);
           for (auto member: mRoleMap) {
               // Relay all parameters to renderers
-              if (std::find(member.second.begin(), member.second.end(), ROLE_RENDERER) != member.second.end()) {
+              if (member.second & ROLE_RENDERER) {
                   mParameterServer->addListener(member.first, receiverPort);
                   continue;
               }
@@ -411,7 +427,7 @@ inline void DistributedApp<TSharedState>::start() {
   // initDeviceServer();
 
 //  std::cout << name() << ":" << roleName() << " before init flow" << std::endl;
-  if (role() == ROLE_SIMULATOR || role() == ROLE_DESKTOP) initFlowApp(true);
+  if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) initFlowApp(true);
   else initFlowApp(false);
   
   if (mParameterServer) {
@@ -424,7 +440,7 @@ inline void DistributedApp<TSharedState>::start() {
   while (!WindowApp::shouldQuit()) {
     // to quit, call WindowApp::quit() or click close button of window,
     // or press ctrl + q
-    if (role() == ROLE_DESKTOP || role() == ROLE_SIMULATOR) {
+    if (role() & ROLE_DESKTOP || role() & ROLE_SIMULATOR) {
       simulate(dt_sec());
       mQueuedStates = 1;
 #ifdef AL_USE_CUTTLEBONE
@@ -446,7 +462,7 @@ inline void DistributedApp<TSharedState>::start() {
     preOnAnimate(dt_sec());
     onAnimate(dt_sec());
     bool forceOmni = false;
-    bool drawOmni = (role() == ROLE_RENDERER && running_in_sphere_renderer) || forceOmni;
+    bool drawOmni = (hasRole(ROLE_RENDERER) && running_in_sphere_renderer) || forceOmni;
     if (drawOmni) {
       draw_using_perprojection_capture();
     }
@@ -493,11 +509,11 @@ template<class TSharedState>
 inline void DistributedApp<TSharedState>::preOnCreate() {
   append(mNavControl);
 #ifdef AL_USE_CUTTLEBONE
-  if (role() == ROLE_SIMULATOR) {
+  if (role() & ROLE_SIMULATOR) {
       std::string broadcastAddress = configLoader.gets("broadcastAddress");
       mMaker = std::make_unique<cuttlebone::Maker<TSharedState>>(broadcastAddress.c_str());
       mMaker->start();
-  } else if (role() == ROLE_RENDERER){
+  } else if (role() & ROLE_RENDERER){
       mTaker = std::make_unique<cuttlebone::Taker<TSharedState>>();
       mTaker->start();
   }
@@ -505,10 +521,10 @@ inline void DistributedApp<TSharedState>::preOnCreate() {
 
   window_is_stereo_buffered = Window::displayMode() & Window::STEREO_BUF;
   mGraphics.init();
-  if (role() == ROLE_RENDERER && running_in_sphere_renderer) {
+  if (role() & ROLE_RENDERER && running_in_sphere_renderer) {
     load_perprojection_configuration();
   }
-  if (role() == ROLE_RENDERER) {
+  if (role() & ROLE_RENDERER) {
     cursorHide(true);
   }
 }

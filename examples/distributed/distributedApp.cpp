@@ -78,14 +78,14 @@ public:
     }
 
     virtual void onDraw(Graphics &g) override {
-        if (role() == ROLE_RENDERER) {
+        if (hasRole(ROLE_RENDERER)) {
             // Renderer will recieve state from simulator
             std::cout << " Rendered got : " << state().value1 << std::endl;
         }
     }
     
     virtual void onSound(AudioIOData &io) override {
-        if (role() == ROLE_AUDIO) {
+        if (hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP)) {
             // Audio will recieve state from simulator
             std::cout << " Audio got : " << state().value1 << std::endl;
         }
