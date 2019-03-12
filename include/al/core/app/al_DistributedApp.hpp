@@ -400,37 +400,38 @@ inline void DistributedApp<TSharedState>::start() {
   uint16_t receiverPort = 9100;
   std::string defaultAddress = "0.0.0.0";
   if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) {
-      mParameterServer = std::make_shared<ParameterServer>(defaultAddress, sendPort);
-      if (mParameterServer->serverRunning()) {
-//          mParameterServer->addListener("127.0.0.1", 9100);
-          mParameterServer->startHandshakeServer(defaultAddress);
-          for (auto member: mRoleMap) {
-              // Relay all parameters to renderers
-              if (member.second & ROLE_RENDERER) {
-                  mParameterServer->addListener(member.first, receiverPort);
-                  continue;
-              }
-          }
-      } else {
-          int portOffset = 0;
-          int maxInstances = 64;
-          while (!mParameterServer->serverRunning() && portOffset < maxInstances) {
-              mParameterServer->listen(receiverPort + portOffset++, defaultAddress);
-          }
-          if (mParameterServer->serverRunning()) {
-
-              mParameterServer->startCommandListener(defaultAddress);
-              mRole = ROLE_DESKTOP_REPLICA;
-              std::cout << "Application is replica on port: " << mParameterServer->serverPort() << std::endl;
-          } else {
-              std::cerr << "Warning: Application has no network role." << std::endl;
-              mRole = ROLE_NONE;
-          }
+    mParameterServer = std::make_shared<ParameterServer>(defaultAddress, sendPort);
+    if (mParameterServer->serverRunning()) {
+      //          mParameterServer->addListener("127.0.0.1", 9100);
+      mParameterServer->startHandshakeServer(defaultAddress);
+      for (auto member: mRoleMap) {
+        // Relay all parameters to renderers
+        if (member.second & ROLE_RENDERER) {
+          std::cout << "Added renderer as listener " << member.first << ":" << receiverPort << std:cout;
+          mParameterServer->addListener(member.first, receiverPort);
+          continue;
+        }
       }
+    } else {
+      int portOffset = 0;
+      int maxInstances = 64;
+      while (!mParameterServer->serverRunning() && portOffset < maxInstances) {
+        mParameterServer->listen(receiverPort + portOffset++, defaultAddress);
+      }
+      if (mParameterServer->serverRunning()) {
+
+        mParameterServer->startCommandListener(defaultAddress);
+        mRole = ROLE_DESKTOP_REPLICA;
+        std::cout << "Application is replica on port: " << mParameterServer->serverPort() << std::endl;
+      } else {
+        std::cerr << "Warning: Application has no network role." << std::endl;
+        mRole = ROLE_NONE;
+      }
+    }
   } else {
-      mParameterServer = std::make_shared<ParameterServer>(defaultAddress, receiverPort);
+    mParameterServer = std::make_shared<ParameterServer>(defaultAddress, receiverPort);
   }
-//  std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
+  //  std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
   onInit();
 
   // must do before Window::create, overrides user given window diemnsions
@@ -438,20 +439,20 @@ inline void DistributedApp<TSharedState>::start() {
 
   Window::create(is_verbose);
   preOnCreate();
-//  std::cout << name() << ":" << roleName()  << " before onCreate" << std::endl;
+  //  std::cout << name() << ":" << roleName()  << " before onCreate" << std::endl;
   onCreate();
 
   if(hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) || hasRole(ROLE_DESKTOP_REPLICA)) {
     AudioApp::beginAudio(); // only begins if `initAudio` was called before
   }
 
-//  std::cout << name() << ":" << roleName() << " before init flow" << std::endl;
+  //  std::cout << name() << ":" << roleName() << " before init flow" << std::endl;
   if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) initFlowApp(true);
   else initFlowApp(false);
   
   if (mParameterServer) {
-      mParameterServer->registerOSCListener(this); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
-      std::cout << "Registered parameter server with Distributed App network socket" <<std::endl;
+    mParameterServer->registerOSCListener(this); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
+    std::cout << "Registered parameter server with Distributed App network socket" <<std::endl;
   }
 
   FPS::startFPS(); // WindowApp (FPS)
@@ -469,12 +470,12 @@ inline void DistributedApp<TSharedState>::start() {
 #endif
     } else {
 #ifdef AL_USE_CUTTLEBONE
-        if (mTaker) {
-            mQueuedStates = mTaker->get(mState);
-        }
+      if (mTaker) {
+        mQueuedStates = mTaker->get(mState);
+      }
 #else
-        // You shouldn't get here if you are relying oncuttlebone for state syncing
-        mQueuedStates = 1;
+      // You shouldn't get here if you are relying oncuttlebone for state syncing
+      mQueuedStates = 1;
 #endif
     }
 
