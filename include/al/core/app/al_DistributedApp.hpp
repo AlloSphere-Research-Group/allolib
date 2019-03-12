@@ -340,7 +340,7 @@ public:
     std::vector<std::string> distributedNodes =
     { "gr01", "gr02", "gr03", "gr04", "gr05", "gr06", "gr07", "gr08", "gr09",
       "gr10", "gr11", "gr12", "gr13", "gr14",
-      "audio", "ar01", "spherez05", "interface", "control"};
+      "audio.10g", "ar01", "spherez05", "interface", "control"};
     for (auto nodeName: distributedNodes) {
       if (al_get_hostname() == nodeName) {
         return true;
