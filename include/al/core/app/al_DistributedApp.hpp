@@ -407,7 +407,7 @@ inline void DistributedApp<TSharedState>::start() {
       for (auto member: mRoleMap) {
         // Relay all parameters to renderers
         if (member.second & ROLE_RENDERER) {
-          std::cout << "Added renderer as listener " << member.first << ":" << receiverPort << std:cout;
+          std::cout << "Added renderer as listener " << member.first << ":" << receiverPort << std:endl;
           mParameterServer->addListener(member.first, receiverPort);
           continue;
         }
