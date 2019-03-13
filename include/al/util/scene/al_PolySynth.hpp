@@ -668,6 +668,9 @@ public:
       for(auto allocCb: mAllocationCallbacks) {
         allocCb.first(voice, allocCb.second);
       }
+      if(mDefaultUserData) {
+        voice->userData(mDefaultUserData); 
+      }
       return voice;
     } else {
       std::cout << "Can't allocate voice of type " << name << ". Voice not registered and no polyphony." << std::endl;

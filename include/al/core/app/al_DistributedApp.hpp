@@ -315,7 +315,7 @@ public:
    * State should only be modified if hasRole(ROLE_SIMULATOR)
    * Otherwise any changes made to state will not propagate.
    */
-  TSharedState &state() { assert(hasRole(ROLE_SIMULATOR)); return mState;}
+  TSharedState &state() { return mState;}
   /**
    * @brief returns the number of states received
    *
