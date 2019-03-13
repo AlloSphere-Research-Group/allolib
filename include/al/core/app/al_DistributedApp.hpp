@@ -232,10 +232,10 @@ public:
       if(getenv("OMPI_COMM_WORLD_RANK")) {
           return world_rank == 0;
       } else {
-          return role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP;
+          return hasRole(ROLE_SIMULATOR) || hasRole(ROLE_DESKTOP);
       }
 #else
-      return role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP;
+      return hasRole(ROLE_SIMULATOR) || hasRole(ROLE_DESKTOP);
 #endif
   }
 

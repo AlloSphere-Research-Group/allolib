@@ -423,3 +423,4 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
     }
     std::cout << "Audio thread " << id << " done" << std::endl;
 }
+

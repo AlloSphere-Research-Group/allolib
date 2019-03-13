@@ -154,11 +154,17 @@ public:
     }
 
 protected:
+    /**
+     * @brief Set voice as part of a replica distributed scene
+     */
+    void markAsReplica() { mIsReplica = true;}
+
     Pose mPose;
     float mSize {1.0};
     std::vector<Vec3f> mAudioOutPositionOffsets; // This vector is added to the voice's position to determine the specific position of the audio out
 
     bool mUseDistAtten {true};
+    bool mIsReplica {false}; // If voice is replica, it should not send its internal state but listen for changes.
 };
 
 

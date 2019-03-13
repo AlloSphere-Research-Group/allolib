@@ -266,9 +266,7 @@ public:
      *
      * You will need to mark this instance as done by calling the
      *  free() function when envelopes or processing is done. You should
-     * call free() from one of the render() functions. You can access the
-     * note parameters using the getInstanceParameter(), getParameters()
-     * and getOffParameters() functions.
+     * call free() from one of the render() functions.
      */
   virtual void onProcess(AudioIOData& io) {}
 
@@ -354,13 +352,33 @@ public:
 
   unsigned int numOutChannels() { return mNumOutChannels; }
 
-  SynthVoice& registerParameterAsField(ParameterMeta &param) { mParametersToFields.push_back(&param); return *this;}
+  // Parameters to fields (i.e. parameters that are set at initialization only)
+  virtual SynthVoice& registerParameterAsField(ParameterMeta &param) { mParametersToFields.push_back(&param); return *this;}
 
   SynthVoice& operator<<(ParameterMeta &param) {return registerParameterAsField(param);}
 
   SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
 
-  std::vector<ParameterMeta *> parameters() {return mParametersToFields;}
+  std::vector<ParameterMeta *> parameterFields() {return mParametersToFields;}
+
+  /**
+   * @brief registerParameter
+   * @param param
+   * @return
+   *
+   * Parameters are values that are meant to be updated while the voice is
+   * running, as opposed to parameters that are set at onTrigger().
+   * Fields will be stored in sequence text files, while voice parameters
+   * are meant to be changing within the voice. In distributed scenes, to
+   * synchronize the internal values within voices, the parameters must be
+   * registered through this function.
+   */
+  virtual SynthVoice& registerParameter(ParameterMeta &param) {
+    mContinuousParameters.push_back(&param);
+    return *this;
+  }
+
+  std::vector<ParameterMeta *> parameters() {return mContinuousParameters;}
 
 protected:
 
@@ -386,7 +404,7 @@ protected:
 
   std::vector<ParameterMeta *> mParametersToFields;
 
-
+  std::vector<ParameterMeta *> mContinuousParameters;
 private:
   int mId {-1};
   int mActive {false};
@@ -516,7 +534,6 @@ public:
      * requested that will not be used.
      */
   void insertFreeVoice(SynthVoice *voice);
-
 
   /**
      * @brief Set default user data to set to voices before the are returned
@@ -654,9 +671,8 @@ public:
         mNoAllocationList.push_back(name);
       }
     }
-    mCreators[name] = []() {
-      TSynthVoice *voice = new TSynthVoice;
-      voice->init();
+    mCreators[name] = [&]() {
+      TSynthVoice *voice = allocateVoice<TSynthVoice>();
       return voice;
     };
   }
@@ -671,11 +687,25 @@ public:
       if(mDefaultUserData) {
         voice->userData(mDefaultUserData); 
       }
+      voice->init();
       return voice;
     } else {
       std::cout << "Can't allocate voice of type " << name << ". Voice not registered and no polyphony." << std::endl;
     }
     return nullptr;
+  }
+
+  template<class TSynthVoice>
+  TSynthVoice *allocateVoice() {
+    TSynthVoice *voice = new TSynthVoice;
+    for(auto allocCb: mAllocationCallbacks) {
+      allocCb.first(voice, allocCb.second);
+    }
+    if(mDefaultUserData) {
+      voice->userData(mDefaultUserData);
+    }
+    voice->init();
+    return voice;
   }
 
   // Testing function. Do not use...
@@ -832,9 +862,6 @@ protected:
   std::unique_ptr<std::thread> mCpuClockThread;
 };
 
-
-
-
 template<class TSynthVoice>
 TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
     std::unique_lock<std::mutex> lk(mFreeVoiceLock); // Only one getVoice() call at a time
@@ -856,13 +883,8 @@ TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
         // TODO report current polyphony for more informed allocation of polyphony
         // TODO check if allocation allowed
         std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
-        freeVoice = new TSynthVoice;
-        freeVoice->init();
-        for(auto allocCb: mAllocationCallbacks) {
-            allocCb.first(freeVoice, allocCb.second);
-        }
+        freeVoice = allocateVoice<TSynthVoice>();
     }
-    freeVoice->userData(mDefaultUserData);
     return static_cast<TSynthVoice *>(freeVoice);
 }
 
@@ -873,19 +895,11 @@ void PolySynth::allocatePolyphony(int number) {
     if (lastVoice) {
         while (lastVoice->next) { lastVoice = lastVoice->next; }
     } else {
-        lastVoice = mFreeVoices = new TSynthVoice;
-        lastVoice->init();
-        for(auto allocCb: mAllocationCallbacks) {
-            allocCb.first(lastVoice, allocCb.second);
-        }
+        lastVoice = mFreeVoices = allocateVoice<TSynthVoice>();
         number--;
     }
     for(int i = 0; i < number; i++) {
-        lastVoice->next = new TSynthVoice;
-        lastVoice->init();
-        for(auto allocCb: mAllocationCallbacks) {
-            allocCb.first(lastVoice, allocCb.second);
-        }
+        lastVoice->next = allocateVoice<TSynthVoice>();
         lastVoice = lastVoice->next;
     }
 }

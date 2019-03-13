@@ -205,7 +205,6 @@ SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc)
         if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
              // TODO report current polyphony for more informed allocation of polyphony
             freeVoice = allocateVoice(name);
-            freeVoice->userData(mDefaultUserData);
         } else {
             std::cout << "Automatic allocation disabled for voice:" << name << std::endl;
         }
