@@ -12,6 +12,7 @@ using namespace al;
 
 struct SharedState {
   double angle1, angle2;
+  Pose pose;
 };
 
 struct DistributedExampleApp : DistributedApp<SharedState> {
@@ -70,6 +71,12 @@ struct DistributedExampleApp : DistributedApp<SharedState> {
   void simulate(double dt) {
     state().angle1 += 1. / 3;
     state().angle2 += M_PI / 3;
+    state().pose = nav();
+  }
+
+  void onAnimate(double dt) {
+    //
+    pose() = state().pose;
   }
 
   void onDraw(Graphics& g) {
@@ -100,5 +107,7 @@ struct DistributedExampleApp : DistributedApp<SharedState> {
 
 int main() {
   DistributedExampleApp app;
+  app.stereo(true);
+  app.displayMode(app.displayMode() | Window::STEREO_BUF);
   app.start();
 }
