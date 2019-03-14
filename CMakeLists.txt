@@ -53,7 +53,7 @@ include(cmake/external.cmake)
 #       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
 include(cmake/al_files.cmake)
 # sets: al_headers, al_sources
-include(cmake/extensions.cmake)
+#include(cmake/extensions.cmake)
 # sets: EXTENSIONS_LIBRARIES, EXTENSIONS_INCLUDE_DIRS
 
 set(headers
