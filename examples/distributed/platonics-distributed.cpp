@@ -1,3 +1,9 @@
+//
+// This should run in the AlloSphere, but it is broken.
+//
+// Currently, in the sphere, every projector shows RED without alpha blending
+//
+//
 
 #include "al/core.hpp"
 #include "al/core/app/al_DistributedApp.hpp"
@@ -52,6 +58,9 @@ struct DistributedExampleApp : DistributedApp<SharedState> {
 
     nav().pos(0, 0, 15);
 
+    // we should not have to do this;
+    // this should be done within DistributedApp
+    // XXX: is this necessary?
     if (hasRole(ROLE_RENDERER)) {
       load_perprojection_configuration();
       cursorHide(true);
