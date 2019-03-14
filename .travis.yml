@@ -26,8 +26,8 @@ addons:
     - g++-8
     - portaudio19-dev
     - libsndfile1-dev
-    - libglew-dev
-    - libglfw3-dev
+    #- libglew-dev
+    #- libglfw3-dev
     - xorg-dev
     # - libusb-1.0-0-dev
     - libfreeimage-dev
