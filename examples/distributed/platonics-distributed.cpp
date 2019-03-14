@@ -1,7 +1,5 @@
 //
-// This should run in the AlloSphere, but it is broken.
-//
-// Currently, in the sphere, every projector shows RED without alpha blending
+// This should run in the AlloSphere.
 //
 //
 
@@ -59,13 +57,11 @@ struct DistributedExampleApp : DistributedApp<SharedState> {
 
     nav().pos(0, 0, 15);
 
-    // we should not have to do this;
-    // this should be done within DistributedApp
-    // XXX: is this necessary?
-    if (hasRole(ROLE_RENDERER)) {
-      load_perprojection_configuration();
-      cursorHide(true);
-    }
+    // XXX: DistributedApp DOES this for us. stop using it..
+    // if (hasRole(ROLE_RENDERER)) {
+    //  load_perprojection_configuration();
+    //  cursorHide(true);
+    //}
   }
 
   void simulate(double dt) {
@@ -75,8 +71,11 @@ struct DistributedExampleApp : DistributedApp<SharedState> {
   }
 
   void onAnimate(double dt) {
-    //
-    pose() = state().pose;
+    // XXX to allow navigation
+    if (hasRole(ROLE_DESKTOP) || hasRole(ROLE_SIMULATOR))
+      ;
+    else
+      pose() = state().pose;
   }
 
   void onDraw(Graphics& g) {
@@ -97,17 +96,22 @@ struct DistributedExampleApp : DistributedApp<SharedState> {
       g.polygonMode(Graphics::FILL);
       g.draw(solids[i]);
       g.scale(1.01);
-      g.color(0);
+      g.color(0.5);
       g.polygonMode(Graphics::LINE);
       g.draw(solids[i]);
       g.popMatrix();
     }
+
+    // XXX absolutely critical in the sphere!
+    g.polygonMode(Graphics::FILL);
   }
 };
 
 int main() {
   DistributedExampleApp app;
-  app.stereo(true);
+
+  // XXX absolutely critical in the sphere! no stereo unless you do this
   app.displayMode(app.displayMode() | Window::STEREO_BUF);
+
   app.start();
 }
