@@ -79,7 +79,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
     PolySynth::registerAllocateCallback(
                 [this](SynthVoice *voice, void *userData) {
         std::cout << "voice allocated " << std::endl;
-        for (auto *param : voice->parameters()) {
+        for (auto *param : voice->parameterFields()) {
             if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
                 dynamic_cast<Parameter *>(param)->registerChangeCallback(
                             [this, param, voice](float value) {
@@ -140,7 +140,7 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
             SynthVoice *voice = mActiveVoices;
             while (voice) {
                 if (voice->id() == std::stoi(number)) {
-                    for (auto *param: voice->parameters()) {
+                    for (auto *param: voice->parameterFields()) {
                         if (ParameterServer::setParameterValueFromMessage(param, subAddr, m)) {
                             // We assume no two parameters have the same address, so we can break the
                             // loop. Perhaps this should be checked by ParameterServer on registration?

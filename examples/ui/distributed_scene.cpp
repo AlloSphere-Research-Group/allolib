@@ -35,57 +35,58 @@ using namespace al;
 // The Scene will contain "SimpleVoice" agents
 class SimpleVoice : public PositionedVoice {
 public:
-    SimpleVoice()
-    {
-        mAmpEnv.levels(0,1,1,0);
-        mAmpEnv.lengths(2, 0.5, 2);
-        addTorus(mMesh);
-        mMesh.primitive(Mesh::LINE_STRIP);
+  SimpleVoice()
+  {
+    mAmpEnv.levels(0,1,1,0);
+    mAmpEnv.lengths(2, 0.5, 2);
 
-        // Register mFreq as the only parameter of the voice
-        *this << mFreq;
+    // Register mFreq as the only parameter of the voice
+    *this << mFreq << mEnvelope;
 
-        // Change the oscillator's frequency whenever the parameter value changes
-        mFreq.registerChangeCallback([this](float value) {
-            mOsc.freq(value);
-        });
+    // Change the oscillator's frequency whenever the parameter value changes
+    mFreq.registerChangeCallback([this](float value) {
+      mOsc.freq(value);
+    });
+  }
+
+  virtual void update(double dt) override {
+    pose().vec().y = mEnvelope;
+    pose().vec().x = mFreq/440.0;
+  }
+
+  virtual void onProcess(AudioIOData& io) override {
+    while(io()){
+      io.out(0) += mOsc() * mAmpEnv() * 0.1;
     }
+    mEnvelope = mAmpEnv.value();
+    if(mAmpEnv.done()) free();
+  }
 
-    virtual void update(double dt) override {
-        pose().vec().y = mAmpEnv.value();
-        pose().vec().x = mFreq/440.0;
-    }
+  virtual void onProcess(Graphics &g) override {
+    g.color(mEnvelope);
+    auto *mesh = (Mesh *) userData();
+    g.draw(*mesh);
+  }
 
-    virtual void onProcess(AudioIOData& io) override {
-        while(io()){
-            io.out(0) += mOsc() * mAmpEnv() * 0.1;
-        }
-        if(mAmpEnv.done()) free();
-    }
+  virtual void onTriggerOn() override {
+    mAmpEnv.reset();
+    mEnvelope = 0.0;
+  }
 
-    virtual void onProcess(Graphics &g) override {
-        g.color(mAmpEnv.value());
-        g.draw(mMesh);
-    }
-
-    virtual void onTriggerOn() override {
-        mAmpEnv.reset();
-    }
-
-    void updateFreq() {
-        mFreq = mFreq * 0.992;
-    }
+  void updateFreq() {
+    mFreq = mFreq * 0.992;
+  }
 
 protected:
 
-    Parameter mAmp {"Amp"};
-    Parameter mFreq {"Freq"};
-    Parameter mDur {"Dur"};
+  Parameter mAmp {"Amp"};
+  Parameter mFreq {"Freq"};
+  Parameter mDur {"Dur"};
+  Parameter mEnvelope {"Dur"};
 
-    Sine<> mOsc;
-    Env<3> mAmpEnv;
+  Sine<> mOsc;
+  Env<3> mAmpEnv;
 
-    Mesh mMesh;
 };
 
 
@@ -96,73 +97,77 @@ class MyApp : public DistributedApp<>
 {
 public:
 
-    virtual void onCreate() override {
+  virtual void onCreate() override {
 
-        if (isPrimary()) {
-            title("Primary");
+    scene.showWorldMarker(false);
+    scene.registerSynthClass<SimpleVoice>();
+    registerDynamicScene(scene);
 
-            // Trigger one voice manually
-            auto *freeVoice = scene.getVoice<SimpleVoice>();
-            std::vector<float> params{440.0f}; 
-            freeVoice->setParamFields(params);
-            freeVoice->pose().vec().z = -10.0;
-            scene.triggerOn(freeVoice);
-        } else {
-            title("Replica");
-        }
+    addTorus(mMesh);
+    mMesh.primitive(Mesh::LINE_STRIP);
+    mMesh.update();
+    scene.setDefaultUserData((void *) &mMesh);
 
-        parameterServer().print();
-        scene.showWorldMarker(false);
-        scene.registerSynthClass<SimpleVoice>();
+    if (isPrimary()) {
+      title("Primary");
 
-        registerDynamicScene(scene);
+      // Trigger one voice manually
+      auto *freeVoice = scene.getVoice<SimpleVoice>();
+      std::vector<float> params{440.0f, 0.0f};
+      freeVoice->setParamFields(params);
+      freeVoice->pose().vec().z = -10.0;
+      scene.triggerOn(freeVoice);
+    } else {
+      title("Replica");
     }
+    parameterServer().print();
+  }
 
-    virtual void onAnimate(double dt) override {
-        if (isPrimary()) {
-            // Only primary node updates frequency. The replicas get notified
-            auto *voice = scene.getActiveVoices();
-            while (voice) {
-                static_cast<SimpleVoice *>(voice)->updateFreq();
-                voice = voice->next;
-            }
-        }
-        scene.update(dt);
+  virtual void onAnimate(double dt) override {
+    if (isPrimary()) {
+      // Only primary node updates frequency. The replicas get notified
+      auto *voice = scene.getActiveVoices();
+      while (voice) {
+        static_cast<SimpleVoice *>(voice)->updateFreq();
+        voice = voice->next;
+      }
     }
+    scene.update(dt);
+  }
 
-    virtual void onSound(AudioIOData &io) override {
-        scene.render(io); // Render audio
+  virtual void onSound(AudioIOData &io) override {
+    scene.render(io); // Render audio
+  }
+
+  virtual void onDraw(Graphics &g) override {
+    g.clear();
+    scene.render(g); // Render graphics
+  }
+
+  //    virtual void onMessage(osc::Message &m) override {
+  //        scene.consumeMessage(m);
+  //    }
+
+  virtual void onKeyDown(Keyboard const &k) override {
+    if (k.key() == ' ') {
+      auto *freeVoice = scene.getVoice<SimpleVoice>();
+      std::vector<float> params{440.0f, 0.0f};
+      freeVoice->setParamFields(params);
+      freeVoice->pose().vec().z = -10.0;
+      scene.triggerOn(freeVoice);
     }
+  }
 
-    virtual void onDraw(Graphics &g) override {
-        g.clear();
-        scene.render(g); // Render graphics
-    }
+  DistributedScene scene{PolySynth::TIME_MASTER_CPU};
+  float size {0.5f};
 
-//    virtual void onMessage(osc::Message &m) override {
-//        scene.consumeMessage(m);
-//    }
-
-    virtual void onKeyDown(Keyboard const &k) override {
-        if (k.key() == ' ') {
-            auto *freeVoice = scene.getVoice<SimpleVoice>();
-            std::vector<float> params{440.0f}; 
-            freeVoice->setParamFields(params);
-            freeVoice->pose().vec().z = -10.0;
-            scene.triggerOn(freeVoice);
-        }
-    }
-
-    DistributedScene scene{PolySynth::TIME_MASTER_CPU};
+  VAOMesh mMesh; // This will be shared user data for all voices
 };
 
 int main(){
-    // Create app instance
-
-    MyApp app;
-
-    // Start everything
-    app.initAudio(48000., 1024, 2,0);
-    Domain::master().spu(app.audioIO().framesPerSecond());
-    app.start();
+  // Create app instance
+  MyApp app;
+  app.initAudio(48000., 1024, 2,0);
+  Domain::master().spu(app.audioIO().framesPerSecond());
+  app.start();
 }
