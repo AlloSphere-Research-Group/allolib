@@ -15,6 +15,11 @@
 #include "al/core/graphics/al_Shapes.hpp"
 
 
+#ifdef AL_WINDOWS
+#undef near
+#undef far
+#endif
+
 namespace al {
 
 Mat4f get_cube_mat(int face) {
