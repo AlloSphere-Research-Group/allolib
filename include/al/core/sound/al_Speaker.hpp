@@ -67,7 +67,7 @@ public:
 	/// @param[in] el				elevation of speaker
 	/// @param[in] radius			radius of speaker
 	/// @param[in] gain				gain of speaker
-	Speaker(int deviceChan=0, float az=0.f, float el=0.f, int group = 0, float radius=1.f, float gain=1.f)
+    Speaker(unsigned int deviceChan=0, float az=0.f, float el=0.f, int group = 0, float radius=1.f, float gain=1.f)
 	:	deviceChannel(deviceChan), gain(gain), azimuth(az), elevation(el), group(group), radius(radius)
 	{}
 
@@ -88,20 +88,20 @@ public:
 	void posCart2(Vec3d xyz){
 		using namespace std;
 
-		radius =  sqrt((xyz[0]*xyz[0])+(xyz[1]*xyz[1])+(xyz[2]*xyz[2]));
-		float gd = sqrt((xyz[0]*xyz[0])+(xyz[1]*xyz[1]));
-		elevation = atan2(xyz[2],gd)*180.f/M_PI;
-		azimuth = atan2(xyz[0],xyz[1])*180.f/M_PI;
+        radius =  sqrt(float((xyz[0]*xyz[0])+(xyz[1]*xyz[1])+(xyz[2]*xyz[2])));
+        float gd = sqrt(float((xyz[0]*xyz[0])+(xyz[1]*xyz[1])));
+        elevation = atan2f(float(xyz[2]),gd)*180.f/float(M_PI);
+        azimuth = atan2f(float(xyz[0]),float(xyz[1]))*180.f/float(M_PI);
 
 	}
 
 	/// Get position as Cartesian coordinate (in audio space)
 	Vec3d vec() const {
 		//TODO doxygen style commenting on coordinates like ambisonics
-		double cosel = cos(toRad(elevation));
-		double x = cos(toRad(azimuth)) * cosel * radius;
-		double y = sin(toRad(azimuth)) * cosel * radius;
-		double z = sin(toRad(elevation)) * radius;
+        double cosel = cos(toRad(double(elevation)));
+        double x = cos(toRad(double(azimuth))) * cosel * double(radius);
+        double y = sin(toRad(double(azimuth))) * cosel * double(radius);
+        double z = sin(toRad(double(elevation))) * double(radius);
 		//Ryan: the standard conversions assume +z is up, these are correct for allocore
 
 		//        double x = sin(toRad(azimuth)) * cosel * radius;
@@ -113,10 +113,10 @@ public:
     /// Get position as Cartesian coordinate (in graphics space)
 	Vec3d vecGraphics() const {
 		//TODO doxygen style commenting on coordinates like ambisonics
-		double cosel = cos(toRad(elevation));
-		double x = cos(toRad(azimuth)) * cosel * radius;
-		double y = sin(toRad(azimuth)) * cosel * radius;
-		double z = sin(toRad(elevation)) * radius;
+        double cosel = cos(toRad(double(elevation)));
+        double x = cos(toRad(double(azimuth))) * cosel * double(radius);
+        double y = sin(toRad(double(azimuth))) * cosel * double(radius);
+        double z = sin(toRad(double(elevation))) * double(radius);
 		//Ryan: the standard conversions assume +z is up, these are correct for allocore
 
 		//        double x = sin(toRad(azimuth)) * cosel * radius;
@@ -126,6 +126,7 @@ public:
 	}
 
 	static double toRad(double d){ return d*M_PI/180.; }
+    static float toRad(float d){ return d*float(M_PI)/180.f; }
 };
 
 
@@ -142,7 +143,7 @@ class SpeakerLayout{
 public:
 
 	/// Get number of speakers
-	int numSpeakers() const { return speakers().size(); }
+    size_t numSpeakers() const { return speakers().size(); }
 
 	/// Get speaker array
 	Speakers& speakers(){ return mSpeakers; }
@@ -170,11 +171,11 @@ public:
 	/// @param[in] phase				starting phase of first speaker, in degrees
 	/// @param[in] radius				radius of all speakers
 	/// @param[in] gain					gain of all speakers
-	SpeakerRingLayout(int deviceChannelStart=0, float phase=0.f, float radius=1.f, float gain=1.f)
+    SpeakerRingLayout(unsigned int deviceChannelStart=0, float phase=0.f, float radius=1.f, float gain=1.f)
 	{
 		mSpeakers.reserve(N);
-		for(int i=0; i<N; ++i)
-            addSpeaker(Speaker(i+deviceChannelStart, 360./N*i + phase, 0, radius, gain));
+        for(unsigned int i=0; i<N; ++i)
+            addSpeaker(Speaker(i+deviceChannelStart, 360.f/N*i + phase, 0.f, 0, radius, gain));
 	}
 };
 
@@ -183,7 +184,7 @@ public:
 /// @ingroup allocore
 class HeadsetSpeakerLayout : public SpeakerRingLayout<2>{
 public:
-	HeadsetSpeakerLayout(int deviceChannelStart=0, float radius=1.f, float gain=1.f)
+    HeadsetSpeakerLayout(unsigned int deviceChannelStart=0, float radius=1.f, float gain=1.f)
 	:	SpeakerRingLayout<2>(deviceChannelStart, 90, radius, gain)
 	{}
 };
@@ -193,9 +194,9 @@ public:
 /// @ingroup allocore
 class StereoSpeakerLayout : public SpeakerLayout{
 public:
-	StereoSpeakerLayout(int deviceChannelStart=0, float angle=30.f, float distance=1.f, float gain=1.f):
-		mLeft(deviceChannelStart, angle, 0, distance, gain),
-		mRight(deviceChannelStart + 1, -angle, 0, distance, gain)
+    StereoSpeakerLayout(unsigned int deviceChannelStart=0, float angle=30.f, float distance=1.f, float gain=1.f):
+        mLeft(deviceChannelStart, angle, 0, 0, distance, gain),
+        mRight(deviceChannelStart + 1, -angle, 0, 0, distance, gain)
 	{
 		addSpeaker(mLeft);
 		addSpeaker(mRight);
@@ -218,12 +219,12 @@ typedef SpeakerRingLayout<8> OctalSpeakerLayout;
 class CubeLayout : public SpeakerLayout {
 public:
 
-	CubeLayout(int deviceChannelStart=0)
+    CubeLayout(unsigned int deviceChannelStart=0)
 	{
 		mSpeakers.reserve(8);
-		for(int i=0; i<4; ++i) {
-			addSpeaker(Speaker(i+deviceChannelStart, 45 + (i * 90), 0));
-			addSpeaker(Speaker(4 + i+deviceChannelStart, 45 + (i * 90), 60, sqrt(5)));
+        for(unsigned int i=0; i<4; ++i) {
+            addSpeaker(Speaker(i+deviceChannelStart, 45.f + (i * 90), 0));
+            addSpeaker(Speaker(4 + i+deviceChannelStart, 45.f + (i * 90), 60, 0, sqrt(5.f)));
 		}
 	}
 };

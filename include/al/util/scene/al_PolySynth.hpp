@@ -218,7 +218,8 @@ public:
   int getParamFields(float *pFields, int maxParams = -1) {
     std::vector<ParameterField> pFieldsVector = getParamFields();
     if (maxParams == -1) {
-      maxParams = pFieldsVector.size();
+      assert(pFieldsVector.size() < INT_MAX);
+      maxParams = int(pFieldsVector.size());
     }
     int count = 0;
     for (auto param: pFieldsVector) {
@@ -335,14 +336,14 @@ public:
   int getStartOffsetFrames(int framesPerBuffer) {
     int frames = mOnOffsetFrames;
     mOnOffsetFrames -= framesPerBuffer;
-    if (mOnOffsetFrames < 0) {mOnOffsetFrames = 0.0;}
+    if (mOnOffsetFrames < 0) {mOnOffsetFrames = 0;}
     return frames;
   }
 
   int getEndOffsetFrames(int framesPerBuffer) {
     int frames = mOffOffsetFrames;
     mOffOffsetFrames -= framesPerBuffer;
-    if (mOffOffsetFrames < 0) {mOffOffsetFrames = 0.0;}
+    if (mOffOffsetFrames < 0) {mOffOffsetFrames = 0;}
     return frames;
   }
 
@@ -762,9 +763,9 @@ protected:
 
   inline void processVoiceTurnOff() {
     int voicesToTurnOff[16];
-    int numVoicesToTurnOff;
+    size_t numVoicesToTurnOff;
     while ( (numVoicesToTurnOff = mVoiceIdsToTurnOff.read((char *) voicesToTurnOff, 16 * sizeof (int))) ) {
-      for (int i = 0; i < numVoicesToTurnOff/int(sizeof (int)); i++) {
+      for (size_t i = 0; i < numVoicesToTurnOff/int(sizeof (int)); i++) {
         auto voice = mActiveVoices;
         while (voice) {
           if (voice->id() == voicesToTurnOff[i]) {
@@ -808,7 +809,7 @@ protected:
 
   inline void processGain(AudioIOData &io) {
     io.frame(0);
-    if (mAudioGain != 1.0) {
+    if (mAudioGain != 1.0f) {
       for (unsigned int i = 0; i < io.channelsOut(); i++) {
         float *buffer = io.outBuffer(i);
         unsigned int samps = io.framesPerBuffer();
@@ -843,7 +844,7 @@ protected:
 
   std::vector<AllocationCallback> mAllocationCallbacks;
 
-  float mAudioGain {1.0};
+  float mAudioGain {1.0f};
 
   int mIdCounter {0};
 
@@ -867,17 +868,21 @@ TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
     std::unique_lock<std::mutex> lk(mFreeVoiceLock); // Only one getVoice() call at a time
     SynthVoice *freeVoice = mFreeVoices;
     SynthVoice *previousVoice = nullptr;
-    while (freeVoice) {
-        if (std::type_index(typeid(*freeVoice)) == std::type_index(typeid(TSynthVoice))) {
-            if (previousVoice) {
-                previousVoice->next = freeVoice->next;
-            } else {
-                mFreeVoices = freeVoice->next;
-            }
-            break;
-        }
-        previousVoice = freeVoice;
-        freeVoice = freeVoice->next;
+    if (forceAlloc) {
+      freeVoice = nullptr;
+    } else {
+      while (freeVoice) {
+          if (std::type_index(typeid(*freeVoice)) == std::type_index(typeid(TSynthVoice))) {
+              if (previousVoice) {
+                  previousVoice->next = freeVoice->next;
+              } else {
+                  mFreeVoices = freeVoice->next;
+              }
+              break;
+          }
+          previousVoice = freeVoice;
+          freeVoice = freeVoice->next;
+      }
     }
     if (!freeVoice) { // No free voice in list, so we need to allocate it
         // TODO report current polyphony for more informed allocation of polyphony
