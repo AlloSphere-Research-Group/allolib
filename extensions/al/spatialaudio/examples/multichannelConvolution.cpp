@@ -22,23 +22,19 @@ public:
   Convolver conv;
   vector<float *> IRchannels;
 
-  MyApp()
-  { }
-
-  ~MyApp() {
-  }
-
   void onInit() {
     // Make IR
     int irdur = 1.0; // duration of the IR in seconds
     int numFrames = audioIO().framesPerSecond() * irdur;
-    int numIRChannels = 2; //Number of channels in the IR
+
+    // Gamma generators for decaying noise
+    gam::sampleRate(audioIO().framesPerSecond());
     gam::NoisePink<> noise;
     gam::Decay<> env(numFrames);
 
     // Make two IRs from pink noise and a exponential decay.
     // You could also load the data from a soundfile
-    for (int chan = 0; chan < numIRChannels; chan++) {
+    for (int chan = 0; chan < 2; chan++) {
       float *ir = new  float[numFrames];
       for (int frame = 0; frame < numFrames; frame++) {
         ir[frame] = noise() * env() * 0.1;
@@ -46,38 +42,18 @@ public:
       env.reset();
       IRchannels.push_back(ir);
     }
-    int numActiveChannels;
-    vector<unsigned int> disabledChannels;
-    numActiveChannels = numIRChannels;
-    if(numActiveChannels != audioIO().channelsOutDevice()){//more outputs than IR channels
-      for(unsigned int i = numActiveChannels; i < audioIO().channelsOutDevice(); ++i){
-        disabledChannels.push_back(i);
-        cout << "Audio channel " << i << " disabled." << endl;
-      }
-    }
 
-    // Setup convolver
-//    unsigned int ioBufferSize,
-//                              vector<float *> IRs, uint32_t IRlength,
-//                              map<uint32_t, vector<uint32_t>> channelRoutingMap,
-//                              uint32_t basePartitionSize, float density,
-//                              uint32_t options
-    conv.configure(audioIO().framesPerBuffer(), IRchannels, numFrames, {0, {0},  });
-    audioIO().append(conv); // By appending, the convolution will be perfomed after any other processes
+    // Setup convolver. Map input 0 to 0, 1
+    conv.configure(audioIO().framesPerBuffer(), IRchannels, numFrames, {{0, {0, 1}}});
   }
 
   //	// Audio callback
   void onSound(AudioIOData& io) override {
-    // Nothing needed here as convolution is performed as the last process since it has been
-    // "appended" to AudioIO
-  }
-
-  void onAnimate(double dt) override {
-
-  }
-
-  void onDraw(Graphics& g) override {
-
+      // Copy input from sound card to convolution input
+      memcpy(conv.getInputBuffer(0), io.inBuffer(0), io.framesPerBuffer() * sizeof (float));
+      conv.processBuffer();
+      memcpy(io.outBuffer(0), io.inBuffer(0), io.framesPerBuffer() * sizeof (float));
+//      memcpy(io.outBuffer(1), conv.getOutputBuffer(1), io.framesPerBuffer() * sizeof (float));
   }
 
   void onExit() override {
@@ -92,10 +68,12 @@ public:
 
 
 int main(){
-  int num_chnls = 2;
   double sampleRate = 44100;
 
   MyApp app;
-  app.initAudio(sampleRate, 512, num_chnls, num_chnls);
+  // Use this line to check devices on your system:
+//  AudioDevice::printAll();
+  app.initAudio(sampleRate, 1024, 2, 2);
+  app.audioIO().print();
   app.start();
 }

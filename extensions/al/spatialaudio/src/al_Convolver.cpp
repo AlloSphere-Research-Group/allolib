@@ -44,6 +44,10 @@ bool Convolver::configure(unsigned int ioBufferSize,
       }
     }
   }
+  if (basePartitionSize < ioBufferSize) {
+    basePartitionSize = ioBufferSize;
+    std::cout << "setting base partition size to ioBufferSize" <<std::endl;
+  }
 
   if(m_Convproc != nullptr) {
     delete m_Convproc;
@@ -89,7 +93,8 @@ float *Convolver::getOutputBuffer(unsigned int index)
 bool Convolver::processBuffer()
 {
   //process
-  return m_Convproc->process(false) == 0;
+  // TODO to sync or not to sync...
+  return m_Convproc->process(true) == 0;
 }
 
 bool Convolver::shutdown(void){
