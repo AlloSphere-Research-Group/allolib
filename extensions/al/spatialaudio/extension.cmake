@@ -41,6 +41,11 @@ else()
 
   add_library(al_spatialaudio ${SPATIALAUDIO_SRC} ${SPATIALAUDIO_HEADERS})
 
+  # c++14 It's very important to set this for the extension as not
+  # setting it will cause targets upstream to not use c++14
+  set_target_properties(al_spatialaudio PROPERTIES CXX_STANDARD 14)
+  set_target_properties(al_spatialaudio PROPERTIES CXX_STANDARD_REQUIRED ON)
+
   set(SPATIALAUDIO_LINK_LIBRARIES ${FFTW_LIBRARY} ${GAMMA_LIBRARY})
 
   target_link_libraries(al_spatialaudio al ${FFTW_LIBRARY} ${GAMMA_LIBRARY})
@@ -49,9 +54,7 @@ else()
   set(CURRENT_EXTENSION_LIBRARIES al_spatialaudio ${SPATIALAUDIO_LINK_LIBRARIES})
   set(CURRENT_EXTENSION_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR})
 
-
   # unit tests
-  message("********************* ${CMAKE_CURRENT_SOURCE_DIR}/external/catch")
   add_executable(convolverTests ${CMAKE_CURRENT_LIST_DIR}/unitTests/utConvolver.cpp)
   target_link_libraries(convolverTests al ${SPATIALAUDIO_LINK_LIBRARIES} )
   target_include_directories(convolverTests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/external/catch")
