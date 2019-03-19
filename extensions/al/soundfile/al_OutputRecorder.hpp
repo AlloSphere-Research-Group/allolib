@@ -4,6 +4,9 @@
 #include "al/core/io/al_AudioIOData.hpp"
 #include "al/soundfile/al_SoundfileBufferedRecord.hpp"
 
+#undef min
+#undef max
+
 namespace al {
 
 class OutputRecorder : public AudioCallback, public SoundFileBufferedRecord {
