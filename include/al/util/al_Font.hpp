@@ -56,8 +56,9 @@ namespace al{
 
 /// Interface for loading fonts and rendering text
 ///
-/// @ingroup allocore
-class Font {
+
+
+class [[deprecated("use FontModule instead")]] Font {
 public:
 
 	/// Metrics of a single font character

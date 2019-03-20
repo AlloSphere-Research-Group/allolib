@@ -98,7 +98,7 @@ class SoundSource;
 /// generate smooth, "zipper"-free trajectories at audio rate.
 ///
 /// @ingroup allocore
-class AudioSceneObject{
+class [[deprecated("use DynamicScene instead")]] AudioSceneObject{
 public:
 
 	/// Set current pose
@@ -133,7 +133,7 @@ protected:
 /// A Listener is tied to a spatialization technique when it is created.
 ///
 /// @ingroup allocore
-class Listener : public AudioSceneObject {
+class [[deprecated("use DynamicScene instead")]] Listener : public AudioSceneObject {
 
 	friend class SoundSource;
 
@@ -174,7 +174,7 @@ enum DopplerType{
 /// a different attenuation characteristic than an airplane.
 ///
 /// @ingroup allocore
-class SoundSource : public AudioSceneObject, public DistAtten<double> {
+class [[deprecated("use DynamicScene instead")]] SoundSource : public AudioSceneObject, public DistAtten<double> {
 public:
 
 	/// @param[in] nearClip		Distance below which amplitude is clamped to 1
@@ -388,6 +388,7 @@ public:
 
 protected:
 	/// Render each source per sample
+    [[deprecated("use renderSample() instead")]]
 	virtual void perform(AudioIOData& io,
 	                     SoundSource& src,
 	                     Vec3d& reldir,
@@ -397,6 +398,7 @@ protected:
 	}
 
 	/// Render each source per buffer
+    [[deprecated("use renderBuffer() instead")]]
 	virtual void perform(AudioIOData& io,
 	                     SoundSource& src,
 	                     Vec3d& reldir
@@ -424,7 +426,7 @@ protected:
 /// An audio scene consisting of Listeners and Sources.
 ///
 /// @ingroup allocore
-class AudioScene {
+class [[deprecated("use DynamicScene instead")]]  AudioScene {
 public:
 
 	/// A set of listeners
