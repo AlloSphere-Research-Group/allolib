@@ -67,24 +67,24 @@ MIDIMessage::MIDIMessage(
 	bytes[2] = b3;
 }
 
-void MIDIMessage::print() const{
-	printf("%s", MIDIByte::messageTypeString(status()));
+void MIDIMessage::print(std::ostream &stream) const{
+    stream << MIDIByte::messageTypeString(status());
 
 	if(type() == MIDIByte::CONTROL_CHANGE){
-		printf(" (%s)", MIDIByte::controlNumberString(controlNumber()));
+        stream << " (" <<  MIDIByte::controlNumberString(controlNumber()) << ")";
 	}
 
-	printf(", port %d", port());
+    stream << ", port " << port();
 
 	if(isChannelMessage()){
-		printf(", chan %u", channel() + 1);
+        stream << ", chan " << channel() + 1;
 	}
 
-	printf(", bytes ");
+    stream << ", bytes ";
 	for(unsigned i=0; i<3; ++i)
-		printf("%3u ", (int)bytes[i]);
+        stream << int(bytes[i]) << ", " ;
 
-	printf(", time %g\n", timeStamp());
+    stream << ", time " << timeStamp() << std::endl;
 }
 
 void MIDIMessageHandler::bindTo(RtMidiIn& midiIn, unsigned port){

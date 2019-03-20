@@ -533,7 +533,7 @@ public:
   Mat& translate(Vals... vals){ return translate(Vec<(sizeof...(Vals)),T>(vals...)); }
 
   /// Print to file (stream)
-  void print(FILE * file = stderr) const;
+  void print(std::ostream &stream) const;
 };
 
 
@@ -667,14 +667,13 @@ bool invert(Mat<N,T>& m){
 // Member function definitions
 
 template <int N, class T>
-void Mat<N,T>::print(FILE * file) const {
+void Mat<N,T>::print(std::ostream &stream) const {
   for(int R=0; R<N; ++R){
-    fprintf(file, "%c", " {"[R==0]);
+    stream << (R==0 ? " {" : "");
     for(int C=0; C<N; ++C){
-      fprintf(file, "% 6.3g%s",
-        double((*this)(R,C)), (R!=N-1)||(C!=N-1) ? ", " : "}");
+      stream << "% " << double((*this)(R,C)) << ((R!=N-1)||(C!=N-1) ? ", " : "}");
     }
-    fprintf(file, "\n");
+    stream << std::endl;
   }
 }
 

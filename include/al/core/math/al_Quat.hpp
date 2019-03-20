@@ -345,7 +345,7 @@ public:
   void towardPoint(const Vec<3,T>& pos, const Quat<T>& q, const Vec<3,T>& v, float amt);
 
   /// utility for debug printing:
-  void print(FILE * out = stdout) const;
+  void print(std::ostream &stream) const;
 
 
   static T accuracyMax(){ return 1.000001; }
@@ -1064,8 +1064,11 @@ Quat<T> Quat<T> :: rotor(const Vec<3,T>& v1, const Vec<3,T>& v2) {
 }
 
 template<typename T>
-void Quat<T>::print(FILE * out) const {
-  fprintf(out, "Quat(% f, % f, % f, % f)\n", w, x, y, z);
+void Quat<T>::print(std::ostream &stream) const {
+  stream << "Quat(" << w << ", "
+         << x << ", "
+         << y << ", "
+         << z << ")" << std::endl;
 }
 
 } // namespace

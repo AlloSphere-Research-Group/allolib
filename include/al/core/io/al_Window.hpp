@@ -103,7 +103,7 @@ public:
   void meta (bool state);    ///< Set meta key state
   void shift(bool state);    ///< Set shift key state
 
-  void print() const;      ///< Print keyboard state
+  void print(std::ostream &stream) const;      ///< Print keyboard state
 
 protected:
   friend class WindowImpl;

@@ -118,7 +118,7 @@ public:
 
 	MIDIMessage(double timeStamp, unsigned port,
 		unsigned char b1, unsigned char b2=0, unsigned char b3=0,
-		unsigned char * data = NULL
+        unsigned char * data = nullptr
 	);
 
 	/// Get the MIDI device port
@@ -166,7 +166,7 @@ public:
 
 
 	/// Print general information about message
-	void print() const;
+    void print(std::ostream &stream = std::cout) const;
 
 protected:
 	double mTimeStamp;
