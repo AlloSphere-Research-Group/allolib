@@ -43,8 +43,10 @@ else()
 
   # c++14 It's very important to set this for the extension as not
   # setting it will cause targets upstream to not use c++14
-  set_target_properties(al_spatialaudio PROPERTIES CXX_STANDARD 14)
-  set_target_properties(al_spatialaudio PROPERTIES CXX_STANDARD_REQUIRED ON)
+  set_target_properties(al_spatialaudio PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+    )
 
   set(SPATIALAUDIO_LINK_LIBRARIES ${FFTW_LIBRARY} ${GAMMA_LIBRARY})
 
@@ -59,14 +61,23 @@ else()
   target_link_libraries(convolverTests al ${SPATIALAUDIO_LINK_LIBRARIES} )
   target_include_directories(convolverTests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/external/catch")
   add_test(NAME convolverTests
-		  COMMAND $<TARGET_FILE:convolverTests> ${TEST_ARGS})
+    COMMAND $<TARGET_FILE:convolverTests> ${TEST_ARGS})
+  set_target_properties(convolverTests PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+    )
+
 #  add_memcheck_test(convolverTests)
 
   add_executable(decorrelationTests ${CMAKE_CURRENT_LIST_DIR}/unitTests/utDecorrelation.cpp)
   target_link_libraries(decorrelationTests al ${SPATIALAUDIO_LINK_LIBRARIES})
   target_include_directories(decorrelationTests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/external/catch")
   add_test(NAME decorrelationTests
-		  COMMAND $<TARGET_FILE:decorrelationTests> ${TEST_ARGS})
+    COMMAND $<TARGET_FILE:decorrelationTests> ${TEST_ARGS})
+  set_target_properties(decorrelationTests PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+    )
 #  add_memcheck_test(decorrelationTests)
 
 endif(NOT FFTW_LIBRARY)

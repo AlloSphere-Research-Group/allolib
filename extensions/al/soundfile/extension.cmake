@@ -25,8 +25,10 @@ else()
 
   # c++14 It's very important to set this for the extension as not
   # setting it will cause targets upstream to not use c++14
-  set_target_properties(${THIS_EXTENSION_LIBRARY_NAME} PROPERTIES CXX_STANDARD 14)
-  set_target_properties(${THIS_EXTENSION_LIBRARY_NAME} PROPERTIES CXX_STANDARD_REQUIRED ON)
+  set_target_properties(${THIS_EXTENSION_LIBRARY_NAME} PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+    )
 
   set(THIS_EXTENSION_LIBRARIES ${SNDFILE_LIBRARY} ${GAMMA_LIBRARY})
 
@@ -42,15 +44,11 @@ else()
   add_executable(soundfileBufferedRecordTests ${CMAKE_CURRENT_LIST_DIR}/unitTests/utSoundfileBufferedRecord.cpp)
   target_link_libraries(soundfileBufferedRecordTests al ${SPATIALAUDIO_LINK_LIBRARIES} )
   target_include_directories(soundfileBufferedRecordTests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/external/catch")
+  set_target_properties(soundfileBufferedRecordTests PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+    )
   add_test(NAME soundfileBufferedRecordTests
-		  COMMAND $<TARGET_FILE:soundfileBufferedRecordTests> ${TEST_ARGS})
-#  add_memcheck_test(convolverTests)
-#
-#  add_executable(decorrelationTests ${CMAKE_CURRENT_LIST_DIR}/unitTests/utDecorrelation.cpp)
-#  target_link_libraries(decorrelationTests al ${SPATIALAUDIO_LINK_LIBRARIES})
-#  target_include_directories(decorrelationTests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/external/catch")
-#  add_test(NAME decorrelationTests
-#		  COMMAND $<TARGET_FILE:decorrelationTests> ${TEST_ARGS})
-##  add_memcheck_test(decorrelationTests)
+    COMMAND $<TARGET_FILE:soundfileBufferedRecordTests> ${TEST_ARGS})
 
 endif(NOT SNDFILE_LIBRARY)
