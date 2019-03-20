@@ -87,13 +87,13 @@ bhlw viewport_for_cubemap_face(int idx) {
     '''''''''
   */
   bhlw v;
-  v.h = 0.33; v.w = 0.25;
-  if      (idx == 0) { v.b = 0.33; v.l = 0.5;  }
-  else if (idx == 1) { v.b = 0.33; v.l = 0.0;  }
-  else if (idx == 2) { v.b = 0.66; v.l = 0.25; }
-  else if (idx == 3) { v.b = 0.0;  v.l = 0.25; }
-  else if (idx == 4) { v.b = 0.33; v.l = 0.75; }
-  else if (idx == 5) { v.b = 0.33; v.l = 0.25; }
+  v.h = 0.33f; v.w = 0.25f;
+  if      (idx == 0) { v.b = 0.33f; v.l = 0.5f;  }
+  else if (idx == 1) { v.b = 0.33f; v.l = 0.0f;  }
+  else if (idx == 2) { v.b = 0.66f; v.l = 0.25f; }
+  else if (idx == 3) { v.b = 0.0f;  v.l = 0.25f; }
+  else if (idx == 4) { v.b = 0.33f; v.l = 0.75f; }
+  else if (idx == 5) { v.b = 0.33f; v.l = 0.25f; }
   return v;
 }
 
@@ -314,8 +314,8 @@ public:
   void init(const al::Lens& lens)
   {
     lens_ = lens;
-    float near = lens_.near();
-    float far = lens_.far();
+    float near = float(lens_.near());
+    float far = float(lens_.far());
     //lens_.focalLength(radius);
     viewport_.set(0, 0, res_, res_);
 
@@ -362,7 +362,7 @@ public:
       // setting same sampling fov for all projectors has advantage that
       // pixels density in terms of OpenGL space dimension remains constant
       // throughout projectors
-      float fov = 2.0f / 3 * M_PI;
+      float fov = float(2.0 / 3.0 * M_PI);
       Vec3f rotation_axis = Vec3f(0, 0, -1).cross(direction);
       rotation_axis = rotation_axis.normalize();
       // (0, 0, -1) because that is the direction camera is looking at
@@ -379,10 +379,10 @@ public:
       Mat4f::multiply(info.pc_matrix, proj, rmat);
       info.r_matrix = rmat;
       info.p_matrix = proj;
-      info.tanFovDiv2 = tan(fov / 2.0);
+      info.tanFovDiv2 = tan(fov / 2.0f);
 
       info.warp_texture.reset(new Texture());
-      info.warp_texture->create2D(vp.width, vp.height, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+      info.warp_texture->create2D((unsigned int)vp.width, (unsigned int)vp.height, GL_RGBA32F, GL_RGBA, GL_FLOAT);
       info.warp_texture->submit(vp.warp_and_blend_data.data());
     }
 
@@ -428,8 +428,8 @@ public:
     calibration_loaded = true;
     
     lens_ = lens;
-    float near = lens_.near();
-    float far = lens_.far();
+    float near = float(lens_.near());
+    float far = float(lens_.far());
     //lens_.focalLength(radius);
     res_ = 256;
     viewport_.set(0, 0, res_, res_);

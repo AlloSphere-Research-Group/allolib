@@ -117,10 +117,10 @@ std::vector<float> generate_equirect_sampletex(int width, int height)
     std::vector<float> arr;
     arr.resize(width * height * 4);
     for (int i = 0; i < width; i++) {
-        float longi = i / float(width) * M_2PI;
+        float longi = float(i / width * M_2PI);
         for (int j = 0; j < height; j++) {
             int idx = i + width * j;
-            float latti = (j / float(height) - 0.5) * M_PI;
+            float latti = float((j /height - 0.5) * M_PI);
             arr[4 * idx + 0] = std::cos(longi) * std::cos(latti);
             arr[4 * idx + 1] = std::sin(latti);
             arr[4 * idx + 2] = std::sin(longi) * std::cos(latti);

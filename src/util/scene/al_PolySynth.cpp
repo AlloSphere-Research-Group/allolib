@@ -392,3 +392,17 @@ void PolySynth::print(std::ostream &stream) {
     }
 }
 
+
+int SynthVoice::getStartOffsetFrames(unsigned int framesPerBuffer) {
+  int frames = mOnOffsetFrames;
+  mOnOffsetFrames -= framesPerBuffer;
+  if (mOnOffsetFrames < 0) {mOnOffsetFrames = 0;}
+  return frames;
+}
+
+int SynthVoice::getEndOffsetFrames(unsigned int framesPerBuffer) {
+  int frames = mOffOffsetFrames;
+  mOffOffsetFrames -= framesPerBuffer;
+  if (mOffOffsetFrames < 0) {mOffOffsetFrames = 0;}
+  return frames;
+}

@@ -333,19 +333,9 @@ public:
      * Get the number of frames by which the start of this voice should be offset within a
      * processing block. This value is decremented by framesPerBuffer once read.
      */
-  int getStartOffsetFrames(int framesPerBuffer) {
-    int frames = mOnOffsetFrames;
-    mOnOffsetFrames -= framesPerBuffer;
-    if (mOnOffsetFrames < 0) {mOnOffsetFrames = 0;}
-    return frames;
-  }
+  int getStartOffsetFrames(unsigned int framesPerBuffer);
 
-  int getEndOffsetFrames(int framesPerBuffer) {
-    int frames = mOffOffsetFrames;
-    mOffOffsetFrames -= framesPerBuffer;
-    if (mOffOffsetFrames < 0) {mOffOffsetFrames = 0;}
-    return frames;
-  }
+  int getEndOffsetFrames(unsigned int framesPerBuffer);
 
   void userData(void *ud) {mUserData = ud;}
 
@@ -430,7 +420,10 @@ public:
     : mMasterMode(masterMode)
   {
     if (mMasterMode == TIME_MASTER_CPU) {
-      std::cout << "Starting CPU clock thread" << std::endl;
+
+      if (mVerbose) {
+        std::cout << "Starting CPU clock thread" << std::endl;
+      }
       mCpuClockThread = std::make_unique<std::thread>([this]() {
         using namespace std::chrono;
         while(mRunCPUClock) {
@@ -665,7 +658,9 @@ public:
       name = demangle(typeid(TSynthVoice).name());
     }
     if (mCreators.find(name) != mCreators.end()) {
-      std::cout << "Warning: Overriding registration of SynthVoice: " << name << std::endl;
+      if (mVerbose) {
+        std::cout << "Warning: Overriding registration of SynthVoice: " << name << std::endl;
+      }
     }
     if (!allowAutoAllocation) {
       if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
@@ -680,7 +675,10 @@ public:
 
   SynthVoice *allocateVoice(std::string name) {
     if (mCreators.find(name) != mCreators.end()) {
-      std::cout << "Allocating (from name) voice of type " << name << "." << std::endl;
+
+      if (mVerbose) {
+        std::cout << "Allocating (from name) voice of type " << name << "." << std::endl;
+      }
       SynthVoice *voice = mCreators[name]();
       for(auto allocCb: mAllocationCallbacks) {
         allocCb.first(voice, allocCb.second);
@@ -691,7 +689,10 @@ public:
       voice->init();
       return voice;
     } else {
-      std::cout << "Can't allocate voice of type " << name << ". Voice not registered and no polyphony." << std::endl;
+
+      if (mVerbose) {
+        std::cout << "Can't allocate voice of type " << name << ". Voice not registered and no polyphony." << std::endl;
+      }
     }
     return nullptr;
   }
@@ -708,6 +709,9 @@ public:
     voice->init();
     return voice;
   }
+
+  bool verbose() { return mVerbose; }
+  void verbose(bool verbose) { mVerbose = verbose; }
 
   // Testing function. Do not use...
   SynthVoice *getActiveVoices() {
@@ -734,7 +738,9 @@ protected:
         } else {
           mActiveVoices = mVoicesToInsert;
         }
-        std::cout << "Voice on "<<  mVoicesToInsert->id() << std::endl;
+        if (mVerbose) {
+          std::cout << "Voice on "<<  mVoicesToInsert->id() << std::endl;
+        }
 
         mVoicesToInsert = nullptr;
       }
@@ -769,7 +775,10 @@ protected:
         auto voice = mActiveVoices;
         while (voice) {
           if (voice->id() == voicesToTurnOff[i]) {
-            std::cout << "Voice off "<<  voice->id() << std::endl;
+
+            if (mVerbose) {
+              std::cout << "Voice off "<<  voice->id() << std::endl;
+            }
             voice->triggerOff(); // TODO use offset for turn off
           }
           voice = voice->next;
@@ -861,6 +870,8 @@ protected:
   bool mRunCPUClock {true};
   double mCpuGranularitySec = 0.001; // 1ms
   std::unique_ptr<std::thread> mCpuClockThread;
+
+  bool mVerbose {false};
 };
 
 template<class TSynthVoice>
@@ -887,8 +898,11 @@ TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
     if (!freeVoice) { // No free voice in list, so we need to allocate it
         // TODO report current polyphony for more informed allocation of polyphony
         // TODO check if allocation allowed
+
+      if (mVerbose) {
         std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
-        freeVoice = allocateVoice<TSynthVoice>();
+      }
+      freeVoice = allocateVoice<TSynthVoice>();
     }
     return static_cast<TSynthVoice *>(freeVoice);
 }

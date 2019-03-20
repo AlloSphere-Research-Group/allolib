@@ -288,7 +288,7 @@ public:
                 std::getline(ss, durationText, ' ');
                 std::getline(ss, name, ' ');
 
-                float startTime = std::stof(start) * timeScale * tempoFactor;
+                double startTime = std::stod(start) * timeScale * tempoFactor;
                 double duration = std::stod(durationText) * timeScale * tempoFactor;
 
                 // const int maxPFields = 64;
