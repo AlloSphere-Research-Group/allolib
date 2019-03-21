@@ -1,5 +1,7 @@
 #include "al/core.hpp"
 #include "module/openvr/al_OpenVRWrapper.hpp"
+#include "al/util/ui/al_Pickable.hpp"
+#include "al/util/ui/al_PickableManager.hpp"
 
 using namespace al;
 
@@ -9,10 +11,15 @@ struct MyApp : public App {
   PickableManager mPickableManager;
   VAOMesh mSphere;
   VAOMesh mBox;
+  VAOMesh mController;
+  Mesh mRay;
 
   void onCreate() override {
     // Initialize openVR in onCreate. A graphics context is needed.
     if (!mOpenVR.init()) std::cerr << "ERROR: OpenVR init returned error" << std::endl;
+
+    nav().pos(0,0,3);
+    navControl().useMouse(false);
 
     addSphere(mSphere, 0.1f, 8, 8);
     mSphere.primitive(Mesh::LINE_STRIP);
@@ -20,6 +27,11 @@ struct MyApp : public App {
     addWireBox(mBox, 0.1f);
     mBox.scale(1, 0.1, 1);
     mBox.update();
+    addWireBox(mController, 0.1f);
+    mController.scale(0.1, 0.1, 1);
+    mController.update();
+
+    mRay.primitive(Mesh::LINES);
 
     // create some pickables
     for (int i = 0; i < 9; i++){
@@ -37,6 +49,28 @@ struct MyApp : public App {
   void onAnimate(double dt) override {
     // Update traking and controller data;
     mOpenVR.update();
+
+    // OpenVR Pickable events
+    auto l = mOpenVR.LeftController;
+    auto r = mOpenVR.RightController;
+
+    static bool wasPressed = false;
+    static Vec3f prevPos = Vec3f();
+    auto ray = r.ray();
+
+    if(r.triggerPressed && !wasPressed){
+      mPickableManager.pick(ray);
+      prevPos.set(r.pos);
+      wasPressed = true;             
+    } else if(r.triggerPressed){
+      Vec3f v = r.pos - prevPos;
+      mPickableManager.drag(ray, v);
+    } else if(wasPressed && !r.triggerPressed){
+      mPickableManager.unpick(ray);
+      wasPressed = false;
+    } else {
+      mPickableManager.point(ray);
+    }
 
     //openVR draw.
     // Draw in onAnimate, to make sure drawing happens only once per frame
@@ -59,10 +93,8 @@ struct MyApp : public App {
     g.pushMatrix();
     g.translate(mOpenVR.LeftController.pos);
     g.rotate(mOpenVR.LeftController.quat);
-    g.scale(0.1);
-    g.color(1);
-    g.polygonMode(Graphics::LINE);
-    g.draw(mCube);
+    g.color(0,1,1);
+    g.draw(mController);
     g.popMatrix();
 
     //right hand
@@ -70,11 +102,19 @@ struct MyApp : public App {
     g.translate(mOpenVR.RightController.pos);
     // std::cout << openVR->RightController.pos.x << openVR->RightController.pos.y << openVR->RightController.pos.z << std::endl;
     g.rotate(mOpenVR.RightController.quat);
-    g.scale(0.1);
-    g.color(1);
-    g.polygonMode(Graphics::LINE);
-    g.draw(mCube);
+    g.color(1,0,1);
+    g.draw(mController);
     g.popMatrix();
+
+    //draw controller rays
+    auto r1 = mOpenVR.RightController.ray();
+    auto r2 = mOpenVR.LeftController.ray();
+    mRay.reset();
+    mRay.vertices().push_back(r1.o);
+    mRay.vertices().push_back(r1.o + r1.d*5);
+    mRay.vertices().push_back(r2.o);
+    mRay.vertices().push_back(r2.o + r2.d*5);
+    g.draw(mRay);
   }
 
   void onDraw(Graphics &g) override {

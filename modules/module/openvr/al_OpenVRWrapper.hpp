@@ -9,6 +9,8 @@
 
 #include "al/core/graphics/al_VAOMesh.hpp"
 #include "al/core/graphics/al_EasyFBO.hpp"
+#include "al/util/al_Ray.hpp"
+
 #include <openvr.h>
 
 namespace al {
@@ -16,42 +18,46 @@ namespace al {
 // TO DO: buttonPress event may sometimes crash the program for unknown reason.
 
 struct Controller{
-    public:
-        int deviceID;
-        al::Mat4f pose;
-        al::Vec3f pos;
-        al::Quatf quat;
-        bool buttonsPressed; //buttons mean any button
-        bool buttonsTouched;
-        bool touchpadPressed;
-        bool touchpadTouched;
-        bool triggerPressed;
-        bool triggerTouched;
-        bool systemPressed;
-        al::Vec2f touchPos;
-        bool triggered; // triggered has a customizable threshold
-        float triggerThreshold;
-        float triggerPressure;
-        bool gripped;
-        
-        Controller(){
-            deviceID = -1;
-            buttonsPressed = false;
-            buttonsTouched = false;
-            touchpadTouched = false;
-            touchpadPressed = false;
-            triggerPressed = false;
-            triggerTouched = false;
-            triggerThreshold = 0.9f; // 0.0 - 1.0f
-            systemPressed= false;
-            triggered = false;
-            gripped = false;
-        }
-        bool Triggered(float threshold = 0.9f){
-            triggerThreshold = threshold;
-            return triggered;
-        }
+public:
+    int deviceID;
+    al::Mat4f pose;
+    al::Vec3f pos;
+    al::Quatf quat;
+    uint64_t buttons;
+    // bool buttonsPressed; //buttons mean any button
+    // bool buttonsTouched;
+    bool touchpadPressed;
+    bool touchpadTouched;
+    bool triggerPressed;
+    bool triggerTouched;
+    bool systemPressed;
+    al::Vec2f touchPos;
+    bool triggered; // triggered has a customizable threshold
+    float triggerThreshold;
+    float triggerPressure;
+    bool gripped;
+    
+    Controller(){
+        deviceID = -1;
+        // buttonsPressed = false;
+        // buttonsTouched = false;
+        touchpadTouched = false;
+        touchpadPressed = false;
+        triggerPressed = false;
+        triggerTouched = false;
+        triggerThreshold = 0.9f; // 0.0 - 1.0f
+        systemPressed= false;
+        triggered = false;
+        gripped = false;
+    }
 
+    bool Triggered(float threshold = 0.9f){
+        triggerThreshold = threshold;
+        return triggered;
+    }
+
+    Rayd ray(){ return Rayd(pos, -quat.toVectorZ()); }
+    
 };
 
 
@@ -216,7 +222,7 @@ public:
                     HMDPos = v;
                 }
 
-                // Check whether the tracked device is a controller. If so, set text color based on the trigger button state
+                // Check whether the tracked device is a controller
                 if (nDevice == LeftController.deviceID || nDevice == RightController.deviceID){
 
                     vr::VRControllerState_t controller_state;
@@ -246,7 +252,7 @@ public:
                             controllers[nDevice]->triggerPressure = 0.0f;
                             // std::cout << nDevice << " ndevice " <<  controllers[nDevice]->triggerPressure << std::endl;
                         }
-
+                        controllers[nDevice]->buttons = controller_state.ulButtonPressed;
                         // ((vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_Axis1) & controller_state.ulButtonPressed) == 0) ? color = green : color = blue;
                     }
                 }
@@ -579,7 +585,7 @@ protected:
             } break;
             case vr::VREvent_ButtonTouch: {
                 vr::VREvent_Controller_t controller_data = event.data.controller;
-                controllers[event.trackedDeviceIndex]->buttonsTouched = true;
+                // controllers[event.trackedDeviceIndex]->buttonsTouched = true;
                 // std::cout << controller_data.button <<  " button touched " << std::endl;
                 switch (controller_data.button) {
                         case 32:       
@@ -595,7 +601,7 @@ protected:
             } break;
             case vr::VREvent_ButtonUntouch: {
                 vr::VREvent_Controller_t controller_data = event.data.controller;
-                controllers[event.trackedDeviceIndex]->buttonsTouched = false;
+                // controllers[event.trackedDeviceIndex]->buttonsTouched = false;
                 switch (controller_data.button) {
                         case 32:       
                             controllers[event.trackedDeviceIndex]->touchpadTouched = false;  
