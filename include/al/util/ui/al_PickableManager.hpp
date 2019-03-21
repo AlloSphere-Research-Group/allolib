@@ -10,16 +10,6 @@
 
 namespace al {
 
-struct Hit {
-	bool hit;
-	Rayd ray;
-	double t;
-	Pickable *p;
-
-	Hit():hit(false){}
-	Hit(bool h, Rayd r, double tt, Pickable* pp) : hit(h), ray(r), t(tt), p(pp){}
-	// Vec3d operator(){ return ray(t); }
-};
 
 class PickableManager {
 public:
@@ -32,82 +22,98 @@ public:
 	PickableManager& operator <<(Pickable &p){ return registerPickable(p); }
 	PickableManager& operator <<(Pickable *p){ return registerPickable(*p); }
 
+	std::vector<Pickable *> pickables(){ return mPickables; }
+
 	Hit intersect(Rayd r){
-		double tmin = 1e10;
-		Pickable *pmin = NULL;
+		// double tmin = 1e10;
+		// Pickable *pmin = NULL;
+		Hit hmin = Hit(false, r, 1e10, NULL);
 		for(Pickable *p : mPickables){
-			double t = p->intersect(r);
-			if(t >= 0.0 && t < tmin){
-				pmin = p;
-				tmin = t;
+			Hit h = p->intersect(r);
+			if(h.hit && h.t < hmin.t){
+				// Hit h2 = p->intersectChild(r);
+				// if (h2.hit && h2.t < hmin.t){
+				// 	hmin = h2;
+				// } else {
+					hmin = h;
+				// }
 			}
 		}
-		if(pmin) return Hit(true, r, tmin, pmin);
-		else return Hit(false, r, -1.0, NULL);
+		return hmin;
+		// if(pmin) return Hit(true, r, tmin, pmin);
+		// else return Hit(false, r, -1.0, NULL);
 	}
 
 	bool point(Rayd &r){
 		Hit h = intersect(r);
+		// if(h.hit) h.p->point(r);
 		for(Pickable *p : mPickables){
-            bool newHoverValue = false;
-            if(h.hit && p == h.p) {
-                newHoverValue = true;
-            }
-            if (p->hover != newHoverValue) {
-                p->hover = newHoverValue; // Only set if changed as this triggers the changed callback
-            }
+			if(p == h.p) p->point(r);
+			else if(p->hover.get()) p->hover = false;
 		}
                 return true;
 	}
 	bool pick(Rayd &r){
 		Hit h = intersect(r);
+		// if (h.hit){
+			// h.p->pick(r);
+			// lastSelect = h;
+		// }
+
 		for(Pickable *p : mPickables){
-			if(h.hit && p == h.p){
-				p->selected = true;
-				p->prevPose.set(p->pose.get());
-				p->prevScale.set(p->scaleVec.get());
-				lastSelect = h;
-				selectOffset = p->pose.get().pos() - r(h.t)*p->scaleVec.get();
-			} else p->selected = false;
+			if(p == h.p) p->pick(r);
+			else if(p->selected.get()) p->selected = false;
+		// 	if(h.hit && p == h.p){
+		// 		p->selected = true;
+		// 		p->prevPose.set(p->pose.get());
+		// 		p->prevScale.set(p->scaleVec.get());
+				// lastSelect = h;
+				// selectOffset = h.p->pose.get().pos() - r(h.t)*h.p->scaleVec.get();
+		// 	} else p->selected = false;
+
 		}
                 return true;
 	}
 	bool drag(Rayd &r, Vec3f dv){
+		// if(lastSelect.p) lastSelect.p->drag(r);
 		for(Pickable *p : mPickables){
-			if(p->selected){
-				if(mZooming){
-			        Vec3f v = p->pose.get().pos();
-			        v.z += dv.y * 0.04;
-			        p->pose.setPos(v); // should move along dir to camera instead
-		    	} else if(mRotating){
-		    		Vec3f dir = r(lastSelect.t) - lastSelect.ray(lastSelect.t);
-		    		Quatf q = Quatf().fromEuler(dir.x*0.01f, -dir.y*0.01f, 0);
+			if(p->selected.get())
+				p->drag(r);
+		// 	if(p->selected){
+		// 		if(mZooming){
+		// 	        Vec3f v = p->pose.get().pos();
+		// 	        v.z += dv.y * 0.04;
+		// 	        p->pose.setPos(v); // should move along dir to camera instead
+		//     	} else if(mRotating){
+		//     		Vec3f dir = r(lastSelect.t) - lastSelect.ray(lastSelect.t);
+		//     		Quatf q = Quatf().fromEuler(dir.x*0.01f, -dir.y*0.01f, 0);
 
-		            Vec3f p1 = p->transformVecWorld(p->bb.cen);
-		    		p->pose.setQuat(q*p->prevPose.quat());
-		            Vec3f p2 = p->transformVecWorld(p->bb.cen);
-		            p->pose.setPos(p->pose.get().pos() + p1-p2);
+		//             Vec3f p1 = p->transformVecWorld(p->bb.cen);
+		//     		p->pose.setQuat(q*p->prevPose.quat());
+		//             Vec3f p2 = p->transformVecWorld(p->bb.cen);
+		//             p->pose.setPos(p->pose.get().pos() + p1-p2);
 
-		    	} else if(mScaling){
-                    p->scale = p->scale - dv.y*0.0005; 
-		    	} else if(mTranslating){
-			        Vec3f newPos = r(lastSelect.t)*p->scaleVec.get() + selectOffset;
-			        p->pose.setPos(newPos);
-		    	} 
-			}
+		//     	} else if(mScaling){
+    //                 p->scale = p->scale - dv.y*0.0005; 
+		//     	} else if(mTranslating){
+		// 	        Vec3f newPos = r(lastSelect.t)*p->scaleVec.get() + selectOffset;
+		// 	        p->pose.setPos(newPos);
+		//     	} 
+		// 	}
 		}
                 return true;
 	}
 	bool unpick(Rayd &r){
 		for(Pickable *p : mPickables){
-			if(!p->hover.get()) p->selected = false;
+			p->unpick(r);
+			// if(!p->hover.get()) p->selected = false;
 		}
                 return true;
 	}
 
     void unhighlightAll() {
         for(Pickable *p : mPickables){
-            p->hover = false;
+            if(p->hover.get()) p->hover = false;
         }
     }
 

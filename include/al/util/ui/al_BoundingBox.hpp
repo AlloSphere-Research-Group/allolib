@@ -47,6 +47,13 @@ struct BoundingBox {
     getTics();
   }
 
+  bool contains(const Vec3d& p){
+    if (p.x < min.x || p.x > max.x) return false;
+    if (p.y < min.y || p.y > max.y) return false;
+    if (p.z < min.z || p.z > max.z) return false;
+    return true;
+  }
+
   Mesh& getMesh(){
     mesh.reset();
     Vec3f halfDim = dim / 2;
