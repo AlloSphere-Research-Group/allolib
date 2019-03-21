@@ -50,6 +50,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <iostream>
 
 #ifndef AL_FILE_DELIMITER_STR
 	#ifdef AL_WINDOWS
@@ -429,7 +430,7 @@ public:
 
 	int count() { return static_cast<int>(mFiles.size()); }
 
-	void print() const;
+    void print(std::ostream& stream = std::cout) const;
 
 	FilePath& operator[](int i) { return mFiles[i]; }
 	iterator begin() { return mFiles.begin(); }
@@ -482,7 +483,7 @@ public:
 
 	const std::string& appPath() const { return mAppPath; }
 
-	void print() const;
+    void print(std::ostream& stream = std::cout) const;
 
 	iterator begin() { return mSearchPaths.begin(); }
 	iterator end() { return mSearchPaths.end(); }

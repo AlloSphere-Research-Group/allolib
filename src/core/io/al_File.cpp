@@ -328,12 +328,12 @@ bool Dir::removeRecursively(const std::string &path)
 
 
 
-void FileList::print() const {
-  printf("FileList:\n");
+void FileList::print(std::ostream& stream) const {
+  stream << "FileList:" <<std::endl;
   std::vector<FilePath>::const_iterator it = mFiles.begin();
   while (it != mFiles.end()) {
     const FilePath& f = (*it++);
-    printf("%s\n", f.filepath().c_str());
+    stream << f.filepath() << std::endl;
   }
 }
 
@@ -396,12 +396,13 @@ void SearchPaths::addSearchPath(const std::string& src, bool recursive) {
   mSearchPaths.push_front(searchpath(path, recursive));
 }
 
-void SearchPaths::print() const {
-  printf("SearchPath %p appPath: %s\n", this, appPath().c_str());
+void SearchPaths::print(std::ostream &stream) const {
+  stream << "SearchPath " << this << " appPath: " << appPath() << std::endl;
   std::list<searchpath>::const_iterator it = mSearchPaths.begin();
   while (it != mSearchPaths.end()) {
     const SearchPaths::searchpath& sp = (*it++);
-    printf("SearchPath %p path: %s (recursive: %d)\n", this, sp.first.c_str(), sp.second);
+    stream << "SearchPath" << this << " appPath: " << sp.first
+           << "(recursive: " << sp.second << ")" << std::endl;
   }
 }
 

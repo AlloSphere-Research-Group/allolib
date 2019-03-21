@@ -65,7 +65,9 @@ namespace al{
 */
 
 /// @ingroup allocore
-class Image {
+
+
+class [[deprecated("use ImgModule instead")]] Image {
 public:
 	/*!
 		Image data formats.

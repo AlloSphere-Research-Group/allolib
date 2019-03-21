@@ -33,7 +33,7 @@ bool SoundFileBufferedRecord::open(std::string fullPath, double frameRate, uint3
     std::mutex condMutex;
     {
       std::unique_lock<std::mutex> lk(condMutex);
-      mReaderThread = new std::thread(writeFunction, this, &cond);
+      mReaderThread = new std::thread(writeFunction, this, &cond, &condMutex);
       cond.wait(lk); // Wait for thread to have started
     }
     return true;
@@ -80,10 +80,12 @@ bool SoundFileBufferedRecord::opened() const
   return mSf.opened();
 }
 
-void SoundFileBufferedRecord::writeFunction(SoundFileBufferedRecord  *obj, std::condition_variable *cond)
+void SoundFileBufferedRecord::writeFunction(SoundFileBufferedRecord  *obj, std::condition_variable *cond, std::mutex *condMutex)
 {
-  float *writeBuffer = new float[int(obj->mBufferFrames * obj->mSf.channels())];
+  float *writeBuffer = new float[size_t(obj->mBufferFrames * obj->mSf.channels())];
+  condMutex->lock();
   cond->notify_all(); // Signal thread is processing;
+  condMutex->unlock();
   while (obj->mRunning) {
     std::unique_lock<std::mutex> lk(obj->mLock);
     obj->mCondVar.wait(lk);

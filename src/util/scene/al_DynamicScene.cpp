@@ -348,7 +348,7 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
         vector<int> &idsToProcess = scene->mThreadMap[id];
         AudioIOData &internalAudioIO = scene->mThreadedAudioData[id];
         AudioIOData &io = *scene->externalAudioIO;
-        int fpb = internalAudioIO.framesPerBuffer();
+        unsigned int fpb = internalAudioIO.framesPerBuffer();
         SynthVoice *voice = scene->mActiveVoices;
         while (voice) {
             //                if (voice->active()) { // No need to check as only active voices are put in mThreadMap

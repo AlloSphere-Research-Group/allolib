@@ -101,7 +101,7 @@ protected:
 private:
   std::unique_ptr<float []> mFileBuffer; // Interleaved Buffer to copy file samples to (in the write thread before passing to ring buffer)
 
-  static void writeFunction(SoundFileBufferedRecord *obj, std::condition_variable *cond);
+  static void writeFunction(SoundFileBufferedRecord *obj, std::condition_variable *cond, std::mutex *condMutex);
 };
 
 } // namespace al
