@@ -77,33 +77,35 @@ public:
       MPI_Get_processor_name(processor_name, &name_len);
 #endif
       TomlLoader appConfig("distributed_app.toml");
-      auto nodesTable = appConfig.root->get_table("nodes");
+      auto nodesTable = appConfig.root->get_table_array("node");
       if (nodesTable) {
-        for (auto &key: *appConfig.root->get_table("nodes")) {
-          std::cout << key.first << " -- " << *key.second->as<std::string>() << std::endl;
-          if (al_get_hostname() == key.first) {
-            mRunDistributed = true;
-          }
-          std::function<Role(std::string)> stringToRole = [](std::string roleString) {
-            Role role = ROLE_NONE;
-            std::string token;
-            std::istringstream ss(roleString);
-            while(std::getline(ss, token, '+')) {
-                std::cout << token << " -- " <<std::endl;
-                if (token == "audio") {
-                  role = Role(role | ROLE_AUDIO);
-                } else if (token == "simulator") {
-                  role = Role(role | ROLE_SIMULATOR);
-                } else if (token == "renderer")  {
-                  role = Role(role | ROLE_RENDERER);
-                } else if (token == "control")  {
-                  role = Role(role | ROLE_CONTROL);
-                }
+        for (const auto& table : *nodesTable)
+        {
+            std::string host = *table->get_as<std::string>("host");
+            std::string role = *table->get_as<std::string>("role");
+            if (al_get_hostname() == host) {
+              mRunDistributed = true;
             }
-            return role;
-          };
+            std::function<Role(std::string)> stringToRole = [](std::string roleString) {
+              Role role = ROLE_NONE;
+              std::string token;
+              std::istringstream ss(roleString);
+              while(std::getline(ss, token, '+')) {
+                  std::cout << token << " -- " <<std::endl;
+                  if (token == "audio") {
+                    role = Role(role | ROLE_AUDIO);
+                  } else if (token == "simulator") {
+                    role = Role(role | ROLE_SIMULATOR);
+                  } else if (token == "renderer")  {
+                    role = Role(role | ROLE_RENDERER);
+                  } else if (token == "control")  {
+                    role = Role(role | ROLE_CONTROL);
+                  }
+              }
+              return role;
+            };
 
-          mRoleMap[key.first] = stringToRole(key.second->as<std::string>()->get());
+            mRoleMap[host] = stringToRole(role);
         }
       }
 
