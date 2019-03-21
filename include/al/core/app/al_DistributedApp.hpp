@@ -66,7 +66,7 @@ public:
       ROLE_USER  = 1 << 8 // User defined roles can add from here through bitshifting
   } Role;
 
-  DistributedApp(bool runDistributed = DistributedApp::shouldRunDistributed()) {
+  DistributedApp() {
 
 #ifdef AL_BUILD_MPI
       MPI_Init(NULL, NULL);
@@ -76,33 +76,59 @@ public:
 
       MPI_Get_processor_name(processor_name, &name_len);
 #endif
-      if (runDistributed) {
-        mRunDistributed = true;
+      TomlLoader appConfig("distributed_app.toml");
+      auto nodesTable = appConfig.root->get_table("nodes");
+      if (nodesTable) {
+        for (auto &key: *appConfig.root->get_table("nodes")) {
+          std::cout << key.first << " -- " << *key.second->as<std::string>() << std::endl;
+          if (al_get_hostname() == key.first) {
+            mRunDistributed = true;
+          }
+          std::function<Role(std::string)> stringToRole = [](std::string roleString) {
+            Role role = ROLE_NONE;
+            std::string token;
+            std::istringstream ss(roleString);
+            while(std::getline(ss, token, '+')) {
+                std::cout << token << " -- " <<std::endl;
+                if (token == "audio") {
+                  role = Role(role | ROLE_AUDIO);
+                } else if (token == "simulator") {
+                  role = Role(role | ROLE_SIMULATOR);
+                } else if (token == "renderer")  {
+                  role = Role(role | ROLE_RENDERER);
+                } else if (token == "control")  {
+                  role = Role(role | ROLE_CONTROL);
+                }
+            }
+            return role;
+          };
+
+          mRoleMap[key.first] = stringToRole(key.second->as<std::string>()->get());
+        }
       }
 
       if (mRunDistributed) {
+//          mRoleMap["spherez05"] = ROLE_SIMULATOR;
+//          mRoleMap["gr01"] = ROLE_SIMULATOR;
 
-          mRoleMap["spherez05"] = ROLE_SIMULATOR;
-          mRoleMap["gr01"] = ROLE_SIMULATOR;
+//          mRoleMap["moxi"] = ROLE_RENDERER;
+//          mRoleMap["gr02"] = ROLE_RENDERER;
+//          mRoleMap["gr03"] = ROLE_RENDERER;
+//          mRoleMap["gr04"] = ROLE_RENDERER;
+//          mRoleMap["gr05"] = ROLE_RENDERER;
+//          mRoleMap["gr06"] = ROLE_RENDERER;
+//          mRoleMap["gr07"] = ROLE_RENDERER;
+//          mRoleMap["gr08"] = ROLE_RENDERER;
+//          mRoleMap["gr09"] = ROLE_RENDERER;
+//          mRoleMap["gr10"] = ROLE_RENDERER;
+//          mRoleMap["gr11"] = ROLE_RENDERER;
+//          mRoleMap["gr12"] = ROLE_RENDERER;
+//          mRoleMap["gr13"] = ROLE_RENDERER;
+//          mRoleMap["gr14"] = ROLE_RENDERER;
 
-          mRoleMap["moxi"] = ROLE_RENDERER;
-          mRoleMap["gr02"] = ROLE_RENDERER;
-          mRoleMap["gr03"] = ROLE_RENDERER;
-          mRoleMap["gr04"] = ROLE_RENDERER;
-          mRoleMap["gr05"] = ROLE_RENDERER;
-          mRoleMap["gr06"] = ROLE_RENDERER;
-          mRoleMap["gr07"] = ROLE_RENDERER;
-          mRoleMap["gr08"] = ROLE_RENDERER;
-          mRoleMap["gr09"] = ROLE_RENDERER;
-          mRoleMap["gr10"] = ROLE_RENDERER;
-          mRoleMap["gr11"] = ROLE_RENDERER;
-          mRoleMap["gr12"] = ROLE_RENDERER;
-          mRoleMap["gr13"] = ROLE_RENDERER;
-          mRoleMap["gr14"] = ROLE_RENDERER;
-
-          mRoleMap["audio"] = (Role) (ROLE_AUDIO | ROLE_SIMULATOR);
-          mRoleMap["audio.10g"] = (Role) (ROLE_AUDIO | ROLE_SIMULATOR);
-          mRoleMap["ar01"] = ROLE_AUDIO;
+//          mRoleMap["audio"] = Role (ROLE_AUDIO | ROLE_SIMULATOR);
+//          mRoleMap["audio.10g"] = Role (ROLE_AUDIO | ROLE_SIMULATOR);
+//          mRoleMap["ar01"] = ROLE_AUDIO;
 
 //          if (isMaster()) {
 //              int number = 398;
@@ -111,7 +137,7 @@ public:
 //              }
 //          }
 
-          mRole = ROLE_NONE;
+//          mRole = ROLE_NONE;
           for (auto entry: mRoleMap) {
               if (strncmp(name().c_str(), entry.first.c_str(), name().size()) == 0) {
                 mRole = entry.second;
@@ -216,14 +242,14 @@ public:
     return name;
   }
 
-  void print() {
+  void print(std::ostream& stream = std::cout) {
 #ifdef AL_BUILD_MPI
       std::cout << "Processor: " << processor_name
                 << " Rank: " << world_rank
                 << " Of: " << world_size << std::endl;
       std::cout << name() << ":" << world_rank << " set role to " << roleName() << std::endl;
 #else
-      std::cout << "DistributedApp: Not using MPI. Role: " << roleName() << std::endl;
+      stream << "DistributedApp: Not using MPI. Role: " << roleName() << std::endl;
 #endif
   }
 
@@ -280,23 +306,23 @@ public:
   // users override these
   void onInit() override {}
   void onCreate() override {}
-  void onAnimate(double dt) override {}
-  void onDraw (Graphics& g) override {}
+  void onAnimate(double dt) override {(void) dt;}
+  void onDraw (Graphics& g) override {(void) g;}
   void onExit() override {}
-  void onKeyDown(Keyboard const& k) override {}
-  void onKeyUp(Keyboard const& k) override {}
-  void onMouseDown(Mouse const& m) override {}
-  void onMouseUp(Mouse const& m) override {}
-  void onMouseDrag(Mouse const& m) override {}
-  void onMouseMove(Mouse const& m) override {}
-  void onResize(int w, int h) override {}
-  void onVisibility(bool v) override {}
+  void onKeyDown(Keyboard const& k) override {(void) k;}
+  void onKeyUp(Keyboard const& k) override {(void) k;}
+  void onMouseDown(Mouse const& m) override {(void) m;}
+  void onMouseUp(Mouse const& m) override {(void) m;}
+  void onMouseDrag(Mouse const& m) override {(void) m;}
+  void onMouseMove(Mouse const& m) override {(void) m;}
+  void onResize(int w, int h) override {(void) w;(void) h;}
+  void onVisibility(bool v) override {(void) v;}
 
   /// Override to compute updates to shared state
   /// Currently run before calls to onAnimate()
   /// i.e. this is synchronous to drawing and runs at
   /// frame rate
-  virtual void simulate(double dt) {}
+  virtual void simulate(double dt) { (void) dt; }
 
   // extra functionalities to be handled
   virtual void preOnCreate();
@@ -306,7 +332,7 @@ public:
   virtual void postOnExit();
 
   // PacketHandler
-  void onMessage(osc::Message& m) override {}
+  void onMessage(osc::Message& m) override { (void) m; }
 
   /**
    * @brief get current shared state
@@ -337,18 +363,18 @@ public:
 
   ParameterServer &parameterServer() override { return *mParameterServer; }
 
-  static bool shouldRunDistributed() {
-    std::vector<std::string> distributedNodes =
-    { "gr01", "gr02", "gr03", "gr04", "gr05", "gr06", "gr07", "gr08", "gr09",
-      "gr10", "gr11", "gr12", "gr13", "gr14",
-      "audio", "audio.10g", "ar01", "spherez05", "interface", "control"};
-    for (auto nodeName: distributedNodes) {
-      if (al_get_hostname() == nodeName) {
-        return true;
-      }
-    }
-    return false;
-  }
+//  static bool shouldRunDistributed() {
+//    TomlLoader appConfig("distributed_app.toml");
+
+//    for (auto key: *appConfig.root->get_table("nodes")) {
+//      std::cout << key.first << " -- " << *key.second << std::endl;
+//      if (al_get_hostname() == key.first) {
+//        return true;
+//      }
+//    }
+
+//    return false;
+//  }
 
   void registerDynamicScene(DynamicScene &scene) {
 
