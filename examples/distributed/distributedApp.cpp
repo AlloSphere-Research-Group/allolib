@@ -39,6 +39,9 @@ public:
   void onInit() override {
     std::cout << "I am '" << name() << "' role: " << roleName() << std::endl;
     parameterServer() << value;
+    if (hasRole(ROLE_RENDERER)) {
+      value.registerChangeCallback([](float newValue) { std::cout << "Got value " << newValue << std::endl;});
+    }
   }
 
   // The simulate function is only run for the simulator
@@ -53,8 +56,10 @@ public:
 
   virtual void onDraw(Graphics &g) override {
     if (hasRole(ROLE_RENDERER)) {
-      // Renderer will recieve state from simulator
-      std::cout << " Rendered got : " << state().value1 << std::endl;
+      if (newStates()> 0) {
+        // Renderer will recieve state from simulator
+        std::cout << " Renderer got state : " << state().value1 << std::endl;
+      }
     }
   }
 
@@ -66,7 +71,7 @@ public:
   }
 
   void onKeyDown(Keyboard const &k) override {
-    value = value + 0.2f;
+    value = value + 0.1f;
     std::cout << "value set to " << value << std::endl;
   }
 
