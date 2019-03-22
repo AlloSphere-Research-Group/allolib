@@ -452,12 +452,18 @@ inline void DistributedApp<TSharedState>::start() {
         mRole = ROLE_DESKTOP_REPLICA;
         std::cout << "Application is replica on port: " << mParameterServer->serverPort() << std::endl;
       } else {
-        std::cerr << "Warning: Application has no network role." << std::endl;
-        mRole = ROLE_NONE;
+        std::cerr << "Warning: Application could not start network role." << std::endl;
       }
     }
   } else {
     mParameterServer = std::make_shared<ParameterServer>(defaultAddress, receiverPort);
+
+    if (mParameterServer->serverRunning()) {
+      mParameterServer->startCommandListener(defaultAddress);
+    } else {
+      std::cerr << "Warning: Application could not start network role." << std::endl;
+    }
+
   }
   //  std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
   onInit();
