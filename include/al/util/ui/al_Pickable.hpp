@@ -215,6 +215,7 @@ struct Pickable : PickableBase {
 
   // used for moving pickable naturally
   Vec3f selectOffset;
+  Quatf selectQuat;
   float selectDist;
 
   Pickable(std::string name = ""){ PickableState::name = name;}
@@ -228,12 +229,14 @@ struct Pickable : PickableBase {
 
   /// override base methods
   Hit intersect(Rayd &r){
-    double t = intersectBB(r);
+    auto ray = transformRayLocal(r);
+    double t = intersectBB(ray) * scaleVec.get().x;
+    // auto r2 = Rayd(r.o*scaleVec.get(), r.d);
     if(t > 0) return Hit(true, r, t, this);
-    else return Hit(false,r,t,this);
+    else return Hit(false, r, t, this);
   }
 
-  bool contains(Vec3d &v){ return bb.contains(v); }
+  bool contains(Vec3d &v){ auto p = transformVecLocal(v); return bb.contains(p); }
 
   bool onPoint(Hit h, bool child){
     bool hoverValue = false;
@@ -251,7 +254,7 @@ struct Pickable : PickableBase {
     if(h.hit && !child){
       prevPose.set(pose.get());
       selectDist = h.t;
-      selectOffset = pose.get().pos() - h() * scaleVec.get();
+      selectOffset = pose.get().pos() - h();// * scaleVec.get();
     }
     if (selected != selectedValue)
       selected = selectedValue; // to avoid triggering change callback if no change
@@ -262,7 +265,7 @@ struct Pickable : PickableBase {
   bool onDrag(Hit h, bool child){
     if(child) return true;
     else if(selected.get()){
-      Vec3f newPos = h.ray(selectDist) * scaleVec.get() + selectOffset;
+      Vec3f newPos = h.ray(selectDist) + selectOffset;
       pose = Pose(newPos, pose.get().quat());
       // if(parent && parent->containChildren){}
       return true;
@@ -326,9 +329,9 @@ struct Pickable : PickableBase {
   }
 
   /// intersect ray with pickable BoundingBox
-  double intersectBB(Rayd ray){
-    Rayd r = transformRayLocal(ray);
-    return r.intersectBox(bb.cen, bb.dim);
+  double intersectBB(Rayd localRay){
+    // Rayd r = transformRayLocal(ray);
+    return localRay.intersectBox(bb.cen, bb.dim);
   }
 
   /// intersect ray with pickable AxisAlignedBoundingBox

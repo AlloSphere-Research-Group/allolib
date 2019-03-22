@@ -175,16 +175,16 @@ struct MyApp : public App {
 #endif
   }
 
-  virtual void onMouseMove(const Mouse &m){
+  virtual void onMouseMove(const Mouse &m) override {
     mPickableManager.onMouseMove(graphics(), m, width(), height());
   }
-  virtual void onMouseDown(const Mouse &m){
+  virtual void onMouseDown(const Mouse &m) override {
     mPickableManager.onMouseDown(graphics(), m, width(), height());
   }
-  virtual void onMouseDrag(const Mouse &m){
+  virtual void onMouseDrag(const Mouse &m) override {
     mPickableManager.onMouseDrag(graphics(), m, width(), height());
   }
-  virtual void onMouseUp(const Mouse &m){
+  virtual void onMouseUp(const Mouse &m) override {
     mPickableManager.onMouseUp(graphics(), m, width(), height());
   }
 };

@@ -633,7 +633,10 @@ public:
 
 	ParameterVec3 operator=(const Vec3f vec) {this->set(vec); return *this;}
 
-	float operator[](size_t index) { Vec3f vec = this->get(); return vec[index];}
+    float operator[](size_t index) {
+      assert(index < INT_MAX); // Hack to remove
+      Vec3f vec = this->get(); return vec[int(index)];
+    }
 
     virtual void sendValue(osc::Send &sender) override {
         Vec3f vec = get();
@@ -652,7 +655,9 @@ public:
 
 	ParameterVec4 operator=(const Vec4f vec) {this->set(vec); return *this;}
 
-	float operator[](size_t index) { Vec4f vec = this->get(); return vec[index];}
+    float operator[](size_t index) {
+      Vec4f vec = this->get(); return vec[index];
+    }
 
     virtual void sendValue(osc::Send &sender) override {
         Vec4f vec = get();

@@ -83,7 +83,7 @@ struct PickableRotateHandle : PickableBase {
     glPopAttrib();
   }
 
-  double intersect(Rayd &r){return 0;}
+  Hit intersect(Rayd &r){return Hit();}
 
   bool onPoint(Rayd &r, double t, bool child){
     if(child) return true;

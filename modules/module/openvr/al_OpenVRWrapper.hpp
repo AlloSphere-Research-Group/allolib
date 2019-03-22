@@ -20,7 +20,7 @@ namespace al {
 struct Controller{
 public:
     int deviceID;
-    al::Mat4f pose;
+    al::Mat4f mat;
     al::Vec3f pos;
     al::Quatf quat;
     al::Vec3f lpos;
@@ -37,6 +37,7 @@ public:
     bool triggerTouched;
     bool systemPressed;
     al::Vec2f touchPos;
+    al::Vec2f touchVel;
     bool triggered; // triggered has a customizable threshold
     float triggerThreshold;
     float triggerPressure;
@@ -56,9 +57,9 @@ public:
         gripped = false;
     }
 
-    bool buttonDown(uint64_t b){ return (buttonsDown & (1l << b)) != 0; }
-    bool buttonPress(uint64_t b){ return (buttonsLE & (1l << b)) != 0; }
-    bool buttonRelease(uint64_t b){ return (buttonsTE & (1l << b)) != 0; }
+    bool buttonDown(int b){return (buttonsDown & (uint64_t(1) << b)) != 0; }
+    bool buttonPress(int b){ return (buttonsLE & (uint64_t(1) << b)) != 0; }
+    bool buttonRelease(int b){ return (buttonsTE & (uint64_t(1) << b)) != 0; }
     bool triggerDown(){ return buttonDown(33); }
     bool triggerPress(){ return buttonPress(33); }
     bool triggerRelease(){ return buttonRelease(33); }
@@ -75,6 +76,7 @@ public:
     }
 
     Rayd ray(){ return Rayd(pos, -quat.toVectorZ()); }
+    Pose pose(){ return Pose(pos,quat); }
     
 };
 
@@ -249,9 +251,12 @@ public:
                         //assign touch pad values
                         if (controllers[nDevice]->touchpadTouched){
                             float tPos[2] = { controller_state.rAxis[0].x,  controller_state.rAxis[0].y };
+                            if(controllers[nDevice]->touchPos.mag() != 0.0)
+                                controllers[nDevice]->touchVel = Vec2f(tPos) - controllers[nDevice]->touchPos;
                             controllers[nDevice]->touchPos = tPos;
                             // std::cout << nDevice << " ndevice " << controllers[nDevice]->touchPos.x << controllers[nDevice]->touchPos.y << std::endl;
                         } else if (!controllers[nDevice]->touchpadTouched){
+                            controllers[nDevice]->touchVel = (0, 0);
                             controllers[nDevice]->touchPos = (0, 0);
                             // std::cout << nDevice << " ndevice " << controllers[nDevice]->touchPos.x << controllers[nDevice]->touchPos.y << std::endl;
                         }
@@ -270,8 +275,8 @@ public:
                             controllers[nDevice]->triggerPressure = 0.0f;
                             // std::cout << nDevice << " ndevice " <<  controllers[nDevice]->triggerPressure << std::endl;
                         }
-                        controllers[nDevice]->buttonsLE = controller_state.ulButtonPressed & !controllers[nDevice]->buttonsDown;
-                        controllers[nDevice]->buttonsTE = !controller_state.ulButtonPressed & controllers[nDevice]->buttonsDown;
+                        controllers[nDevice]->buttonsLE = controller_state.ulButtonPressed & ~controllers[nDevice]->buttonsDown;
+                        controllers[nDevice]->buttonsTE = ~controller_state.ulButtonPressed & controllers[nDevice]->buttonsDown;
                         controllers[nDevice]->buttonsDown = controller_state.ulButtonPressed;
                         // ((vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_Axis1) & controller_state.ulButtonPressed) == 0) ? color = green : color = blue;
                     }
@@ -281,13 +286,13 @@ public:
                 if (nDevice == LeftController.deviceID){
                     LeftController.lpos = LeftController.pos;
                     LeftController.pos = v;
-                    LeftController.vel = v - LeftController.lpos;
+                    LeftController.vel = LeftController.pos - LeftController.lpos;
                 }
 
                 if (nDevice == RightController.deviceID){
                    RightController.lpos = RightController.pos;
                    RightController.pos = v;
-                   RightController.vel = v - RightController.lpos;
+                   RightController.vel = RightController.pos - RightController.lpos;
                 }
 
 
@@ -326,15 +331,15 @@ public:
                     // controllers[nDevice]->quat = al::Quatf().fromMatrix(controllers[nDevice]->pose);
                     if (nDevice == RightController.deviceID){
                         //std::cout <<  nDevice << " is " << "updating right controller matrix" << endl;
-                        RightController.pose = m_rmat4DevicePose[nDevice];
-                        al::invert(RightController.pose);
+                        RightController.mat = m_rmat4DevicePose[nDevice];
+                        al::invert(RightController.mat);
                         // RightHandQuat = ConvertAlMat4fToAlQuatf(RightHandPose);
-                        RightController.quat = al::Quatf().fromMatrix(RightController.pose);
+                        RightController.quat = al::Quatf().fromMatrix(RightController.mat);
                     } else if (nDevice == LeftController.deviceID){
                         //std::cout << nDevice << " is " << "updating left controller matrix" << endl;
-                        LeftController.pose = m_rmat4DevicePose[nDevice];
-                        al::invert(LeftController.pose);
-                        LeftController.quat = al::Quatf().fromMatrix(LeftController.pose);
+                        LeftController.mat = m_rmat4DevicePose[nDevice];
+                        al::invert(LeftController.mat);
+                        LeftController.quat = al::Quatf().fromMatrix(LeftController.mat);
                     } else {
 
                     }
