@@ -54,22 +54,26 @@ struct MyApp : public App {
     auto l = mOpenVR.LeftController;
     auto r = mOpenVR.RightController;
 
-    static bool wasPressed = false;
-    static Vec3f prevPos = Vec3f();
     auto ray = r.ray();
 
-    if(r.triggerPressed && !wasPressed){
+    if(r.triggerPress()){
       mPickableManager.pick(ray);
-      prevPos.set(r.pos);
-      wasPressed = true;             
-    } else if(r.triggerPressed){
-      Vec3f v = r.pos - prevPos;
-      mPickableManager.drag(ray, v);
-    } else if(wasPressed && !r.triggerPressed){
+    } else if(r.triggerDown()){
+      mPickableManager.drag(ray, r.vel);
+    } else if(r.triggerRelease()){
       mPickableManager.unpick(ray);
-      wasPressed = false;
     } else {
       mPickableManager.point(ray);
+    }
+    
+    if(r.gripPress()){
+      mPickableManager.pick(r.pos);
+    } else if(r.gripDown()){
+      mPickableManager.drag(r.pos, r.vel);
+    } else if(r.gripRelease()){
+      mPickableManager.unpick(r.pos);
+    } else {
+      mPickableManager.point(r.pos);
     }
 
     //openVR draw.

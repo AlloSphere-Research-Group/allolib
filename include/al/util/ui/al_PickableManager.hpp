@@ -3,6 +3,7 @@
 #define __PICKABLEMANAGER_HPP__
 
 #include <vector>
+// #include <map>
 
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/util/al_Ray.hpp"
@@ -25,57 +26,35 @@ public:
 	std::vector<Pickable *> pickables(){ return mPickables; }
 
 	Hit intersect(Rayd r){
-		// double tmin = 1e10;
-		// Pickable *pmin = NULL;
 		Hit hmin = Hit(false, r, 1e10, NULL);
 		for(Pickable *p : mPickables){
 			Hit h = p->intersect(r);
 			if(h.hit && h.t < hmin.t){
-				// Hit h2 = p->intersectChild(r);
-				// if (h2.hit && h2.t < hmin.t){
-				// 	hmin = h2;
-				// } else {
 					hmin = h;
-				// }
 			}
 		}
 		return hmin;
-		// if(pmin) return Hit(true, r, tmin, pmin);
-		// else return Hit(false, r, -1.0, NULL);
 	}
 
 	bool point(Rayd &r){
 		Hit h = intersect(r);
-		// if(h.hit) h.p->point(r);
 		for(Pickable *p : mPickables){
 			if(p == h.p) p->point(r);
 			else if(p->hover.get()) p->hover = false;
 		}
-                return true;
+		return true;
 	}
+
 	bool pick(Rayd &r){
 		Hit h = intersect(r);
-		// if (h.hit){
-			// h.p->pick(r);
-			// lastSelect = h;
-		// }
-
 		for(Pickable *p : mPickables){
 			if(p == h.p) p->pick(r);
 			else if(p->selected.get()) p->selected = false;
-		// 	if(h.hit && p == h.p){
-		// 		p->selected = true;
-		// 		p->prevPose.set(p->pose.get());
-		// 		p->prevScale.set(p->scaleVec.get());
-				// lastSelect = h;
-				// selectOffset = h.p->pose.get().pos() - r(h.t)*h.p->scaleVec.get();
-		// 	} else p->selected = false;
-
 		}
-                return true;
+		return true;
 	}
+
 	bool drag(Rayd &r, Vec3f dv){
-		// if(lastSelect.p) lastSelect.p->drag(r);
 		for(Pickable *p : mPickables){
 			if(p->selected.get())
 				p->drag(r);
@@ -101,68 +80,55 @@ public:
 		//     	} 
 		// 	}
 		}
-                return true;
+		return true;
 	}
+	
 	bool unpick(Rayd &r){
 		for(Pickable *p : mPickables){
 			p->unpick(r);
-			// if(!p->hover.get()) p->selected = false;
 		}
-                return true;
+		return true;
 	}
 
-    void unhighlightAll() {
-        for(Pickable *p : mPickables){
-            if(p->hover.get()) p->hover = false;
-        }
-    }
+	void unhighlightAll() {
+		for(Pickable *p : mPickables){
+			if(p->hover.get()) p->hover = false;
+		}
+	}
 
 	void rotate(Rayd &r){
 		for(Pickable *p : mPickables){
 			if(p->selected){
-	    		Vec3f dir = r(lastSelect.t) - lastSelect.ray(lastSelect.t);
-	    		Quatf q = Quatf().fromEuler(dir.x*0.01f, -dir.y*0.01f, 0);
+				Vec3f dir = r(lastSelect.t) - lastSelect.ray(lastSelect.t);
+				Quatf q = Quatf().fromEuler(dir.x*0.01f, -dir.y*0.01f, 0);
 
-	            Vec3f p1 = p->transformVecWorld(p->bb.cen);
-	    		p->pose.setQuat(q*p->prevPose.quat());
-	            Vec3f p2 = p->transformVecWorld(p->bb.cen);
-	            p->pose.setPos(p->pose.get().pos() + p1-p2);
+				Vec3f p1 = p->transformVecWorld(p->bb.cen);
+				p->pose.setQuat(q*p->prevPose.quat());
+				Vec3f p2 = p->transformVecWorld(p->bb.cen);
+				p->pose.setPos(p->pose.get().pos() + p1-p2);
 			}
 		}
 	}
 	void scale(Rayd &r, float amt){
 		for(Pickable *p : mPickables){
 			if(p->selected) 
-                p->scale = p->prevScale.x + amt; 
+			p->scale = p->prevScale.x + amt; 
 		}
 	}
 	void translate(Rayd &r, bool relative=false, Vec3f motion=Vec3f()){
 		for(Pickable *p : mPickables){
 			if(p->selected){
-		        if(relative){
-		        	Vec3f newPos = p->prevPose.pos() + motion;
-		        	p->pose.setPos(newPos);
-		        }else {
-			        Vec3f newPos = r(lastSelect.t)*p->scaleVec.get() + selectOffset;
-			        p->pose.setPos(newPos);
-			    }
+				if(relative){
+					Vec3f newPos = p->prevPose.pos() + motion;
+					p->pose.setPos(newPos);
+				}else {
+					Vec3f newPos = r(lastSelect.t)*p->scaleVec.get() + selectOffset;
+					p->pose.setPos(newPos);
+				}
 			}
 		}
 	}
 
-
-	void onPoint(Rayd r, int id){
-		point(r);
-	}
-	void onPick(Rayd r, int id, int button){
-		pick(r);
-	}
-	void onDrag(Rayd r, int id, int button, Vec3f motion){
-		drag(r, motion);
-	}
-	void onUnpick(Rayd r, int id, int button){
-		unpick(r);
-	}
 
 	void onMouseMove(Graphics &g, const Mouse& m, int w, int h){
 		Rayd r = getPickRay(g, m.x(), m.y(), w, h);
@@ -211,6 +177,9 @@ public:
 
 protected:
 	std::vector<Pickable *> mPickables;
+	// std::map<int, Hit> mHover;
+	// std::map<int, Hit> mSelect;
+
 	Hit lastSelect;
 	Vec3d selectOffset;
 

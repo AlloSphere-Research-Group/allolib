@@ -23,7 +23,12 @@ public:
     al::Mat4f pose;
     al::Vec3f pos;
     al::Quatf quat;
-    uint64_t buttons;
+    al::Vec3f lpos;
+    al::Vec3f vel;
+
+    uint64_t buttonsDown;
+    uint64_t buttonsLE;
+    uint64_t buttonsTE;
     // bool buttonsPressed; //buttons mean any button
     // bool buttonsTouched;
     bool touchpadPressed;
@@ -51,6 +56,19 @@ public:
         gripped = false;
     }
 
+    bool buttonDown(uint64_t b){ return (buttonsDown & (1l << b)) != 0; }
+    bool buttonPress(uint64_t b){ return (buttonsLE & (1l << b)) != 0; }
+    bool buttonRelease(uint64_t b){ return (buttonsTE & (1l << b)) != 0; }
+    bool triggerDown(){ return buttonDown(33); }
+    bool triggerPress(){ return buttonPress(33); }
+    bool triggerRelease(){ return buttonRelease(33); }
+    bool touchpadDown(){ return buttonDown(32); }
+    bool touchpadPress(){ return buttonPress(32); }
+    bool touchpadRelease(){ return buttonRelease(32); }
+    bool gripDown(){ return buttonDown(2); }
+    bool gripPress(){ return buttonPress(2); }
+    bool gripRelease(){ return buttonRelease(2); }
+    
     bool Triggered(float threshold = 0.9f){
         triggerThreshold = threshold;
         return triggered;
@@ -252,18 +270,24 @@ public:
                             controllers[nDevice]->triggerPressure = 0.0f;
                             // std::cout << nDevice << " ndevice " <<  controllers[nDevice]->triggerPressure << std::endl;
                         }
-                        controllers[nDevice]->buttons = controller_state.ulButtonPressed;
+                        controllers[nDevice]->buttonsLE = controller_state.ulButtonPressed & !controllers[nDevice]->buttonsDown;
+                        controllers[nDevice]->buttonsTE = !controller_state.ulButtonPressed & controllers[nDevice]->buttonsDown;
+                        controllers[nDevice]->buttonsDown = controller_state.ulButtonPressed;
                         // ((vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_Axis1) & controller_state.ulButtonPressed) == 0) ? color = green : color = blue;
                     }
                 }
 
                 //region mengyu-> save v3 pos data into controller pos variable
                 if (nDevice == LeftController.deviceID){
+                    LeftController.lpos = LeftController.pos;
                     LeftController.pos = v;
+                    LeftController.vel = v - LeftController.lpos;
                 }
 
                 if (nDevice == RightController.deviceID){
+                   RightController.lpos = RightController.pos;
                    RightController.pos = v;
+                   RightController.vel = v - RightController.lpos;
                 }
 
 
