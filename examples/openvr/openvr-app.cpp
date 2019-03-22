@@ -1,8 +1,18 @@
+
+// These includes are all that's needed to turn a regular App
+// into a VRApp
+// You will also need to specify the location of OpenVR in the
+// flags.cmake file
+#ifdef BUILD_VR
 #include "module/openvr/al_VRApp.hpp"
+#define App VRApp
+#else
+#include "al/core/app/al_App.hpp"
+#endif
 
 using namespace al;
 
-class MyApp : public VRApp {
+class MyApp : public App {
 public:
     void onCreate() override {
         
