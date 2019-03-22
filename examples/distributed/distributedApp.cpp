@@ -37,14 +37,18 @@ public:
   Parameter value {"value"};
 
   void onInit() override {
-    ParameterServer() << value;
+    std::cout << "I am '" << name() << "' role: " << roleName() << std::endl;
+    parameterServer() << value;
   }
 
   // The simulate function is only run for the simulator
+  // So there is no need to check role
+  // Updating state will only work if cuttlebone is available
+  // but parameters will always be synchronized
   virtual void simulate(double dt) override {
-
     state().value1 = rnd::uniform();
     state().value2 = int(state().value1 * 1000.f);
+    std::cout << "Updating state ... " << state().value1 << std::endl;
   }
 
   virtual void onDraw(Graphics &g) override {
@@ -63,20 +67,21 @@ public:
 
   void onKeyDown(Keyboard const &k) override {
     value = value + 0.2f;
+    std::cout << "value set to " << value << std::endl;
   }
 
 };
 
 int main(){
   DistributedExampleApp app;
-  app.fps(1);
+  app.fps(1); // Only call simulate and draw once per second
   app.startFPS();
   app.print();
   for (int i = 0; i < 10; i++) {
     if (app.isPrimary()) {
-      std::cout << " Run " << i << " ---------------" <<std::endl;
+      std::cout << "   Call simulate " << i << " ---------------" <<std::endl;
+      app.simulate(0);
     }
-    app.simulate(0);
   }
   app.start();
   return 0;
