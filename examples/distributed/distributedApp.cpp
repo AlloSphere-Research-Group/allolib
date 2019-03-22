@@ -34,7 +34,8 @@ struct SharedState {
 class DistributedExampleApp : public DistributedApp<SharedState> {
 public:
 
-  Parameter value {"value"};
+  Parameter value {"value", "", 0.1};
+  Mesh sphere;
 
   void onInit() override {
     std::cout << "I am '" << name() << "' role: " << roleName() << std::endl;
@@ -42,6 +43,9 @@ public:
     if (hasRole(ROLE_RENDERER)) {
       value.registerChangeCallback([](float newValue) { std::cout << "Got value " << newValue << std::endl;});
     }
+
+    addSphere(sphere);
+    sphere.primitive(Mesh::LINES);
   }
 
   // The simulate function is only run for the simulator
@@ -61,6 +65,12 @@ public:
         std::cout << " Renderer got state : " << state().value1 << std::endl;
       }
     }
+    g.clear(0);
+    g.pushMatrix();
+    g. translate(0,0, -4);
+    g.scale(value);
+    g.draw(sphere);
+    g.popMatrix();
   }
 
   virtual void onSound(AudioIOData &io) override {
