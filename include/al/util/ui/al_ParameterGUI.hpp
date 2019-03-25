@@ -82,6 +82,8 @@ public:
     static void drawVec4(ParameterVec4 *param, std::string suffix = "");
     static void drawTrigger(Trigger *param, std::string suffix = "");
 
+    static void drawSynthController(PolySynth *param, std::string suffix = "");
+
     // Display for al types
     static void drawNav(Nav *mNav, std::string suffix = "");
     static void drawDynamicScene(DynamicScene *scene, std::string suffix = "");
@@ -205,6 +207,55 @@ private:
     std::string mName;
     int mCurrentBundle {0};
     bool mBundleGlobal {false};
+};
+
+template<class VoiceType>
+class SynthGUIManager {
+public:
+    void configureVoice(VoiceType *voice) {
+        for (size_t i = 0; i < voice->parameterFields().size(); i++) {
+            voice->parameterFields()[i]->set(controlVoice.parameterFields()[i]);
+        }
+    }
+    void init() {
+        controlVoice.init();
+        for (auto *param: controlVoice.parameterFields()) {
+            presetHandler << *param;
+        }
+    }
+
+    void drawFields() {
+        for (auto *param : controlVoice.parameterFields()) {
+            ParameterGUI::drawParameterMeta(param);
+        }
+    }
+
+    void drawPresets(int columns = 12, int rows = 4) {
+        ParameterGUI::drawPresetHandler(&presetHandler, columns, rows);
+    }
+
+    void drawTriggerButton(PolySynth &synth) {
+        static bool currentState = false;
+        static int voiceId;
+        std::string buttonName = currentState ? "Turn off" : "Trigger" ;
+        if (ImGui::Button(buttonName.c_str(), ImVec2( ImGui::GetWindowWidth(), 0))) {
+             if (!currentState) {
+                auto *voice = synth.getVoice<VoiceType>();
+                configureVoice(voice);
+                voiceId = synth.triggerOn(voice);
+                currentState = true;
+             } else {
+                 synth.triggerOff(voiceId);
+                 currentState = false;
+             }
+        }
+    }
+
+    VoiceType *voice() {return &controlVoice;}
+
+private:
+    VoiceType controlVoice;
+    PresetHandler presetHandler;
 };
 
 

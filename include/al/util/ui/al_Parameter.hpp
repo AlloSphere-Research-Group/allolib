@@ -150,6 +150,8 @@ public:
         std::cout << "sendValue function not implemented for " << typeid(*this).name() << std::endl;
     }
 
+    void set(ParameterMeta *p);
+
 protected:
 	std::string mFullAddress;
 	std::string mParameterName;
