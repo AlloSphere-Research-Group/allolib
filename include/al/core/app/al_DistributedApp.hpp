@@ -508,8 +508,10 @@ inline void DistributedApp<TSharedState>::start() {
         mQueuedStates = mTaker->get(mState);
       }
 #else
-      // You shouldn't get here if you are relying oncuttlebone for state syncing
-      mQueuedStates = 1;
+      if (!mRunDistributed) {
+      // You shouldn't get here if you are relying on cuttlebone for state syncing
+        mQueuedStates = 1;
+      }
 #endif
     }
 
