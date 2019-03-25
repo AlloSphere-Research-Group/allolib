@@ -34,7 +34,7 @@ struct SharedState {
 class DistributedExampleApp : public DistributedApp<SharedState> {
 public:
 
-  Parameter value {"value", "", 0.1};
+  Parameter value {"value", "", 0.1f};
   Mesh sphere;
 
   void onInit() override {
