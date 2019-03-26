@@ -96,6 +96,9 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
 }
 
 bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) {
+    if (verbose()) {
+      m.print();
+    }
     if (m.addressPattern() == "/triggerOn") {
         if (m.typeTags().size() > 2
                 && m.typeTags()[0] == 'i'
@@ -115,7 +118,9 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
                 }
                 voice->setParamFields(params);
                 triggerOn(voice, offset, id);
-                std::cout << "trigger on received" <<std::endl;
+                if (verbose()) {
+                  std::cout << "trigger on received" <<std::endl;
+                }
                 return true;
             } else {
                 std::cerr << "Can't get free voice of type: " << voiceName<< std::endl;
@@ -128,7 +133,9 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
             int id;
             m >> id;
             triggerOff(id);
-            std::cout << "trigger off received " << id <<std::endl;
+            if (verbose()) {
+              std::cout << "trigger off received " << id <<std::endl;
+            }
             return true;
         }
     } else {
