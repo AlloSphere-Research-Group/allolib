@@ -108,7 +108,7 @@ public:
     REAL,
     INTEGER,
     BOOLEAN,
-    IGNORE
+    IGNORE_COLUMN
   } DataType;
 
   CSVReader() {
