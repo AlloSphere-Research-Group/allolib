@@ -117,12 +117,23 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
             m >> offset >> id >> voiceName;
             auto *voice = getVoice(voiceName);
             if (voice) {
-                std::vector<float> params;
-                params.resize(m.typeTags().size() - 3);
+                std::vector<ParameterField> params;
+//                params.resize(m.typeTags().size() - 3);
 
                 std::cout << m.typeTags()<< " params:" << params.size() <<std::endl;
                 for (unsigned int i = 0; i < m.typeTags().size() -3; i++) {
-                    m >> params[i];
+                  if (m.typeTags()[i] == 'f') {
+                    float value;
+                    m >> value;
+                    params.emplace_back(value);
+                  } else if (m.typeTags()[i] == 's') {
+                    std::string value;
+                    m >> value;
+                    params.emplace_back(value);
+                  } else {
+                    std::cerr << "ERROR: Unsupported parameter type for scene trigger" << std::endl;
+                    params.emplace_back(0.0f);
+                  }
                 }
                 voice->setParamFields(params);
                 triggerOn(voice, offset, id);
