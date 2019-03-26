@@ -26,6 +26,8 @@ public:
 
     void registerNotifier(OSCNotifier &notifier) {mNotifier = &notifier;}
 
+    virtual void allNotesOff() override;
+
     virtual bool consumeMessage(osc::Message& m, std::string rootOSCPath = "") override;
 
 protected:
@@ -103,6 +105,23 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
 
 }
 
+void DistributedScene::allNotesOff()
+{
+
+  PolySynth::allNotesOff();
+  osc::Packet p;
+  p.beginMessage("/allNotesOff");
+  p.endMessage();
+
+  if (verbose()) {
+    std::cout << "Sending all notes off message" << std::endl;
+  }
+  if (this->mNotifier) {
+      this->mNotifier->send(p);
+  }
+
+}
+
 bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) {
     if (verbose()) {
       m.print();
@@ -154,6 +173,8 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
             }
             return true;
         }
+    } else if (m.addressPattern() == "/allNotesOff") {
+      allNotesOff();
     } else {
         std::string addr = m.addressPattern();
         int start = ("/" + name() + "/").size();

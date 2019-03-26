@@ -435,7 +435,7 @@ public:
   /**
      * @brief Call TriggerOff for all active notes
      */
-  void allNotesOff();
+  virtual void allNotesOff();
 
   /**
      * @brief Get a reference to a voice.
