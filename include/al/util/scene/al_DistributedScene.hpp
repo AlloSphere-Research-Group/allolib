@@ -58,6 +58,9 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
         }
         p.endMessage();
 
+        if (verbose()) {
+          std::cout << "Sending trigger on message" << std::endl;
+        }
         if (this->mNotifier) {
             this->mNotifier->send(p);
         }
@@ -70,6 +73,9 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
         p << id;
         p.endMessage();
 
+        if (verbose()) {
+          std::cout << "Sending trigger off message" << std::endl;
+        }
         if (this->mNotifier) {
             this->mNotifier->send(p);
         }
@@ -78,7 +84,9 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
 
     PolySynth::registerAllocateCallback(
                 [this](SynthVoice *voice, void *userData) {
-        std::cout << "voice allocated " << std::endl;
+        if (verbose()) {
+          std::cout << "voice allocated " << std::endl;
+        }
         for (auto *param : voice->parameterFields()) {
             if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
                 dynamic_cast<Parameter *>(param)->registerChangeCallback(

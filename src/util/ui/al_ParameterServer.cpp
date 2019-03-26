@@ -582,6 +582,12 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param, std::st
             p->set(Color(a,b,c,d));
             return true;
         }
+    } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) == 0) {// ParameterColor
+      Trigger *p = dynamic_cast<Trigger *>(param);
+      if(address == p->getFullAddress()){
+          p->trigger();
+          return true;
+      }
     } else {
         // TODO this check should be performed on registration
         std::cout << "Unsupported registered Parameter on message " << typeid(*param).name() << std::endl;
