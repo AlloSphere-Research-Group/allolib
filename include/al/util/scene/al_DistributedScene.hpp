@@ -118,10 +118,7 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
             auto *voice = getVoice(voiceName);
             if (voice) {
                 std::vector<ParameterField> params;
-//                params.resize(m.typeTags().size() - 3);
-
-                std::cout << m.typeTags()<< " params:" << params.size() <<std::endl;
-                for (unsigned int i = 0; i < m.typeTags().size() -3; i++) {
+                for (unsigned int i = 3; i < m.typeTags().size(); i++) {
                   if (m.typeTags()[i] == 'f') {
                     float value;
                     m >> value;
