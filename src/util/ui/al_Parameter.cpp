@@ -168,3 +168,55 @@ ParameterMeta::ParameterMeta(std::string parameterName, std::string group, std::
 
     mDisplayName = mParameterName;
 }
+
+void ParameterMeta::set(ParameterMeta *p) {
+    // We do a runtime check to determine the type of the parameter to determine how to draw it.
+    if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) == 0) { // ParameterBool
+        ParameterBool *param = dynamic_cast<ParameterBool *>(p);
+        // Check that incoming parameter is the same type as this
+        assert(strcmp(typeid(this).name(), typeid(ParameterBool).name()) == 0);
+        dynamic_cast<ParameterBool *>(this)->set(param->get());
+    } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
+        Parameter *param = dynamic_cast<Parameter *>(p);
+        // Check that incoming parameter is the same type as this
+        assert(strcmp(typeid(this).name(), typeid(Parameter).name()) == 0);
+        dynamic_cast<Parameter *>(this)->set(param->get());
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) == 0) {// ParameterInt
+        ParameterInt *param = dynamic_cast<ParameterInt *>(p);
+        // Check that incoming parameter is the same type as this
+        assert(strcmp(typeid(this).name(), typeid(ParameterInt).name()) == 0);
+        dynamic_cast<ParameterInt *>(this)->set(param->get());
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter pose
+        ParameterPose *param = dynamic_cast<ParameterPose *>(p);
+        // Check that incoming parameter is the same type as this
+        assert(strcmp(typeid(this).name(), typeid(ParameterPose).name()) == 0);
+        dynamic_cast<ParameterPose *>(this)->set(param->get());
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter
+        ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
+        // Check that incoming parameter is the same type as this
+        assert(strcmp(typeid(this).name(), typeid(ParameterMenu).name()) == 0);
+        dynamic_cast<ParameterMenu *>(this)->set(param->get());
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter
+        ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
+        // Check that incoming parameter is the same type as this
+        assert(strcmp(typeid(this).name(), typeid(ParameterChoice).name()) == 0);
+        dynamic_cast<ParameterChoice *>(this)->set(param->get());
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) == 0) {// Parameter
+        ParameterVec3 *param = dynamic_cast<ParameterVec3 *>(p);
+        // Check that incoming parameter is the same type as this
+        assert(strcmp(typeid(this).name(), typeid(ParameterVec3).name()) == 0);
+        dynamic_cast<ParameterVec3 *>(this)->set(param->get());
+    }  else if (strcmp(typeid(*p).name(), typeid(ParameterVec4).name()) == 0) {// Parameter
+        ParameterVec4 *param = dynamic_cast<ParameterVec4 *>(p);
+        // Check that incoming parameter is the same type as this
+        assert(strcmp(typeid(this).name(), typeid(ParameterVec4).name()) == 0);
+        dynamic_cast<ParameterVec4 *>(this)->set(param->get());
+    } else if (strcmp(typeid(*p).name(), typeid(ParameterColor).name()) == 0) {// Parameter
+        ParameterColor *param = dynamic_cast<ParameterColor *>(p);
+        // Check that incoming parameter is the same type as this
+        assert(strcmp(typeid(this).name(), typeid(ParameterColor).name()) == 0);
+        dynamic_cast<ParameterColor *>(this)->set(param->get());
+    } else {
+        std::cout << "Unsupported Parameter " << p->getFullAddress() << std::endl;
+    }
+}

@@ -11,6 +11,18 @@
 
 namespace al {
 
+struct PickableBase;
+
+struct Hit{
+  bool hit;
+  Rayd ray;
+  double t;
+  PickableBase *p;
+
+  Hit() : hit(false) {}
+  Hit(bool h, Rayd r, double tt, PickableBase *pp) : hit(h), ray(r), t(tt), p(pp) {}
+  Vec3d operator()(){ return hit ? ray(t) : Vec3d(); }
+};
 
 struct PickableState {
   std::string name;
@@ -40,70 +52,72 @@ struct PickableBase : virtual PickableState {
   PickableBase *parent = 0;
   std::vector<PickableBase *> children;
   bool alwaysTestChildren = true;
+  bool containChildren = true;
 
   // initial values, and previous values
   Pose pose0, prevPose;
   Vec3f scale0, prevScale;
 
   /// intersection test must be specified
-  virtual double intersect(Rayd &r) = 0;
+  virtual Hit intersect(Rayd &r) = 0;
+  virtual bool contains(Vec3d &v) = 0;
 
   /// override these callbacks
-  virtual bool onPoint(Rayd &r, double t, bool child){return false;}
-  virtual bool onPick(Rayd &r, double t, bool child){return false;}
-  virtual bool onDrag(Rayd &r, double t, bool child){return false;}
-  virtual bool onUnpick(Rayd &r, double t, bool child){return false;}
+  virtual bool onPoint(Hit hit, bool child){return false;}
+  virtual bool onPick(Hit hit, bool child){return false;}
+  virtual bool onDrag(Hit hit, bool child){return false;}
+  virtual bool onUnpick(Hit hit, bool child){return false;}
   
   /// do interaction on self and children, call onPoint callbacks
   virtual bool point(Rayd &r){
-    bool child = false;  
-    double t = intersect(r);
-    if(t > 0.0 || alwaysTestChildren){
+    bool child = false;
+    Hit h = intersect(r);
+    if(h.hit || alwaysTestChildren){
       for(unsigned int i=0; i < children.size(); i++){
         Rayd ray = transformRayLocal(r);
         child |= children[i]->point(ray);
       }
     }
-    return onPoint(r,t,child);
+    return onPoint(h, child);
   }
 
   /// do interaction on self and children, call onPick callbacks
   virtual bool pick(Rayd &r){
     bool child = false;  
-    double t = intersect(r);
-    if(t > 0.0 || alwaysTestChildren){
+    Hit h = intersect(r);
+    if(h.hit || alwaysTestChildren){
       for(unsigned int i=0; i < children.size(); i++){
         Rayd ray = transformRayLocal(r);
         child |= children[i]->pick(ray);
       }
     }
-    return onPick(r,t,child);
+    return onPick(h, child);
   }
 
   /// do interaction on self and children, call onDrag callbacks
   virtual bool drag(Rayd &r){
     bool child = false;  
-    double t = intersect(r);
-    if(t > 0.0 || alwaysTestChildren){
+    Hit h = intersect(r);
+    if(h.hit || alwaysTestChildren){
       for(unsigned int i=0; i < children.size(); i++){
         Rayd ray = transformRayLocal(r);
         child |= children[i]->drag(ray);
       }
     }
-    return onDrag(r,t,child);
+    return onDrag(h, child);
   }
   
   /// do interaction on self and children, call onUnpick callbacks
   virtual bool unpick(Rayd &r){
     bool child = false;  
-    double t = intersect(r);
-    if(t > 0.0 || alwaysTestChildren){
+    Hit h = intersect(r);
+    if(h.hit || alwaysTestChildren){
       for(unsigned int i=0; i < children.size(); i++){
         Rayd ray = transformRayLocal(r);
         child |= children[i]->unpick(ray);
       }
     }
-    return onUnpick(r,t,child);
+    return onUnpick(h, child);
   }
 
   virtual void draw(Graphics &g){}
@@ -115,7 +129,7 @@ struct PickableBase : virtual PickableState {
     popMatrix(g);
   }
 
-  bool intersects(Rayd &r){ return intersect(r) > 0.0; }
+  bool intersects(Rayd &r){ return intersect(r).hit; }
   bool intersectsChild(Rayd &r){
     bool child = false;
     for(unsigned int i=0; i < children.size(); i++){
@@ -124,11 +138,35 @@ struct PickableBase : virtual PickableState {
     }
     return child;
   }
+  Hit intersectChild(Rayd &r){
+    double tmin = 1e10;
+    Hit hmin = Hit(false, r, 1e10, NULL);
+    Rayd ray = transformRayLocal(r);
+    for (auto *c : children){
+      Hit h = c->intersect(ray);
+      if (h.hit && h.t < hmin.t){
+        hmin = h;
+        // pmin = p;
+        // tmin = h.t;
+      }
+    }
+    return hmin;
+    // if (pmin) return Hit(true, r, tmin, pmin);
+    // else return Hit(false, r, -1.0, NULL);
+    // bool child = false;
+    // for(unsigned int i=0; i < children.size(); i++){
+      // Rayd ray = transformRayLocal(r);
+      // child |= children[i]->intersect(ray);
+    // }
+    // return child;
+  }
 
   void addChild(PickableBase &pickable){
     pickable.parent = this;
     children.push_back(&pickable);
   }
+  
+  void addChild(PickableBase *p){ addChild(*p); }
 
   /// apply pickable pose transforms
   inline void pushMatrix(Graphics &g){
@@ -177,6 +215,7 @@ struct Pickable : PickableBase {
 
   // used for moving pickable naturally
   Vec3f selectOffset;
+  Quatf selectQuat;
   float selectDist;
 
   Pickable(std::string name = ""){ PickableState::name = name;}
@@ -189,54 +228,52 @@ struct Pickable : PickableBase {
   }
 
   /// override base methods
-  double intersect(Rayd &r){
-    return intersectBB(r);
+  Hit intersect(Rayd &r){
+    auto ray = transformRayLocal(r);
+    double t = intersectBB(ray) * scaleVec.get().x;
+    // auto r2 = Rayd(r.o*scaleVec.get(), r.d);
+    if(t > 0) return Hit(true, r, t, this);
+    else return Hit(false, r, t, this);
   }
 
-  bool onPoint(Rayd &r, double t, bool child){
+  bool contains(Vec3d &v){ auto p = transformVecLocal(v); return bb.contains(p); }
+
+  bool onPoint(Hit h, bool child){
     bool hoverValue = false;
-    if(t > 0.0){
-      if(!child){
-        hoverValue = true;
-      }
-    }
-    if (hover.get() != hoverValue) {
-        hover = hoverValue; // setting value propagates via OSC, so only set if there is a change
-    }
+    if(h.hit) hoverValue = true;
+    
+    if(hover.get() != hoverValue)
+      hover = hoverValue; // setting value propagates via OSC, so only set if there is a change
 
-    return hover.get() || child;
+    return h.hit || child;
   }
 
-  bool onPick(Rayd &r, double t, bool child){
+  bool onPick(Hit h, bool child){
     bool selectedValue = false;
-    if(t > 0.0){
-      if(!child){
-        prevPose.set(pose.get());
-        selectDist = t;
-        selectOffset = pose.get().pos() - r(t)*scaleVec.get();
-        selectedValue = true;
-      }
+    if(h.hit) selectedValue = true;
+    if(h.hit && !child){
+      prevPose.set(pose.get());
+      selectDist = h.t;
+      selectOffset = pose.get().pos() - h();// * scaleVec.get();
     }
-    if (selected != selectedValue) {
-        selected = selectedValue; // to avoid triggering change callback if no change
-    }
-    return selected.get() || child;
+    if (selected != selectedValue)
+      selected = selectedValue; // to avoid triggering change callback if no change
+    
+    return h.hit || child;
   }
   
-  bool onDrag(Rayd &r, double t, bool child){
-    // if(t > 0.0){
-      if(child){
-        return true;
-      } else if(selected.get()){
-        Vec3f newPos = r(selectDist)*scaleVec.get() + selectOffset;
-        pose = Pose(newPos, pose.get().quat());
-        return true;
-      }
-    // }
+  bool onDrag(Hit h, bool child){
+    if(child) return true;
+    else if(selected.get()){
+      Vec3f newPos = h.ray(selectDist) + selectOffset;
+      pose = Pose(newPos, pose.get().quat());
+      // if(parent && parent->containChildren){}
+      return true;
+    }
     return false;
   }
 
-  bool onUnpick(Rayd &r, double t, bool child){
+  bool onUnpick(Hit h, bool child){
     if(!hover && selected) selected = false;
     return false;
   }
@@ -249,7 +286,7 @@ struct Pickable : PickableBase {
 
     if(selected.get()) g.color(0,1,1);
     else if(hover.get()) g.color(1,1,1);
-    bb.draw(g, false);
+    if(selected.get() || hover.get()) bb.draw(g, false);
 
     // glPopAttrib();
     popMatrix(g);
@@ -292,9 +329,9 @@ struct Pickable : PickableBase {
   }
 
   /// intersect ray with pickable BoundingBox
-  double intersectBB(Rayd ray){
-    Rayd r = transformRayLocal(ray);
-    return r.intersectBox(bb.cen, bb.dim);
+  double intersectBB(Rayd localRay){
+    // Rayd r = transformRayLocal(ray);
+    return localRay.intersectBox(bb.cen, bb.dim);
   }
 
   /// intersect ray with pickable AxisAlignedBoundingBox

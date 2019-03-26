@@ -343,10 +343,13 @@ public:
 
   unsigned int numOutChannels() { return mNumOutChannels; }
 
-  // Parameters to fields (i.e. parameters that are set at initialization only)
+  /// Parameters to fields (i.e. parameters that are set at initialization only)
+  ///
   virtual SynthVoice& registerParameterAsField(ParameterMeta &param) { mParametersToFields.push_back(&param); return *this;}
 
   SynthVoice& operator<<(ParameterMeta &param) {return registerParameterAsField(param);}
+
+  SynthVoice& synthVoice() { return *this; }
 
   SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
 
