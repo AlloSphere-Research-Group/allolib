@@ -32,8 +32,7 @@ void ControlGUI::draw(Graphics &g) {
         ParameterGUI::drawPresetSequencer(mPresetSequencer, mCurrentPresetSequencerItem);
     }
     if (mSequenceRecorder) {
-        ParameterGUI::drawSequenceRecorder(mSequenceRecorder,
-                                           mOverwriteButtonValue);
+        ParameterGUI::drawSequenceRecorder(mSequenceRecorder);
     }
     if (mPolySynth) {
         if (ImGui::CollapsingHeader("PolySynth", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {

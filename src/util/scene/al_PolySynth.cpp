@@ -318,6 +318,26 @@ void PolySynth::insertFreeVoice(SynthVoice *voice) {
     }
 }
 
+bool PolySynth::popFreeVoice(SynthVoice *voice) {
+    std::unique_lock<std::mutex> lk(mFreeVoiceLock);
+    SynthVoice *lastVoice = mFreeVoices;
+    SynthVoice *previousVoice = nullptr;
+    while (lastVoice) {
+        if (lastVoice == voice) {
+            if (previousVoice) {
+                previousVoice->next = lastVoice->next;
+                voice->next = nullptr;
+            } else {
+                mFreeVoices = lastVoice->next;
+                voice->next = nullptr;
+            }
+            return true;
+        }
+        lastVoice = lastVoice->next;
+    }
+    return false;
+}
+
 PolySynth &PolySynth::append(AudioCallback &v) {
     mPostProcessing.push_back(&v);
     return *this;

@@ -683,21 +683,28 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
     ImGui::PopID();
 }
 
-void ParameterGUI::drawSequenceRecorder(SequenceRecorder *sequenceRecorder,
-                                        bool &overwriteButtonValue)
+void ParameterGUI::drawSequenceRecorder(SequenceRecorder *sequenceRecorder)
 {
-    if (ImGui::CollapsingHeader("Sequence Recorder##__SequenceRecorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+    struct SequenceRecorderState {
+        bool overwriteButtonValue {false};
+    };
+    static std::map<SequenceRecorder *, SequenceRecorderState> stateMap;
+    if(stateMap.find(sequenceRecorder) == stateMap.end()) {
+        stateMap[sequenceRecorder] = SequenceRecorderState{0};
+    }
+    SequenceRecorderState &state = stateMap[sequenceRecorder];
+    if (ImGui::CollapsingHeader("Preset Sequence Recorder##__SequenceRecorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         static char buf_seq_recorder[64] = "test"; ImGui::InputText("Record Name##__SequenceRecorder", buf_seq_recorder, 64);
         static bool button_seq_recorder_value = false;
         if (ImGui::Checkbox("Record##__SequenceRecorder", &button_seq_recorder_value)) {
             if (button_seq_recorder_value) {
-                sequenceRecorder->startRecord(buf_seq_recorder, overwriteButtonValue);
+                sequenceRecorder->startRecord(buf_seq_recorder, state.overwriteButtonValue);
             } else {
                 sequenceRecorder->stopRecord();
             }
         }
         ImGui::SameLine();
-        ImGui::Checkbox("Overwrite##__SequenceRecorder", &overwriteButtonValue);
+        ImGui::Checkbox("Overwrite##__SequenceRecorder", &state.overwriteButtonValue);
     }
 }
 

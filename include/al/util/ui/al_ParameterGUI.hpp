@@ -40,6 +40,8 @@
 	Andrés Cabrera mantaraya36@gmail.com
 */
 
+#include <climits>
+
 #include "al/core/io/al_ControlNav.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/util/ui/al_Preset.hpp"
@@ -118,7 +120,7 @@ public:
 
     static PresetHandlerState &drawPresetHandler(PresetHandler *presetHandler, int presetColumns, int presetRows);
     static void drawPresetSequencer(PresetSequencer *presetSequencer, int &currentPresetSequencerItem);
-    static void drawSequenceRecorder(SequenceRecorder *sequenceRecorder, bool &overwriteButtonValue);
+    static void drawSequenceRecorder(SequenceRecorder *sequenceRecorder);
     static void drawSynthSequencer(SynthSequencer *synthSequencer);
     static void drawSynthRecorder(SynthRecorder *synthRecorder);
 
@@ -212,73 +214,133 @@ private:
 template<class VoiceType>
 class SynthGUIManager {
 public:
-    SynthGUIManager() {
-        controlVoice.init();
-        for (auto *param: controlVoice.triggerParameters()) {
-            presetHandler << *param;
+    SynthGUIManager(PolySynth &synth) {
+        mControlVoice.init();
+        for (auto *param: mControlVoice.triggerParameters()) {
+            mPresetHandler << *param;
         }
+        mSynth = &synth;
+        mPresetSequencer << mPresetHandler;
+        mPresetSequenceRecorder << mPresetHandler;
+
+        mSequencer << *mSynth;
+        mRecorder << *mSynth;
+
+        synth.registerSynthClass<VoiceType>(demangle(typeid (VoiceType).name()));
     }
 
-    void configureVoice(VoiceType *voice) {
+    void drawSynthControlPanel() {
+        ParameterGUI::beginPanel(demangle(typeid (mControlVoice).name()).c_str());
+        drawFields();
+        drawPresets();
+        ImGui::Separator();
+        drawTriggerButton();
+        if (triggerButtonState()) {
+            drawPresetSequencer();
+            drawPresetSequencerRecorder();
+        } else {
+            drawSynthSequencer();
+            drawSynthRecorder();
+        }
+        ParameterGUI::endPanel();
+    }
+
+    void configureVoiceFromGui(VoiceType *voice) {
         for (size_t i = 0; i < voice->triggerParameters().size(); i++) {
-            voice->triggerParameters()[i]->set(controlVoice.triggerParameters()[i]);
+            voice->triggerParameters()[i]->set(mControlVoice.triggerParameters()[i]);
         }
     }
 
     void drawFields() {
-        for (auto *param : controlVoice.triggerParameters()) {
+        for (auto *param : mControlVoice.triggerParameters()) {
             ParameterGUI::drawParameterMeta(param);
         }
     }
 
     void drawPresets(int columns = 12, int rows = 4) {
-        ParameterGUI::drawPresetHandler(&presetHandler, columns, rows);
+        ParameterGUI::drawPresetHandler(&mPresetHandler, columns, rows);
     }
 
-    void createBundle(uint8_t bundleSize, PolySynth &synth) {
+    void drawSynthSequencer() {
+        ParameterGUI::drawSynthSequencer(&mSequencer);
+    }
+
+    void drawSynthRecorder() {
+        ParameterGUI::drawSynthRecorder(&mRecorder);
+    }
+
+    void drawPresetSequencer() {
+        static int currentItem {0};
+        ParameterGUI::drawPresetSequencer(&mPresetSequencer, currentItem);
+    }
+
+    void drawPresetSequencerRecorder() {
+        ParameterGUI::drawSequenceRecorder(&mPresetSequenceRecorder);
+    }
+
+    void createBundle(uint8_t bundleSize) {
         for (uint8_t i = 0; i < bundleSize; i++) {
-            auto voice = synth.getVoice<VoiceType>();
-            auto bundle = std::make_shared<ParameterBundle>(demangle(typeid (controlVoice).name()));
+            auto voice = mSynth->getVoice<VoiceType>();
+            auto bundle = std::make_shared<ParameterBundle>(demangle(typeid (mControlVoice).name()));
             for(auto *param: voice->triggerParameters()) {
                 *bundle << param;
             }
-            bundles.push_back(bundle);
-            bundleGui << *bundle;
-            synth.triggerOn(voice);
+            mBundles.push_back(bundle);
+            mBundleGui << *bundle;
+            mSynth->triggerOn(voice);
         }
     }
 
     void drawBundle() {
-        if (bundles.size() > 0) {
-            bundleGui.drawBundleGUI();
+        if (mBundles.size() > 0) {
+            mBundleGui.drawBundleGUI();
         }
     }
 
-    void drawTriggerButton(PolySynth &synth) {
-        static bool currentState = false;
-        static int voiceId;
-        std::string buttonName = currentState ? "Turn off" : "Trigger" ;
-        if (ImGui::Button(buttonName.c_str(), ImVec2( ImGui::GetWindowWidth(), 0))) {
-             if (!currentState) {
-                auto *voice = synth.getVoice<VoiceType>();
-                configureVoice(voice);
-                voiceId = synth.triggerOn(voice);
-                currentState = true;
+    void drawTriggerButton() {
+        std::string buttonName = mCurrentTriggerState ? "Turn off##paramGUI" : "Trigger##paramGUI" ;
+        if (ImGui::Button(buttonName.c_str(), ImVec2( ImGui::GetWindowWidth(), 40))) {
+             if (!mCurrentTriggerState) {
+
+//                 std::cout << mControlVoice.id() << std::endl;
+                mTriggerVoiceId = mSynth->triggerOn(&mControlVoice, 0, INT_MIN);
+//                std::cout << mControlVoice.id() << " -- " << mTriggerVoiceId << std::endl;
+                mCurrentTriggerState = true;
              } else {
-                 synth.triggerOff(voiceId);
-                 currentState = false;
+                 mControlVoice.free();
+                 while (!mSynth->popFreeVoice(&mControlVoice)) {
+                     // Wait - spin lock
+                 }
+//                 std::cout << mControlVoice.id() << std::endl;
+                 mCurrentTriggerState = false;
              }
         }
     }
 
-    VoiceType *voice() {return &controlVoice;}
+    bool triggerButtonState () {return mCurrentTriggerState;}
+
+    VoiceType *voice() {return &mControlVoice;}
+
+    void recallPreset(int index) {
+        mPresetHandler.recallPreset(index);
+    }
 
 private:
-    VoiceType controlVoice;
-    PresetHandler presetHandler;
-    SynthSequencer sequencer;
-    std::vector<std::shared_ptr<ParameterBundle>> bundles;
-    BundleGUIManager bundleGui;
+    VoiceType mControlVoice;
+
+    PresetHandler mPresetHandler;
+    PresetSequencer mPresetSequencer;
+    SequenceRecorder mPresetSequenceRecorder;
+
+    PolySynth *mSynth;
+    SynthSequencer mSequencer;
+    SynthRecorder mRecorder;
+
+    std::vector<std::shared_ptr<ParameterBundle>> mBundles;
+    BundleGUIManager mBundleGui;
+
+    bool mCurrentTriggerState {false};
+    int mTriggerVoiceId {INT_MIN};
 };
 
 

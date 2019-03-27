@@ -345,7 +345,7 @@ public:
   int id() {return mId;}
 
   /**
-     * @brief returns the offset frames and sets them to 0.
+     * @brief returns the offset frames framesPerSecondand sets them to 0.
      * @param framesPerBuffer number of frames per buffer
      * @return offset frames
      *
@@ -414,9 +414,6 @@ public:
 
   std::vector<ParameterMeta *> parameters() {return mContinuousParameters;}
 
-protected:
-
-  ///
   /**
      * @brief Mark this voice as done.
      *
@@ -424,8 +421,13 @@ protected:
      * functions when envelope or time is done and no more processing for
      * the note is needed. The voice will be considered ready for retriggering
      * by PolySynth.
+     *
+     * It can also be used to force removal of a voice from the rendering chain
+     * without going through the release phase.
      */
   void free() {mActive = false; } // Mark this voice as done.
+
+protected:
   /**
      * @brief Set the number of outputs this SynthVoice generates
      * @param numOutputs
@@ -571,6 +573,12 @@ public:
      * requested that will not be used.
      */
   void insertFreeVoice(SynthVoice *voice);
+
+  /**
+   * @brief Remove voice from the free voice pool
+   * @param voice
+   */
+  bool popFreeVoice(SynthVoice *voice);
 
   /**
      * @brief Set default user data to set to voices before the are returned
