@@ -212,20 +212,21 @@ private:
 template<class VoiceType>
 class SynthGUIManager {
 public:
-    void configureVoice(VoiceType *voice) {
-        for (size_t i = 0; i < voice->parameterFields().size(); i++) {
-            voice->parameterFields()[i]->set(controlVoice.parameterFields()[i]);
-        }
-    }
-    void init() {
+    SynthGUIManager() {
         controlVoice.init();
-        for (auto *param: controlVoice.parameterFields()) {
+        for (auto *param: controlVoice.triggerParameters()) {
             presetHandler << *param;
         }
     }
 
+    void configureVoice(VoiceType *voice) {
+        for (size_t i = 0; i < voice->triggerParameters().size(); i++) {
+            voice->triggerParameters()[i]->set(controlVoice.triggerParameters()[i]);
+        }
+    }
+
     void drawFields() {
-        for (auto *param : controlVoice.parameterFields()) {
+        for (auto *param : controlVoice.triggerParameters()) {
             ParameterGUI::drawParameterMeta(param);
         }
     }

@@ -352,7 +352,7 @@ public:
                 if (false) { // Insert event as EVENT_VOICE. This is not good as it forces preallocating all the events...
                     SynthVoice *newVoice = mPolySynth->getVoice(name);
                     if (newVoice) {
-                        if (!newVoice->setParamFields(pFields)) {
+                        if (!newVoice->setTriggerParams(pFields)) {
                             std::cout << "Error setting pFields for voice of type " << name << ". Fields: ";
                             for (auto &field: pFields) {
                                 std::cout << field.type() << " ";
@@ -420,7 +420,7 @@ public:
                 SynthVoice *newVoice = mPolySynth->getVoice(name);
                 if (newVoice) {
                     newVoice->id(id);
-                    if (!newVoice->setParamFields(pFields, numFields)) {
+                    if (!newVoice->setTriggerParams(pFields, numFields)) {
                         std::cout << "Error setting pFields for voice of type " << name << ". Fields: ";
                         for (int i = 0; i < numFields; i++) {
                             std::cout << pFields[i] << " ";

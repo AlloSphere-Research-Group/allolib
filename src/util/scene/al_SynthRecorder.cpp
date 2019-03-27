@@ -118,7 +118,7 @@ void SynthRecorder::stopRecord() {
         f << "# " << instr << " ";
         // Hack to get the parameter names. Get a voice from the polysynth and then check the parameters. Should there be a better way?
         auto *voice = mPolySynth->getVoice(instr);
-        for (auto p: voice->parameterFields()) {
+        for (auto p: voice->triggerParameters()) {
             f << p->getName() << " ";
         }
         f << std::endl;

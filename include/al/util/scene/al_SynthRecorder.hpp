@@ -132,7 +132,7 @@ public:
                 rec->mSequenceStart = now;
                 rec->mStartOnEvent = false;
             }
-            std::vector<ParameterField> pFields = voice->getParamFields();
+            std::vector<ParameterField> pFields = voice->getTriggerParams();
             std::unique_lock<std::mutex> lk(rec->mSequenceLock);
 
             SynthEvent event;
