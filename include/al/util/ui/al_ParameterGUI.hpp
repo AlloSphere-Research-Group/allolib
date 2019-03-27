@@ -235,6 +235,25 @@ public:
         ParameterGUI::drawPresetHandler(&presetHandler, columns, rows);
     }
 
+    void createBundle(uint8_t bundleSize, PolySynth &synth) {
+        for (uint8_t i = 0; i < bundleSize; i++) {
+            auto voice = synth.getVoice<VoiceType>();
+            auto bundle = std::make_shared<ParameterBundle>(demangle(typeid (controlVoice).name()));
+            for(auto *param: voice->triggerParameters()) {
+                *bundle << param;
+            }
+            bundles.push_back(bundle);
+            bundleGui << *bundle;
+            synth.triggerOn(voice);
+        }
+    }
+
+    void drawBundle() {
+        if (bundles.size() > 0) {
+            bundleGui.drawBundleGUI();
+        }
+    }
+
     void drawTriggerButton(PolySynth &synth) {
         static bool currentState = false;
         static int voiceId;
@@ -257,6 +276,9 @@ public:
 private:
     VoiceType controlVoice;
     PresetHandler presetHandler;
+    SynthSequencer sequencer;
+    std::vector<std::shared_ptr<ParameterBundle>> bundles;
+    BundleGUIManager bundleGui;
 };
 
 
