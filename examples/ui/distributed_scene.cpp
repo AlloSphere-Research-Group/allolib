@@ -114,7 +114,7 @@ public:
       // Trigger one voice manually
       auto *freeVoice = scene.getVoice<SimpleVoice>();
       std::vector<float> params{440.0f, 0.0f};
-      freeVoice->setParamFields(params);
+      freeVoice->setTriggerParams(params);
       freeVoice->pose().vec().z = -10.0;
       scene.triggerOn(freeVoice);
     } else {
@@ -152,7 +152,7 @@ public:
     if (k.key() == ' ') {
       auto *freeVoice = scene.getVoice<SimpleVoice>();
       std::vector<float> params{440.0f, 0.0f};
-      freeVoice->setParamFields(params);
+      freeVoice->setTriggerParams(params);
       freeVoice->pose().vec().z = -10.0;
       scene.triggerOn(freeVoice);
     }

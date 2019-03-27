@@ -381,17 +381,18 @@ public:
    */
   virtual SynthVoice& registerTriggerParameter(ParameterMeta &param) { mTriggerParams.push_back(&param); return *this;}
 
+  /**
+   * Allows registering any number of trigger parameters on a single line
+   */
   template<class... Args>
   SynthVoice& registerTriggerParameters(Args &... paramsArgs) {
       std::vector<ParameterMeta *> params{&paramsArgs...};
       for (auto *param: params) {
           registerTriggerParameter(*param);
       }
-
   }
-  SynthVoice& operator<<(ParameterMeta &param) {return registerTriggerParameter(param);}
 
-  SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
+  SynthVoice& operator<<(ParameterMeta &param) {return registerTriggerParameter(param);}
 
   std::vector<ParameterMeta *> triggerParameters() {return mTriggerParams;}
 
@@ -412,6 +413,17 @@ public:
     return *this;
   }
 
+  /**
+   * Allows registering any number of parameters on a single line
+   */
+  template<class... Args>
+  SynthVoice& registerParameters(Args &... paramsArgs) {
+      std::vector<ParameterMeta *> params{&paramsArgs...};
+      for (auto *param: params) {
+          registerParameter(*param);
+      }
+  }
+
   std::vector<ParameterMeta *> parameters() {return mContinuousParameters;}
 
   /**
@@ -426,6 +438,8 @@ public:
      * without going through the release phase.
      */
   void free() {mActive = false; } // Mark this voice as done.
+
+  SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
 
 protected:
   /**
