@@ -238,6 +238,9 @@ inline bool createDir(std::string const& path)
         std::cout << "[!] [createDir] " << path << " already exists" << std::endl;
         return true;
     }
+    if (path.size() == 0) {
+      return false;
+    }
 
 #ifdef ITS_WINDOWS
     // Create all intermediate dirs up to last one
