@@ -81,7 +81,7 @@ class SequenceRecorder : public osc::MessageConsumer
 public:
 	SequenceRecorder();
 
-	~SequenceRecorder() {}
+    ~SequenceRecorder() override {}
 
 	/**
 	 * @brief startRecord begins recording preset changes
@@ -94,7 +94,7 @@ public:
 	void startRecord(std::string name = "", bool overwrite = false);
 	void stopRecord();
 
-    bool recording() {return  mRecording;};
+    bool recording() {return  mRecording;}
 
 	void setMaxRecordTime(al_sec maxTime) { mMaxRecordTime = maxTime; }
 

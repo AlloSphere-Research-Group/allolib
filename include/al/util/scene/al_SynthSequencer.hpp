@@ -58,6 +58,7 @@
 #include <functional>
 #include <atomic>
 #include <thread>
+#include <cassert>
 
 #include <typeinfo> // For class name instrospection
 
@@ -225,6 +226,9 @@ public:
         mPolySynth->print();
     }
 
+    bool verbose() {return mVerbose;}
+    void verbose(bool verbose) { mVerbose = verbose;}
+
     void setTempo(float tempo) {mNormalizedTempo = tempo/60.f;}
 
     bool playSequence(std::string sequenceName) {
@@ -248,6 +252,11 @@ public:
         
         mEvents.clear();
         mNextEvent = 0;
+    }
+
+    void setDirectory(std::string directory) {
+      assert(directory.size() > 0);
+      mDirectory = directory;
     }
 
     std::string buildFullPath(std::string sequenceName)
@@ -284,9 +293,15 @@ public:
             int command = ss.get();
             if (command == '@' && ss.get() == ' ') {
                 std::string name, start, durationText;
-                std::getline(ss, start, ' ');
-                std::getline(ss, durationText, ' ');
-                std::getline(ss, name, ' ');
+                while (start.size() == 0) {
+                  std::getline(ss, start, ' ');
+                }
+                while (durationText.size() == 0) {
+                  std::getline(ss, durationText, ' ');
+                }
+                while (name.size() == 0) {
+                  std::getline(ss, name, ' ');
+                }
 
                 double startTime = std::stod(start) * timeScale * tempoFactor;
                 double duration = std::stod(durationText) * timeScale * tempoFactor;
@@ -421,11 +436,11 @@ public:
                 if (newVoice) {
                     newVoice->id(id);
                     if (!newVoice->setTriggerParams(pFields, numFields)) {
-                        std::cout << "Error setting pFields for voice of type " << name << ". Fields: ";
+                        std::cerr << "Error setting pFields for voice of type " << name << ". Fields: ";
                         for (int i = 0; i < numFields; i++) {
-                            std::cout << pFields[i] << " ";
+                            std::cerr << pFields[i] << " ";
                         }
-                        std::cout << std::endl;
+                        std::cerr << std::endl;
                     } else {
                         std::list<SynthSequencerEvent>::iterator insertedEvent;
                         double absoluteTime = timeOffset + startTime;
@@ -444,7 +459,9 @@ public:
 //                        std::cout << "Inserted event " << id << " at time " << startTime << std::endl;
                     }
                 } else {
+                  if (verbose()) {
                     std::cout << "Warning: Unable to get free voice from PolySynth." << std::endl;
+                  }
                 }
             } else if (command == '-' && ss.get() == ' ') {
                 std::string time, idText;
@@ -495,7 +512,9 @@ public:
                 tempoFactor = 60.0/std::stod(tempo);
             } else {
                 if (command > 0) {
+                  if(verbose()) {
                     std::cout << "Line ignored. Command: " << command << std::endl;
+                  }
                 }
             }
         }
@@ -553,6 +572,7 @@ private:
     std::unique_ptr<PolySynth> mInternalSynth;
 
     std::string mDirectory {"."};
+    bool mVerbose{false};
 
     double mFps {30}; // graphics frames per second
 

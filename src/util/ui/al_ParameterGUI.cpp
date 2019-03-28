@@ -621,8 +621,8 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
             {*currentTime = currTime;}, 0.1);
         presetSequencer->registerBeginCallback([&](PresetSequencer *sender, void *userData) {stateMap[presetSequencer].totalDuration = sender->getSequenceTotalDuration(sender->currentSequence());});
         vector<string> seqList = presetSequencer->getSequenceList();
-        std::cout << seqList[currentPresetSequencerItem] <<std::endl;
         if (currentPresetSequencerItem >= 0 && currentPresetSequencerItem < (int) seqList.size()) {
+            std::cout << seqList[currentPresetSequencerItem] <<std::endl;
             presetSequencer->loadSequence(seqList[currentPresetSequencerItem]);
             stateMap[presetSequencer].totalDuration = presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
         }
@@ -672,12 +672,14 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
                 presetSequencer->stopSequence();
                 presetSequencer->rewind();
             }
-        }
-        float time = state.currentTime;
-//        std::cout << time << std::endl;
-        if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
-//            std::cout << "Requested time:" << time << std::endl;
-            presetSequencer->setTime(time);
+            float time = state.currentTime;
+    //        std::cout << time << std::endl;
+            if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
+    //            std::cout << "Requested time:" << time << std::endl;
+                presetSequencer->setTime(time);
+            }
+        } else {
+          ImGui::Text("No sequences found.");
         }
     }
     ImGui::PopID();
@@ -718,7 +720,9 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
     }
     SynthSequencerState &state = stateMap[synthSequencer];
 
-    if (ImGui::CollapsingHeader("Event Sequencer##EventSequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+    std::string headerLabel = "Event Sequencer##EventSequencer";
+    if (ImGui::CollapsingHeader(headerLabel.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+      // TODO we should only refresh occasionally or perhaps reactively.
         std::vector<std::string> seqList = synthSequencer->getSequenceList();
         if (seqList.size() > 0) {
             if (seqList.size() > 64) {
@@ -737,6 +741,8 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
                 synthSequencer->stopSequence();
                 synthSequencer->synth().allNotesOff();
             }
+        } else {
+          ImGui::Text("No sequences found.");
         }
     }
 }

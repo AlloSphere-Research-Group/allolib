@@ -214,20 +214,30 @@ private:
 template<class VoiceType>
 class SynthGUIManager {
 public:
-    SynthGUIManager(PolySynth &synth) {
+    SynthGUIManager(std::string name = "") {
         mControlVoice.init();
         for (auto *param: mControlVoice.triggerParameters()) {
             mPresetHandler << *param;
         }
-        mSynth = &synth;
+//        mSynth = &synth;
+
+        mName = name;
+        if (mName == "") {
+          mName = demangle(typeid (mControlVoice).name());
+        }
+        mPresetHandler.setRootPath(mName);
         mPresetSequencer << mPresetHandler;
         mPresetSequenceRecorder << mPresetHandler;
 
-        mSequencer << *mSynth;
-        mRecorder << *mSynth;
+        mSequencer.setDirectory(mName);
+        mRecorder.setDirectory(mName);
+//        mSequencer << *mSynth;
+        mRecorder << mSequencer.synth();
 
-        synth.registerSynthClass<VoiceType>(demangle(typeid (VoiceType).name()));
-    }
+//        template<class VoiceType>
+        mSequencer.synth().template registerSynthClass<VoiceType>(demangle(typeid (VoiceType).name()));
+        mSequencer.synth().template allocatePolyphony<VoiceType>(16);
+;    }
 
     void drawSynthControlPanel() {
         ParameterGUI::beginPanel(demangle(typeid (mControlVoice).name()).c_str());
@@ -280,14 +290,14 @@ public:
 
     void createBundle(uint8_t bundleSize) {
         for (uint8_t i = 0; i < bundleSize; i++) {
-            auto voice = mSynth->getVoice<VoiceType>();
+            auto voice = mSequencer.synth()->getVoice<VoiceType>();
             auto bundle = std::make_shared<ParameterBundle>(demangle(typeid (mControlVoice).name()));
             for(auto *param: voice->triggerParameters()) {
                 *bundle << param;
             }
             mBundles.push_back(bundle);
             mBundleGui << *bundle;
-            mSynth->triggerOn(voice);
+            mSequencer.synth()->triggerOn(voice);
         }
     }
 
@@ -303,12 +313,12 @@ public:
              if (!mCurrentTriggerState) {
 
 //                 std::cout << mControlVoice.id() << std::endl;
-                mTriggerVoiceId = mSynth->triggerOn(&mControlVoice, 0, INT_MIN);
+                mTriggerVoiceId = mSequencer.synth().triggerOn(&mControlVoice, 0, INT_MIN);
 //                std::cout << mControlVoice.id() << " -- " << mTriggerVoiceId << std::endl;
                 mCurrentTriggerState = true;
              } else {
                  mControlVoice.free();
-                 while (!mSynth->popFreeVoice(&mControlVoice)) {
+                 while (!mSequencer.synth().popFreeVoice(&mControlVoice)) {
                      // Wait - spin lock
                  }
 //                 std::cout << mControlVoice.id() << std::endl;
@@ -325,15 +335,22 @@ public:
         mPresetHandler.recallPreset(index);
     }
 
+    PresetSequencer &presetSequencer() {return mPresetSequencer;}
+    PresetHandler &presetHandler() {return mPresetHandler;}
+
+    PolySynth &synth() {return mSequencer.synth();}
+    SynthSequencer &synthSequencer() {return mSequencer;}
+
 private:
+    std::string mName;
     VoiceType mControlVoice;
 
     PresetHandler mPresetHandler;
     PresetSequencer mPresetSequencer;
     SequenceRecorder mPresetSequenceRecorder;
 
-    PolySynth *mSynth;
-    SynthSequencer mSequencer;
+//    PolySynth *mSynth;
+    SynthSequencer mSequencer {PolySynth::TIME_MASTER_AUDIO};
     SynthRecorder mRecorder;
 
     std::vector<std::shared_ptr<ParameterBundle>> mBundles;

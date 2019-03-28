@@ -182,6 +182,8 @@ public:
 	/// Path including subdirectory if any
 	std::string getCurrentPath();
 
+    void setRootPath(std::string path);
+
 	/// Base path without appending sub directory
 	std::string getRootPath();
 

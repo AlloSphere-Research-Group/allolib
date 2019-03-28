@@ -100,6 +100,15 @@ public:
 
     SynthRecorder(TextFormat format = SEQUENCER_EVENT) { mFormat = format;}
 
+    void setDirectory(std::string path) {
+      if (!File::exists(path)) {
+          if (!Dir::make(path)) {
+              std::cout << "Error creating directory: " << path << std::endl;
+          }
+      }
+      mDirectory = path;
+    }
+
     void startRecord(std::string name = "", bool overwrite = false, bool startOnEvent = true);
 
     void stopRecord();

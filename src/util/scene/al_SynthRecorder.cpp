@@ -13,10 +13,7 @@ void SynthRecorder::startRecord(std::string name, bool overwrite, bool startOnEv
 
 void SynthRecorder::stopRecord() {
     mRecording = false;
-    std::string path = ".";
-    if (path.back() != '/') {
-        path += "/";
-    }
+    std::string path = File::conformDirectory(mDirectory);
     std::string fileName = path + mSequenceName + ".synthSequence";
 
     std::string newSequenceName = mSequenceName;

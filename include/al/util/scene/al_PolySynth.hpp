@@ -390,6 +390,7 @@ public:
       for (auto *param: params) {
           registerTriggerParameter(*param);
       }
+      return *this;
   }
 
   SynthVoice& operator<<(ParameterMeta &param) {return registerTriggerParameter(param);}
