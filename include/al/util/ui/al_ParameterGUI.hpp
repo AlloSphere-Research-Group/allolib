@@ -256,7 +256,7 @@ public:
     }
 
     void configureVoiceFromGui(VoiceType *voice) {
-        for (size_t i = 0; i < voice->triggerParameters().size(); i++) {
+        for (size_t i = 0; i < mControlVoice.triggerParameters().size(); i++) {
             voice->triggerParameters()[i]->set(mControlVoice.triggerParameters()[i]);
         }
     }

@@ -746,13 +746,12 @@ public:
         std::cout << "Allocating (from name) voice of type " << name << "." << std::endl;
       }
       SynthVoice *voice = mCreators[name]();
-      for(auto allocCb: mAllocationCallbacks) {
-        allocCb.first(voice, allocCb.second);
-      }
-      if(mDefaultUserData) {
-        voice->userData(mDefaultUserData); 
-      }
-      voice->init();
+//      for(auto allocCb: mAllocationCallbacks) {
+//        allocCb.first(voice, allocCb.second);
+//      }
+//      if(mDefaultUserData) {
+//        voice->userData(mDefaultUserData);
+//      }
       return voice;
     } else {
 
@@ -766,6 +765,8 @@ public:
   template<class TSynthVoice>
   TSynthVoice *allocateVoice() {
     TSynthVoice *voice = new TSynthVoice;
+    assert(voice->triggerParameters().size() == 0);
+    assert(voice->parameters().size() == 0);
     for(auto allocCb: mAllocationCallbacks) {
       allocCb.first(voice, allocCb.second);
     }
