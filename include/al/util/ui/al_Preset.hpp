@@ -310,7 +310,8 @@ public:
         return index;
     }
 
-    void verbose(bool isVerbose = true) { mVerbose = isVerbose; }
+    void verbose(bool isVerbose) { mVerbose = isVerbose; }
+    bool verbose() {return mVerbose;}
 
     /**
      * @brief load preset into parameter states data structure without setting values

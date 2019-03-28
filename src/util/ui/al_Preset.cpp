@@ -432,6 +432,7 @@ void PresetHandler::setRootPath(std::string path)
   } else {
     mRootDir = path;
   }
+  setCurrentPresetMap();
 }
 
 std::string al::PresetHandler::getRootPath()
@@ -538,13 +539,13 @@ void PresetHandler::setCurrentPresetMap(std::string mapName, bool autoCreate)
 		}
 		mCurrentMapName = mapName;
 		storeCurrentPresetMap();
-	} else {
-		std::cout << "Setting " << mapName << std::endl;
+    } else {
 		mPresetsMap = readPresetMap(mapName);
 		mCurrentMapName = mapName;
 	}
-
-    std::cout << "Setting " << mapName << std::endl;
+    if (verbose()) {
+      std::cout << "Setting preset map:" << mapName << std::endl;
+    }
     for (auto cb:mPresetsMapCbs) {
         cb(mapName);
     }
