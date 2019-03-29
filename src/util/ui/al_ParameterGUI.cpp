@@ -543,11 +543,13 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler 
                 state.presetHandlerBank = 0;
             }
         }
+        ImGui::SameLine(0.0f, 40.0f);
+
         if (state.storeButtonState) {
           ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0, 0.0, 0.0, 1.0));
         }
         std::string storeText = state.storeButtonState ? "Cancel" : "Store";
-        bool storeButtonPressed = ImGui::Button(storeText.c_str());
+        bool storeButtonPressed = ImGui::Button(storeText.c_str(), ImVec2(100, 0));
         if (state.storeButtonState) {
           ImGui::PopStyleColor();
         }
@@ -592,10 +594,12 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler 
               char buf2[64];
               strncpy(buf2, state.newMapText.c_str(), 63);
               ImGui::Text("New map:");
-              ImGui::SameLine();
+//              ImGui::SameLine();
+              ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
               if (ImGui::InputText("", buf2, 64)) {
                   state.newMapText = buf2;
               }
+              ImGui::PopItemWidth();
               ImGui::SameLine();
               if (ImGui::Button("Create")) {
                   auto path = File::conformDirectory(presetHandler->getCurrentPath()) + state.newMapText + ".presetMap";

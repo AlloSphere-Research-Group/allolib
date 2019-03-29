@@ -353,22 +353,21 @@ public:
 
     void triggerOn() {
       if (!mCurrentTriggerState) {
-
-//                 std::cout << mControlVoice.id() << std::endl;
          mTriggerVoiceId = mSequencer.synth().triggerOn(&mControlVoice, 0, INT_MIN);
-//                std::cout << mControlVoice.id() << " -- " << mTriggerVoiceId << std::endl;
          mCurrentTriggerState = true;
       }
     }
 
     void triggerOff() {
-      mControlVoice.free();
-      while (mControlVoice.id() != -1) {
-        // Wait - spin lock
+      if (mCurrentTriggerState) {
+        mControlVoice.free();
+        while (mControlVoice.id() != -1) {
+          // Wait a bit
+          std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+        mSequencer.synth().popFreeVoice(&mControlVoice);
+        mCurrentTriggerState = false;
       }
-      mSequencer.synth().popFreeVoice(&mControlVoice);
-      //                 std::cout << mControlVoice.id() << std::endl;
-      mCurrentTriggerState = false;
     }
 
     bool triggerButtonState () {return mCurrentTriggerState;}
