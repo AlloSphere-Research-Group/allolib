@@ -36,6 +36,7 @@ public:
 
     // Create a torus mesh
     addTorus(mesh);
+    mesh.scale(0.5);
     mesh.generateNormals();
 
     // Initialize Pickable
