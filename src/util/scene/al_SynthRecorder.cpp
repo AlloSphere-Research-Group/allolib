@@ -5,8 +5,8 @@ using namespace al;
 
 void SynthRecorder::startRecord(std::string name, bool overwrite, bool startOnEvent) {
     mOverwrite = overwrite;
-    mRecording = true;
     mStartOnEvent = startOnEvent;
+    mRecording = true;
     mSequenceStart = std::chrono::high_resolution_clock::now();
     mSequenceName = name;
 }

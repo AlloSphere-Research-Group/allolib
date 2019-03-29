@@ -115,7 +115,7 @@ public:
         bool newMap = false;
         std::string enteredText;
         std::string newMapText;
-        bool storeButtonState;
+        bool storeButtonState {false};
     };
 
     static PresetHandlerState &drawPresetHandler(PresetHandler *presetHandler, int presetColumns, int presetRows);
@@ -132,6 +132,7 @@ public:
     static void drawBundleManager(BundleGUIManager *manager);
 
     static bool usingInput() {return imgui_is_using_input();}
+    static bool usingKeyboard() {return imgui_is_using_keyboard();}
 
     // Convenience function for use in ImGui::Combo
     static auto vector_getter(void* vec, int idx, const char** out_text)
@@ -244,15 +245,40 @@ public:
         drawFields();
         drawPresets();
         ImGui::Separator();
-        drawTriggerButton();
-        if (triggerButtonState()) {
-            drawPresetSequencer();
-            drawPresetSequencerRecorder();
+        static int currentTab = 1;
+        ImGui::Columns(2, nullptr, true);
+        if (ImGui::Selectable("Polyphonic", currentTab == 1)) {
+            currentTab = 1;
+            triggerOff();
+        }
+        ImGui::NextColumn();
+        if (ImGui::Selectable("Static", currentTab == 2)) {
+            currentTab = 2;
+            synthSequencer().stopSequence();
+            synth().allNotesOff();
+//            while (synth().getActiveVoices()) {} // Spin until all voices have been removed
+//            triggerOn();
+        }
+
+        ImGui::Columns(1);
+        if (currentTab == 1) {
+          drawAllNotesOffButton();
+          drawSynthSequencer();
+          drawSynthRecorder();
         } else {
-            drawSynthSequencer();
-            drawSynthRecorder();
+          drawTriggerButton();
+          drawPresetSequencer();
+          drawPresetSequencerRecorder();
         }
         ParameterGUI::endPanel();
+    }
+
+    void render(AudioIOData &io) {
+      synthSequencer().render(io);
+    }
+
+    void render(Graphics &g) {
+      synthSequencer().render(g);
     }
 
     void configureVoiceFromGui(VoiceType *voice) {
@@ -311,20 +337,38 @@ public:
         std::string buttonName = mCurrentTriggerState ? "Turn off##paramGUI" : "Trigger##paramGUI" ;
         if (ImGui::Button(buttonName.c_str(), ImVec2( ImGui::GetWindowWidth(), 40))) {
              if (!mCurrentTriggerState) {
-
-//                 std::cout << mControlVoice.id() << std::endl;
-                mTriggerVoiceId = mSequencer.synth().triggerOn(&mControlVoice, 0, INT_MIN);
-//                std::cout << mControlVoice.id() << " -- " << mTriggerVoiceId << std::endl;
-                mCurrentTriggerState = true;
+               triggerOn();
              } else {
-                 mControlVoice.free();
-                 while (!mSequencer.synth().popFreeVoice(&mControlVoice)) {
-                     // Wait - spin lock
-                 }
-//                 std::cout << mControlVoice.id() << std::endl;
-                 mCurrentTriggerState = false;
+               triggerOff();
              }
         }
+    }
+
+    void drawAllNotesOffButton() {
+        std::string buttonName = "All notes off##paramGUI";
+        if (ImGui::Button(buttonName.c_str(), ImVec2( ImGui::GetWindowWidth(), 0))) {
+             synth().allNotesOff();
+        }
+    }
+
+    void triggerOn() {
+      if (!mCurrentTriggerState) {
+
+//                 std::cout << mControlVoice.id() << std::endl;
+         mTriggerVoiceId = mSequencer.synth().triggerOn(&mControlVoice, 0, INT_MIN);
+//                std::cout << mControlVoice.id() << " -- " << mTriggerVoiceId << std::endl;
+         mCurrentTriggerState = true;
+      }
+    }
+
+    void triggerOff() {
+      mControlVoice.free();
+      while (mControlVoice.id() != -1) {
+        // Wait - spin lock
+      }
+      mSequencer.synth().popFreeVoice(&mControlVoice);
+      //                 std::cout << mControlVoice.id() << std::endl;
+      mCurrentTriggerState = false;
     }
 
     bool triggerButtonState () {return mCurrentTriggerState;}
@@ -340,6 +384,7 @@ public:
 
     PolySynth &synth() {return mSequencer.synth();}
     SynthSequencer &synthSequencer() {return mSequencer;}
+    SynthRecorder &synthRecorder() {return mRecorder;}
 
 private:
     std::string mName;

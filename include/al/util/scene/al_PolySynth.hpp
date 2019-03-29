@@ -780,7 +780,7 @@ public:
   bool verbose() { return mVerbose; }
   void verbose(bool verbose) { mVerbose = verbose; }
 
-  // Testing function. Do not use...
+  // Use this function with care as there are no memory protections
   SynthVoice *getActiveVoices() {
     return mActiveVoices;
   }
@@ -861,16 +861,17 @@ protected:
       SynthVoice *previousVoice = nullptr;
       while(voice) {
         if (!voice->active()) {
-          voice->id(-1); // Reset voice id
           if (previousVoice) {
             previousVoice->next = voice->next; // Remove from active list
             voice->next = mFreeVoices;
             mFreeVoices = voice; // Insert as head in free voices
+            voice->id(-1); // Reset voice id
             voice = previousVoice; // prepare next iteration
           } else { // Inactive is head of the list
             mActiveVoices = voice->next; // Remove voice from list
             voice->next = mFreeVoices;
             mFreeVoices = voice; // Insert as head in free voices
+            voice->id(-1); // Reset voice id
             voice = mActiveVoices; // prepare next iteration
           }
         }
