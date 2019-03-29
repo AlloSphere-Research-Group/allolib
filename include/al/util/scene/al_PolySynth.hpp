@@ -476,39 +476,9 @@ public:
 
   friend class SynthSequencer;
 
-  PolySynth(TimeMasterMode masterMode = TIME_MASTER_AUDIO)
-    : mMasterMode(masterMode)
-  {
-    if (mMasterMode == TIME_MASTER_CPU) {
+  PolySynth(TimeMasterMode masterMode = TIME_MASTER_AUDIO);
 
-      if (mVerbose) {
-        std::cout << "Starting CPU clock thread" << std::endl;
-      }
-      mCpuClockThread = std::make_unique<std::thread>([this]() {
-        using namespace std::chrono;
-        while(mRunCPUClock) {
-          high_resolution_clock::time_point startTime = high_resolution_clock::now();
-          std::chrono::milliseconds waitTime(int(mCpuGranularitySec * 1000));
-
-          high_resolution_clock::time_point futureTime = startTime + waitTime;
-          std::this_thread::sleep_until(futureTime);
-          // FIXME this will generate some jitter and drift, fix.
-
-          processVoices();
-          // Turn off voices
-          processVoiceTurnOff();
-          processInactiveVoices();
-        }
-      });
-    }
-  }
-
-  virtual ~PolySynth() {
-    if (mCpuClockThread) {
-      mRunCPUClock = false;
-      mCpuClockThread->join();
-    }
-  }
+  virtual ~PolySynth();
 
   /**
      * @brief trigger Puts voice in active voice lit and calls triggerOn() for it
@@ -525,7 +495,7 @@ public:
   /**
      * @brief Call TriggerOff for all active notes
      */
-  void allNotesOff();
+  virtual void allNotesOff();
 
   /**
      * @brief Get a reference to a voice.
@@ -739,28 +709,7 @@ public:
     };
   }
 
-  SynthVoice *allocateVoice(std::string name) {
-    if (mCreators.find(name) != mCreators.end()) {
-
-      if (mVerbose) {
-        std::cout << "Allocating (from name) voice of type " << name << "." << std::endl;
-      }
-      SynthVoice *voice = mCreators[name]();
-//      for(auto allocCb: mAllocationCallbacks) {
-//        allocCb.first(voice, allocCb.second);
-//      }
-//      if(mDefaultUserData) {
-//        voice->userData(mDefaultUserData);
-//      }
-      return voice;
-    } else {
-
-      if (mVerbose) {
-        std::cout << "Can't allocate voice of type " << name << ". Voice not registered and no polyphony." << std::endl;
-      }
-    }
-    return nullptr;
-  }
+  SynthVoice *allocateVoice(std::string name);
 
   template<class TSynthVoice>
   TSynthVoice *allocateVoice() {
@@ -805,7 +754,7 @@ protected:
         } else {
           mActiveVoices = mVoicesToInsert;
         }
-        if (mVerbose) {
+        if (verbose()) {
           std::cout << "Voice on "<<  mVoicesToInsert->id() << std::endl;
         }
 

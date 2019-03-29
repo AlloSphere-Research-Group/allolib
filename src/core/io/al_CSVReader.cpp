@@ -104,7 +104,7 @@ bool CSVReader::readFile(std::string fileName, bool hasColumnNames) {
             std::memcpy(data, &booleanValue, sizeof (bool));
             byteCount += sizeof (bool);
             break;
-          case IGNORE:
+          case IGNORE_COLUMN:
             break;
           }
         }
@@ -157,7 +157,7 @@ bool CSVReader::readFile(std::string fileName, bool hasColumnNames) {
           std::memcpy(data, &booleanValue, sizeof (bool));
           byteCount += sizeof (bool);
           break;
-        case IGNORE:
+        case IGNORE_COLUMN:
           break;
         }
       }
@@ -187,7 +187,7 @@ std::vector<double> CSVReader::getColumn(int index) {
 		case BOOLEAN:
 			offset += sizeof (bool);
 			break;
-		case IGNORE:
+        case IGNORE_COLUMN:
 			break;
 		}
 	}
@@ -215,7 +215,7 @@ size_t CSVReader::calculateRowLength() {
 		case BOOLEAN:
 			len += sizeof (bool);
 			break;
-		case IGNORE:
+        case IGNORE_COLUMN:
 			break;
 		}
 	}

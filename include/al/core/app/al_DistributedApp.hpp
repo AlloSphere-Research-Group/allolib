@@ -100,6 +100,8 @@ public:
                     role = Role(role | ROLE_RENDERER);
                   } else if (token == "control")  {
                     role = Role(role | ROLE_CONTROL);
+                  } else if (token == "replica")  {
+                    role = Role(role | ROLE_DESKTOP_REPLICA);
                   }
               }
               return role;
