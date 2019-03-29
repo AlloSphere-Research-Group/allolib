@@ -390,6 +390,7 @@ public:
       for (auto *param: params) {
           registerTriggerParameter(*param);
       }
+      return *this;
   }
 
   SynthVoice& operator<<(ParameterMeta &param) {return registerTriggerParameter(param);}
@@ -745,13 +746,12 @@ public:
         std::cout << "Allocating (from name) voice of type " << name << "." << std::endl;
       }
       SynthVoice *voice = mCreators[name]();
-      for(auto allocCb: mAllocationCallbacks) {
-        allocCb.first(voice, allocCb.second);
-      }
-      if(mDefaultUserData) {
-        voice->userData(mDefaultUserData); 
-      }
-      voice->init();
+//      for(auto allocCb: mAllocationCallbacks) {
+//        allocCb.first(voice, allocCb.second);
+//      }
+//      if(mDefaultUserData) {
+//        voice->userData(mDefaultUserData);
+//      }
       return voice;
     } else {
 
@@ -765,6 +765,8 @@ public:
   template<class TSynthVoice>
   TSynthVoice *allocateVoice() {
     TSynthVoice *voice = new TSynthVoice;
+    assert(voice->triggerParameters().size() == 0);
+    assert(voice->parameters().size() == 0);
     for(auto allocCb: mAllocationCallbacks) {
       allocCb.first(voice, allocCb.second);
     }
@@ -778,7 +780,7 @@ public:
   bool verbose() { return mVerbose; }
   void verbose(bool verbose) { mVerbose = verbose; }
 
-  // Testing function. Do not use...
+  // Use this function with care as there are no memory protections
   SynthVoice *getActiveVoices() {
     return mActiveVoices;
   }
@@ -859,16 +861,17 @@ protected:
       SynthVoice *previousVoice = nullptr;
       while(voice) {
         if (!voice->active()) {
-          voice->id(-1); // Reset voice id
           if (previousVoice) {
             previousVoice->next = voice->next; // Remove from active list
             voice->next = mFreeVoices;
             mFreeVoices = voice; // Insert as head in free voices
+            voice->id(-1); // Reset voice id
             voice = previousVoice; // prepare next iteration
           } else { // Inactive is head of the list
             mActiveVoices = voice->next; // Remove voice from list
             voice->next = mFreeVoices;
             mFreeVoices = voice; // Insert as head in free voices
+            voice->id(-1); // Reset voice id
             voice = mActiveVoices; // prepare next iteration
           }
         }

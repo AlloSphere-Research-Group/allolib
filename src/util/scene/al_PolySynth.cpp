@@ -186,7 +186,9 @@ SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc)
     SynthVoice *freeVoice = mFreeVoices;
     SynthVoice *previousVoice = nullptr;
     while (freeVoice) {
+      if (verbose()) {
         std::cout << "Comparing  voice '" << demangle(typeid(*freeVoice).name()) << "' to '" << name << "'" << std::endl;
+      }
         if (demangle(typeid(*freeVoice).name()) == name
                 || strncmp(typeid(*freeVoice).name(),name.c_str(), name.size()) == 0 ) {
 

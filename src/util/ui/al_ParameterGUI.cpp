@@ -484,17 +484,11 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler 
 
         int selection = presetHandler->getCurrentPresetIndex();
         std::string currentPresetName = presetHandler->getCurrentPresetName();
-
-        char buf1[64];
-        if (state.enteredText.size() == 0) {
-            strncpy(buf1, currentPresetName.c_str(), 63);
-        } else {
-            strncpy(buf1, state.enteredText.c_str(), 63);
-        }
-        if (ImGui::InputText("preset", buf1, 64)) {
-            state.enteredText = buf1;
-        }
+        ImGui::Text("%s", currentPresetName.c_str());
         int counter = state.presetHandlerBank * (presetColumns * presetRows) ;
+        if (state.storeButtonState) {
+          ImGui::PushStyleColor(ImGuiCol_Text, 0xff0000ff);
+        }
         for (int row = 0; row < presetRows; row++) {
             for (int column = 0; column < presetColumns; column++) {
                 std::string name = std::to_string(counter);
@@ -514,6 +508,7 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler 
                         presetHandler->storePreset(counter, saveName.c_str());
                         selection = counter;
                         state.storeButtonState = false;
+                        ImGui::PopStyleColor();
                         state.enteredText.clear();
                     } else {
                         if (presetHandler->recallPreset(counter) != "") { // Preset is available
@@ -532,8 +527,9 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler 
                 ImGui::PopID();
             }
         }
-        ImGui::Checkbox("Store", &state.storeButtonState);
-        ImGui::SameLine();
+        if (state.storeButtonState) {
+          ImGui::PopStyleColor();
+        }
         if (ImGui::Button("<-")) {
             state.presetHandlerBank -= 1;
             if (state.presetHandlerBank < 0) {
@@ -547,60 +543,86 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler 
                 state.presetHandlerBank = 0;
             }
         }
-
-        vector<string> mapList = presetHandler->availablePresetMaps();
-        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.15f);
-        if (ImGui::BeginCombo("Preset Map", state.currentBank.data())) {
-            stateMap[presetHandler].mapList = presetHandler->availablePresetMaps();
-            for (auto mapName : stateMap[presetHandler].mapList ) {
-                bool isSelected = (state.currentBank == mapName);
-                if (ImGui::Selectable(mapName.data(), isSelected)){
-                    state.currentBank = mapName;
-                    presetHandler->setCurrentPresetMap(mapName);
-                }
-                if (isSelected) {
-                    ImGui::SetItemDefaultFocus();
-                }
-            }
-            ImGui::EndCombo();
+        if (state.storeButtonState) {
+          ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0, 0.0, 0.0, 1.0));
         }
-        ImGui::SameLine();
-        if (!state.newMap) {
-            if (ImGui::Button("+")) {
-                state.newMap = true;
-            }
+        std::string storeText = state.storeButtonState ? "Cancel" : "Store";
+        bool storeButtonPressed = ImGui::Button(storeText.c_str());
+        if (state.storeButtonState) {
+          ImGui::PopStyleColor();
+        }
+        if (storeButtonPressed) {
+          state.storeButtonState = !state.storeButtonState;
+          if (state.storeButtonState) {
+            state.enteredText = currentPresetName;
+          }
+        }
+        if (state.storeButtonState) {
+          char buf1[64];
+          strncpy(buf1, state.enteredText.c_str(), 63);
+          ImGui::Text("Store preset as:");
+          ImGui::SameLine();
+          if (ImGui::InputText("preset", buf1, 64)) {
+              state.enteredText = buf1;
+          }
+          ImGui::Text("Click on a preset number to store.");
         } else {
-            char buf2[64];
-            strncpy(buf2, state.newMapText.c_str(), 63);
-            ImGui::Text("New map:");
+          vector<string> mapList = presetHandler->availablePresetMaps();
+//          ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);
+          if (ImGui::BeginCombo("Preset Map", state.currentBank.data())) {
+              stateMap[presetHandler].mapList = presetHandler->availablePresetMaps();
+              for (auto mapName : stateMap[presetHandler].mapList ) {
+                  bool isSelected = (state.currentBank == mapName);
+                  if (ImGui::Selectable(mapName.data(), isSelected)){
+                      state.currentBank = mapName;
+                      presetHandler->setCurrentPresetMap(mapName);
+                  }
+                  if (isSelected) {
+                      ImGui::SetItemDefaultFocus();
+                  }
+              }
+              ImGui::EndCombo();
+          }
+          if (!state.newMap) {
             ImGui::SameLine();
-            if (ImGui::InputText("", buf2, 64)) {
-                state.newMapText = buf2;
+            if (ImGui::Button("+")) {
+              state.newMap = true;
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Create")) {
-                auto path = File::conformDirectory(presetHandler->getCurrentPath()) + state.newMapText + ".presetMap";
-                // Create an empty file
-                ofstream file;
-                file.open(path, ios::out);
-                file.close();
-                state.newMap = false;
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Cancel")) {
-                state.newMapText = "";
-                state.newMap = false;
-            }
+          } else {
+              char buf2[64];
+              strncpy(buf2, state.newMapText.c_str(), 63);
+              ImGui::Text("New map:");
+              ImGui::SameLine();
+              if (ImGui::InputText("", buf2, 64)) {
+                  state.newMapText = buf2;
+              }
+              ImGui::SameLine();
+              if (ImGui::Button("Create")) {
+                  auto path = File::conformDirectory(presetHandler->getCurrentPath()) + state.newMapText + ".presetMap";
+                  // Create an empty file
+                  ofstream file;
+                  file.open(path, ios::out);
+                  file.close();
+                  state.newMap = false;
+              }
+              ImGui::SameLine();
+              if (ImGui::Button("Cancel")) {
+                  state.newMapText = "";
+                  state.newMap = false;
+              }
+          }
+          // TODO options to create new bank
+  //        ImGui::SameLine();
+//          ImGui::PopItemWidth();
+          ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+          float morphTime = presetHandler->getMorphTime();
+          if (ImGui::InputFloat("morph time", &morphTime, 0.0f, 20.0f)) {
+              presetHandler->setMorphTime(morphTime);
+          }
+          ImGui::PopItemWidth();
+
         }
-        // TODO options to create new bank
-//        ImGui::SameLine();
-        ImGui::PopItemWidth();
-        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
-        float morphTime = presetHandler->getMorphTime();
-        if (ImGui::InputFloat("morph time", &morphTime, 0.0f, 20.0f)) {
-            presetHandler->setMorphTime(morphTime);
-        }
-        ImGui::PopItemWidth();
+
 //            ImGui::Text("%s", currentPresetName.c_str());
 
     }
@@ -621,8 +643,8 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
             {*currentTime = currTime;}, 0.1);
         presetSequencer->registerBeginCallback([&](PresetSequencer *sender, void *userData) {stateMap[presetSequencer].totalDuration = sender->getSequenceTotalDuration(sender->currentSequence());});
         vector<string> seqList = presetSequencer->getSequenceList();
-        std::cout << seqList[currentPresetSequencerItem] <<std::endl;
         if (currentPresetSequencerItem >= 0 && currentPresetSequencerItem < (int) seqList.size()) {
+            std::cout << seqList[currentPresetSequencerItem] <<std::endl;
             presetSequencer->loadSequence(seqList[currentPresetSequencerItem]);
             stateMap[presetSequencer].totalDuration = presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
         }
@@ -672,12 +694,14 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
                 presetSequencer->stopSequence();
                 presetSequencer->rewind();
             }
-        }
-        float time = state.currentTime;
-//        std::cout << time << std::endl;
-        if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
-//            std::cout << "Requested time:" << time << std::endl;
-            presetSequencer->setTime(time);
+            float time = state.currentTime;
+    //        std::cout << time << std::endl;
+            if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
+    //            std::cout << "Requested time:" << time << std::endl;
+                presetSequencer->setTime(time);
+            }
+        } else {
+          ImGui::Text("No sequences found.");
         }
     }
     ImGui::PopID();
@@ -718,7 +742,9 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
     }
     SynthSequencerState &state = stateMap[synthSequencer];
 
-    if (ImGui::CollapsingHeader("Event Sequencer##EventSequencer", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+    std::string headerLabel = "Event Sequencer##EventSequencer";
+    if (ImGui::CollapsingHeader(headerLabel.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+      // TODO we should only refresh occasionally or perhaps reactively.
         std::vector<std::string> seqList = synthSequencer->getSequenceList();
         if (seqList.size() > 0) {
             if (seqList.size() > 64) {
@@ -737,6 +763,8 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
                 synthSequencer->stopSequence();
                 synthSequencer->synth().allNotesOff();
             }
+        } else {
+          ImGui::Text("No sequences found.");
         }
     }
 }

@@ -326,6 +326,14 @@ void ParameterServer::stopServer()
     }
 }
 
+bool ParameterServer::serverRunning() {
+    if (!mServer) {
+        return false;
+    } else {
+        return mServer->isOpen();
+    }
+}
+
 std::vector<Parameter *> ParameterServer::parameters()
 {
     std::vector<Parameter *> params;
@@ -582,7 +590,15 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param, std::st
             p->set(Color(a,b,c,d));
             return true;
         }
-    } else {
+    } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) == 0) {// ParameterColor
+      Trigger *p = dynamic_cast<Trigger *>(param);
+      if(address == p->getFullAddress()){
+//          float a,b,c,d;
+//          m >> a >> b >> c >> d;
+          p->trigger();
+          return true;
+      }
+  } else {
         // TODO this check should be performed on registration
         std::cout << "Unsupported registered Parameter on message " << typeid(*param).name() << std::endl;
     }

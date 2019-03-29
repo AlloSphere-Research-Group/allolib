@@ -204,16 +204,28 @@ public:
 	inline bool running() { return mRunning; }
 
     /**
+     * @brief Register preset handler with sequencer
+     * @param presetHandler
+     * @return
+     *  Sequencer will recall presets through the registered
+     * preset handler. The sequencer's directory is set to
+     * the preset handler's directory
+     */
+    PresetSequencer &registerPresetHandler(PresetHandler &presetHandler) {
+      mPresetHandler = &presetHandler;
+      mDirectory = mPresetHandler->getCurrentPath();
+//		std::cout << "Path set to:" << mDirectory << std::endl;
+      return *this;
+    }
+
+    /**
      * @brief Register PresetHandler through the << operator
      * @param presetHandler
      * @return reference to this object
      */
 	PresetSequencer &operator<< (PresetHandler &presetHandler)
-	{
-		mPresetHandler = &presetHandler;
-		mDirectory = mPresetHandler->getCurrentPath();
-//		std::cout << "Path set to:" << mDirectory << std::endl;
-		return *this;
+    {
+      return registerPresetHandler(presetHandler);
 	}
 
     PresetSequencer &operator<< (ParameterMeta &param) { return registerParameter(param); }

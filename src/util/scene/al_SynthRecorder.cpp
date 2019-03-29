@@ -5,18 +5,15 @@ using namespace al;
 
 void SynthRecorder::startRecord(std::string name, bool overwrite, bool startOnEvent) {
     mOverwrite = overwrite;
-    mRecording = true;
     mStartOnEvent = startOnEvent;
+    mRecording = true;
     mSequenceStart = std::chrono::high_resolution_clock::now();
     mSequenceName = name;
 }
 
 void SynthRecorder::stopRecord() {
     mRecording = false;
-    std::string path = ".";
-    if (path.back() != '/') {
-        path += "/";
-    }
+    std::string path = File::conformDirectory(mDirectory);
     std::string fileName = path + mSequenceName + ".synthSequence";
 
     std::string newSequenceName = mSequenceName;

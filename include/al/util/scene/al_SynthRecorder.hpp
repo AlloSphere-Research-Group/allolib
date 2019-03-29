@@ -100,11 +100,23 @@ public:
 
     SynthRecorder(TextFormat format = SEQUENCER_EVENT) { mFormat = format;}
 
+    void setDirectory(std::string path) {
+      if (!File::exists(path)) {
+          if (!Dir::make(path)) {
+              std::cout << "Error creating directory: " << path << std::endl;
+          }
+      }
+      mDirectory = path;
+    }
+
     void startRecord(std::string name = "", bool overwrite = false, bool startOnEvent = true);
 
     void stopRecord();
 
     void setMaxRecordTime(al_sec maxTime) { mMaxRecordTime = maxTime; }
+
+    void verbose(bool verbose) {mVerbose = true;}
+    bool verbose() {return mVerbose;}
 
     //	std::string lastSequenceName();
     //	std::string lastSequenceSubDir();
@@ -126,14 +138,14 @@ public:
     {
         std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
         SynthRecorder *rec = static_cast<SynthRecorder *>(userData);
-        std::chrono::duration<double> diff = now - rec->mSequenceStart;
         if (rec->mRecording) {
+            std::unique_lock<std::mutex> lk(rec->mSequenceLock);
             if (rec->mStartOnEvent) {
                 rec->mSequenceStart = now;
                 rec->mStartOnEvent = false;
             }
+            std::chrono::duration<double> diff = now - rec->mSequenceStart;
             std::vector<ParameterField> pFields = voice->getTriggerParams();
-            std::unique_lock<std::mutex> lk(rec->mSequenceLock);
 
             SynthEvent event;
             event.type = SynthEventType::TRIGGER_ON;
@@ -143,6 +155,10 @@ public:
             event.duration = -1;
             event.pFields = pFields;
             rec->mSequence.push_back(event);
+            if (rec->verbose()) {
+              std::cout << "trigger at " << event.time << ":" << event.synthName << ":" << voice->id() << std::endl;
+            }
+
         }
     }
 
@@ -155,12 +171,12 @@ public:
         std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
         SynthRecorder *rec = static_cast<SynthRecorder *>(userData);
         if (rec->mRecording) {
-            if (rec->mStartOnEvent) {
-                rec->mSequenceStart = now;
-                rec->mStartOnEvent = false;
-            }
-            std::chrono::duration<double> diff = now - rec->mSequenceStart;
             std::unique_lock<std::mutex> lk(rec->mSequenceLock);
+//            if (rec->mStartOnEvent) {
+//                rec->mSequenceStart = now;
+//                rec->mStartOnEvent = false;
+//            }
+            std::chrono::duration<double> diff = now - rec->mSequenceStart;
 
             SynthEvent event;
             event.type = SynthEventType::TRIGGER_OFF;
@@ -172,6 +188,9 @@ public:
             //                event.pFields.push_back(pFields[i]);
             //            }
             rec->mSequence.push_back(event);
+            if (rec->verbose()) {
+              std::cout << "trigger OFF at " << event.time << ":" << event.synthName << ":" << id << std::endl;
+            }
         }
     }
 
@@ -180,6 +199,7 @@ private:
     std::string mDirectory;
     PolySynth *mPolySynth {nullptr};
     TextFormat mFormat;
+    bool mVerbose;
 
     bool mOverwrite;
     std::string mSequenceName;
