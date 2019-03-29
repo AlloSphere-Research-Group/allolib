@@ -280,14 +280,14 @@ public:
 
     void createBundle(uint8_t bundleSize) {
         for (uint8_t i = 0; i < bundleSize; i++) {
-            auto voice = mSynth->getVoice<VoiceType>();
+            auto voice = mSequencer.synth().template getVoice<VoiceType>();
             auto bundle = std::make_shared<ParameterBundle>(demangle(typeid (mControlVoice).name()));
             for(auto *param: voice->triggerParameters()) {
                 *bundle << param;
             }
             mBundles.push_back(bundle);
             mBundleGui << *bundle;
-            mSynth->triggerOn(voice);
+            mSequencer.synth().triggerOn(voice);
         }
     }
 
