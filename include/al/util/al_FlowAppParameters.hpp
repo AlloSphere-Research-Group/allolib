@@ -106,7 +106,7 @@ public:
 
                 nearClip.registerChangeCallback([&](float x){ lens().near(x); });
                 farClip.registerChangeCallback([&](float x){ lens().far(x); });
-		eyeSeparation.registerChangeCallback([&](float x){ lens().eyeSep(x); });
+        eyeSeparation.registerChangeCallback([&](float x){ std::cout << "eye sep" <<std::endl; lens().eyeSep(x); });
 		focalLength.registerChangeCallback([&](float x){ lens().focalLength(x); });
 		fovx.registerChangeCallback([&](float x){ lens().fovx(x, 1); });
 		fovy.registerChangeCallback([&](float x){ lens().fovy(x); });

@@ -577,7 +577,8 @@ void SocketReceiveMultiplexer::DetachPeriodicTimerListener( TimerListener *liste
 
 void SocketReceiveMultiplexer::Run()
 {
-	impl_->Run();
+
+    impl_->Run();
 }
 
 void SocketReceiveMultiplexer::RunUntilSigInt()

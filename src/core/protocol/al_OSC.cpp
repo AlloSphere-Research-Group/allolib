@@ -427,6 +427,7 @@ Recv::Recv(uint16_t port, const char *address, al_sec timeout)
 Recv::~Recv() { stop(); }
 
 bool Recv::open(uint16_t port, const char * address, al_sec timeout) {
+  mOpen = false;
   try {
     // unique pointer assignment releases and deletes previously owned object
     if (*address == '\0') {
@@ -442,6 +443,7 @@ bool Recv::open(uint16_t port, const char * address, al_sec timeout) {
     std::cout << "run time exception at Recv::open: " << e.what() << " " << address << ":" << port << std::endl;
     return false;
   }
+  mOpen = true;
   return true;
 }
 
