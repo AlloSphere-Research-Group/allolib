@@ -226,12 +226,12 @@ public:
         if (mName == "") {
           mName = demangle(typeid (mControlVoice).name());
         }
-        mPresetHandler.setRootPath(mName);
+        mPresetHandler.setRootPath(mName + "-data");
         mPresetSequencer << mPresetHandler;
         mPresetSequenceRecorder << mPresetHandler;
 
-        mSequencer.setDirectory(mName);
-        mRecorder.setDirectory(mName);
+        mSequencer.setDirectory(mName+ "-data");
+        mRecorder.setDirectory(mName+ "-data");
 //        mSequencer << *mSynth;
         mRecorder << mSequencer.synth();
 
