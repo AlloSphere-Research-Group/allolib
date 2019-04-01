@@ -754,9 +754,9 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
     static std::map<SynthSequencer *, SynthSequencerState> stateMap;
     if(stateMap.find(synthSequencer) == stateMap.end()) {
         stateMap[synthSequencer] = SynthSequencerState{0};
-        float *currentTime = &(stateMap[synthSequencer].currentTime);
-        synthSequencer->registerTimeChangeCallback( [currentTime](float currTime)
-            {*currentTime = currTime;}, 0.1);
+//        float *currentTime = &(stateMap[synthSequencer].currentTime);
+//        synthSequencer->registerTimeChangeCallback( [currentTime](float currTime)
+//            {*currentTime = currTime;}, 0.1);
     }
     SynthSequencerState &state = stateMap[synthSequencer];
 
@@ -784,10 +784,10 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
                 synthSequencer->stopSequence();
                 synthSequencer->synth().allNotesOff();
             }
-            if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
-    //            std::cout << "Requested time:" << time << std::endl;
-                synthSequencer->setTime(time);
-            }
+//            if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
+//    //            std::cout << "Requested time:" << time << std::endl;
+//                synthSequencer->setTime(time);
+//            }
         } else {
           ImGui::Text("No sequences found.");
         }
