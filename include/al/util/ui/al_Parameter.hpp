@@ -710,14 +710,15 @@ public:
 
 	std::vector<std::string> getElements() { return mElements; }
 
-	std::string getCurrent() {
-		if (mElements.size() > 0) {
-			return mElements[get()];
-		}
-		else {
-			return "";
-		}
-	}
+    std::string getCurrent() {
+      int current = get();
+      if (mElements.size() > 0 && current >=0 && current < int(mElements.size())) {
+        return mElements[get()];
+      }
+      else {
+        return "";
+      }
+    }
 
     void setCurrent(std::string element) {
         auto position = std::find(mElements.begin(), mElements.end(), element);

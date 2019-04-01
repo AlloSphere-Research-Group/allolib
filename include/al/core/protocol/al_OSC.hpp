@@ -371,6 +371,8 @@ public:
 
 	bool open(uint16_t port, const char * address = "", al_sec timeout=0);
 
+    bool isOpen() {return mOpen;}
+
 	const std::string& address() const { return mAddress; }
 	uint16_t port() const { return mPort; }
 	
@@ -413,6 +415,7 @@ protected:
 	bool mBackground;
 	std::string mAddress = "";
 	uint16_t mPort = 0;
+    bool mOpen {false};
 };
 
 

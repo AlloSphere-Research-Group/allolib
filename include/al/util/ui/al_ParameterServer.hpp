@@ -60,7 +60,7 @@ public:
 
     void startCommandListener(std::string address = "0.0.0.0") {
         int offset = 0;
-        while(!mNetworkListener.open(listenerFirstPort + offset, address.c_str()) & (offset < 128) ) {
+        while(!mNetworkListener.open(listenerFirstPort + offset, address.c_str()) && (offset < 128) ) {
             offset++;
         }
         if (offset < 128) {
@@ -266,7 +266,7 @@ public:
      */
     void stopServer();
 
-    bool serverRunning() { return (mServer != nullptr); }
+    bool serverRunning();
 
     /**
      * @brief Get the list of registered parameters.

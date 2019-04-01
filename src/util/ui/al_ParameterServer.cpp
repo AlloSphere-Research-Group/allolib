@@ -326,6 +326,14 @@ void ParameterServer::stopServer()
     }
 }
 
+bool ParameterServer::serverRunning() {
+    if (!mServer) {
+        return false;
+    } else {
+        return mServer->isOpen();
+    }
+}
+
 std::vector<Parameter *> ParameterServer::parameters()
 {
     std::vector<Parameter *> params;
@@ -588,7 +596,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param, std::st
           p->trigger();
           return true;
       }
-    } else {
+  } else {
         // TODO this check should be performed on registration
         std::cout << "Unsupported registered Parameter on message " << typeid(*param).name() << std::endl;
     }
