@@ -26,10 +26,14 @@ void SynthSequencer::render(Graphics &g) {
 bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   //        synth().allNotesOff();
   // Add an offset of 0.1 to make sure the allNotesOff message gets processed before the sequence
-  std::list<SynthSequencerEvent> events = loadSequence(sequenceName, mMasterTime - startTime + 0.1);
+  double currentMasterTime = mMasterTime;
+  const double startPad = 0.1;
+  std::list<SynthSequencerEvent> events = loadSequence(sequenceName, currentMasterTime - startTime + startPad);
+
   std::unique_lock<std::mutex> lk(mEventLock);
   mEvents = events;
   mNextEvent = 0;
+  mPlaybackStartTime = currentMasterTime;
 
   if (mMasterMode == PolySynth::TIME_MASTER_CPU) {
     mCpuThread = std::make_shared<std::thread>([&](int granularityns = 1000) {
@@ -72,6 +76,7 @@ void SynthSequencer::registerTimeChangeCallback(std::function<void (float)> func
 {
   if (mEventLock.try_lock()) {
     mTimeChangeCallback = func;
+    mTimeChangeMinTimeDelta = minTimeDeltaSec;
     mEventLock.unlock();
   } else {
     std::cerr << "ERROR: Failed to set time change callback. Sequencer running" <<std::endl;
@@ -375,9 +380,30 @@ std::vector<std::string> SynthSequencer::getSequenceList() {
   return sequenceList;
 }
 
+double SynthSequencer::getSequenceDuration(std::string sequenceName) {
+  std::list<SynthSequencerEvent> events = loadSequence(sequenceName, 0.0);
+  double dur = 0.0;
+  for (auto const &event: events) {
+    if (event.startTime + event.duration > dur) {
+      dur = event.startTime + event.duration;
+    }
+  }
+  return dur;
+}
+
 void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
   if (mEventLock.try_lock()) {
+
     if (mNextEvent < mEvents.size()) {
+
+      mTimeAccumCallbackNs += (mMasterTime - blockStartTime)* 1.0e9;
+      if (mTimeAccumCallbackNs*1.0e-9 > mTimeChangeMinTimeDelta) {
+        if (mTimeChangeCallback) {
+          mTimeChangeCallback(float(blockStartTime - mPlaybackStartTime));
+//          std::cout << blockStartTime- mPlaybackStartTime << std::endl;
+        }
+        mTimeAccumCallbackNs -= mTimeChangeMinTimeDelta* 1.0e9;
+      }
       auto iter = mEvents.begin();
       std::advance(iter, mNextEvent);
       auto event = iter;

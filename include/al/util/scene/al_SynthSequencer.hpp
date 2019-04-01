@@ -248,8 +248,9 @@ public:
 
     std::list<SynthSequencerEvent> loadSequence(std::string sequenceName, double timeOffset = 0, double timeScale = 1.0);
 
-
     std::vector<std::string> getSequenceList();
+
+    double getSequenceDuration(std::string sequenceName);
 
     PolySynth &synth() {return *mPolySynth;}
 
@@ -277,12 +278,14 @@ private:
 
     PolySynth::TimeMasterMode mMasterMode {PolySynth::TIME_MASTER_AUDIO};
     double mMasterTime {0.0};
+    double mPlaybackStartTime {0.0};
 
     float mNormalizedTempo {1.0f}; // Linearly normalized inverted around 60 bpm (1.0 = 60bpm, 0.5 = 120 bpm)
 
     // Time change callback
     std::function<void(float)> mTimeChangeCallback;
     float mTimeChangeMinTimeDelta = 0;
+    double mTimeAccumCallbackNs = 0; // Accumulator for tirggering time change callback.
 
     // CPU processing thread. Used when TIME_MASTER_CPU
     std::shared_ptr<std::thread> mCpuThread;

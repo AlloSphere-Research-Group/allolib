@@ -754,9 +754,9 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
     static std::map<SynthSequencer *, SynthSequencerState> stateMap;
     if(stateMap.find(synthSequencer) == stateMap.end()) {
         stateMap[synthSequencer] = SynthSequencerState{0};
-//        float *currentTime = &(stateMap[synthSequencer].currentTime);
-//        synthSequencer->registerTimeChangeCallback( [currentTime](float currTime)
-//            {*currentTime = currTime;}, 0.1);
+        float *currentTime = &(stateMap[synthSequencer].currentTime);
+        synthSequencer->registerTimeChangeCallback( [currentTime](float currTime)
+            {*currentTime = currTime;}, 0.1f);
     }
     SynthSequencerState &state = stateMap[synthSequencer];
 
@@ -772,26 +772,32 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
                 seqList.resize(64);
                 std::cout << "Cropping sequence list to 64 items for display" <<std::endl;
             }
-            ImGui::Combo("Sequences", &state.currentItem, ParameterGUI::vector_getter,
-                         static_cast<void*>(&seqList), seqList.size());
+            if (ImGui::Combo("Sequences", &state.currentItem, ParameterGUI::vector_getter,
+                             static_cast<void*>(&seqList), seqList.size())) {
+              state.totalDuration = synthSequencer->getSequenceDuration(seqList[state.currentItem]);
+            }
             if (ImGui::Button("Play")) {
                 synthSequencer->stopSequence();
                 synthSequencer->synth().allNotesOff();
+                state.totalDuration = synthSequencer->getSequenceDuration(seqList[state.currentItem]);
                 synthSequencer->playSequence(seqList[state.currentItem]);
+
             }
             ImGui::SameLine();
             if (ImGui::Button("Stop")) {
                 synthSequencer->stopSequence();
                 synthSequencer->synth().allNotesOff();
             }
-//            if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
-//    //            std::cout << "Requested time:" << time << std::endl;
-//                synthSequencer->setTime(time);
-//            }
+//            static float time = state.currentTime;
+            if (ImGui::SliderFloat("Position", &state.currentTime, 0.0f, state.totalDuration)) {
+                std::cout << "Requested time:" << state.currentTime << std::endl;
+                synthSequencer->setTime(state.currentTime);
+            }
         } else {
           ImGui::Text("No sequences found.");
         }
     }
+    ImGui::PopID();
 }
 
 void ParameterGUI::drawSynthRecorder(SynthRecorder *synthRecorder) {
