@@ -793,8 +793,6 @@ public:
   template<class TSynthVoice>
   TSynthVoice *allocateVoice() {
     TSynthVoice *voice = new TSynthVoice;
-    assert(voice->triggerParameters().size() == 0);
-    assert(voice->parameters().size() == 0);
     for(auto allocCb: mAllocationCallbacks) {
       allocCb.first(voice, allocCb.second);
     }
