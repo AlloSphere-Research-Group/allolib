@@ -79,10 +79,10 @@ public:
     /**
      * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields
      */ 
-    virtual bool setParamFields(float *pFields, int numFields = -1) override {
-        bool ok = SynthVoice::setParamFields(pFields, numFields);
-        if (numFields == (int) mParametersToFields.size() + 8) { // If seven extra, it means pose and size are there too
-            pFields += mParametersToFields.size();
+    virtual bool setTriggerParams(float *pFields, int numFields = -1) override {
+        bool ok = SynthVoice::setTriggerParams(pFields, numFields);
+        if (numFields == (int) mTriggerParams.size() + 8) { // If seven extra, it means pose and size are there too
+            pFields += mTriggerParams.size();
             double x = *pFields++;
             double y = *pFields++;
             double z = *pFields++;
@@ -104,8 +104,8 @@ public:
      * @param pFields std::vector<float> containing the values
      * @return true if able to set the fields
      */
-    virtual bool setParamFields(std::vector<float> &pFields) override {
-        return setParamFields(pFields.data(), pFields.size());
+    virtual bool setTriggerParams(std::vector<float> &pFields) override {
+        return setTriggerParams(pFields.data(), pFields.size());
     }
 
     /**
@@ -113,10 +113,10 @@ public:
      * @param pFields std::vector<float> containing the values
      * @return true if able to set the fields
      */
-    virtual bool setParamFields(std::vector<ParameterField> pFields) override {
-        bool ok = SynthVoice::setParamFields(pFields);
-        if (pFields.size() == mParametersToFields.size() + 8) { // If seven extra, it means pose and size are there too
-            size_t index = mParametersToFields.size();
+    virtual bool setTriggerParams(std::vector<ParameterField> pFields) override {
+        bool ok = SynthVoice::setTriggerParams(pFields);
+        if (pFields.size() == mTriggerParams.size() + 8) { // If seven extra, it means pose and size are there too
+            size_t index = mTriggerParams.size();
             double x = pFields[index++].get<float>();
             double y = pFields[index++].get<float>();
             double z = pFields[index++].get<float>();
@@ -136,9 +136,9 @@ public:
     /**
      * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields
      */ 
-    virtual std::vector<ParameterField> getParamFields() override {
+    virtual std::vector<ParameterField> getTriggerParams() override {
 
-        std::vector<ParameterField> pFields = SynthVoice::getParamFields();
+        std::vector<ParameterField> pFields = SynthVoice::getTriggerParams();
         pFields.reserve(pFields.size() + 8);
         pFields.insert(pFields.end(), mPose.vec().begin(), mPose.vec().end());
 

@@ -5,18 +5,15 @@ using namespace al;
 
 void SynthRecorder::startRecord(std::string name, bool overwrite, bool startOnEvent) {
     mOverwrite = overwrite;
-    mRecording = true;
     mStartOnEvent = startOnEvent;
+    mRecording = true;
     mSequenceStart = std::chrono::high_resolution_clock::now();
     mSequenceName = name;
 }
 
 void SynthRecorder::stopRecord() {
     mRecording = false;
-    std::string path = ".";
-    if (path.back() != '/') {
-        path += "/";
-    }
+    std::string path = File::conformDirectory(mDirectory);
     std::string fileName = path + mSequenceName + ".synthSequence";
 
     std::string newSequenceName = mSequenceName;
@@ -118,7 +115,7 @@ void SynthRecorder::stopRecord() {
         f << "# " << instr << " ";
         // Hack to get the parameter names. Get a voice from the polysynth and then check the parameters. Should there be a better way?
         auto *voice = mPolySynth->getVoice(instr);
-        for (auto p: voice->parameterFields()) {
+        for (auto p: voice->triggerParameters()) {
             f << p->getName() << " ";
         }
         f << std::endl;

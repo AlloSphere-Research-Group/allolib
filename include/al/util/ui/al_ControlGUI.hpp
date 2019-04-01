@@ -289,7 +289,6 @@ private:
     int mCurrentSequencerItem {0};
     int mCurrentPresetSequencerItem {0};
     bool mRecordButtonValue {false};
-    bool mOverwriteButtonValue {true};
     char** mSequencerItems;
 
     std::map<std::string, int> mCurrentBundle;

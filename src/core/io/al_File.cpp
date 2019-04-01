@@ -247,6 +247,9 @@ std::string File::extension(const std::string& path){
 }
 
 static std::string stripEndSlash(const std::string& path){
+  if (path.size() < 2) {
+    return path;
+  }
   if(path.back() == '\\' || path.back() == '/'){
     return path.substr(0, path.size()-1);
   }

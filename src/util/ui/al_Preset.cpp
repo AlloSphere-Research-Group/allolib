@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
+#include <cassert>
 
 #include "al/util/ui/al_Preset.hpp"
 #include "al/core/io/al_File.hpp"
@@ -419,9 +420,24 @@ std::string PresetHandler::getCurrentPath()
 	return relPath;
 }
 
+void PresetHandler::setRootPath(std::string path)
+{
+  assert(path.size() > 0);
+  if (!File::exists(path)) {
+      if (!Dir::make(path)) {
+          std::cerr << "Error creating directory: " << path << std::endl;
+      } else {
+        mRootDir = path;
+      }
+  } else {
+    mRootDir = path;
+  }
+  setCurrentPresetMap();
+}
+
 std::string al::PresetHandler::getRootPath()
 {
-	std::string relPath = File::conformDirectory(mRootDir);
+  std::string relPath = File::conformDirectory(mRootDir);
 	return relPath;
 }
 
@@ -523,13 +539,13 @@ void PresetHandler::setCurrentPresetMap(std::string mapName, bool autoCreate)
 		}
 		mCurrentMapName = mapName;
 		storeCurrentPresetMap();
-	} else {
-		std::cout << "Setting " << mapName << std::endl;
+    } else {
 		mPresetsMap = readPresetMap(mapName);
 		mCurrentMapName = mapName;
 	}
-
-    std::cout << "Setting " << mapName << std::endl;
+    if (verbose()) {
+      std::cout << "Setting preset map:" << mapName << std::endl;
+    }
     for (auto cb:mPresetsMapCbs) {
         cb(mapName);
     }

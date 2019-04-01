@@ -42,7 +42,7 @@ struct SimpleVoice : public PositionedVoice {
 
         // Register parameters using the stream operator
         // parameters registered this way can be set through
-        // the setParamFields(), and will also allow their
+        // the setTriggerParams(), and will also allow their
         // values to be stored when using SynthSequencer
         *this << mFreq;
 
@@ -124,7 +124,7 @@ struct MyApp : public App
             auto *freeVoice = scene.getVoice<SimpleVoice>();
             // Then set its parameters (this voice only has one parameter Freq)
             auto params = std::vector<float>{880.0f};
-            freeVoice->setParamFields(params);
+            freeVoice->setTriggerParams(params);
             // Set a position for it
             // Trigger it (this inserts it into the chain)
             scene.triggerOn(freeVoice);

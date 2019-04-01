@@ -438,7 +438,7 @@ public:
 	}
 
 	virtual void fromFloat(float value) override {
-		mFloatValue = value;
+        set(value);
 	}
 
 	float operator= (const float value) { this->set(value); return value; }
@@ -515,7 +515,7 @@ public:
 	}
 
 	virtual void fromFloat(float value) override {
-        mIntValue = int32_t(value);
+        set(int32_t(value));
 	}
 
     float operator= (const int32_t value) { this->set(value); return float(value); }

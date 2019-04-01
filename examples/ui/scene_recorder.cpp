@@ -41,7 +41,7 @@ public:
 
         // Register parameters using the stream operator
         // parameters registered this way can be set through
-        // the setParamFields(), and will also allow their
+        // the setTriggerParams(), and will also allow their
         // values to be stored when using SynthSequencer
         *this << mFreq << mText;
 
@@ -138,7 +138,7 @@ public:
             // First get a free voice of type SimpleVoice
             auto *freeVoice = scene.getVoice<SimpleVoice>();
             std::string text = std::to_string(char(k.key()));
-            freeVoice->setParamFields({440.f, text});
+            freeVoice->setTriggerParams({440.f, text});
             // Set a position for it
             // Trigger it (this inserts it into the chain)
             scene.triggerOn(freeVoice, 0, k.key());

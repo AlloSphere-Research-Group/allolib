@@ -50,7 +50,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
         p << offsetFrames << id;
         std::string voiceName = demangle(typeid(*voice).name());
         p<<voiceName;
-        auto fields = voice->getParamFields();
+        auto fields = voice->getTriggerParams();
         for (auto field: fields) {
             if (field.type() == ParameterField::FLOAT) {
                 p << field.get<float>();
@@ -89,7 +89,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
         if (verbose()) {
           std::cout << "voice allocated " << std::endl;
         }
-        for (auto *param : voice->parameterFields()) {
+        for (auto *param : voice->triggerParameters()) {
             if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
                 dynamic_cast<Parameter *>(param)->registerChangeCallback(
                             [this, param, voice](float value) {
@@ -151,7 +151,7 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
                     params.emplace_back(0.0f);
                   }
                 }
-                voice->setParamFields(params);
+                voice->setTriggerParams(params);
                 triggerOn(voice, offset, id);
                 if (verbose()) {
                   std::cout << "trigger on received" <<std::endl;
@@ -184,7 +184,7 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
             SynthVoice *voice = mActiveVoices;
             while (voice) {
                 if (voice->id() == std::stoi(number)) {
-                    for (auto *param: voice->parameterFields()) {
+                    for (auto *param: voice->triggerParameters()) {
                         if (ParameterServer::setParameterValueFromMessage(param, subAddr, m)) {
                             // We assume no two parameters have the same address, so we can break the
                             // loop. Perhaps this should be checked by ParameterServer on registration?

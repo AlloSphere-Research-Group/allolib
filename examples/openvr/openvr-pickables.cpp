@@ -138,21 +138,26 @@ struct MyApp : public App {
     // Draw markers for the controllers
     // The openVR object is available in the VRRenderer class to query the controllers
     g.pushMatrix();
+#ifdef BUILD_VR
     g.translate(mOpenVR.LeftController.pos);
     g.rotate(mOpenVR.LeftController.quat);
+#endif
     g.color(0,1,1);
     g.draw(mController);
     g.popMatrix();
 
     //right hand
     g.pushMatrix();
+#ifdef BUILD_VR
     g.translate(mOpenVR.RightController.pos);
     g.rotate(mOpenVR.RightController.quat);
+#endif
     g.color(1,0,1);
     g.draw(mController);
     g.popMatrix();
 
     //draw controller rays
+#ifdef BUILD_VR
     auto r1 = mOpenVR.RightController.ray();
     auto r2 = mOpenVR.LeftController.ray();
     mRay.reset();
@@ -161,6 +166,7 @@ struct MyApp : public App {
     mRay.vertices().push_back(r2.o);
     mRay.vertices().push_back(r2.o + r2.d*5);
     g.draw(mRay);
+#endif
   }
 
   void onDraw(Graphics &g) override {
