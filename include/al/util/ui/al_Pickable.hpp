@@ -67,7 +67,7 @@ struct PickableBase : virtual PickableState {
   virtual bool onPick(Hit hit, bool child){return false;}
   virtual bool onDrag(Hit hit, bool child){return false;}
   virtual bool onUnpick(Hit hit, bool child){return false;}
-  
+
   /// do interaction on self and children, call onPoint callbacks
   virtual bool point(Rayd &r){
     bool child = false;
@@ -139,7 +139,6 @@ struct PickableBase : virtual PickableState {
     return child;
   }
   Hit intersectChild(Rayd &r){
-    double tmin = 1e10;
     Hit hmin = Hit(false, r, 1e10, NULL);
     Rayd ray = transformRayLocal(r);
     for (auto *c : children){

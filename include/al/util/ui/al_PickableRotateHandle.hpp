@@ -44,7 +44,7 @@ struct PickableRotateHandle : PickableBase {
     }
   }
 
-  void draw(Graphics &g){
+  void draw(Graphics &g) override {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     Mesh m;
     m.primitive(Mesh::LINE_STRIP);
@@ -83,17 +83,22 @@ struct PickableRotateHandle : PickableBase {
     glPopAttrib();
   }
 
-  Hit intersect(Rayd &r){return Hit();}
+  Hit intersect(Rayd &r) override {
+    double t = r.intersectSphere(pose.get().pos(), size+dr);
+    if (t > 0) return Hit(true, r, t, this);
+    else return Hit(false, r, t, this);
+  }
+  bool contains(Vec3d &v) override { return false; } //XXX
 
-  bool onPoint(Rayd &r, double t, bool child){
+  bool onPoint(Hit h, bool child) override {
     if(child) return true;
-    if(r.intersectsSphere(pose.get().pos(), size+dr)){
+    if(h.ray.intersectsSphere(pose.get().pos(), size+dr)){
       float t = -1;
       float min = FLT_MAX;
       int minIdx = -1;
       for(int i=0; i < 3; i++){
         hover[i] = false;
-        t = r.intersectCircle(pose.get().pos(), Vec3f(i==0,i==1,i==2), size+dr, size-dr);
+        t = h.ray.intersectCircle(pose.get().pos(), Vec3f(i==0,i==1,i==2), size+dr, size-dr);
         if(t > 0 && t < min){
           min = t;
           minIdx = i;
@@ -107,15 +112,15 @@ struct PickableRotateHandle : PickableBase {
     return false;
   }
 
-  bool onPick(Rayd &r, double t, bool child){
+  bool onPick(Hit h, bool child) override {
     if(child) return true;
-    if(r.intersectsSphere(pose.get().pos(), size+dr)){
+    if(h.ray.intersectsSphere(pose.get().pos(), size+dr)){
       float t = -1;
       float min = FLT_MAX;
       int minIdx = -1;
       for(int i=0; i < 3; i++){
         selected[i] = false;
-        t = r.intersectCircle(pose.get().pos(), Vec3f(i==0,i==1,i==2), size+dr, size-dr);
+        t = h.ray.intersectCircle(pose.get().pos(), Vec3f(i==0,i==1,i==2), size+dr, size-dr);
         if(t > 0 && t < min){
           min = t;
           minIdx = i;
@@ -123,21 +128,21 @@ struct PickableRotateHandle : PickableBase {
       }
       if(minIdx >= 0){
         selected[minIdx] = true;
-        downDir.set(r(min)-pose.get().pos());
-        newDir.set(r(min)-pose.get().pos());
+        downDir.set(h.ray(min)-pose.get().pos());
+        newDir.set(h.ray(min)-pose.get().pos());
         return true;
       }
     }
     return false;
   }
 
-  bool onDrag(Rayd &r, double t, bool child){
+  bool onDrag(Hit h, bool child) override {
     if(child) return true;
     for(int i=0; i < 3; i++){
       if(selected[i]){
-        float t = r.intersectPlane(pose.get().pos(), Vec3f(i==0,i==1,i==2));
+        float t = h.ray.intersectPlane(pose.get().pos(), Vec3f(i==0,i==1,i==2));
         if(t > 0){
-          newDir.set(r(t)-pose.get().pos());
+          newDir.set(h()-pose.get().pos());
           rotate = Quatf::getRotationTo(downDir.normalized(),newDir.normalized());
           if(parent){
             // rotate parent around rotation handle offset, probably a better way to do this :p
@@ -153,7 +158,7 @@ struct PickableRotateHandle : PickableBase {
     return false;
   }
 
-  bool onUnpick(Rayd &r, double t, bool child){
+  bool onUnpick(Hit h, bool child) override {
     for(int i=0; i < 3; i++) selected[i] = false;
     return false;
   }
