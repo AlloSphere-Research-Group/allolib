@@ -393,12 +393,16 @@ public:
    * single float. It realies on float being atomic on the platform so there
    * is no locking. This is a safe assumption for most platforms today.
    */
-    Parameter(std::string parameterName, std::string Group = "",
+    Parameter(std::string parameterName, std::string Group,
               float defaultValue = 0,
 	          std::string prefix = "",
 	          float min = -99999.0,
 	          float max = 99999.0
 	        );
+
+    Parameter(std::string parameterName, float defaultValue = 0, float min = -99999.0,
+              float max = 99999.0
+            );
 
 	Parameter(const al::Parameter& param) :
 	    ParameterWrapper<float>(param)

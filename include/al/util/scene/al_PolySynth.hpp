@@ -367,6 +367,30 @@ public:
    */
   unsigned int numOutChannels() { return mNumOutChannels; }
 
+
+  void createInternalTriggerParameter(std::string name, float defaultValue = 0.0, float minValue = -9999.0, float maxValue = 9999.0) {
+    mInternalParameters.push_back(std::make_shared<Parameter>(name, defaultValue, minValue, maxValue));
+    registerTriggerParameter(*mInternalParameters.back().get());
+  }
+
+  float getInternalParameterValue(std::string name) {
+    for (auto param: mInternalParameters) {
+      if (param->getName() == name) {
+        return param->get();
+      }
+    }
+    return 0.0;
+  }
+
+  void setInternalParameterValue(std::string name, float value) {
+    for (auto param: mInternalParameters) {
+      if (param->getName() == name) {
+        param->set(value);
+//        return;
+      }
+    }
+  }
+
   /**
    * @brief Register a parameter as a "trigger" parameter
    * @param param
@@ -456,6 +480,8 @@ protected:
   std::vector<ParameterMeta *> mTriggerParams;
 
   std::vector<ParameterMeta *> mContinuousParameters;
+
+  std::vector<std::shared_ptr<Parameter>> mInternalParameters;
 private:
   int mId {-1};
   int mActive {false};
@@ -515,7 +541,9 @@ public:
      * @param voice pointer to the voice to trigger
      * @return a unique id for the voice
      *
-     * You can use the id to identify the note for later triggerOff() calls
+     * You can use the id to identify the note for later triggerOff() calls.
+     * Always use a positive value for id, as negative ids have special treatment
+     * in classes like this one and SynthGUIManager
      */
   int triggerOn(SynthVoice *voice, int offsetFrames = 0, int id = -1, void *userData = nullptr);
 

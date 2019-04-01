@@ -17,7 +17,13 @@ Parameter::Parameter(std::string parameterName, std::string Group,
                      float max) :
     ParameterWrapper<float>(parameterName, Group, defaultValue, prefix, min, max)
 {
-	mFloatValue = defaultValue;
+  mFloatValue = defaultValue;
+}
+
+Parameter::Parameter(std::string parameterName, float defaultValue, float min, float max) :
+  ParameterWrapper<float>(parameterName, "", defaultValue, "", min, max)
+{
+  mFloatValue = defaultValue;
 }
 
 float Parameter::get()

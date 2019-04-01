@@ -644,11 +644,11 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
         stateMap[presetSequencer] = SequencerState{0.0, 0.0};
         float *currentTime = &(stateMap[presetSequencer].currentTime);
         presetSequencer->registerTimeChangeCallback( [currentTime](float currTime)
-            {*currentTime = currTime;}, 0.1);
-        presetSequencer->registerBeginCallback([&](PresetSequencer *sender, void *userData) {stateMap[presetSequencer].totalDuration = sender->getSequenceTotalDuration(sender->currentSequence());});
+            {*currentTime = currTime;}, 0.1f);
+        presetSequencer->registerBeginCallback([&](PresetSequencer *sender, void */*userData*/) {stateMap[presetSequencer].totalDuration = sender->getSequenceTotalDuration(sender->currentSequence());});
         vector<string> seqList = presetSequencer->getSequenceList();
         if (currentPresetSequencerItem >= 0 && currentPresetSequencerItem < (int) seqList.size()) {
-            std::cout << seqList[currentPresetSequencerItem] <<std::endl;
+            std::cout << seqList[currentPresetSequencerItem] << std::endl;
             presetSequencer->loadSequence(seqList[currentPresetSequencerItem]);
             stateMap[presetSequencer].totalDuration = presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
         }
@@ -724,7 +724,16 @@ void ParameterGUI::drawSequenceRecorder(SequenceRecorder *sequenceRecorder)
     if (ImGui::CollapsingHeader("Preset Sequence Recorder##__SequenceRecorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         static char buf_seq_recorder[64] = "test"; ImGui::InputText("Record Name##__SequenceRecorder", buf_seq_recorder, 64);
         static bool button_seq_recorder_value = false;
-        if (ImGui::Checkbox("Record##__SequenceRecorder", &button_seq_recorder_value)) {
+        if (button_seq_recorder_value) {
+          ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0, 0.0, 0.0, 1.0));
+        }
+        std::string buttonText = button_seq_recorder_value ? "Stop##__SequenceRecorder" : "Record##__SequenceRecorder";
+        bool recordButtonClicked = ImGui::Button(buttonText.c_str());
+        if (button_seq_recorder_value) {
+          ImGui::PopStyleColor();
+        }
+        if (recordButtonClicked) {
+            button_seq_recorder_value = !button_seq_recorder_value;
             if (button_seq_recorder_value) {
                 sequenceRecorder->startRecord(buf_seq_recorder, state.overwriteButtonValue);
             } else {
@@ -739,14 +748,22 @@ void ParameterGUI::drawSequenceRecorder(SequenceRecorder *sequenceRecorder)
 void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
     struct SynthSequencerState {
         int currentItem;
+        float totalDuration {0.0f};
+        float currentTime {0.0f};
     };
     static std::map<SynthSequencer *, SynthSequencerState> stateMap;
     if(stateMap.find(synthSequencer) == stateMap.end()) {
         stateMap[synthSequencer] = SynthSequencerState{0};
+        float *currentTime = &(stateMap[synthSequencer].currentTime);
+        synthSequencer->registerTimeChangeCallback( [currentTime](float currTime)
+            {*currentTime = currTime;}, 0.1);
     }
     SynthSequencerState &state = stateMap[synthSequencer];
 
-    std::string headerLabel = "Event Sequencer##EventSequencer";
+    std::string id = std::to_string((unsigned long) synthSequencer);
+    std::string suffix = "##EventSequencer" + id;
+    ImGui::PushID(suffix.c_str());
+    std::string headerLabel = "Event Sequencer";
     if (ImGui::CollapsingHeader(headerLabel.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
       // TODO we should only refresh occasionally or perhaps reactively.
         std::vector<std::string> seqList = synthSequencer->getSequenceList();
@@ -755,17 +772,21 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
                 seqList.resize(64);
                 std::cout << "Cropping sequence list to 64 items for display" <<std::endl;
             }
-            ImGui::Combo("Sequences##SynthSequencer", &state.currentItem, ParameterGUI::vector_getter,
+            ImGui::Combo("Sequences", &state.currentItem, ParameterGUI::vector_getter,
                          static_cast<void*>(&seqList), seqList.size());
-            if (ImGui::Button("Play##EventSequencer")) {
+            if (ImGui::Button("Play")) {
                 synthSequencer->stopSequence();
                 synthSequencer->synth().allNotesOff();
                 synthSequencer->playSequence(seqList[state.currentItem]);
             }
             ImGui::SameLine();
-            if (ImGui::Button("Stop##EventSequencer")) {
+            if (ImGui::Button("Stop")) {
                 synthSequencer->stopSequence();
                 synthSequencer->synth().allNotesOff();
+            }
+            if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
+    //            std::cout << "Requested time:" << time << std::endl;
+                synthSequencer->setTime(time);
             }
         } else {
           ImGui::Text("No sequences found.");
@@ -786,7 +807,16 @@ void ParameterGUI::drawSynthRecorder(SynthRecorder *synthRecorder) {
 
     if (ImGui::CollapsingHeader("Event Recorder##__EventRecorder", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         static char buf1[64] = "test"; ImGui::InputText("Record Name##__EventRecorder", buf1, 64);
-        if (ImGui::Checkbox("Record##__EventRecorder", &state.recordButton)) {
+        if (state.recordButton) {
+          ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0, 0.0, 0.0, 1.0));
+        }
+        std::string buttonText = state.recordButton ? "Stop##__EventRecorder" : "Record##__EventRecorder";
+        bool recordButtonClicked = ImGui::Button(buttonText.c_str());
+        if (state.recordButton) {
+          ImGui::PopStyleColor();
+        }
+        if (recordButtonClicked) {
+            state.recordButton = !state.recordButton;
             if (state.recordButton) {
                 synthRecorder->startRecord(buf1, state.overrideButton);
             } else {
@@ -794,7 +824,7 @@ void ParameterGUI::drawSynthRecorder(SynthRecorder *synthRecorder) {
             }
         }
         ImGui::SameLine();
-        ImGui::Checkbox("Overwrite", &state.overrideButton);
+        ImGui::Checkbox("Overwrite##__EventRecorder", &state.overrideButton);
     }
 }
 

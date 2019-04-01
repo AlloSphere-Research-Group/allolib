@@ -231,10 +231,10 @@ public:
 
     void setTempo(float tempo) {mNormalizedTempo = tempo/60.f;}
 
-    bool playSequence(std::string sequenceName) {
+    bool playSequence(std::string sequenceName, float startTime = 0.0f) {
 //        synth().allNotesOff();
         // Add an offset of 0.1 to make sure the allNotesOff message gets processed before the sequence
-        std::list<SynthSequencerEvent> events = loadSequence(sequenceName, mMasterTime + 0.1);
+        std::list<SynthSequencerEvent> events = loadSequence(sequenceName, mMasterTime - startTime + 0.1);
         std::unique_lock<std::mutex> lk(mEventLock);
         mEvents = events;
         mNextEvent = 0;

@@ -351,22 +351,36 @@ public:
         }
     }
 
-    void triggerOn() {
-      if (!mCurrentTriggerState) {
-         mTriggerVoiceId = mSequencer.synth().triggerOn(&mControlVoice, 0, INT_MIN);
-         mCurrentTriggerState = true;
+    /**
+     * @brief Trigger a free voice. If no id provided the internal voice is triggered
+     * @param id
+     */
+    void triggerOn(int id = INT_MIN) {
+      if (id == INT_MIN) {
+        if (!mCurrentTriggerState) {
+           mTriggerVoiceId = mSequencer.synth().triggerOn(&mControlVoice, 0, INT_MIN);
+           mCurrentTriggerState = true;
+        }
+      } else {
+        VoiceType *voice = synth().template getVoice<VoiceType>();
+        configureVoiceFromGui(voice);
+        synth().triggerOn(voice, 0, id);
       }
     }
 
-    void triggerOff() {
-      if (mCurrentTriggerState) {
-        mControlVoice.free();
-        while (mControlVoice.id() != -1) {
-          // Wait a bit
-          std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    void triggerOff(int id = INT_MIN) {
+      if (id == INT_MIN) {
+        if (mCurrentTriggerState) {
+          mControlVoice.free();
+          while (mControlVoice.id() != -1) {
+            // Wait a bit
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+          }
+          mSequencer.synth().popFreeVoice(&mControlVoice);
+          mCurrentTriggerState = false;
         }
-        mSequencer.synth().popFreeVoice(&mControlVoice);
-        mCurrentTriggerState = false;
+      } else {
+        synth().triggerOff(id);
       }
     }
 
