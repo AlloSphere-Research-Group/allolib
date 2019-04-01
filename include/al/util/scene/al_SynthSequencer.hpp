@@ -254,16 +254,6 @@ public:
         mNextEvent = 0;
     }
 
-    void registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec)
-    {
-        if (mSequenceLock.try_lock()) {
-            mTimeChangeCallback = func;
-            mSequenceLock.unlock();
-        } else {
-            std::cerr << "ERROR: Failed to set time change callback. Sequencer running" <<std::endl;
-        }
-    }
-
     void setDirectory(std::string directory) {
       assert(directory.size() > 0);
       mDirectory = directory;
