@@ -40,6 +40,7 @@ VERBOSE_FLAG=OFF
 RUN_MPI=0
 RUN_APP=1
 GENERATOR="Unix Makefiles"
+CMAKE_BINARY="cmake"
 
 if [ $# == 0 ]; then
   echo "$usage"
@@ -100,8 +101,13 @@ if [ $(uname -s) == "Darwin" ]; then
 elif [ $(uname -s) == "Linux" ]; then
   BUILD_FLAGS="${BUILD_FLAGS} -j${PROC_FLAG}"
 elif [ $(uname -s) != MINGW64* ] && [ "${GENERATOR_PLATFORM}" != "x86" ]; then
-  WINDOWS_FLAGS=-DCMAKE_GENERATOR_PLATFORM=x64
-  GENERATOR="Visual Studio 15 2017 Win64"
+    # WINDOWS_FLAGS=-DCMAKE_GENERATOR_PLATFORM=x64
+    echo Building for Visual Studio 15 2017
+      if [ ! -d "C:\Program Files (x86)\Microsoft Visual Studio\2017" ]; then
+        echo You must install Visual Studio 2017 to use allolib
+    fi
+    GENERATOR="Visual Studio 15 2017 Win64"
+    CMAKE_BINARY="C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe"
 fi
 
 if [ ${IS_VERBOSE} == 1 ]; then
@@ -137,7 +143,7 @@ TARGET_NAME=$(basename ${APP_FILE_INPUT} | sed 's/\.[^.]*$//')
 
 # set -x enters debug mode and prints the command
 set -x
-cmake -G "${GENERATOR}" -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} -DUSE_MPI=${RUN_MPI} ${AL_LIB_PATH}/cmake/single_file > cmake_log.txt
+"${CMAKE_BINARY}" -G "${GENERATOR}" -Wno-deprecated -DBUILD_EXAMPLES=0 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DAL_APP_FILE=../../../${APP_FILE} -DAL_VERBOSE_OUTPUT=${VERBOSE_FLAG} ${VERBOSE_MAKEFILE} -DAL_APP_RUN=${RUN_APP} -DUSE_MPI=${RUN_MPI} "${AL_LIB_PATH}/cmake/single_file" > cmake_log.txt
 set +x
 
 if [ ${RUN_APP} == 1 ]; then
@@ -147,11 +153,9 @@ if [ ${BUILD_TYPE} == "Debug" ]; then
   TARGET_NAME=${TARGET_NAME}_debug
 fi
 
-echo cmake --build . --target ${TARGET_NAME} --config ${BUILD_TYPE} -- ${BUILD_FLAGS}
-
 # set -x enters debug mode and prints the command
 set -x
-cmake --build . --target ${TARGET_NAME} --config ${BUILD_TYPE} -- ${BUILD_FLAGS}
+"${CMAKE_BINARY}" --build . --target ${TARGET_NAME} --config ${BUILD_TYPE} -- ${BUILD_FLAGS}
 set +x
 )
 
@@ -165,7 +169,7 @@ fi
 # run app
 # go to where the binary is so we have cwd there
 # (app's cmake is set to put binary in 'bin')
-cd ${INITIALDIR}
+cd "${INITIALDIR}"
 cd ${APP_PATH}/bin
 
 if [ ${RUN_MPI}  != 0 ]; then
