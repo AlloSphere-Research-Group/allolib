@@ -157,7 +157,7 @@ public:
                 std::cout << " Driver serial ID: " << driver_serial << std::endl;
             }
             else {
-                std::cout << "Tracking device " << td << " not connected" << std::endl;
+//                std::cout << "Tracking device " << td << " not connected" << std::endl;
             }
         }
 
