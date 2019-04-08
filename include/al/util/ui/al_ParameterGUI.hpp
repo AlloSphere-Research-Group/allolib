@@ -238,38 +238,46 @@ public:
 //        template<class VoiceType>
         mSequencer.synth().template registerSynthClass<VoiceType>(demangle(typeid (VoiceType).name()));
         mSequencer.synth().template allocatePolyphony<VoiceType>(16);
-;    }
+    }
+
+
+    std::string name() {return mName;}
+
+    void drawSynthWidgets() {
+      drawFields();
+      drawAllNotesOffButton();
+      drawPresets();
+      ImGui::Separator();
+      static int currentTab = 1;
+      ImGui::Columns(2, nullptr, true);
+      if (ImGui::Selectable("Polyphonic", currentTab == 1)) {
+          currentTab = 1;
+          triggerOff();
+      }
+      ImGui::NextColumn();
+      if (ImGui::Selectable("Static", currentTab == 2)) {
+          currentTab = 2;
+          synthSequencer().stopSequence();
+          synth().allNotesOff();
+//            while (synth().getActiveVoices()) {} // Spin until all voices have been removed
+//            triggerOn();
+      }
+
+      ImGui::Columns(1);
+      if (currentTab == 1) {
+        drawAllNotesOffButton();
+        drawSynthSequencer();
+        drawSynthRecorder();
+      } else {
+        drawTriggerButton();
+        drawPresetSequencer();
+        drawPresetSequencerRecorder();
+      }
+    }
 
     void drawSynthControlPanel() {
         ParameterGUI::beginPanel(demangle(typeid (mControlVoice).name()).c_str());
-        drawFields();
-        drawPresets();
-        ImGui::Separator();
-        static int currentTab = 1;
-        ImGui::Columns(2, nullptr, true);
-        if (ImGui::Selectable("Polyphonic", currentTab == 1)) {
-            currentTab = 1;
-            triggerOff();
-        }
-        ImGui::NextColumn();
-        if (ImGui::Selectable("Static", currentTab == 2)) {
-            currentTab = 2;
-            synthSequencer().stopSequence();
-            synth().allNotesOff();
-//            while (synth().getActiveVoices()) {} // Spin until all voices have been removed
-//            triggerOn();
-        }
-
-        ImGui::Columns(1);
-        if (currentTab == 1) {
-          drawAllNotesOffButton();
-          drawSynthSequencer();
-          drawSynthRecorder();
-        } else {
-          drawTriggerButton();
-          drawPresetSequencer();
-          drawPresetSequencerRecorder();
-        }
+        drawSynthWidgets();
         ParameterGUI::endPanel();
     }
 
