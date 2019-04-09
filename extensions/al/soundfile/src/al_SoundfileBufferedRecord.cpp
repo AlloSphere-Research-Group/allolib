@@ -6,7 +6,7 @@
 using namespace al;
 
 SoundFileBufferedRecord::SoundFileBufferedRecord() :
-  mRunning(true),
+  mRunning(false),
   mCurPos(0)
 {
 }
@@ -24,32 +24,44 @@ bool SoundFileBufferedRecord::open(std::string fullPath, double frameRate, uint3
   mSf.channels(int(numChannels));
   mSf.format(format);
   mSf.encoding(encoding);
-  mSf.openWrite(fullPath);
-  if (mSf.opened()) {
-    mBufferFrames = bufferFrames;
-    mRingBuffer = new SingleRWRingBuffer(mBufferFrames * numChannels * sizeof(float));
-    mFileBuffer = std::make_unique<float []>(mBufferFrames * numChannels);
-    std::condition_variable cond;
-    std::mutex condMutex;
-    {
-      std::unique_lock<std::mutex> lk(condMutex);
-      mReaderThread = new std::thread(writeFunction, this, &cond, &condMutex);
-      cond.wait(lk); // Wait for thread to have started
-    }
-    return true;
+  mBufferFrames = bufferFrames;
+
+  mRingBuffer = new SingleRWRingBuffer(mBufferFrames * numChannels * sizeof(float));
+  mFileBuffer = std::make_unique<float []>(mBufferFrames * numChannels);
+  std::condition_variable cond;
+  std::mutex condMutex;
+  {
+    std::unique_lock<std::mutex> lk(condMutex);
+    mReaderThread = new std::thread(writeFunction, this, &cond, &condMutex);
+    cond.wait(lk); // Wait for thread to have started
   }
-  return false;
+
+  mSf.openWrite(fullPath);
+  if (!mSf.opened()) {
+    std::cerr << "ERROR opening sound file in " << __FUNCTION__ << std::endl;
+    cleanup();
+    return false;
+  }
+  return true;
+}
+
+void SoundFileBufferedRecord::cleanup()
+{
+  if (mReaderThread &&  mRingBuffer) {
+    mRunning = false;
+    mCondVar.notify_one();
+    mReaderThread->join();
+    delete mReaderThread;
+    delete mRingBuffer;
+    mReaderThread = nullptr;
+    mRingBuffer = nullptr;
+  }
 }
 
 bool SoundFileBufferedRecord::close()
 {
 
   if (mSf.opened()) {
-    mRunning = false;
-    mCondVar.notify_one();
-    mReaderThread->join();
-    delete mReaderThread;
-    delete mRingBuffer;
     mSf.close();
   }
   return true;
@@ -82,6 +94,7 @@ bool SoundFileBufferedRecord::opened() const
 
 void SoundFileBufferedRecord::writeFunction(SoundFileBufferedRecord  *obj, std::condition_variable *cond, std::mutex *condMutex)
 {
+  obj->mRunning = true;
   float *writeBuffer = new float[size_t(obj->mBufferFrames * obj->mSf.channels())];
   condMutex->lock();
   cond->notify_all(); // Signal thread is processing;

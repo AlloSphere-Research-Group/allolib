@@ -45,6 +45,8 @@ public:
             uint32_t bufferFrames = 8192,
             Format format = Format::WAV, EncodingType encoding = EncodingType::PCM_16);
 
+  void cleanup();
+
   bool close();
 
   ///
@@ -90,8 +92,8 @@ protected:
   std::atomic<int> mCurPos; // Updated once per read buffer
   std::mutex mLock;
   std::condition_variable mCondVar;
-  std::thread *mReaderThread;
-  SingleRWRingBuffer *mRingBuffer;
+  std::thread *mReaderThread {nullptr};
+  SingleRWRingBuffer *mRingBuffer {nullptr};
   uint32_t mBufferFrames;
 
   gam::SoundFile mSf;

@@ -11,6 +11,9 @@ namespace al {
 
 class OutputRecorder : public AudioCallback, public SoundFileBufferedRecord {
 public:
+  OutputRecorder() {}
+  virtual ~OutputRecorder() {}
+
   bool start(std::string fullPath, double frameRate, uint32_t numChannels,
              uint32_t bufferFrames = 4096,
              Format format = Format::WAV, EncodingType encoding = EncodingType::PCM_16) {
