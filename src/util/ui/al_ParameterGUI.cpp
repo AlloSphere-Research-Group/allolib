@@ -996,11 +996,12 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
     int index = currentBundle;
 
     //    ImGui::Separator();
+    ImGui::PushID(suffix.c_str());
 
-    if (ImGui::CollapsingHeader(("Bundle:" + name + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::CollapsingHeader(name.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         if (!bundleGlobal) {
             //            ImGui::SameLine();
-            if (ImGui::InputInt(suffix.c_str(), &index)) {
+            if (ImGui::InputInt("Current", &index)) {
                 if (index >= 0 && index < (int) bundleGroup.size()) {
                     currentBundle = index;
                 }
@@ -1032,7 +1033,7 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
             }
             for (auto bundle: bundleGroup[currentBundle]->bundles()) {
                 std::string subBundleName = bundle.first;
-                if (ImGui::CollapsingHeader((subBundleName + "##" + name + subBundleName + suffix).c_str(), ImGuiTreeNodeFlags_CollapsingHeader)) {
+                if (ImGui::CollapsingHeader((subBundleName + "##" + name + subBundleName).c_str(), ImGuiTreeNodeFlags_CollapsingHeader)) {
                    for (auto *param: bundle.second->parameters()) {
                        drawParameterMeta({param}, suffix + subBundleName, 0);
                    }
@@ -1041,6 +1042,7 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
         }
         ImGui::Separator();
     }
+    ImGui::PopID();
 }
 
 void ParameterGUI::drawBundleManager(BundleGUIManager *manager)

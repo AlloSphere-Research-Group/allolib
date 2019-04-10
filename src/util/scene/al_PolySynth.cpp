@@ -142,37 +142,71 @@ int al::asciiToMIDI(int asciiKey, int offset) {
 
 // ----------------------------
 
+PolySynth::PolySynth(PolySynth::TimeMasterMode masterMode)
+  : mMasterMode(masterMode)
+{
+  if (mMasterMode == TIME_MASTER_CPU) {
+
+    if (mVerbose) {
+      std::cout << "Starting CPU clock thread" << std::endl;
+    }
+    mCpuClockThread = std::make_unique<std::thread>([this]() {
+      using namespace std::chrono;
+      while(mRunCPUClock) {
+        high_resolution_clock::time_point startTime = high_resolution_clock::now();
+        std::chrono::milliseconds waitTime(int(mCpuGranularitySec * 1000));
+
+        high_resolution_clock::time_point futureTime = startTime + waitTime;
+        std::this_thread::sleep_until(futureTime);
+        // FIXME this will generate some jitter and drift, fix.
+
+        processVoices();
+        // Turn off voices
+        processVoiceTurnOff();
+        processInactiveVoices();
+      }
+    });
+  }
+}
+
+PolySynth::~PolySynth() {
+  if (mCpuClockThread) {
+    mRunCPUClock = false;
+    mCpuClockThread->join();
+  }
+}
+
 int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id, void *userData) {
-    assert(voice);
-    int thisId = id;
-    if (thisId == -1) {
-        if (voice->id() > 0) {
-            thisId = voice->id();
-        } else {
-            thisId = mIdCounter++;
-        }
+  assert(voice);
+  int thisId = id;
+  if (thisId == -1) {
+    if (voice->id() > 0) {
+      thisId = voice->id();
+    } else {
+      thisId = mIdCounter++;
     }
-    voice->id(thisId);
-    if (userData) {
-        voice->userData(userData);
-    }
-    voice->triggerOn(offsetFrames);
-    {
-        std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
-        voice->next = mVoicesToInsert;
-        mVoicesToInsert = voice;
-    }
-    for (auto cbNode: mTriggerOnCallbacks) {
-        cbNode.first(voice, offsetFrames, thisId, cbNode.second);
-    }
-    return thisId;
+  }
+  voice->id(thisId);
+  if (userData) {
+    voice->userData(userData);
+  }
+  voice->triggerOn(offsetFrames);
+  {
+    std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
+    voice->next = mVoicesToInsert;
+    mVoicesToInsert = voice;
+  }
+  for (auto cbNode: mTriggerOnCallbacks) {
+    cbNode.first(voice, offsetFrames, thisId, cbNode.second);
+  }
+  return thisId;
 }
 
 void PolySynth::triggerOff(int id) {
-    mVoiceIdsToTurnOff.write((const char*) &id, sizeof (int));
-    for (auto cbNode: mTriggerOffCallbacks) {
-        cbNode.first(id, cbNode.second);
-    }
+  mVoiceIdsToTurnOff.write((const char*) &id, sizeof (int));
+  for (auto cbNode: mTriggerOffCallbacks) {
+    cbNode.first(id, cbNode.second);
+  }
 }
 
 void PolySynth::allNotesOff()
@@ -414,6 +448,22 @@ void PolySynth::print(std::ostream &stream) {
     }
 }
 
+SynthVoice *PolySynth::allocateVoice(std::string name) {
+  if (mCreators.find(name) != mCreators.end()) {
+
+    if (mVerbose) {
+      std::cout << "Allocating (from name) voice of type " << name << "." << std::endl;
+    }
+    SynthVoice *voice = mCreators[name]();
+    return voice;
+  } else {
+
+    if (mVerbose) {
+      std::cout << "Can't allocate voice of type " << name << ". Voice not registered and no polyphony." << std::endl;
+    }
+  }
+  return nullptr;
+}
 
 int SynthVoice::getStartOffsetFrames(unsigned int framesPerBuffer) {
   int frames = mOnOffsetFrames;

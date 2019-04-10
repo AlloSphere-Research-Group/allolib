@@ -655,7 +655,7 @@ template <class T>
 static void stripToTri(std::vector<T>& buf){
   size_t N = buf.size();
   int Ntri = N-2;
-  buf.reserve(Ntri*3);
+  buf.resize(Ntri*3);
 
   // Iterate backwards through elements so we can operate in place
   // strip (i): 0 1 2 3 4 5 6 7 8 ...

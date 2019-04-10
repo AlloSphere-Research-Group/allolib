@@ -66,8 +66,31 @@ public:
       ROLE_USER  = 1 << 8 // User defined roles can add from here through bitshifting
   } Role;
 
-  DistributedApp(bool runDistributed = DistributedApp::shouldRunDistributed()) {
+  DistributedApp() { }
 
+
+  ~DistributedApp() {
+#ifdef AL_USE_CUTTLEBONE
+      if (mMaker) {
+          mMaker->stop();
+      } else if (mTaker){
+          mTaker->stop();
+      }
+#endif
+  }
+
+  void initialize() {
+#ifdef AL_WINDOWS
+    // Required to make sure gethostname() works....
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    int err;
+    wVersionRequested = MAKEWORD(2, 2);
+    err = WSAStartup(wVersionRequested, &wsaData);
+    if (err != 0) {
+        std::cerr << "WSAStartup failed with error: " << err << std::endl;
+    }
+#endif
 #ifdef AL_BUILD_MPI
       MPI_Init(NULL, NULL);
 
@@ -76,42 +99,46 @@ public:
 
       MPI_Get_processor_name(processor_name, &name_len);
 #endif
-      if (runDistributed) {
-        mRunDistributed = true;
+      TomlLoader appConfig("distributed_app.toml");
+      auto nodesTable = appConfig.root->get_table_array("node");
+      if (nodesTable) {
+        for (const auto& table : *nodesTable)
+        {
+            std::string host = *table->get_as<std::string>("host");
+            std::string role = *table->get_as<std::string>("role");
+            if (al_get_hostname() == host) {
+              mRunDistributed = true;
+            }
+            std::function<Role(std::string)> stringToRole = [](std::string roleString) {
+              Role role = ROLE_NONE;
+              std::string token;
+              std::istringstream ss(roleString);
+              while(std::getline(ss, token, '+')) {
+                  std::cout << token << " -- " <<std::endl;
+                  if (token == "audio") {
+                    role = Role(role | ROLE_AUDIO);
+                  } else if (token == "simulator") {
+                    role = Role(role | ROLE_SIMULATOR);
+                  } else if (token == "renderer")  {
+                    role = Role(role | ROLE_RENDERER);
+                  } else if (token == "control")  {
+                    role = Role(role | ROLE_CONTROL);
+                  } else if (token == "replica")  {
+                    role = Role(role | ROLE_DESKTOP_REPLICA);
+                  }
+              }
+              return role;
+            };
+
+            mRoleMap[host] = stringToRole(role);
+            if (table->get("dataRoot") && (strncmp(name().c_str(), host.c_str(), name().size()) == 0) ) {
+              mGlobalDataRootPath = File::conformDirectory(*table->get_as<std::string>("dataRoot"));
+            }
+
+        }
       }
 
       if (mRunDistributed) {
-
-          mRoleMap["spherez05"] = ROLE_SIMULATOR;
-          mRoleMap["gr01"] = ROLE_SIMULATOR;
-
-          mRoleMap["moxi"] = ROLE_RENDERER;
-          mRoleMap["gr02"] = ROLE_RENDERER;
-          mRoleMap["gr03"] = ROLE_RENDERER;
-          mRoleMap["gr04"] = ROLE_RENDERER;
-          mRoleMap["gr05"] = ROLE_RENDERER;
-          mRoleMap["gr06"] = ROLE_RENDERER;
-          mRoleMap["gr07"] = ROLE_RENDERER;
-          mRoleMap["gr08"] = ROLE_RENDERER;
-          mRoleMap["gr09"] = ROLE_RENDERER;
-          mRoleMap["gr10"] = ROLE_RENDERER;
-          mRoleMap["gr11"] = ROLE_RENDERER;
-          mRoleMap["gr12"] = ROLE_RENDERER;
-          mRoleMap["gr13"] = ROLE_RENDERER;
-          mRoleMap["gr14"] = ROLE_RENDERER;
-
-          mRoleMap["audio"] = (Role) (ROLE_AUDIO | ROLE_SIMULATOR);
-          mRoleMap["audio.10g"] = (Role) (ROLE_AUDIO | ROLE_SIMULATOR);
-          mRoleMap["ar01"] = ROLE_AUDIO;
-
-//          if (isMaster()) {
-//              int number = 398;
-//              for (int i = 1; i < world_size; i ++) {
-//                  MPI_Send(&number, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
-//              }
-//          }
-
-          mRole = ROLE_NONE;
           for (auto entry: mRoleMap) {
               if (strncmp(name().c_str(), entry.first.c_str(), name().size()) == 0) {
                 mRole = entry.second;
@@ -126,59 +153,65 @@ public:
           }
       }
 
+      // Set up netwroking
+      uint16_t sendPort = 9010;
+      uint16_t receiverPort = 9100;
+      std::string defaultAddress = "0.0.0.0";
+      if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) {
+        mParameterServer = std::make_shared<ParameterServer>(defaultAddress, sendPort);
+        if (mParameterServer->serverRunning()) {
+          //          mParameterServer->addListener("127.0.0.1", 9100);
+          mParameterServer->startHandshakeServer(defaultAddress);
+          for (auto member: mRoleMap) {
+            // Relay all parameters to renderers
+            if (member.second & ROLE_RENDERER) {
+              std::cout << "Added renderer as listener " << member.first << ":" << receiverPort << std::endl;
+              mParameterServer->addListener(member.first, receiverPort);
+              continue;
+            }
+          }
+        } else {
+          int portOffset = 0;
+          int maxInstances = 64;
+          while (!mParameterServer->serverRunning() && portOffset < maxInstances) {
+            mParameterServer->listen(receiverPort + portOffset++, defaultAddress);
+          }
+          if (mParameterServer->serverRunning()) {
 
-#ifdef AL_BUILD_MPI
-      if (!isPrimary()) {
-//          int number;
-//          MPI_Recv(&number, 1, MPI_INT, 0, 1, MPI_COMM_WORLD,
-//                   MPI_STATUS_IGNORE);
-        if(getenv("OMPI_COMM_WORLD_RANK")) {
-              mRole = ROLE_RENDERER;
+            mParameterServer->startCommandListener(defaultAddress);
+            mRole = ROLE_DESKTOP_REPLICA;
+            std::cout << "Application is replica on port: " << mParameterServer->serverPort() << std::endl;
+          } else {
+            std::cerr << "Warning: Application could not start network role." << std::endl;
+          }
         }
-      }
-      std::cout << name() << ":" << world_rank << " pid: "<< getpid()<< " set role to " << roleName() << std::endl;
-#endif
-  }
+      } else {
+        mParameterServer = std::make_shared<ParameterServer>(defaultAddress, receiverPort);
 
-  ~DistributedApp() {
-#ifdef AL_USE_CUTTLEBONE
-      if (mMaker) {
-          mMaker->stop();
-      } else if (mTaker){
-          mTaker->stop();
+        if (mParameterServer->serverRunning()) {
+          mParameterServer->startCommandListener(defaultAddress);
+        } else {
+          std::cerr << "Warning: Application could not start network role." << std::endl;
+        }
+
       }
-#endif
-#ifdef AL_BUILD_MPI
-      MPI_Finalize();
-#endif
   }
 
   std::string name() {
-#ifdef AL_BUILD_MPI
-      return processor_name;
-#else
     if (mRunDistributed) {
       return al_get_hostname();
     } else {
       return "localhost";
     }
-#endif
   }
 
+  std::string dataRoot() { return mGlobalDataRootPath;}
   Role role() { return mRole;}
 
   bool hasRole(Role role) { return mRole & role;}
 
   int rank() {
-#ifdef AL_BUILD_MPI
-      if(getenv("OMPI_COMM_WORLD_RANK")) {
-          return world_rank;
-      } else {
-          return 0;
-      }
-#else
-      return 0;
-#endif
+    return 0;
   }
 
   std::string roleName() {
@@ -216,27 +249,19 @@ public:
     return name;
   }
 
-  void print() {
+  void print(std::ostream& stream = std::cout) {
 #ifdef AL_BUILD_MPI
       std::cout << "Processor: " << processor_name
                 << " Rank: " << world_rank
                 << " Of: " << world_size << std::endl;
       std::cout << name() << ":" << world_rank << " set role to " << roleName() << std::endl;
 #else
-      std::cout << "DistributedApp: Not using MPI. Role: " << roleName() << std::endl;
+      stream << "DistributedApp: Not using MPI. Role: " << roleName() << std::endl;
 #endif
   }
 
   bool isPrimary() {
-#ifdef AL_BUILD_MPI
-      if(getenv("OMPI_COMM_WORLD_RANK")) {
-          return world_rank == 0;
-      } else {
-          return hasRole(ROLE_SIMULATOR) || hasRole(ROLE_DESKTOP);
-      }
-#else
       return hasRole(ROLE_SIMULATOR) || hasRole(ROLE_DESKTOP);
-#endif
   }
 
   virtual void initAudio (double audioRate, int audioBlockSize,
@@ -280,23 +305,23 @@ public:
   // users override these
   void onInit() override {}
   void onCreate() override {}
-  void onAnimate(double dt) override {}
-  void onDraw (Graphics& g) override {}
+  void onAnimate(double dt) override {(void) dt;}
+  void onDraw (Graphics& g) override {(void) g;}
   void onExit() override {}
-  void onKeyDown(Keyboard const& k) override {}
-  void onKeyUp(Keyboard const& k) override {}
-  void onMouseDown(Mouse const& m) override {}
-  void onMouseUp(Mouse const& m) override {}
-  void onMouseDrag(Mouse const& m) override {}
-  void onMouseMove(Mouse const& m) override {}
-  void onResize(int w, int h) override {}
-  void onVisibility(bool v) override {}
+  void onKeyDown(Keyboard const& k) override {(void) k;}
+  void onKeyUp(Keyboard const& k) override {(void) k;}
+  void onMouseDown(Mouse const& m) override {(void) m;}
+  void onMouseUp(Mouse const& m) override {(void) m;}
+  void onMouseDrag(Mouse const& m) override {(void) m;}
+  void onMouseMove(Mouse const& m) override {(void) m;}
+  void onResize(int w, int h) override {(void) w;(void) h;}
+  void onVisibility(bool v) override {(void) v;}
 
   /// Override to compute updates to shared state
   /// Currently run before calls to onAnimate()
   /// i.e. this is synchronous to drawing and runs at
   /// frame rate
-  virtual void simulate(double dt) {}
+  virtual void simulate(double dt) { (void) dt; }
 
   // extra functionalities to be handled
   virtual void preOnCreate();
@@ -306,7 +331,7 @@ public:
   virtual void postOnExit();
 
   // PacketHandler
-  void onMessage(osc::Message& m) override {}
+  void onMessage(osc::Message& m) override { (void) m; }
 
   /**
    * @brief get current shared state
@@ -337,18 +362,18 @@ public:
 
   ParameterServer &parameterServer() override { return *mParameterServer; }
 
-  static bool shouldRunDistributed() {
-    std::vector<std::string> distributedNodes =
-    { "gr01", "gr02", "gr03", "gr04", "gr05", "gr06", "gr07", "gr08", "gr09",
-      "gr10", "gr11", "gr12", "gr13", "gr14",
-      "audio", "audio.10g", "ar01", "spherez05", "interface", "control"};
-    for (auto nodeName: distributedNodes) {
-      if (al_get_hostname() == nodeName) {
-        return true;
-      }
-    }
-    return false;
-  }
+//  static bool shouldRunDistributed() {
+//    TomlLoader appConfig("distributed_app.toml");
+
+//    for (auto key: *appConfig.root->get_table("nodes")) {
+//      std::cout << key.first << " -- " << *key.second << std::endl;
+//      if (al_get_hostname() == key.first) {
+//        return true;
+//      }
+//    }
+
+//    return false;
+//  }
 
   void registerDynamicScene(DynamicScene &scene) {
 
@@ -374,6 +399,7 @@ private:
 #endif
   bool mRunDistributed {false};
   Role mRole {ROLE_DESKTOP};
+  std::string mGlobalDataRootPath;
 
   std::map<std::string, Role> mRoleMap;
 
@@ -394,43 +420,10 @@ private:
 
 template<class TSharedState>
 inline void DistributedApp<TSharedState>::start() {
+
   glfw::init(is_verbose);
+  initialize();
 
-  uint16_t sendPort = 9010;
-  uint16_t receiverPort = 9100;
-  std::string defaultAddress = "0.0.0.0";
-  if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) {
-    mParameterServer = std::make_shared<ParameterServer>(defaultAddress, sendPort);
-    if (mParameterServer->serverRunning()) {
-      //          mParameterServer->addListener("127.0.0.1", 9100);
-      mParameterServer->startHandshakeServer(defaultAddress);
-      for (auto member: mRoleMap) {
-        // Relay all parameters to renderers
-        if (member.second & ROLE_RENDERER) {
-          std::cout << "Added renderer as listener " << member.first << ":" << receiverPort << std::endl;
-          mParameterServer->addListener(member.first, receiverPort);
-          continue;
-        }
-      }
-    } else {
-      int portOffset = 0;
-      int maxInstances = 64;
-      while (!mParameterServer->serverRunning() && portOffset < maxInstances) {
-        mParameterServer->listen(receiverPort + portOffset++, defaultAddress);
-      }
-      if (mParameterServer->serverRunning()) {
-
-        mParameterServer->startCommandListener(defaultAddress);
-        mRole = ROLE_DESKTOP_REPLICA;
-        std::cout << "Application is replica on port: " << mParameterServer->serverPort() << std::endl;
-      } else {
-        std::cerr << "Warning: Application has no network role." << std::endl;
-        mRole = ROLE_NONE;
-      }
-    }
-  } else {
-    mParameterServer = std::make_shared<ParameterServer>(defaultAddress, receiverPort);
-  }
   //  std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
   onInit();
 
@@ -474,8 +467,10 @@ inline void DistributedApp<TSharedState>::start() {
         mQueuedStates = mTaker->get(mState);
       }
 #else
-      // You shouldn't get here if you are relying oncuttlebone for state syncing
-      mQueuedStates = 1;
+      if (!mRunDistributed) {
+      // You shouldn't get here if you are relying on cuttlebone for state syncing
+        mQueuedStates = 1;
+      }
 #endif
     }
 

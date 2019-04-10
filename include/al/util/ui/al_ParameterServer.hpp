@@ -104,11 +104,18 @@ public:
      * @param IPaddress The IP address of the listener
      * @param oscPort The network port so send the value changes on
      */
-    virtual void addListener(std::string IPaddress, int oscPort) {
+    virtual void addListener(std::string IPaddress, uint16_t oscPort) {
+      auto newListenerSocket = new osc::Send;
+
+      if (newListenerSocket->open(oscPort, IPaddress.c_str())) {
         mListenerLock.lock();
-        mOSCSenders.push_back(new osc::Send(oscPort, IPaddress.c_str()));
+        mOSCSenders.push_back(newListenerSocket);
         mListenerLock.unlock();
-//		std::cout << "Registered listener " << IPaddress << ":" << oscPort<< std::endl;
+        //		std::cout << "Registered listener " << IPaddress << ":" << oscPort<< std::endl;
+      } else {
+        delete newListenerSocket;
+        std::cerr << "ERROR: Could not register listener " << IPaddress << ":" << oscPort << std::endl;
+      }
     }
 
     /**

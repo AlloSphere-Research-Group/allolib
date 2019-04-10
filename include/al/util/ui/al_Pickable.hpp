@@ -208,7 +208,7 @@ struct PickableBase : virtual PickableState {
 
 /// Bounding Box PickableMesh
 struct Pickable : PickableBase {
-  Mesh *mesh; // pointer to mesh that is wrapped
+  Mesh *mesh {nullptr}; // pointer to mesh that is wrapped
   BoundingBox bb; // original bounding box
   BoundingBox aabb; // axis aligned bounding box (after pose/scale transforms)
 

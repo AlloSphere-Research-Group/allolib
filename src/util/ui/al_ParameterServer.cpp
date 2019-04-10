@@ -593,8 +593,6 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param, std::st
     } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) == 0) {// ParameterColor
       Trigger *p = dynamic_cast<Trigger *>(param);
       if(address == p->getFullAddress()){
-//          float a,b,c,d;
-//          m >> a >> b >> c >> d;
           p->trigger();
           return true;
       }
