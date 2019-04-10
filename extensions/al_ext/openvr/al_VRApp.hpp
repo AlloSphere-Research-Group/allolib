@@ -51,10 +51,6 @@ public:
 
     // run app
     void start() override;
-
-    // VR controls
-    Controller &leftController() { return openVR->LeftController;}
-    Controller &rightController() { return openVR->RightController;}
 protected:
   Lens mLens;
   Pose mPose;

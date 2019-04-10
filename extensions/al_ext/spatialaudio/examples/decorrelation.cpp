@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "al/core/app/al_AudioApp.hpp"
-#include "al/spatialaudio/al_Decorrelation.hpp"
+#include "al_ext/spatialaudio/al_Decorrelation.hpp"
 
 #include "Gamma/Noise.h"
 #include "Gamma/Envelope.h"

@@ -3,7 +3,7 @@
 #include "al/util/ui/al_Pickable.hpp"
 #include "al/util/ui/al_PickableManager.hpp"
 
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
 #include "module/openvr/al_OpenVRWrapper.hpp"
 #endif
 
@@ -11,7 +11,7 @@ using namespace al;
 
 struct MyApp : public App {
 
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
   OpenVRWrapper mOpenVR;
 #endif
   PickableManager mPickableManager;
@@ -22,7 +22,7 @@ struct MyApp : public App {
   Mesh mHit;
 
   void onCreate() override {
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
     // Initialize openVR in onCreate. A graphics context is needed.
     if (!mOpenVR.init()) std::cerr << "ERROR: OpenVR init returned error" << std::endl;
 #else
@@ -61,7 +61,7 @@ struct MyApp : public App {
   }
 
   void onAnimate(double dt) override {
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
     // Update traking and controller data;
     mOpenVR.update();
 
@@ -138,7 +138,7 @@ struct MyApp : public App {
     // Draw markers for the controllers
     // The openVR object is available in the VRRenderer class to query the controllers
     g.pushMatrix();
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
     g.translate(mOpenVR.LeftController.pos);
     g.rotate(mOpenVR.LeftController.quat);
 #endif
@@ -148,7 +148,7 @@ struct MyApp : public App {
 
     //right hand
     g.pushMatrix();
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
     g.translate(mOpenVR.RightController.pos);
     g.rotate(mOpenVR.RightController.quat);
 #endif
@@ -157,7 +157,7 @@ struct MyApp : public App {
     g.popMatrix();
 
     //draw controller rays
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
     auto r1 = mOpenVR.RightController.ray();
     auto r2 = mOpenVR.LeftController.ray();
     mRay.reset();
@@ -176,7 +176,7 @@ struct MyApp : public App {
   }
 
   void onExit() override {
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
     mOpenVR.close();
 #endif
   }

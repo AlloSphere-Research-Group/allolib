@@ -54,7 +54,7 @@
 
 #include <Gamma/FFT.h>
 
-#include "al_Decorrelation.hpp"
+#include "al_ext/spatialaudio/al_Decorrelation.hpp"
 
 using namespace al;
 using namespace std;

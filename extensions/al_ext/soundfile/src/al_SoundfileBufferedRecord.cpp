@@ -1,7 +1,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "al/soundfile/al_SoundfileBufferedRecord.hpp"
+#include "al_ext/soundfile/al_SoundfileBufferedRecord.hpp"
 
 using namespace al;
 

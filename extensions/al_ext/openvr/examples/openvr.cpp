@@ -1,9 +1,7 @@
 #include "al/core.hpp"
 
-// The BUILD_VR macro is set by flags.cmake if OpenVR is found.
-// You will need to adjust flags.cmake to let it know the location
-// of your OpenVR installation
-#ifdef BUILD_VR
+// The AL_EXT_OPENVR macro is set if OpenVR is found.
+#ifdef AL_EXT_OPENVR
 #include "module/openvr/al_OpenVRWrapper.hpp"
 #endif
 
@@ -14,7 +12,7 @@ public:
 
     void onCreate() override {
 
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
         // Initialize openVR in onCreate. A graphics context is needed.
         if(!mOpenVR.init()) {
             std::cerr << "ERROR: OpenVR init returned error" << std::endl;
@@ -28,7 +26,7 @@ public:
     }
 
     void onAnimate(double dt) override {
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
         // Update traking and controller data;
         mOpenVR.update();
 
@@ -40,10 +38,11 @@ public:
     }
 
     void drawScene(Graphics &g) {
-        g.clear();
-    // Draw a cube in the scene
-        g.draw(mCube);
 
+#ifdef AL_EXT_OPENVR
+      g.clear();
+  // Draw a cube in the scene
+      g.draw(mCube);
     // Draw markers for the controllers
     // The openVR object is available in the VRRenderer class to query the controllers
         g.pushMatrix();
@@ -65,6 +64,10 @@ public:
             g.polygonMode(Graphics::LINE);
             g.draw(mCube);
         g.popMatrix();
+#else
+
+      g.clear(1.0, 0.0, 0.0); // Draw red if not building for OpenVR
+#endif
     }
 
     void onDraw(Graphics &g) override {
@@ -74,14 +77,14 @@ public:
     }
 
     void onExit() override {
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
         mOpenVR.close();
 #endif
     }
 
 private:
     VAOMesh mCube;
-#ifdef BUILD_VR
+#ifdef AL_EXT_OPENVR
     OpenVRWrapper mOpenVR;
 #endif
 };

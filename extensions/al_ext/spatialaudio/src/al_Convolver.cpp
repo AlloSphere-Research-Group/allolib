@@ -12,7 +12,7 @@
 #error "This program requires zita-convolver 4.x.x"
 #endif
 
-#include "al_Convolver.hpp"
+#include "al_ext/spatialaudio/al_Convolver.hpp"
 
 using namespace al;
 

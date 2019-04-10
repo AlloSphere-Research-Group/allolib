@@ -1,12 +1,10 @@
 /*
-Based on Allocore Example: Audio To Graphics by Lance Putnam
-
 */
 
 #include <iostream>
 
 #include "al/core.hpp"
-#include "al/spatialaudio/al_Convolver.hpp"
+#include "al_ext/spatialaudio/al_Convolver.hpp"
 
 #include "Gamma/Noise.h"
 #include "Gamma/Envelope.h"
