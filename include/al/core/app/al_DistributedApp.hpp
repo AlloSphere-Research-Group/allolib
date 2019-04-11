@@ -131,8 +131,13 @@ public:
             };
 
             mRoleMap[host] = stringToRole(role);
-            if (table->get("dataRoot") && (strncmp(name().c_str(), host.c_str(), name().size()) == 0) ) {
-              mGlobalDataRootPath = File::conformDirectory(*table->get_as<std::string>("dataRoot"));
+            if (/*table->get("dataRoot") &&*/ (strncmp(name().c_str(), host.c_str(), name().size()) == 0) ) {
+              std::string dataRootValue = *table->get_as<std::string>("dataRoot");
+              if (dataRootValue.size() > 0) {
+                mGlobalDataRootPath = File::conformDirectory(dataRootValue);
+              } else {
+                std::cout << "WARNING: node " << host.c_str() << " not given dataRoot" <<std::endl;
+              }
             }
 
         }
