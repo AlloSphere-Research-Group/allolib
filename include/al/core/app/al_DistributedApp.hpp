@@ -131,18 +131,23 @@ public:
             };
 
             mRoleMap[host] = stringToRole(role);
-            if ((strncmp(name().c_str(), host.c_str(), name().size()) == 0) ) { // Set configuration for this node when found
+            if (table->contains("dataRoot") && strncmp(name().c_str(), host.c_str(), name().size()) == 0)  { // Set configuration for this node when found
               std::string dataRootValue = *table->get_as<std::string>("dataRoot");
-              if (dataRootValue.size() > 0) {
-                mGlobalDataRootPath = File::conformDirectory(dataRootValue);
-              } else {
-                std::cout << "WARNING: node " << host.c_str() << " not given dataRoot" <<std::endl;
-              }
-
-              mRank = *table->get_as<int>("rank");
-              mGroup = *table->get_as<int>("group");
+              mGlobalDataRootPath = File::conformDirectory(dataRootValue);
+            } else {
+              std::cout << "WARNING: node " << host.c_str() << " not given dataRoot" <<std::endl;
             }
 
+            if (table->contains("rank") ) {
+              mRank = *table->get_as<int>("rank");
+            } else {
+              std::cout << "WARNING: node " << host.c_str() << " not given rank" <<std::endl;
+            }
+            if (table->contains("group") ) {
+              mGroup = *table->get_as<int>("group");
+            } else {
+              std::cout << "WARNING: node " << host.c_str() << " not given group" << std::endl;
+            }
         }
       }
 
