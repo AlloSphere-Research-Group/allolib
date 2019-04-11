@@ -108,6 +108,13 @@ elif [ $(uname -s) != MINGW64* ] && [ "${GENERATOR_PLATFORM}" != "x86" ]; then
     fi
     GENERATOR="Visual Studio 15 2017 Win64"
     CMAKE_BINARY="C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe"
+    if [ ! -f "${CMAKE_BINARY}" ]; then
+      CMAKE_BINARY="C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe"
+    fi
+    if [ ! -f "${CMAKE_BINARY}" ]; then
+      echo Trying to use cmake on PATH as Visual Studio Cmake not found
+      CMAKE_BINARY="cmake.exe"
+    fi
 fi
 
 if [ ${IS_VERBOSE} == 1 ]; then
