@@ -131,13 +131,16 @@ public:
             };
 
             mRoleMap[host] = stringToRole(role);
-            if (/*table->get("dataRoot") &&*/ (strncmp(name().c_str(), host.c_str(), name().size()) == 0) ) {
+            if ((strncmp(name().c_str(), host.c_str(), name().size()) == 0) ) { // Set configuration for this node when found
               std::string dataRootValue = *table->get_as<std::string>("dataRoot");
               if (dataRootValue.size() > 0) {
                 mGlobalDataRootPath = File::conformDirectory(dataRootValue);
               } else {
                 std::cout << "WARNING: node " << host.c_str() << " not given dataRoot" <<std::endl;
               }
+
+              mRank = *table->get_as<int>("rank");
+              mGroup = *table->get_as<int>("group");
             }
 
         }
@@ -211,13 +214,17 @@ public:
   }
 
   std::string dataRoot() { return mGlobalDataRootPath;}
+
   Role role() { return mRole;}
 
-  bool hasRole(Role role) { return mRole & role;}
-
-  int rank() {
-    return 0;
+  bool isPrimary() {
+      return hasRole(ROLE_SIMULATOR) || hasRole(ROLE_DESKTOP);
   }
+
+  int rank() { return mRank; }
+  int group() { return mGroup; }
+
+  bool hasRole(Role role) { return mRole & role;}
 
   std::string roleName() {
     std::string name;
@@ -263,10 +270,6 @@ public:
 #else
       stream << "DistributedApp: Not using MPI. Role: " << roleName() << std::endl;
 #endif
-  }
-
-  bool isPrimary() {
-      return hasRole(ROLE_SIMULATOR) || hasRole(ROLE_DESKTOP);
   }
 
   virtual void initAudio (double audioRate, int audioBlockSize,
@@ -404,6 +407,8 @@ private:
 #endif
   bool mRunDistributed {false};
   Role mRole {ROLE_DESKTOP};
+  int mRank {0};
+  int mGroup {0};
   std::string mGlobalDataRootPath;
 
   std::map<std::string, Role> mRoleMap;
