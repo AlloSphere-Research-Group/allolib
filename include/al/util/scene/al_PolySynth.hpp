@@ -447,6 +447,7 @@ public:
       for (auto *param: params) {
           registerParameter(*param);
       }
+      return *this;
   }
 
   std::vector<ParameterMeta *> parameters() {return mContinuousParameters;}
