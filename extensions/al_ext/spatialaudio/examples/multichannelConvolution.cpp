@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "al/core.hpp"
+
 #include "al_ext/spatialaudio/al_Convolver.hpp"
 
 #include "Gamma/Noise.h"

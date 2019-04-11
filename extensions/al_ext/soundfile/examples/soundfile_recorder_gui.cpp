@@ -1,9 +1,10 @@
 #include <memory>
 
-#include "al/soundfile/al_OutputRecorder.hpp"
 #include "al/core/app/al_App.hpp"
-#include "al/soundfile/al_SoundfileRecordGUI.hpp"
 #include "al/util/scene/al_PolySynth.hpp" // For asciiToMidi()
+
+#include "al_ext/soundfile/al_SoundfileRecordGUI.hpp"
+#include "al_ext/soundfile/al_OutputRecorder.hpp"
 
 #include "Gamma/Oscillator.h"
 

@@ -1,7 +1,9 @@
 #include <memory>
 
-#include "al/soundfile/al_OutputRecorder.hpp"
 #include "al/core/app/al_App.hpp"
+
+#include "al_ext/soundfile/al_OutputRecorder.hpp"
+
 #include "Gamma/Oscillator.h"
 
 using namespace al;

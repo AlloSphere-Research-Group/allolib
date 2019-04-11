@@ -6,8 +6,9 @@
 #include <algorithm>
 #include <cstring>
 
-#include "al/soundfile/al_SoundfileBufferedRecord.hpp"
 #include "al/core/io/al_AudioIO.hpp"
+
+#include "al_ext/soundfile/al_SoundfileBufferedRecord.hpp"
 
 #include "Gamma/SoundFile.h"
 

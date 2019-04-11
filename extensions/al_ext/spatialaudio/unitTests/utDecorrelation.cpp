@@ -6,8 +6,9 @@
 #include <iostream>
 #include <cmath>
 
-#include "al/spatialaudio/al_Decorrelation.hpp"
 #include "al/core/system/al_Time.hpp"
+
+#include "al_ext/spatialaudio/al_Decorrelation.hpp"
 
 #include "Gamma/FFT.h"
 

@@ -6,8 +6,9 @@
 #include <algorithm>
 #include <cstring>
 
-#include "al/spatialaudio/al_Convolver.hpp"
 #include "al/core/io/al_AudioIO.hpp"
+
+#include "al_ext/spatialaudio/al_Convolver.hpp"
 
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include "catch.hpp"
