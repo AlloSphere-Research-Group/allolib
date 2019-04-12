@@ -593,8 +593,17 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param, std::st
     } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) == 0) {// ParameterColor
       Trigger *p = dynamic_cast<Trigger *>(param);
       if(address == p->getFullAddress()){
+        if (m.typeTags().size() == 0) {
           p->trigger();
           return true;
+        } else if (m.typeTags() == "f") {
+          float val;
+          m >> val;
+          if (val == 1.0) {
+            p->trigger();
+          }
+          return true;
+        }
       }
   } else {
         // TODO this check should be performed on registration
