@@ -26,6 +26,13 @@ public:
     int device = -1
   );
 
+  virtual void initAudio(
+    AudioDevice &dev,
+    double audioRate, int audioBlockSize,
+    int audioOutputs, int audioInputs,
+    int device = -1
+  );
+
   // initialize audio with default values from default device
   enum AudioIOConfig : unsigned int {
       // binary literal supported since c++14

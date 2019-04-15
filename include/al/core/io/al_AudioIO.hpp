@@ -175,6 +175,11 @@ class AudioIO : public AudioIOData {
             int framesPerBuf = 64, double framesPerSec = 44100.0,
             int outChans = 2, int inChans = 0);
 
+  void init(void (*callback)(AudioIOData &), void *userData,
+            AudioDevice &dev,
+            int framesPerBuf = 64, double framesPerSec = 44100.0,
+            int outChans = 2, int inChans = 0);
+
   /// @param[in] callback	Audio processing callback
   /// (optional)
   /// @param[in] userData	Pointer to user data accessible within callback

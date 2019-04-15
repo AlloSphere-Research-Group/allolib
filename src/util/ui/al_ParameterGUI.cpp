@@ -834,7 +834,7 @@ void ParameterGUI::drawSynthRecorder(SynthRecorder *synthRecorder) {
     }
 }
 
-void ParameterGUI::drawParameterMIDI(ParameterMIDI *parameterMidi)
+void ParameterGUI::drawParameterMIDI(ParameterMIDI *midi)
 {
     struct ParameterMIDIState {
         std::vector<std::string> devices;
@@ -849,15 +849,15 @@ void ParameterGUI::drawParameterMIDI(ParameterMIDI *parameterMidi)
         }
     };
     static std::map<ParameterMIDI *, ParameterMIDIState> stateMap;
-    if(stateMap.find(parameterMidi) == stateMap.end()) {
-        stateMap[parameterMidi] = ParameterMIDIState();
-        updateDevices(stateMap[parameterMidi]);
+    if(stateMap.find(midi) == stateMap.end()) {
+        stateMap[midi] = ParameterMIDIState();
+        updateDevices(stateMap[midi]);
     }
-    ParameterMIDIState &state = stateMap[parameterMidi];
+    ParameterMIDIState &state = stateMap[midi];
 
-    ImGui::PushID(std::to_string((unsigned long) parameterMidi).c_str());
+    ImGui::PushID(std::to_string((unsigned long) midi).c_str());
     if (ImGui::CollapsingHeader("Paramter MIDI", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (parameterMidi->isOpen()) {
+        if (midi->isOpen()) {
             std::string noteBindings;
             noteBindings += "MIDI Note -> Channel, Value";
 //            for (auto &binding: parameterMidi->getCurrentNoteBindings()) {
@@ -867,7 +867,7 @@ void ParameterGUI::drawParameterMIDI(ParameterMIDI *parameterMidi)
 //            }
             ImGui::Text("%s",noteBindings.c_str());
             if (ImGui::Button("Stop")) {
-                parameterMidi->close();
+                midi->close();
             }
         } else {
 
@@ -876,7 +876,7 @@ void ParameterGUI::drawParameterMIDI(ParameterMIDI *parameterMidi)
                 // TODO adjust valid number of channels.
             }
             if (ImGui::Button("Start")) {
-                parameterMidi->open(state.currentDevice);
+                midi->open(state.currentDevice);
             }
         }
     }
@@ -936,6 +936,7 @@ void ParameterGUI::drawAudioIO(AudioIO *io)
 {
     struct AudioIOState {
         int currentSr = 0;
+        int currentBufSize = 0;
         int currentDevice = 0;
         std::vector<std::string> devices;
     };
@@ -955,7 +956,10 @@ void ParameterGUI::drawAudioIO(AudioIO *io)
     ImGui::PushID(std::to_string((unsigned long) io).c_str());
     if (ImGui::CollapsingHeader("Audio", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         if (io->isOpen()) {
-            std::string text = "Sampling Rate: " + std::to_string(io->fps()) + "\nin chnls: " + std::to_string(io->channelsIn());
+            std::string text;
+            text += "Sampling Rate: " + std::to_string(io->fps());
+            text += "\nbuffer size: " + std::to_string(io->framesPerBuffer());
+            text += "\nin chnls: " + std::to_string(io->channelsIn());
             text += "\nout chnls:" + std::to_string(io->channelsOut());
             ImGui::Text("%s", text.c_str());
             if (ImGui::Button("Stop")) {
@@ -973,8 +977,13 @@ void ParameterGUI::drawAudioIO(AudioIO *io)
             std::vector<std::string> samplingRates {"44100", "48000", "88100", "96000"};
             ImGui::Combo("Sampling Rate", &state.currentSr, ParameterGUI::vector_getter,
                          static_cast<void*>(&samplingRates), samplingRates.size());
+
+            std::vector<std::string> bufferSizes {"64", "128", "256", "512", "1024"};
+            ImGui::Combo("Buffer size", &state.currentBufSize, ParameterGUI::vector_getter,
+                         static_cast<void*>(&bufferSizes), bufferSizes.size());
             if (ImGui::Button("Start")) {
                 io->framesPerSecond(std::stof(samplingRates[state.currentSr]));
+                io->framesPerBuffer(std::stof(bufferSizes[state.currentBufSize]));
                 io->device(AudioDevice(state.currentDevice));
                 io->open();
                 io->start();

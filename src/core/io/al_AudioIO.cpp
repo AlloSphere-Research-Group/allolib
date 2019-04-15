@@ -947,13 +947,24 @@ AudioIO::AudioIO()
 AudioIO::~AudioIO() { close(); }
 
 void AudioIO::init(void (*callbackA)(AudioIOData &), void *userData,
-                   int framesPerBuf, double framesPerSec, int outChansA,
-                   int inChansA) {
+                   int framesPerBuf, double framesPerSec,
+                   int outChansA,  int inChansA)
+{
+  AudioDevice dev = AudioDevice::defaultOutput();
+  init(callbackA, userData, dev,
+       framesPerBuf, framesPerSec,
+       outChansA, inChansA);
+}
+
+void AudioIO::init(void (*callbackA)(AudioIOData &), void *userData,
+                   AudioDevice &dev,
+                   int framesPerBuf, double framesPerSec,
+                   int outChansA,  int inChansA)
+{
   // mBackend = std::make_unique<AudioBackend>();
   callback = callbackA;
   user(userData);
-  deviceIn(AudioDevice::defaultInput());
-  deviceOut(AudioDevice::defaultOutput());
+  device(dev);
   //	init(outChansA, inChansA);
   channels(inChansA, false);
   channels(outChansA, true);
@@ -1206,5 +1217,6 @@ double AudioIO::time() const {
 double AudioIO::time(int frame) const {
   return (double)frame / framesPerSecond() + time();
 }
+
 
 }  // al::

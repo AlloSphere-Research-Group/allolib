@@ -124,8 +124,10 @@ public:
     static void drawSynthSequencer(SynthSequencer *synthSequencer);
     static void drawSynthRecorder(SynthRecorder *synthRecorder);
 
+    static void drawAudioIO(AudioIO &io) { drawAudioIO(&io);}
     static void drawAudioIO(AudioIO *io);
-    static void drawParameterMIDI(ParameterMIDI *io);
+    static void drawParameterMIDI(ParameterMIDI &midi) { drawParameterMIDI(&midi);}
+    static void drawParameterMIDI(ParameterMIDI *midi);
     static void drawPresetMIDI(PresetMIDI *presetMidi);
 
     static void drawBundleGroup(std::vector<ParameterBundle *> bundles, std::string suffix, int &currentBundle, bool &bundleGlobal);

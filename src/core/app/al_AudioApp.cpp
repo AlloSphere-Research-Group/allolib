@@ -13,6 +13,16 @@ void AudioApp::initAudio(
   int audioOutputs, int audioInputs,
   int device
 ) {
+  AudioDevice dev = AudioDevice(device);
+  initAudio(dev, audioRate, audioBlockSize,
+            audioOutputs, audioInputs, device);
+}
+
+void AudioApp::initAudio(AudioDevice &dev,
+                         double audioRate, int audioBlockSize,
+                         int audioOutputs, int audioInputs, int device)
+{
+
   mAudioIO.init(AppAudioCB, this, audioBlockSize, audioRate, audioOutputs, audioInputs);
   if (device >= 0) {
        mAudioIO.device(AudioDevice(device));
