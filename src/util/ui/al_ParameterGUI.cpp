@@ -555,9 +555,9 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(PresetHandler 
         }
         if (storeButtonPressed) {
           state.storeButtonState = !state.storeButtonState;
-          if (state.storeButtonState) {
-            state.enteredText = currentPresetName;
-          }
+//          if (state.storeButtonState) {
+//            state.enteredText = currentPresetName;
+//          }
         }
         if (state.storeButtonState) {
           char buf1[64];
