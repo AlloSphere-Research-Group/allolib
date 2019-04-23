@@ -47,7 +47,9 @@
 #include <condition_variable>
 
 #include "al/core/spatial/al_Pose.hpp"
-#include "al/core/sound/al_AudioScene.hpp"
+#include "al/core/math/al_Vec.hpp"
+#include "al/core/spatial/al_DistAtten.hpp"
+#include "al/core/sound/al_Speaker.hpp"
 #include "al/util/scene/al_SynthSequencer.hpp"
 
 #include "al/core/sound/al_StereoPanner.hpp"

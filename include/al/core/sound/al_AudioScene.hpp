@@ -57,6 +57,7 @@
 #include "al/core/spatial/al_Pose.hpp"
 #include "al/core/io/al_AudioIO.hpp"
 #include "al/core/sound/al_Speaker.hpp"
+#include "al/core/sound/al_Spatializer.hpp"
 #include "al/core/sound/al_Reverb.hpp"
 #include "al/core/sound/al_Biquad.hpp"
 
@@ -340,87 +341,6 @@ private:
 
 	BiQuadNX presenceFilter; //used for presence filtering and spatial modulation BW control
 };
-
-
-
-/// Abstract class for all spatializers: Ambisonics, DBAP, VBAP, etc.
-///
-/// @ingroup allocore
-class Spatializer {
-public:
-
-	/// @param[in] sl	A speaker layout to use
-	Spatializer(const SpeakerLayout& sl);
-
-	virtual ~Spatializer(){}
-
-	/// Perform any necessary updates when the speaker layout changes, ex. new speaker triplets for VBAP
-	/// Must be called before any calls to prepare(), renderBuffer(), renderSample()
-	/// or perform()
-	virtual void compile(){}
-
-	/// Called once per listener, before sources are rendered. ex. zero ambisonics coefficients
-	virtual void prepare(AudioIOData& io){}
-
-	/// Render audio buffer in position
-	virtual void renderBuffer(AudioIOData& io,
-	                          const Pose& listeningPose,
-	                          const float *samples,
-	                          const int& numFrames
-	                          ) = 0;
-
-	/// Render audio sample in position
-	virtual void renderSample(AudioIOData& io, const Pose& listeningPose,
-	                          const float& sample,
-	                          const int& frameIndex) = 0;
-
-	/// Called once per listener, after sources are rendered. ex. ambisonics decode
-	virtual void finalize(AudioIOData& io){}
-
-	/// Print out information about spatializer
-	virtual void print(std::ostream& stream = std::cout){}
-
-	/// Get number of speakers
-	int numSpeakers() const { return mSpeakers.size(); }
-
-	/// Set number of frames
-	virtual void numFrames(unsigned int v){ mNumFrames = v;}
-
-protected:
-	/// Render each source per sample
-    [[deprecated("use renderSample() instead")]]
-	virtual void perform(AudioIOData& io,
-	                     SoundSource& src,
-	                     Vec3d& reldir,
-	                     const int& frameIndex
-	                     ) {
-		renderSample(io, reldir, src.readSample(frameIndex), frameIndex);
-	}
-
-	/// Render each source per buffer
-    [[deprecated("use renderBuffer() instead")]]
-	virtual void perform(AudioIOData& io,
-	                     SoundSource& src,
-	                     Vec3d& reldir
-	                     ) {
-		if (mBuffer.size() != io.framesPerBuffer()) {
-			mBuffer.resize(io.framesPerBuffer());
-		}
-        for(unsigned int i = 0; i < io.framesPerBuffer(); i++)
-		{
-			double readIndex = (io.framesPerBuffer() - i - 1);
-			mBuffer[i] = src.readSample(readIndex);
-		}
-//		src.getBuffer()
-		renderBuffer(io, reldir, mBuffer.data(), io.framesPerBuffer());
-	}
-
-	Speakers mSpeakers;
-
-	std::vector<float> mBuffer;	// temporary frame buffer
-    unsigned int mNumFrames {0};
-};
-
 
 
 /// An audio scene consisting of Listeners and Sources.

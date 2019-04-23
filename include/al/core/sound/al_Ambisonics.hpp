@@ -50,7 +50,11 @@
 #include <stdio.h>
 #include <iostream>
 
-#include "al/core/sound/al_AudioScene.hpp"
+#include "al/core/math/al_Vec.hpp"
+#include "al/core/spatial/al_DistAtten.hpp"
+#include "al/core/spatial/al_Pose.hpp"
+#include "al/core/sound/al_Speaker.hpp"
+#include "al/core/sound/al_Spatializer.hpp"
 
 //#define MAX_ORDER 3
 

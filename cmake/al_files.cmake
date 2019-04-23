@@ -49,6 +49,7 @@ set(core_headers
   include/al/core/sound/al_Dbap.hpp
   include/al/core/sound/al_Lbap.hpp
   include/al/core/sound/al_Reverb.hpp
+  include/al/core/sound/al_Spatializer.hpp
   include/al/core/sound/al_Speaker.hpp
   include/al/core/sound/al_StereoPanner.hpp
   include/al/core/sound/al_Vbap.hpp
@@ -101,6 +102,7 @@ set(core_sources
   ${al_path}/src/core/sound/al_Biquad.cpp
   ${al_path}/src/core/sound/al_Dbap.cpp
   ${al_path}/src/core/sound/al_Vbap.cpp
+  ${al_path}/src/core/sound/al_Spatializer.cpp
   ${al_path}/src/core/spatial/al_HashSpace.cpp
   ${al_path}/src/core/spatial/al_Pose.cpp
   ${al_path}/src/core/system/al_PeriodicThread.cpp

@@ -1,6 +1,9 @@
-#include "al/core/sound/al_Vbap.hpp"
 #include <utility> // move
 #include <vector>
+#include <list>
+
+#include "al/core/sound/al_Vbap.hpp"
+
 
 namespace al{
 

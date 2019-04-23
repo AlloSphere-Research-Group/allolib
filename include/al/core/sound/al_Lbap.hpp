@@ -44,7 +44,10 @@
 
 #include <map>
 
-#include "al/core/sound/al_AudioScene.hpp"
+#include "al/core/math/al_Vec.hpp"
+#include "al/core/spatial/al_DistAtten.hpp"
+#include "al/core/spatial/al_Pose.hpp"
+#include "al/core/sound/al_Speaker.hpp"
 #include "al/core/sound/al_Vbap.hpp"
 
 #define RAD_2_DEG_SCALE 57.29577951308232  // 360/(2*pi)
