@@ -7,7 +7,7 @@
 # 	ADDITIONAL_COMPILE_FLAGS
 
 #option(USE_APR "" OFF)
-option(USE_MPI "" ON)
+option(USE_MPI "" OFF)
 
 # OpenGL is the minimum required dependency
 find_package(OpenGL REQUIRED)
@@ -24,7 +24,6 @@ list(APPEND CMAKE_MODULE_PATH
 ${al_path}/cmake/find_scripts
 )
 
-find_package(Assimp QUIET)
 find_package(MPI QUIET)
 
 # Cuttlebone
@@ -104,16 +103,6 @@ if (FREEIMAGE_FOUND)
   list(APPEND ADDITIONAL_HEADERS ${al_path}/include/al/util/al_Image.hpp)
   list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_Image.cpp)
 endif (FREEIMAGE_FOUND)
-
-if (ASSIMP_LIBRARY)
-  if (AL_VERBOSE_OUTPUT)
-    message("found assimp")
-  endif()
-  list(APPEND ADDITIONAL_INCLUDE_DIRS ${ASSIMP_INCLUDE_DIR})
-  list(APPEND ADDITIONAL_LIBRARIES ${ASSIMP_LIBRARY})
-  list(APPEND ADDITIONAL_HEADERS ${al_path}/include/al/util/al_Asset.hpp)
-  list(APPEND ADDITIONAL_SOURCES ${al_path}/src/util/al_Asset.cpp)
-endif()
 
 if (FREETYPE_INCLUDE_DIRS)
   if (AL_VERBOSE_OUTPUT)

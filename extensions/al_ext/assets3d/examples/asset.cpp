@@ -9,8 +9,8 @@ Graham Wakefield 2011
 */
 
 #include "al/core.hpp"
-#include "al/util/al_Asset.hpp"
-#include "al/util/al_Image.hpp"
+#include "al_ext/assets3d/al_Asset.hpp"
+#include "module/img/loadImage.hpp"
 #include <algorithm> // max
 #include <vector>
 #include <cstdint> // uint8_t
@@ -42,10 +42,16 @@ struct MyWindow : App {
       ascene->print();
     }
 
-    Image img(searchpaths.find("hubble.jpg").filepath());
-    img.sendToTexture(tex);
-    // tex.create2D(img.width(), img.height(), Texture::RGB8, Texture::RGB, Texture::UBYTE);
-    // tex.submit(img.pixels<uint8_t>(), Texture::RGB, Texture::UBYTE);
+    auto filename = searchpaths.find("hubble.jpg").filepath();
+
+    auto imageData = imgModule::loadImage(filename);
+    if (imageData.data.size() == 0) {
+      cout << "failed to load image" << endl;
+    }
+    cout << "loaded image size: " << imageData.width << ", " << imageData.height << endl;
+
+    tex.create2D(imageData.width, imageData.height);
+    tex.submit(imageData.data.data(), GL_RGBA, GL_UNSIGNED_BYTE);
 
     // extract meshes from scene
 	meshes.resize(ascene->meshes());
@@ -56,9 +62,6 @@ struct MyWindow : App {
 
   void onDraw(Graphics& g) {
     g.clear(0.1);
-
-    g.projMatrix(Matrix4f::perspective(45, aspect(), 0.1, 100));
-    g.viewMatrix(Matrix4f::lookAt(Vec3d(0, 0, 4), Vec3d(0, 0, 0), Vec3d(0, 1, 0)));
 
     g.depthTesting(true);
     g.lighting(true);

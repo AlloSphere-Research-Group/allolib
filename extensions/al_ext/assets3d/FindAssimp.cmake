@@ -8,43 +8,31 @@
 
 include(LibFindMacros)
 
-# Dependencies
-#libfind_package(LO Magick)
-if(USE_ASSIMP_V3)
-    add_definitions(-DUSE_ASSIMP3)
-endif()
-
 if((NOT ASSIMP_INCLUDE_DIR) AND (NOT ASSIMP_LIBRARY))
   # Use pkg-config to get hints about paths
   libfind_pkg_check_modules(ASSIMP_PKGCONF libassimp)
 
-  # Include dir
-  find_path(ASSIMP2_INCLUDE_DIR
-    NAMES assimp/assimp.h
-    PATHS ${ASSIMP_PKGCONF_INCLUDE_DIRS} /usr/include /usr/local/include /opt/local/include
-    )
-
-  find_path(ASSIMP3_INCLUDE_DIR
+  # Assume Assimp 4. Bionic Beaver (Ubuntu 18.04 and current homebrew bring in Assimp 4)
+  find_path(ASSIMP_INCLUDE_DIR
     NAMES assimp/types.h
-    PATHS ${ASSIMP_PKGCONF_INCLUDE_DIRS} /usr/include /usr/local/include /opt/local/include
+    PATHS ${ASSIMP_PKGCONF_INCLUDE_DIRS}
+    /usr/include
+    /usr/local/include
+    /opt/local/include
+    "c:/Program Files/Assimp/include"
     )
 
-  if(ASSIMP2_INCLUDE_DIR)
-    message(STATUS "Assimp 2 found")
-    set(ASSIMP_INCLUDE_DIR ${ASSIMP2_INCLUDE_DIR})
-  endif(ASSIMP2_INCLUDE_DIR)
+  if(ASSIMP_INCLUDE_DIR)
+    message(STATUS "Assimp found")
+  endif(ASSIMP_INCLUDE_DIR)
 
-  if(ASSIMP3_INCLUDE_DIR)
-    message(STATUS "Assimp 3 found")
-    set(ASSIMP_INCLUDE_DIR ${ASSIMP3_INCLUDE_DIR})
-    set(USE_ASSIMP_V3 1 CACHE STRING "Use assimp v3")
-    add_definitions(-DUSE_ASSIMP3)
-  endif(ASSIMP3_INCLUDE_DIR)
+
 
   # Finally the library itself
   find_library(ASSIMP_LIBRARY
-    NAMES assimp
+    NAMES assimp assimp-vc140-mt
     PATHS ${ASSIMP_PKGCONF_LIBRARY_DIRS}
+    "c:/Program Files/Assimp/lib/x64"
     )
 
   #/usr/include/assimp

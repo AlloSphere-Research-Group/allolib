@@ -87,9 +87,7 @@ namespace al{
 */
 
 class Listener;
-class Spatializer;
 class SoundSource;
-
 
 
 /// Base class for an object (listener or source) in an audio scene
@@ -150,7 +148,7 @@ public:
 protected:
 	friend class AudioScene;
 
-	Listener(int numFrames, Spatializer *spatializer);
+    Listener(int numFrames, Spatializer *spatialier);
 
 	void numFrames(unsigned v);
 

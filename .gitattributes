@@ -1,2 +1,4 @@
 examples/graphics/bin/data/ducky.obj filter=lfs diff=lfs merge=lfs -text
 examples/graphics/bin/data/hubble.jpg filter=lfs diff=lfs merge=lfs -text
+extensions/al_ext/assets3d/examples/bin/data/ducky.obj filter=lfs diff=lfs merge=lfs -text
+extensions/al_ext/assets3d/examples/bin/data/hubble.jpg filter=lfs diff=lfs merge=lfs -text

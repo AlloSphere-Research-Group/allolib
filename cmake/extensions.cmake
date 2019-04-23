@@ -25,6 +25,6 @@ foreach(subdir ${SUBDIRS})
 #    message("--**-- ${subdir} : ${CURRENT_EXTENSION_LIBRARIES}")
   endif()
 endforeach()
-
+message("** DONE Processing extensions **")
 #message("---- ${EXTENSION_LIBRARIES}")
 
