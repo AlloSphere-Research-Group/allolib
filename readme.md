@@ -4,6 +4,8 @@ Developed by:
 
 AlloSphere Research Group
 
+allolib is a fork of [AlloSystem](https://github.com/AlloSphere-Research-Group/AlloSystem), maintained in separate repository.
+
 University of California, Santa Barbara
 
 [![Build Status](https://travis-ci.org/AlloSphere-Research-Group/allolib.svg?branch=master)](https://travis-ci.org/AlloSphere-Research-Group/allolib)
