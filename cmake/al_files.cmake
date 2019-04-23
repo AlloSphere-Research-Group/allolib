@@ -103,6 +103,7 @@ set(core_sources
   ${al_path}/src/core/sound/al_Dbap.cpp
   ${al_path}/src/core/sound/al_Vbap.cpp
   ${al_path}/src/core/sound/al_Spatializer.cpp
+  ${al_path}/src/core/sound/al_StereoPanner.cpp
   ${al_path}/src/core/spatial/al_HashSpace.cpp
   ${al_path}/src/core/spatial/al_Pose.cpp
   ${al_path}/src/core/system/al_PeriodicThread.cpp
