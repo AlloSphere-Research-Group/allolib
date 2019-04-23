@@ -43,6 +43,8 @@ struct MyApp : public App
     X.registerChangeCallback(
           [](float value) {std::cout << "X = " << value << std::endl; });
 
+    navControl().disable(); // Disable so mouse drag doesn't control nav
+
     gui << X << Y << Brightness;
     gui.init();
   }
@@ -55,7 +57,7 @@ struct MyApp : public App
     g.translate(X.get(),Y.get(), 0);
     g.draw(mesh);
     g.popMatrix();
-//    gui.draw(g);
+    gui.draw(g);
   }
 
 };
