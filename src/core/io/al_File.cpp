@@ -186,13 +186,36 @@ std::string File::conformDirectory(const std::string& path){
 }
 
 std::string File::conformPathToOS(const std::string& path){
-  std::string res(path);
+  std::string res;
 
   // Ensure delimiters are correct
+  bool previousIsDelimiter = false;
+  bool previousIsDot = false;
   for(unsigned i=0; i<path.size(); ++i){
-    char c = res[i];
+    char c = path[i];
     if('\\'==c || '/'==c){
-      res[i] = AL_FILE_DELIMITER;
+      if (previousIsDot) {
+        // ./ - remove dot and dom't append separator
+        res.resize(res.size() -1);
+        previousIsDot = false;
+        previousIsDelimiter = false;
+      } else {
+        if (!previousIsDelimiter) {
+          res += AL_FILE_DELIMITER;
+          previousIsDelimiter = true;
+        } else {
+          previousIsDelimiter = false;
+        }
+
+      }
+    } else {
+      if (c == '.' && i > 0) { // Don't remove first dot
+        previousIsDot = true;
+      } else {
+        previousIsDot = false;
+      }
+      res += path[i];
+      previousIsDelimiter = false;
     }
   }
 
