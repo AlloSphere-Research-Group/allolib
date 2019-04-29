@@ -32,8 +32,8 @@ enum COLOR_TYPE { HCLAB, HCLUV, NUM_TYPES };
 
 COLOR_TYPE TYPE = HCLAB;
 
-class MyApp : public App {
- public:
+struct CieColor : public App {
+  
   int numRows = 4, numCols = 4;
 
   Mesh verts {Mesh::TRIANGLES};
@@ -233,4 +233,4 @@ class MyApp : public App {
   }
 };
 
-int main() { MyApp().start(); }
+int main() { CieColor().start(); }

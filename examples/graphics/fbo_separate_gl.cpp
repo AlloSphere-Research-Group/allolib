@@ -27,7 +27,7 @@ int h = 256;
 EasyFBO fbo;
 bool mipmap = true;
 
-class MyApp : public App {
+struct MyApp : public App {
 	
 	Mesh m {Mesh::TRIANGLES};
 	Graphics gl;
