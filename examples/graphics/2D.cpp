@@ -13,8 +13,7 @@ Keehong Youn, 2017
 #include "al/core.hpp"
 using namespace al;
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
 
 	Mesh verts;
 	Mesh verts2 {Mesh::LINES};
@@ -28,7 +27,6 @@ public:
 			float f = float(i)/(N-1);
 			verts.vertex(2*f-1, 0.5*sin(f*M_PI*2));
 		}
-
 
 	}
 
