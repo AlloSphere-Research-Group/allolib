@@ -373,6 +373,17 @@ public:
     registerTriggerParameter(*mInternalParameters.back().get());
   }
 
+  Parameter &getInternalParameter(std::string name) {
+    for (auto param: mInternalParameters) {
+      if (param->getName() == name &&
+          strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
+        return *param;
+      }
+    }
+    std::cerr << "Parameter not found! Aborting: " << name << std::endl;
+    throw "Invalid parameter name";
+  }
+
   float getInternalParameterValue(std::string name) {
     for (auto param: mInternalParameters) {
       if (param->getName() == name) {
