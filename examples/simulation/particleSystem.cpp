@@ -63,8 +63,7 @@ struct Emitter {
 };
 
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
 
 	Emitter<8000> em1;
 	Mesh mesh;

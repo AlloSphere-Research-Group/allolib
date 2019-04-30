@@ -99,7 +99,7 @@ public:
 
 	void onAnimate(double dt_ms){
 		// convert millisecond to second
-		float dt = dt_ms / 1000;
+		float dt = dt_ms;
 
 		// Compute forces
 		for(auto& p : particles){

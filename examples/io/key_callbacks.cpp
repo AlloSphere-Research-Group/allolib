@@ -20,7 +20,7 @@ struct type_with_keycallback_t
   }
 };
 
-struct my_app : App
+struct MyApp : App
 {
 
   type_with_keycallback_t callback_object0;
@@ -45,6 +45,6 @@ struct my_app : App
 
 int main()
 {
-  my_app app;
+  MyApp app;
   app.start();
 }

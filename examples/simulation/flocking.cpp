@@ -42,8 +42,7 @@ public:
 };
 
 
-class MyApp : public App{
-public:
+struct MyApp : public App{
 
 	static const int Nb = 32; // Number of boids
 	Boid boids[Nb];
@@ -70,8 +69,7 @@ public:
 	}
 
 	void onAnimate(double dt_ms){
-		// convert millisecond to second
-		float dt = dt_ms / 1000;
+		float dt = dt_ms;
 
 		// Compute boid-boid interactions
 		for(int i=0; i<Nb-1; ++i){

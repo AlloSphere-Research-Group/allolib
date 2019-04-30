@@ -3,28 +3,28 @@
 
 using namespace al;
 
-struct my_app : App
+struct MyApp : App
 {
   float grayscale = 1;;
   Color clear_color {0, 0, 0};
   bool show_gui = true;
   Mesh m;
 
-  void onCreate() override {
+  void onCreate()  {
     initIMGUI();
     addSphere(m);
     nav().pos(0, 0, 10);
     nav().setHome();
   }
 
-  void onAnimate(double dt) override {
+  void onAnimate(double dt)  {
     // pass show_gui for use_input param to turn off interactions
     // when not showing gui
     beginIMGUI_minimal(show_gui);
     navControl().active(!imgui_is_using_input());
   }
 
-  void onDraw(Graphics& g) override {
+  void onDraw(Graphics& g)  {
 
     // Edit 3 floats representing a color
     ImGui::ColorEdit3("clear color", clear_color.components);
@@ -39,19 +39,19 @@ struct my_app : App
     endIMGUI_minimal(show_gui);
   }
 
-  void onKeyDown(const Keyboard& k) override {
+  void onKeyDown(const Keyboard& k)  {
     if (k.key() == 'g') {
       show_gui = !show_gui;
     }
   }
 
-  void onExit() override {
+  void onExit()  {
     shutdownIMGUI();
   }
 };
 
 int main()
 {
-  my_app app;
+  MyApp app;
   app.start();
 }

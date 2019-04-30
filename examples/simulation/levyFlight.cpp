@@ -15,8 +15,7 @@ Lance Putnam, 9/2011
 
 using namespace al;
 
-class MyApp : public App{
-public:
+struct MyApp : public App{
 
 	RingBuffer<Vec3f> A{8000};
 	Mesh vert;
