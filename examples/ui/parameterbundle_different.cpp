@@ -8,8 +8,8 @@
 
 using namespace al;
 
-class Thing {
-public:
+struct Thing {
+
     Parameter X {"X", "", 0.0f, "", -1.0f, 1.0f};
     Parameter Y {"Y", "", 0.0f, "", -1.0f, 1.0f};
     Parameter Rotation {"Rotation", "", 0.0f, "", -90.f, 90.0f};
@@ -43,8 +43,8 @@ private:
     Mesh mesh;
 };
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
+
     MyApp() {
         for (int i = 0; i < 3; i++) {
             // Create element

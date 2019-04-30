@@ -13,7 +13,7 @@ using namespace std;
 #define BLOCK_SIZE (2048)
 
 
-class MyApp : public App
+struct MyApp : public App
 {
 	Mesh mSpeakerMesh;
 	vector<Mesh> mVec;

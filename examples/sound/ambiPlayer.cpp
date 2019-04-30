@@ -1,5 +1,4 @@
 /*
-What is our "Hello world!" app?
 
 An agent orbits around the origin emitting the audio line input. The camera
 view can be switched between a freely navigable keyboard/mouse controlled mode 

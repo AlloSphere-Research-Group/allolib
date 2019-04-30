@@ -11,8 +11,8 @@ using namespace al;
 // Create an 'agent' with parameters. For all agents have
 // the same parameters, but each one can have a different
 // value for them
-class Thing {
-public:
+struct Thing {
+
     Parameter X {"X", "", 0.0f, "", -1.0f, 1.0f};
     Parameter Y {"Y", "", 0.0f, "", -1.0f, 1.0f};
     // The name of the bundle is used to group bundles together
@@ -42,8 +42,8 @@ private:
     Mesh mesh;
 };
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
+    
     void onCreate() override {
         for (int i = 0; i < 3; i++) {
             // Register its parameter bundle with the ControlGUI

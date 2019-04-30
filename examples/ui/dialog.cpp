@@ -9,7 +9,7 @@ using namespace std;
 class MyApp : public App {
 
     void onCreate() override {
-        font.loadDefault(32);
+        font.loadDefault(32); 
     }
 
     void onDraw(Graphics &g) override {
