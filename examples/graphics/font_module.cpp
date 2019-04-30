@@ -12,7 +12,7 @@ struct MyApp : App {
 
     void onCreate() override {
         font.load("data/VeraMono.ttf", 128);
-        font.align(TEXT_ALIGN::RIGHT);
+        font.align(TEXT_ALIGN::CENTER);
     }
 
     void onDraw(Graphics& g) override {

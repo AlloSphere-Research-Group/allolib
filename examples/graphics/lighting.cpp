@@ -16,8 +16,8 @@ Lance Putnam, Dec. 2010
 #include "al/core.hpp"
 using namespace al;
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
+
 	Light light;			// Necessary to light objects in the scene
 	Material material;		// Necessary for specular highlights
 	Mesh surface, sphere;	// Geometry to render

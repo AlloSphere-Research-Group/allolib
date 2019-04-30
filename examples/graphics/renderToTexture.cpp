@@ -16,8 +16,7 @@ Lance Putnam, 2015
 using namespace al;
 using namespace std;
 
-class MyApp : public App{
-public:
+struct MyApp : public App{
 	Mesh mesh;
 	FBO fbo;		// Frame buffer object; this is our render target
 	RBO rbo;		// Render buffer object for depth buffer
