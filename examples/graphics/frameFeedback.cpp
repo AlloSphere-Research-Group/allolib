@@ -18,8 +18,7 @@ Keehong Youn, 2017
 
 using namespace al;
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
 
 	Mesh shape;
 	Texture texBlur;

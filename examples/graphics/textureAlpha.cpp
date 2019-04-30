@@ -18,8 +18,7 @@ using namespace al;
 using namespace std;
 
 
-class MyApp : public App{
-public:
+struct MyApp : public App{
 
 	Mesh mesh;
 	Texture tex;

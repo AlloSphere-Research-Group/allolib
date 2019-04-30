@@ -13,8 +13,7 @@ Lance Putnam, 2011, 2015
 #include "al/core.hpp"
 using namespace al;
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
 
 	static const int Nm = 9;
 	Mesh meshes[Nm];
