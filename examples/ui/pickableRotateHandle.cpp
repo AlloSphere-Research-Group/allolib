@@ -17,8 +17,7 @@ Tim Wood, April 2016
 
 using namespace al;
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
 
   Material material; 
   

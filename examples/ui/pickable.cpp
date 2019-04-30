@@ -16,7 +16,7 @@ Tim Wood, May 2019
 
 using namespace al;
 
-struct PickableApp : public App {
+struct MyApp : public App {
 
   double t;
   Light light;      
@@ -151,5 +151,5 @@ struct PickableApp : public App {
 };
 
 int main(){
-  PickableApp().start();
+  MyApp().start();
 }

@@ -7,8 +7,8 @@
 using namespace al;
 using namespace std;
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
+
     // Parameter declaration
     // Access to these parameters is competely thread safe
     // constructor parameters are:
