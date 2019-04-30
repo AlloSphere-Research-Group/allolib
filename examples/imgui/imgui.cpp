@@ -6,9 +6,8 @@
 
 using namespace al;
 
-class my_app : public App
+struct my_app : public App
 {
-  public:
   
   float x = 0;
   Color clear_color {0, 0, 0};
