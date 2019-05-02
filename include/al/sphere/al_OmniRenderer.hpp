@@ -169,15 +169,14 @@ inline void OmniRenderer::draw_using_perprojection_capture() {
   }
   pp_render.end(); // pops everything pushed before
 
-  // no stereo and no omni when actually displaying sampled result
-  mGraphics.omni(false);
-  mGraphics.eye(Graphics::MONO_EYE);
-
-  mGraphics.blending(false);
-  mGraphics.depthTesting(false);
-
-  // perprojection compositing changes viewport, save it
-  mGraphics.pushViewport(0, 0, fbWidth(), fbHeight());
+  /* Settings for warp and blend composition sampling
+  */
+  mGraphics.omni(false); // warp and blend composition done on flat rendering
+  mGraphics.eye(Graphics::MONO_EYE);     // stereo handled at capture stage
+  mGraphics.polygonMode(Graphics::FILL); // to draw viewport filling quad
+  mGraphics.blending(false);     // blending already done when capturing
+  mGraphics.depthTesting(false); // no depth testing when drawing viewport slab
+  mGraphics.pushViewport(0, 0, fbWidth(), fbHeight()); // filling the whole window
 
   // now sample the results
   if (running_in_sphere_renderer) {
