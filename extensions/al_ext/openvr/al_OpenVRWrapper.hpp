@@ -100,7 +100,7 @@ public:
 
 protected:
 
-    vr::IVRSystem* vr_context;
+    vr::IVRSystem* vr_context = nullptr;
     vr::TrackedDevicePose_t tracked_device_pose[vr::k_unMaxTrackedDeviceCount];
     std::string driver_name, driver_serial;
     std::string tracked_device_type[vr::k_unMaxTrackedDeviceCount];

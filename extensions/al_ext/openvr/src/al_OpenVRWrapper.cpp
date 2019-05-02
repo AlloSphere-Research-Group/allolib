@@ -115,7 +115,7 @@ bool al::OpenVRWrapper::init() {
 }
 
 bool OpenVRWrapper::update() {
-  assert(vr_context != NULL);
+  if(!vr_context) { return false; }
   // Process SteamVR events
   vr::VREvent_t vr_event;
   while (vr_context->PollNextEvent(&vr_event, sizeof(vr_event))) {
@@ -277,6 +277,7 @@ bool OpenVRWrapper::update() {
 }
 
 void OpenVRWrapper::draw(std::function<void (Graphics &)> drawingFunction, Graphics &g) {
+  if(!vr_context) { return; }
   // std::cout << openVR->RightController.triggerPressure << std::endl;
   //TO DO : translate matrix to move camera
   //HMDPose times translate Matrix will make it translate to somewhere else while HMDPose still in the range near 0,0,0
