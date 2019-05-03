@@ -263,6 +263,9 @@ void ParameterServer::onMessage(osc::Message &m)
             std::string address;
             int port;
             m >> address >> port;
+            if (address == "0.0.0.0") {
+              address = m.senderAddress();
+            }
             sendAllParameters(address, port);
         } else if (m.typeTags() == "i") {
             int port;
@@ -429,6 +432,13 @@ void ParameterServer::notifyAll()
 void ParameterServer::sendAllParameters(std::string IPaddress, int oscPort)
 {
     osc::Send sender(oscPort, IPaddress.c_str());
+    for(auto bundleGroup: mParameterBundles) {
+      for (auto bundle : bundleGroup.second) {
+        for (ParameterMeta *param: bundle->parameters()) {
+          param->sendValue(sender, bundle->bundlePrefix());
+        }
+      }
+    }
     for(ParameterMeta *param: mParameters) {
         param->sendValue(sender);
     }

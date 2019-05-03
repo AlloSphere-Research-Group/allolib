@@ -305,6 +305,8 @@ public:
       * @brief send all currently regeistered parameter values
       * @param IPaddress
       * @param oscPort
+      *
+      * This can throw an exception if IPAddress or port are not available.
       */
     void sendAllParameters(std::string IPaddress, int oscPort);
 

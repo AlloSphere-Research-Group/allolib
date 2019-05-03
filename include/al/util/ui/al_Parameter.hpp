@@ -146,7 +146,7 @@ public:
         return value;
     }
 
-    virtual void sendValue(osc::Send &sender) {
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") {
         std::cout << "sendValue function not implemented for " << typeid(*this).name() << std::endl;
     }
 
@@ -447,8 +447,8 @@ public:
 
 	float operator= (const float value) { this->set(value); return value; }
 
-    virtual void sendValue(osc::Send &sender) override {
-        sender.send(getFullAddress(), get());
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+        sender.send(prefix + getFullAddress(), get());
     }
 
 private:
@@ -524,8 +524,8 @@ public:
 
     float operator= (const int32_t value) { this->set(value); return float(value); }
 
-    virtual void sendValue(osc::Send &sender) override {
-        sender.send(getFullAddress(), get());
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+        sender.send(prefix + getFullAddress(), get());
     }
 
 private:
@@ -586,8 +586,8 @@ public:
         set(value != 0.0f);
     }
 
-    virtual void sendValue(osc::Send &sender) override {
-        sender.send(getFullAddress());
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+        sender.send(prefix + getFullAddress());
     }
 
     void trigger() {
@@ -623,8 +623,8 @@ public:
 		set(std::to_string(value));
 	}
 
-    virtual void sendValue(osc::Send &sender) override {
-        sender.send(getFullAddress(), get());
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+        sender.send(prefix + getFullAddress(), get());
     }
 };
 
@@ -644,9 +644,9 @@ public:
       Vec3f vec = this->get(); return vec[int(index)];
     }
 
-    virtual void sendValue(osc::Send &sender) override {
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
         Vec3f vec = get();
-        sender.send(getFullAddress(), vec.x, vec.y, vec.z);
+        sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z);
     }
 };
 
@@ -665,9 +665,9 @@ public:
       Vec4f vec = this->get(); return vec[index];
     }
 
-    virtual void sendValue(osc::Send &sender) override {
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
         Vec4f vec = get();
-        sender.send(getFullAddress(), vec.x, vec.y, vec.z, vec.w);
+        sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z, vec.w);
     }
 };
 
@@ -684,10 +684,10 @@ public:
     al::Pose operator=(const al::Pose vec) {this->set(vec); return *this;}
 
 
-    virtual void sendValue(osc::Send &sender) override {
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
         Pose pose = get();
         Quatd q = pose.quat();
-        sender.send(getFullAddress(), float(pose.x()), float(pose.y()), float(pose.z()),
+        sender.send(prefix + getFullAddress(), float(pose.x()), float(pose.y()), float(pose.z()),
                     float(q.w), float(q.x), float(q.y), float(q.z));
     }
 
@@ -742,8 +742,8 @@ public:
 		set( (int) value);
 	}
 
-    virtual void sendValue(osc::Send &sender) override {
-        sender.send(getFullAddress(), get());
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+        sender.send(prefix + getFullAddress(), get());
     }
 
 private:
@@ -821,8 +821,8 @@ public:
 	virtual void fromFloat(float value) override {
 		set( (int) value);
 	}
-    virtual void sendValue(osc::Send &sender) override {
-        sender.send(getFullAddress(), get());
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+        sender.send(prefix + getFullAddress(), get());
     }
 
 private:
@@ -840,9 +840,9 @@ public:
 
     ParameterColor operator=(const al::Color vec) {this->set(vec); return *this;}
 
-    virtual void sendValue(osc::Send &sender) override {
+    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
         Color c = get();
-        sender.send(getFullAddress(), c.r, c.g, c.b, c.a);
+        sender.send(prefix + getFullAddress(), c.r, c.g, c.b, c.a);
     }
 };
 
