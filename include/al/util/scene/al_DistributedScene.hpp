@@ -66,6 +66,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
         if (this->mNotifier) {
             this->mNotifier->send(p);
         }
+        return true;
     });
 
     PolySynth::registerTriggerOffCallback(
@@ -81,6 +82,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
         if (this->mNotifier) {
             this->mNotifier->send(p);
         }
+        return true;
 
     });
 

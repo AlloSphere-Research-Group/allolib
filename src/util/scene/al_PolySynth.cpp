@@ -190,22 +190,30 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id, void *user
   if (userData) {
     voice->userData(userData);
   }
-  voice->triggerOn(offsetFrames);
-  {
-    std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
-    voice->next = mVoicesToInsert;
-    mVoicesToInsert = voice;
-  }
+  bool allCallbacksOk = true;
   for (auto cbNode: mTriggerOnCallbacks) {
-    cbNode.first(voice, offsetFrames, thisId, cbNode.second);
+    allCallbacksOk &= cbNode.first(voice, offsetFrames, thisId, cbNode.second);
   }
-  return thisId;
+  if (allCallbacksOk) {
+    voice->triggerOn(offsetFrames);
+    {
+      std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
+      voice->next = mVoicesToInsert;
+      mVoicesToInsert = voice;
+    }
+    return thisId;
+  } else {
+    return -1;
+  }
 }
 
 void PolySynth::triggerOff(int id) {
-  mVoiceIdsToTurnOff.write((const char*) &id, sizeof (int));
+  bool allCallbacksOk = true;
   for (auto cbNode: mTriggerOffCallbacks) {
-    cbNode.first(id, cbNode.second);
+    allCallbacksOk &= cbNode.first(id, cbNode.second);
+  }
+  if (allCallbacksOk) {
+    mVoiceIdsToTurnOff.write((const char*) &id, sizeof (int));
   }
 }
 

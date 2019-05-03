@@ -702,7 +702,7 @@ public:
   /**
      * @brief register a callback to be notified of a trigger on event
      */
-  void registerTriggerOnCallback(std::function<void(SynthVoice *voice, int offsetFrames, int id, void *userData)> cb, void *userData = nullptr) {
+  void registerTriggerOnCallback(std::function<bool(SynthVoice *voice, int offsetFrames, int id, void *userData)> cb, void *userData = nullptr) {
     TriggerOnCallback cbNode(cb, userData);
     mTriggerOnCallbacks.push_back(cbNode);
   }
@@ -710,7 +710,7 @@ public:
   /**
      * @brief register a callback to be notified of a trigger off event
      */
-  void registerTriggerOffCallback(std::function<void(int id, void *userData)> cb, void *userData = nullptr) {
+  void registerTriggerOffCallback(std::function<bool(int id, void *userData)> cb, void *userData = nullptr) {
     TriggerOffCallback cbNode(cb, userData);
     mTriggerOffCallbacks.push_back(cbNode);
   }
@@ -898,10 +898,10 @@ protected:
 
   std::vector<AudioCallback *> mPostProcessing;
 
-  typedef std::pair<std::function<void(SynthVoice *voice, int offsetFrames, int id, void *)>, void *> TriggerOnCallback;
+  typedef std::pair<std::function<bool(SynthVoice *voice, int offsetFrames, int id, void *)>, void *> TriggerOnCallback;
   std::vector<TriggerOnCallback> mTriggerOnCallbacks;
 
-  typedef std::pair<std::function<void(int id, void *)>, void *> TriggerOffCallback;
+  typedef std::pair<std::function<bool(int id, void *)>, void *> TriggerOffCallback;
   std::vector<TriggerOffCallback> mTriggerOffCallbacks;
 
   typedef std::pair<std::function<void(SynthVoice *voice, void *)>, void *> AllocationCallback;

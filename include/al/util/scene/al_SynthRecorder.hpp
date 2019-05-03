@@ -134,7 +134,7 @@ public:
      * @param id
      * @param userData
      */
-    static void onTriggerOn(SynthVoice *voice, int offsetFrames, int id, void *userData)
+    static bool onTriggerOn(SynthVoice *voice, int offsetFrames, int id, void *userData)
     {
         std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
         SynthRecorder *rec = static_cast<SynthRecorder *>(userData);
@@ -160,6 +160,7 @@ public:
             }
 
         }
+        return true;
     }
 
     /**
@@ -167,7 +168,7 @@ public:
      * @param id
      * @param userData
      */
-    static void onTriggerOff(int id, void *userData) {
+    static bool onTriggerOff(int id, void *userData) {
         std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
         SynthRecorder *rec = static_cast<SynthRecorder *>(userData);
         if (rec->mRecording) {
@@ -192,6 +193,7 @@ public:
               std::cout << "trigger OFF at " << event.time << ":" << event.synthName << ":" << id << std::endl;
             }
         }
+        return true;
     }
 
 private:
