@@ -253,8 +253,11 @@ void ParameterServer::unregisterParameter(ParameterMeta &param)
 
 void ParameterServer::onMessage(osc::Message &m)
 {
-    std::string requestAddress = "/request";
     m.resetStream(); // Needs to be moved to caller...
+    if (mVerbose) {
+      m.print();
+    }
+    std::string requestAddress = "/sendAllParameters";
     if(m.addressPattern() == requestAddress) {
         if (m.typeTags() == "si") {
             std::string address;
@@ -266,10 +269,8 @@ void ParameterServer::onMessage(osc::Message &m)
             m >> port;
             sendAllParameters(m.senderAddress(), port);
         }
+        return;
     }
-        if (mVerbose) {
-            m.print();
-        }
     mParameterLock.lock();
     for(ParameterMeta *param: mParameters) {
         if (setParameterValueFromMessage(param, m.addressPattern(), m)) {
@@ -431,6 +432,12 @@ void ParameterServer::sendAllParameters(std::string IPaddress, int oscPort)
     for(ParameterMeta *param: mParameters) {
         param->sendValue(sender);
     }
+}
+
+void ParameterServer::requestAllParameters(std::string IPaddress, int oscPort)
+{
+  osc::Send sender(oscPort, IPaddress.c_str());
+  sender.send("/sendAllParameters", mServer->address(), mServer->port());
 }
 
 void ParameterServer::changeCallback(float value, void *sender, void *userData, void *blockThis)

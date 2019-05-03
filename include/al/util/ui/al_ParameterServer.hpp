@@ -301,12 +301,14 @@ public:
 
     void notifyAll();
 
-        /**
-         * @brief send all currently regeistered parameter values
-         * @param IPaddress
-         * @param oscPort
-         */
-        void sendAllParameters(std::string IPaddress, int oscPort);
+    /**
+      * @brief send all currently regeistered parameter values
+      * @param IPaddress
+      * @param oscPort
+      */
+    void sendAllParameters(std::string IPaddress, int oscPort);
+
+    void requestAllParameters(std::string IPaddress, int oscPort);
 
     virtual void onMessage(osc::Message& m) override;
 
