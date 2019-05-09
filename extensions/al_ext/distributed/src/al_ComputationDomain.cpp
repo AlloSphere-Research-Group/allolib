@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 
 #include "al_ext/distributed/al_ComputationDomain.hpp"
 
