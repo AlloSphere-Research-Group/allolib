@@ -26,6 +26,7 @@ foreach(subdir ${SUBDIRS})
     set(CURRENT_EXTENSION_INCLUDE_DIRS)
     set(CURRENT_EXTENSION_DEFINITIONS)
     set(CURRENT_EXTENSION_EXAMPLES)
+    set(CURRENT_EXTENSION_DLLS) # Only used on Windows currently
 
 
     include("${al_path}/extensions/al_ext/${subdir}/extension.cmake")
@@ -34,6 +35,7 @@ foreach(subdir ${SUBDIRS})
     list(APPEND EXTENSIONS_INCLUDE_DIRS ${CURRENT_EXTENSION_INCLUDE_DIRS})
     list(APPEND EXTENSIONS_DEFINITIONS ${CURRENT_EXTENSION_DEFINITIONS})
     list(APPEND EXTENSIONS_EXAMPLES ${CURRENT_EXTENSION_EXAMPLES})
+    list(APPEND EXTENSIONS_DLLS ${CURRENT_EXTENSION_DLLS})
 #    message("--**-- ${subdir} : ${CURRENT_EXTENSION_LIBRARIES}")
 #    message("---- ${CURRENT_EXTENSION_EXAMPLES}")
   endif()

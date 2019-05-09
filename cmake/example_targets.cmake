@@ -36,6 +36,7 @@ endif()
 
 macro(BuildExample example_src dir)
   get_filename_component(EXAMPLE_NAME ${example_src} NAME_WE) # Get name w/o extension
+  get_filename_component(EXAMPLE_DIRECTORY ${example_src} DIRECTORY) # Get name w/o extension
 
   if ("${dir}" STREQUAL ".")
     set(EXAMPLE_TARGET examples_${EXAMPLE_NAME})
@@ -49,7 +50,11 @@ macro(BuildExample example_src dir)
     PROPERTIES
     DEBUG_POSTFIX d
     CXX_STANDARD 14
-    CXX_STANDARD_REQUIRED ON)
+    CXX_STANDARD_REQUIRED ON
+
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${EXAMPLE_DIRECTORY}/bin
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${EXAMPLE_DIRECTORY}/bin
+    )
 
 #       message("Adding target for example: ${example_src}")
   include_directories(${ALLOCORE_INCLUDE_DIR} ${GAMMA_INCLUDE_DIRS}})
@@ -76,11 +81,32 @@ if(BUILD_EXAMPLES)
     endif (${_index} EQUAL -1)
     endforeach(example_src)
 
+    foreach(dll ${EXTENSIONS_DLLS})
+      if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+        get_filename_component(DLL_NAME ${dll} NAME_WE) # Get name w/o extension
+
+        execute_process(COMMAND robocopy ${dll} ${dir}/bin ${DLL_NAME})
+      endif()
+    endforeach()
+
   endforeach(dir)
 
   foreach(example_src ${EXTENSIONS_EXAMPLES})
     message("Building extension example: ${example_src}")
+    get_filename_component(EXAMPLE_DIR "${example_src}" DIRECTORY)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${EXAMPLE_DIR}/bin")
     BuildExample("${example_src}" "extensions" )
+
+    foreach(dll ${EXTENSIONS_DLLS})
+      get_filename_component(DLL_DIR "${dll}" DIRECTORY)
+      if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+        get_filename_component(DLL_NAME "${dll}" NAME) # Get name w/o extension
+
+        message(" ********** ${dll} ${EXAMPLE_DIR}/bin ${DLL_NAME}")
+        execute_process(COMMAND robocopy "${DLL_DIR}" "${EXAMPLE_DIR}/bin" "${DLL_NAME}")
+      endif()
+    endforeach()
   endforeach()
+
 
 endif(BUILD_EXAMPLES)

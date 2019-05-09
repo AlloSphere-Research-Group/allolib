@@ -353,7 +353,6 @@ public:
 
   bool cleanup(ComputationDomain *parent = nullptr) override { return true; }
 
-
   ParameterServer& parameterServer() { return mParameterServer; }
   ParameterServer const& parameterServer() const { return mParameterServer; }
 
@@ -448,8 +447,9 @@ public:
     mAudioDomain->configure();
 
     mGraphicsDomain = newDomain<GraphicsDomain>();
-    //FIXME fix openVR domain
+#ifdef AL_EXT_OPENVR
     mGraphicsDomain->newSubDomain<OpenVRDomain>();
+#endif
   }
 
 
@@ -466,6 +466,14 @@ public:
   virtual void onSound(AudioIOData &io) {}
   virtual void onMessage(osc::Message &m) {}
 
+  void setOpenVRDrawFunction(std::function<void(Graphics &)> func) {
+#ifdef AL_EXT_OPENVR
+    mOpenVRDomain->setDrawFunction(func);
+#else
+    std::cout << "Not building OpenVR support. setOpenVRDrawFunction() ignored." << std::endl;
+#endif
+  }
+
   void start();
 
   std::shared_ptr<OSCDomain> oscDomain() {return mOSCDomain;}
@@ -477,6 +485,7 @@ private:
   std::shared_ptr<OSCDomain> mOSCDomain;
   std::shared_ptr<AudioDomain> mAudioDomain;
   std::shared_ptr<GraphicsDomain> mGraphicsDomain;
+  std::shared_ptr<OpenVRDomain> mOpenVRDomain;
 
   std::vector<std::shared_ptr<AsynchronousDomain>> mDomainList;
   std::stack<std::shared_ptr<AsynchronousDomain>> mRunningDomains;

@@ -5,7 +5,6 @@
 
 using namespace al;
 
-
 bool ComputationDomain::initializeSubdomains(bool pre)
 {
   bool ret = true;
