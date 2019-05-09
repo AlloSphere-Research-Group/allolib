@@ -68,6 +68,8 @@ set(dirs_to_include
   ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS} ${EXTENSIONS_INCLUDE_DIRS}
 )
 
+set (link_dirs  ${EXTENSIONS_LINK_DIRS})
+
 set(libs_to_link
   ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES} ${EXTENSIONS_LIBRARIES}
 )
@@ -109,16 +111,12 @@ set_target_properties(al PROPERTIES CXX_STANDARD_REQUIRED ON)
 # definitions
 target_compile_definitions(al PUBLIC ${definitions})
 
-# include dirs
-# target_include_directories(al PUBLIC
-#   ${al_path}/include
-#   ${dirs_to_include}
-# )
-
 target_include_directories(al PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
 #  "$<INSTALL_INTERFACE:include>"
 )
+
+link_directories(${link_dirs})
 
 target_include_directories(al PUBLIC ${CMAKE_CURRENT_LIST_DIR}/modules)
 
@@ -137,6 +135,8 @@ target_include_directories(al PUBLIC ${dirs_to_include})
 target_link_libraries(al PUBLIC ${libs_to_link} Gamma glfw glew_s)
 
 set_target_properties(al PROPERTIES AL_LINK_LIBRARIES "${libs_to_link}")
+set_target_properties(al PROPERTIES AL_LINK_DIRECTORIES "${link_dirs}")
+set_target_properties(al PROPERTIES AL_INCLUDE_DIRECTORIES "${dirs_to_include}")
 
 # --- Testing -----------------------------------------
 if (ALLOLIB_BUILD_TESTS)

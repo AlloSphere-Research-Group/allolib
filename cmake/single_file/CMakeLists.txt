@@ -94,6 +94,14 @@ else()
   endif()
 endif ()
 
+get_target_property(al_libs al AL_LINK_LIBRARIES)
+get_target_property(al_includes al AL_INCLUDE_DIRECTORIES)
+get_target_property(al_link_directories al AL_LINK_DIRECTORIES)
+
+link_directories(${al_link_directories})
+
+message("___ ${al_link_directories}")
+
 add_executable(${app_name} ${app_files_list})
 
 set_target_properties(${app_name} PROPERTIES
@@ -112,9 +120,7 @@ else ()
   target_compile_options(${app_name} PRIVATE "-Wall")
 endif (AL_WINDOWS)
 
-get_target_property(al_libs al AL_LINK_LIBRARIES)
-
-target_link_libraries(${app_name} al ${al_libs})
+target_link_libraries(${app_name} PRIVATE al ${al_libs})
 
 foreach(include_dir IN LISTS app_include_dirs)
     if (IS_ABSOLUTE ${include_dir})
@@ -123,6 +129,9 @@ foreach(include_dir IN LISTS app_include_dirs)
         target_include_directories(${app_name} PRIVATE ${app_path}/${include_dir})
     endif()
 endforeach(include_dir IN app_include_dirs)
+
+# This might bring in too much?
+target_include_directories(${app_name} PRIVATE ${al_includes})
 
 target_link_libraries(${app_name} ${app_link_libs})
 target_compile_definitions(${app_name} PRIVATE ${app_definitions})
