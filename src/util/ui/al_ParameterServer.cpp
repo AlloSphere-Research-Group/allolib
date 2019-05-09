@@ -127,10 +127,14 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, ParameterMeta *param)
 
 // ParameterServer ------------------------------------------------------------
 
-ParameterServer::ParameterServer(std::string oscAddress, int oscPort)
+ParameterServer::ParameterServer(std::string oscAddress, int oscPort, bool autoStart)
     : mServer(nullptr)
 {
+  mOscAddress = oscAddress;
+  mOscPort = oscPort;
+  if (autoStart) {
     listen(oscPort, oscAddress);
+  }
 }
 
 ParameterServer::~ParameterServer()
@@ -143,12 +147,23 @@ ParameterServer::~ParameterServer()
     }
 }
 
-void ParameterServer::listen(int oscPort, std::string oscAddress)
+bool ParameterServer::listen(int oscPort, std::string oscAddress)
 {
+    std::unique_lock<std::mutex> lk(mServerLock);
     if (mServer) {
         mServer->stop();
         delete mServer;
         mServer = nullptr;
+    }
+    if (oscPort < 0) {
+      oscPort = mOscPort;
+    } else {
+      mOscPort = oscPort;
+    }
+    if (oscAddress.size() == 0) {
+      oscAddress = mOscAddress;
+    } else {
+      mOscAddress = oscAddress;
     }
     mServer = new osc::Recv();
     if (mServer) {
@@ -158,10 +173,13 @@ void ParameterServer::listen(int oscPort, std::string oscAddress)
         } else {
             delete mServer;
             mServer = nullptr;
+            return false;
         }
     } else {
         std::cout << "Error starting OSC server." << std::endl;
+        return false;
     }
+    return true;
 }
 
 ParameterServer &ParameterServer::registerParameter(ParameterMeta &param)
@@ -297,6 +315,7 @@ void ParameterServer::onMessage(osc::Message &m)
 
 void ParameterServer::print(std::ostream &stream)
 {
+    std::unique_lock<std::mutex> lk(mServerLock);
     if (!mServer) {
         stream << "Parameter server not running." << std::endl;
         return;
@@ -323,6 +342,7 @@ void ParameterServer::print(std::ostream &stream)
 
 void ParameterServer::stopServer()
 {
+    std::unique_lock<std::mutex> lk(mServerLock);
     if (mServer) {
         mServer->stop();
         delete mServer;
@@ -331,6 +351,7 @@ void ParameterServer::stopServer()
 }
 
 bool ParameterServer::serverRunning() {
+    std::unique_lock<std::mutex> lk(mServerLock);
     if (!mServer) {
         return false;
     } else {

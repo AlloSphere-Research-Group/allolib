@@ -228,13 +228,20 @@ public:
      @endcode
      */
     // ParameterServer() : mServer(nullptr) {};
-    ParameterServer(std::string oscAddress = "", int oscPort = 9010);
+    ParameterServer(std::string oscAddress = "", int oscPort = 9010, bool autoStart = true);
     ~ParameterServer();
 
     /**
-     * Open and start receiving osc
+     * @brief Set cached configuration. These values are used if listen() is called without arguments
      */
-    void listen(int oscPort, std::string oscAddress = "");
+    void configure(uint16_t port, std::string addr = "") {
+      mOscPort = port;
+      mOscAddress = addr;
+    }
+    /**
+     * Open and start receiving osc. Returns true on successful start.
+     */
+    bool listen(int oscPort = -1, std::string oscAddress = "");
 
     /**
      * Register a parameter with the server.
@@ -350,10 +357,16 @@ protected:
     std::vector<osc::PacketHandler *> mPacketHandlers;
     std::vector<std::pair<osc::MessageConsumer *, std::string>> mMessageConsumers;
     osc::Recv *mServer;
+    std::mutex mServerLock;
+
     std::vector<ParameterMeta *> mParameters;
     std::map<std::string, std::vector<ParameterBundle *>> mParameterBundles;
     std::map<std::string, int> mCurrentActiveBundle;
     std::mutex mParameterLock;
+
+    std::string mOscAddress;
+    int mOscPort;
+
     bool mVerbose {false};
 };
 
