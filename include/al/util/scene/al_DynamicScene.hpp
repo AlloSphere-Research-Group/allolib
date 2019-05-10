@@ -92,7 +92,7 @@ public:
             double w = *pFields++;
             x = *pFields++;
             y = *pFields++;
-            z = *pFields;
+            z = *pFields++;
             mPose.quat() = Quatd(w, x, y, z);
             mSize = *pFields;
         } else {
