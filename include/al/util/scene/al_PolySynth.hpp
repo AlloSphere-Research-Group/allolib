@@ -414,9 +414,10 @@ public:
   unsigned int numOutChannels() { return mNumOutChannels; }
 
 
-  void createInternalTriggerParameter(std::string name, float defaultValue = 0.0, float minValue = -9999.0, float maxValue = 9999.0) {
+  std::shared_ptr<Parameter> createInternalTriggerParameter(std::string name, float defaultValue = 0.0, float minValue = -9999.0, float maxValue = 9999.0) {
     mInternalParameters.push_back(std::make_shared<Parameter>(name, defaultValue, minValue, maxValue));
     registerTriggerParameter(*mInternalParameters.back().get());
+    return mInternalParameters.back();
   }
 
   Parameter &getInternalParameter(std::string name) {
