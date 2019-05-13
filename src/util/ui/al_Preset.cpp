@@ -45,7 +45,8 @@ void PresetHandler::setSubDirectory(std::string directory)
 			std::cout << "Error creating directory: " << mRootDir << std::endl;
 			return;
 		}
-	}
+    }
+    setCurrentPresetMap();
 	mSubDir = directory;
 }
 
@@ -416,7 +417,7 @@ void PresetHandler::stopMorph()
 
 std::string PresetHandler::getCurrentPath()
 {
-    std::string relPath = File::conformDirectory(getRootPath() + mSubDir);
+    std::string relPath = File::conformPathToOS(getRootPath() + mSubDir);
 	return relPath;
 }
 
@@ -538,7 +539,7 @@ void PresetHandler::setCurrentPresetMap(std::string mapName, bool autoCreate)
 			mPresetsMap[i] = presets[i];
 		}
 		mCurrentMapName = mapName;
-		storeCurrentPresetMap();
+        storeCurrentPresetMap(mapName, true);
     } else {
 		mPresetsMap = readPresetMap(mapName);
 		mCurrentMapName = mapName;

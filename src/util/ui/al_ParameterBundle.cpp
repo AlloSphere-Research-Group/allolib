@@ -11,6 +11,10 @@ using namespace al;
 std::map<std::string, int> ParameterBundle::mBundleCounter = std::map<std::string, int>();
 
 ParameterBundle::ParameterBundle(std::string name) {
+
+    if (name.find(" ") != std::string::npos) {
+      std::cout << "WARNING: Remove spaces from bundle name." << std::endl;
+    }
     if (name.size() == 0) {
         mBundleName = "bundle";
     } else {
