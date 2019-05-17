@@ -35,64 +35,8 @@ public:
 		return hmin;
 	}
 
-<<<<<<< Updated upstream
-	bool point(Rayd &r){
-		Hit h = intersect(r);
-		for(Pickable *p : mPickables){
-			if(p == h.p){
-				p->point(r);
-				mLastPoint = h;
-			} else if(p->hover.get()) p->hover = false;
-		}
-		return true;
-	}
-
-	bool pick(Rayd &r){
-		Hit h = intersect(r);
-		for(Pickable *p : mPickables){
-			if(p == h.p){
-				p->pick(r);
-				mLastPick = h;
-			} else if(p->selected.get()) p->selected = false;
-		}
-		return true;
-	}
-
-	bool drag(Rayd &r, Vec3f dv){
-		for(Pickable *p : mPickables){
-			if(p->selected.get()){
-				if(mZooming){
-			        Vec3f v = p->pose.get().pos();
-			        v.z += dv.y * 0.04;
-			        p->pose.setPos(v); // should move along dir to camera instead
-		    	} else if(mRotating){
-		    		Vec3f dir = r(mLastPick.t) - mLastPick(); 
-		    		Quatf q = Quatf().fromEuler(dir.x*0.5f, -dir.y*0.5f, 0);
-
-		            Vec3f p1 = p->transformVecWorld(p->bb.cen);
-		    		p->pose.setQuat(q*p->prevPose.quat());
-		            Vec3f p2 = p->transformVecWorld(p->bb.cen);
-		            p->pose.setPos(p->pose.get().pos() + p1-p2);
-
-		    	} else if(mScaling){
-                    p->scale = p->scale - dv.y*0.01*p->scale; 
-					if(p->scale < 0.0005) p->scale = 0.0005;
-		    	} else if(mTranslating){
-					p->drag(r);
-					// mLastPoint = Hit(true, r, mLastPick.t, p); //?
-			        // Vec3f newPos = r(mLastPick.t)*p->scaleVec.get() + selectOffset;
-			        // p->pose.setPos(newPos);
-		    	} 
-			}
-		}
-		return true;
-	}
-	
-	bool unpick(Rayd &r){
-=======
 	void event(PickEvent e){
 		Hit h = intersect(e.ray);
->>>>>>> Stashed changes
 		for(Pickable *p : mPickables){
 			if(p == h.p || p->selected.get()){
 				p->event(e);

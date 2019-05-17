@@ -198,16 +198,11 @@ struct PickableBB : Pickable {
   Quatf selectQuat;
   float selectDist;
 
-<<<<<<< Updated upstream
-  Pickable(std::string name = "") {
-    PickableState::name = name;
-                                    bundle.name(name);
+  PickableBB(std::string name = "") {
+    Pickable::name = name;
+    bundle.name(name);
   }
-  Pickable(Mesh &m){set(m);}
-=======
-  PickableBB(std::string name = ""){ Pickable::name = name;}
   PickableBB(Mesh &m){set(m);}
->>>>>>> Stashed changes
 
   /// initialize bounding box;
   void set(Mesh &m){
@@ -300,7 +295,8 @@ struct PickableBB : Pickable {
 
       case Scale:
         if(selected.get()){
-          scale = scale - e.amount*0.005; 
+          scale = scale - e.amount*0.01 * scale; 
+					if(scale < 0.0005) scale = 0.0005;
           return true;
         } else return false;
         break;
