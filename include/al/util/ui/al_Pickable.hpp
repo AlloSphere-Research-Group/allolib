@@ -217,7 +217,10 @@ struct Pickable : PickableBase {
   Quatf selectQuat;
   float selectDist;
 
-  Pickable(std::string name = ""){ PickableState::name = name;}
+  Pickable(std::string name = "") {
+    PickableState::name = name;
+                                    bundle.name(name);
+  }
   Pickable(Mesh &m){set(m);}
 
   /// initialize bounding box;

@@ -75,10 +75,11 @@ public:
 		            p->pose.setPos(p->pose.get().pos() + p1-p2);
 
 		    	} else if(mScaling){
-                    p->scale = p->scale - dv.y*0.005; 
+                    p->scale = p->scale - dv.y*0.01*p->scale; 
+					if(p->scale < 0.0005) p->scale = 0.0005;
 		    	} else if(mTranslating){
 					p->drag(r);
-					mLastPoint = Hit(true, r, mLastPick.t, p);
+					// mLastPoint = Hit(true, r, mLastPick.t, p); //?
 			        // Vec3f newPos = r(mLastPick.t)*p->scaleVec.get() + selectOffset;
 			        // p->pose.setPos(newPos);
 		    	} 
