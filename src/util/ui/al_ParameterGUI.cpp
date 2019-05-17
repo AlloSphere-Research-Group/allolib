@@ -1054,6 +1054,30 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
     ImGui::PopID();
 }
 
+void ParameterGUI::drawBundle(ParameterBundle *bundle)
+{
+  auto name = bundle->name();
+  ImGui::PushID((name + std::to_string((unsigned long) bundle)).c_str());
+
+  if (ImGui::CollapsingHeader(name.c_str())) {
+    for (ParameterMeta *param: bundle->parameters()) {
+        drawParameterMeta(param);
+    }
+    for (auto innerBundle: bundle->bundles()) {
+        std::string subBundleName = innerBundle.first;
+        ImGui::PushID(subBundleName.c_str());
+        if (ImGui::CollapsingHeader(subBundleName.c_str(), ImGuiTreeNodeFlags_CollapsingHeader)) {
+           for (auto *param: innerBundle.second->parameters()) {
+               drawParameterMeta({param}, subBundleName, 0);
+           }
+        }
+        ImGui::PopID();
+    }
+
+  }
+  ImGui::PopID();
+}
+
 void ParameterGUI::drawBundleManager(BundleGUIManager *manager)
 {
 
