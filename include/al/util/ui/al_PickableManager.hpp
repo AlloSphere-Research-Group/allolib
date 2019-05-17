@@ -14,14 +14,13 @@ namespace al {
 
 class PickableManager {
 public:
-	PickableManager(){ 
-		mTranslating = true;
-		mRotating = mScaling = mZooming = false;
-	}
+	PickableManager(){}
 
 	PickableManager& registerPickable(Pickable &p){ mPickables.push_back(&p); return *this; }
 	PickableManager& operator <<(Pickable &p){ return registerPickable(p); }
 	PickableManager& operator <<(Pickable *p){ return registerPickable(*p); }
+	PickableManager& operator +=(Pickable &p){ return registerPickable(p); }
+	PickableManager& operator +=(Pickable *p){ return registerPickable(*p); }
 
 	std::vector<Pickable *> pickables(){ return mPickables; }
 
@@ -36,6 +35,7 @@ public:
 		return hmin;
 	}
 
+<<<<<<< Updated upstream
 	bool point(Rayd &r){
 		Hit h = intersect(r);
 		for(Pickable *p : mPickables){
@@ -89,46 +89,19 @@ public:
 	}
 	
 	bool unpick(Rayd &r){
+=======
+	void event(PickEvent e){
+		Hit h = intersect(e.ray);
+>>>>>>> Stashed changes
 		for(Pickable *p : mPickables){
-			p->unpick(r);
-		}
-		return true;
+			if(p == h.p || p->selected.get()){
+				p->event(e);
+
+				if(e.type == Point) mLastPoint = h;
+				if(e.type == Pick) mLastPick = h;
+			} else p->clearSelection(); //unpick?
+		}	
 	}
-
-	void grab(Pose &pose){
-		for(Pickable *p : mPickables){
-			if(p->selected){
-			// if(p->contains(pose.pos())){
-		    	// p->prevPose.set(p->pose.get());
-				p->selectQuat.set(pose.quat());
-				p->selectOffset.set(p->pose.get().pos() - pose.pos());
-				// p->selected = true;
-			}
-		}
-	}
-	void rotate(Pose &pose){
-		for(Pickable *p : mPickables){
-			if(p->selected){
-			// if(p->contains(pose.pos())){
-				Quatf diff = pose.quat() * p->selectQuat.inverse();  // diff * q0 = q1 --> diff = q1 * q0.inverse
-
-				Vec3f p1 = p->transformVecWorld(p->bb.cen);
-				p->pose.setQuat(diff*p->prevPose.quat());
-				Vec3f p2 = p->transformVecWorld(p->bb.cen);
-				// p->pose.setPos(p->pose.get().pos() + p1-p2); 
-				p->pose.setPos(pose.pos()+p->selectOffset + p1-p2);
-
-			}
-		}
-	}
-
-	// void point(Vec3d &v){
-	// 	for(Pickable *p : mPickables){
-	// 		mLastPoint = p->point(v);
-	// 		mLastPoint = h;
-	// 		} else if(p->hover.get()) p->hover = false;
-	// 	}
-	// }
 
 	void unhighlightAll() {
 		for(Pickable *p : mPickables){
@@ -136,84 +109,35 @@ public:
 		}
 	}
 
-	void rotate(Rayd &r){
-		for(Pickable *p : mPickables){
-			if(p->selected){
-				Vec3f dir = r(mLastPick.t) - mLastPick.ray(mLastPick.t);
-				Quatf q = Quatf().fromEuler(dir.x*0.01f, -dir.y*0.01f, 0);
-
-				Vec3f p1 = p->transformVecWorld(p->bb.cen);
-				p->pose.setQuat(q*p->prevPose.quat());
-				Vec3f p2 = p->transformVecWorld(p->bb.cen);
-				p->pose.setPos(p->pose.get().pos() + p1-p2);
-			}
-		}
-	}
-	void scale(Rayd &r, float amt){
-		for(Pickable *p : mPickables){
-			if(p->selected) 
-			p->scale = p->prevScale.x + amt; 
-		}
-	}
-	void translate(Rayd &r, bool relative=false, Vec3f motion=Vec3f()){
-		for(Pickable *p : mPickables){
-			if(p->selected){
-				if(relative){
-					Vec3f newPos = p->prevPose.pos() + motion;
-					p->pose.setPos(newPos);
-				}else {
-					Vec3f newPos = r(mLastPick.t)*p->scaleVec.get() + selectOffset;
-					p->pose.setPos(newPos);
-				}
-			}
-		}
-	}
-
-
 	void onMouseMove(Graphics &g, const Mouse& m, int w, int h){
 		Rayd r = getPickRay(g, m.x(), m.y(), w, h);
-		point(r);
+		event(PickEvent(Point, r));
 	}
 	void onMouseDown(Graphics &g, const Mouse& m, int w, int h){
 		Rayd r = getPickRay(g, m.x(), m.y(), w, h);
-		pick(r);
+		event(PickEvent(Pick, r));
 	}
 	void onMouseDrag(Graphics &g, const Mouse& m, int w, int h){
-        if (m.right()) mRotating = true;
-        else if (m.middle()) mScaling = true;
 		Rayd r = getPickRay(g, m.x(), m.y(), w, h);
-		drag(r,Vec3f(m.dx(),m.dy(),0));
+		if(m.right()) event(PickEvent(RotateRay, r));
+		else if(m.middle()) event(PickEvent(Scale, r, m.dy()));
+		else event(PickEvent(TranslateRay, r));
 	}
 	void onMouseUp(Graphics &g, const Mouse& m, int w, int h){
-        mRotating = false;
-        mScaling = false;
 		Rayd r = getPickRay(g, m.x(), m.y(), w, h);
-		unpick(r);
+		event(PickEvent(Unpick, r));
 	}
 
 	void onKeyDown(const Keyboard &k){
 		switch (k.key()) {
-          // case 't': mTranslating = true; break;
-//          case 'r': mRotating = true; break;
-          case 'z': mZooming = true; break;
-//          case 's': mScaling = true; break;
           default: break;
     	}
 	}
 	void onKeyUp(const Keyboard &k){
 		switch (k.key()) {
-          // case 't': mTranslating = false; break;
-//          case 'r': mRotating = false; break;
-          case 'z': mZooming = false; break;
-//          case 's': mScaling = false; break;
           default: break;
     	}
 	}
-
-	void translating(bool b){ mTranslating = b; }
-	void rotating(bool b){ mRotating = b; }
-	void zooming(bool b){ mZooming = b; }
-	void scaling(bool b){ mScaling = b; }
 
 	Hit lastPoint(){ return mLastPoint; }
 	Hit lastPick(){ return mLastPick; }
@@ -226,8 +150,6 @@ protected:
 	Hit mLastPoint;
 	Hit mLastPick;
 	Vec3d selectOffset;
-
-	bool mTranslating, mRotating, mZooming, mScaling;
 
 	Vec3d unproject(Graphics &g, Vec3d screenPos, bool view=true){
 		auto v = Matrix4d::identity();

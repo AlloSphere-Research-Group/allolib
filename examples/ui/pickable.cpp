@@ -2,11 +2,11 @@
 Allocore Example: Pickable
 
 Description:
-This example demonstrates how associate a mesh with a pickable
-and interact with it via the mouse
+This example demonstrates how to associate a mesh with a pickable,
+add children pickables and interact with them via the mouse and keyboard.
 
 Author:
-Tim Wood, April 2016
+Tim Wood, May 2019
 */
 
 #include "al/core.hpp"
@@ -16,35 +16,49 @@ Tim Wood, April 2016
 
 using namespace al;
 
-class MyApp : public App {
-public:
+struct PickableApp : public App {
 
   double t;
   Light light;      
   
   Mesh mesh; 
 
-  Pickable pickable;
+  PickableBB pickable;
+  PickableBB child1;
+  PickableBB child2;
+  PickableBB child3;
 
   void onCreate(){
 
     // position camera, disable mouse to look
-    nav().pos(0,0,20);
+    nav().pos(0,0,10);
     navControl().useMouse(false);
 
-    // Create a red spheres mesh
-    addSphere(mesh,1);
-    mesh.translate(-3,3,0);
-    addSphere(mesh,2);
-    mesh.translate(-2.7,2.7,0);
-    addSphere(mesh,0.7);
-    mesh.translate(2.7,-2.7,0);
-
+    // Create a mesh
+    addSphere(mesh);
     mesh.generateNormals();
-    mesh.color(RGB(1,0,0));
 
-    // Initialize BoundingBox
+    // Initialize pickableBB with mesh
     pickable.set(mesh);
+    pickable.testChildren = false; // disable event propagation, we only enable when shift key is down
+    
+    // initialize child pickables
+    child1.set(mesh);
+    child1.scale.set(0.5);
+    child1.pose.setPos(Vec3f(2,0,0));
+
+    child2.set(mesh);
+    child2.scale.set(0.5);
+    child2.pose.setPos(Vec3f(2,0,0));
+    
+    child3.set(mesh);
+    child3.scale.set(0.25);
+    child3.containedChild = true; // drag events will not allow this child to leave its parent's bounding box
+
+    // create pickable heirarchy
+    pickable.addChild(child1);
+    child1.addChild(child2);
+    child2.addChild(child3);
 
   }
 
@@ -62,12 +76,28 @@ public:
     g.lighting(true);
     g.light(light);
 
-    pickable.drawMesh(g);
-    
+    g.polygonLine(); //as lines
+
+    // pass function to draw pickable and child meshes
+    pickable.draw(g, [&](Pickable &p){
+      auto &b = dynamic_cast<PickableBB&>(p);
+      if(p.depth == 3){ // change rendering based on pickable depth
+        g.polygonFill();
+        g.color(1,0,0);
+      }
+      b.drawMesh(g);
+    });
+
+    // pass function to draw pickable and children bounding boxes
     g.lighting(false);
-    pickable.drawBB(g);
+    pickable.draw(g, [&](Pickable &p) {
+      auto &b = dynamic_cast<PickableBB &>(p);
+      b.drawBB(g);
+    });
+
   }
 
+  // helper functions to get scene ray from mouse events
   Vec3d unproject(Vec3d screenPos){
     auto& g = graphics();
     auto mvp = g.projMatrix() * g.viewMatrix() * g.modelMatrix();
@@ -93,25 +123,33 @@ public:
     return r;
   }
 
-  virtual void onMouseMove(const Mouse& m){
+  // allow event propagation to children pickables while shift key down
+  virtual void onKeyDown(const Keyboard &k) override{
+    pickable.testChildren = k.shift();
+  }
+  virtual void onKeyUp(const Keyboard &k) override{
+    pickable.testChildren = k.shift();
+  }
+
+  virtual void onMouseMove(const Mouse &m) override {
     // make a ray from mouse location
     Rayd r = getPickRay(m.x(), m.y());
-    pickable.point(r);
+    pickable.event(PickEvent(Point, r));
   }
-  virtual void onMouseDown(const Mouse& m){
+  virtual void onMouseDown(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
-    pickable.pick(r);
+    pickable.event(PickEvent(Pick, r));
   }
-  virtual void onMouseDrag(const Mouse& m){
+  virtual void onMouseDrag(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
-    pickable.drag(r);
+    pickable.event(PickEvent(Drag, r));
   }
-  virtual void onMouseUp(const Mouse& m){
+  virtual void onMouseUp(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
-    pickable.unpick(r);
+    pickable.event(PickEvent(Unpick, r));
   }
 };
 
 int main(){
-  MyApp().start();
+  PickableApp().start();
 }

@@ -3,10 +3,11 @@
 #define __AL_ROTATE_HANDLE_HPP__
 
 #include <cfloat>
+#include <al/util/ui/al_Pickable.hpp>
 
 namespace al {
 
-struct PickableRotateHandle : PickableBase {
+struct PickableRotateHandle : Pickable {
 
   Vec3f downPos, newPos;
   Vec3f downDir, newDir;
@@ -44,7 +45,7 @@ struct PickableRotateHandle : PickableBase {
     }
   }
 
-  void draw(Graphics &g) override {
+  void draw(Graphics &g) {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     Mesh m;
     m.primitive(Mesh::LINE_STRIP);
@@ -62,7 +63,7 @@ struct PickableRotateHandle : PickableBase {
           case 2: q.fromEuler(0,0,0); break;
         }
         g.rotate(q);
-        if(hover[i]) addCircle(m,size+dr,30);//{ m.ribbonize(.03f); m.primitive(Mesh::TRIANGLE_STRIP);}//g.lineWidth(3);
+        if(hover[i]) addCircle(m,size-dr,30);//{ m.ribbonize(.03f); m.primitive(Mesh::TRIANGLE_STRIP);}//g.lineWidth(3);
         // else g.lineWidth(1);
         g.draw(m);
       g.popMatrix();
@@ -73,9 +74,9 @@ struct PickableRotateHandle : PickableBase {
         m.reset();
         m.primitive(Mesh::LINES);
         m.vertex(pose.get().pos());
-        m.vertex(pose.get().pos()+newDir);
+        m.vertex(pose.get().pos()+newDir.normalized()*(size));
         m.vertex(pose.get().pos());
-        m.vertex(pose.get().pos()+downDir);
+        m.vertex(pose.get().pos()+downDir.normalized()*(size));
         g.color(i==0,i==1,i==2);
         g.draw(m);
       }
@@ -83,83 +84,94 @@ struct PickableRotateHandle : PickableBase {
     glPopAttrib();
   }
 
-  Hit intersect(Rayd &r) override {
-    double t = r.intersectSphere(pose.get().pos(), size+dr);
+  Hit intersect(Rayd r) override {
+    double t = r.intersectSphere(pose.get().pos(), size);
     if (t > 0) return Hit(true, r, t, this);
     else return Hit(false, r, t, this);
   }
-  bool contains(Vec3d &v) override { return false; } //XXX
 
-  bool onPoint(Hit h, bool child) override {
-    if(child) return true;
-    if(h.ray.intersectsSphere(pose.get().pos(), size+dr)){
-      float t = -1;
-      float min = FLT_MAX;
-      int minIdx = -1;
-      for(int i=0; i < 3; i++){
-        hover[i] = false;
-        t = h.ray.intersectCircle(pose.get().pos(), Vec3f(i==0,i==1,i==2), size+dr, size-dr);
-        if(t > 0 && t < min){
-          min = t;
-          minIdx = i;
-        }
-      }
-      if(minIdx >= 0){
-        hover[minIdx] = true;
-        return true;
-      }
-    } else for(int i=0; i<3; i++) hover[i] = false;
-    return false;
-  }
 
-  bool onPick(Hit h, bool child) override {
-    if(child) return true;
-    if(h.ray.intersectsSphere(pose.get().pos(), size+dr)){
-      float t = -1;
-      float min = FLT_MAX;
-      int minIdx = -1;
-      for(int i=0; i < 3; i++){
-        selected[i] = false;
-        t = h.ray.intersectCircle(pose.get().pos(), Vec3f(i==0,i==1,i==2), size+dr, size-dr);
-        if(t > 0 && t < min){
-          min = t;
-          minIdx = i;
-        }
-      }
-      if(minIdx >= 0){
-        selected[minIdx] = true;
-        downDir.set(h.ray(min)-pose.get().pos());
-        newDir.set(h.ray(min)-pose.get().pos());
-        return true;
-      }
-    }
-    return false;
-  }
-
-  bool onDrag(Hit h, bool child) override {
-    if(child) return true;
-    for(int i=0; i < 3; i++){
-      if(selected[i]){
-        float t = h.ray.intersectPlane(pose.get().pos(), Vec3f(i==0,i==1,i==2));
-        if(t > 0){
-          newDir.set(h()-pose.get().pos());
-          rotate = Quatf::getRotationTo(downDir.normalized(),newDir.normalized());
-          if(parent){
-            // rotate parent around rotation handle offset, probably a better way to do this :p
-            Vec3f p1 = parent->transformVecWorld(pose.get().pos());
-            parent->pose.setQuat(parent->pose.get().quat() * rotate);
-            Vec3f p2 = parent->transformVecWorld(pose.get().pos());
-            parent->pose.setPos( parent->pose.get().pos() + p1-p2);
+  bool onEvent(PickEvent e, Hit h) override {
+    switch(e.type){
+      case Point:
+        if (h.ray.intersectsSphere(pose.get().pos(), size)){
+          float t = -1;
+          float min = FLT_MAX;
+          int minIdx = -1;
+          for (int i = 0; i < 3; i++){
+            hover[i] = false;
+            t = h.ray.intersectCircle(pose.get().pos(), Vec3f(i == 0, i == 1, i == 2), size, size - dr);
+            if (t > 0 && t < min){
+              min = t;
+              minIdx = i;
+            }
           }
-          return true;
+          if (minIdx >= 0){
+            hover[minIdx] = true;
+            return true;
+          }
         }
-      }
-    }
-    return false;
-  }
+        else
+          for (int i = 0; i < 3; i++)
+            hover[i] = false;
+        return false;
+        break;
 
-  bool onUnpick(Hit h, bool child) override {
-    for(int i=0; i < 3; i++) selected[i] = false;
+      case Pick:
+        if (h.ray.intersectsSphere(pose.get().pos(), size)){
+          float t = -1;
+          float min = FLT_MAX;
+          int minIdx = -1;
+          for (int i = 0; i < 3; i++){
+            selected[i] = false;
+            t = h.ray.intersectCircle(pose.get().pos(), Vec3f(i == 0, i == 1, i == 2), size, size - dr);
+            if (t > 0 && t < min){
+              min = t;
+              minIdx = i;
+            }
+          }
+          if (minIdx >= 0){
+            selected[minIdx] = true;
+            downDir.set(h.ray(min) - pose.get().pos());
+            newDir.set(h.ray(min) - pose.get().pos());
+            if(parent){
+              parent->prevPose.set(parent->pose.get());
+            }
+            return true;
+          }
+        }
+        return false;
+        break;
+
+      case Drag:
+        for (int i = 0; i < 3; i++){
+          if (selected[i]){
+            float t = h.ray.intersectPlane(pose.get().pos(), Vec3f(i == 0, i == 1, i == 2));
+            if (t > 0){
+              newDir.set(h.ray(t) - pose.get().pos());
+              rotate = Quatf::getRotationTo(downDir.normalized(), newDir.normalized());
+              if (parent){
+                // rotate parent around rotation handle offset, probably a better way to do this :p
+                Vec3f p1 = parent->transformVecWorld(pose.get().pos());
+                parent->pose.setQuat(parent->pose.get().quat() * rotate);
+                Vec3f p2 = parent->transformVecWorld(pose.get().pos());
+                parent->pose.setPos(parent->pose.get().pos() + p1 - p2);
+              }
+              return true;
+            }
+          }
+        }
+        return false;
+        break;
+
+      case Unpick:
+        for (int i = 0; i < 3; i++)
+          selected[i] = false;
+        return false;
+        break;
+
+      default: break;
+    }
     return false;
   }
 
