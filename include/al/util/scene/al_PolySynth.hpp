@@ -584,6 +584,9 @@ public:
   template<class TSynthVoice>
   void allocatePolyphony(int number);
 
+  template<class TSynthVoice>
+  void disableAllocation();
+
   /**
      * Preallocate a number of voices of a voice to avoid doing realtime
      * allocation. The name must be registered using registerSynthClass()
@@ -930,6 +933,15 @@ protected:
 };
 
 template<class TSynthVoice>
+void PolySynth::disableAllocation()
+{
+  std::string name = demangle(typeid(TSynthVoice).name());
+  if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
+    mNoAllocationList.push_back(name);
+  }
+}
+
+template<class TSynthVoice>
 TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
     std::unique_lock<std::mutex> lk(mFreeVoiceLock); // Only one getVoice() call at a time
     SynthVoice *freeVoice = mFreeVoices;
@@ -953,11 +965,17 @@ TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
     if (!freeVoice) { // No free voice in list, so we need to allocate it
         // TODO report current polyphony for more informed allocation of polyphony
         // TODO check if allocation allowed
-
-      if (mVerbose) {
-        std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
+      //  But only allocate if allocation has not been disabled
+      std::string name = demangle(typeid(TSynthVoice).name());
+      if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
+        // TODO report current polyphony for more informed allocation of polyphony
+        freeVoice = allocateVoice<TSynthVoice>();
+        if (mVerbose) {
+          std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
+        }
+      } else {
+        std::cout << "Automatic allocation disabled for voice:" << name << std::endl;
       }
-      freeVoice = allocateVoice<TSynthVoice>();
     }
     return static_cast<TSynthVoice *>(freeVoice);
 }
