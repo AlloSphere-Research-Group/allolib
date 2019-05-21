@@ -28,7 +28,7 @@ void Texture::create1D(GLsizei width, GLint internal, GLenum format,
 
   glTexImage1D(mTarget, 0,  // level
                mInternalFormat, mWidth, 0,  // border
-               mFormat, mType, NULL);
+               mFormat, mType, nullptr);
 
   update_filter();
   update_wrap();
@@ -59,7 +59,7 @@ void Texture::create2D(unsigned int width, unsigned int height, int internal,
                0,  // level
                mInternalFormat, mWidth, mHeight,
                0,  // border
-               mFormat, mType, NULL);
+               mFormat, mType, nullptr);
   // AL_GRAPHICS_ERROR("creating 2D texture", id());
   update_filter();
   update_wrap();

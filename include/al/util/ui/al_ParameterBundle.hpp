@@ -70,6 +70,14 @@ public:
     std::string name() const;
 
     /**
+     * @brief set the name for this bundle
+     *
+     * Make sure you call this before the bundle
+     * is being used as this is not thread safe
+     */
+    void name(std::string newName);
+
+    /**
      * @brief get the prefix for this bundle
      * @return the prefix string, includes the name and the index or id e.g. /thing/3
      */

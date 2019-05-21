@@ -132,6 +132,7 @@ public:
     static void drawPresetMIDI(PresetMIDI *presetMidi);
 
     static void drawBundleGroup(std::vector<ParameterBundle *> bundles, std::string suffix, int &currentBundle, bool &bundleGlobal);
+    static void drawBundle(ParameterBundle * bundle);
     static void drawBundleManager(BundleGUIManager *manager);
 
     static bool usingInput() {return imgui_is_using_input();}

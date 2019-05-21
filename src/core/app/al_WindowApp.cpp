@@ -79,6 +79,11 @@ bool WindowApp::mouseUp(const Mouse& m) {
   return true;
 }
 
+bool WindowApp::mouseScroll(const Mouse& m) {
+  onMouseScroll(m);
+  return true;
+}
+
 bool WindowApp::resize(int dw, int dh) {
   onResize(dw, dh);
   return true;

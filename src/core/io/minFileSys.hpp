@@ -275,8 +275,8 @@ inline bool createDir(std::string const& path)
     for (unsigned i = 0; i < path.size() - 1; ++i) {
         if (path[i] == '/') {
             if (mkdir(path.substr(0, i+1).c_str(), mode) != 0) {
-                if (errno != EEXIST) {
-                    std::cout << "[!] [createDir] Error creating directory " << path << std::endl;
+                if (errno != EEXIST && errno != EISDIR) {
+                    std::cout << "[!] [createDir] Error creating directory " << errno << " " << path << std::endl;
                     return false;
                 }
             }

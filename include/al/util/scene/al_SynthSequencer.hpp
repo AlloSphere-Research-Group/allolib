@@ -188,14 +188,27 @@ public:
      * @param duration
      * @return a reference to the voice instance inserted
      *
-     * This function is not thread safe, so you must add all your notes before starting the
-     * sequencer context (e.g. the audio callback if using TIME_MASTER_AUDIO). If you need
-     * to insert events on the fly, use triggerOn() directly on the PolySynth member
+     * The voice will be inserted into the sequencer immediately, so you may want to
+     * add all your notes before starting the sequencer. If you need
+     * to insert events on the fly, use addVoice() or use triggerOn()
+     * directly on the PolySynth
      *
      * The TSynthVoice template must be a class inherited from SynthVoice.
      */
     template<class TSynthVoice>
     TSynthVoice &add(double startTime, double duration = -1);
+
+    /**
+     * Insert configured voice into sequencer.
+     */
+    template<class TSynthVoice>
+    void addVoice(TSynthVoice *voice, double startTime, double duration = -1);
+
+    /**
+     * Insert configured voice into sequencer using time offset from current time
+     */
+    template<class TSynthVoice>
+    void addVoiceFromNow(TSynthVoice *voice, double startTime, double duration = -1);
 
     /**
      * @brief Basic audio callback for quick prototyping
@@ -298,6 +311,28 @@ TSynthVoice &SynthSequencer::add(double startTime, double duration) {
     insertedEvent->duration = duration;
     insertedEvent->voice = newVoice;
     return *newVoice;
+}
+
+template<class TSynthVoice>
+void SynthSequencer::addVoice(TSynthVoice *voice, double startTime, double duration) {
+    std::list<SynthSequencerEvent>::iterator insertedEvent;
+    std::unique_lock<std::mutex> lk(mEventLock);
+    // Insert into event list, sorted.
+    auto position = mEvents.begin();
+    while(position != mEvents.end() && position->startTime < startTime) {
+        position++;
+    }
+    insertedEvent = mEvents.insert(position, SynthSequencerEvent());
+    insertedEvent->startTime = startTime;
+    insertedEvent->duration = duration;
+    insertedEvent->voice = voice;
+}
+
+template<class TSynthVoice>
+void SynthSequencer::addVoiceFromNow(TSynthVoice *voice, double startTime, double duration)
+{
+  float triggerOffset = 0.05;
+  addVoice(voice, mMasterTime + startTime + triggerOffset, duration);
 }
 
 }

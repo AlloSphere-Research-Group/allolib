@@ -32,9 +32,11 @@ std::string ParameterBundle::name() const
     return mBundleName;
 }
 
+void ParameterBundle::name(std::string newName) { mBundleName = newName; }
+
 std::string ParameterBundle::bundlePrefix() const
 {
-    std::string prefix = mParentPrefix + "/" + mBundleName;
+  std::string prefix = mParentPrefix + "/" + mBundleName;
     if (mBundleId.size() == 0) {
         prefix += "/" + std::to_string(mBundleIndex);
     } else {

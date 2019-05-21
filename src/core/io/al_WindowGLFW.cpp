@@ -128,6 +128,15 @@ class WindowImpl {
     }
   }
 
+  static void cbScroll(GLFWwindow *window, double xoffset, double yoffset) {
+    auto *w = getWindow(window);
+    if (!w) return;
+
+    Mouse &m = w->mMouse;
+    m.scroll(xoffset, yoffset);
+    w->callHandlersMouseScroll();
+  }
+
   static void cbMotion(GLFWwindow* window, double mx, double my) {
     auto* w = getWindow(window);
     if (!w) return;
@@ -180,6 +189,7 @@ class WindowImpl {
     glfwSetKeyCallback(mGLFWwindow, cbKeyboard);
     glfwSetMouseButtonCallback(mGLFWwindow, cbMouse);
     glfwSetCursorPosCallback(mGLFWwindow, cbMotion);
+    glfwSetScrollCallback(mGLFWwindow, cbScroll);
     // glfwSetWindowPosCallback(mGLFWwindow, cbReshape);
     // glfwSetWindowCloseCallback(mGLFWwindow, window_close_callback);
     // glfwSetWindowRefreshCallback(window, cb_windowrefresh);
