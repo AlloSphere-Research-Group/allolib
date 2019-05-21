@@ -785,8 +785,8 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
             }
             ImGui::SameLine();
             if (ImGui::Button("Stop")) {
-                synthSequencer->stopSequence();
-                synthSequencer->synth().allNotesOff();
+              synthSequencer->synth().allNotesOff();
+              synthSequencer->stopSequence();
             }
 //            static float time = state.currentTime;
             if (ImGui::SliderFloat("Position", &state.currentTime, 0.0f, state.totalDuration)) {

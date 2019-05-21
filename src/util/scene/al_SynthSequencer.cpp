@@ -64,7 +64,9 @@ void SynthSequencer::stopSequence() {
   for (auto &event: mEvents) {
     if (event.type == SynthSequencerEvent::EVENT_VOICE) {
       // Give back allocated voice to synth
-      mPolySynth->insertFreeVoice(event.voice);
+      if (event.voice) {
+        mPolySynth->insertFreeVoice(event.voice);
+      }
     }
   }
 
@@ -411,7 +413,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
         event->offsetCounter = (event->startTime - blockStartTime)*fpsAdjusted;
         if (event->type == SynthSequencerEvent::EVENT_VOICE) {
           mPolySynth->triggerOn(event->voice, event->offsetCounter);
-          event->voice = nullptr; // Voice has been consumed
+//          event->voice = nullptr; // Voice has been consumed
         } else if (event->type == SynthSequencerEvent::EVENT_PFIELDS){
           auto *voice = mPolySynth->getVoice(event->fields.name);
           if (voice) {
@@ -440,7 +442,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
       double eventTermination = event.startTime + event.duration;
       if (event.voice && event.voice->active() && eventTermination <= mMasterTime) {
         mPolySynth->triggerOff(event.voice->id());
-        //                std::cout << "trigger off " <<  event.voice->id() << " " << eventTermination << " " << mMasterTime  << std::endl;
+//        std::cout << "trigger off " <<  event.voice->id() << " " << eventTermination << " " << mMasterTime  << std::endl;
         event.voice = nullptr; // When an event gives up a voice, it is done.
       }
     }
