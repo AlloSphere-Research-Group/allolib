@@ -133,7 +133,7 @@ endforeach(include_dir IN app_include_dirs)
 # This might bring in too much?
 target_include_directories(${app_name} PRIVATE ${al_includes})
 
-target_link_libraries(${app_name} ${app_link_libs})
+target_link_libraries(${app_name} PRIVATE ${app_link_libs})
 target_compile_definitions(${app_name} PRIVATE ${app_definitions})
 target_compile_options(${app_name} PRIVATE ${app_compile_flags})
 # Item names starting with -, but not -l or -framework, are treated as linker flags.
