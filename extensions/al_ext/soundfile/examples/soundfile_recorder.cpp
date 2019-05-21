@@ -30,7 +30,7 @@ struct MyApp : public App {
     void onSound(AudioIOData &io) override {
         while(io()) {
             // Write the signal to the output
-            float waveValue = wave();
+            float waveValue = wave() * 0.5f;
             io.out(0) = waveValue;
             io.out(1) = -waveValue; // Phase inverted
         }
