@@ -44,6 +44,7 @@
 
 #include <memory>
 #include <thread>
+#include <queue>
 #include <condition_variable>
 
 #include "al/core/spatial/al_Pose.hpp"
@@ -81,25 +82,7 @@ public:
     /**
      * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields
      */ 
-    virtual bool setTriggerParams(float *pFields, int numFields = -1) override {
-        bool ok = SynthVoice::setTriggerParams(pFields, numFields);
-        if (numFields == (int) mTriggerParams.size() + 8) { // If seven extra, it means pose and size are there too
-            pFields += mTriggerParams.size();
-            double x = *pFields++;
-            double y = *pFields++;
-            double z = *pFields++;
-            mPose.vec() = Vec3d(x, y, z);
-            double w = *pFields++;
-            x = *pFields++;
-            y = *pFields++;
-            z = *pFields++;
-            mPose.quat() = Quatd(w, x, y, z);
-            mSize = *pFields;
-        } else {
-            ok = false;
-        }
-        return ok;
-    }
+    virtual bool setTriggerParams(float *pFields, int numFields = -1) override;
 
     /**
      * @brief Set parameter values
@@ -115,25 +98,7 @@ public:
      * @param pFields std::vector<float> containing the values
      * @return true if able to set the fields
      */
-    virtual bool setTriggerParams(std::vector<ParameterField> pFields) override {
-        bool ok = SynthVoice::setTriggerParams(pFields);
-        if (pFields.size() == mTriggerParams.size() + 8) { // If seven extra, it means pose and size are there too
-            size_t index = mTriggerParams.size();
-            double x = pFields[index++].get<float>();
-            double y = pFields[index++].get<float>();
-            double z = pFields[index++].get<float>();
-            mPose.vec() = Vec3d(x, y, z);
-            double w = pFields[index++].get<float>();
-            x = pFields[index++].get<float>();
-            y = pFields[index++].get<float>();
-            z = pFields[index++].get<float>();
-            mPose.quat() = Quatd(w, x, y, z);
-            mSize = pFields[index++].get<float>();
-        } else {
-//            std::cout << "Not setting position for voice" << std::endl;
-        }
-        return ok;
-    }
+    virtual bool setTriggerParams(std::vector<ParameterField> pFields) override;
 
     /**
      * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields

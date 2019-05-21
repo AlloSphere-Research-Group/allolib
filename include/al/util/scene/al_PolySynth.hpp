@@ -910,7 +910,7 @@ protected:
 
   float mAudioGain {1.0f};
 
-  int mIdCounter {0};
+  int mIdCounter {1000};
 
   bool mAllNotesOff {false}; // Flag used to notify processing to turn off all voices
 

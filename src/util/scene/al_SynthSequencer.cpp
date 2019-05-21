@@ -1,4 +1,12 @@
 
+#include <iostream>
+#include <cassert>
+#include <sstream>
+#include <fstream>
+#include <algorithm>
+#include <climits>
+#include <typeinfo> // For class name instrospection
+
 #include "al/util/scene/al_SynthSequencer.hpp"
 
 using namespace al;
@@ -23,14 +31,19 @@ void SynthSequencer::render(Graphics &g) {
     mPolySynth->render(g);
 }
 
+void SynthSequencer::print() {
+  std::cout << "POLYSYNTH INFO ................." << std::endl;
+  mPolySynth->print();
+}
+
 bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   //        synth().allNotesOff();
   // Add an offset of 0.1 to make sure the allNotesOff message gets processed before the sequence
   double currentMasterTime = mMasterTime;
   const double startPad = 0.1;
   std::list<SynthSequencerEvent> events = loadSequence(sequenceName, currentMasterTime - startTime + startPad);
-
   std::unique_lock<std::mutex> lk(mEventLock);
+  mLastSequencePlayed = sequenceName;
   mEvents = events;
   mNextEvent = 0;
   mPlaybackStartTime = currentMasterTime;
@@ -72,6 +85,13 @@ void SynthSequencer::stopSequence() {
   mNextEvent = 0;
 }
 
+void SynthSequencer::setTime(float newTime) {  std::cout << "Setting time not implemented" <<std::endl;}
+
+void SynthSequencer::setDirectory(std::string directory) {
+  assert(directory.size() > 0);
+  mDirectory = directory;
+}
+
 void SynthSequencer::registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec)
 {
   if (mEventLock.try_lock()) {
@@ -81,6 +101,16 @@ void SynthSequencer::registerTimeChangeCallback(std::function<void (float)> func
   } else {
     std::cerr << "ERROR: Failed to set time change callback. Sequencer running" <<std::endl;
   }
+}
+
+void SynthSequencer::registerSequenceEndCallback(std::function<void (std::string)> func)
+{
+  mSequenceEndCallbacks.push_back(func);
+}
+
+void SynthSequencer::registerSynth(PolySynth &synth) {
+  mPolySynth = &synth;
+  mMasterMode = mPolySynth->mMasterMode;
 }
 
 std::string SynthSequencer::buildFullPath(std::string sequenceName)
@@ -327,7 +357,7 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
         return a.startTime < b.startTime;
       });
     } else if (command == '>' && ss.get() == ' ') {
-      std::string time, sequenceName;
+      std::string time;
       std::getline(ss, time);
       timeOffset += std::stod(time);
     } else if (command == 't' && ss.get() == ' ') {
@@ -433,6 +463,8 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
         event = iter;
       }
     }
+    bool allEventsDone = true;
+    bool triggerOffThisBlock = false;
     for (auto &event : mEvents) {
       //            if (event.startTime*mNormalizedTempo > mMasterTime) {
       //                break;
@@ -442,6 +474,15 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
         mPolySynth->triggerOff(event.voice->id());
         //                std::cout << "trigger off " <<  event.voice->id() << " " << eventTermination << " " << mMasterTime  << std::endl;
         event.voice = nullptr; // When an event gives up a voice, it is done.
+        triggerOffThisBlock = true;
+      }
+      if (eventTermination > mMasterTime) {
+        allEventsDone = false;
+      }
+    }
+    if (allEventsDone && triggerOffThisBlock) { // This block marks the end of the sequence
+      for (auto cb: mSequenceEndCallbacks) {
+        cb(mLastSequencePlayed);
       }
     }
     mEventLock.unlock();
