@@ -622,18 +622,7 @@ public:
    * You should not call this function if any of the rendering domains are
    * running.
    */
-  void setTimeMaster(TimeMasterMode masterMode) {
-    mMasterMode = masterMode;
-    if (mMasterMode == TIME_MASTER_CPU) {
-      startCpuClockThread();
-    } else {
-      if (mCpuClockThread) {
-        mRunCPUClock = false;
-        mCpuClockThread->join();
-        mCpuClockThread = nullptr;
-      }
-    }
-  }
+  void setTimeMaster(TimeMasterMode masterMode);
 
   /**
      * @brief Insert an AudioCallback object at the end of the callback queue
@@ -801,27 +790,7 @@ public:
 
 protected:
 
-  void startCpuClockThread() {
-    if (mVerbose) {
-      std::cout << "Starting CPU clock thread" << std::endl;
-    }
-    mCpuClockThread = std::make_unique<std::thread>([this]() {
-      using namespace std::chrono;
-      while(mRunCPUClock) {
-        high_resolution_clock::time_point startTime = high_resolution_clock::now();
-        std::chrono::milliseconds waitTime(int(mCpuGranularitySec * 1000));
-
-        high_resolution_clock::time_point futureTime = startTime + waitTime;
-        std::this_thread::sleep_until(futureTime);
-        // FIXME this will generate some jitter and drift, fix.
-
-        processVoices();
-        // Turn off voices
-        processVoiceTurnOff();
-        processInactiveVoices();
-      }
-    });
-  }
+  void startCpuClockThread();
 
   inline void processVoices() {
     if (mVoiceToInsertLock.try_lock()) {
