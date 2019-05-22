@@ -137,7 +137,7 @@ target_link_libraries(${app_name} PRIVATE ${app_link_libs})
 target_compile_definitions(${app_name} PRIVATE ${app_definitions})
 target_compile_options(${app_name} PRIVATE ${app_compile_flags})
 # Item names starting with -, but not -l or -framework, are treated as linker flags.
-target_link_libraries(${app_name} ${app_linker_flags})
+target_link_libraries(${app_name} PRIVATE ${app_linker_flags})
 
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
