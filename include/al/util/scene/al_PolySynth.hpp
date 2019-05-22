@@ -616,6 +616,17 @@ public:
   void setDefaultUserData(void *userData) { mDefaultUserData = userData;}
 
   /**
+   * @brief Set time master context
+   * @param master domain
+   *
+   * You should not call this function if any of the rendering domains are
+   * running.
+   */
+  void setTimeMaster(TimeMasterMode masterMode) {
+    mMasterMode = masterMode;
+  }
+
+  /**
      * @brief Insert an AudioCallback object at the end of the callback queue
      * @param v The AudioCallback object
      * @return this instance
