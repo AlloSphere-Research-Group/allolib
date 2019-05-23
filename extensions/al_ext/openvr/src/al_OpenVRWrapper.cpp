@@ -3,6 +3,12 @@
 using namespace al;
 
 bool al::OpenVRWrapper::init() {
+
+  static bool initialized = false;
+  if (initialized) {
+    std::cerr << "Another allolib application is using the HMD. Not runnning HMD" <<std::endl;
+    return false;
+  }
   // Check whether there is an HMD plugged-in and the SteamVR runtime is installed
   if (vr::VR_IsHmdPresent()) {
     std::cout << "An HMD was successfully found in the system" << std::endl;
@@ -29,9 +35,10 @@ bool al::OpenVRWrapper::init() {
   vr_context = vr::VR_Init(&err, vr::EVRApplicationType::VRApplication_Scene);
   // vr_context = vr::VR_Init(&err, vr::EVRApplicationType::VRApplication_Overlay);
 
-  if (vr_context == NULL) {
+  if (vr_context == nullptr) {
     std::cout << "Error while initializing SteamVR runtime. Error code is "
               << vr::VR_GetVRInitErrorAsSymbol(err) << std::endl;
+    return false;
   }
   else {
     std::cout << "SteamVR runtime successfully initialized" << std::endl;
@@ -110,7 +117,7 @@ bool al::OpenVRWrapper::init() {
   projectionRight = GetHMDMatrixProjectionEye(vr_context, vr::Eye_Right, m_fNearClip, m_fFarClip);
   eyePosLeft = GetHMDMatrixPoseEye(vr_context, vr::Eye_Left);
   eyePosRight = GetHMDMatrixPoseEye(vr_context, vr::Eye_Right);
-
+  initialized = true;
   return true;
 }
 
