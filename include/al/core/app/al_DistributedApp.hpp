@@ -125,6 +125,8 @@ public:
                     role = Role(role | ROLE_CONTROL);
                   } else if (token == "replica")  {
                     role = Role(role | ROLE_DESKTOP_REPLICA);
+                  } else if (token == "desktop")  {
+                    role = Role(role | ROLE_DESKTOP);
                   }
               }
               return role;
@@ -205,6 +207,7 @@ public:
           mParameterServer->startCommandListener(defaultAddress);
           for (auto member: mRoleMap) {
             // Relay all parameters to renderers
+            // FIXME check for myself and not add to listeners otherwise there is feedback
 //            if (member.second & ROLE_RENDERER && member) {
 //              std::cout << "Added renderer as listener " << member.first << ":" << receiverPort << std::endl;
 //              mParameterServer->addListener(member.first, receiverPort);
