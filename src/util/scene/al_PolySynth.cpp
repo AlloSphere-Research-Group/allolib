@@ -339,15 +339,8 @@ void PolySynth::allocatePolyphony(std::string name, int number)
 
 void PolySynth::insertFreeVoice(SynthVoice *voice) {
     std::unique_lock<std::mutex> lk(mFreeVoiceLock);
-    SynthVoice *lastVoice = mFreeVoices;
-    if (lastVoice) {
-        while (lastVoice->next) { lastVoice = lastVoice->next; }
-        lastVoice->next = voice;
-        voice->next = nullptr;
-    } else {
-        mFreeVoices = voice;
-        voice->next = nullptr;
-    }
+    voice->next = mFreeVoices;
+    mFreeVoices = voice;
 }
 
 bool PolySynth::popFreeVoice(SynthVoice *voice) {
