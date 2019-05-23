@@ -313,6 +313,13 @@ void PolySynth::update(double dt) {
     }
 }
 
+void PolySynth::disableAllocation(std::string name)
+{
+  if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
+    mNoAllocationList.push_back(name);
+  }
+}
+
 void PolySynth::allocatePolyphony(std::string name, int number)
 {
     std::unique_lock<std::mutex> lk(mFreeVoiceLock);
@@ -366,6 +373,7 @@ bool PolySynth::popFreeVoice(SynthVoice *voice) {
 void PolySynth::setTimeMaster(PolySynth::TimeMasterMode masterMode) {
   mMasterMode = masterMode;
   if (mMasterMode == TIME_MASTER_CPU) {
+    mRunCPUClock = true;
     startCpuClockThread();
   } else {
     if (mCpuClockThread) {

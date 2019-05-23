@@ -587,6 +587,8 @@ public:
   template<class TSynthVoice>
   void disableAllocation();
 
+  void disableAllocation(std::string name);
+
   /**
      * Preallocate a number of voices of a voice to avoid doing realtime
      * allocation. The name must be registered using registerSynthClass()
@@ -948,9 +950,7 @@ template<class TSynthVoice>
 void PolySynth::disableAllocation()
 {
   std::string name = demangle(typeid(TSynthVoice).name());
-  if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
-    mNoAllocationList.push_back(name);
-  }
+  disableAllocation(name);
 }
 
 template<class TSynthVoice>

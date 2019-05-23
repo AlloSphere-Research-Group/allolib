@@ -16,9 +16,9 @@ class DistributedScene :
         public osc::MessageConsumer
 {
 public:
-    DistributedScene(std::string name = "scene", int threadPoolSize = 0, TimeMasterMode masterMode = TIME_MASTER_AUDIO);
+    DistributedScene(std::string name = "scene", int threadPoolSize = 0, TimeMasterMode masterMode = TIME_MASTER_CPU);
 
-    DistributedScene(TimeMasterMode masterMode = TIME_MASTER_AUDIO)
+    DistributedScene(TimeMasterMode masterMode = TIME_MASTER_CPU)
         : DistributedScene("scene", 0, masterMode) {}
 
     
