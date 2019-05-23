@@ -161,7 +161,7 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id, void *user
   assert(voice);
   int thisId = id;
   if (thisId == -1) {
-    if (voice->id() > 0) {
+    if (voice->id() >= 0) {
       thisId = voice->id();
     } else {
       thisId = mIdCounter++;
