@@ -125,6 +125,8 @@ public:
                     role = Role(role | ROLE_CONTROL);
                   } else if (token == "replica")  {
                     role = Role(role | ROLE_DESKTOP_REPLICA);
+                  } else if (token == "desktop")  {
+                    role = Role(role | ROLE_DESKTOP);
                   }
               }
               return role;
@@ -203,6 +205,20 @@ public:
 
         if (mParameterServer->serverRunning()) {
           mParameterServer->startCommandListener(defaultAddress);
+          for (auto member: mRoleMap) {
+            // Relay all parameters to renderers
+            // FIXME check for myself and not add to listeners otherwise there is feedback
+//            if (member.second & ROLE_RENDERER && member) {
+//              std::cout << "Added renderer as listener " << member.first << ":" << receiverPort << std::endl;
+//              mParameterServer->addListener(member.first, receiverPort);
+//              continue;
+//            }
+            if (member.second & ROLE_DESKTOP || member.second & ROLE_SIMULATOR ) {
+              std::cout << "Added desktop as listener " << member.first << ":" << sendPort << std::endl;
+              mParameterServer->addListener(member.first, sendPort);
+              continue;
+            }
+          }
         } else {
           std::cerr << "Warning: Application could not start network role." << std::endl;
         }
@@ -439,7 +455,7 @@ inline void DistributedApp<TSharedState>::start() {
   glfw::init(is_verbose);
   initialize();
 
-  //  std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
+  std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
   onInit();
 
   // must do before Window::create, overrides user given window diemnsions
@@ -468,7 +484,7 @@ inline void DistributedApp<TSharedState>::start() {
   while (!WindowApp::shouldQuit()) {
     // to quit, call WindowApp::quit() or click close button of window,
     // or press ctrl + q
-    if (role() & ROLE_DESKTOP || role() & ROLE_SIMULATOR) {
+    if (hasRole(ROLE_DESKTOP) || hasRole(ROLE_SIMULATOR) ) {
       simulate(dt_sec());
       mQueuedStates = 1;
 #ifdef AL_USE_CUTTLEBONE

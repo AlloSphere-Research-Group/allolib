@@ -47,7 +47,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   mEvents = events;
   mNextEvent = 0;
   mPlaybackStartTime = currentMasterTime;
-
+  lk.unlock();
   if (mMasterMode == PolySynth::TIME_MASTER_CPU) {
     mCpuThread = std::make_shared<std::thread>([&](int granularityns = 1000) {
       bool running = true;
@@ -443,7 +443,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
         event->offsetCounter = (event->startTime - blockStartTime)*fpsAdjusted;
         if (event->type == SynthSequencerEvent::EVENT_VOICE) {
           mPolySynth->triggerOn(event->voice, event->offsetCounter);
-//          event->voice = nullptr; // Voice has been consumed
+          event->voice = nullptr; // Voice has been consumed, all voices reamining in the event list are put back in the synth's free voice pool
         } else if (event->type == SynthSequencerEvent::EVENT_PFIELDS){
           auto *voice = mPolySynth->getVoice(event->fields.name);
           if (voice) {

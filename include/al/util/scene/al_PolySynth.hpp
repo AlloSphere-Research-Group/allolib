@@ -587,6 +587,8 @@ public:
   template<class TSynthVoice>
   void disableAllocation();
 
+  void disableAllocation(std::string name);
+
   /**
      * Preallocate a number of voices of a voice to avoid doing realtime
      * allocation. The name must be registered using registerSynthClass()
@@ -614,6 +616,15 @@ public:
      * @param userData
      */
   void setDefaultUserData(void *userData) { mDefaultUserData = userData;}
+
+  /**
+   * @brief Set time master context
+   * @param master domain
+   *
+   * You should not call this function if any of the rendering domains are
+   * running.
+   */
+  void setTimeMaster(TimeMasterMode masterMode);
 
   /**
      * @brief Insert an AudioCallback object at the end of the callback queue
@@ -780,6 +791,9 @@ public:
   }
 
 protected:
+
+  void startCpuClockThread();
+
   inline void processVoices() {
     if (mVoiceToInsertLock.try_lock()) {
       if (mVoicesToInsert) {
@@ -936,9 +950,7 @@ template<class TSynthVoice>
 void PolySynth::disableAllocation()
 {
   std::string name = demangle(typeid(TSynthVoice).name());
-  if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
-    mNoAllocationList.push_back(name);
-  }
+  disableAllocation(name);
 }
 
 template<class TSynthVoice>
