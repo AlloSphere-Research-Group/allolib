@@ -44,43 +44,45 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
 
     PolySynth::registerTriggerOnCallback(
                 [this](SynthVoice *voice, int offsetFrames, int id, void *userData) {
-        osc::Packet p;
-        p.beginMessage("/triggerOn");
-        offsetFrames = 0;
-        p << offsetFrames << id;
-        std::string voiceName = demangle(typeid(*voice).name());
-        p<<voiceName;
-        auto fields = voice->getTriggerParams();
-        for (auto field: fields) {
-            if (field.type() == ParameterField::FLOAT) {
-                p << field.get<float>();
-            } else {
-                p << field.get<std::string>();
-            }
-        }
-        p.endMessage();
-
-        if (verbose()) {
-          std::cout << "Sending trigger on message" << std::endl;
-        }
         if (this->mNotifier) {
-            this->mNotifier->send(p);
+          osc::Packet p;
+          std::string prefix = this->name() + "/";
+          p.beginMessage("/" + prefix + "triggerOn");
+          offsetFrames = 0;
+          p << offsetFrames << id;
+          std::string voiceName = demangle(typeid(*voice).name());
+          p<<voiceName;
+          auto fields = voice->getTriggerParams();
+          for (auto field: fields) {
+              if (field.type() == ParameterField::FLOAT) {
+                  p << field.get<float>();
+              } else {
+                  p << field.get<std::string>();
+              }
+          }
+          p.endMessage();
+
+          if (verbose()) {
+            std::cout << "Sending trigger on message" << std::endl;
+          }
+          this->mNotifier->send(p);
         }
         return true;
     });
 
     PolySynth::registerTriggerOffCallback(
                 [this](int id, void *userData) {
-        osc::Packet p;
-        p.beginMessage("/triggerOff");
-        p << id;
-        p.endMessage();
-
-        if (verbose()) {
-          std::cout << "Sending trigger off message" << std::endl;
-        }
         if (this->mNotifier) {
-            this->mNotifier->send(p);
+          osc::Packet p;
+          std::string prefix = this->name() + "/";
+          p.beginMessage("/" + prefix + "triggerOff");
+          p << id;
+          p.endMessage();
+
+          if (verbose()) {
+            std::cout << "Sending trigger off message" << std::endl;
+          }
+          this->mNotifier->send(p);
         }
         return true;
 
@@ -128,7 +130,19 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
     if (verbose()) {
       m.print();
     }
-    if (m.addressPattern() == "/triggerOn") {
+    std::string address = m.addressPattern();
+    if (rootOSCPath.size() > 0) {
+      if (address.rfind(rootOSCPath, 0) == 1) {
+        address = address.substr(rootOSCPath.size() + 1);
+      } else {
+        if (verbose()) {
+          std::cout << "Prefix " << rootOSCPath << " not matched." << std::endl;
+          return false;
+        }
+      }
+    }
+
+    if (address == "/triggerOn") {
         if (m.typeTags().size() > 2
                 && m.typeTags()[0] == 'i'
                 && m.typeTags()[1] == 'i'
@@ -165,7 +179,7 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
         } else {
             std::cerr << "Unexpected type for /triggerOn name" << std::endl;
         }
-    } else if (m.addressPattern() == "/triggerOff") {
+    } else if (address == "/triggerOff") {
         if (m.typeTags() == "i") {
             int id;
             m >> id;
@@ -175,10 +189,10 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
             }
             return true;
         }
-    } else if (m.addressPattern() == "/allNotesOff") {
+    } else if (address == "/allNotesOff") {
       allNotesOff();
     } else {
-        std::string addr = m.addressPattern();
+        std::string addr = address;
         int start = ("/" + name() + "/").size();
         if (addr.compare(0, start, "/" + name() + "/") == 0) {
             std::string number = addr.substr(start, addr.find('/',  start + 1) - start);

@@ -405,17 +405,18 @@ public:
 //  }
 
   void registerDynamicScene(DynamicScene &scene) {
-
+    if (dynamic_cast<DistributedScene *>(&scene)) {
+      // If distributed scene, connect according to this app's role
+      DistributedScene *s =  dynamic_cast<DistributedScene *>(&scene);
       if (isPrimary()) {
-          if (dynamic_cast<DistributedScene *>(&scene)) {
-              dynamic_cast<DistributedScene *>(&scene)->registerNotifier(parameterServer());
-
-          }
+       s->registerNotifier(parameterServer());
       } else {
-          parameterServer().registerOSCConsumer(
-                      dynamic_cast<DistributedScene *>(&scene), "");
+        parameterServer().registerOSCConsumer(
+              s, s->name());
       }
-      scene.prepare(audioIO());
+    }
+
+    scene.prepare(audioIO());
   }
 private:
 
