@@ -5,16 +5,6 @@
 
 using namespace al;
 
-template<class DomainType>
-std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
-  // Only Synchronous domains are allowed as subdomains
-  assert(strcmp(typeid (DomainType).name(), "SynchronousDomain") == 0);
-  auto newDomain = std::dynamic_pointer_cast<SynchronousDomain>(std::make_shared<DomainType>());
-  if (newDomain) {
-    mSubDomainList.push_back({newDomain, prepend});
-  }
-  return newDomain;
-}
 
 bool ComputationDomain::initializeSubdomains(bool pre)
 {

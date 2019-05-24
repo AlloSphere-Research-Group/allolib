@@ -11,161 +11,128 @@
 
 namespace al {
 
-struct PickableBase;
+enum PickEventType { Point, Pick, Unpick, Drag, TranslateRay, RotateRay, RotatePose, Scale };
 
-struct Hit{
+struct PickEvent{
+  PickEventType type;
+  Rayd ray;
+  Pose pose;
+  float amount;
+
+  PickEvent(PickEventType t, Rayd r) : type(t), ray(r) {}
+  PickEvent(PickEventType t, Rayd r, Pose p) : type(t), ray(r), pose(p) {}
+  PickEvent(PickEventType t, Rayd r, Vec3f v) : type(t), ray(r), pose(v,Quatf()) {}
+  PickEvent(PickEventType t, Rayd r, float v) : type(t), ray(r), amount(v) {}
+  PickEvent(PickEventType t, Pose p) : type(t), pose(p) {}
+};
+
+struct Pickable;
+
+struct Hit {
   bool hit;
   Rayd ray;
   double t;
-  PickableBase *p;
+  Pickable *p;
 
   Hit() : hit(false) {}
-  Hit(bool h, Rayd r, double tt, PickableBase *pp) : hit(h), ray(r), t(tt), p(pp) {}
+  Hit(bool h, Rayd r, double tt, Pickable *pp) : hit(h), ray(r), t(tt), p(pp) {}
   Vec3d operator()(){ return hit ? ray(t) : Vec3d(); }
 };
 
-struct PickableState {
+struct Pickable {
   std::string name;
+
   ParameterBool hover{"hover", name}, selected{"selected", name};
   ParameterPose pose{"pose", name};
   ParameterVec3 scaleVec{"scaleVec", name};
   Parameter scale{"scale", name, 1.0f, "", 0.0f, 10.0f};
+  ParameterBundle bundle{"pickable"};
 
-  ParameterBundle bundle {"pickable"};
+  Pickable *parent = 0;
+  std::vector<Pickable *> children;
+  bool testChildren = true;
+  bool containChildren = false;
+  bool containedChild = false;
+  int depth=0;
 
-  PickableState(){
+  // initial values, and previous values
+  Pose pose0, prevPose;
+  Vec3f scale0, prevScale;
+
+  Pickable(){
     pose = Pose();
     scaleVec = Vec3f(1);
     hover = false;
     selected = false;
     bundle << hover << selected << pose << scale << scaleVec;
     scale.registerChangeCallback([this](float value) {
-        scaleVec.set(Vec3f(value, value, value));
+      scaleVec.set(Vec3f(value, value, value));
     });
     hover.setHint("hide", 1.0);
     selected.setHint("hide", 1.0);
     scaleVec.setHint("hide", 1.0); // We want to show the single value scale by default.
   }
-};
 
-struct PickableBase : virtual PickableState {
-  PickableBase *parent = 0;
-  std::vector<PickableBase *> children;
-  bool alwaysTestChildren = true;
-  bool containChildren = true;
+  /// intersection test must be implemented
+  virtual Hit intersect(Rayd r) = 0;
+  virtual Hit intersect(Vec3d v){ intersect(Rayd(v,Vec3d())); };
 
-  // initial values, and previous values
-  Pose pose0, prevPose;
-  Vec3f scale0, prevScale;
+  /// override callback
+  virtual bool onEvent(PickEvent e, Hit hit){ return false; }
 
-  /// intersection test must be specified
-  virtual Hit intersect(Rayd &r) = 0;
-  virtual bool contains(Vec3d &v) = 0;
-
-  /// override these callbacks
-  virtual bool onPoint(Hit hit, bool child){return false;}
-  virtual bool onPick(Hit hit, bool child){return false;}
-  virtual bool onDrag(Hit hit, bool child){return false;}
-  virtual bool onUnpick(Hit hit, bool child){return false;}
-
-  /// do interaction on self and children, call onPoint callbacks
-  virtual bool point(Rayd &r){
+  /// do interaction on self and children, call onEvent callbacks
+  virtual bool event(PickEvent e){
     bool child = false;
-    Hit h = intersect(r);
-    if(h.hit || alwaysTestChildren){
-      for(unsigned int i=0; i < children.size(); i++){
-        Rayd ray = transformRayLocal(r);
-        child |= children[i]->point(ray);
-      }
-    }
-    return onPoint(h, child);
-  }
-
-  /// do interaction on self and children, call onPick callbacks
-  virtual bool pick(Rayd &r){
-    bool child = false;  
-    Hit h = intersect(r);
-    if(h.hit || alwaysTestChildren){
-      for(unsigned int i=0; i < children.size(); i++){
-        Rayd ray = transformRayLocal(r);
-        child |= children[i]->pick(ray);
-      }
-    }
-    return onPick(h, child);
-  }
-
-  /// do interaction on self and children, call onDrag callbacks
-  virtual bool drag(Rayd &r){
-    bool child = false;  
-    Hit h = intersect(r);
-    if(h.hit || alwaysTestChildren){
-      for(unsigned int i=0; i < children.size(); i++){
-        Rayd ray = transformRayLocal(r);
-        child |= children[i]->drag(ray);
-      }
-    }
-    return onDrag(h, child);
-  }
-  
-  /// do interaction on self and children, call onUnpick callbacks
-  virtual bool unpick(Rayd &r){
-    bool child = false;  
-    Hit h = intersect(r);
-    if(h.hit || alwaysTestChildren){
-      for(unsigned int i=0; i < children.size(); i++){
-        Rayd ray = transformRayLocal(r);
-        child |= children[i]->unpick(ray);
-      }
-    }
-    return onUnpick(h, child);
-  }
-
-  virtual void draw(Graphics &g){}
-  virtual void drawChildren(Graphics &g){
-    pushMatrix(g);
     for(unsigned int i=0; i < children.size(); i++){
-      children[i]->draw(g);
+      if(testChildren){
+        Rayd ray = transformRayLocal(e.ray);
+        auto ev = PickEvent(e.type, ray);
+        child |= children[i]->event(ev);
+      } else children[i]->clearSelection();
     }
-    popMatrix(g);
+    if(child) return true;
+    else {
+      Hit h = intersect(e.ray);
+      return onEvent(e, h);
+    }
+  }
+
+  void clearSelection(){
+    this->foreach([](Pickable &p){
+      if(p.hover.get()) p.hover = false;
+      if(p.selected.get()) p.selected = false;
+    });
   }
 
   bool intersects(Rayd &r){ return intersect(r).hit; }
   bool intersectsChild(Rayd &r){
     bool child = false;
+    Rayd ray = transformRayLocal(r);
     for(unsigned int i=0; i < children.size(); i++){
-      Rayd ray = transformRayLocal(r);
-      child |= children[i]->intersects(ray);
+      child |= children[i]->intersectsChild(ray);
+      if(child) return child;
     }
     return child;
   }
-  Hit intersectChild(Rayd &r){
+
+  Hit intersectChildren(Rayd &r){
     Hit hmin = Hit(false, r, 1e10, NULL);
     Rayd ray = transformRayLocal(r);
     for (auto *c : children){
       Hit h = c->intersect(ray);
       if (h.hit && h.t < hmin.t){
         hmin = h;
-        // pmin = p;
-        // tmin = h.t;
       }
     }
     return hmin;
-    // if (pmin) return Hit(true, r, tmin, pmin);
-    // else return Hit(false, r, -1.0, NULL);
-    // bool child = false;
-    // for(unsigned int i=0; i < children.size(); i++){
-      // Rayd ray = transformRayLocal(r);
-      // child |= children[i]->intersect(ray);
-    // }
-    // return child;
   }
 
-  void addChild(PickableBase &pickable){
+  void addChild(Pickable &pickable){
     pickable.parent = this;
+    pickable.depth = this->depth+1;
     children.push_back(&pickable);
   }
-  
-  void addChild(PickableBase *p){ addChild(*p); }
+  void addChild(Pickable *p){ addChild(*p); }
 
   /// apply pickable pose transforms
   inline void pushMatrix(Graphics &g){
@@ -177,7 +144,20 @@ struct PickableBase : virtual PickableState {
   /// pop matrix.
   inline void popMatrix(Graphics &g){
     g.popMatrix();
-  } 
+  }
+
+  void draw(Graphics &g, std::function<void(Pickable &p)> f){
+    f(*this);
+    pushMatrix(g);
+    for (auto *c : children) c->draw(g, f);
+    popMatrix(g);
+  }
+
+  void foreach (std::function<void(Pickable &p)> pre, std::function<void(Pickable &p)> post = [](Pickable &p) {}){
+    pre(*this);
+    for (auto *c : children) c->foreach(pre, post);
+    post(*this);
+  }
 
   /// transform a ray in world space to local space
   Rayd transformRayLocal(const Rayd &ray){
@@ -207,18 +187,22 @@ struct PickableBase : virtual PickableState {
 
 
 /// Bounding Box PickableMesh
-struct Pickable : PickableBase {
+struct PickableBB : Pickable {
   Mesh *mesh {nullptr}; // pointer to mesh that is wrapped
   BoundingBox bb; // original bounding box
   BoundingBox aabb; // axis aligned bounding box (after pose/scale transforms)
 
   // used for moving pickable naturally
+  Vec3f selectPos;
   Vec3f selectOffset;
   Quatf selectQuat;
   float selectDist;
 
-  Pickable(std::string name = ""){ PickableState::name = name;}
-  Pickable(Mesh &m){set(m);}
+  PickableBB(std::string name = "") {
+    Pickable::name = name;
+    bundle.name(name);
+  }
+  PickableBB(Mesh &m){set(m);}
 
   /// initialize bounding box;
   void set(Mesh &m){
@@ -227,70 +211,116 @@ struct Pickable : PickableBase {
   }
 
   /// override base methods
-  Hit intersect(Rayd &r){
+  Hit intersect(Rayd r){
     auto ray = transformRayLocal(r);
     double t = intersectBB(ray) * scaleVec.get().x;
     // auto r2 = Rayd(r.o*scaleVec.get(), r.d);
     if(t > 0) return Hit(true, r, t, this);
     else return Hit(false, r, t, this);
   }
+  // bool contains(Vec3d v){ auto p = transformVecLocal(v); return bb.contains(p); }
 
-  bool contains(Vec3d &v){ auto p = transformVecLocal(v); return bb.contains(p); }
+  bool onEvent(PickEvent e, Hit h){
 
-  bool onPoint(Hit h, bool child){
-    bool hoverValue = false;
-    if(h.hit) hoverValue = true;
-    
-    if(hover.get() != hoverValue)
-      hover = hoverValue; // setting value propagates via OSC, so only set if there is a change
+    switch(e.type){
+      case Point:
+        if (hover.get() != h.hit)
+          hover = h.hit; // setting value propagates via OSC, so only set if there is a change
+        return h.hit;
+        break;
 
-    return h.hit || child;
-  }
+      case Pick:
+        if (h.hit){
+          prevPose.set(pose.get());
+          selectDist = h.t;
+          selectPos = h();
+          selectOffset = pose.get().pos() - h(); // * scaleVec.get();
+          // selectQuat.set(e.pose.quat()); // XXX previously grab
+          // selectOffset.set(e.pose.pos() - pose.get().pos());
 
-  bool onPick(Hit h, bool child){
-    bool selectedValue = false;
-    if(h.hit) selectedValue = true;
-    if(h.hit && !child){
-      prevPose.set(pose.get());
-      selectDist = h.t;
-      selectOffset = pose.get().pos() - h();// * scaleVec.get();
+        }
+        if(selected.get() != h.hit)
+          selected = h.hit; // to avoid triggering change callback if no change
+
+        return h.hit;
+        break;
+
+      case Drag:
+      case TranslateRay:
+        if (selected.get()){
+          Vec3f newPos = h.ray(selectDist) + selectOffset;
+          if(parent && (parent->containChildren || containedChild)){
+            auto *p = dynamic_cast<PickableBB *>(parent);
+            if(p){
+              std::cout << "pre: " << newPos << std::endl;
+
+              newPos = min(newPos, p->bb.max - scaleVec.get()*bb.dim/2);
+              std::cout << "mid: " << newPos << std::endl;
+
+              newPos = max(newPos, p->bb.min + scaleVec.get()*bb.dim/2);
+
+              std::cout << "post: " << newPos << std::endl;
+              std::cout << "min: " << p->bb.min << " max: " << p->bb.max << " scale: " << scaleVec.get() << " hdim: " << bb.dim / 2  << std::endl;
+              newPos -= bb.dim/2;
+            }
+          } else pose = Pose(newPos, pose.get().quat());
+          return true;
+        } else return false;
+        break;
+
+      case RotateRay:
+        if(selected.get()){
+          Vec3f dir = h.ray(selectDist) - selectPos; 
+          Quatf q = Quatf().fromEuler(dir.x*0.5f, -dir.y*0.5f, 0);
+
+          Vec3f p1 = transformVecWorld(bb.cen);
+          pose.setQuat(q*prevPose.quat());
+          Vec3f p2 = transformVecWorld(bb.cen);
+          pose.setPos(pose.get().pos() + p1-p2);
+          return true;
+        } else return false;
+        break;
+
+      case RotatePose:
+        if(selected.get()){
+          Quatf diff = e.pose.quat() * selectQuat.inverse();  // diff * q0 = q1 --> diff = q1 * q0.inverse
+
+          Vec3f p1 = transformVecWorld(bb.cen);
+          pose.setQuat(diff*prevPose.quat());
+          Vec3f p2 = transformVecWorld(bb.cen);
+          pose.setPos(e.pose.pos()+selectOffset + p1-p2);
+          return true;
+        } else return false;
+        break;
+
+      case Scale:
+        if(selected.get()){
+          scale = scale - e.amount*0.01 * scale; 
+					if(scale < 0.0005) scale = 0.0005;
+          return true;
+        } else return false;
+        break;
+
+      case Unpick:
+        if (!hover.get() && selected.get())
+          selected = false;
+        return false;
+        break;
+
+      default: break;
     }
-    if (selected != selectedValue)
-      selected = selectedValue; // to avoid triggering change callback if no change
-    
-    return h.hit || child;
-  }
-  
-  bool onDrag(Hit h, bool child){
-    if(child) return true;
-    else if(selected.get()){
-      Vec3f newPos = h.ray(selectDist) + selectOffset;
-      pose = Pose(newPos, pose.get().quat());
-      // if(parent && parent->containChildren){}
-      return true;
-    }
-    return false;
   }
 
-  bool onUnpick(Hit h, bool child){
-    if(!hover && selected) selected = false;
-    return false;
-  }
+  // void draw(Graphics &g){
+  //   pushMatrix(g);
+  //   if(mesh) g.draw(*mesh);
 
-  // draw
-  void draw(Graphics &g){
-    pushMatrix(g);
-    // glPushAttrib(GL_CURRENT_BIT);
-    if(mesh) g.draw(*mesh);
+  //   if(selected.get()) g.color(0,1,1);
+  //   else if(hover.get()) g.color(1,1,1);
+  //   if(selected.get() || hover.get()) bb.draw(g, false);
 
-    if(selected.get()) g.color(0,1,1);
-    else if(hover.get()) g.color(1,1,1);
-    if(selected.get() || hover.get()) bb.draw(g, false);
-
-    // glPopAttrib();
-    popMatrix(g);
-    // drawChildren(g);
-  }
+  //   popMatrix(g);
+  // }
 
   void drawMesh(Graphics &g){
     if(!mesh) return;
@@ -301,13 +331,9 @@ struct Pickable : PickableBase {
   void drawBB(Graphics &g){
     if(!selected.get() && !hover.get()) return;
     pushMatrix(g);
-    // glPushAttrib(GL_CURRENT_BIT);
     if(selected.get()) g.color(0,1,1);
     else if(hover.get()) g.color(1,1,1);
     bb.draw(g, false);
-    // g.draw(bb.mesh);
-    // g.draw(bb.tics);
-    // glPopAttrib();
     popMatrix(g);
   }
 

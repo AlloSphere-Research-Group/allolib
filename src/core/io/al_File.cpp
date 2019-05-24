@@ -152,11 +152,11 @@ bool File::copy(const std::string &srcPath, const std::string &dstPath, unsigned
     outPath += "/" + File::baseName(srcPath);
   }
   outPath = File::conformPathToOS(outPath);
-  File srcFile(srcPath);
+  File srcFile(srcPath, "rb");
   if (!srcFile.open()) {
     return false;
   }
-  File dstFile(outPath, "w");
+  File dstFile(outPath, "wb");
   if (!dstFile.open()) {
     return false;
   }

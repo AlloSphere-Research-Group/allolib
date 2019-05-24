@@ -39,6 +39,8 @@ int Mouse::x() const { return mX; }
 int Mouse::y() const { return mY; }
 int Mouse::dx() const { return mDX; }
 int Mouse::dy() const { return mDY; }
+double Mouse::scrollX() const { return mScrollX; }
+double Mouse::scrollY() const { return mScrollY; }
 int Mouse::button() const { return mButton; }
 bool Mouse::down() const { return down(mButton); }
 bool Mouse::down(int button) const { return mB[button]; }
@@ -50,6 +52,9 @@ void Mouse::button(int b, bool v){
 }
 void Mouse::position(int x, int y){
   mDX=x-mX; mDY=y-mY; mX=x; mY=y;
+}
+void Mouse::scroll(double x, double y){
+  mScrollX=x; mScrollY=y;
 }
 
 

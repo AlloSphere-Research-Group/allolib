@@ -8,12 +8,12 @@
 using namespace al;
 
 
-class App: public BaseCompositeApp {
+class MyApp: public BaseCompositeApp {
 public:
   gam::Sine<> mOsc {440};
   gam::Sine<> mOsc2 {1};
 
-  App() {
+  MyApp() {
     mOsc.domain(*audioDomain());
     mOsc2.domain(*graphicsDomain());
   }
@@ -34,7 +34,7 @@ public:
 
 int main(int argc, char *argv[])
 {
-  App app;
+  MyApp app;
   app.start();
 
 

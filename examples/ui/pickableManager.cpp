@@ -24,34 +24,38 @@ struct MyApp : public App {
 
     // create some pickables
     for (int i = 0; i < 9; i++){
-      Pickable *p = new Pickable;
+      PickableBB *p = new PickableBB;
       p->set(mSphere);
       p->pose = Pose(Vec3f(i*0.25f - 1,0,0),Quatf());
+      p->containChildren = true;
       
-      Pickable *child = new Pickable;
+      PickableBB *child = new PickableBB;
       child->set(mBox);
-      p->addChild((*child));
-      mPickableManager << p;
+      p->addChild(child);
+      mPickableManager += p;
     }
   }
 
-  void onAnimate(double dt) override {
-    // std::cout << "min  " << ((Pickable*)mPickableManager.pickables()[0]->children[0])->bb.min << std::endl;
-    // std::cout << "pmin " << ((Pickable*)mPickableManager.pickables()[0])->bb.min << std::endl;
-    // std::cout << mPickableManager.pickables()[0]->children[0]->pose.get().pos() << std::endl;
-  }
+  void onAnimate(double dt) override {}
 
   void onDraw(Graphics &g) override {
 
     g.clear();
     g.depthTesting(true);
 
-    for(auto p : mPickableManager.pickables()){
+    for(auto pickable : mPickableManager.pickables()){
       g.color(1,1,1);
-      p->draw(g);
-      g.color(1,0,0);
-      p->drawChildren(g);
+
+      // pass function to draw pickable and child meshes
+      pickable->draw(g, [&](Pickable &p){
+        auto &b = dynamic_cast<PickableBB&>(p);
+        if(p.depth == 1) g.color(1,0,0);
+        b.drawMesh(g);
+        b.drawBB(g);
+      });
     }
+
+
   }
 
   virtual void onMouseMove(const Mouse &m){

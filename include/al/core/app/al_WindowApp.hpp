@@ -53,6 +53,7 @@ class WindowApp : public Window, public WindowEventHandler, public FPS {
   virtual void onMouseUp(Mouse const& m) {}
   virtual void onMouseDrag(Mouse const& m) {}
   virtual void onMouseMove(Mouse const& m) {}
+  virtual void onMouseScroll(Mouse const& m) {}
   virtual void onResize(int w, int h) {}
   virtual void onVisibility(bool v) {}
 
@@ -64,6 +65,7 @@ class WindowApp : public Window, public WindowEventHandler, public FPS {
   bool mouseDrag(const Mouse& m) final;
   bool mouseMove(const Mouse& m) final;
   bool mouseUp(const Mouse& m) final;
+  bool mouseScroll(const Mouse& m) final;
   bool resize(int dw, int dh) final;
   bool visibility(bool v) final;
 };

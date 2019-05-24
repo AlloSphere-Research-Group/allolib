@@ -60,6 +60,7 @@ public:
   void onMouseUp(Mouse const& m) override {}
   void onMouseDrag(Mouse const& m) override {}
   void onMouseMove(Mouse const& m) override {}
+  void onMouseScroll(Mouse const& m) override {}
   void onResize(int w, int h) override {}
   void onVisibility(bool v) override {}
 

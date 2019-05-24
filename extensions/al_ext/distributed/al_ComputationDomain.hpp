@@ -25,11 +25,39 @@ public:
   bool tickSubdomains(bool pre = false);
   bool cleanupSubdomains(bool pre = false);
 
+  /**
+   * @brief callInitializeCallbacks should be called by children of this class after the domain has been initialized
+   */
+  void callInitializeCallbacks() {
+    for (auto callback: mInitializeCallbacks) {
+      callback(this);
+    }
+  }
+
+  /**
+   * @brief callInitializeCallbacks should be called by children of this class before the domain has been cleaned up
+   */
+  void callCleanupCallbacks() {
+    for (auto callback: mCleanupCallbacks) {
+      callback(this);
+    }
+  }
+
+  void registerInitializeCallback(std::function<void(ComputationDomain *)> callback) {
+    mInitializeCallbacks.push_back(callback);
+  }
+
+  void registerCleanupCallback(std::function<void(ComputationDomain *)> callback) {
+    mCleanupCallbacks.push_back(callback);
+  }
+
   template<class DomainType>
   std::shared_ptr<DomainType> newSubDomain(bool prepend = false);
 
 private:
   std::vector<std::pair<std::shared_ptr<SynchronousDomain>, bool>> mSubDomainList;
+  std::vector<std::function<void(ComputationDomain *)>> mInitializeCallbacks;
+  std::vector<std::function<void(ComputationDomain *)>> mCleanupCallbacks;
 
 };
 
@@ -49,8 +77,39 @@ public:
 
   virtual bool stop() = 0;
 
+  /**
+   * @brief callInitializeCallbacks should be called by children of this class after the domain has been set up to start, before going into the blocking loop
+   */
+  void callStartCallbacks() {
+    for (auto callback: mStartCallbacks) {
+      callback(this);
+    }
+  }
+
+  /**
+   * @brief callInitializeCallbacks should be called by children of this class on the stop request, before the domain has been stopped
+   */
+  void callStopCallbacks() {
+    for (auto callback: mStopCallbacks) {
+      callback(this);
+    }
+  }
+
+private:
+  std::vector<std::function<void(ComputationDomain *)>> mStartCallbacks;
+  std::vector<std::function<void(ComputationDomain *)>> mStopCallbacks;
 };
 
+template<class DomainType>
+std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
+  // Only Synchronous domains are allowed as subdomains
+  assert(strcmp(typeid (DomainType).name(), "SynchronousDomain") == 0);
+  auto newDomain = std::make_shared<DomainType>();
+  if (newDomain) {
+    mSubDomainList.push_back({newDomain, prepend});
+  }
+  return newDomain;
+}
 
 }
 
@@ -75,6 +134,7 @@ public:
     glfwSetErrorCallback([](int code, const char* description){std::cout << "glfw error [" << code << "]: " << description << std::endl;});
 
     ret &= initializeSubdomains(false);
+    callInitializeCallbacks();
     return ret;
   }
 
@@ -84,6 +144,7 @@ public:
     app.create(app.is_verbose);
     preOnCreate();
     onCreate();
+    callStartCallbacks();
     while (!app.shouldQuit()) {
       // to quit, call WindowApp::quit() or click close button of window,
       // or press ctrl + q
@@ -99,6 +160,7 @@ public:
   }
 
   bool stop() override {
+    callStopCallbacks();
     onExit(); // user defined
     postOnExit();
     app.destroy();
@@ -106,6 +168,7 @@ public:
   }
 
   bool cleanup() override {
+    callCleanupCallbacks();
     glfw::terminate(app.is_verbose);
     return true;
   }
@@ -175,7 +238,10 @@ public:
   AudioIO& audioIO(){ return mAudioIO; }
   const AudioIO& audioIO() const { return mAudioIO; }
 
-  bool initialize() override { return true; }
+  bool initialize() override {
+    callInitializeCallbacks();
+    return true;
+  }
 
   bool start() override {
     bool ret = true;
@@ -192,7 +258,10 @@ public:
     return true;
   }
 
-  bool cleanup() override { return true; }
+  bool cleanup() override {
+    callCleanupCallbacks();
+    return true;
+  }
 
   static void AppAudioCB(AudioIOData& io){
     AudioDomain& app = io.user<AudioDomain>();
@@ -295,6 +364,56 @@ private:
   } mHandler;
     ParameterServer mParameterServer {"0.0.0.0", 9010, false};
 };
+}
+
+
+ // ----------------------------------------------------------------
+// The AL_EXT_OPENVR macro is set if OpenVR is found.
+#ifdef AL_EXT_OPENVR
+#include "al_ext/openvr/al_OpenVRWrapper.hpp"
+#endif
+
+namespace al {
+
+
+class OpenVRDomain: public SynchronousDomain {
+public:
+
+  bool initialize() override {
+#ifdef AL_EXT_OPENVR
+    // Initialize openVR in onCreate. A graphics context is needed.
+    if(!mOpenVR.init()) {
+      return false;
+//      std::cerr << "ERROR: OpenVR init returned error" << std::endl;
+    }
+//    std::cerr << "Not building wiht OpenVR support" << std::endl;
+    return true;
+#endif
+    return false;
+  }
+
+  bool tick() override {
+#ifdef AL_EXT_OPENVR
+        // Update traking and controller data;
+        mOpenVR.update();
+
+        //openVR draw.
+        // Draw in onAnimate, to make sure drawing happens only once per frame
+        // Pass a function that takes Graphics &g argument
+//        mOpenVR.draw(std::bind(&OpenVRDomain::drawScene, this, std::placeholders::_1), mGraphics);
+#endif
+        return true;
+  }
+
+  bool cleanup() override { return true; }
+
+  std::function<void(Graphics &)> drawScene = [](Graphics &g){ };
+
+private:
+#ifdef AL_EXT_OPENVR
+    al::OpenVRWrapper mOpenVR;
+#endif
+};
 
 }
 
@@ -311,6 +430,8 @@ public:
     mAudioDomain->configure();
 
     mGraphicsDomain = newDomain<GraphicsDomain>();
+    //FIXME fix openVR domain
+//    mGraphicsDomain->newSubDomain<OpenVRDomain>();
   }
 
 

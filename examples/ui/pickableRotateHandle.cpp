@@ -24,7 +24,7 @@ public:
   
   Mesh mesh; 
 
-  Pickable pickable;
+  PickableBB pickable;
   // TranslateHandle th;
   PickableRotateHandle rh;
 
@@ -42,7 +42,7 @@ public:
     // Initialize Pickable
     pickable.set(mesh);
     
-    // add translate handle as child
+    // add handle as child
     pickable.addChild(rh);
     // pickable.addChild(th);
   }
@@ -61,7 +61,9 @@ public:
     pickable.drawBB(g);
 
     g.depthTesting(false);
-    pickable.drawChildren(g);
+    pickable.pushMatrix(g);
+    rh.draw(g);
+    pickable.popMatrix(g);
     g.depthTesting(true);
   }
 
@@ -93,19 +95,19 @@ public:
   virtual void onMouseMove(const Mouse& m){
     // make a ray from mouse location
     Rayd r = getPickRay(m.x(), m.y());
-    pickable.point(r);
+    pickable.event(PickEvent(Point, r));
   }
   virtual void onMouseDown(const Mouse& m){
     Rayd r = getPickRay(m.x(), m.y());
-    pickable.pick(r);
+    pickable.event(PickEvent(Pick, r));
   }
   virtual void onMouseDrag(const Mouse& m){
     Rayd r = getPickRay(m.x(), m.y());
-    pickable.drag(r);
+    pickable.event(PickEvent(Drag, r));
   }
   virtual void onMouseUp(const Mouse& m){
     Rayd r = getPickRay(m.x(), m.y());
-    pickable.unpick(r);
+    pickable.event(PickEvent(Unpick, r));
   }
 };
 

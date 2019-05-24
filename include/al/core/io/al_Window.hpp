@@ -134,6 +134,8 @@ public:
   int y() const;        ///< Get x position relative to top-left corner of window, in pixels
   int dx() const;        ///< Get change in x position, in pixels
   int dy() const;        ///< Get change in y position, in pixels
+  double scrollX() const; ///< Get x scroll amount
+  double scrollY() const; ///< Get y scroll amount
 
   int button() const;      ///< Get last clicked button
   bool down() const;      ///< Get state of last clicked button
@@ -147,6 +149,7 @@ protected:
 
   int mX, mY;            // x,y positions
   int mDX, mDY;          // change in x,y positions
+  double mScrollX, mScrollY; // scroll motion
   int mButton;          // most recent button changed
   int mBX[AL_MOUSE_MAX_BUTTONS];  // button down xs
   int mBY[AL_MOUSE_MAX_BUTTONS];  // button down ys
@@ -154,6 +157,7 @@ protected:
 
   void button(int b, bool v);
   void position(int x, int y);
+  void scroll(double x, double y);
 };
 
 /// Controller for handling input and window events
@@ -184,6 +188,9 @@ public:
 
   /// Called when a mouse button is released
   virtual bool mouseUp(const Mouse& m){return true;}
+
+  /// Called when mouse scrolled
+  virtual bool mouseScroll(const Mouse& m){return true;}
 
   /// Called whenever window dimensions change
   virtual bool resize(int dw, int dh){ return true; }
@@ -384,6 +391,7 @@ protected:
   void callHandlersMouseDrag(){ CALL(mouseDrag(mMouse)); }
   void callHandlersMouseMove(){ CALL(mouseMove(mMouse)); }
   void callHandlersMouseUp(){ CALL(mouseUp(mMouse)); }
+  void callHandlersMouseScroll(){ CALL(mouseScroll(mMouse)); }
   void callHandlersKeyDown(){ CALL(keyDown(mKeyboard)); }
   void callHandlersKeyUp(){ CALL(keyUp(mKeyboard)); }
   void callHandlersResize(int w, int h){ CALL(resize(w, h)); }
