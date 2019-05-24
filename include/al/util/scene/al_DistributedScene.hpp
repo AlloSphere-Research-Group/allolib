@@ -132,11 +132,11 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
     }
     std::string address = m.addressPattern();
     if (rootOSCPath.size() > 0) {
-      if (address.rfind(rootOSCPath, 0) == 1) {
+      if (address.find(rootOSCPath, 0) == 1) {
         address = address.substr(rootOSCPath.size() + 1);
       } else {
         if (verbose()) {
-          std::cout << "Prefix " << rootOSCPath << " not matched." << std::endl;
+          std::cout << "Prefix " << rootOSCPath << " not matched." <<  std::endl;
           return false;
         }
       }
