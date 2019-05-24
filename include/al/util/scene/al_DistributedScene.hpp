@@ -46,8 +46,9 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
                 [this](SynthVoice *voice, int offsetFrames, int id, void *userData) {
         if (this->mNotifier) {
           osc::Packet p;
-          std::string prefix = this->name() + "/";
-          p.beginMessage("/" + prefix + "triggerOn");
+          std::string prefix = "/" + this->name();
+          if (prefix.size() == 1) { prefix = ""; }
+          p.beginMessage(prefix + "/triggerOn");
           offsetFrames = 0;
           p << offsetFrames << id;
           std::string voiceName = demangle(typeid(*voice).name());
@@ -74,8 +75,9 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
                 [this](int id, void *userData) {
         if (this->mNotifier) {
           osc::Packet p;
-          std::string prefix = this->name() + "/";
-          p.beginMessage("/" + prefix + "triggerOff");
+          std::string prefix = "/" + this->name();
+          if (prefix.size() == 1) { prefix = ""; }
+          p.beginMessage(prefix + "/triggerOff");
           p << id;
           p.endMessage();
 
@@ -98,7 +100,10 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
                 dynamic_cast<Parameter *>(param)->registerChangeCallback(
                             [this, param, voice](float value) {
                     if (this->mNotifier) {
-                        this->mNotifier->notifyListeners("/" + this->name() + "/" + std::to_string(voice->id()) + param->getFullAddress(),
+
+                      std::string prefix = "/" + this->name();
+                      if (prefix.size() == 1) { prefix = ""; }
+                        this->mNotifier->notifyListeners(prefix + "/" + std::to_string(voice->id()) + param->getFullAddress(),
                                                          param);
                     }
                     //                                std::cout << voice->id() << " parameter " << param->getName() << "-> " << value << std::endl;
@@ -114,7 +119,9 @@ void DistributedScene::allNotesOff()
 
   PolySynth::allNotesOff();
   osc::Packet p;
-  p.beginMessage("/allNotesOff");
+  std::string prefix = "/" + this->name();
+  if (prefix.size() == 1) { prefix = ""; }
+  p.beginMessage(prefix + "/allNotesOff");
   p.endMessage();
 
   if (verbose()) {
