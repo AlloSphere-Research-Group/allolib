@@ -42,25 +42,15 @@
 	Andrés Cabrera mantaraya36@gmail.com
 */
 
-#include <map>
 #include <vector>
 #include <string>
 #include <list>
-#include <queue>
-#include <limits.h>
-#include <cassert>
-#include <iostream>
-#include <sstream>
-#include <fstream>
 #include <memory>
 #include <mutex>
-#include <algorithm>
 #include <functional>
 #include <atomic>
 #include <thread>
 #include <cassert>
-
-#include <typeinfo> // For class name instrospection
 
 #include "al/core/graphics/al_Graphics.hpp"
 #include "al/core/io/al_AudioIOData.hpp"
@@ -171,7 +161,7 @@ struct SynthEvent {
 class SynthSequencer {
 public:
 
-    SynthSequencer(PolySynth::TimeMasterMode masterMode =  PolySynth::TIME_MASTER_AUDIO)
+    SynthSequencer(PolySynth::TimeMasterMode masterMode =  PolySynth::TIME_MASTER_CPU)
     {
         mInternalSynth = std::make_unique<PolySynth>(masterMode);
         registerSynth(*mInternalSynth.get());
@@ -234,10 +224,7 @@ public:
     /**
      * @brief print current sequence
      */
-    void print() {
-        std::cout << "POLYSYNTH INFO ................." << std::endl;
-        mPolySynth->print();
-    }
+    void print();
 
     bool verbose() {return mVerbose;}
     void verbose(bool verbose) { mVerbose = verbose;}
@@ -247,15 +234,9 @@ public:
     bool playSequence(std::string sequenceName, float startTime = 0.0f);
 
     void stopSequence();
+    void setTime(float newTime);
 
-    void registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec);
-
-    void setTime(float newTime) {  std::cout << "Setting time not implemented" <<std::endl;}
-
-    void setDirectory(std::string directory) {
-      assert(directory.size() > 0);
-      mDirectory = directory;
-    }
+    void setDirectory(std::string directory);
 
     std::string buildFullPath(std::string sequenceName);
 
@@ -267,11 +248,14 @@ public:
 
     PolySynth &synth() {return *mPolySynth;}
 
+    // Callbacks
+    void registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec);
+
+    void registerSequenceEndCallback(std::function<void (std::string)> func);
+
+
     // TODO we should cleanup internal synth if an external one is set
-    void registerSynth(PolySynth &synth) {
-        mPolySynth = &synth;
-        mMasterMode = mPolySynth->mMasterMode;
-    }
+    void registerSynth(PolySynth &synth);
 
     void operator<<(PolySynth &synth) { return registerSynth(synth);}
 
@@ -281,6 +265,7 @@ private:
 
     std::string mDirectory {"."};
     bool mVerbose{false};
+    std::string mLastSequencePlayed;
 
     double mFps {30}; // graphics frames per second
 
@@ -299,6 +284,8 @@ private:
     std::function<void(float)> mTimeChangeCallback;
     float mTimeChangeMinTimeDelta = 0;
     double mTimeAccumCallbackNs = 0; // Accumulator for tirggering time change callback.
+
+    std::vector<std::function<void(std::string sequenceName)>> mSequenceEndCallbacks;
 
     // CPU processing thread. Used when TIME_MASTER_CPU
     std::shared_ptr<std::thread> mCpuThread;

@@ -28,6 +28,7 @@ set(EXAMPLES_TO_IGNORE
     examples/user_flags/main.cpp
     examples/openvr/openvr.cpp
     examples/openvr/openvr-app.cpp
+    examples/one-line-of-c/main.cpp
     )
 endif()
 

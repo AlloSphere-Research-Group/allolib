@@ -424,3 +424,43 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
     std::cout << "Audio thread " << id << " done" << std::endl;
 }
 
+
+bool PositionedVoice::setTriggerParams(float *pFields, int numFields) {
+  bool ok = SynthVoice::setTriggerParams(pFields, numFields);
+  if (numFields == (int) mTriggerParams.size() + 8) { // If seven extra, it means pose and size are there too
+    pFields += mTriggerParams.size();
+    double x = *pFields++;
+    double y = *pFields++;
+    double z = *pFields++;
+    mPose.vec() = Vec3d(x, y, z);
+    double w = *pFields++;
+    x = *pFields++;
+    y = *pFields++;
+    z = *pFields++;
+    mPose.quat() = Quatd(w, x, y, z);
+    mSize = *pFields;
+  } else {
+    ok = false;
+  }
+  return ok;
+}
+
+bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields) {
+  bool ok = SynthVoice::setTriggerParams(pFields);
+  if (pFields.size() == mTriggerParams.size() + 8) { // If seven extra, it means pose and size are there too
+    size_t index = mTriggerParams.size();
+    double x = pFields[index++].get<float>();
+    double y = pFields[index++].get<float>();
+    double z = pFields[index++].get<float>();
+    mPose.vec() = Vec3d(x, y, z);
+    double w = pFields[index++].get<float>();
+    x = pFields[index++].get<float>();
+    y = pFields[index++].get<float>();
+    z = pFields[index++].get<float>();
+    mPose.quat() = Quatd(w, x, y, z);
+    mSize = pFields[index++].get<float>();
+  } else {
+    //            std::cout << "Not setting position for voice" << std::endl;
+  }
+  return ok;
+}

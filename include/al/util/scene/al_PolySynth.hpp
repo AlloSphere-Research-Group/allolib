@@ -585,6 +585,11 @@ public:
   template<class TSynthVoice>
   void allocatePolyphony(int number);
 
+  template<class TSynthVoice>
+  void disableAllocation();
+
+  void disableAllocation(std::string name);
+
   /**
      * Preallocate a number of voices of a voice to avoid doing realtime
      * allocation. The name must be registered using registerSynthClass()
@@ -612,6 +617,15 @@ public:
      * @param userData
      */
   void setDefaultUserData(void *userData) { mDefaultUserData = userData;}
+
+  /**
+   * @brief Set time master context
+   * @param master domain
+   *
+   * You should not call this function if any of the rendering domains are
+   * running.
+   */
+  void setTimeMaster(TimeMasterMode masterMode);
 
   /**
      * @brief Insert an AudioCallback object at the end of the callback queue
@@ -778,6 +792,9 @@ public:
   }
 
 protected:
+
+  void startCpuClockThread();
+
   inline void processVoices() {
     if (mVoiceToInsertLock.try_lock()) {
       if (mVoicesToInsert) {
@@ -911,7 +928,7 @@ protected:
 
   float mAudioGain {1.0f};
 
-  int mIdCounter {0};
+  int mIdCounter {1000};
 
   bool mAllNotesOff {false}; // Flag used to notify processing to turn off all voices
 
@@ -929,6 +946,13 @@ protected:
 
   bool mVerbose {false};
 };
+
+template<class TSynthVoice>
+void PolySynth::disableAllocation()
+{
+  std::string name = demangle(typeid(TSynthVoice).name());
+  disableAllocation(name);
+}
 
 template<class TSynthVoice>
 TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
@@ -954,11 +978,17 @@ TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
     if (!freeVoice) { // No free voice in list, so we need to allocate it
         // TODO report current polyphony for more informed allocation of polyphony
         // TODO check if allocation allowed
-
-      if (mVerbose) {
-        std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
+      //  But only allocate if allocation has not been disabled
+      std::string name = demangle(typeid(TSynthVoice).name());
+      if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) == mNoAllocationList.end()) {
+        // TODO report current polyphony for more informed allocation of polyphony
+        freeVoice = allocateVoice<TSynthVoice>();
+        if (mVerbose) {
+          std::cout << "Allocating voice of type " << typeid (TSynthVoice).name() << "." << std::endl;
+        }
+      } else {
+        std::cout << "Automatic allocation disabled for voice:" << name << std::endl;
       }
-      freeVoice = allocateVoice<TSynthVoice>();
     }
     return static_cast<TSynthVoice *>(freeVoice);
 }
