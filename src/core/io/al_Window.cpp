@@ -198,9 +198,12 @@ void Window::iconify() {
   if (created()) implIconify();
 }
 
-void Window::decorated(bool b) {
-  mDecorated = b;
-  if (created()) implSetDecorated();
+void Window::decorated (bool b)
+{
+    mDecorated = b;
+
+    // not change after creation....
+    // if (created()) implSetDecorated();
 }
 
 Window& Window::insert(WindowEventHandler& v, int i){

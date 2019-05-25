@@ -243,6 +243,7 @@ bool Window::implCreate(bool is_verbose) {
   // GLFW_STEREO: GLFW_TRUE GLFW_FALSE
   // GLFW_CLIENT_API: GLFW_OPENGL_API GLFW_OPENGL_API, GLFW_OPENGL_ES_API or
   // GLFW_NO_API
+  glfwWindowHint(GLFW_DECORATED, mDecorated? GLFW_TRUE : GLFW_FALSE);
 
   bool should_create_stereo = (mDisplayMode & STEREO_BUF) ? true : false;
   glfwWindowHint(GLFW_STEREO, should_create_stereo);
@@ -390,7 +391,7 @@ void Window::implHide() {}
 
 void Window::implIconify() {}
 
-void Window::implSetDecorated() {}
+void Window::implSetDecorated () {}
 
 void Window::destroyAll() {
   // printf("Window::destroyAll\n");
