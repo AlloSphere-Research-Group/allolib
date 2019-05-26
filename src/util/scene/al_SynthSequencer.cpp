@@ -443,7 +443,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
         event->offsetCounter = (event->startTime - blockStartTime)*fpsAdjusted;
         if (event->type == SynthSequencerEvent::EVENT_VOICE) {
           mPolySynth->triggerOn(event->voice, event->offsetCounter);
-          event->voice = nullptr; // Voice has been consumed, all voices reamining in the event list are put back in the synth's free voice pool
+          // event->voice = nullptr; // Voice has been consumed, all voices reamining in the event list are put back in the synth's free voice pool
         } else if (event->type == SynthSequencerEvent::EVENT_PFIELDS){
           auto *voice = mPolySynth->getVoice(event->fields.name);
           if (voice) {
