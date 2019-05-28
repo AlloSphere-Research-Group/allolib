@@ -11,10 +11,12 @@ MACRO(SUBDIRLIST result curdir)
 ENDMACRO()
 
 # Ignore examples that wont work in CI
-set(EXAMPLES_TO_IGNORE  examples/user_flags/main.cpp
+set(EXAMPLES_TO_IGNORE
+    examples/user_flags/main.cpp
     examples/openvr/openvr.cpp
     examples/openvr/openvr-app.cpp
-    )
+    examples/one-line-of-c/main.cpp
+)
 
 if(AL_WINDOWS EQUAL 1 AND APPVEYOR_BUILD EQUAL 1) 
 # Don't build files with dynamic dependencies on Appveyor CI build
@@ -29,7 +31,7 @@ set(EXAMPLES_TO_IGNORE
     examples/openvr/openvr.cpp
     examples/openvr/openvr-app.cpp
     examples/one-line-of-c/main.cpp
-    )
+)
 endif()
 
 if(BUILD_EXAMPLES)
