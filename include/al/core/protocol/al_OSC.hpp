@@ -261,8 +261,7 @@ public:
 class MessageConsumer {
 public:
 	virtual ~MessageConsumer() {}
-	/// Returns true if message was consumed by this class
-	/// rootOSCPath should be prefixed to the consumer's OSC path
+    /// Returns true if message was consumed by this class
 	virtual bool consumeMessage(Message& m, std::string rootOSCPath) = 0;
 };
 

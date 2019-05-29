@@ -259,6 +259,7 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
         insertedEvent->startTime = absoluteTime;
         insertedEvent->duration = duration;
         insertedEvent->fields.name = name;
+        insertedEvent->voice = nullptr;
         insertedEvent->fields.pFields = pFields; // TODO it would be nice not to have to copy here...
       }
 
@@ -309,6 +310,7 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
             insertedEvent = events.insert(position, SynthSequencerEvent());
           }
           // Add 0.1 padding to ensure all events play.
+          insertedEvent->type = SynthSequencerEvent::EVENT_VOICE;
           insertedEvent->startTime = absoluteTime;
           insertedEvent->duration = -1; // Turn on events have undetermined duration until a turn off is found later
           insertedEvent->voice = newVoice;
@@ -326,7 +328,7 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
       int id = std::stoi(idText);
       double eventTime = std::stod(time) * timeScale * tempoFactor;
       for (SynthSequencerEvent &event: events) {
-        if (event.voice->id() == id && event.duration < 0) {
+        if (event.voice->id() == id && event.duration < 0 && event.type == SynthSequencerEvent::EVENT_VOICE) {
           double duration = eventTime - event.startTime + timeOffset;
           if (duration < 0) {
             duration = 0;
@@ -443,13 +445,13 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
         event->offsetCounter = (event->startTime - blockStartTime)*fpsAdjusted;
         if (event->type == SynthSequencerEvent::EVENT_VOICE) {
           mPolySynth->triggerOn(event->voice, event->offsetCounter);
-          // event->voice = nullptr; // Voice has been consumed, all voices reamining in the event list are put back in the synth's free voice pool
+           event->voice = nullptr; // Voice has been consumed, all voices reamining in the event list are put back in the synth's free voice pool
         } else if (event->type == SynthSequencerEvent::EVENT_PFIELDS){
           auto *voice = mPolySynth->getVoice(event->fields.name);
           if (voice) {
             voice->setTriggerParams(event->fields.pFields);
             mPolySynth->triggerOn(voice, event->offsetCounter);
-            event->voice = voice;
+//            event->voice = voice;
           } else {
             std::cerr << "SynthSequencer::processEvents: Could not get free voice for sequencer!" << std::endl;
           }
