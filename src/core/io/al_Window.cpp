@@ -201,9 +201,12 @@ void Window::iconify() {
 void Window::decorated (bool b)
 {
     mDecorated = b;
+    if(created()) {
+      // TODO change decoration even if already created.
+      // if (created()) implSetDecorated();
 
-    // not change after creation....
-    // if (created()) implSetDecorated();
+      std::cout << "decorated() called after window created. Ignored." << std::endl;
+    }
 }
 
 Window& Window::insert(WindowEventHandler& v, int i){
