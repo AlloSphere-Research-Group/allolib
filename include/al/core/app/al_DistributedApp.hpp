@@ -224,11 +224,11 @@ public:
 //              mParameterServer->addListener(member.first, receiverPort);
 //              continue;
 //            }
-            if (member.second & ROLE_DESKTOP || member.second & ROLE_SIMULATOR ) {
-              std::cout << "Added desktop as listener " << member.first << ":" << primaryPort << std::endl;
-              mParameterServer->addListener(member.first, primaryPort);
-              continue;
-            }
+            // if (member.second & ROLE_DESKTOP || member.second & ROLE_SIMULATOR ) {
+            //   std::cout << "Added desktop as listener " << member.first << ":" << primaryPort << std::endl;
+            //   mParameterServer->addListener(member.first, primaryPort);
+            //   continue;
+            // }
           }
         } else {
           std::cerr << "Warning: Application could not start network role." << std::endl;
