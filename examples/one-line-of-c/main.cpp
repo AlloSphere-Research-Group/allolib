@@ -7,10 +7,15 @@ using std::endl;
 
 #include "libtcc.h"
 
+inline float mtof(float m) { return 8.175799f * powf(2.0f, m / 12.0f); }
+inline float dbtoa(float db) { return 1.0f * powf(10.0f, db / 20.0f); }
+
 const char* starterCode = R"(
 char foo(int t) {
-  static int v = 0;
-  return (v=(v>>1)+(v>>4)+t*(((t>>16)|(t>>6))&(69&(t>>9))));
+  return t; // sawtooth wav
+
+  // static int v = 0;
+  // return (v=(v>>1)+(v>>4)+t*(((t>>16)|(t>>6))&(69&(t>>9))));
   // return (t*((t>>12|t>>8)&63&t>>4));
   // return (t*((t>>5|t>>8)>>(t>>16)));
   // return (t*((t>>9|t>>13)&25&t>>6));
@@ -27,64 +32,79 @@ char foo(int t) {
 }
 )";
 
-//
+// Fabrice Bellard's Tiny C Compiler can compile simple C programs quickly and
+// "in memory". Given a string, we create a callable function that generates a
+// sequence of audio samples.
+void tcc_error_handler(void* tcc, const char* msg);
 struct TCC {
+  using FunctionPointer = char (*)(int);
+  FunctionPointer process = nullptr;
   TCCState* instance = nullptr;
-  char (*process)(int) = nullptr;
-  unsigned t = 0;
+  std::string error;
 
   void destroy() {
     if (instance) {
-      cout << "Destroying Compiler..." << endl;
       tcc_delete(instance);
     }
   }
 
   bool compile(std::string source) {
     destroy();
-    cout << "Creating Compiler..." << endl;
     instance = tcc_new();
     assert(instance != nullptr);
+
+    // set up the compiler
+    tcc_set_options(instance, "-nostdinc -nostdlib -Wall -Werror");
+    tcc_set_error_func(instance, this, tcc_error_handler);
     tcc_set_output_type(instance, TCC_OUTPUT_MEMORY);
     //
 
     if (tcc_compile_string(instance, source.c_str()) == -1) {
       //
+      // error string is set by the TCC handler
       return false;
     }
 
     if (tcc_relocate(instance, TCC_RELOCATE_AUTO) < 0) {
-      // fail
+      error = "failed to relocate code";
       return false;
     }
 
-    char (*foo)(int) = (char (*)(int))(tcc_get_symbol(instance, "foo"));
+    FunctionPointer foo = (FunctionPointer)(tcc_get_symbol(instance, "foo"));
     if (foo == nullptr) {
-      // fail
+      error = "could not find the symbol 'foo'";
       return false;
     }
 
-    cout << "Compile Succeeded..." << endl;
+    // maybe we should go a step further and try a few calls to see if it
+    // crashes
 
+    error = "";
     process = foo;
-    // t = 0;
     return true;
   }
 
-  float operator()() {
+  float operator()(int t) {
     if (process == nullptr) return 0;
     char c = process(t);
-    t = 1 + t;
     return c / 128.0f;
   }
 };
+void tcc_error_handler(void* tcc, const char* msg) {
+  ((TCC*)tcc)->error = msg;
+  // TODO:
+  // - remove file name prefix which is "<string>"
+  // - correct line number which is off by about 20
+}
 
 struct Appp : App {
   TCC tcc[2];
   unsigned active = 0;
   bool shouldSwap = false;
   char buffer[10000];
-  bool show_gui = true;
+  char error[10000];
+  float gain = 0;
+  int t = 0;
 
   Appp() {
     // start out with some code
@@ -103,17 +123,35 @@ struct Appp : App {
     bool using_gui =
         io.WantCaptureMouse | io.WantCaptureKeyboard | io.WantTextInput;
 
-    navControl().active(!using_gui);
+    navControl().active(false);
   }
 
   void onDraw(Graphics& g) override {
     g.clear(0.1);
-    if (ImGui::InputTextMultiline("", buffer, sizeof(buffer),
-                                  ImVec2(640, 480))) {
+
+    static float db = -20;
+    ImGui::SliderFloat(" ", &db, -60.0f, 0.0f);
+    gain = dbtoa(db);
+
+    ImGui::Separator();
+
+    ImGui::InputInt("t", &t);
+
+    ImGui::Separator();
+
+    bool update =
+        ImGui::InputTextMultiline("", buffer, sizeof(buffer), ImVec2(640, 480));
+
+    if (update) {
       if (tcc[1 - active].compile(buffer)) {
         shouldSwap = true;
       }
     }
+
+    ImGui::Separator();
+
+    ImGui::Text(tcc[1 - active].error.c_str());
+
     endIMGUI();
     //
   }
@@ -128,15 +166,17 @@ struct Appp : App {
         shouldSwap = false;
       }
 
-      s = tcc[active]();
+      s = gain * tcc[active](t);
       io.out(0) = s;
       io.out(1) = s;
+      t++;
     }
   }
 };
 
 int main() {
   Appp a;
+  a.dimensions(1200, 800);
   a.initAudio();
   a.start();
 }
