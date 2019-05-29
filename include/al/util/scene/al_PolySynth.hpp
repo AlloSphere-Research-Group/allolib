@@ -768,13 +768,13 @@ public:
   template<class TSynthVoice>
   TSynthVoice *allocateVoice() {
     TSynthVoice *voice = new TSynthVoice;
-    for(auto allocCb: mAllocationCallbacks) {
-      allocCb.first(voice, allocCb.second);
-    }
     if(mDefaultUserData) {
       voice->userData(mDefaultUserData);
     }
     voice->init();
+    for(auto allocCb: mAllocationCallbacks) {
+      allocCb.first(voice, allocCb.second);
+    }
     return voice;
   }
 

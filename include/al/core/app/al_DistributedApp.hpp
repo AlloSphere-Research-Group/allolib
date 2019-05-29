@@ -66,8 +66,19 @@ public:
       ROLE_USER  = 1 << 8 // User defined roles can add from here through bitshifting
   } Role;
 
-  DistributedApp() { }
+  typedef enum {
+    CAP_AUDIO = 1 << 1,
+    CAP_GRAPHICS = 1 << 2,
+    CAP_SIMULATE_SYNC = 1 << 3,
+    CAP_SIMULATE_ASYNC = 1 << 4,
+    CAP_PARAMETER_SERVER = 1 << 5,
+    CAP_FLOW_CLIENT = 1 << 6,
+    CAP_CUTTLEBONE = 1 << 7,
+    CAP_OPENVR = 1 << 7,
+    CAP_USER = 1 << 10 // User defined roles can add from here through bitshifting
+  } Capability;
 
+  DistributedApp() { }
 
   ~DistributedApp() {
 #ifdef AL_USE_CUTTLEBONE
@@ -169,11 +180,11 @@ public:
       }
 
       // Set up netwroking
-      uint16_t sendPort = 9010;
+      uint16_t primaryPort = 9010;
       uint16_t receiverPort = 9100;
       std::string defaultAddress = "0.0.0.0";
       if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) {
-        mParameterServer = std::make_shared<ParameterServer>(defaultAddress, sendPort);
+        mParameterServer = std::make_shared<ParameterServer>(defaultAddress, primaryPort);
         if (mParameterServer->serverRunning()) {
           //          mParameterServer->addListener("127.0.0.1", 9100);
           mParameterServer->startHandshakeServer(defaultAddress);
@@ -214,8 +225,8 @@ public:
 //              continue;
 //            }
             if (member.second & ROLE_DESKTOP || member.second & ROLE_SIMULATOR ) {
-              std::cout << "Added desktop as listener " << member.first << ":" << sendPort << std::endl;
-              mParameterServer->addListener(member.first, sendPort);
+              std::cout << "Added desktop as listener " << member.first << ":" << primaryPort << std::endl;
+              mParameterServer->addListener(member.first, primaryPort);
               continue;
             }
           }

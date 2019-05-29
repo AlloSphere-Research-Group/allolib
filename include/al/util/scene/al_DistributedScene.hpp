@@ -18,7 +18,7 @@ class DistributedScene :
 public:
     DistributedScene(std::string name = "scene", int threadPoolSize = 0, TimeMasterMode masterMode = TIME_MASTER_CPU);
 
-    DistributedScene(TimeMasterMode masterMode = TIME_MASTER_CPU)
+    DistributedScene(TimeMasterMode masterMode)
         : DistributedScene("scene", 0, masterMode) {}
 
     
@@ -64,7 +64,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
           p.endMessage();
 
           if (verbose()) {
-            std::cout << "Sending trigger on message" << std::endl;
+            std::cout << "Sending trigger on message for voice " << id << std::endl;
           }
           this->mNotifier->send(p);
         }
@@ -110,7 +110,35 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
                 });
             }
         }
+        // register callbacks for internal parameters
+        for (auto *param: voice->parameters()) {
+          if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {// Parameter
+            Parameter *p = dynamic_cast<Parameter *>(param);
+            p->registerChangeCallback([&, p, voice](float value) {
+              if (this->mNotifier) {
+
+                std::string prefix = "/" + this->name() + "/voice";
+                if (prefix.size() == 1) { prefix = ""; }
+                  this->mNotifier->notifyListeners(prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
+                                                   p);
+              }
+            });
+          }
+          if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) == 0) {// Parameter
+            ParameterPose *p = dynamic_cast<ParameterPose *>(param);
+            p->registerChangeCallback([&, p, voice](Pose value) {
+              if (this->mNotifier) {
+
+                std::string prefix = "/" + this->name() + "/voice";
+                if (prefix.size() == 1) { prefix = ""; }
+                  this->mNotifier->notifyListeners(prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
+                                                   p);
+              }
+            });
+          }
+        }
     });
+
 
 }
 
@@ -134,9 +162,7 @@ void DistributedScene::allNotesOff()
 }
 
 bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) {
-    if (verbose()) {
-      m.print();
-    }
+
     std::string address = m.addressPattern();
     if (rootOSCPath.size() > 0) {
       if (address.find(rootOSCPath, 0) == 1) {
@@ -177,7 +203,7 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
                 voice->setTriggerParams(params);
                 triggerOn(voice, offset, id);
                 if (verbose()) {
-                  std::cout << "trigger on received" <<std::endl;
+                  std::cout << "trigger on received " <<std::endl;
                 }
                 return true;
             } else {
@@ -200,25 +226,35 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
       allNotesOff();
     } else {
         std::string addr = address;
-        int start = ("/" + name() + "/").size();
-        if (addr.compare(0, start, "/" + name() + "/") == 0) {
+        int start = std::string("/voice/").size();
+        if (addr.compare(0, start, "/voice/") == 0) {
             std::string number = addr.substr(start, addr.find('/',  start + 1) - start);
             std::string subAddr = addr.substr(start + number.size());
-            SynthVoice *voice = mActiveVoices;
+            SynthVoice *voice = dynamic_cast<DistributedScene *>(this)->mActiveVoices;
             while (voice) {
                 if (voice->id() == std::stoi(number)) {
                     for (auto *param: voice->triggerParameters()) {
                         if (ParameterServer::setParameterValueFromMessage(param, subAddr, m)) {
                             // We assume no two parameters have the same address, so we can break the
                             // loop. Perhaps this should be checked by ParameterServer on registration?
-                            break;
+                          return true;
+                        }
+                    }
+                    for (auto *param: voice->parameters()) {
+                        if (ParameterServer::setParameterValueFromMessage(param, subAddr, m)) {
+                            // We assume no two parameters have the same address, so we can break the
+                            // loop. Perhaps this should be checked by ParameterServer on registration?
+                          return true;
                         }
                     }
                 }
                 voice = voice->next;
             }
-            return true;
+            std::cerr << " -- Can't match voice id " << number << std::endl;
         }
+    }
+    if (verbose()) {
+      m.print();
     }
     return false;
 }

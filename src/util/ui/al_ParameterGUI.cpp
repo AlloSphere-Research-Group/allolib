@@ -778,7 +778,10 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
             }
             if (ImGui::Button("Play")) {
                 synthSequencer->stopSequence();
-                synthSequencer->synth().allNotesOff();
+                while(synthSequencer->synth().getActiveVoices()) {
+                  synthSequencer->synth().allNotesOff();
+                  al_sleep(0.05);
+                }
                 state.totalDuration = synthSequencer->getSequenceDuration(seqList[state.currentItem]);
                 synthSequencer->playSequence(seqList[state.currentItem]);
 

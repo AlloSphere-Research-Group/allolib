@@ -35,9 +35,17 @@ using namespace al;
 // The Scene will contain "SimpleVoice" agents
 class SimpleVoice : public PositionedVoice {
 public:
+  virtual void init() override {
+    // Pose and size are not transmitted by default
+    registerParameter(paramterPose());
+    registerParameter(parameterSize());
+  }
 
   virtual void update(double dt) override {
-    pose().vec().x = pose().vec().x * 0.993;
+    Pose p = pose();
+    p.vec().x = p.vec().x * 0.993;
+    setPose(p);
+    setSize(size() * 0.997);
   }
 
   virtual void onProcess(Graphics &g) override {
@@ -57,16 +65,20 @@ public:
 
     scene1.registerSynthClass<SimpleVoice>();
     scene2.registerSynthClass<SimpleVoice>();
+    scene1.verbose(true);
+
     registerDynamicScene(scene1); // scene1 is broadcast from primary
 
     // Now connect scene2 so that it is broadcast from replica
     // If distributed scene, connect according to this app's role
-    if (!isPrimary()) {
-      scene2.registerNotifier(parameterServer());
-      parameterServer().addListener("localhost", 9010);
-    } else {
+    if (isPrimary()) {
       parameterServer().registerOSCConsumer(
             &scene2, scene2.name());
+      scene1.allNotesOff(); // To turn off any events that might remain in a replica scene
+    } else {
+      scene2.registerNotifier(parameterServer());
+      parameterServer().addListener("localhost", 9010);
+      scene2.allNotesOff(); // To turn off any events that might remain in a replica scene
     }
 
     addDisc(mMesh1, 0.5);
@@ -97,25 +109,38 @@ public:
 //        std::cout << "Added voice for scene 1" << std::endl;
         // Only primary node triggers voice
         auto voice = scene1.getVoice<SimpleVoice>();
-        voice->pose().pos() = {1.0, 0.0, -3.0};
+        voice->setPose({Vec3d(1.0, 0.0, -3.0), Quatd()});
+        voice->setSize(1.0f);
         scene1.triggerOn(voice);
       } else {
 
 //        std::cout << "Added voice for scene 2" << std::endl;
         // Only replica node triggers voice for scene2
         auto voice = scene2.getVoice<SimpleVoice>();
-        voice->pose().pos() = {-1.0, 0.0, -3.0};
+        voice->setPose({Vec3d(-1.0, 0.0, -3.0), Quatd()});
+        voice->setSize(1.0f);
         scene2.triggerOn(voice);
       }
     }
-    scene1.update(dt);
-    scene2.update(dt);
+    if (isPrimary()) {
+      scene1.update(dt);
+    } else {
+      scene2.update(dt);
+    }
   }
 
   virtual void onDraw(Graphics &g) override {
     g.clear();
     scene1.render(g); // Render graphics
     scene2.render(g); // Render graphics
+  }
+
+  virtual void onExit() override {
+    if (isPrimary()) {
+      scene1.allNotesOff(); // To turn off any events that might remain in a replica scene
+    } else {
+      scene2.allNotesOff(); // To turn off any events that might remain in a replica scene
+    }
   }
 
   DistributedScene scene1 {"scene1"};
@@ -130,5 +155,6 @@ public:
 int main(){
   // Create app instance
   MyApp app;
+  app.fps(30);
   app.start();
 }

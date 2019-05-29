@@ -145,7 +145,7 @@ void DynamicScene::render(Graphics &g) {
             g.pushMatrix();
             if (dynamic_cast<PositionedVoice *>(voice)) {
                 PositionedVoice *posVoice = static_cast<PositionedVoice *>(voice);
-                Pose &pose = posVoice->pose();
+                Pose pose = posVoice->pose();
                 g.translate(pose.x(), pose.y(), pose.z());
                 g.rotate(pose.quat());
                 g.scale(posVoice->size());
@@ -169,6 +169,7 @@ void DynamicScene::render(AudioIOData &io) {
         // Turn off voices
         processVoiceTurnOff();
     }
+    io.zeroBus();
 
     auto voice = mActiveVoices;
     int fpb = internalAudioIO.framesPerBuffer();
@@ -432,13 +433,12 @@ bool PositionedVoice::setTriggerParams(float *pFields, int numFields) {
     double x = *pFields++;
     double y = *pFields++;
     double z = *pFields++;
-    mPose.vec() = Vec3d(x, y, z);
-    double w = *pFields++;
-    x = *pFields++;
-    y = *pFields++;
-    z = *pFields++;
-    mPose.quat() = Quatd(w, x, y, z);
-    mSize = *pFields;
+    double qw = *pFields++;
+    double qx = *pFields++;
+    double qy = *pFields++;
+    double qz = *pFields++;
+    mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+    mSize.set(*pFields);
   } else {
     ok = false;
   }
@@ -452,13 +452,12 @@ bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields) {
     double x = pFields[index++].get<float>();
     double y = pFields[index++].get<float>();
     double z = pFields[index++].get<float>();
-    mPose.vec() = Vec3d(x, y, z);
-    double w = pFields[index++].get<float>();
-    x = pFields[index++].get<float>();
-    y = pFields[index++].get<float>();
-    z = pFields[index++].get<float>();
-    mPose.quat() = Quatd(w, x, y, z);
-    mSize = pFields[index++].get<float>();
+    double qw = pFields[index++].get<float>();
+    double qx = pFields[index++].get<float>();
+    double qy = pFields[index++].get<float>();
+    double qz = pFields[index++].get<float>();
+    mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+    mSize.set(pFields[index++].get<float>());
   } else {
     //            std::cout << "Not setting position for voice" << std::endl;
   }

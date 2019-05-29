@@ -308,7 +308,9 @@ void ParameterServer::onMessage(osc::Message &m)
     }
     for (auto consumer: mMessageConsumers) {
         m.resetStream();
-        consumer.first->consumeMessage(m, consumer.second);
+        if (consumer.first->consumeMessage(m, consumer.second)) {
+          break;
+        }
     }
     mParameterLock.unlock();
 }

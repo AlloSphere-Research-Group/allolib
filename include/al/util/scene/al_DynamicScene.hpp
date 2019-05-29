@@ -64,9 +64,17 @@ namespace al
  */
 class PositionedVoice : public SynthVoice {
 public:
-    Pose &pose() {return mPose;}
+    Pose pose() {return mPose.get();}
 
-    float &size() {return mSize;}
+    float size() {return mSize;}
+
+    void setPose(Pose pose) {mPose.set(pose);}
+
+    void setSize(float size) {mSize.set(size);}
+
+    ParameterPose &paramterPose() {return mPose;}
+
+    Parameter &parameterSize() {return mSize;}
 
     bool useDistanceAttenuation() {return mUseDistAtten;}
     void useDistanceAttenuation(bool atten) {mUseDistAtten = atten;}
@@ -107,16 +115,17 @@ public:
 
         std::vector<ParameterField> pFields = SynthVoice::getTriggerParams();
         pFields.reserve(pFields.size() + 8);
-        pFields.insert(pFields.end(), mPose.vec().begin(), mPose.vec().end());
+        Pose currentPose = pose();
+        pFields.insert(pFields.end(), currentPose.vec().begin(), currentPose.vec().end());
 
-        auto *comps = mPose.quat().components;
+        auto *comps = currentPose.quat().components;
 
         pFields.push_back(*comps++);
         pFields.push_back(*comps++);
         pFields.push_back(*comps++);
         pFields.push_back(*comps);
 
-        pFields.push_back(mSize);
+        pFields.push_back(mSize.get());
         return pFields;
     }
 
@@ -126,8 +135,10 @@ protected:
      */
     void markAsReplica() { mIsReplica = true;}
 
-    Pose mPose;
-    float mSize {1.0};
+    ParameterPose mPose {"_pose"};
+    Parameter mSize {"_size", "", 1.0};
+//    ParameterPose mPose {"_pose"};
+//    Parameter mSize {"_size", "", 1.0};
     std::vector<Vec3f> mAudioOutPositionOffsets; // This vector is added to the voice's position to determine the specific position of the audio out
 
     bool mUseDistAtten {true};
@@ -254,7 +265,7 @@ public:
     void setVoiceBusChannels(unsigned int channels) {mVoiceBusChannels = channels;}
 
 
-    typedef const std::function<void (AudioIOData &io, Pose &channelPose)> BusRoutingCallback;
+    typedef const std::function<void (AudioIOData &internalVoiceIO, Pose &channelPose)> BusRoutingCallback;
 
     /**
      * @brief setBusRoutingCallback
