@@ -75,7 +75,7 @@ struct Pickable {
 
   /// intersection test must be implemented
   virtual Hit intersect(Rayd r) = 0;
-  virtual Hit intersect(Vec3d v){ intersect(Rayd(v,Vec3d())); };
+  virtual Hit intersect(Vec3d v){ return intersect(Rayd(v,Vec3d())); };
 
   /// override callback
   virtual bool onEvent(PickEvent e, Hit hit){ return false; }
