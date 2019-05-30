@@ -11,7 +11,7 @@ using namespace al;
 struct MyApp : public App {
 
     SoundFileBufferedRecord soundFile;
-    gam::Square<> wave {440.0f};
+    gam::Sine<> wave {440.0f};
 
     void onInit() {
         // Set Gamma sampling rate. Needed for the gam::Square oscillator
@@ -24,7 +24,7 @@ struct MyApp : public App {
         soundFile.setMaxWriteTime(2.0f);
         // Open the sound file for writing. This will be a two channel soundfile
         // The default is to use 16-bit int WAV files.
-        soundFile.open("output.wav", audioIO().framesPerSecond(), 2);
+        soundFile.open("output.wav", audioIO().framesPerSecond(), 2, audioIO().framesPerSecond() * 8);
     }
 
     void onSound(AudioIOData &io) override {
