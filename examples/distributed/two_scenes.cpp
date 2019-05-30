@@ -37,7 +37,7 @@ class SimpleVoice : public PositionedVoice {
 public:
   virtual void init() override {
     // Pose and size are not transmitted by default
-    registerParameter(paramterPose());
+    registerParameter(parameterPose());
     registerParameter(parameterSize());
   }
 

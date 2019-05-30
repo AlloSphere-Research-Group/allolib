@@ -91,6 +91,7 @@ public:
     SynthVoice *voice {nullptr};
     ParamFields fields;
     float tempo;
+    int voiceId;
 };
 
 enum SynthEventType {

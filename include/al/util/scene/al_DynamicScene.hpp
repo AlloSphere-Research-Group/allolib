@@ -72,7 +72,7 @@ public:
 
     void setSize(float size) {mSize.set(size);}
 
-    ParameterPose &paramterPose() {return mPose;}
+    ParameterPose &parameterPose() {return mPose;}
 
     Parameter &parameterSize() {return mSize;}
 
