@@ -21,13 +21,16 @@ void PresetSequencer::playSequence(std::string sequenceName, double timeScale)
 	if (sequenceName.size() > 0) {
 		std::queue<Step> steps = loadSequence(sequenceName, timeScale);
 		mSteps = steps;
-	}
-	mRunning = true;
-	mSequenceLock.unlock();
+    }
 	{
-		std::unique_lock<std::mutex> lk(mPlayWaitLock);
-		mSequencerThread = new std::thread(PresetSequencer::sequencerFunction, this);
-		mPlayWaitVariable.wait(lk);
+        std::unique_lock<std::mutex> lk(mPlayWaitLock);
+        mStartingRun = true;
+        mPlayWaitVariable.notify_one();
+    }
+    mSequenceLock.unlock();
+    {
+      std::unique_lock<std::mutex> lk(mPlayWaitLock);
+        mPlayWaitVariable.wait(lk, [&] { return mRunning;});
 	}
 
 //	std::thread::id seq_thread_id = mSequencerThread->get_id();
@@ -36,23 +39,20 @@ void PresetSequencer::playSequence(std::string sequenceName, double timeScale)
 
 void PresetSequencer::stopSequence(bool triggerCallbacks)
 {
-	if (mRunning == true) {
-		mRunning = false;
-		bool mCallbackStatus = false;
-		if (!triggerCallbacks) {
-			mCallbackStatus = mEndCallbackEnabled;
-			enableEndCallback(false);
-		}
-		if (mSequencerThread) {
-			std::thread *th = mSequencerThread;
-			mSequencerThread = nullptr;
-			th->join();
-			delete th;
-		}
-		if (!triggerCallbacks) {
-			enableEndCallback(mCallbackStatus);
-		}
+  if (mRunning == true) {
+    bool mCallbackStatus = false;
+    if (!triggerCallbacks) {
+      mCallbackStatus = mEndCallbackEnabled;
+      enableEndCallback(false);
     }
+    if (!triggerCallbacks) {
+      enableEndCallback(mCallbackStatus);
+    }
+    mRunning = false;
+    // Is waiting on this lock reliable? Will it hang?
+    mPlayWaitLock.lock(); // This waits for the sequencer thread function to wait on the condition variable.
+    mPlayWaitLock.unlock();
+  }
 }
 
 void PresetSequencer::setTime(double time)
@@ -202,17 +202,22 @@ std::vector<std::string> al::PresetSequencer::getSequenceList()
 
 void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
 {
-	{
-		std::lock_guard<std::mutex> lk(sequencer->mPlayWaitLock);
-		if (sequencer->mBeginCallbackEnabled && sequencer->mBeginCallback != nullptr) {
-			sequencer->mBeginCallback(sequencer, sequencer->mBeginCallbackData);
-		}
-		sequencer->mPlayWaitVariable.notify_one();
-	}
-	const int granularity = 10; // milliseconds
-	sequencer->mSequenceLock.lock();
-	auto sequenceStart = std::chrono::high_resolution_clock::now();
-	auto targetTime = sequenceStart;
+  while (sequencer->mSequencerActive) {
+    {
+        std::unique_lock<std::mutex> lk(sequencer->mPlayWaitLock);
+        if (sequencer->mBeginCallbackEnabled && sequencer->mBeginCallback != nullptr) {
+            sequencer->mBeginCallback(sequencer, sequencer->mBeginCallbackData);
+        }
+        sequencer->mPlayWaitVariable.wait(lk, [&] { return sequencer->mStartingRun;});
+        sequencer->mRunning = true;
+        sequencer->mStartingRun = false;
+    }
+    sequencer->mPlayWaitVariable.notify_one(); // to have the calling function know play has started and callbacks have been called.
+    sequencer->mSequenceLock.lock();
+
+    int granularity = sequencer->mGranularity;
+    auto sequenceStart = std::chrono::high_resolution_clock::now();
+    auto targetTime = sequenceStart;
     auto paramTargetTime = sequenceStart;
     float timeAccumulator = 0.0f;
     std::queue<Step> parameterList;
@@ -225,17 +230,17 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
         sequencer->mSteps.pop();
         playStandaloneParameters = true;
     }
-	while(sequencer->running() && sequencer->mSteps.size() > 0) {
-		Step step = sequencer->mSteps.front();
+    while(sequencer->running() && sequencer->mSteps.size() > 0) {
+        Step step = sequencer->mSteps.front();
         auto now = std::chrono::high_resolution_clock::now();
-		if (step.type == PRESET && !playStandaloneParameters) {
-			if (sequencer->mPresetHandler) {
-				sequencer->mPresetHandler->setMorphTime(step.morphTime);
-				sequencer->mPresetHandler->recallPreset(step.presetName);
+        if (step.type == PRESET && !playStandaloneParameters) {
+            if (sequencer->mPresetHandler) {
+                sequencer->mPresetHandler->setMorphTime(step.morphTime);
+                sequencer->mPresetHandler->recallPreset(step.presetName);
 //                std::cout << "recalling " << step.presetName << std::endl;
-			} else {
-				std::cerr << "No preset handler registered with PresetSequencer. Ignoring preset change." << std::endl;
-			}
+            } else {
+                std::cerr << "No preset handler registered with PresetSequencer. Ignoring preset change." << std::endl;
+            }
             sequencer->mSteps.pop();
             while (!parameterList.empty()) {
                 parameterList.pop();
@@ -345,19 +350,20 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer)
         }
 
 //		std::this_thread::sleep_until(targetTime);
-		// std::this_thread::sleep_for(std::chrono::duration<float>(totalWaitTime));
-	}
-	if (sequencer->mPresetHandler) {
+        // std::this_thread::sleep_for(std::chrono::duration<float>(totalWaitTime));
+    }
+    if (sequencer->mPresetHandler) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Give a little time to process any pending preset changes.
-		sequencer->mPresetHandler->stopMorph();
-	}
+        sequencer->mPresetHandler->stopMorph();
+    }
 //	std::cout << "Sequence finished." << std::endl;
-	sequencer->mRunning = false;
-	sequencer->mSequenceLock.unlock();
-	if (sequencer->mEndCallbackEnabled && sequencer->mEndCallback != nullptr) {
-		bool finished = sequencer->mSteps.size() == 0;
-		sequencer->mEndCallback(finished, sequencer, sequencer->mEndCallbackData);
-	}
+    sequencer->mRunning = false;
+    sequencer->mSequenceLock.unlock();
+    if (sequencer->mEndCallbackEnabled && sequencer->mEndCallback != nullptr) {
+        bool finished = sequencer->mSteps.size() == 0;
+        sequencer->mEndCallback(finished, sequencer, sequencer->mEndCallbackData);
+    }
+  }
 }
 
 
@@ -476,14 +482,19 @@ void PresetSequencer::registerTimeChangeCallback(std::function<void (float)> fun
 
 float PresetSequencer::getSequenceTotalDuration(std::string sequenceName)
 {
-	std::queue<Step> steps = loadSequence(sequenceName);
-	float duration = 0.0f;
-	while (steps.size() > 0) {
-		const Step &step = steps.front();
-		duration += step.morphTime + step.waitTime;
-		steps.pop();
-	}
-	return duration;
+  float duration = 0.0f;
+  std::queue<Step> steps;
+  if (sequenceName == mCurrentSequence) {
+    steps = mMostRecentSequence;
+  } else {
+    steps = loadSequence(sequenceName);
+  }
+  while (steps.size() > 0) {
+    const Step &step = steps.front();
+    duration += step.morphTime + step.waitTime;
+    steps.pop();
+  }
+  return duration;
 }
 
 void PresetSequencer::clearSteps()

@@ -227,6 +227,8 @@ public:
      */
     void print();
 
+    bool playing() { return  mPlaying; }
+
     bool verbose() {return mVerbose;}
     void verbose(bool verbose) { mVerbose = verbose;}
 
@@ -274,6 +276,7 @@ private:
     std::list<SynthSequencerEvent> mEvents; // List of events sorted by start time.
     std::mutex mEventLock;
     std::mutex mLoadingLock;
+    bool mPlaying {false};
 
     PolySynth::TimeMasterMode mMasterMode {PolySynth::TIME_MASTER_AUDIO};
     double mMasterTime {0.0};

@@ -47,6 +47,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   mEvents = events;
   mNextEvent = 0;
   mPlaybackStartTime = currentMasterTime;
+  mPlaying = true;
   lk.unlock();
   if (mMasterMode == PolySynth::TIME_MASTER_CPU) {
     mCpuThread = std::make_shared<std::thread>([&](int granularityns = 1000) {
@@ -85,6 +86,7 @@ void SynthSequencer::stopSequence() {
 
   mEvents.clear();
   mNextEvent = 0;
+  mPlaying = false;
 }
 
 void SynthSequencer::setTime(float newTime) {  std::cout << "Setting time not implemented" <<std::endl;}
@@ -488,6 +490,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
       }
     }
     if (allEventsDone && triggerOffThisBlock) { // This block marks the end of the sequence
+      mPlaying = false;
       for (auto cb: mSequenceEndCallbacks) {
         cb(mLastSequencePlayed);
       }

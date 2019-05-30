@@ -56,11 +56,11 @@ class Speaker {
 public:
 
 	unsigned int deviceChannel;	///< Index in the output device channels array
-	float gain;					///< Gain of speaker
-	float azimuth;				///< Angle from forward to left vector
-	float elevation;			///< Angle from forward-right plane to up vector
+    float azimuth;				///< Angle from forward to left vector
+    float elevation;			///< Angle from forward-right plane to up vector
     int group;					///< Group identifier
 	float radius;				///< Distance from center of listening space
+    float gain;					///< Gain of speaker
 
 	/// @param[in] deviceChan		audio device output channel
 	/// @param[in] az				azimuth of speaker
@@ -68,7 +68,7 @@ public:
 	/// @param[in] radius			radius of speaker
 	/// @param[in] gain				gain of speaker
     Speaker(unsigned int deviceChan=0, float az=0.f, float el=0.f, int group = 0, float radius=1.f, float gain=1.f)
-	:	deviceChannel(deviceChan), gain(gain), azimuth(az), elevation(el), group(group), radius(radius)
+    :	deviceChannel(deviceChan), azimuth(az), elevation(el), group(group), radius(radius), gain(gain)
 	{}
 
 	/// Get position in Cartesian coordinate (in audio space)

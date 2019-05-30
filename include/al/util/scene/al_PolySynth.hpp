@@ -532,8 +532,9 @@ public:
   /// trigger release of voice with id
   void triggerOff(int id);
 
+
   /**
-     * @brief Call TriggerOff for all active notes
+     * @brief Turn off all notes immediately (without calling triggerOff() )
      */
   virtual void allNotesOff();
 

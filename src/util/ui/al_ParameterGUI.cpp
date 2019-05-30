@@ -646,7 +646,9 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer, int &cu
         float *currentTime = &(stateMap[presetSequencer].currentTime);
         presetSequencer->registerTimeChangeCallback( [currentTime](float currTime)
             {*currentTime = currTime;}, 0.1f);
-        presetSequencer->registerBeginCallback([&](PresetSequencer *sender, void */*userData*/) {stateMap[presetSequencer].totalDuration = sender->getSequenceTotalDuration(sender->currentSequence());});
+        presetSequencer->registerBeginCallback([&](PresetSequencer *sender, void */*userData*/) {
+          stateMap[presetSequencer].totalDuration = sender->getSequenceTotalDuration(sender->currentSequence());
+        });
         stateMap[presetSequencer].seqList = presetSequencer->getSequenceList();
         if (stateMap[presetSequencer].seqList.size() > 64) {
             stateMap[presetSequencer].seqList.resize(64);

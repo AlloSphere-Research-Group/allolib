@@ -97,22 +97,26 @@ class PresetSequencer : public osc::MessageConsumer
 {
 	friend class Composition;
 public:
-	PresetSequencer() :
-	    mSequencerActive(true),
+    PresetSequencer() :
+        mSequencerActive(true),
 	    mRunning(false),
+        mStartingRun(false),
 	    mSequencerThread(nullptr),
 	    mBeginCallbackEnabled(false),
 	    mEndCallbackEnabled(false)
-	{
+    {
+      mSequencerThread = std::make_unique<std::thread>(PresetSequencer::sequencerFunction, this);
+
 	}
 
 	~PresetSequencer() override
-	{
-		mSequencerActive = false;
-		stopSequence(false);
-		if (mPresetHandler) {
+    {
+        mSequencerActive = false;
+        stopSequence(false);
+        if (mPresetHandler) {
 			mPresetHandler->stopMorph();
 		}
+        mSequencerThread->join();
 	}
 
 	typedef enum {
@@ -294,6 +298,13 @@ public:
     // For programmatic control of the sequencer:
 	void clearSteps();
 
+    /**
+     * @brief appendStep
+     * @param newStep
+     *
+     * This function will block while the sequence is playing. Always stop
+     * sequence before calling this function.
+     */
 	void appendStep(Step &newStep);
 
 protected:
@@ -318,9 +329,11 @@ private:
 
     std::atomic<float> mTimeRequest {-1.0f}; // Request setting the current time. Passes info to playback thread
 
-	bool mSequencerActive;
+    bool mSequencerActive;
 	bool mRunning;
-	std::thread *mSequencerThread;
+    bool mStartingRun;
+    std::unique_ptr<std::thread> mSequencerThread;
+    const int mGranularity = 10; // milliseconds
 	bool mBeginCallbackEnabled;
 	std::function<void(PresetSequencer *, void *userData)> mBeginCallback;
 	void *mBeginCallbackData;
@@ -404,7 +417,7 @@ private:
 	std::string mOSCQueryPath;
 //	std::mutex mHandlerLock;
 //	std::vector<osc::PacketHandler *> mHandlers;
-	std::vector<osc::MessageConsumer *> mConsumers;
+    std::vector<osc::MessageConsumer *> mConsumers;
 };
 
 
