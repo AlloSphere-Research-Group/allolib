@@ -64,9 +64,9 @@ namespace al
  */
 class PositionedVoice : public SynthVoice {
 public:
-    Pose pose() {return mPose.get();}
+    const Pose pose() {return mPose.get();}
 
-    float size() {return mSize;}
+    float size() {return mSize.get();}
 
     void setPose(Pose pose) {mPose.set(pose);}
 
