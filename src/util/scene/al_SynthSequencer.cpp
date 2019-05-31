@@ -99,8 +99,9 @@ void SynthSequencer::setDirectory(std::string directory) {
 void SynthSequencer::registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec)
 {
   if (mEventLock.try_lock()) {
-    mTimeChangeCallback = func;
-    mTimeChangeMinTimeDelta = minTimeDeltaSec;
+    mTimeAccumCallbackNs.push_back(0.0);
+    mTimeChangeCallbacks.push_back({func,minTimeDeltaSec}) ;
+//    mTimeChangeMinTimeDelta = minTimeDeltaSec;
     mEventLock.unlock();
   } else {
     std::cerr << "ERROR: Failed to set time change callback. Sequencer running" <<std::endl;
@@ -432,13 +433,15 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
 
     if (mNextEvent < mEvents.size()) {
 
-      mTimeAccumCallbackNs += (mMasterTime - blockStartTime)* 1.0e9;
-      if (mTimeAccumCallbackNs*1.0e-9 > mTimeChangeMinTimeDelta) {
-        if (mTimeChangeCallback) {
-          mTimeChangeCallback(float(blockStartTime - mPlaybackStartTime));
-//          std::cout << blockStartTime- mPlaybackStartTime << std::endl;
+      int i = 0;
+      for (auto cb: mTimeChangeCallbacks) {
+        mTimeAccumCallbackNs[i] += (mMasterTime - blockStartTime)* 1.0e9;
+        cb.first(float(blockStartTime - mPlaybackStartTime));
+        if (mTimeAccumCallbackNs[i]*1.0e-9 > cb.second) {
+          //          std::cout << blockStartTime- mPlaybackStartTime << std::endl;
         }
-        mTimeAccumCallbackNs -= mTimeChangeMinTimeDelta* 1.0e9;
+        mTimeAccumCallbackNs[i] -= cb.second* 1.0e9;
+        i++;
       }
       auto iter = mEvents.begin();
       std::advance(iter, mNextEvent);

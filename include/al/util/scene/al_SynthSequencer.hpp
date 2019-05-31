@@ -252,7 +252,7 @@ public:
     PolySynth &synth() {return *mPolySynth;}
 
     // Callbacks
-    void registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec);
+    void registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec = 0);
 
     void registerSequenceEndCallback(std::function<void (std::string)> func);
 
@@ -285,11 +285,12 @@ private:
     float mNormalizedTempo {1.0f}; // Linearly normalized inverted around 60 bpm (1.0 = 60bpm, 0.5 = 120 bpm)
 
     // Time change callback
-    std::function<void(float)> mTimeChangeCallback;
-    float mTimeChangeMinTimeDelta = 0;
-    double mTimeAccumCallbackNs = 0; // Accumulator for tirggering time change callback.
+    std::vector<std::pair<std::function<void(float)>, float>> mTimeChangeCallbacks;
+//    float mTimeChangeMinTimeDelta = 0;
+    std::vector<double> mTimeAccumCallbackNs; // Accumulator for tirggering time change callback.
 
     std::vector<std::function<void(std::string sequenceName)>> mSequenceEndCallbacks;
+
 
     // CPU processing thread. Used when TIME_MASTER_CPU
     std::shared_ptr<std::thread> mCpuThread;
