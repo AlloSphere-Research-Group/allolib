@@ -472,22 +472,24 @@ void PolySynth::startCpuClockThread() {
   if (mVerbose) {
     std::cout << "Starting CPU clock thread" << std::endl;
   }
-  mCpuClockThread = std::make_unique<std::thread>([this]() {
-    using namespace std::chrono;
-    while(mRunCPUClock) {
-      high_resolution_clock::time_point startTime = high_resolution_clock::now();
-      std::chrono::milliseconds waitTime(int(mCpuGranularitySec * 1000));
+  if (!mCpuClockThread) {
+    mCpuClockThread = std::make_unique<std::thread>([this]() {
+      using namespace std::chrono;
+      while(mRunCPUClock) {
+        high_resolution_clock::time_point startTime = high_resolution_clock::now();
+        std::chrono::milliseconds waitTime(int(mCpuGranularitySec * 1000));
 
-      high_resolution_clock::time_point futureTime = startTime + waitTime;
-      std::this_thread::sleep_until(futureTime);
-      // FIXME this will generate some jitter and drift, fix.
+        high_resolution_clock::time_point futureTime = startTime + waitTime;
+        std::this_thread::sleep_until(futureTime);
+        // FIXME this will generate some jitter and drift, fix.
 
-      processVoices();
-      // Turn off voices
-      processVoiceTurnOff();
-      processInactiveVoices();
-    }
-  });
+        processVoices();
+        // Turn off voices
+        processVoiceTurnOff();
+        processInactiveVoices();
+      }
+    });
+  }
 }
 
 int SynthVoice::getStartOffsetFrames(unsigned int framesPerBuffer) {
