@@ -436,11 +436,11 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
       int i = 0;
       for (auto cb: mTimeChangeCallbacks) {
         mTimeAccumCallbackNs[i] += (mMasterTime - blockStartTime)* 1.0e9;
-        cb.first(float(blockStartTime - mPlaybackStartTime));
+//        std::cout << mTimeAccumCallbackNs[i] << std::endl;
         if (mTimeAccumCallbackNs[i]*1.0e-9 > cb.second) {
-          //          std::cout << blockStartTime- mPlaybackStartTime << std::endl;
+          cb.first(float(blockStartTime - mPlaybackStartTime));
+          mTimeAccumCallbackNs[i] -= cb.second* 1.0e9;
         }
-        mTimeAccumCallbackNs[i] -= cb.second* 1.0e9;
         i++;
       }
       auto iter = mEvents.begin();
