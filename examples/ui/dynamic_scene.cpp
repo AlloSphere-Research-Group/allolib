@@ -94,7 +94,9 @@ struct SimpleVoice : public PositionedVoice {
     // DynamicScene. Since the agent's memory is recycled, use this function
     // to initialize and reset data
     virtual void onTriggerOn() override {
-        pose().vec() = {mFreq/440.0 , 0.0, -10.0};
+        Pose p = pose();
+        p.vec() = {mFreq/440.0 , 0.0, -10.0};
+        setPose(p);
         mAmpEnv.reset();
     }
 };

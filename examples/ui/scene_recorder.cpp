@@ -78,7 +78,9 @@ public:
 
     virtual void onTriggerOn() override {
 
-        pose().vec() = {mFreq/440.0 , 0.0, -10.0};
+        Pose p = pose();
+        p.vec() = {mFreq/440.0 , 0.0, -10.0};
+        setPose(p);
         mAmpEnv.reset();
     }
     virtual void onTriggerOff() override {
