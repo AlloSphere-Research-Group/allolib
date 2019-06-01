@@ -437,8 +437,8 @@ bool PositionedVoice::setTriggerParams(float *pFields, int numFields) {
     double qx = *pFields++;
     double qy = *pFields++;
     double qz = *pFields++;
-    mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
-    mSize.set(*pFields);
+    mPose.setNoCalls({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+    mSize.setNoCalls(*pFields);
   } else {
     ok = false;
   }
@@ -456,8 +456,8 @@ bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields) {
     double qx = pFields[index++].get<float>();
     double qy = pFields[index++].get<float>();
     double qz = pFields[index++].get<float>();
-    mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
-    mSize.set(pFields[index++].get<float>());
+    mPose.setNoCalls({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+    mSize.setNoCalls(pFields[index++].get<float>());
   } else {
     //            std::cout << "Not setting position for voice" << std::endl;
   }
