@@ -64,7 +64,9 @@ struct MyApp : App {
       // Then configure voice
       freeVoice->oscillator.freq(330 * i);
       freeVoice->lfo.freq(0.3 + i * 0.25);
-      freeVoice->pose().vec() = Vec3f(rnd::uniformS(4), rnd::uniformS(4), -3 - rnd::uniform(2));
+      Pose p = freeVoice->pose();
+      p.vec() = Vec3f(rnd::uniformS(4), rnd::uniformS(4), -3 - rnd::uniform(2));
+      freeVoice->setPose(p);
       // The insert it in the rendering chain
       scene.triggerOn(freeVoice);
     }

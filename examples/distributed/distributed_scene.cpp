@@ -50,8 +50,10 @@ public:
   }
 
   virtual void update(double dt) override {
-    pose().vec().y = mEnvelope;
-    pose().vec().x = mFreq/440.0;
+    auto p = pose();
+    p.vec().y = mEnvelope;
+    p.vec().x = mFreq/440.0;
+    setPose(p);
   }
 
   virtual void onProcess(AudioIOData& io) override {
@@ -115,7 +117,9 @@ public:
       auto *freeVoice = scene.getVoice<SimpleVoice>();
       std::vector<float> params{440.0f, 0.0f};
       freeVoice->setTriggerParams(params);
-      freeVoice->pose().vec().z = -10.0;
+      auto p = freeVoice->pose();
+      p.vec().z = -10.0;
+      freeVoice->setPose(p);
       scene.triggerOn(freeVoice);
     } else {
       title("Replica");
@@ -153,7 +157,9 @@ public:
       auto *freeVoice = scene.getVoice<SimpleVoice>();
       std::vector<float> params{440.0f, 0.0f};
       freeVoice->setTriggerParams(params);
-      freeVoice->pose().vec().z = -10.0;
+      auto p = freeVoice->pose();
+      p.vec().z = -10.0;
+      freeVoice->setPose(p);
       scene.triggerOn(freeVoice);
     }
   }

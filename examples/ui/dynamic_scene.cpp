@@ -62,8 +62,10 @@ struct SimpleVoice : public PositionedVoice {
     // i.e. once every frame
     virtual void update(double dt) override {
         mFreq = mFreq * 0.995f;
-        pose().vec().y = mAmpEnv.value()*3;
-        pose().vec().x = mFreq/440.0;
+        auto p = pose();
+        p.vec().y = mAmpEnv.value()*3;
+        p.vec().x = mFreq/440.0;
+        setPose(p);
     }
 
     // Write your audio code inside this function

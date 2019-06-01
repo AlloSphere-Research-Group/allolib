@@ -56,8 +56,10 @@ public:
     virtual void update(double dt) override {
 
         mFreq = mFreq * 0.995;
-        pose().vec().y = mAmpEnv.value()*3;
-        pose().vec().x = mFreq/440.0;
+        Pose p = pose();
+        p.vec().y = mAmpEnv.value()*3;
+        p.vec().x = mFreq/440.0;
+        setPose(p);
     }
 
     virtual void onProcess(AudioIOData& io) override {
