@@ -176,7 +176,7 @@ public:
     }
     auto it = pFields.begin();
     for (auto &param:mTriggerParams) {
-      param->fromFloat(*it++);
+      static_cast<Parameter *>(param)->setNoCalls(*it++);
     }
     return true;
   }
@@ -192,16 +192,20 @@ public:
       return false;
     }
     auto it = pFields.begin();
+    // Trigger parameters should not trigger callbacks when set through
+    // this function as these values are initial "construction" values
+    // If you need the callbacks to propagate, set the parameter values
+    // directly instead of through these functions.
     for (auto &param:mTriggerParams) {
       if (it->type() == ParameterField::FLOAT) {
-        param->fromFloat(it->get<float>());
+        static_cast<Parameter *>(param)->setNoCalls(it->get<float>());
       } else if (it->type() == ParameterField::STRING) {
         if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
-          static_cast<ParameterString *>(param)->set(it->get<std::string>());
+          static_cast<ParameterString *>(param)->setNoCalls(it->get<std::string>());
         } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
-          static_cast<ParameterMenu *>(param)->setCurrent(it->get<std::string>());
+          static_cast<ParameterMenu *>(param)->setCurrent(it->get<std::string>(), true);
         } else {
-          std::cerr << "ERROR: p-field string not setting ParameterString" << std::endl;
+          std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type." << std::endl;
         }
       }
       it++;

@@ -717,24 +717,28 @@ public:
     std::string getCurrent() {
       int current = get();
       if (mElements.size() > 0 && current >=0 && current < int(mElements.size())) {
-        return mElements[get()];
+        return mElements[current];
       }
       else {
         return "";
       }
     }
 
-    void setCurrent(std::string element) {
+    void setCurrent(std::string element, bool noCalls = false) {
         auto position = std::find(mElements.begin(), mElements.end(), element);
         if (position != mElements.end()) {
+          if (noCalls) {
+            setNoCalls(std::distance(mElements.begin(), position));
+          } else {
             set(std::distance(mElements.begin(), position));
+          }
         } else {
             std::cerr << "ERROR: Could not find element: " << element << std::endl;
         }
     }
 
 	virtual float toFloat() override {
-		return (float) get();
+        return float(get());
 		// return std::stof(getCurrent());
 	}
 
