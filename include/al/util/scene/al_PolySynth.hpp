@@ -198,14 +198,24 @@ public:
     // directly instead of through these functions.
     for (auto &param:mTriggerParams) {
       if (it->type() == ParameterField::FLOAT) {
-        static_cast<Parameter *>(param)->setNoCalls(it->get<float>());
+        if (strcmp(typeid(*param).name(), typeid(Parameter).name() ) == 0) {
+          static_cast<Parameter *>(param)->setNoCalls(it->get<float>());
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name() ) == 0) {
+          static_cast<ParameterInt *>(param)->setNoCalls(it->get<float>());
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+          static_cast<ParameterMenu*>(param)->setNoCalls(it->get<float>());
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+          static_cast<ParameterString *>(param)->setNoCalls(std::to_string(it->get<float>()));
+        } else {
+          std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+        }
       } else if (it->type() == ParameterField::STRING) {
         if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
           static_cast<ParameterString *>(param)->setNoCalls(it->get<std::string>());
         } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
           static_cast<ParameterMenu *>(param)->setCurrent(it->get<std::string>(), true);
         } else {
-          std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type." << std::endl;
+          std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
         }
       }
       it++;
