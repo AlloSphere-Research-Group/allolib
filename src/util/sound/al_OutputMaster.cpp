@@ -33,14 +33,19 @@ void butter_set_fc(DataType fc, DataType sr, DataType *a, DataType *b, bool lp =
 OutputMaster::OutputMaster(unsigned int num_chnls, double sampleRate):
 	m_numChnls(num_chnls), m_framesPerSec(sampleRate)
 {
-	allocateChannels(m_numChnls);
-	initializeData();
+  initialize(num_chnls, sampleRate);
 }
 
 OutputMaster::~OutputMaster()
 {
 }
 
+void OutputMaster::initialize(unsigned int num_chnls, double sampleRate)
+{
+  allocateChannels(num_chnls);
+  initializeData();
+  m_framesPerSec = sampleRate;
+}
 
 void OutputMaster::setMasterGain(double gain)
 {
@@ -164,17 +169,24 @@ void OutputMaster::onAudioCB(AudioIOData &io)
         if (m_meterOn) {
             for (unsigned int chan = 0; chan < m_numChnls; chan++) {
                 float out = io.out(chan);
-                float absValue = fabs(out);
-                if (m_meterMax[chan] < absValue) {
-                    m_meterMax[chan] = absValue;
+//                float absValue = fabs(out);
+                if (m_meterMax[chan] < out) {
+                    m_meterMax[chan] = out;
+                }
+                if (m_meterMin[chan] > out) {
+                    m_meterMin[chan] = out;
                 }
             }
             m_meterCounter++;
             if (m_meterCounter >= m_meterUpdateSamples) {
-                m_meterBuffer.write(m_meterMax.data());
+                m_meterMaxBuffer.write(m_meterMax.data());
                 m_meterCounter = m_meterCounter - m_meterUpdateSamples;
                 for (unsigned int chan = 0; chan < m_numChnls; chan++) {
-                    m_meterMax[chan] = 0.0;
+                  //FIXME offload to separate thread, trigger by condition variable
+                  // FIXME on separate thread allow both printing and sending values via OSC
+                  std::cout <<  m_meterMax[chan] << " : " << m_meterMin[chan] << " ---- " << std::endl;
+                    m_meterMax[chan] = FLT_MIN;
+                    m_meterMin[chan] = FLT_MAX;
                 }
             }
         }
@@ -268,8 +280,10 @@ void OutputMaster::initializeData()
 void OutputMaster::allocateChannels(unsigned int numChnls)
 {
 	m_gains.resize(numChnls);
-	m_meterBuffer.setSize(numChnls);
+    m_meterMaxBuffer.setSize(numChnls);
+    m_meterMinBuffer.setSize(numChnls);
     m_meterMax.resize(numChnls);
+    m_meterMin.resize(numChnls);
 
 	m_lopass1.resize(numChnls);
 	m_lopass2.resize(numChnls);
@@ -281,5 +295,6 @@ void OutputMaster::allocateChannels(unsigned int numChnls)
 	for (unsigned int i = 0; i < numChnls; i++) {
 		m_gains[i] = 1.0;
 	}
+    m_numChnls = numChnls;
 }
 

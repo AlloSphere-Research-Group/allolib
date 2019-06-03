@@ -151,7 +151,9 @@ private:
  */
 class OutputMaster : /*public osc::Recv,*/ public al::AudioCallback
 {
-    public:
+public:
+  OutputMaster() {}
+
     /**
 	 * @brief OutputMaster
      * @param num_chnls number of channels that will be processed by the OutputMaster object
@@ -164,6 +166,13 @@ class OutputMaster : /*public osc::Recv,*/ public al::AudioCallback
      */
     OutputMaster(unsigned int num_chnls, double sampleRate);
     ~OutputMaster() override;
+
+    /**
+     * @brief initialize outputMaster class
+     * @param num_chnls number of output channels
+     * @param sampleRate
+     */
+    void initialize(unsigned int num_chnls, double sampleRate);
 
     /** Set master output gain. This gain is applied after individual channel gains, and
      * determines the value at which signals are clipped if the clipper is set with
@@ -224,12 +233,30 @@ class OutputMaster : /*public osc::Recv,*/ public al::AudioCallback
     float getCurrentChannelValue(unsigned int channel) {
         assert(channel < m_numChnls);
         float values[2];
-        m_meterBuffer.read(values);
+        m_meterMaxBuffer.read(values);
         return values[channel];
     }
 
     void getCurrentValues(float *values) {
-        m_meterBuffer.read(values);
+      float * minValues = new float[m_numChnls];
+      m_meterMaxBuffer.read(values);
+      m_meterMinBuffer.read(minValues);
+      for (size_t i = 0; i < m_numChnls; i++) {
+        if (fabs(values[i]) > fabs(minValues[i])) {
+          values[i] = fabs(values[i]);
+        } else {
+          values[i] = fabs(minValues[i]);
+        }
+      }
+      delete[] minValues;
+    }
+
+    void getMinimumValues(float *values) {
+      m_meterMinBuffer.read(values);
+    }
+
+    void getMaximumValues(float *values) {
+      m_meterMaxBuffer.read(values);
     }
 
     /** Get the number of channels processed by this OutputMaster object */
@@ -271,7 +298,7 @@ protected:
     void setBassManagementModeTimestamped(al_sec until, int mode);
 
 private:
-	const unsigned int m_numChnls;
+    unsigned int m_numChnls;
 
 	/* parameters */
 	std::string m_addressPrefix;
@@ -287,7 +314,9 @@ private:
     int swIndex[4]; /* support for 4 SW max */
 
     std::vector<float> m_meterMax;
-    DoubleBuffering<float> m_meterBuffer;
+    std::vector<float> m_meterMin;
+    DoubleBuffering<float> m_meterMaxBuffer;
+    DoubleBuffering<float> m_meterMinBuffer;
     int m_meterCounter {0}; /* count samples for level updates */
 
     /* bass management filters */
