@@ -159,11 +159,12 @@ public:
 
     template<class F>
     void enqueue(F &&f, UpdateThreadFuncData &data);
-    void waitFinished();
+    void waitForProcessingDone();
     ~ThreadPool();
 
     unsigned int size() {return workers.size();}
 
+    void stopThreads();
 private:
     std::vector< std::thread > workers;
     std::deque<std::pair<std::function<void(UpdateThreadFuncData)>, UpdateThreadFuncData>> tasks;
@@ -171,7 +172,7 @@ private:
     std::condition_variable cv_task;
     std::condition_variable cv_finished;
     unsigned int busy;
-    bool stop;
+    bool stop {false};
 
     void thread_proc();
 };
@@ -277,6 +278,21 @@ public:
     void setBusRoutingCallback(BusRoutingCallback cb)
     {
         mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
+    }
+
+    /**
+     * @brief Stop all audio threads. No processing is possible after calling this function
+     *
+     * You might need to close all threads to have applications close neatly. Will
+     * only have effect if threading is enabled for simulation or audio
+     */
+    void stopAudioThreads() {
+      mSynthRunning = false;
+      mThreadTrigger.notify_all();
+      for (auto &thr : mAudioThreads) {
+          thr.join();
+      }
+      mAudioThreads.clear();
     }
 
 protected:

@@ -6,34 +6,25 @@ using namespace al;
 
 ThreadPool::ThreadPool(unsigned int n)
     : busy()
-    , stop()
 {
-    for (unsigned int i=0; i<n; ++i)
+    for (unsigned int i=0; i<n; ++i) {
         workers.emplace_back(std::bind(&ThreadPool::thread_proc, this));
+    }
 }
 
 
 ThreadPool::~ThreadPool()
 {
-    // set stop-condition
-    std::unique_lock<std::mutex> latch(queue_mutex);
-    stop = true;
-    cv_task.notify_all();
-    latch.unlock();
-
-    // all threads terminate, then we're done.
-    for (auto& t : workers)
-        t.join();
+  stopThreads();
 }
 
 void ThreadPool::thread_proc()
 {
-    while (true)
+    while (!stop)
     {
         std::unique_lock<std::mutex> latch(queue_mutex);
         cv_task.wait(latch, [this](){ return stop || !tasks.empty(); });
-        if (!tasks.empty())
-        {
+        if (!tasks.empty()) {
             // got work. set busy.
             ++busy;
 
@@ -50,19 +41,29 @@ void ThreadPool::thread_proc()
             latch.lock();
             --busy;
             cv_finished.notify_one();
-        } else if (stop)
-        {
-            break;
         }
     }
 }
 
 // waits until the queue is empty.
 
-void ThreadPool::waitFinished()
+void ThreadPool::waitForProcessingDone()
 {
     std::unique_lock<std::mutex> lock(queue_mutex);
     cv_finished.wait(lock, [this](){ return tasks.empty() && (busy == 0); });
+}
+
+
+void ThreadPool::stopThreads()
+{
+  // set stop-condition
+  std::unique_lock<std::mutex> latch(queue_mutex);
+  stop = true;
+  cv_task.notify_all();
+  latch.unlock();
+  // all threads terminate, then we're done.
+  for (auto& t : workers)
+      t.join();
 }
 
 // ------------------------------------------------
@@ -98,13 +99,10 @@ DynamicScene::DynamicScene (int threadPoolSize, TimeMasterMode masterMode)
 }
 
 DynamicScene::~DynamicScene() {
-    mSynthRunning = false;
-    mThreadTrigger.notify_all();
+    stopAudioThreads();
+
     if (mWorkerThreads) {
-        mWorkerThreads->waitFinished();
-    }
-    for (auto &thr : mAudioThreads) {
-        thr.join();
+        mWorkerThreads->waitForProcessingDone();
     }
     cleanup();
 }
@@ -302,7 +300,7 @@ void DynamicScene::update(double dt) {
             }
             voice = voice->next;
         }
-        mWorkerThreads->waitFinished();
+        mWorkerThreads->waitForProcessingDone();
     }
     // Update
     if (mMasterMode == TIME_MASTER_ASYNC) {
