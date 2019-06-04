@@ -143,6 +143,7 @@ void DynamicScene::render(Graphics &g) {
             g.pushMatrix();
             if (dynamic_cast<PositionedVoice *>(voice)) {
                 PositionedVoice *posVoice = static_cast<PositionedVoice *>(voice);
+                posVoice->preProcess(g);
                 Pose pose = posVoice->pose();
                 g.translate(pose.x(), pose.y(), pose.z());
                 g.rotate(pose.quat());

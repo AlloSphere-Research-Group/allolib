@@ -88,6 +88,11 @@ public:
     void audioOutOffsets(const std::vector<Vec3f> &offsets) { mAudioOutPositionOffsets = offsets;}
     
     /**
+     * @brief Override this function to apply transformations after the internal transformations of the voice has been applied
+     */
+    virtual void preProcess(Graphics& g) {}
+
+    /**
      * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields
      */ 
     virtual bool setTriggerParams(float *pFields, int numFields = -1) override;
