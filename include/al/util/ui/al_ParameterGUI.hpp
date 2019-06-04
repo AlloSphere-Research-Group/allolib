@@ -70,6 +70,8 @@ public:
     static void beginDraw() { beginIMGUI(); }
     static void endDraw() { endIMGUI(); }
 
+    static inline void draw(ParameterMeta *param) {drawParameterMeta(param);}
+
     // These functions require no state other than the parameter itself
     static void drawVectorParameters(std::vector<ParameterMeta *> params, std::string suffix = "");
     static void drawParameterMeta(ParameterMeta *param, std::string suffix = "");
