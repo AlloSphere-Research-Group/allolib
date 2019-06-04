@@ -254,10 +254,9 @@ public:
     // Callbacks
     void registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec = 0);
 
+    void registerSequenceBeginCallback(std::function<void (std::string)> func);
     void registerSequenceEndCallback(std::function<void (std::string)> func);
 
-
-    // TODO we should cleanup internal synth if an external one is set
     void registerSynth(PolySynth &synth);
 
     void operator<<(PolySynth &synth) { return registerSynth(synth);}
@@ -289,6 +288,7 @@ private:
 //    float mTimeChangeMinTimeDelta = 0;
     std::vector<double> mTimeAccumCallbackNs; // Accumulator for tirggering time change callback.
 
+    std::vector<std::function<void(std::string sequenceName)>> mSequenceBeginCallbacks;
     std::vector<std::function<void(std::string sequenceName)>> mSequenceEndCallbacks;
 
 

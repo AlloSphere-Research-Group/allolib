@@ -39,6 +39,7 @@ void SynthSequencer::print() {
 bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   //        synth().allNotesOff();
   // Add an offset of 0.1 to make sure the allNotesOff message gets processed before the sequence
+  mMasterTime = startTime;
   double currentMasterTime = mMasterTime;
   const double startPad = 0.1;
   std::list<SynthSequencerEvent> events = loadSequence(sequenceName, currentMasterTime - startTime + startPad);
@@ -46,9 +47,12 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   mLastSequencePlayed = sequenceName;
   mEvents = events;
   mNextEvent = 0;
-  mPlaybackStartTime = currentMasterTime;
+  mPlaybackStartTime = currentMasterTime - startTime + startPad;
   mPlaying = true;
   lk.unlock();
+  for (auto cb: mSequenceBeginCallbacks) {
+    cb(mLastSequencePlayed);
+  }
   if (mMasterMode == PolySynth::TIME_MASTER_CPU) {
     mCpuThread = std::make_shared<std::thread>([&](int granularityns = 1000) {
       bool running = true;
@@ -89,7 +93,14 @@ void SynthSequencer::stopSequence() {
   mPlaying = false;
 }
 
-void SynthSequencer::setTime(float newTime) {  std::cout << "Setting time not implemented" <<std::endl;}
+void SynthSequencer::setTime(float newTime) {
+  synth().allNotesOff();
+//  mPlaybackStartTime = newTime;
+  mMasterTime = newTime;
+  mNextEvent = 0;
+
+//  std::cout << "Setting time not implemented" <<std::endl;
+}
 
 void SynthSequencer::setDirectory(std::string directory) {
   assert(directory.size() > 0);
@@ -108,12 +119,20 @@ void SynthSequencer::registerTimeChangeCallback(std::function<void (float)> func
   }
 }
 
+void SynthSequencer::registerSequenceBeginCallback(std::function<void (std::string)> func)
+{
+  mSequenceBeginCallbacks.push_back(func);
+}
+
 void SynthSequencer::registerSequenceEndCallback(std::function<void (std::string)> func)
 {
   mSequenceEndCallbacks.push_back(func);
 }
 
 void SynthSequencer::registerSynth(PolySynth &synth) {
+  if (mInternalSynth && mInternalSynth.get() != &synth) {
+    mInternalSynth = nullptr;
+  }
   mPolySynth = &synth;
   mMasterMode = mPolySynth->mMasterMode;
 }
@@ -446,6 +465,9 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
       auto iter = mEvents.begin();
       std::advance(iter, mNextEvent);
       auto event = iter;
+      while (event != mEvents.end() && event->startTime <= mMasterTime - blockStartTime) {
+        event++;
+      }
       while (event->startTime <= mMasterTime) {
         event->offsetCounter = (event->startTime - blockStartTime)*fpsAdjusted;
         if (event->type == SynthSequencerEvent::EVENT_VOICE) {

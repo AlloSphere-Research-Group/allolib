@@ -752,13 +752,20 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
         int currentItem;
         float totalDuration {0.0f};
         float currentTime {0.0f};
+        bool newSequence {false};
+        std::string loadedSequence;
     };
     static std::map<SynthSequencer *, SynthSequencerState> stateMap;
     if(stateMap.find(synthSequencer) == stateMap.end()) {
         stateMap[synthSequencer] = SynthSequencerState{0};
         float *currentTime = &(stateMap[synthSequencer].currentTime);
+        auto *state = &(stateMap[synthSequencer]);
         synthSequencer->registerTimeChangeCallback( [currentTime](float currTime)
             {*currentTime = currTime;}, 0.1f);
+        synthSequencer->registerSequenceBeginCallback([state](std::string sequenceName)
+            {  state->loadedSequence = sequenceName;
+               state->newSequence = true; // poor man's mutex... perhaps should eb changed to a real mutex...
+            });
     }
     SynthSequencerState &state = stateMap[synthSequencer];
 
@@ -767,8 +774,17 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
     ImGui::PushID(suffix.c_str());
     std::string headerLabel = "Event Sequencer";
     if (ImGui::CollapsingHeader(headerLabel.c_str(), ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+      std::vector<std::string> seqList = synthSequencer->getSequenceList();
+      if (state.newSequence) {
+        ptrdiff_t pos = find(seqList.begin(), seqList.end(), state.loadedSequence) - seqList.begin();
+        if (pos < seqList.size()) {
+          state.currentItem = pos;
+          state.newSequence = false;
+          state.totalDuration = synthSequencer->getSequenceDuration(seqList[state.currentItem]);
+        }
+        state.newSequence = false;
+      }
       // TODO we should only refresh occasionally or perhaps reactively.
-        std::vector<std::string> seqList = synthSequencer->getSequenceList();
         if (seqList.size() > 0) {
             if (seqList.size() > 64) {
                 seqList.resize(64);
