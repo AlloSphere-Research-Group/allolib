@@ -122,6 +122,11 @@ public:
     return *static_cast<type *>(mData);
   }
 
+  template<typename type>
+  void set(type value) {
+    *static_cast<type *>(mData) = value;
+  }
+
 private:
   ParameterDataType mType;
   void *mData;
