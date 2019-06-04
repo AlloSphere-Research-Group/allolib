@@ -124,7 +124,34 @@ public:
 
   template<typename type>
   void set(type value) {
-    *static_cast<type *>(mData) = value;
+    if (std::is_same<type, float>::value) {
+      if (mType == FLOAT) {
+        *static_cast<type *>(mData) = value;
+      } else {
+        std::cerr << "ERROR: Unexpected type for parameter field set(). Ignoring." << std::endl;
+      }
+    }
+    if (std::is_same<type, double>::value) {
+      if (mType == FLOAT) {
+        *static_cast<type *>(mData) = value;
+      } else {
+        std::cerr << "ERROR: Unexpected type for parameter field set(). Ignoring." << std::endl;
+      }
+    }
+    if (std::is_same<type, std::string>::value) {
+      if (mType == STRING) {
+        *static_cast<type *>(mData) = value;
+      } else {
+        std::cerr << "ERROR: Unexpected type for parameter field set(). Ignoring." << std::endl;
+      }
+    }
+    if (std::is_same<type, char *>::value) {
+      if (mType == STRING) {
+        *static_cast<type *>(mData) = value;
+      } else {
+        std::cerr << "ERROR: Unexpected type for parameter field set(). Ignoring." << std::endl;
+      }
+    }
   }
 
 private:
