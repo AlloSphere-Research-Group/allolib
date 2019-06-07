@@ -482,7 +482,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
             event->voiceId = voice->id();
 //            event->voice = voice;
           } else {
-            std::cerr << "SynthSequencer::processEvents: Could not get free voice for sequencer!" << std::endl;
+            std::cerr << "SynthSequencer::processEvents: Could not get free voice '" << event->fields.name << "' for sequencer!" << std::endl;
           }
         } else if (event->type == SynthSequencerEvent::EVENT_TEMPO){
           // TODO support tempo events

@@ -157,6 +157,16 @@ struct SynthEvent {
  *
  * e.g. t 4.5 120
  *
+ * Insert another sequence
+ * = absTime sequenceName timeScale
+ *
+ * e.g. = 201.0000 "endEtherial.synthSequence" 1
+ *
+ * Time offset
+ * > timeOffset
+ *
+ * All events following will have this offset added to their start time. Negative numbers are allowed.
+ *
  */
 
 class SynthSequencer {
@@ -255,6 +265,15 @@ public:
     void registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec = 0);
 
     void registerSequenceBeginCallback(std::function<void (std::string)> func);
+    /**
+     * @brief registerSequenceEndCallback
+     * @param func
+     *
+     * Note that this callback is called whenever the event list empties, so it will be triggered
+     * after events added dynamically through addVoice() and addVoiceFromNow() are consumed.
+     * The callback will be called after the last trigger off time, which means there might still
+     * be voices being processed while if the have release envelopes, for example
+     */
     void registerSequenceEndCallback(std::function<void (std::string)> func);
 
     void registerSynth(PolySynth &synth);
