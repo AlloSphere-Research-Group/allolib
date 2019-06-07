@@ -116,6 +116,8 @@ public:
         if (mPresetHandler) {
 			mPresetHandler->stopMorph();
 		}
+        this->enableBeginCallback(false); // To vaoid triggering callback on thread wake up
+        this->mPlayWaitVariable.notify_all();
         mSequencerThread->join();
 	}
 
