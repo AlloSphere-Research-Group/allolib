@@ -833,6 +833,18 @@ public:
     return mActiveVoices;
   }
 
+  /**
+  * @brief getFreeVoices
+  * @return
+  *
+  * This function is unsafe and should be used with extreme care. Ensure that no
+  * allocation, voice insertion or removal takes place while working with these
+  * voices.
+  */
+  SynthVoice *getFreeVoices() {
+    return mFreeVoices;
+  }
+
   void setCpuClockGranularity(double timeSecs) {
     mCpuGranularitySec = timeSecs;
   }
