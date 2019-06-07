@@ -406,8 +406,8 @@ void Mesh::ribbonize(float * widths, int widthsStride, bool faceBinormal){
 
   if(0 == N) return;
 
-  mVertices.reserve(N*2);
-  mNormals.reserve(N*2);
+  mVertices.resize(N*2);
+  mNormals.resize(N*2);
 
   int in = faceBinormal ? 2 : 1;
   int ib = faceBinormal ? 1 : 2;
