@@ -254,15 +254,14 @@ public:
       drawAllNotesOffButton();
       drawPresets();
       ImGui::Separator();
-      static int currentTab = 1;
       ImGui::Columns(2, nullptr, true);
-      if (ImGui::Selectable("Polyphonic", currentTab == 1)) {
-          currentTab = 1;
+      if (ImGui::Selectable("Polyphonic", mCurrentTab == 1)) {
+          mCurrentTab = 1;
           triggerOff();
       }
       ImGui::NextColumn();
-      if (ImGui::Selectable("Static", currentTab == 2)) {
-          currentTab = 2;
+      if (ImGui::Selectable("Static", mCurrentTab == 2)) {
+          mCurrentTab = 2;
           synthSequencer().stopSequence();
           synth().allNotesOff();
 //            while (synth().getActiveVoices()) {} // Spin until all voices have been removed
@@ -270,7 +269,7 @@ public:
       }
 
       ImGui::Columns(1);
-      if (currentTab == 1) {
+      if (mCurrentTab == 1) {
         drawAllNotesOffButton();
         drawSynthSequencer();
         drawSynthRecorder();
@@ -278,6 +277,14 @@ public:
         drawTriggerButton();
         drawPresetSequencer();
         drawPresetSequencerRecorder();
+      }
+    }
+
+    void setCurrentTab(int tab) {
+      if (tab >= 1 && tab <= 2) {
+        mCurrentTab = tab;
+      } else {
+        std::cerr << "ERROR: Can't set tab for SynthGUIManager:" << tab << std::endl;
       }
     }
 
@@ -430,6 +437,8 @@ private:
 
     bool mCurrentTriggerState {false};
     int mTriggerVoiceId {INT_MIN};
+
+    int mCurrentTab = 1;
 };
 
 
