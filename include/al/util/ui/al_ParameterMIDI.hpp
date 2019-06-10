@@ -85,17 +85,20 @@ public:
         open(deviceIndex, verbose);
 	}
 
-    void open(int deviceIndex = 0, bool verbose = false) {
+    void open(int deviceIndex = 0) {
+      MIDIMessageHandler::bindTo(mMidiIn);
+      try {
+          mMidiIn.openPort(deviceIndex);
+          printf("ParameterMIDI: Opened port to %s\n", mMidiIn.getPortName(deviceIndex).c_str());
+      }
+      catch (al::MIDIError &error) {
+          std::cout << "ParameterMIDI Warning: Could not open MIDI port " << deviceIndex << std::endl;
+      }
+    }
 
-        MIDIMessageHandler::bindTo(mMidiIn);
-		mVerbose = verbose;
-		try {
-			mMidiIn.openPort(deviceIndex);
-			printf("ParameterMIDI: Opened port to %s\n", mMidiIn.getPortName(deviceIndex).c_str());
-		}
-		catch (al::MIDIError &error) {
-			std::cout << "ParameterMIDI Warning: Could not open MIDI port " << deviceIndex << std::endl;
-		}
+    void open(int deviceIndex, bool verbose) {
+      open(deviceIndex);
+      mVerbose = verbose;
     }
 
     void close() {
@@ -221,6 +224,8 @@ public:
 			m.print();
 		}
 	}
+
+    void verbose(bool v) {mVerbose = v;}
 
     struct ControlBinding {
 		int controlNumber;

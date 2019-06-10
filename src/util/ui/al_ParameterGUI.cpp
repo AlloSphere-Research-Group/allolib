@@ -860,6 +860,7 @@ void ParameterGUI::drawParameterMIDI(ParameterMIDI *midi)
     struct ParameterMIDIState {
         std::vector<std::string> devices;
         int currentDevice;
+        bool verbose;
     };
     auto updateDevices = [](ParameterMIDIState& state) {
         RtMidiIn in;
@@ -880,12 +881,21 @@ void ParameterGUI::drawParameterMIDI(ParameterMIDI *midi)
     if (ImGui::CollapsingHeader("Paramter MIDI", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
         if (midi->isOpen()) {
             std::string noteBindings;
-            noteBindings += "MIDI Note -> Channel, Value";
-//            for (auto &binding: parameterMidi->getCurrentNoteBindings()) {
-//                noteBindings += std::to_string(binding.noteNumber) + " -> ";
-//                noteBindings += std::to_string(binding.channel) + ":" + std::to_string(binding.value);
-//                noteBindings += "\n";
-//            }
+//            noteBindings += "MIDI Note -> Channel, Value\n";
+            for (auto &binding: midi->getCurrentNoteBindings()) {
+                noteBindings += std::to_string(binding.noteNumber) + " -> ";
+                noteBindings += std::to_string(binding.channel) + ":" + std::to_string(binding.value);
+                noteBindings += "\n";
+            }
+            if (noteBindings.size() > 0) {
+              noteBindings = "MIDI Note -> Channel, Value\n" + noteBindings;
+            }
+
+            for (auto &binding: midi->getCurrentControlBindings()) {
+                noteBindings += "Channel " + std::to_string(binding.channel + 1) + " CC#" +  std::to_string(binding.controlNumber) + " -> ";
+                noteBindings += binding.param->getFullAddress();
+                noteBindings += "\n";
+            }
             ImGui::Text("%s",noteBindings.c_str());
             if (ImGui::Button("Stop")) {
                 midi->close();
@@ -896,8 +906,9 @@ void ParameterGUI::drawParameterMIDI(ParameterMIDI *midi)
                              static_cast<void*>(&state.devices), state.devices.size())) {
                 // TODO adjust valid number of channels.
             }
+            ImGui::Checkbox("Verbose", &state.verbose);
             if (ImGui::Button("Start")) {
-                midi->open(state.currentDevice);
+                midi->open(state.currentDevice, state.verbose);
             }
         }
     }

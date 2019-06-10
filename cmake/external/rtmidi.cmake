@@ -42,12 +42,9 @@ if(IS_DIRECTORY "${al_path}/external/rtmidi")
   endif(AL_MACOS)
 
   if(AL_WINDOWS)
-    set(RTMIDI_DEFINITIONS -D__WINDOWS_WASAPI__)
+    set(RTMIDI_DEFINITIONS -D__WINDOWS_MM__)
     list(APPEND RTMIDI_LIBRARIES
-      ole32
-      winmm
-      ksuser
-      uuid
+      winmm.lib
     )
   endif(AL_WINDOWS)
 endif() # RTMIDI

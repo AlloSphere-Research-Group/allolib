@@ -102,7 +102,7 @@ if(BUILD_EXAMPLES)
       if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         get_filename_component(DLL_NAME "${dll}" NAME) # Get name w/o extension
 
-        message(" ********** ${dll} ${EXAMPLE_DIR}/bin ${DLL_NAME}")
+#        message(" ********** ${dll} ${EXAMPLE_DIR}/bin ${DLL_NAME}")
         execute_process(COMMAND robocopy "${DLL_DIR}" "${EXAMPLE_DIR}/bin" "${DLL_NAME}")
       endif()
     endforeach()
