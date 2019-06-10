@@ -46,7 +46,9 @@ macro(BuildExample example_src dir)
   add_executable(${EXAMPLE_TARGET} ${example_src})
 
   set_target_properties(${EXAMPLE_TARGET}
-    PROPERTIES CXX_STANDARD 14
+    PROPERTIES
+    DEBUG_POSTFIX d
+    CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON)
 
 #       message("Adding target for example: ${example_src}")
