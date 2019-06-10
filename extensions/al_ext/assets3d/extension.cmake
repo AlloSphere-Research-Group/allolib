@@ -6,7 +6,7 @@ ${CMAKE_CURRENT_LIST_DIR}
 find_package(Assimp)
 
 if (NOT ASSIMP_LIBRARY)
-  message("OpenVR not found. Not building al_openvr extension.")
+  message("Assimp not found. Not building al_assets3d extension.")
 else()
 #  list(APPEND ADDITIONAL_INCLUDE_DIRS ${ASSIMP_INCLUDE_DIR})
 #  list(APPEND ADDITIONAL_LIBRARIES ${ASSIMP_LIBRARY})
