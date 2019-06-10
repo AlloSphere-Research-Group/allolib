@@ -13,7 +13,7 @@ bool ComputationDomain::initializeSubdomains(bool pre)
     if (subDomain.second == pre) {
       auto syncSubDomain = std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
       if (syncSubDomain) {
-        ret &= syncSubDomain->initialize();
+        ret &= syncSubDomain->initialize(this);
       }
     }
   }
@@ -40,14 +40,12 @@ bool ComputationDomain::cleanupSubdomains(bool pre)
     if (subDomain.second == pre) {
       auto syncSubDomain = std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
       if (syncSubDomain) {
-        ret &= syncSubDomain->cleanup();
+        ret &= syncSubDomain->cleanup(this);
       }
     }
   }
   return ret;
 }
-
-
 
 void al::BaseCompositeApp::start() {
   for (auto domain: mDomainList) {

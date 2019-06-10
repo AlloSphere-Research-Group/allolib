@@ -17,9 +17,9 @@ class SynchronousDomain;
 class ComputationDomain
 {
 public:
-  virtual bool initialize() = 0;
+  virtual bool initialize(ComputationDomain *parent = nullptr) = 0;
 
-  virtual bool cleanup() = 0;
+  virtual bool cleanup(ComputationDomain *parent = nullptr) = 0;
 
   bool initializeSubdomains(bool pre = false);
   bool tickSubdomains(bool pre = false);
@@ -103,8 +103,8 @@ private:
 template<class DomainType>
 std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
   // Only Synchronous domains are allowed as subdomains
-  assert(strcmp(typeid (DomainType).name(), "SynchronousDomain") == 0);
   auto newDomain = std::make_shared<DomainType>();
+  assert(dynamic_cast<SynchronousDomain *>(newDomain.get()));
   if (newDomain) {
     mSubDomainList.push_back({newDomain, prepend});
   }
@@ -124,24 +124,26 @@ class GraphicsDomain : public AsynchronousDomain, public gam::Domain
 {
 public:
 
-  bool initialize() override {
+  bool initialize(ComputationDomain *parent = nullptr) override {
     bool ret = true;
-    ret &= initializeSubdomains(true);
     glfw::init(app.is_verbose);
     ret &= glfwInit();
 
     if (app.is_verbose) std::cout << "Initialized GLFW " << glfwGetVersionString() << std::endl;
     glfwSetErrorCallback([](int code, const char* description){std::cout << "glfw error [" << code << "]: " << description << std::endl;});
 
-    ret &= initializeSubdomains(false);
     callInitializeCallbacks();
     return ret;
   }
 
   bool start() override {
+    bool ret = true;
+    ret &= initializeSubdomains(true);
     app.startFPS(); // WindowApp (FPS)
     gam::Domain::spu(app.fps());
     app.create(app.is_verbose);
+    ret &= initializeSubdomains(false);
+
     preOnCreate();
     onCreate();
     callStartCallbacks();
@@ -150,13 +152,16 @@ public:
       // or press ctrl + q
       preOnAnimate(app.dt_sec());
       onAnimate(app.dt_sec());
+      tickSubdomains(true);
       preOnDraw();
       onDraw(app.mGraphics);
       postOnDraw();
       app.refresh();
+      tickSubdomains(false);
       app.tickFPS();
     }
-    return true;
+
+    return ret;
   }
 
   bool stop() override {
@@ -167,7 +172,7 @@ public:
     return true;
   }
 
-  bool cleanup() override {
+  bool cleanup(ComputationDomain *parent = nullptr) override {
     callCleanupCallbacks();
     glfw::terminate(app.is_verbose);
     return true;
@@ -217,6 +222,8 @@ public:
     //
   }
 
+  Graphics &graphics() { return app.mGraphics;}
+
 private:
   WindowApp app;
   Nav mNav; // is a Pose itself and also handles manipulation of pose
@@ -238,7 +245,7 @@ public:
   AudioIO& audioIO(){ return mAudioIO; }
   const AudioIO& audioIO() const { return mAudioIO; }
 
-  bool initialize() override {
+  bool initialize(ComputationDomain *parent = nullptr) override {
     callInitializeCallbacks();
     return true;
   }
@@ -258,7 +265,7 @@ public:
     return true;
   }
 
-  bool cleanup() override {
+  bool cleanup(ComputationDomain *parent = nullptr) override {
     callCleanupCallbacks();
     return true;
   }
@@ -321,7 +328,7 @@ namespace al {
 class OSCDomain: public AsynchronousDomain {
 public:
 
-  bool initialize() override {
+  bool initialize(ComputationDomain *parent = nullptr) override {
     mHandler.mOscDomain = this;
     mParameterServer.registerOSCListener(&mHandler); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
     return true;
@@ -344,7 +351,7 @@ public:
     return ret;
   }
 
-  bool cleanup() override { return true; }
+  bool cleanup(ComputationDomain *parent = nullptr) override { return true; }
 
 
   ParameterServer& parameterServer() { return mParameterServer; }
@@ -379,12 +386,15 @@ namespace al {
 class OpenVRDomain: public SynchronousDomain {
 public:
 
-  bool initialize() override {
+  bool initialize(ComputationDomain *parent = nullptr) override {
 #ifdef AL_EXT_OPENVR
     // Initialize openVR in onCreate. A graphics context is needed.
     if(!mOpenVR.init()) {
       return false;
 //      std::cerr << "ERROR: OpenVR init returned error" << std::endl;
+    }
+    if (dynamic_cast<GraphicsDomain *>(parent)) {
+      g = &dynamic_cast<GraphicsDomain *>(parent)->graphics();
     }
 //    std::cerr << "Not building wiht OpenVR support" << std::endl;
     return true;
@@ -394,22 +404,30 @@ public:
 
   bool tick() override {
 #ifdef AL_EXT_OPENVR
+    std::cout << "tick" << std::endl;
         // Update traking and controller data;
         mOpenVR.update();
 
         //openVR draw.
         // Draw in onAnimate, to make sure drawing happens only once per frame
         // Pass a function that takes Graphics &g argument
-//        mOpenVR.draw(std::bind(&OpenVRDomain::drawScene, this, std::placeholders::_1), mGraphics);
+        mOpenVR.draw(drawSceneFunc, *g);
 #endif
         return true;
   }
 
-  bool cleanup() override { return true; }
+  void setDrawFunction(std::function<void(Graphics &)> func) {
+    drawSceneFunc = func;
+  }
 
-  std::function<void(Graphics &)> drawScene = [](Graphics &g){ };
+  bool cleanup(ComputationDomain *parent = nullptr) override { return true; }
+
+  Graphics *g;
 
 private:
+
+  std::function<void(Graphics &)> drawSceneFunc = [](Graphics &g){ g.clear(0, 0, 1.0); };
+
 #ifdef AL_EXT_OPENVR
     al::OpenVRWrapper mOpenVR;
 #endif
@@ -431,7 +449,7 @@ public:
 
     mGraphicsDomain = newDomain<GraphicsDomain>();
     //FIXME fix openVR domain
-//    mGraphicsDomain->newSubDomain<OpenVRDomain>();
+    mGraphicsDomain->newSubDomain<OpenVRDomain>();
   }
 
 
