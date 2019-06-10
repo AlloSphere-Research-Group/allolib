@@ -143,7 +143,7 @@ target_link_libraries(${app_name} PRIVATE ${app_linker_flags})
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set (DEBUGGER "gdb" "-ex" "run")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set (DEBUGGER "lldb" "-o run" "-ex ")
+    set (DEBUGGER "lldb" "-o run")
 endif()
 
 add_custom_target(${app_name}_run
