@@ -1,7 +1,7 @@
 #include <memory>
 #include <iostream>
 
-#include "al_ext/distributed/al_ComputationDomain.hpp"
+#include "al_ext/distributed/al_App.hpp"
 
 #include "Gamma/Oscillator.h"
 

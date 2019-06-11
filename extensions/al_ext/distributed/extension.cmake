@@ -12,10 +12,21 @@ ${CMAKE_CURRENT_LIST_DIR}
 #  list(APPEND ADDITIONAL_LIBRARIES ${ASSIMP_LIBRARY})
   
   set(THIS_EXTENSION_SRC
+    "${CMAKE_CURRENT_LIST_DIR}/src/al_App.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/src/al_ComputationDomain.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/al_GraphicsDomain.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/al_AudioDomain.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/al_OSCDomain.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/al_OpenVRDomain.cpp"
   )
+
   set(THIS_EXTENSION_HEADERS
+    "${CMAKE_CURRENT_LIST_DIR}/al_App.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/al_ComputationDomain.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/al_GraphicsDomain.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/al_AudioDomain.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/al_OSCDomain.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/al_OpenVRDomain.hpp"
   )
 
   set(THIS_EXTENSION_LIBRARIES
