@@ -97,29 +97,8 @@ class PresetSequencer : public osc::MessageConsumer
 {
 	friend class Composition;
 public:
-    PresetSequencer() :
-        mSequencerActive(true),
-	    mRunning(false),
-        mStartingRun(false),
-	    mSequencerThread(nullptr),
-	    mBeginCallbackEnabled(false),
-	    mEndCallbackEnabled(false)
-    {
-      mSequencerThread = std::make_unique<std::thread>(PresetSequencer::sequencerFunction, this);
-
-	}
-
-	~PresetSequencer() override
-    {
-        mSequencerActive = false;
-        stopSequence(false);
-        if (mPresetHandler) {
-			mPresetHandler->stopMorph();
-		}
-        this->enableBeginCallback(false); // To vaoid triggering callback on thread wake up
-        this->mPlayWaitVariable.notify_all();
-        mSequencerThread->join();
-	}
+    PresetSequencer();
+    ~PresetSequencer() override;
 
 	typedef enum {
 		PRESET,

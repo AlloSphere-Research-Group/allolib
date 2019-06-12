@@ -11,23 +11,48 @@
 
 using namespace al;
 
+PresetSequencer::PresetSequencer() :
+  mSequencerActive(true),
+  mRunning(false),
+  mStartingRun(false),
+  mSequencerThread(nullptr),
+  mBeginCallbackEnabled(false),
+  mEndCallbackEnabled(false)
+{
+  mSequencerThread = std::make_unique<std::thread>(PresetSequencer::sequencerFunction, this);
+
+}
+
+PresetSequencer::~PresetSequencer()
+{
+  mSequencerActive = false;
+  stopSequence(false);
+  if (mPresetHandler) {
+    mPresetHandler->stopMorph();
+  }
+  this->enableBeginCallback(false); // To vaoid triggering callback on thread wake up
+  mStartingRun = true; // The conditional variable will only stop waiting if this is true
+  this->mPlayWaitVariable.notify_all();
+  mSequencerThread->join();
+}
+
 void PresetSequencer::playSequence(std::string sequenceName, double timeScale)
 {
-	stopSequence();
-	mSequenceLock.lock();
-	//		while (!mSteps.empty()) {
-	//			mSteps.pop();
-	//		}
-	if (sequenceName.size() > 0) {
-		std::queue<Step> steps = loadSequence(sequenceName, timeScale);
-		mSteps = steps;
-    }
-	{
-        std::unique_lock<std::mutex> lk(mPlayWaitLock);
-        mStartingRun = true;
-        mPlayWaitVariable.notify_one();
-    }
-    mSequenceLock.unlock();
+  stopSequence();
+  mSequenceLock.lock();
+  //		while (!mSteps.empty()) {
+  //			mSteps.pop();
+  //		}
+  if (sequenceName.size() > 0) {
+    std::queue<Step> steps = loadSequence(sequenceName, timeScale);
+    mSteps = steps;
+  }
+  {
+    std::unique_lock<std::mutex> lk(mPlayWaitLock);
+    mStartingRun = true;
+    mPlayWaitVariable.notify_one();
+  }
+  mSequenceLock.unlock();
     {
       std::unique_lock<std::mutex> lk(mPlayWaitLock);
         mPlayWaitVariable.wait(lk, [&] { return mRunning;});
