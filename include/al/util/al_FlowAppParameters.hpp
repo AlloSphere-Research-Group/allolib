@@ -5,6 +5,7 @@
 */
 
 #include "al/core/io/al_ControlNav.hpp"
+#include "al/core/graphics/al_Lens.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/util/ui/al_ParameterServer.hpp"
 
