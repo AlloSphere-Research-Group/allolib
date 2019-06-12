@@ -7,6 +7,7 @@
 #include <iostream>
 #include <functional>
 #include <cassert>
+#include <cstring>
 
 #include "al_ComputationDomain.hpp"
 #include "al_GraphicsDomain.hpp"
