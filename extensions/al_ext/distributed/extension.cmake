@@ -18,6 +18,7 @@ ${CMAKE_CURRENT_LIST_DIR}
     "${CMAKE_CURRENT_LIST_DIR}/src/al_AudioDomain.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/src/al_OSCDomain.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/src/al_OpenVRDomain.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/al_StateDistributionDomain.cpp"
   )
 
   set(THIS_EXTENSION_HEADERS
@@ -27,6 +28,7 @@ ${CMAKE_CURRENT_LIST_DIR}
     "${CMAKE_CURRENT_LIST_DIR}/al_AudioDomain.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/al_OSCDomain.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/al_OpenVRDomain.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/al_StateDistributionDomain.hpp"
   )
 
   set(THIS_EXTENSION_LIBRARIES
@@ -50,7 +52,10 @@ ${CMAKE_CURRENT_LIST_DIR}
   set(CURRENT_EXTENSION_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR})
   set(CURRENT_EXTENSION_DLLS "${OPENVR_ROOT}/bin/win64/openvr_api.dll")
 
-  set(CURRENT_EXTENSION_EXAMPLES "${CMAKE_CURRENT_LIST_DIR}/examples/app-domains.cpp")
+  set(CURRENT_EXTENSION_EXAMPLES
+    "${CMAKE_CURRENT_LIST_DIR}/examples/app-domains.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/examples/distributedapp.cpp"
+    )
 
   message("libs: ${CURRENT_EXTENSION_LIBRARIES}")
 
