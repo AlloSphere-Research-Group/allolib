@@ -38,12 +38,12 @@ public:
 	void event(PickEvent e){
 		Hit h = intersect(e.ray);
 		for(Pickable *p : mPickables){
-			if(p == h.p || p->selected.get()){
+			if(p == h.p || p->selected.get() || e.type == Unpick  || e.type == Point){
 				p->event(e);
 
 				if(e.type == Point) mLastPoint = h;
 				if(e.type == Pick) mLastPick = h;
-			} else p->clearSelection(); //unpick?
+			} //else p->clearSelection(); //unpick?
 		}	
 	}
 
@@ -64,7 +64,7 @@ public:
 	void onMouseDrag(Graphics &g, const Mouse& m, int w, int h){
 		Rayd r = getPickRay(g, m.x(), m.y(), w, h);
 		if(m.right()) event(PickEvent(RotateRay, r));
-		else if(m.middle()) event(PickEvent(Scale, r, m.dy()));
+		else if(m.middle()) event(PickEvent(Scale, r, -m.dy()));
 		else event(PickEvent(TranslateRay, r));
 	}
 	void onMouseUp(Graphics &g, const Mouse& m, int w, int h){

@@ -8,10 +8,11 @@
 #include "al/util/ui/al_BoundingBox.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/util/ui/al_ParameterBundle.hpp"
+#include "al/core/graphics/al_Graphics.hpp"
 
 namespace al {
 
-enum PickEventType { Point, Pick, Unpick, Drag, TranslateRay, RotateRay, RotatePose, Scale };
+enum PickEventType { Point, Pick, PickPose, Unpick, Drag, TranslateRay, RotateRay, RotatePose, Scale };
 
 struct PickEvent{
   PickEventType type;
@@ -24,6 +25,7 @@ struct PickEvent{
   PickEvent(PickEventType t, Rayd r, Vec3f v) : type(t), ray(r), pose(v,Quatf()) {}
   PickEvent(PickEventType t, Rayd r, float v) : type(t), ray(r), amount(v) {}
   PickEvent(PickEventType t, Pose p) : type(t), pose(p) {}
+  PickEvent(PickEventType t, float v) : type(t), amount(v) {}
 };
 
 struct Pickable;
@@ -48,7 +50,7 @@ struct Pickable {
   Parameter scale{"scale", name, 1.0f, "", 0.0f, 10.0f};
   ParameterBundle bundle{"pickable"};
 
-  Pickable *parent = 0;
+  Pickable *parent = nullptr;
   std::vector<Pickable *> children;
   bool testChildren = true;
   bool containChildren = false;
@@ -72,6 +74,8 @@ struct Pickable {
     selected.setHint("hide", 1.0);
     scaleVec.setHint("hide", 1.0); // We want to show the single value scale by default.
   }
+
+  virtual ~Pickable(){}
 
   /// intersection test must be implemented
   virtual Hit intersect(Rayd r) = 0;
@@ -116,7 +120,7 @@ struct Pickable {
   }
 
   Hit intersectChildren(Rayd &r){
-    Hit hmin = Hit(false, r, 1e10, NULL);
+    Hit hmin = Hit(false, r, 1e10, nullptr);
     Rayd ray = transformRayLocal(r);
     for (auto *c : children){
       Hit h = c->intersect(ray);
@@ -235,14 +239,22 @@ struct PickableBB : Pickable {
           selectDist = h.t;
           selectPos = h();
           selectOffset = pose.get().pos() - h(); // * scaleVec.get();
-          // selectQuat.set(e.pose.quat()); // XXX previously grab
-          // selectOffset.set(e.pose.pos() - pose.get().pos());
-
         }
         if(selected.get() != h.hit)
           selected = h.hit; // to avoid triggering change callback if no change
 
         return h.hit;
+        break;
+
+      case PickPose:
+        prevPose.set(pose.get());
+        selectQuat.set(e.pose.quat());
+        selectOffset.set(pose.get().pos() - e.pose.pos());
+
+        if(selected.get() != true)
+          selected = true; 
+
+        return true;
         break;
 
       case Drag:
@@ -252,18 +264,19 @@ struct PickableBB : Pickable {
           if(parent && (parent->containChildren || containedChild)){
             auto *p = dynamic_cast<PickableBB *>(parent);
             if(p){
-              std::cout << "pre: " << newPos << std::endl;
+              // std::cout << "pre: " << newPos << std::endl;
 
               newPos = min(newPos, p->bb.max - scaleVec.get()*bb.dim/2);
-              std::cout << "mid: " << newPos << std::endl;
+              // std::cout << "mid: " << newPos << std::endl;
 
               newPos = max(newPos, p->bb.min + scaleVec.get()*bb.dim/2);
 
-              std::cout << "post: " << newPos << std::endl;
-              std::cout << "min: " << p->bb.min << " max: " << p->bb.max << " scale: " << scaleVec.get() << " hdim: " << bb.dim / 2  << std::endl;
+              // std::cout << "post: " << newPos << std::endl;
+              // std::cout << "min: " << p->bb.min << " max: " << p->bb.max << " scale: " << scaleVec.get() << " hdim: " << bb.dim / 2  << std::endl;
               newPos -= bb.dim/2;
             }
-          } else pose = Pose(newPos, pose.get().quat());
+          }
+          pose = Pose(newPos, pose.get().quat());
           return true;
         } else return false;
         break;
@@ -288,15 +301,22 @@ struct PickableBB : Pickable {
           Vec3f p1 = transformVecWorld(bb.cen);
           pose.setQuat(diff*prevPose.quat());
           Vec3f p2 = transformVecWorld(bb.cen);
-          pose.setPos(e.pose.pos()+selectOffset + p1-p2);
+          // pose.setPos(e.pose.pos()+selectOffset + p1-p2);
+          pose.setPos(pose.get().pos() + p1-p2);
           return true;
         } else return false;
         break;
 
       case Scale:
         if(selected.get()){
-          scale = scale - e.amount*0.01 * scale; 
+
+          Vec3f p1 = transformVecWorld(bb.cen);
+          scale = scale + e.amount*0.01 * scale; 
 					if(scale < 0.0005) scale = 0.0005;
+          // scaleVec.set(scale)
+          Vec3f p2 = transformVecWorld(bb.cen);
+          pose.setPos(pose.get().pos() + p1-p2);
+
           return true;
         } else return false;
         break;

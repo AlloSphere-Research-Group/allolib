@@ -128,6 +128,8 @@ set(util_headers
   include/al/util/ui/al_HtmlInterfaceServer.hpp
   include/al/util/ui/al_PresetMapper.hpp
   include/al/util/ui/al_PresetMIDI.hpp
+  include/al/util/ui/al_Pickable.hpp
+  include/al/util/ui/al_PickableManager.hpp
   include/al/util/ui/al_PresetSequencer.hpp
   include/al/util/ui/al_SequenceRecorder.hpp
   include/al/util/ui/al_ControlGUI.hpp
