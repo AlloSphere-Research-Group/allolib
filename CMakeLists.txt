@@ -135,8 +135,56 @@ target_include_directories(al PUBLIC ${dirs_to_include})
 target_link_libraries(al PUBLIC ${libs_to_link} Gamma glfw glew_s)
 
 set_target_properties(al PROPERTIES AL_LINK_LIBRARIES "${libs_to_link}")
+set_target_properties(al PROPERTIES AL_DLL_LIBRARIES "${EXTENSIONS_DLLS}")
 set_target_properties(al PROPERTIES AL_LINK_DIRECTORIES "${link_dirs}")
 set_target_properties(al PROPERTIES AL_INCLUDE_DIRECTORIES "${dirs_to_include}")
+
+# Convenience function
+macro(Copy_dlls app_path app_name DLLS_TO_COPY)
+
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    message("--- Copying dlls to ${app_path} for target ${app_name}: ${DLLS_TO_COPY}")
+
+    foreach(LIBRARY ${DLLS_TO_COPY})
+      get_filename_component(LIBRARY_DIR "${LIBRARY}" DIRECTORY)
+      get_filename_component(LIBRARY_NAME "${LIBRARY}" NAME)
+      message("${LIBRARY_DIR} ----- ${LIBRARY_NAME}")
+      list(APPEND post_build_command
+        robocopy "${LIBRARY_DIR}" "${app_path}/bin" "${LIBRARY_NAME}" &
+        )
+    endforeach(LIBRARY IN "${DLLS_TO_COPY}")
+
+    if (USE_PORTAUDIO)
+      list(APPEND post_build_command
+        robocopy ${al_path}/dependencies/portaudio/ ${app_path}/bin portaudio_x64.dll &
+        )
+    endif (USE_PORTAUDIO)
+
+    if (USE_APR)
+      list(APPEND post_build_command
+        robocopy ${al_path}/dependencies/apr/ ${app_path}/bin libapr-1.dll &
+        )
+    endif (USE_APR)
+
+    if (FREEIMAGE_FOUND)
+      list(APPEND post_build_command
+        robocopy ${al_path}/dependencies/FreeImage/Dist/x64 ${app_path}/bin FreeImage.dll &
+        )
+    endif (FREEIMAGE_FOUND)
+
+    list(APPEND post_build_command
+      IF %ERRORLEVEL% LEQ 1 exit 0
+      )
+
+    add_custom_command(
+      TARGET ${app_name}
+      POST_BUILD
+      COMMAND ${post_build_command}
+      )
+  endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
+endmacro(Copy_dlls)
+
 
 # --- Testing -----------------------------------------
 if (ALLOLIB_BUILD_TESTS)
@@ -173,4 +221,6 @@ install(FILES external/imgui/imgui.h DESTINATION include)
 install(FILES external/imgui/imconfig.h DESTINATION include)
 install(FILES external/rtaudio/RtAudio.h DESTINATION include)
 install(FILES external/rtmidi/rtmidi_c.h external/rtmidi/RtMidi.h
-        DESTINATION include)
+        DESTINATION include
+)
+

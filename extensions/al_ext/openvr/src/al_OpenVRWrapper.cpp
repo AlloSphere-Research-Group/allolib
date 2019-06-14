@@ -156,17 +156,30 @@ bool OpenVRWrapper::update() {
 
   int actual_y = 110, tracked_device_count = 0;
   for (int nDevice = 0; nDevice < vr::k_unMaxTrackedDeviceCount; nDevice++) {
-    if ((tracked_device_pose[nDevice].bDeviceIsConnected) && (tracked_device_pose[nDevice].bPoseIsValid)) {
+    if ((tracked_device_pose[nDevice].bDeviceIsConnected)) {
 
       // print_text(("Tracked device #" + ftos((float) nDevice,0) + " (" + tracked_device_type[nDevice] + ")").c_str(), color, 10, actual_y);
       // We take just the translation part of the matrix (actual position of tracked device, not orientation)
-      float v[3] = { tracked_device_pose[nDevice].mDeviceToAbsoluteTracking.m[0][3], tracked_device_pose[nDevice].mDeviceToAbsoluteTracking.m[1][3], tracked_device_pose[nDevice].mDeviceToAbsoluteTracking.m[2][3] };
+      if(tracked_device_pose[nDevice].bPoseIsValid){
+        float v[3] = { tracked_device_pose[nDevice].mDeviceToAbsoluteTracking.m[0][3], tracked_device_pose[nDevice].mDeviceToAbsoluteTracking.m[1][3], tracked_device_pose[nDevice].mDeviceToAbsoluteTracking.m[2][3] };
 
-      //save hmd pos data
-      if (nDevice == 0){
-        HMDPos = v;
+        //save hmd pos data
+        if (nDevice == 0){
+          HMDPos = v;
+        }
+        //region mengyu-> save v3 pos data into controller pos variable
+        if (nDevice == LeftController.deviceID){
+          LeftController.lpos = LeftController.pos;
+          LeftController.pos = v;
+          LeftController.vel = LeftController.pos - LeftController.lpos;
+        }
+
+        if (nDevice == RightController.deviceID){
+          RightController.lpos = RightController.pos;
+          RightController.pos = v;
+          RightController.vel = RightController.pos - RightController.lpos;
+        }
       }
-
       // Check whether the tracked device is a controller
       if (nDevice == LeftController.deviceID || nDevice == RightController.deviceID){
 
@@ -206,20 +219,6 @@ bool OpenVRWrapper::update() {
           // ((vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_Axis1) & controller_state.ulButtonPressed) == 0) ? color = green : color = blue;
         }
       }
-
-      //region mengyu-> save v3 pos data into controller pos variable
-      if (nDevice == LeftController.deviceID){
-        LeftController.lpos = LeftController.pos;
-        LeftController.pos = v;
-        LeftController.vel = LeftController.pos - LeftController.lpos;
-      }
-
-      if (nDevice == RightController.deviceID){
-        RightController.lpos = RightController.pos;
-        RightController.pos = v;
-        RightController.vel = RightController.pos - RightController.lpos;
-      }
-
 
       // //end region
 

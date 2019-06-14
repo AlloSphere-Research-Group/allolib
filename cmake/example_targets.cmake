@@ -61,6 +61,10 @@ macro(BuildExample example_src dir)
   #    message("Gamma : ${GAMMA_INCLUDE_DIRs}")
   add_dependencies(${EXAMPLE_TARGET} al Gamma)
   target_link_libraries(${EXAMPLE_TARGET} al Gamma ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES})
+
+  get_target_property(DLLS_TO_COPY al AL_DLL_LIBRARIES)
+  Copy_dlls("${EXAMPLE_DIRECTORY}/bin" "${EXAMPLE_TARGET}" "${EXTENSIONS_DLLS}")
+
 endmacro()
 
 if(BUILD_EXAMPLES)
@@ -76,18 +80,10 @@ if(BUILD_EXAMPLES)
         set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin/examples/${dir}")
         BuildExample("${example_src}" "${dir}")
 
-    else()
-      message("Ignoring example ${EXAMPLE_NAME}")
-    endif (${_index} EQUAL -1)
+      else()
+        message("Ignoring example ${EXAMPLE_NAME}")
+      endif (${_index} EQUAL -1)
     endforeach(example_src)
-
-    foreach(dll ${EXTENSIONS_DLLS})
-      if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-        get_filename_component(DLL_NAME ${dll} NAME_WE) # Get name w/o extension
-
-        execute_process(COMMAND robocopy ${dll} ${dir}/bin ${DLL_NAME})
-      endif()
-    endforeach()
 
   endforeach(dir)
 
@@ -96,16 +92,6 @@ if(BUILD_EXAMPLES)
     get_filename_component(EXAMPLE_DIR "${example_src}" DIRECTORY)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${EXAMPLE_DIR}/bin")
     BuildExample("${example_src}" "extensions" )
-
-    foreach(dll ${EXTENSIONS_DLLS})
-      get_filename_component(DLL_DIR "${dll}" DIRECTORY)
-      if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-        get_filename_component(DLL_NAME "${dll}" NAME) # Get name w/o extension
-
-#        message(" ********** ${dll} ${EXAMPLE_DIR}/bin ${DLL_NAME}")
-        execute_process(COMMAND robocopy "${DLL_DIR}" "${EXAMPLE_DIR}/bin" "${DLL_NAME}")
-      endif()
-    endforeach()
   endforeach()
 
 

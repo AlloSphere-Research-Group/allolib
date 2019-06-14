@@ -159,22 +159,14 @@ add_custom_target(${app_name}_run_debug
     USES_TERMINAL
     )
 
-if (AL_WINDOWS)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   # when run from Visual Studio, working directory is where the solution is by default
   # set it to app output directory
   set_target_properties(${app_name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${app_path}/bin)
   # startup project is `ALL_BUILD` by default so we change it to app project
   set_directory_properties(PROPERTIES VS_STARTUP_PROJECT ${app_name})
 
-  if (SNDFILE_LIBRARY)
-      #This is brought in from Gamma external library, but we might need to copy it to bin
-      message("Copying ${SNDFILE_LIBRARY}" )
-      get_filename_component(SNDFILE_LIBRARY_NAME "${SNDFILE_LIBRARY}" NAME_WE)
-      get_filename_component(SNDFILE_LIBRARY_DIR "${SNDFILE_LIBRARY}" DIRECTORY)
-      list(APPEND post_build_command
-        robocopy "${SNDFILE_LIBRARY_DIR}/../bin" ${app_path}/bin ${SNDFILE_LIBRARY_NAME}.dll &
-      )
-  endif(SNDFILE_LIBRARY)
 
   if (USE_PORTAUDIO)
     list(APPEND post_build_command
@@ -204,15 +196,16 @@ if (AL_WINDOWS)
     COMMAND ${post_build_command}
   )
 
-add_custom_command(
-  TARGET ${app_name}_run
-  POST_BUILD
-  COMMAND ${post_build_command}
-)
-add_custom_command(
-  TARGET ${app_name}_run_debug
-  POST_BUILD
-  COMMAND ${post_build_command}
-)
-endif (AL_WINDOWS)
+  add_custom_command(
+    TARGET ${app_name}_run
+    POST_BUILD
+    COMMAND ${post_build_command}
+    )
+  add_custom_command(
+    TARGET ${app_name}_run_debug
+    POST_BUILD
+    COMMAND ${post_build_command}
+    )
+
+endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
