@@ -295,7 +295,7 @@ class Texture : public GPUObject {
   void wrapR(int v) { wrap(mWrapS, mWrapT, v); };
 
   /// Set whether to generate mipmaps
-  // void mipmap(bool b);
+  void mipmap(bool b){ mUseMipmap = b; };
 
   /// Copy client pixels to GPU texels
   /// NOTE: the graphics context (e.g. Window) must have been created

@@ -57,7 +57,7 @@ struct EasyFBOSetting {
     int wrapR = GL_CLAMP_TO_EDGE;
     int filterMin = GL_NEAREST;
     int filterMag = GL_NEAREST;
-    // bool mUseMipmap = false;
+    bool mUseMipmap = false;
     bool use_depth_texture = false;
 };
 
