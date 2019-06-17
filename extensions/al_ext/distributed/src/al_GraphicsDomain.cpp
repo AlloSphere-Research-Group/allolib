@@ -33,12 +33,14 @@ bool GraphicsDomain::start() {
     // or press ctrl + q
     preOnAnimate(app.dt_sec());
     onAnimate(app.dt_sec());
+    mSubdomainLock.lock();
     tickSubdomains(true);
     preOnDraw();
     onDraw(app.mGraphics);
     postOnDraw();
     app.refresh();
     tickSubdomains(false);
+    mSubdomainLock.unlock();
     app.tickFPS();
   }
 

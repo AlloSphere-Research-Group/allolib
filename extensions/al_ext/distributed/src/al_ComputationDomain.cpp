@@ -45,3 +45,15 @@ bool ComputationDomain::cleanupSubdomains(bool pre)
   }
   return ret;
 }
+
+void ComputationDomain::removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain)
+{
+  // Only Synchronous domains are allowed as subdomains
+  for (auto existingSubDomain = mSubDomainList.begin(); existingSubDomain != mSubDomainList.end(); existingSubDomain++) {
+    if (existingSubDomain->first == subDomain) {
+      existingSubDomain->first->cleanup();
+      mSubDomainList.erase(existingSubDomain);
+      break;
+    }
+  }
+}

@@ -30,9 +30,6 @@ public:
     mAudioDomain->configure();
 
     mGraphicsDomain = newDomain<GraphicsDomain>();
-#ifdef AL_EXT_OPENVR
-    mGraphicsDomain->newSubDomain<OpenVRDomain>();
-#endif
   }
 
 
@@ -40,6 +37,9 @@ public:
   std::shared_ptr<DomainType> newDomain() {
     auto newDomain = std::make_shared<DomainType>();
     mDomainList.push_back(newDomain);
+    if (!newDomain->initialize()) {
+      std::cerr << "ERROR initializing domain " << std::endl;
+    }
     return newDomain;
   }
 
@@ -63,7 +63,31 @@ public:
   std::shared_ptr<AudioDomain> audioDomain() { return mAudioDomain;}
   std::shared_ptr<GraphicsDomain> graphicsDomain() { return mGraphicsDomain;}
 
+  void enableVR() {
+
+#ifdef AL_EXT_OPENVR
+    if (!mOpenVRDomain) {
+      std::cout << "Attempting to create OpenVRDomain" << std::endl;
+      mOpenVRDomain = graphicsDomain()->newSubDomain<OpenVRDomain>(true);
+    }
+#else
+    std::cout << "OpenVR support not available. Ignoring enableVR()" << std::endl;
+#endif
+  }
+
+  void disableVR() {
+
+#ifdef AL_EXT_OPENVR
+    mGraphicsDomain->removeSubDomain(mOpenVRDomain);
+    mOpenVRDomain = nullptr;
+#else
+    std::cout << "OpenVR support not available. Ignoring enableVR()" << std::endl;
+#endif
+  }
+
 private:
+
+  void initializeDomains();
 
   std::shared_ptr<OSCDomain> mOSCDomain;
   std::shared_ptr<AudioDomain> mAudioDomain;

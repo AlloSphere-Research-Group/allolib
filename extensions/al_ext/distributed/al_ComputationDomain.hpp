@@ -6,6 +6,7 @@
 #include <memory>
 #include <iostream>
 #include <functional>
+#include <mutex>
 #include <cassert>
 
 
@@ -53,6 +54,14 @@ public:
   template<class DomainType>
   std::shared_ptr<DomainType> newSubDomain(bool prepend = false);
 
+  void removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain);
+
+  void lock() { mSubdomainLock.lock();}
+  void unlock() { mSubdomainLock.unlock(); }
+
+protected:
+  std::mutex mSubdomainLock; // It is the domain's responsibility to lock and unlock while processing.
+
 private:
   std::vector<std::pair<std::shared_ptr<SynchronousDomain>, bool>> mSubDomainList;
   std::vector<std::function<void(ComputationDomain *)>> mInitializeCallbacks;
@@ -63,6 +72,7 @@ private:
 
 class SynchronousDomain : public ComputationDomain
 {
+  friend class ComputationDomain;
 public:
 
   virtual bool tick() { return true;}
@@ -101,11 +111,16 @@ private:
 
 template<class DomainType>
 std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
+//  std::lock_guard<std::mutex> lk(mSubdomainLock);
   // Only Synchronous domains are allowed as subdomains
   auto newDomain = std::make_shared<DomainType>();
   assert(dynamic_cast<SynchronousDomain *>(newDomain.get()));
   if (newDomain) {
-    mSubDomainList.push_back({newDomain, prepend});
+    if (newDomain->initialize(this)) {
+      mSubDomainList.push_back({newDomain, prepend});
+    } else {
+      newDomain = nullptr;
+    }
   }
   return newDomain;
 }

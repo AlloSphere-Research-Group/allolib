@@ -3,9 +3,7 @@
 using namespace al;
 
 bool al::OpenVRWrapper::init() {
-
-  static bool initialized = false;
-  if (initialized) {
+  if (mInitialized) {
     std::cerr << "Another allolib application is using the HMD. Not runnning HMD" <<std::endl;
     return false;
   }
@@ -117,7 +115,7 @@ bool al::OpenVRWrapper::init() {
   projectionRight = GetHMDMatrixProjectionEye(vr_context, vr::Eye_Right, m_fNearClip, m_fFarClip);
   eyePosLeft = GetHMDMatrixPoseEye(vr_context, vr::Eye_Left);
   eyePosRight = GetHMDMatrixPoseEye(vr_context, vr::Eye_Right);
-  initialized = true;
+  mInitialized = true;
   return true;
 }
 
@@ -315,6 +313,7 @@ void OpenVRWrapper::close() {
     vr::VR_Shutdown();
     vr_context = nullptr;
   }
+  mInitialized = false;
 }
 
 void OpenVRWrapper::drawVREye(std::function<void (Graphics &)> drawingFunction, Graphics &g, EasyFBO &fbo, Mat4f &view, Mat4f &proj) {

@@ -54,6 +54,7 @@ ${CMAKE_CURRENT_LIST_DIR}
 
   set(CURRENT_EXTENSION_EXAMPLES
     "${CMAKE_CURRENT_LIST_DIR}/examples/app-domains.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/examples/app-vr.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/examples/distributedapp.cpp"
     )
 

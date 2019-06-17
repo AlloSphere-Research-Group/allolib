@@ -161,6 +161,8 @@ protected:
 
     void process_vr_event(const vr::VREvent_t & event);
 
+    bool mInitialized = false;
+
 };
 }
 
