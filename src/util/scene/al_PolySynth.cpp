@@ -200,7 +200,7 @@ void PolySynth::triggerOff(int id) {
 
 void PolySynth::allNotesOff()
 {
-    mAllNotesOff = true;
+  mAllNotesOff = true;
 }
 
 SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc)
@@ -238,7 +238,20 @@ SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc)
     return freeVoice;
 }
 
+SynthVoice *PolySynth::getFreeVoice()
+{
+  std::unique_lock<std::mutex> lk(mFreeVoiceLock); // Only one getVoice() call at a time
+  SynthVoice *freeVoice = mFreeVoices;
+  if (freeVoice) {
+    mFreeVoices = freeVoice->next;
+  }
+  return freeVoice;
+}
+
 void PolySynth::render(AudioIOData &io) {
+    if (!m_internalAudioConfigured) {
+      prepare(io);
+    }
     if (mMasterMode == TIME_MASTER_AUDIO) {
         processVoices();
         // Turn off voices
@@ -250,20 +263,45 @@ void PolySynth::render(AudioIOData &io) {
     int fpb = io.framesPerBuffer();
     while (voice) {
         if (voice->active()) {
+
             int offset = voice->getStartOffsetFrames(fpb);
             if (offset < fpb) {
-                io.frame(offset);
                 int endOffsetFrames = voice->getEndOffsetFrames(fpb);
                 if (endOffsetFrames > 0 && endOffsetFrames <= fpb) {
                     voice->triggerOff(endOffsetFrames);
                 }
-                voice->onProcess(io);
+                if (m_useInternalAudioIO) {
+                  internalAudioIO.zeroOut();
+                  internalAudioIO.zeroBus();
+                  internalAudioIO.frame(offset);
+                  voice->onProcess(internalAudioIO);
+
+                  if (mBusRoutingCallback) {
+                      // First call callback to route signals to internal buses
+                      internalAudioIO.frame(offset);
+                      Pose p;
+                      (*mBusRoutingCallback)(internalAudioIO, p);
+                  }
+                  // Then gather all the internal buses into the master AudioIO buses
+                  io.frame(offset);
+                  internalAudioIO.frame(offset);
+                  while (io() && internalAudioIO()) {
+                    for (int i = 0; i < mVoiceMaxOutputChannels; i++) {
+                      io.out(i) += internalAudioIO.out(i);
+                    }
+                    for (int i = 0; i < mVoiceBusChannels; i++) {
+                      io.bus(i) += internalAudioIO.bus(i);
+                    }
+                  }
+                }
+            } else {
+                  io.frame(offset);
+                  voice->onProcess(io);
             }
         }
         voice = voice->next;
     }
     processGain(io);
-
     // Run post processing callbacks
     for (auto cb: mPostProcessing) {
         io.frame(0);

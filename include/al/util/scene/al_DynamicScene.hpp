@@ -255,37 +255,6 @@ public:
     void showWorldMarker(bool show = true) { mDrawWorldMarker = show;}
 
     /**
-     * @brief Determines the number of output channels allocated for the internal AudioIOData objects
-     * @param channels
-     *
-     * Always call prepare() after calling this function. The changes are only applied by prepare().
-     */
-    void setVoiceMaxOutputChannels(unsigned int channels) {mVoiceMaxOutputChannels = channels;}
-
-    /**
-     * @brief Determines the number of buses for the internal AudioIOData objects
-     * @param channels
-     *
-     * Always call prepare() after calling this function. The changes are only applied by prepare().
-     */
-    void setVoiceBusChannels(unsigned int channels) {mVoiceBusChannels = channels;}
-
-
-    typedef const std::function<void (AudioIOData &internalVoiceIO, Pose &channelPose)> BusRoutingCallback;
-
-    /**
-     * @brief setBusRoutingCallback
-     * @param cb
-     *
-     * This function will be called after all voices have rendered their output and prior
-     * to the function call to process spatialization. Can be used to route signals to buses.
-     */
-    void setBusRoutingCallback(BusRoutingCallback cb)
-    {
-        mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
-    }
-
-    /**
      * @brief Stop all audio threads. No processing is possible after calling this function
      *
      * You might need to close all threads to have applications close neatly. Will
@@ -308,8 +277,6 @@ private:
     // A speaker layout and spatializer
     std::shared_ptr<Spatializer> mSpatializer;
 
-    AudioIOData internalAudioIO;
-
     Pose mListenerPose;
     DistAtten<> mDistAtten;
 
@@ -329,12 +296,6 @@ private:
     std::mutex mThreadTriggerLock;
     bool mSynthRunning {true};
     unsigned int mAudioBusy = 0;
-
-    // Internal AudioIOData characteristics. Set these
-    int mVoiceMaxOutputChannels = 2;
-    int mVoiceMaxInputChannels = 0;
-    int mVoiceBusChannels = 0;
-    std::shared_ptr<BusRoutingCallback> mBusRoutingCallback;
 
     static void updateThreadFunc(UpdateThreadFuncData data);
 

@@ -1061,7 +1061,7 @@ void AudioIO::deviceIn(const AudioDevice &v) {
     mBackend->inDevice(v.id());
     channelsIn(v.channelsInMax());
   } else {
-    warn("attempt to set input device to a device without inputs", "AudioIO");
+//    warn("attempt to set input device to a device without inputs", "AudioIO");
   }
 }
 
@@ -1071,7 +1071,7 @@ void AudioIO::deviceOut(const AudioDevice &v) {
     mBackend->outDevice(v.id());
     channelsOut(v.channelsOutMax());
   } else {
-    warn("attempt to set output device to a device without outputs", "AudioIO");
+//    warn("attempt to set output device to a device without outputs", "AudioIO");
   }
 }
 

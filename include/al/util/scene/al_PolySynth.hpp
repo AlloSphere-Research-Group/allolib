@@ -541,7 +541,9 @@ protected:
   std::vector<ParameterMeta *> mContinuousParameters;
 
   std::vector<std::shared_ptr<Parameter>> mInternalParameters;
+
 private:
+
   int mId {-1};
   int mActive {false};
   int mOnOffsetFrames {0};
@@ -608,6 +610,15 @@ public:
      * with registerSynthClass()
      */
   SynthVoice *getVoice(std::string name, bool forceAlloc = false);
+
+  /**
+   * @brief Get the first available voice with minimal checks
+   * @param forceAlloc
+   * @return
+   *
+   * This is a quick function with littl eoverhead for PolySynths that handle only one type of voice.
+   */
+  SynthVoice *getFreeVoice();
 
   /**
      * @brief render all the active voices into the audio buffers
@@ -816,6 +827,7 @@ public:
   template<class TSynthVoice>
   TSynthVoice *allocateVoice() {
     TSynthVoice *voice = new TSynthVoice;
+    voice->next = nullptr;
     if(mDefaultUserData) {
       voice->userData(mDefaultUserData);
     }
@@ -844,6 +856,37 @@ public:
   */
   SynthVoice *getFreeVoices() {
     return mFreeVoices;
+  }
+
+  /**
+   * @brief Determines the number of output channels allocated for the internal AudioIOData objects
+   * @param channels
+   *
+   * Always call prepare() after calling this function. The changes are only applied by prepare().
+   */
+  void setVoiceMaxOutputChannels(unsigned int channels) {mVoiceMaxOutputChannels = channels;}
+
+  /**
+   * @brief Determines the number of buses for the internal AudioIOData objects
+   * @param channels
+   *
+   * Always call prepare() after calling this function. The changes are only applied by prepare().
+   */
+  void setVoiceBusChannels(unsigned int channels) {mVoiceBusChannels = channels;}
+
+
+  typedef const std::function<void (AudioIOData &internalVoiceIO, Pose &channelPose)> BusRoutingCallback;
+
+  /**
+   * @brief setBusRoutingCallback
+   * @param cb
+   *
+   * This function will be called after all voices have rendered their output and prior
+   * to the function call to process spatialization. Can be used to route signals to buses.
+   */
+  void setBusRoutingCallback(BusRoutingCallback cb)
+  {
+      mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
   }
 
   void setCpuClockGranularity(double timeSecs) {
@@ -961,6 +1004,24 @@ protected:
     }
   }
 
+  virtual void prepare(AudioIOData &io) {
+      internalAudioIO.framesPerBuffer(io.framesPerBuffer());
+      internalAudioIO.channelsIn(mVoiceMaxInputChannels);
+      internalAudioIO.channelsOut(mVoiceMaxOutputChannels);
+      internalAudioIO.channelsBus(mVoiceBusChannels);
+      if ((int) io.channelsBus() < mVoiceBusChannels) {
+          std::cout << "WARNING: You don't have enough buses in AudioIO object. This is likely to crash." << std::endl;
+      }
+//      mThreadedAudioData.resize(mAudioThreads.size());
+//      for (auto &threadio: mThreadedAudioData) {
+//          threadio.framesPerBuffer(io.framesPerBuffer());
+//          threadio.channelsIn(mVoiceMaxInputChannels);
+//          threadio.channelsOut(mVoiceMaxOutputChannels);
+//          threadio.channelsBus(mVoiceBusChannels);
+//      }
+      m_internalAudioConfigured = true;
+  }
+
   // Internal voices are allocated in PolySynth and shared with the outside.
   SynthVoice *mVoicesToInsert {nullptr}; //Voices to be inserted in the realtime context
   SynthVoice *mFreeVoices {nullptr}; // Allocated voices available for reuse
@@ -968,6 +1029,15 @@ protected:
   std::mutex mVoiceToInsertLock;
   std::mutex mFreeVoiceLock;
   std::mutex mGraphicsLock;
+
+  bool m_useInternalAudioIO = true;
+  bool m_internalAudioConfigured = false;
+  // Internal AudioIOData characteristics. Set these
+  int mVoiceMaxOutputChannels = 2;
+  int mVoiceMaxInputChannels = 0;
+  int mVoiceBusChannels = 0;
+  std::shared_ptr<BusRoutingCallback> mBusRoutingCallback;
+  AudioIOData internalAudioIO;
 
   SingleRWRingBuffer mVoiceIdsToTurnOff {64 * sizeof(int)};
 

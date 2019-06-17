@@ -122,6 +122,7 @@ void DynamicScene::prepare(AudioIOData &io) {
         threadio.channelsOut(mVoiceMaxOutputChannels);
         threadio.channelsBus(mVoiceBusChannels);
     }
+    m_internalAudioConfigured = true;
 }
 
 void DynamicScene::render(Graphics &g) {
@@ -160,6 +161,9 @@ void DynamicScene::render(Graphics &g) {
 }
 
 void DynamicScene::render(AudioIOData &io) {
+    if (!m_internalAudioConfigured) {
+      prepare(io);
+    }
     assert(mSpatializer && "ERROR: call setSpatializer before starting audio");
     io.frame(0);
     mSpatializer->prepare(io);
