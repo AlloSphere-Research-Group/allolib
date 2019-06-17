@@ -120,6 +120,15 @@ public:
   void unlockState() {mRecvLock.unlock();}
   int newStates() { return mQueuedStates; }
 
+  std::string id() const
+  {
+    return mId;
+  }
+  void setId(const std::string &id)
+  {
+    mId = id;
+  }
+
 private:
   std::shared_ptr<TSharedState> mState;
   int mQueuedStates {1};
@@ -127,6 +136,7 @@ private:
   std::string mAddress {"0.0.0.0"};
   uint16_t mPort = 10100;
   uint16_t mPacketSize = 1400;
+  std::string mId;
 
 #ifdef AL_USE_CUTTLEBONE
   std::unique_ptr<cuttlebone::Taker<TSharedState>> mTaker;
@@ -136,11 +146,15 @@ private:
     StateReceiveDomain *mOscDomain;
     void onMessage(osc::Message &m) override {
 //      m.print();
-      if (m.addressPattern() == "/_state" && m.typeTags() == "b") {
-        mOscDomain->mRecvLock.lock();
-        m >> mOscDomain->mBlobBuf;
-        mOscDomain->newMessages++;
-        mOscDomain->mRecvLock.unlock();
+      if (m.addressPattern() == "/_state" && m.typeTags() == "sb") {
+        std::string id;
+        m >> id;
+        if (id == mOscDomain->mId) {
+          mOscDomain->mRecvLock.lock();
+          m >> mOscDomain->mBlobBuf;
+          mOscDomain->newMessages++;
+          mOscDomain->mRecvLock.unlock();
+        }
       }
     }
   } mHandler;
@@ -200,7 +214,7 @@ public:
     osc::Blob b(mState.get(), sizeof(TSharedState));
     osc::Send s(mPort, mAddress.c_str());
 //    std::cout << mAddress << ":" << mPort << std::endl;
-    s.send("/_state", b);
+    s.send("/_state", mId, b);
 
     mStateLock.unlock();
 
@@ -237,6 +251,11 @@ public:
   }
 
   int newStates() { return mQueuedStates; }
+
+  std::string id() const { return mId; }
+
+  void setId(const std::string &id) { mId = id; }
+
 private:
 
 #ifdef AL_USE_CUTTLEBONE
@@ -255,6 +274,7 @@ private:
 
 #endif
 
+  std::string mId = "";
   uint16_t mPort = 10100;
   std::string mAddress {"localhost"};
   uint16_t mPacketSize = 1400;
@@ -275,18 +295,20 @@ public:
   bool cleanup(ComputationDomain *parent = nullptr) override;
 
   template<class TSharedState = DefaultState>
-  std::shared_ptr<TSharedState> addStateSender(std::shared_ptr<TSharedState> statePtr = nullptr) {
+  std::shared_ptr<TSharedState> addStateSender(std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr) {
     auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(this);
     if (statePtr) {
+      newDomain->setId(id);
       newDomain->setStatePointer(statePtr);
     }
     return newDomain->state();
   }
 
   template<class TSharedState = DefaultState>
-  std::shared_ptr<TSharedState> addStateReceiver(std::shared_ptr<TSharedState> statePtr = nullptr) {
+  std::shared_ptr<TSharedState> addStateReceiver(std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr) {
     auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(this);
     if (statePtr) {
+      newDomain->setId(id);
       newDomain->setStatePointer(statePtr);
     }
     return newDomain->state();

@@ -8,7 +8,7 @@
 
 #include "al/core/protocol/al_OSC.hpp"
 #include "al/util/ui/al_ParameterServer.hpp"
-#include "al/util/al_FlowAppParameters.hpp"
+//#include "al/util/al_FlowAppParameters.hpp"
 
 namespace al {
 
@@ -21,8 +21,11 @@ public:
   bool stop() override;
   bool cleanup(ComputationDomain *parent = nullptr) override;
 
-
+  // Configuration and query
   bool configure(uint16_t port, std::string address = "");
+
+  bool running() { return mParameterServer.serverRunning();}
+
   ParameterServer& parameterServer() { return mParameterServer; }
   ParameterServer const& parameterServer() const { return mParameterServer; }
 

@@ -20,22 +20,33 @@ public:
   std::shared_ptr<StateDistributionDomain> mStateDistribution;
   std::shared_ptr<State> mState;
 
-  MyApp() {
+  MyApp(bool primary = true) : BaseCompositeApp() {
     mOsc.domain(*audioDomain());
     mOsc2.domain(*graphicsDomain());
 
     mStateDistribution = graphicsDomain()->newSubDomain<StateDistributionDomain>();
-    // State will be same memory for local, but will be synced on the network for separate instances
-    mState = mStateDistribution->addStateSender<State>();
-    mStateDistribution->addStateReceiver<State>(mState);
+    // State will be same memory for local, but will be synced on the network for separate instances 
+
+    mPrimary = primary;
+    if (mPrimary) {
+      std::cout << "Running primary" << std::endl;
+      mState = mStateDistribution->addStateSender<State>("state");
+    } else {
+      std::cout << "Running REPLICA" << std::endl;
+      mState = mStateDistribution->addStateReceiver<State>("state");
+      oscDomain()->configure(9100);
+    }
   }
 
   void onDraw(Graphics &g) override {
     // Update state
-    mState->value = mOsc2();
+    if (mPrimary) {
+      mState->value = mOsc2();
+    } else {
+      std::cout << mState->value << std::endl;
+    }
     // Use received values
     g.clear(0,0, mState->value);
-    std::cout << mState->value << std::endl;
   }
 
   void onSound(AudioIOData &io) override {
@@ -46,12 +57,21 @@ public:
 
   void onMessage(osc::Message &m) override {}
 
+private:
+  bool mPrimary;
 };
 
 int main(int argc, char *argv[])
 {
-  MyApp app;
-  app.start();
+  if (argc > 1) {
+    MyApp app(false);
+    app.start();
+
+  } else {
+    MyApp app;
+    app.start();
+
+  }
 
 
   return 0;
