@@ -3,7 +3,7 @@ list(APPEND CMAKE_MODULE_PATH
 ${CMAKE_CURRENT_LIST_DIR}
 )
 
-# TODO check for openvr module
+# TODO force this module to depend on openvr module so that gets built first.
 
 #if (NOT ASSIMP_LIBRARY)
 #  message("OpenVR not found. Not building al_openvr extension.")
@@ -50,7 +50,7 @@ ${CMAKE_CURRENT_LIST_DIR}
   # Connections to outside
   set(CURRENT_EXTENSION_LIBRARIES ${THIS_EXTENSION_LIBRARY_NAME} ${THIS_EXTENSION_LIBRARIES})
   set(CURRENT_EXTENSION_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR})
-  set(CURRENT_EXTENSION_DLLS "${OPENVR_ROOT}/bin/win64/openvr_api.dll")
+#  set(CURRENT_EXTENSION_DLLS)
 
   set(CURRENT_EXTENSION_EXAMPLES
     "${CMAKE_CURRENT_LIST_DIR}/examples/app-domains.cpp"
