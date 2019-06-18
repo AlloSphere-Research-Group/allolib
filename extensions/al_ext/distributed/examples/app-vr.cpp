@@ -4,6 +4,7 @@
 #include "al/util/ui/al_ControlGUI.hpp"
 
 #include "al_ext/distributed/al_App.hpp"
+#include "al/core/graphics/al_Shapes.hpp"
 
 #include "Gamma/Oscillator.h"
 
@@ -25,7 +26,10 @@ public:
       }
     });
 
+#ifdef AL_EXT_OPENVR
+    // Only show VR button if there is support for OpenVR
     gui << mVr;
+#endif
     gui.init();
   }
 
