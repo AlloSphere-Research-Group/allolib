@@ -33,6 +33,8 @@ bool OpenVRDomain::tick() {
 }
 
 bool OpenVRDomain::cleanup(ComputationDomain *parent) {
+#ifdef AL_EXT_OPENVR
   mOpenVR.close();
+#endif
   return true;
 }
