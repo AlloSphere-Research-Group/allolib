@@ -146,7 +146,7 @@ public:
             mRoleMap[host] = stringToRole(role);
             if (table->contains("dataRoot") && strncmp(name().c_str(), host.c_str(), name().size()) == 0)  { // Set configuration for this node when found
               std::string dataRootValue = *table->get_as<std::string>("dataRoot");
-              mGlobalDataRootPath = File::conformDirectory(dataRootValue);
+              mGlobalDataRootPath = File::conformPathToOS(dataRootValue);
             } else {
               std::cout << "WARNING: node " << host.c_str() << " not given dataRoot" <<std::endl;
             }
