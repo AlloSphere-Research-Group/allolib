@@ -709,13 +709,18 @@ public:
 	int operator=(const int value) { this->set(value); return *this; }
 
 	void setElements(std::vector<std::string> elements) {
-		mElements = elements;
+      std::lock_guard<std::mutex> lk(mElementsLock);
+      mElements = elements;
 	}
 
-	std::vector<std::string> getElements() { return mElements; }
+    std::vector<std::string> getElements() {
+      std::lock_guard<std::mutex> lk(mElementsLock);
+      return mElements;
+    }
 
     std::string getCurrent() {
       int current = get();
+      std::lock_guard<std::mutex> lk(mElementsLock);
       if (mElements.size() > 0 && current >=0 && current < int(mElements.size())) {
         return mElements[current];
       }
@@ -725,12 +730,16 @@ public:
     }
 
     void setCurrent(std::string element, bool noCalls = false) {
+        mElementsLock.lock();
         auto position = std::find(mElements.begin(), mElements.end(), element);
-        if (position != mElements.end()) {
+        bool found = position != mElements.end();
+        auto foundPosition = std::distance(mElements.begin(), position);
+        mElementsLock.unlock();
+        if (found) {
           if (noCalls) {
-            setNoCalls(std::distance(mElements.begin(), position));
+            setNoCalls(foundPosition);
           } else {
-            set(std::distance(mElements.begin(), position));
+            set(foundPosition);
           }
         } else {
             std::cerr << "ERROR: Could not find element: " << element << std::endl;
@@ -751,6 +760,7 @@ public:
     }
 
 private:
+    std::mutex mElementsLock;
 	std::vector<std::string> mElements;
 };
 
