@@ -41,7 +41,6 @@ public:
 
   TSharedState &state() { return *mState;}
 
-  template<class TSharedState>
   std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(std::string id = "") {
     auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(this);
     newDomain->setId(id);
@@ -49,7 +48,6 @@ public:
     return newDomain;
   }
 
-  template<class TSharedState = DefaultState>
   std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(std::string id = "") {
     auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(this);
     newDomain->setId(id);
