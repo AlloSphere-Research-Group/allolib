@@ -80,3 +80,28 @@ bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
   glfw::terminate(app.is_verbose);
   return true;
 }
+
+/// Window Domain
+
+bool OpenGLWindowDomain::initialize(ComputationDomain *parent) {
+  if (strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) == 0) {
+    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
+  }
+
+  return mWindow.create();
+}
+
+bool OpenGLWindowDomain::tick() {
+  /* Make the window's context current */
+  mWindow.makeCurrent();
+  preOnDraw();
+  onDraw(*mGraphics);
+  postOnDraw();
+  mWindow.refresh();
+  return true;
+}
+
+bool OpenGLWindowDomain::cleanup(ComputationDomain *parent) {
+  mWindow.destroy();
+  return true;
+}

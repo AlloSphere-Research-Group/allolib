@@ -98,37 +98,15 @@ private:
 
   bool mRunning {false};
 };
-}
-
-
-
-namespace al {
 
 class OpenGLWindowDomain : public SynchronousDomain {
 public:
   // Domain functions
-  bool initialize(ComputationDomain *parent = nullptr) override {
-    if (strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) == 0) {
-      mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
-    }
+  bool initialize(ComputationDomain *parent = nullptr) override;
 
-    return mWindow.create();
-  }
+  bool tick() override;
 
-  bool tick() override {
-    /* Make the window's context current */
-    mWindow.makeCurrent();
-    preOnDraw();
-    onDraw(*mGraphics);
-    postOnDraw();
-    mWindow.refresh();
-    return true;
-  }
-
-  bool cleanup(ComputationDomain *parent = nullptr) override {
-    mWindow.destroy();
-    return true;
-  }
+  bool cleanup(ComputationDomain *parent = nullptr) override;
 
   std::function<void()> preOnDraw = [this]() {
     mGraphics->framebuffer(FBO::DEFAULT);
