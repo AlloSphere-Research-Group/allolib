@@ -88,7 +88,7 @@ if(BUILD_EXAMPLES)
   endforeach(dir)
 
   foreach(example_src ${EXTENSIONS_EXAMPLES})
-    message("Building extension example: ${example_src}")
+#    message("Building extension example: ${example_src}")
     get_filename_component(EXAMPLE_DIR "${example_src}" DIRECTORY)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${EXAMPLE_DIR}/bin")
     BuildExample("${example_src}" "extensions" )

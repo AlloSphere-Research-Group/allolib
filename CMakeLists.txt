@@ -143,12 +143,12 @@ set_target_properties(al PROPERTIES AL_INCLUDE_DIRECTORIES "${dirs_to_include}")
 macro(Copy_dlls app_path app_name DLLS_TO_COPY)
 
   if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    message("--- Copying dlls to ${app_path} for target ${app_name}: ${DLLS_TO_COPY}")
+#    message("--- Copying dlls to ${app_path} for target ${app_name}: ${DLLS_TO_COPY}")
 
     foreach(LIBRARY ${DLLS_TO_COPY})
       get_filename_component(LIBRARY_DIR "${LIBRARY}" DIRECTORY)
       get_filename_component(LIBRARY_NAME "${LIBRARY}" NAME)
-      message("${LIBRARY_DIR} ----- ${LIBRARY_NAME}")
+#      message("${LIBRARY_DIR} ----- ${LIBRARY_NAME}")
       list(APPEND post_build_command
         robocopy "${LIBRARY_DIR}" "${app_path}/bin" "${LIBRARY_NAME}" &
         )

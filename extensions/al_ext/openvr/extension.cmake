@@ -46,7 +46,7 @@ else()
   set(CURRENT_EXTENSION_DEFINITIONS -DAL_EXT_OPENVR)
   set(CURRENT_EXTENSION_DLLS "${OPENVR_ROOT}/bin/win64/openvr_api.dll")
 
-  message("libs: ${CURRENT_EXTENSION_LIBRARIES}")
+#  message("libs: ${CURRENT_EXTENSION_LIBRARIES}")
 
 #  # unit tests
 #  add_executable(soundfileBufferedRecordTests ${CMAKE_CURRENT_LIST_DIR}/unitTests/utSoundfileBufferedRecord.cpp)

@@ -38,7 +38,7 @@ else()
   set(CURRENT_EXTENSION_LIBRARIES ${THIS_EXTENSION_LIBRARY_NAME} ${THIS_EXTENSION_LIBRARIES})
   set(CURRENT_EXTENSION_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR})
 
-  message("libs: ${CURRENT_EXTENSION_LIBRARIES}")
+#  message("libs: ${CURRENT_EXTENSION_LIBRARIES}")
 
   # unit tests
   add_executable(soundfileBufferedRecordTests ${CMAKE_CURRENT_LIST_DIR}/unitTests/utSoundfileBufferedRecord.cpp)

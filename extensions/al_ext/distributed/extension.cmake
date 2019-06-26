@@ -61,6 +61,6 @@ ${CMAKE_CURRENT_LIST_DIR}
     "${CMAKE_CURRENT_LIST_DIR}/examples/distributedapp.cpp"
     )
 
-  message("libs: ${CURRENT_EXTENSION_LIBRARIES}")
+#  message("libs: ${CURRENT_EXTENSION_LIBRARIES}")
 
 #endif()
