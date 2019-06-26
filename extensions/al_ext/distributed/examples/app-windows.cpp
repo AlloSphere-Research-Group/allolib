@@ -28,10 +28,30 @@ public:
 
   void onAnimate(double dt) override {
     value += dt;
+
+    static std::shared_ptr<OpenGLWindowDomain> wd;
+    if (value > 2) {
+      value -= 4.0f;
+      if (!wd) {
+        wd = graphicsDomain()->newWindow();
+        wd->window().dimensions(400, 400, 100, 100);
+        wd->window().title("Second window");
+        wd->onDraw = std::bind(&MyApp::otherDraw, this, std::placeholders::_1);
+      } else {
+        graphicsDomain()->closeWindow(wd);
+        wd = nullptr;
+      }
+    }
   }
 
   void onDraw(Graphics &g) override {
     g.clear(0,0,mOsc2());
+    g.translate(0, value, -4);
+    g.draw(mesh);
+  }
+
+  void otherDraw(Graphics &g) {
+    g.clear(0,mOsc2.phase(), 0);
     g.translate(0, value, -4);
     g.draw(mesh);
   }
@@ -42,9 +62,7 @@ public:
     }
   }
 
-  void onMessage(osc::Message &m) override {
-    m.print();
-  }
+  void onMessage(osc::Message &m) override {}
 
 };
 

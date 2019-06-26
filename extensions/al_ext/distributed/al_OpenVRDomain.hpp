@@ -5,7 +5,7 @@
 #include <functional>
 
 #include "al_ComputationDomain.hpp"
-#include "al_GraphicsDomain.hpp"
+#include "al_OpenGLGraphicsDomain.hpp"
 
  // ----------------------------------------------------------------
 // The AL_EXT_OPENVR macro is set if OpenVR is found.

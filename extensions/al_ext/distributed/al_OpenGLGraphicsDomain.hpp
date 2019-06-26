@@ -16,13 +16,13 @@
 
 namespace al {
 
-class WindowDomain;
+class OpenGLWindowDomain;
 
-class GraphicsDomain : public AsynchronousDomain, public gam::Domain
+class OpenGLGraphicsDomain : public AsynchronousDomain, public gam::Domain
 {
 public:
 
-  virtual ~GraphicsDomain() {}
+  virtual ~OpenGLGraphicsDomain() {}
 
   // Domain functions
   bool initialize(ComputationDomain *parent = nullptr) override;
@@ -39,12 +39,12 @@ public:
 //  void onResize(int w, int h) {}
 //  void onVisibility(bool v) {}
 
-  std::shared_ptr<WindowDomain> newWindow() {
-    auto newWindowDomain = newSubDomain<WindowDomain>();
+  std::shared_ptr<OpenGLWindowDomain> newWindow() {
+    auto newWindowDomain = newSubDomain<OpenGLWindowDomain>();
     return newWindowDomain;
   }
 
-  void closeWindow(std::shared_ptr<WindowDomain> windowDomain) {
+  void closeWindow(std::shared_ptr<OpenGLWindowDomain> windowDomain) {
     removeSubDomain(std::static_pointer_cast<SynchronousDomain>(windowDomain));
   }
 
@@ -90,6 +90,7 @@ public:
   Graphics &graphics() { return app.mGraphics;}
 
 private:
+  // TODO change WindowApp to OpenGLWindowDomain
   WindowApp app;
   Nav mNav; // is a Pose itself and also handles manipulation of pose
   Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
@@ -103,12 +104,12 @@ private:
 
 namespace al {
 
-class WindowDomain : public SynchronousDomain {
+class OpenGLWindowDomain : public SynchronousDomain {
 public:
   // Domain functions
   bool initialize(ComputationDomain *parent = nullptr) override {
-    if (strcmp(typeid(*parent).name(), typeid(GraphicsDomain).name()) == 0) {
-      mGraphics = &static_cast<GraphicsDomain *>(parent)->graphics();
+    if (strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) == 0) {
+      mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
     }
 
     return mWindow.create();
@@ -117,7 +118,9 @@ public:
   bool tick() override {
     /* Make the window's context current */
     mWindow.makeCurrent();
+    preOnDraw();
     onDraw(*mGraphics);
+    postOnDraw();
     mWindow.refresh();
     return true;
   }
@@ -127,12 +130,34 @@ public:
     return true;
   }
 
+  std::function<void()> preOnDraw = [this]() {
+    mGraphics->framebuffer(FBO::DEFAULT);
+    mGraphics->viewport(0, 0, mWindow.fbWidth(), mWindow.fbHeight());
+    mGraphics->resetMatrixStack();
+    mGraphics->camera(mView);
+    mGraphics->color(1, 1, 1);
+
+  };
+
   std::function<void(Graphics &)> onDraw = [](Graphics &){};
+
+  std::function<void()> postOnDraw = []() {};
+
+  Viewpoint& view() { return mView; }
+  const Viewpoint& view() const { return mView; }
+
+  Nav& nav() { return mNav; }
+  // Nav& nav() { return mNav; }
+  const Nav& nav() const { return mNav; }
+
+  Window &window() {return mWindow;}
 
 private:
   Window mWindow;
   Graphics *mGraphics {nullptr};
 
+  Nav mNav; // is a Pose itself and also handles manipulation of pose
+  Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
 
 };
 

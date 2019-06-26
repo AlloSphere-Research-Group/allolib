@@ -10,7 +10,7 @@
 #include <cstring>
 
 #include "al_ComputationDomain.hpp"
-#include "al_GraphicsDomain.hpp"
+#include "al_OpenGLGraphicsDomain.hpp"
 #include "al_AudioDomain.hpp"
 #include "al_OSCDomain.hpp"
 #include "al_SimulationDomain.hpp"
@@ -30,8 +30,8 @@ public:
     mAudioDomain = newDomain<AudioDomain>();
     mAudioDomain->configure();
 
-    mGraphicsDomain = newDomain<GraphicsDomain>();
-    mSimulationDomain = mGraphicsDomain->newSubDomain<SimulationDomain>(true);
+    mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
+    mSimulationDomain = mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
   }
 
 
@@ -64,7 +64,7 @@ public:
 
   std::shared_ptr<OSCDomain> oscDomain() {return mOSCDomain;}
   std::shared_ptr<AudioDomain> audioDomain() { return mAudioDomain;}
-  std::shared_ptr<GraphicsDomain> graphicsDomain() { return mGraphicsDomain;}
+  std::shared_ptr<OpenGLGraphicsDomain> graphicsDomain() { return mOpenGLGraphicsDomain;}
 
   void enableVR() {
 
@@ -96,7 +96,7 @@ private:
 
   std::shared_ptr<OSCDomain> mOSCDomain;
   std::shared_ptr<AudioDomain> mAudioDomain;
-  std::shared_ptr<GraphicsDomain> mGraphicsDomain;
+  std::shared_ptr<OpenGLGraphicsDomain> mOpenGLGraphicsDomain;
   std::shared_ptr<SimulationDomain> mSimulationDomain;
   std::shared_ptr<OpenVRDomain> mOpenVRDomain;
 

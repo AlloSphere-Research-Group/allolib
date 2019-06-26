@@ -1,11 +1,11 @@
 #include <iostream>
 #include <cstring>
 
-#include "al_GraphicsDomain.hpp"
+#include "al_OpenGLGraphicsDomain.hpp"
 
 using namespace al;
 
-bool GraphicsDomain::initialize(ComputationDomain *parent) {
+bool OpenGLGraphicsDomain::initialize(ComputationDomain *parent) {
   bool ret = true;
   glfw::init(app.is_verbose);
   ret &= glfwInit();
@@ -18,7 +18,7 @@ bool GraphicsDomain::initialize(ComputationDomain *parent) {
   return ret;
 }
 
-bool GraphicsDomain::start() {
+bool OpenGLGraphicsDomain::start() {
   if (!mRunning) {
     mRunning = true;
     bool ret = true;
@@ -58,7 +58,7 @@ bool GraphicsDomain::start() {
   }
 }
 
-bool GraphicsDomain::stop() {
+bool OpenGLGraphicsDomain::stop() {
 
   bool ret = true;
   callStopCallbacks();
@@ -75,7 +75,7 @@ bool GraphicsDomain::stop() {
   return ret;
 }
 
-bool GraphicsDomain::cleanup(ComputationDomain *parent) {
+bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
   callCleanupCallbacks();
   glfw::terminate(app.is_verbose);
   return true;

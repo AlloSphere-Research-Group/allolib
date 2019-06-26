@@ -11,8 +11,8 @@ bool OpenVRDomain::initialize(ComputationDomain *parent) {
     std::cerr << "ERROR: OpenVR init returned error" << std::endl;
     return false;
   }
-  if (dynamic_cast<GraphicsDomain *>(parent)) {
-    g = &dynamic_cast<GraphicsDomain *>(parent)->graphics();
+  if (dynamic_cast<OpenGLGraphicsDomain *>(parent)) {
+    g = &dynamic_cast<OpenGLGraphicsDomain *>(parent)->graphics();
   }
   return true;
 #else
