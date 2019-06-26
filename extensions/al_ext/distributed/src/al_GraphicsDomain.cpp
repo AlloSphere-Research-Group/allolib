@@ -13,46 +13,66 @@ bool GraphicsDomain::initialize(ComputationDomain *parent) {
   if (app.is_verbose) std::cout << "Initialized GLFW " << glfwGetVersionString() << std::endl;
   glfwSetErrorCallback([](int code, const char* description){std::cout << "glfw error [" << code << "]: " << description << std::endl;});
 
+  onInit();
   callInitializeCallbacks();
   return ret;
 }
 
 bool GraphicsDomain::start() {
-  bool ret = true;
-  ret &= initializeSubdomains(true);
-  app.startFPS(); // WindowApp (FPS)
-  gam::Domain::spu(app.fps());
-  app.create(app.is_verbose);
-  ret &= initializeSubdomains(false);
+  if (!mRunning) {
+    mRunning = true;
+    bool ret = true;
+    ret &= initializeSubdomains(true);
+    app.startFPS(); // WindowApp (FPS)
+    gam::Domain::spu(app.fps());
+    app.create(app.is_verbose);
+    ret &= initializeSubdomains(false);
 
-  preOnCreate();
-  onCreate();
-  callStartCallbacks();
-  while (!app.shouldQuit()) {
-    // to quit, call WindowApp::quit() or click close button of window,
-    // or press ctrl + q
-    preOnAnimate(app.dt_sec());
-    onAnimate(app.dt_sec());
-    mSubdomainLock.lock();
-    tickSubdomains(true);
-    preOnDraw();
-    onDraw(app.mGraphics);
-    postOnDraw();
-    app.refresh();
-    tickSubdomains(false);
-    mSubdomainLock.unlock();
-    app.tickFPS();
+    preOnCreate();
+    onCreate();
+    callStartCallbacks();
+    while (!app.shouldQuit()) {
+      // to quit, call WindowApp::quit() or click close button of window,
+      // or press ctrl + q
+      onNewFrame();
+
+      mSubdomainLock.lock();
+      tickSubdomains(true);
+
+      app.makeCurrent();
+
+      preOnDraw();
+      onDraw(app.mGraphics);
+      postOnDraw();
+      app.refresh();
+
+      tickSubdomains(false);
+      mSubdomainLock.unlock();
+      app.tickFPS();
+    }
+
+    ret &= stop();
+    return ret;
+  } else {
+    return true;
   }
-
-  return ret;
 }
 
 bool GraphicsDomain::stop() {
+
+  bool ret = true;
   callStopCallbacks();
+
+
+  ret &= cleanupSubdomains(true);
+
   onExit(); // user defined
   postOnExit();
   app.destroy();
-  return true;
+
+  ret &= cleanupSubdomains(false);
+  mRunning = false;
+  return ret;
 }
 
 bool GraphicsDomain::cleanup(ComputationDomain *parent) {

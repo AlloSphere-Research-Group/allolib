@@ -13,6 +13,7 @@
 #include "al_GraphicsDomain.hpp"
 #include "al_AudioDomain.hpp"
 #include "al_OSCDomain.hpp"
+#include "al_SimulationDomain.hpp"
 #include "al_OpenVRDomain.hpp"
 
 #include "al/core/app/al_WindowApp.hpp"
@@ -30,6 +31,7 @@ public:
     mAudioDomain->configure();
 
     mGraphicsDomain = newDomain<GraphicsDomain>();
+    mSimulationDomain = mGraphicsDomain->newSubDomain<SimulationDomain>(true);
   }
 
 
@@ -45,6 +47,7 @@ public:
 
   virtual void onInit () {}
   virtual void onCreate() {}
+  virtual void onAnimate(double dt) {}
   virtual void onDraw(Graphics &g) { (void) g;}
   virtual void onSound(AudioIOData &io) { (void) io;}
   virtual void onMessage(osc::Message &m) { (void) m;}
@@ -78,12 +81,14 @@ public:
   void disableVR() {
 
 #ifdef AL_EXT_OPENVR
-    mGraphicsDomain->removeSubDomain(mOpenVRDomain);
+    graphicsDomain()->removeSubDomain(mOpenVRDomain);
     mOpenVRDomain = nullptr;
 #else
     std::cout << "OpenVR support not available. Ignoring enableVR()" << std::endl;
 #endif
   }
+
+protected:
 
 private:
 
@@ -92,7 +97,9 @@ private:
   std::shared_ptr<OSCDomain> mOSCDomain;
   std::shared_ptr<AudioDomain> mAudioDomain;
   std::shared_ptr<GraphicsDomain> mGraphicsDomain;
+  std::shared_ptr<SimulationDomain> mSimulationDomain;
   std::shared_ptr<OpenVRDomain> mOpenVRDomain;
+
 
   std::vector<std::shared_ptr<AsynchronousDomain>> mDomainList;
   std::stack<std::shared_ptr<AsynchronousDomain>> mRunningDomains;

@@ -326,6 +326,11 @@ bool Window::implCreate(bool is_verbose) {
 
 bool Window::implCreated() const { return mImpl->created(); }
 
+void Window::implMakeCurrent()
+{
+  glfwMakeContextCurrent(mImpl->glfwWindow());
+}
+
 void Window::implRefresh() {
   // [!] POLLEVENTS IS AFTER SWAPBUFFERS
   // why: if an event destroys window

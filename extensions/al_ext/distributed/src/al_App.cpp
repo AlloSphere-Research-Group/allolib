@@ -30,19 +30,20 @@ void BaseCompositeApp::start() {
 
 void BaseCompositeApp::initializeDomains() {
   for (auto domain: mDomainList) {
+    if (strcmp(typeid(*domain).name(), typeid(GraphicsDomain).name()) == 0) {
+      dynamic_cast<GraphicsDomain *>(domain.get())->onInit = std::bind(&BaseCompositeApp::onInit, this);
+      dynamic_cast<GraphicsDomain *>(domain.get())->onCreate = std::bind(&BaseCompositeApp::onCreate, this);
+      dynamic_cast<GraphicsDomain *>(domain.get())->onDraw = std::bind(&BaseCompositeApp::onDraw, this, std::placeholders::_1);
+      mSimulationDomain->simulationFunction = std::bind(&BaseCompositeApp::onAnimate, this, std::placeholders::_1);
+    } else if (strcmp(typeid(*domain).name(), typeid(AudioDomain).name()) == 0) {
+      dynamic_cast<AudioDomain *>(domain.get())->onSound = std::bind(&BaseCompositeApp::onSound, this, std::placeholders::_1);
+    } else if (strcmp(typeid(*domain).name(), typeid(OSCDomain).name()) == 0) {
+      dynamic_cast<OSCDomain *>(domain.get())->onMessage = std::bind(&BaseCompositeApp::onMessage, this, std::placeholders::_1);
+    } else {
+      std::cout << "WARNING: Domain unknown for auto connection" << std::endl;
+    }
     if (!domain->initialize()) {
       std::cerr << "ERROR initializing domain " << std::endl;
-    } else {
-      if (strcmp(typeid(*domain).name(), typeid(GraphicsDomain).name()) == 0) {
-        dynamic_cast<GraphicsDomain *>(domain.get())->onInit = std::bind(&BaseCompositeApp::onInit, this);
-        dynamic_cast<GraphicsDomain *>(domain.get())->onCreate = std::bind(&BaseCompositeApp::onCreate, this);
-        dynamic_cast<GraphicsDomain *>(domain.get())->onDraw = std::bind(&BaseCompositeApp::onDraw, this, std::placeholders::_1);
-      } else if (strcmp(typeid(*domain).name(), typeid(AudioDomain).name()) == 0) {
-        dynamic_cast<AudioDomain *>(domain.get())->onSound = std::bind(&BaseCompositeApp::onSound, this, std::placeholders::_1);
-      } else if (strcmp(typeid(*domain).name(), typeid(OSCDomain).name()) == 0) {
-        dynamic_cast<OSCDomain *>(domain.get())->onMessage = std::bind(&BaseCompositeApp::onMessage, this, std::placeholders::_1);
-      }
-
     }
   }
 }

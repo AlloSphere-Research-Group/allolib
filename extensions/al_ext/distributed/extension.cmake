@@ -18,6 +18,7 @@ ${CMAKE_CURRENT_LIST_DIR}
     "${CMAKE_CURRENT_LIST_DIR}/src/al_AudioDomain.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/src/al_OSCDomain.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/src/al_OpenVRDomain.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/al_SimulationDomain.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/src/al_StateDistributionDomain.cpp"
   )
 
@@ -28,6 +29,7 @@ ${CMAKE_CURRENT_LIST_DIR}
     "${CMAKE_CURRENT_LIST_DIR}/al_AudioDomain.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/al_OSCDomain.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/al_OpenVRDomain.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/al_SimulationDomain.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/al_StateDistributionDomain.hpp"
   )
 

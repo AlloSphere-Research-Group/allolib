@@ -76,6 +76,7 @@ bool Window::create(bool verbose) {
   return false;
 }
 bool Window::created() const {return implCreated(); }
+void Window::makeCurrent() { implMakeCurrent(); }
 void Window::refresh() { implRefresh(); }
 void Window::destroy(){ if(created()){ implDestroy(); } }
 

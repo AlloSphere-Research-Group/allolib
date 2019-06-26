@@ -31,9 +31,6 @@ struct DefaultState {
 template<class TSharedState = DefaultState>
 class StateReceiveDomain : public SynchronousDomain {
 public:
-  StateReceiveDomain() {
-    mState = std::make_shared<TSharedState>();
-  }
 
   bool initialize(ComputationDomain *parent = nullptr) override {
     initializeSubdomains(true);
@@ -124,6 +121,7 @@ public:
   {
     return mId;
   }
+
   void setId(const std::string &id)
   {
     mId = id;
@@ -288,55 +286,33 @@ private:
 class StateDistributionDomain : public SynchronousDomain {
 public:
 
-  bool initialize(ComputationDomain *parent = nullptr) override;
+//  bool initialize(ComputationDomain *parent = nullptr) override;
 
-  bool tick() override;
+//  bool tick() override;
 
-  bool cleanup(ComputationDomain *parent = nullptr) override;
+//  bool cleanup(ComputationDomain *parent = nullptr) override;
 
   template<class TSharedState = DefaultState>
-  std::shared_ptr<TSharedState> addStateSender(std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr) {
+  std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr) {
     auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(this);
+    newDomain->setId(id);
     if (statePtr) {
-      newDomain->setId(id);
       newDomain->setStatePointer(statePtr);
     }
-    return newDomain->state();
+    return newDomain;
   }
 
   template<class TSharedState = DefaultState>
-  std::shared_ptr<TSharedState> addStateReceiver(std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr) {
+  std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr) {
     auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(this);
+    newDomain->setId(id);
     if (statePtr) {
-      newDomain->setId(id);
       newDomain->setStatePointer(statePtr);
     }
-    return newDomain->state();
+    return newDomain;
   }
 
 private:
-
-#ifdef AL_USE_CUTTLEBONE
-  std::unique_ptr<cuttlebone::Maker<TSharedState>> mMaker;
-#else
-  std::unique_ptr<osc::Send> mSend;
-#endif
-
-#ifdef AL_USE_CUTTLEBONE
-  if (role() & ROLE_SIMULATOR) {
-      std::string broadcastAddress = configLoader.gets("broadcastAddress");
-      mMaker = std::make_unique<cuttlebone::Maker<TSharedState>>(broadcastAddress.c_str());
-      mMaker->start();
-  } else if (role() & ROLE_RENDERER){
-  }
-
-#endif
-
-  uint16_t mPort = 10100;
-  std::string mAddress {"localhost"};
-  uint16_t mPacketSize = 1400;
-
-  int mQueuedStates {0};
 };
 
 }

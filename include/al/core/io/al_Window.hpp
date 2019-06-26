@@ -265,6 +265,7 @@ public:
   /// \returns whether a valid window is created
   bool create(bool is_verbose=false);
 
+  void makeCurrent();
   // refresh window (swap buffers, poll events, etc.)
   void refresh();
 
@@ -366,6 +367,7 @@ protected:
   // Must be defined in pimpl-specific file
   bool implCreate(bool is_verbose=false);
   bool implCreated() const;
+  void implMakeCurrent();
   void implRefresh();
   void implDestroy();
   void implSetCursor();
