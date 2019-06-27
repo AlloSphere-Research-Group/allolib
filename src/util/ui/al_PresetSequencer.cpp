@@ -422,7 +422,6 @@ std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(std::string sequ
 		std::getline(ss, name, ':');
 		std::getline(ss, delta, ':');
 		std::getline(ss, duration, ':');
-		std::cout << line << std::endl;
 		if (name.size() > 0 && name[0] == '@') {
 			Step step;
 			step.type = EVENT;
