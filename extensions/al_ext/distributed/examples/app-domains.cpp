@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "al_ext/distributed/al_App.hpp"
+#include "al/core/graphics/al_Shapes.hpp"
 
 #include "Gamma/Oscillator.h"
 
