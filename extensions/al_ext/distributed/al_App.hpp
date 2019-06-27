@@ -47,7 +47,7 @@ public:
 
   virtual void onInit () {}
   virtual void onCreate() {}
-  virtual void onAnimate(double dt) {}
+  virtual void onAnimate(double dt) {(void) dt;}
   virtual void onDraw(Graphics &g) { (void) g;}
   virtual void onSound(AudioIOData &io) { (void) io;}
   virtual void onMessage(osc::Message &m) { (void) m;}
@@ -65,6 +65,7 @@ public:
   std::shared_ptr<OSCDomain> oscDomain() {return mOSCDomain;}
   std::shared_ptr<AudioDomain> audioDomain() { return mAudioDomain;}
   std::shared_ptr<OpenGLGraphicsDomain> graphicsDomain() { return mOpenGLGraphicsDomain;}
+  std::shared_ptr<SimulationDomain> simulationDomain() { return mSimulationDomain;}
 
   void enableVR() {
 
@@ -89,8 +90,6 @@ public:
   }
 
 protected:
-
-private:
 
   void initializeDomains();
 
