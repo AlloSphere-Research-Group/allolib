@@ -125,6 +125,7 @@ set(util_headers
   include/al/util/ui/al_ParameterServer.hpp
   include/al/util/ui/al_ParameterMIDI.hpp
   include/al/util/ui/al_Preset.hpp
+  include/al/util/ui/al_FileSelector.hpp
   include/al/util/ui/al_HtmlInterfaceServer.hpp
   include/al/util/ui/al_PresetMapper.hpp
   include/al/util/ui/al_PresetMIDI.hpp
@@ -153,6 +154,7 @@ set(util_sources
   ${al_path}/src/util/ui/al_ParameterBundle.cpp
   ${al_path}/src/util/ui/al_ParameterGUI.cpp
   ${al_path}/src/util/ui/al_ParameterServer.cpp
+  ${al_path}/src/util/ui/al_FileSelector.cpp
   ${al_path}/src/util/ui/al_Preset.cpp
   ${al_path}/src/util/ui/al_HtmlInterfaceServer.cpp
   ${al_path}/src/util/ui/al_PresetMapper.cpp
