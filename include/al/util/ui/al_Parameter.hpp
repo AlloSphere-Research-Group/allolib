@@ -426,7 +426,7 @@ public:
 	 * registerChangeCallback() are not called. This is useful to avoid infinite
 	 * recursion when a widget sets the parameter that then sets the widget.
 	 */
-	virtual void setNoCalls(float value, void *blockReceiver = NULL) override;
+    virtual void setNoCalls(float value, void *blockReceiver = nullptr) override;
 
 	/**
 	 * @brief get the parameter's value
