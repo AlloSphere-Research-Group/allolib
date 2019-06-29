@@ -42,7 +42,7 @@ bool FileSelector::drawFileSelector() {
         mCurrentDir = mCurrentDir.substr(0, mCurrentDir.rfind("\\"));
       }
 #ifndef AL_WINDOWS
-      if (mGlobalRoot.size() == 0 && mCurrentDir = "") {
+      if (mGlobalRoot.size() == 0 && mCurrentDir == "") {
         // On *nix stop at root.
         mCurrentDir = "/";
       }
