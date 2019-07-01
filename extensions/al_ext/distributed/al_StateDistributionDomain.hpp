@@ -45,7 +45,7 @@ public:
     initializeSubdomains(false);
     return true;
 #else
-    buf = new char[sizeof(TSharedState)];
+    buf = std::make_unique<unsigned char []>(sizeof(TSharedState));
     mRecv = std::make_unique<osc::Recv>();
     if (!mRecv || !mRecv->open(mPort, mAddress.c_str())) {
       std::cerr << "Error opening server" << std::endl;
@@ -53,7 +53,10 @@ public:
     }
     mHandler.mOscDomain = this;
     mRecv->handler(mHandler);
-    mRecv->start();
+    if (!mRecv->start()) {
+      std::cerr << "Failed to start receiver. " << std::endl;
+      return false;
+    }
 
     std::cout << "Opened " << mAddress << ":" << mPort << std::endl;
     initializeSubdomains(false);
@@ -95,16 +98,16 @@ public:
     mRecv = nullptr;
     mState = nullptr;
 
-    delete[] buf;
 //    std::cerr << "Not using Cuttlebone. Ignoring" << std::endl;
     cleanupSubdomains(false);
     return true;
 #endif
   }
 
-  void configure(uint16_t port=10100, std::string address = "0.0.0.0",
+  void configure(uint16_t port=10100, std::string id = "state", std::string address = "localhost",
                  uint16_t packetSize = 1400) {
     mPort = port;
+    mId = id;
     mAddress = address;
     mPacketSize = packetSize;
   }
@@ -131,7 +134,7 @@ private:
   std::shared_ptr<TSharedState> mState;
   int mQueuedStates {1};
 
-  std::string mAddress {"0.0.0.0"};
+  std::string mAddress {"localhost"};
   uint16_t mPort = 10100;
   uint16_t mPacketSize = 1400;
   std::string mId;
@@ -143,7 +146,7 @@ private:
   public:
     StateReceiveDomain *mOscDomain;
     void onMessage(osc::Message &m) override {
-//      m.print();
+      m.print();
       if (m.addressPattern() == "/_state" && m.typeTags() == "sb") {
         std::string id;
         m >> id;
@@ -157,7 +160,7 @@ private:
     }
   } mHandler;
 
-  char *buf;
+  std::unique_ptr<unsigned char []> buf;
   osc::Blob mBlobBuf;
   uint16_t newMessages = 0;
   std::mutex mRecvLock;
@@ -235,6 +238,13 @@ public:
     cleanupSubdomains(false);
     return true;
 #endif
+  }
+
+  void configure(uint16_t port, std::string id = "state", std::string address = "localhost", uint16_t packetSize = 1400) {
+    mPort = port;
+    mId = id;
+    mAddress = address;
+    mPacketSize = packetSize;
   }
 
   std::shared_ptr<TSharedState> state() { return mState;}

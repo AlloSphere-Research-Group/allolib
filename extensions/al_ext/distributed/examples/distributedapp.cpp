@@ -30,20 +30,25 @@ public:
     mPrimary = primary;
     if (mPrimary) {
       std::cout << "Running primary" << std::endl;
+      auto sender = std::static_pointer_cast<StateSimulationDomain<State>>(mSimulationDomain)->addStateSender("state");
+      sender->configure(10101);
     } else {
       std::cout << "Running REPLICA" << std::endl;
-      std::static_pointer_cast<StateSimulationDomain<State>>(mSimulationDomain)->addStateReceiver("state");
-      oscDomain()->configure(9100);
+      auto receiver = std::static_pointer_cast<StateSimulationDomain<State>>(mSimulationDomain)->addStateReceiver("state");
+      receiver->configure(10101);
     }
   }
 
-  void onDraw(Graphics &g) override {
-    // Update state
+  void onAnimate(double dt) {
     if (mPrimary) {
       state().value = mOsc2();
     } else {
       std::cout << state().value << std::endl;
     }
+  }
+
+  void onDraw(Graphics &g) override {
+    // Update state
     // Use received values
     g.clear(0,0, state().value);
   }
@@ -66,7 +71,7 @@ private:
 
 int main(int argc, char *argv[])
 {
-  if (argc > 1) {
+  if (argc > 1 || !osc::Recv::portAvailable(9010, "0.0.0.0")) {
     MyApp app(false);
     app.start();
 
@@ -75,7 +80,6 @@ int main(int argc, char *argv[])
     app.start();
 
   }
-
 
   return 0;
 }
