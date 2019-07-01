@@ -407,6 +407,8 @@ public:
 	void parse(const char *packet, int size, const char *senderAddr);
 	void loop();
 
+    static bool portAvailable(uint16_t port, const char * address = "");
+
 protected:
 	std::vector<PacketHandler *> mHandlers;
 	std::vector<char> mBuffer;

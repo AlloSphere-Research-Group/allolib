@@ -477,5 +477,23 @@ void Recv::loop()
   socketReceiver->loop();
 }
 
+bool Recv::portAvailable(uint16_t port, const char *address) {
+  std::unique_ptr<SocketReceiver> socketReceiver;
+  try {
+    // unique pointer assignment releases and deletes previously owned object
+    if (*address == '\0') {
+      socketReceiver = std::make_unique<SocketReceiver>(port, "localhost", nullptr);
+    } else {
+      socketReceiver = std::make_unique<SocketReceiver>(port, address, nullptr);
+    }
+
+  }
+  catch (const std::runtime_error& e) {
+    //        std::cout << "run time exception at Recv::open: " << e.what() << " " << address << ":" << port << std::endl;
+    return false;
+  }
+  return true;
+}
+
 } // osc::
 } // al::
