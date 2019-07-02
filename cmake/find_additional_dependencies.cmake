@@ -9,8 +9,6 @@
 #option(USE_APR "" OFF)
 option(USE_MPI "" OFF)
 
-# OpenGL is the minimum required dependency
-find_package(OpenGL REQUIRED)
 
 # al_path needs to be set prior to calling this script
 

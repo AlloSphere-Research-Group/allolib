@@ -48,7 +48,7 @@ endif(TRAVIS_BUILD)
 include(cmake/find_additional_dependencies.cmake)
 # sets: ADDITIONAL_INCLUDE_DIRS, ADDITIONAL_LIBRARIES, ADDITIONAL_HEADERS,
 #       ADDITIONAL_SOURCES, ADDITIONAL_DEFINITIONS
-include(cmake/external.cmake)
+# include(cmake/external.cmake)
 # sets: EXTERNAL_INCLUDE_DIRS, EXTERNAL_SRC, EXTERNAL_DEFINITIONS
 #       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
 include(cmake/al_files.cmake)
@@ -56,26 +56,29 @@ include(cmake/al_files.cmake)
 include(cmake/extensions.cmake)
 # sets: EXTENSIONS_LIBRARIES, EXTENSIONS_INCLUDE_DIRS
 
+find_package(OpenGL REQUIRED)
+add_subdirectory(external)
+
 set(headers
   ${al_headers} ${ADDITIONAL_HEADERS}
 )
 
 set(sources
-  ${al_sources} ${module_sources} ${EXTERNAL_SRC} ${ADDITIONAL_SOURCES}
+  ${al_sources} ${module_sources} ${ADDITIONAL_SOURCES}
 )
 
 set(dirs_to_include
-  ${ADDITIONAL_INCLUDE_DIRS} ${EXTERNAL_INCLUDE_DIRS} ${EXTENSIONS_INCLUDE_DIRS}
+  ${ADDITIONAL_INCLUDE_DIRS} external/Gamma external/rtaudio external/rtmidi ${EXTENSIONS_INCLUDE_DIRS}
 )
 
 set (link_dirs  ${EXTENSIONS_LINK_DIRS})
 
 set(libs_to_link
-  ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTERNAL_LIBRARIES} ${EXTENSIONS_LIBRARIES}
+  ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTENSIONS_LIBRARIES}
 )
 
 set(definitions
-  ${PLATFORM_DEFINITION} ${EXTERNAL_DEFINITIONS} ${ADDITIONAL_DEFINITIONS} ${EXTENSIONS_DEFINITIONS}
+  ${PLATFORM_DEFINITION} ${ADDITIONAL_DEFINITIONS} ${EXTENSIONS_DEFINITIONS}
 )
 
 # multi configuration generators
@@ -89,12 +92,10 @@ endif ()
 add_library(al STATIC ${headers} ${sources})
 
 #paths
-set_target_properties(al
-  PROPERTIES
+set_target_properties(al PROPERTIES
   DEBUG_POSTFIX d
-  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib
-  ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR}/lib
-  ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR}/lib
+  CXX_STANDARD 14
+  CXX_STANDARD_REQUIRED ON
 )
 
 #flags
@@ -104,19 +105,15 @@ else ()
   target_compile_options(al PRIVATE "-Wall")
 endif (AL_WINDOWS)
 
-# c++14
-set_target_properties(al PROPERTIES CXX_STANDARD 14)
-set_target_properties(al PROPERTIES CXX_STANDARD_REQUIRED ON)
-
 # definitions
-target_compile_definitions(al PUBLIC ${definitions})
+target_compile_definitions(al PUBLIC ${definitions} AL_AUDIO_RTAUDIO)
 
 target_include_directories(al PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
 #  "$<INSTALL_INTERFACE:include>"
 )
 
-link_directories(${link_dirs})
+link_directories(${link_dirs}) # should be gone
 
 target_include_directories(al PUBLIC ${CMAKE_CURRENT_LIST_DIR}/modules)
 
@@ -132,7 +129,10 @@ endforeach (dir)
 target_include_directories(al PUBLIC ${dirs_to_include})
 
 # libs
-target_link_libraries(al PUBLIC ${libs_to_link} Gamma glfw glew_s)
+target_link_libraries(al PUBLIC
+  ${libs_to_link}
+  Gamma glew_s glfw glad rtaudio rtmidi cpptoml
+  nlohmann_json::nlohmann_json imgui oscpack stb)
 
 set_target_properties(al PROPERTIES AL_LINK_LIBRARIES "${libs_to_link}")
 set_target_properties(al PROPERTIES AL_DLL_LIBRARIES "${EXTENSIONS_DLLS}")
