@@ -31,11 +31,13 @@ endif()
 
   set(THIS_EXTENSION_SRC
     "${CMAKE_CURRENT_LIST_DIR}/src/al_Serial.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/al_Arduino.cpp"
     ${serial_SRCS}
   )
 
   set(THIS_EXTENSION_HEADERS
     "${CMAKE_CURRENT_LIST_DIR}/al_Serial.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/al_Arduino.hpp"
   )
 
   set(THIS_EXTENSION_LIBRARIES
@@ -73,6 +75,7 @@ endif()
 
   set(CURRENT_EXTENSION_EXAMPLES
     "${CMAKE_CURRENT_LIST_DIR}/examples/serialin.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/examples/arduino.cpp"
     )
 
 #  message("libs: ${CURRENT_EXTENSION_LIBRARIES}")
