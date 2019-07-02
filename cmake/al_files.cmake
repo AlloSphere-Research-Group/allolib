@@ -1,6 +1,3 @@
-#option(USE_GLV "" OFF)
-
-# Main Library
 set(core_headers
   include/al/core/app/al_App.hpp
   include/al/core/app/al_AudioApp.hpp

@@ -30,6 +30,9 @@ external/glew/glew.pc
 *.lib
 *.so
 *.dylib
+*.exe
+*.ilk
+*.pdb
 
 # documentation
 doc/html
