@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "al_Serial.hpp"
+#include "al_Arduino.hpp"
 
 #include "al/core/system/al_Time.hpp"
 

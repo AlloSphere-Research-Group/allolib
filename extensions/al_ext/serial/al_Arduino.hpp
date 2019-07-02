@@ -1,5 +1,5 @@
-#ifndef AL_SERIAL_HPP
-#define AL_SERIAL_HPP
+#ifndef AL_ARDUINO_HPP
+#define AL_ARDUINO_HPP
 
 #include <memory>
 #include <thread>
