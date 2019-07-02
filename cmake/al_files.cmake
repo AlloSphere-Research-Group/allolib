@@ -63,54 +63,54 @@ set(core_headers
 )
 
 set(core_sources
-  ${al_path}/src/core/app/al_AudioApp.cpp
-  ${al_path}/src/core/app/al_FPS.cpp
-  ${al_path}/src/core/app/al_WindowApp.cpp
-  ${al_path}/src/core/graphics/al_BufferObject.cpp
-  ${al_path}/src/core/graphics/al_DefaultShaders.cpp
-  ${al_path}/src/core/graphics/al_EasyFBO.cpp
-  ${al_path}/src/core/graphics/al_EasyVAO.cpp
-  ${al_path}/src/core/graphics/al_FBO.cpp
-  ${al_path}/src/core/graphics/al_GLEW.cpp
-  ${al_path}/src/core/graphics/al_GLFW.cpp
-  ${al_path}/src/core/graphics/al_GPUObject.cpp
-  ${al_path}/src/core/graphics/al_Graphics.cpp
-  ${al_path}/src/core/graphics/al_Isosurface.cpp
-  ${al_path}/src/core/graphics/al_Lens.cpp
-  ${al_path}/src/core/graphics/al_Light.cpp
-  ${al_path}/src/core/graphics/al_Mesh.cpp
-  ${al_path}/src/core/graphics/al_OpenGL.cpp
-  ${al_path}/src/core/graphics/al_RenderManager.cpp
-  ${al_path}/src/core/graphics/al_Shader.cpp
-  ${al_path}/src/core/graphics/al_Shapes.cpp
-  ${al_path}/src/core/graphics/al_Texture.cpp
-  ${al_path}/src/core/graphics/al_VAO.cpp
-  ${al_path}/src/core/graphics/al_VAOMesh.cpp
-  ${al_path}/src/core/graphics/al_Viewpoint.cpp
-  ${al_path}/src/core/io/al_AudioIO.cpp
-  ${al_path}/src/core/io/al_AudioIOData.cpp
-  ${al_path}/src/core/io/al_ControlNav.cpp
-  ${al_path}/src/core/io/al_CSVReader.cpp
-  ${al_path}/src/core/io/al_File.cpp
-  ${al_path}/src/core/io/al_MIDI.cpp
-  ${al_path}/src/core/io/al_Window.cpp
-  ${al_path}/src/core/io/al_WindowGLFW.cpp
-  ${al_path}/src/core/math/al_StdRandom.cpp
-  ${al_path}/src/core/protocol/al_OSC.cpp
-  ${al_path}/src/core/sound/al_Ambisonics.cpp
-  ${al_path}/src/core/sound/al_AudioScene.cpp
-  ${al_path}/src/core/sound/al_Biquad.cpp
-  ${al_path}/src/core/sound/al_Dbap.cpp
-  ${al_path}/src/core/sound/al_Vbap.cpp
-  ${al_path}/src/core/sound/al_Spatializer.cpp
-  ${al_path}/src/core/sound/al_StereoPanner.cpp
-  ${al_path}/src/core/spatial/al_HashSpace.cpp
-  ${al_path}/src/core/spatial/al_Pose.cpp
-  ${al_path}/src/core/system/al_PeriodicThread.cpp
-  ${al_path}/src/core/system/al_Printing.cpp
-  ${al_path}/src/core/system/al_ThreadNative.cpp
-  ${al_path}/src/core/system/al_Time.cpp
-  ${al_path}/src/core/types/al_Color.cpp
+  src/core/app/al_AudioApp.cpp
+  src/core/app/al_FPS.cpp
+  src/core/app/al_WindowApp.cpp
+  src/core/graphics/al_BufferObject.cpp
+  src/core/graphics/al_DefaultShaders.cpp
+  src/core/graphics/al_EasyFBO.cpp
+  src/core/graphics/al_EasyVAO.cpp
+  src/core/graphics/al_FBO.cpp
+  src/core/graphics/al_GLEW.cpp
+  src/core/graphics/al_GLFW.cpp
+  src/core/graphics/al_GPUObject.cpp
+  src/core/graphics/al_Graphics.cpp
+  src/core/graphics/al_Isosurface.cpp
+  src/core/graphics/al_Lens.cpp
+  src/core/graphics/al_Light.cpp
+  src/core/graphics/al_Mesh.cpp
+  src/core/graphics/al_OpenGL.cpp
+  src/core/graphics/al_RenderManager.cpp
+  src/core/graphics/al_Shader.cpp
+  src/core/graphics/al_Shapes.cpp
+  src/core/graphics/al_Texture.cpp
+  src/core/graphics/al_VAO.cpp
+  src/core/graphics/al_VAOMesh.cpp
+  src/core/graphics/al_Viewpoint.cpp
+  src/core/io/al_AudioIO.cpp
+  src/core/io/al_AudioIOData.cpp
+  src/core/io/al_ControlNav.cpp
+  src/core/io/al_CSVReader.cpp
+  src/core/io/al_File.cpp
+  src/core/io/al_MIDI.cpp
+  src/core/io/al_Window.cpp
+  src/core/io/al_WindowGLFW.cpp
+  src/core/math/al_StdRandom.cpp
+  src/core/protocol/al_OSC.cpp
+  src/core/sound/al_Ambisonics.cpp
+  src/core/sound/al_AudioScene.cpp
+  src/core/sound/al_Biquad.cpp
+  src/core/sound/al_Dbap.cpp
+  src/core/sound/al_Vbap.cpp
+  src/core/sound/al_Spatializer.cpp
+  src/core/sound/al_StereoPanner.cpp
+  src/core/spatial/al_HashSpace.cpp
+  src/core/spatial/al_Pose.cpp
+  src/core/system/al_PeriodicThread.cpp
+  src/core/system/al_Printing.cpp
+  src/core/system/al_ThreadNative.cpp
+  src/core/system/al_Time.cpp
+  src/core/types/al_Color.cpp
 )
 
 set(util_headers
@@ -145,29 +145,29 @@ set(util_headers
 )
 
 set(util_sources
-  ${al_path}/src/util/al_Array_C.c
-  ${al_path}/src/util/al_Array.cpp
-  ${al_path}/src/util/imgui/al_Imgui.cpp
-  ${al_path}/src/util/imgui/imgui_impl_glfw_gl3.cpp
-  ${al_path}/src/util/ui/al_Composition.cpp
-  ${al_path}/src/util/ui/al_Parameter.cpp
-  ${al_path}/src/util/ui/al_ParameterBundle.cpp
-  ${al_path}/src/util/ui/al_ParameterGUI.cpp
-  ${al_path}/src/util/ui/al_ParameterServer.cpp
-  ${al_path}/src/util/ui/al_FileSelector.cpp
-  ${al_path}/src/util/ui/al_Preset.cpp
-  ${al_path}/src/util/ui/al_HtmlInterfaceServer.cpp
-  ${al_path}/src/util/ui/al_PresetMapper.cpp
-  ${al_path}/src/util/ui/al_PresetMIDI.cpp
-  ${al_path}/src/util/ui/al_PresetSequencer.cpp
-  ${al_path}/src/util/ui/al_SequenceRecorder.cpp
-  ${al_path}/src/util/ui/al_ControlGUI.cpp
-  ${al_path}/src/util/scene/al_SynthSequencer.cpp
-  ${al_path}/src/util/scene/al_SynthRecorder.cpp
-  ${al_path}/src/util/scene/al_DynamicScene.cpp
-  ${al_path}/src/util/scene/al_PolySynth.cpp
-  ${al_path}/src/util/al_Toml.cpp
-  ${al_path}/src/util/sound/al_OutputMaster.cpp
+  src/util/al_Array_C.c
+  src/util/al_Array.cpp
+  src/util/imgui/al_Imgui.cpp
+  src/util/imgui/imgui_impl_glfw_gl3.cpp
+  src/util/ui/al_Composition.cpp
+  src/util/ui/al_Parameter.cpp
+  src/util/ui/al_ParameterBundle.cpp
+  src/util/ui/al_ParameterGUI.cpp
+  src/util/ui/al_ParameterServer.cpp
+  src/util/ui/al_FileSelector.cpp
+  src/util/ui/al_Preset.cpp
+  src/util/ui/al_HtmlInterfaceServer.cpp
+  src/util/ui/al_PresetMapper.cpp
+  src/util/ui/al_PresetMIDI.cpp
+  src/util/ui/al_PresetSequencer.cpp
+  src/util/ui/al_SequenceRecorder.cpp
+  src/util/ui/al_ControlGUI.cpp
+  src/util/scene/al_SynthSequencer.cpp
+  src/util/scene/al_SynthRecorder.cpp
+  src/util/scene/al_DynamicScene.cpp
+  src/util/scene/al_PolySynth.cpp
+  src/util/al_Toml.cpp
+  src/util/sound/al_OutputMaster.cpp
 )
 
 set(al_headers
@@ -187,48 +187,6 @@ set(module_sources
 
 # Header only files produce a lot of warnings from unused functions,
 # So disable these warnings for modules
-foreach(src_file IN LISTS module_sources)
+# foreach(src_file IN LISTS module_sources)
 #SET_SOURCE_FILES_PROPERTIES(${src_file} PROPERTIES COMPILE_FLAGS "-Wunused-function -Wunused-variable")
-endforeach(src_file IN LISTS module_sources)
-
-# OPTIONAL ---------------------------------------------------------------------
-
-#set(glv_headers
-#  include/al/glv/al_GLV.hpp
-#  include/al/glv/glv.h
-#  include/al/glv/glv_behavior.h
-#  include/al/glv/glv_buttons.h
-#  include/al/glv/glv_conf.h
-#  include/al/glv/glv_core.h
-#  include/al/glv/glv_font.h
-#  include/al/glv/glv_layout.h
-#  include/al/glv/glv_model.h
-#  include/al/glv/glv_notification.h
-#  include/al/glv/glv_rect.h
-#  include/al/glv/glv_sliders.h
-#  include/al/glv/glv_textview.h
-#  include/al/glv/glv_util.h
-#  include/al/glv/glv_widget.h
-#)
-
-#set(glv_sources
-#  src/glv/al_GLV_draw.cpp
-#  src/glv/al_GLV_wrapper.cpp
-#  src/glv/glv_buttons.cpp
-#  src/glv/glv_core.cpp
-#  src/glv/glv_font.cpp
-#  src/glv/glv_glv.cpp
-#  src/glv/glv_inputdevice.cpp
-#  src/glv/glv_layout.cpp
-#  src/glv/glv_model.cpp
-#  src/glv/glv_notification.cpp
-#  src/glv/glv_sliders.cpp
-#  src/glv/glv_textview.cpp
-#  src/glv/glv_view.cpp
-#  src/glv/glv_widget.cpp
-#)
-
-#if (USE_GLV)
-#  list(APPEND al_headers ${glv_headers})
-#  list(APPEND al_sources ${glv_sources})
-#endif()
+# endforeach(src_file IN LISTS module_sources)
