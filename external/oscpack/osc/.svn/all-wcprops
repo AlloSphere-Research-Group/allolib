@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/122/tags/release_1_1_0/osc
+END
+OscReceivedElements.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscReceivedElements.cpp
+END
+OscException.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscException.h
+END
+OscOutboundPacketStream.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscOutboundPacketStream.cpp
+END
+MessageMappingOscPacketListener.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/122/tags/release_1_1_0/osc/MessageMappingOscPacketListener.h
+END
+OscTypes.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscTypes.cpp
+END
+OscPrintReceivedElements.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscPrintReceivedElements.h
+END
+OscOutboundPacketStream.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscOutboundPacketStream.h
+END
+OscReceivedElements.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscReceivedElements.h
+END
+OscTypes.h
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscTypes.h
+END
+OscHostEndianness.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscHostEndianness.h
+END
+OscPrintReceivedElements.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscPrintReceivedElements.cpp
+END
+OscPacketListener.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/122/tags/release_1_1_0/osc/OscPacketListener.h
+END
