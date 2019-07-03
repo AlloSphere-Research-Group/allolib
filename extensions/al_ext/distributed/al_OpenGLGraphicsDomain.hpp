@@ -89,9 +89,10 @@ public:
 
   Graphics &graphics() { return app.mGraphics;}
 
-private:
   // TODO change WindowApp to OpenGLWindowDomain
   WindowApp app;
+
+private:
   Nav mNav; // is a Pose itself and also handles manipulation of pose
   Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
   NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse

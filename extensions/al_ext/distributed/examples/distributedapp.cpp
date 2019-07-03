@@ -13,18 +13,15 @@ struct State {
   float value;
 };
 
-class MyApp: public BaseCompositeApp {
+class DistributedApp : public BaseCompositeApp {
 public:
-  gam::Sine<> mOsc {440};
-  gam::Sine<> mOsc2 {1};
+  DistributedApp(bool primary = true) : BaseCompositeApp() {
 
-  MyApp(bool primary = true) : BaseCompositeApp() {
-    mOsc.domain(*audioDomain());
-    mOsc2.domain(*graphicsDomain());
-
-    // State will be same memory for local, but will be synced on the network for separate instances 
+    // State will be same memory for local, but will be synced on the network for separate instances
 
     mOpenGLGraphicsDomain->removeSubDomain(simulationDomain());
+
+    // Replace Simulation domain with state simulation domain
     mSimulationDomain = mOpenGLGraphicsDomain->newSubDomain<StateSimulationDomain<State>>(true);
 
     mPrimary = primary;
@@ -36,15 +33,35 @@ public:
       std::cout << "Running REPLICA" << std::endl;
       auto receiver = std::static_pointer_cast<StateSimulationDomain<State>>(mSimulationDomain)->addStateReceiver("state");
       receiver->configure(10101);
+      mSimulationDomain->disableProcessingCallback(); // Replicas won't call onAnimate()
     }
   }
 
+  State &state() {
+    return std::static_pointer_cast<StateSimulationDomain<State>>(mSimulationDomain)->state();
+  }
+
+  void setTitle(std::string title) {
+    graphicsDomain()->app.title(title);
+  }
+
+private:
+  bool mPrimary;
+};
+
+class MyApp: public DistributedApp {
+public:
+  gam::Sine<> mOsc {440};
+  gam::Sine<> mOsc2 {1};
+
+  MyApp(bool primary = true) : DistributedApp(primary) {
+    mOsc.domain(*audioDomain());
+    mOsc2.domain(*graphicsDomain());
+
+  }
+
   void onAnimate(double dt) {
-    if (mPrimary) {
-      state().value = mOsc2();
-    } else {
-      std::cout << state().value << std::endl;
-    }
+    state().value = mOsc2();
   }
 
   void onDraw(Graphics &g) override {
@@ -61,22 +78,18 @@ public:
 
   void onMessage(osc::Message &m) override {}
 
-  State &state() {
-    return std::static_pointer_cast<StateSimulationDomain<State>>(mSimulationDomain)->state();
-  }
-
-private:
-  bool mPrimary;
 };
 
 int main(int argc, char *argv[])
 {
-  if (argc > 1 || !osc::Recv::portAvailable(9010, "0.0.0.0")) {
+  if (argc > 1 || !osc::Recv::portAvailable(9010, "0.0.0.0")) { // Run replica
     MyApp app(false);
+    app.setTitle("REPLICA");
     app.start();
 
   } else {
     MyApp app;
+    app.setTitle("PRIMARY");
     app.start();
 
   }

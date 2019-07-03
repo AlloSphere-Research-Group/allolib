@@ -10,6 +10,7 @@
 #include <mutex>
 
 #include "al/core/spatial/al_Pose.hpp"
+#include "al/core/protocol/al_OSC.hpp"
 
 #include "al_ComputationDomain.hpp"
 #include "Gamma/Domain.h"
@@ -27,45 +28,34 @@ namespace al {
 struct DefaultState {
     Pose pose;
 };
+template<class TSharedState>
+class StateReceiveDomain;
+
+template<class TSharedState>
+class StateSendDomain;
+
+class StateDistributionDomain : public SynchronousDomain {
+public:
+
+  template<class TSharedState = DefaultState>
+  std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr);
+
+  template<class TSharedState = DefaultState>
+  std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr);
+
+private:
+};
 
 template<class TSharedState = DefaultState>
 class StateReceiveDomain : public SynchronousDomain {
 public:
 
-  bool initialize(ComputationDomain *parent = nullptr) override {
-    initializeSubdomains(true);
-    assert(parent != nullptr);
-
-    if (!mState) {
-      mState = std::make_shared<TSharedState>();
-    }
-#ifdef AL_USE_CUTTLEBONE
-    mTaker = std::make_unique<cuttlebone::Taker<TSharedState, mPacketSize, mPort>>();
-    mTaker->start();
-    initializeSubdomains(false);
-    return true;
-#else
-    buf = std::make_unique<unsigned char []>(sizeof(TSharedState));
-    mRecv = std::make_unique<osc::Recv>();
-    if (!mRecv || !mRecv->open(mPort, mAddress.c_str())) {
-      std::cerr << "Error opening server" << std::endl;
-      return false;
-    }
-    mHandler.mOscDomain = this;
-    mRecv->handler(mHandler);
-    if (!mRecv->start()) {
-      std::cerr << "Failed to start receiver. " << std::endl;
-      return false;
-    }
-
-    std::cout << "Opened " << mAddress << ":" << mPort << std::endl;
-    initializeSubdomains(false);
-    return true;
-#endif
-  }
+  bool initialize(ComputationDomain *parent = nullptr) override;
 
   bool tick() override {
     tickSubdomains(true);
+
+    assert(mState); // State must have been set at this point
 #ifdef AL_USE_CUTTLEBONE
     assert(mTaker);
     mQueuedStates = mTaker->get(mState);
@@ -73,12 +63,8 @@ public:
 #else
     mRecvLock.lock();
     if (newMessages > 0) {
-      if (sizeof(TSharedState) == mBlobBuf.size) {
-        mQueuedStates = newMessages;
-        memcpy(mState.get(), mBlobBuf.data, sizeof(TSharedState));
-      } else {
-        std::cerr << "received state size inconsistent. Ignoring " << newMessages << "states " << std::endl;
-      }
+      mQueuedStates = newMessages;
+      memcpy(mState.get(), buf.get(), sizeof(TSharedState));
       newMessages = 0;
     }
     mRecvLock.unlock();
@@ -146,22 +132,28 @@ private:
   public:
     StateReceiveDomain *mOscDomain;
     void onMessage(osc::Message &m) override {
-      m.print();
+//      m.print();
       if (m.addressPattern() == "/_state" && m.typeTags() == "sb") {
         std::string id;
         m >> id;
         if (id == mOscDomain->mId) {
-          mOscDomain->mRecvLock.lock();
-          m >> mOscDomain->mBlobBuf;
-          mOscDomain->newMessages++;
-          mOscDomain->mRecvLock.unlock();
+          osc::Blob inBlob;
+          m >> inBlob;
+          if (sizeof(TSharedState) == inBlob.size) {
+            mOscDomain->mRecvLock.lock();
+            memcpy(mOscDomain->buf.get(), inBlob.data, sizeof(TSharedState));
+            mOscDomain->newMessages++;
+            mOscDomain->mRecvLock.unlock();
+          } else {
+            std::cerr << "ERROR: received state size mismatch" << std::endl;
+          }
         }
       }
     }
   } mHandler;
 
   std::unique_ptr<unsigned char []> buf;
-  osc::Blob mBlobBuf;
+
   uint16_t newMessages = 0;
   std::mutex mRecvLock;
   std::unique_ptr<osc::Recv> mRecv;
@@ -169,30 +161,54 @@ private:
 
 };
 
+template<class TSharedState>
+bool StateReceiveDomain<TSharedState>::initialize(ComputationDomain *parent) {
+  initializeSubdomains(true);
+  assert(parent != nullptr);
+
+#ifdef AL_USE_CUTTLEBONE
+  mTaker = std::make_unique<cuttlebone::Taker<TSharedState, mPacketSize, mPort>>();
+  mTaker->start();
+  initializeSubdomains(false);
+  return true;
+#else
+  buf = std::make_unique<unsigned char []>(sizeof(TSharedState));
+  mRecv = std::make_unique<osc::Recv>();
+  if (!mRecv || !mRecv->open(mPort, mAddress.c_str())) {
+    std::cerr << "Error opening server" << std::endl;
+    return false;
+  }
+  mHandler.mOscDomain = this;
+  mRecv->handler(mHandler);
+  if (!mRecv->start()) {
+    std::cerr << "Failed to start receiver. " << std::endl;
+    return false;
+  }
+
+  std::cout << "Opened " << mAddress << ":" << mPort << std::endl;
+  initializeSubdomains(false);
+  return true;
+#endif
+}
+
 template<class TSharedState = DefaultState>
 class StateSendDomain : public SynchronousDomain {
 public:
 
-  StateSendDomain() {
-    mState = std::make_shared<TSharedState>();
-  }
-
   bool initialize(ComputationDomain *parent = nullptr) override {
     initializeSubdomains(true);
-    if (!mState) {
-      mState = std::make_shared<TSharedState>();
-    }
+
 #ifdef AL_USE_CUTTLEBONE
     mMaker = std::make_unique<cuttlebone::Taker<TSharedState, mPacketSize, mPort>>();
     mMaker->start();
     initializeSubdomains(false);
     return true;
 #else
-//    mSend = std::make_unique<osc::Send>(mPort, mAddress.c_str());
-////    std::cout << "StateSendDomain not using Cuttlebone" << std::endl;
-//    if (!mSend) {
-//      std::cerr << "Can't create sender for StateSendDomain address:" << mAddress << " port:" << mPort <<std::endl;
-//    }
+    //    mSend = std::make_unique<osc::Send>(mPort, mAddress.c_str());
+    ////    std::cout << "StateSendDomain not using Cuttlebone" << std::endl;
+    //    if (!mSend) {
+    //      std::cerr << "Can't create sender for StateSendDomain address:" << mAddress << " port:" << mPort <<std::endl;
+    //    }
     initializeSubdomains(false);
     return true;
 #endif
@@ -200,6 +216,8 @@ public:
 
   bool tick() override {
     tickSubdomains(true);
+
+    assert(mState); // State must have been set at this point
 #ifdef AL_USE_CUTTLEBONE
     assert(mMaker);
     mMaker->set(mState);
@@ -293,37 +311,22 @@ private:
 };
 
 
-class StateDistributionDomain : public SynchronousDomain {
-public:
+template<class TSharedState>
+std::shared_ptr<StateSendDomain<TSharedState>> StateDistributionDomain::addStateSender(std::string id, std::shared_ptr<TSharedState> statePtr) {
+  auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(false);
+  newDomain->setId(id);
+  return newDomain;
+}
 
-//  bool initialize(ComputationDomain *parent = nullptr) override;
 
-//  bool tick() override;
+template<class TSharedState>
+std::shared_ptr<StateReceiveDomain<TSharedState>>  StateDistributionDomain::addStateReceiver(std::string id , std::shared_ptr<TSharedState> statePtr) {
+  auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(true);
+  newDomain->setId(id);
 
-//  bool cleanup(ComputationDomain *parent = nullptr) override;
+  return newDomain;
+}
 
-  template<class TSharedState = DefaultState>
-  std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr) {
-    auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(this);
-    newDomain->setId(id);
-    if (statePtr) {
-      newDomain->setStatePointer(statePtr);
-    }
-    return newDomain;
-  }
-
-  template<class TSharedState = DefaultState>
-  std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr) {
-    auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(this);
-    newDomain->setId(id);
-    if (statePtr) {
-      newDomain->setStatePointer(statePtr);
-    }
-    return newDomain;
-  }
-
-private:
-};
 
 }
 
