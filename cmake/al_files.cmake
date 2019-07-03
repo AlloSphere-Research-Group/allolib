@@ -13,6 +13,7 @@ set(core_headers
   include/al/core/graphics/al_GLFW.hpp
   include/al/core/graphics/al_GPUObject.hpp
   include/al/core/graphics/al_Graphics.hpp
+  include/al/core/graphics/al_Image.hpp
   include/al/core/graphics/al_Isosurface.hpp
   include/al/core/graphics/al_Lens.hpp
   include/al/core/graphics/al_Light.hpp
@@ -72,6 +73,8 @@ set(core_sources
   src/core/graphics/al_GLFW.cpp
   src/core/graphics/al_GPUObject.cpp
   src/core/graphics/al_Graphics.cpp
+  src/core/graphics/al_Image.cpp
+  src/core/graphics/al_stb_image.cpp
   src/core/graphics/al_Isosurface.cpp
   src/core/graphics/al_Lens.cpp
   src/core/graphics/al_Light.cpp
