@@ -2,9 +2,9 @@
 #include "catch.hpp"
 
 #include "al/util/scene/al_DynamicScene.hpp"
-#include "al/core/sound/al_Speaker.hpp"
-#include "al/core/sound/al_Ambisonics.hpp"
-#include "al/core/io/al_AudioIOData.hpp"
+#include "al/sound/al_Speaker.hpp"
+#include "al/sound/al_Ambisonics.hpp"
+#include "al/io/al_AudioIOData.hpp"
 
 using namespace al;
 

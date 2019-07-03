@@ -2,8 +2,8 @@
 
 #include "catch.hpp"
 
-#include "al/core/io/al_AudioIO.hpp"
-#include "al/core/sound/al_Vbap.hpp"
+#include "al/io/al_AudioIO.hpp"
+#include "al/sound/al_Vbap.hpp"
 #include "al/util/al_AlloSphereSpeakerLayout.hpp"
 
 using namespace al;

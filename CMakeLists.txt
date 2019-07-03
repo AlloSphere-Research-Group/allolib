@@ -16,7 +16,6 @@ MACRO_ENSURE_OUT_OF_SOURCE_BUILD(
     "${CMAKE_PROJECT_NAME} requires an out of source build. Make a directory and run cmake there."
 )
 
-set(al_path ${CMAKE_CURRENT_SOURCE_DIR})
 option(AL_VERBOSE_OUTPUT "" OFF)
 option(BUILD_EXAMPLES "" ON)
 option(TRAVIS_BUILD "" OFF)
@@ -43,52 +42,125 @@ if(TRAVIS_BUILD)
   add_definitions(-DTRAVIS_BUILD)
 endif(TRAVIS_BUILD)
 
-# include(cmake/find_core_dependencies.cmake)
-# sets: CORE_INCLUDE_DIRS, CORE_LIBRARIES, CORE_LIBRARY_DIRS
-include(cmake/find_additional_dependencies.cmake)
-# sets: ADDITIONAL_INCLUDE_DIRS, ADDITIONAL_LIBRARIES, ADDITIONAL_HEADERS,
-#       ADDITIONAL_SOURCES, ADDITIONAL_DEFINITIONS
-# include(cmake/external.cmake)
-# sets: EXTERNAL_INCLUDE_DIRS, EXTERNAL_SRC, EXTERNAL_DEFINITIONS
-#       EXTERNAL_LIBRARIES, EXTERNAL_DEBUG_LIBRARIES EXTERNAL_RELEASE_LIBRARIES
-include(cmake/al_files.cmake)
-# sets: al_headers, al_sources
-include(cmake/extensions.cmake)
-# sets: EXTENSIONS_LIBRARIES, EXTENSIONS_INCLUDE_DIRS
-
 find_package(OpenGL REQUIRED)
 add_subdirectory(external)
 
 set(headers
-  ${al_headers} ${ADDITIONAL_HEADERS}
+  include/al/app/al_App.hpp
+  include/al/app/al_AudioApp.hpp
+  # include/al/app/al_DistributedApp.hpp
+  include/al/app/al_FPS.hpp/
+  include/al/app/al_WindowApp.hpp
+  include/al/graphics/al_BufferObject.hpp
+  include/al/graphics/al_DefaultShaders.hpp
+  include/al/graphics/al_EasyFBO.hpp
+  include/al/graphics/al_EasyVAO.hpp
+  include/al/graphics/al_FBO.hpp
+  include/al/graphics/al_GLEW.hpp
+  include/al/graphics/al_GLFW.hpp
+  include/al/graphics/al_GPUObject.hpp
+  include/al/graphics/al_Graphics.hpp
+  include/al/graphics/al_Image.hpp
+  include/al/graphics/al_Isosurface.hpp
+  include/al/graphics/al_Lens.hpp
+  include/al/graphics/al_Light.hpp
+  include/al/graphics/al_Mesh.hpp
+  include/al/graphics/al_OpenGL.hpp
+  include/al/graphics/al_RenderManager.hpp
+  include/al/graphics/al_Shader.hpp
+  include/al/graphics/al_Shapes.hpp
+  include/al/graphics/al_Texture.hpp
+  include/al/graphics/al_VAO.hpp
+  include/al/graphics/al_VAOMesh.hpp
+  include/al/graphics/al_Viewpoint.hpp
+  include/al/io/al_AudioIO.hpp
+  include/al/io/al_AudioIOData.hpp
+  include/al/io/al_ControlNav.hpp
+  include/al/io/al_CSVReader.hpp
+  include/al/io/al_File.hpp
+  include/al/io/al_MIDI.hpp
+  include/al/io/al_Window.hpp
+  include/al/math/al_Constants.hpp
+  include/al/math/al_Mat.hpp
+  include/al/math/al_Matrix4.hpp
+  include/al/math/al_Quat.hpp
+  include/al/math/al_StdRandom.hpp
+  include/al/math/al_Vec.hpp
+  include/al/protocol/al_OSC.hpp
+  include/al/sound/al_Ambisonics.hpp
+  include/al/sound/al_AudioScene.hpp
+  include/al/sound/al_Biquad.hpp
+  include/al/sound/al_Crossover.hpp
+  include/al/sound/al_Dbap.hpp
+  include/al/sound/al_Lbap.hpp
+  include/al/sound/al_Reverb.hpp
+  include/al/sound/al_Spatializer.hpp
+  include/al/sound/al_Speaker.hpp
+  include/al/sound/al_StereoPanner.hpp
+  include/al/sound/al_Vbap.hpp
+  include/al/spatial/al_HashSpace.hpp
+  include/al/spatial/al_Pose.hpp
+  include/al/system/al_PeriodicThread.hpp
+  include/al/system/al_Printing.hpp
+  include/al/system/al_Thread.hpp
+  include/al/system/al_Time.hpp
+  include/al/types/al_Color.hpp
 )
 
 set(sources
-  ${al_sources} ${module_sources} ${ADDITIONAL_SOURCES}
+  src/app/al_AudioApp.cpp
+  src/app/al_FPS.cpp
+  src/app/al_WindowApp.cpp
+  src/graphics/al_BufferObject.cpp
+  src/graphics/al_DefaultShaders.cpp
+  src/graphics/al_EasyFBO.cpp
+  src/graphics/al_EasyVAO.cpp
+  src/graphics/al_FBO.cpp
+  src/graphics/al_GLEW.cpp
+  src/graphics/al_GLFW.cpp
+  src/graphics/al_GPUObject.cpp
+  src/graphics/al_Graphics.cpp
+  src/graphics/al_Image.cpp
+  src/graphics/al_stb_image.cpp
+  src/graphics/al_Isosurface.cpp
+  src/graphics/al_Lens.cpp
+  src/graphics/al_Light.cpp
+  src/graphics/al_Mesh.cpp
+  src/graphics/al_OpenGL.cpp
+  src/graphics/al_RenderManager.cpp
+  src/graphics/al_Shader.cpp
+  src/graphics/al_Shapes.cpp
+  src/graphics/al_Texture.cpp
+  src/graphics/al_VAO.cpp
+  src/graphics/al_VAOMesh.cpp
+  src/graphics/al_Viewpoint.cpp
+  src/io/al_AudioIO.cpp
+  src/io/al_AudioIOData.cpp
+  src/io/al_ControlNav.cpp
+  src/io/al_CSVReader.cpp
+  src/io/al_File.cpp
+  src/io/al_MIDI.cpp
+  src/io/al_Window.cpp
+  src/io/al_WindowGLFW.cpp
+  src/math/al_StdRandom.cpp
+  src/protocol/al_OSC.cpp
+  src/sound/al_Ambisonics.cpp
+  src/sound/al_AudioScene.cpp
+  src/sound/al_Biquad.cpp
+  src/sound/al_Dbap.cpp
+  src/sound/al_Vbap.cpp
+  src/sound/al_Spatializer.cpp
+  src/sound/al_StereoPanner.cpp
+  src/spatial/al_HashSpace.cpp
+  src/spatial/al_Pose.cpp
+  src/system/al_PeriodicThread.cpp
+  src/system/al_Printing.cpp
+  src/system/al_ThreadNative.cpp
+  src/system/al_Time.cpp
+  src/types/al_Color.cpp
 )
 
-set(dirs_to_include
-  ${ADDITIONAL_INCLUDE_DIRS} external/Gamma external/rtaudio external/rtmidi ${EXTENSIONS_INCLUDE_DIRS}
-)
-
-set (link_dirs  ${EXTENSIONS_LINK_DIRS})
-
-set(libs_to_link
-  ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} ${EXTENSIONS_LIBRARIES}
-)
-
-set(definitions
-  ${PLATFORM_DEFINITION} ${ADDITIONAL_DEFINITIONS} ${EXTENSIONS_DEFINITIONS}
-)
-
-# multi configuration generators
-if (DEFINED CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
-endif ()
-
-# --- NOW WE ARE READY TO SETUP THE LIBRARY TARGET ---------------------
-
-# then allolib library
+# target
 add_library(al STATIC ${headers} ${sources})
 
 #paths
@@ -106,31 +178,18 @@ else ()
 endif (AL_WINDOWS)
 
 # definitions
-target_compile_definitions(al PUBLIC ${definitions} AL_AUDIO_RTAUDIO)
+target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
 
-target_include_directories(al PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+#target_include_directories(al PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
 #  "$<INSTALL_INTERFACE:include>"
-)
+#)
 
-link_directories(${link_dirs}) # should be gone
-
-target_include_directories(al PUBLIC ${CMAKE_CURRENT_LIST_DIR}/modules)
-
-# use external include dirs when building,
-# when installed, external headers will be in `include`
-# so only `include` needs to be specified as include directory
-foreach (dir ${EXTERNAL_INCLUDE_DIRS})
-  target_include_directories(al PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${dir}>"
-  )
-endforeach (dir)
-
-target_include_directories(al PUBLIC ${dirs_to_include})
+target_include_directories(al PUBLIC include external/Gamma external/rtaudio external/rtmidi)
 
 # libs
 target_link_libraries(al PUBLIC
-  ${libs_to_link}
+  ${OPENGL_gl_LIBRARY}
   Gamma glew_s glfw glad rtaudio rtmidi cpptoml
   nlohmann_json::nlohmann_json imgui oscpack stb)
 
@@ -156,19 +215,19 @@ macro(Copy_dlls app_path app_name DLLS_TO_COPY)
 
     if (USE_PORTAUDIO)
       list(APPEND post_build_command
-        robocopy ${al_path}/dependencies/portaudio/ ${app_path}/bin portaudio_x64.dll &
+          robocopy ${CMAKE_CURRENT_LIST_DIR}/dependencies/portaudio/ ${app_path}/bin portaudio_x64.dll &
         )
     endif (USE_PORTAUDIO)
 
     if (USE_APR)
       list(APPEND post_build_command
-        robocopy ${al_path}/dependencies/apr/ ${app_path}/bin libapr-1.dll &
+          robocopy ${CMAKE_CURRENT_LIST_DIR}/dependencies/apr/ ${app_path}/bin libapr-1.dll &
         )
     endif (USE_APR)
 
     if (FREEIMAGE_FOUND)
       list(APPEND post_build_command
-        robocopy ${al_path}/dependencies/FreeImage/Dist/x64 ${app_path}/bin FreeImage.dll &
+          robocopy ${CMAKE_CURRENT_LIST_DIR}/dependencies/FreeImage/Dist/x64 ${app_path}/bin FreeImage.dll &
         )
     endif (FREEIMAGE_FOUND)
 
@@ -185,7 +244,6 @@ macro(Copy_dlls app_path app_name DLLS_TO_COPY)
 
 endmacro(Copy_dlls)
 
-
 # --- Testing -----------------------------------------
 if (ALLOLIB_BUILD_TESTS)
   add_subdirectory(test)
@@ -194,33 +252,27 @@ endif()
 # ----- Examples -------------------------------------
 
 if (NOT NO_EXAMPLES)
-  include("cmake/example_targets.cmake")
+  add_subdirectory(examples)
 endif()
 
 # ----- INSTALL ----------------------------------------------------------------
 #
-# [!] dependent targets (glew_s, glfw, and Gamma) shoud have install target also
 
-set(CMAKE_INSTALL_PREFIX ${al_path}/al)
-
-install(TARGETS al
-  EXPORT al-targets
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)
+#install(TARGETS al
+#  EXPORT al-targets
+#  RUNTIME DESTINATION bin
+#  LIBRARY DESTINATION lib
+#  ARCHIVE DESTINATION lib
+#)
 
 # For some reason this line causes an error when including depencies that are inside the source
 # tree on windows.... What does it do anyway...?
 #install(EXPORT al-targets DESTINATION lib/cmake/al)
-install(DIRECTORY ${al_path}/include/al DESTINATION include)
-
-install(DIRECTORY external/oscpack/ip DESTINATION include)
-install(DIRECTORY external/oscpack/osc DESTINATION include)
-install(FILES external/imgui/imgui.h DESTINATION include)
-install(FILES external/imgui/imconfig.h DESTINATION include)
-install(FILES external/rtaudio/RtAudio.h DESTINATION include)
-install(FILES external/rtmidi/rtmidi_c.h external/rtmidi/RtMidi.h
-        DESTINATION include
-)
+#install(DIRECTORY include/al DESTINATION include)
+#install(DIRECTORY external/oscpack/ip DESTINATION include)
+#install(DIRECTORY external/oscpack/osc DESTINATION include)
+#install(FILES external/imgui/imgui.h DESTINATION include)
+#install(FILES external/imgui/imconfig.h DESTINATION include)
+#install(FILES external/rtaudio/RtAudio.h DESTINATION include)
+#install(FILES external/rtmidi/rtmidi_c.h external/rtmidi/RtMidi.h DESTINATION include)
 

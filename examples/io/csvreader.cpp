@@ -1,5 +1,5 @@
 
-#include "al/core/io/al_CSVReader.hpp"
+#include "al/io/al_CSVReader.hpp"
 
 typedef struct {
   char s[32];

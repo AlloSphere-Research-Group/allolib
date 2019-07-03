@@ -9,7 +9,7 @@ Lance Putnam, Nov. 2013
 */
 
 #include "al/core.hpp"
-#include "al/core/math/al_Functions.hpp"
+#include "al/math/al_Functions.hpp"
 #include <vector>
 #include <iostream>
 

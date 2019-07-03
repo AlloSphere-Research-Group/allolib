@@ -12,8 +12,8 @@ stereographic rendering
 */
 
 #include "al/core.hpp"
-#include "al/core/sound/al_Ambisonics.hpp"
-#include "al/core/sound/al_AudioScene.hpp"
+#include "al/sound/al_Ambisonics.hpp"
+#include "al/sound/al_AudioScene.hpp"
 
 #include <cmath>
 #include <iostream>

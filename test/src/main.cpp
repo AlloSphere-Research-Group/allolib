@@ -4,8 +4,8 @@
 #include <cmath>
 #include <iostream>
 
-#include "al/core/math/al_Constants.hpp"
-#include "al/core/system/al_Time.hpp"
+#include "al/math/al_Constants.hpp"
+#include "al/system/al_Time.hpp"
 
 //#include "test_audio.cpp"
 //#include "test_midi.cpp"

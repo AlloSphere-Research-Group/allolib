@@ -9,7 +9,7 @@ Lance Putnam, Nov. 2014
 */
 
 #include <stdio.h>
-#include "al/core/system/al_PeriodicThread.hpp"
+#include "al/system/al_PeriodicThread.hpp"
 using namespace al;
 
 int main(){

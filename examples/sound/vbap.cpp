@@ -1,6 +1,6 @@
 #include "al/core.hpp"
-#include "al/core/sound/al_Vbap.hpp"
-#include "al/core/sound/al_Speaker.hpp"
+#include "al/sound/al_Vbap.hpp"
+#include "al/sound/al_Speaker.hpp"
 #include "al/util/al_Font.hpp"
 #include "al/util/al_AlloSphereSpeakerLayout.hpp"
 

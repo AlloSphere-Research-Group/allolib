@@ -12,7 +12,7 @@ Lance Putnam, Nov. 2015
 */
 
 #include "al/core.hpp"
-#include "al/core/types/al_Conversion.hpp" // clone
+#include "al/types/al_Conversion.hpp" // clone
 #include <algorithm> // max
 #include <cmath>
 

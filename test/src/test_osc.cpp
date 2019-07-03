@@ -1,7 +1,7 @@
 
 #include "catch.hpp"
 
-#include "al/core/protocol/al_OSC.hpp"
+#include "al/protocol/al_OSC.hpp"
 
 using namespace al;
 

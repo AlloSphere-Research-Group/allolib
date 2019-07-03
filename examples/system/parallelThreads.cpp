@@ -12,7 +12,7 @@ Lance Putnam, 1/2012
 */
 
 #include <stdio.h>
-#include "al/core/system/al_Thread.hpp"
+#include "al/system/al_Thread.hpp"
 using namespace al;
 
 // The function each worker thread will execute

@@ -8,7 +8,7 @@ Author:
 Lance Putnam, June 2016
 */
 
-#include "al/core/math/al_Mat.hpp"
+#include "al/math/al_Mat.hpp"
 using namespace al;
 
 int main(){

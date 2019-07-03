@@ -8,7 +8,7 @@ Author:
 Lance Putnam, 10/2012, putnam.lance@gmail.com
 */
 
-#include "al/core/math/al_Random.hpp"
+#include "al/math/al_Random.hpp"
 using namespace al;
 
 int main(){

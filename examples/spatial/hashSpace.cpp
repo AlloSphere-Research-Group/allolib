@@ -1,7 +1,7 @@
 #include "al/core.hpp"
-#include "al/core/math/al_Random.hpp"
-#include "al/core/spatial/al_HashSpace.hpp"
-#include "al/core/math/al_Functions.hpp"
+#include "al/math/al_Random.hpp"
+#include "al/spatial/al_HashSpace.hpp"
+#include "al/math/al_Functions.hpp"
 
 /*
 Allocore Example: Hashspace for nearest neighbor lookup.

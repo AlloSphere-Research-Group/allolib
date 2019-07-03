@@ -6,8 +6,8 @@
 
 
 #include "al/core.hpp"
-#include "al/core/sound/al_StereoPanner.hpp"
-#include "al/core/sound/al_AudioScene.hpp"
+#include "al/sound/al_StereoPanner.hpp"
+#include "al/sound/al_AudioScene.hpp"
 
 #define BLOCK_SIZE 256
 #define SAMPLE_RATE 44100

@@ -10,8 +10,8 @@ Lance Putnam, 9/2011
 */
 
 #include "al/core.hpp"
-#include "al/core/types/al_Buffer.hpp"
-#include "al/core/math/al_Functions.hpp"
+#include "al/types/al_Buffer.hpp"
+#include "al/math/al_Functions.hpp"
 
 using namespace al;
 

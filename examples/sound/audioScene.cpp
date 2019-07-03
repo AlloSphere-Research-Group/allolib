@@ -9,10 +9,10 @@
  */
 
 #include "al/core.hpp"
-#include "al/core/sound/al_Vbap.hpp"
-#include "al/core/sound/al_Dbap.hpp"
-#include "al/core/sound/al_Ambisonics.hpp"
-#include "al/core/sound/al_AudioScene.hpp"
+#include "al/sound/al_Vbap.hpp"
+#include "al/sound/al_Dbap.hpp"
+#include "al/sound/al_Ambisonics.hpp"
+#include "al/sound/al_AudioScene.hpp"
 
 using namespace al;
 

@@ -21,8 +21,8 @@ Andres Cabrera 2/2018
 
 #include <stdio.h>
 
-#include "al/core/app/al_DistributedApp.hpp"
-#include "al/core/math/al_Random.hpp"
+#include "al/app/al_DistributedApp.hpp"
+#include "al/math/al_Random.hpp"
 
 using namespace al;
 

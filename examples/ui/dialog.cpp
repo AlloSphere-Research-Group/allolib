@@ -1,5 +1,5 @@
 
-#include "al/core/app/al_App.hpp"
+#include "al/app/al_App.hpp"
 #include "al/util/ui/al_Dialog.hpp"
 #include "al/util/al_FontModule.hpp"
 

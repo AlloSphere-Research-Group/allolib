@@ -11,7 +11,7 @@
 */
 
 #include "al/core.hpp"
-#include "al/core/math/al_Random.hpp"
+#include "al/math/al_Random.hpp"
 
 using namespace al;
 using namespace std;

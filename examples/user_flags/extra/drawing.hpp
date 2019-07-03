@@ -1,7 +1,7 @@
 #ifndef DRAWING_HPP
 #define DRAWING_HPP
 
-#include "al/core/graphics/al_Mesh.hpp"
+#include "al/graphics/al_Mesh.hpp"
 
 namespace al
 {

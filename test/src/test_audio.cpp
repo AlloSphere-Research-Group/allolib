@@ -3,8 +3,8 @@
 
 #include "catch.hpp"
 
-#include "al/core/io/al_AudioIO.hpp"
-#include "al/core/system/al_Time.hpp"
+#include "al/io/al_AudioIO.hpp"
+#include "al/system/al_Time.hpp"
 
 
 using namespace al;

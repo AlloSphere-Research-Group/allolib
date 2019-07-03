@@ -3,8 +3,8 @@
 #include "al/util/ui/al_HtmlInterfaceServer.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 #include "al/util/ui/al_ControlGUI.hpp"
-#include "al/core/app/al_App.hpp"
-#include "al/core/graphics/al_Shapes.hpp"
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
 
 using namespace al;
 

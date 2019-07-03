@@ -11,7 +11,7 @@ Lance Putnam, 12/2012
 
 #include <stdio.h>
 #include "al/core.hpp"
-#include "al/core/io/al_MIDI.hpp"
+#include "al/io/al_MIDI.hpp"
 using namespace al;
 
 

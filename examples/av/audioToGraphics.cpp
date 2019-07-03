@@ -12,7 +12,7 @@ Lance Putnam, 10/2012, putnam.lance@gmail.com
 */
 
 #include "al/core.hpp"
-#include "al/core/types/al_Buffer.hpp"
+#include "al/types/al_Buffer.hpp"
 
 using namespace al;
 

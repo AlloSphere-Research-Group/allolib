@@ -9,7 +9,7 @@ Lance Putnam, 4/25/2011, putnam.lance@gmail.com
 */
 
 #include "al/core.hpp"
-#include "al/core/sound/al_Reverb.hpp"
+#include "al/sound/al_Reverb.hpp"
 using namespace al;
 
 Reverb<float> reverb;

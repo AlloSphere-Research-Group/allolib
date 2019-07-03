@@ -12,7 +12,7 @@ stereographic rendering
 */
 
 #include "al/core.hpp"
-#include "al/core/sound/al_Ambisonics.hpp"
+#include "al/sound/al_Ambisonics.hpp"
 #include <Gamma/SoundFile.h>
 #include <iostream>
 #include <cassert>

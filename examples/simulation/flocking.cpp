@@ -23,7 +23,7 @@ Lance Putnam, Oct. 2014
 */
 
 #include "al/core.hpp"
-#include "al/core/math/al_Functions.hpp"
+#include "al/math/al_Functions.hpp"
 #include <cmath>
 
 using namespace al;

@@ -1,7 +1,7 @@
 #include "al/core.hpp"
-#include "al/core/sound/al_Lbap.hpp"
-#include "al/core/sound/al_Speaker.hpp"
-#include "al/core/math/al_Random.hpp"
+#include "al/sound/al_Lbap.hpp"
+#include "al/sound/al_Speaker.hpp"
+#include "al/math/al_Random.hpp"
 #include "al/util/al_AlloSphereSpeakerLayout.hpp"
 #include "al/util/ui/al_Parameter.hpp"
 

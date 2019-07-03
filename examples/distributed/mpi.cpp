@@ -20,7 +20,7 @@ Andres Cabrera 2/2018
 
 
 #include <stdio.h>
-#include "al/core/app/al_DistributedApp.hpp"
+#include "al/app/al_DistributedApp.hpp"
 using namespace al;
 
 float *create_rand_nums(int num_elements) {

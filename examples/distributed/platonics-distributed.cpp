@@ -4,7 +4,7 @@
 //
 
 #include "al/core.hpp"
-#include "al/core/app/al_DistributedApp.hpp"
+#include "al/app/al_DistributedApp.hpp"
 
 using namespace al;
 
