@@ -163,14 +163,14 @@ set(sources
 # target
 add_library(al STATIC ${headers} ${sources})
 
-#paths
+# paths
 set_target_properties(al PROPERTIES
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON
 )
 
-#flags
+# flags
 if (AL_WINDOWS)
   target_compile_options(al PRIVATE "")
 else ()
