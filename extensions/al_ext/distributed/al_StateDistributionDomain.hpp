@@ -6,8 +6,9 @@
 #include <memory>
 #include <iostream>
 #include <functional>
-#include <cassert>
 #include <mutex>
+#include <cstring>
+#include <cassert>
 
 #include "al/core/spatial/al_Pose.hpp"
 #include "al/core/protocol/al_OSC.hpp"
@@ -64,7 +65,7 @@ public:
     mRecvLock.lock();
     if (newMessages > 0) {
       mQueuedStates = newMessages;
-      memcpy(mState.get(), buf.get(), sizeof(TSharedState));
+      std::memcpy(mState.get(), buf.get(), sizeof(TSharedState));
       newMessages = 0;
     }
     mRecvLock.unlock();
