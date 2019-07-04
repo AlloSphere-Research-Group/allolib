@@ -1,11 +1,36 @@
 #include "al/graphics/al_OpenGL.hpp"
 #include "al/system/al_Printing.hpp"
+#include <cstdlib> // exit, EXIT_FAILURE
+#include <iostream>
+#include <string>
 
-namespace al {
+static bool gl_loaded = false;
 
-namespace gl {
+bool al::gl::load () {
+  if (gl_loaded) return true;
 
-const char * errorString(bool verbose) {
+  GLenum err = glewInit();
+  if (err != GLEW_OK) {
+    std::string err_msg = "[al::gl::load] Glew Error: ";
+    err_msg += (const char*)glewGetErrorString(err);
+    err_msg += '\n';
+    std::cerr << err_msg;
+    return false;
+  }
+
+  gl_loaded = true;
+  return true;
+}
+
+bool al::gl::loaded () {
+  return gl_loaded;
+}
+
+const char* al::gl::versionString () {
+  return (const char*)glewGetString(GLEW_VERSION);
+}
+
+const char * al::gl::errorString(bool verbose) {
 	GLenum err = glGetError();
 	#define CS(GL_ERR, desc) case GL_ERR: return verbose ? #GL_ERR ", " desc : #GL_ERR;
 	switch(err){
@@ -20,7 +45,7 @@ const char * errorString(bool verbose) {
 	#undef CS
 }
 
-bool error(const char *msg, int ID) {
+bool al::gl::error(const char *msg, int ID) {
   const char * errStr = errorString();
   if(errStr[0]){
     if(ID>=0) AL_WARN_ONCE("Error %s (id=%d): %s", msg, ID, errStr);
@@ -30,7 +55,7 @@ bool error(const char *msg, int ID) {
   return false;
 }
 
-int numBytes(GLenum v)
+int al::gl::numBytes(GLenum v)
 {
   #define CS(a,b) case a: return sizeof(b);
   switch(v){
@@ -47,15 +72,11 @@ int numBytes(GLenum v)
   #undef CS
 }
 
-template<> GLenum toDataType<char>(){ return GL_BYTE; }
-template<> GLenum toDataType<unsigned char>(){ return GL_UNSIGNED_BYTE; }
-template<> GLenum toDataType<short>(){ return GL_SHORT; }
-template<> GLenum toDataType<unsigned short>(){ return GL_UNSIGNED_SHORT; }
-template<> GLenum toDataType<int>(){ return GL_INT; }
-template<> GLenum toDataType<unsigned int>(){ return GL_UNSIGNED_INT; }
-template<> GLenum toDataType<float>(){ return GL_FLOAT; }
-template<> GLenum toDataType<double>(){ return GL_DOUBLE; }
-
-} // gl::
-
-}
+template<> GLenum al::gl::toDataType<char>(){ return GL_BYTE; }
+template<> GLenum al::gl::toDataType<unsigned char>(){ return GL_UNSIGNED_BYTE; }
+template<> GLenum al::gl::toDataType<short>(){ return GL_SHORT; }
+template<> GLenum al::gl::toDataType<unsigned short>(){ return GL_UNSIGNED_SHORT; }
+template<> GLenum al::gl::toDataType<int>(){ return GL_INT; }
+template<> GLenum al::gl::toDataType<unsigned int>(){ return GL_UNSIGNED_INT; }
+template<> GLenum al::gl::toDataType<float>(){ return GL_FLOAT; }
+template<> GLenum al::gl::toDataType<double>(){ return GL_DOUBLE; }

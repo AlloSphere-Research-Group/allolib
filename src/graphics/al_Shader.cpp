@@ -1,5 +1,5 @@
 #include "al/graphics/al_Shader.hpp"
-#include "al/graphics/al_GLEW.hpp"
+#include "al/graphics/al_OpenGL.hpp"
 #include "al/system/al_Printing.hpp"
 
 #include <cstring>

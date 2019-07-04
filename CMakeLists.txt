@@ -17,7 +17,7 @@ MACRO_ENSURE_OUT_OF_SOURCE_BUILD(
 )
 
 option(AL_VERBOSE_OUTPUT "" OFF)
-option(BUILD_EXAMPLES "" ON)
+option(BUILD_EXAMPLES "" OFF)
 option(TRAVIS_BUILD "" OFF)
 option(APPVEYOR_BUILD "" OFF)
 option(ALLOLIB_BUILD_TESTS "" OFF)
@@ -30,7 +30,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(PLATFORM_DEFINITION -DAL_LINUX)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(AL_WINDOWS 1 CACHE BOOL "Building on Windows")
-  set(PLATFORM_DEFINITION -DAL_WINDOWS -D_USE_MATH_DEFINES)
+  set(PLATFORM_DEFINITION -DAL_WINDOWS)
   if (NOT ${CMAKE_GENERATOR_PLATFORM} STREQUAL "x64")
   message("Warning! Not building for Win64 : ${CMAKE_GENERATOR_PLATFORM}")
   endif(NOT ${CMAKE_GENERATOR_PLATFORM} STREQUAL "x64")
@@ -56,8 +56,6 @@ set(headers
   include/al/graphics/al_EasyFBO.hpp
   include/al/graphics/al_EasyVAO.hpp
   include/al/graphics/al_FBO.hpp
-  include/al/graphics/al_GLEW.hpp
-  include/al/graphics/al_GLFW.hpp
   include/al/graphics/al_GPUObject.hpp
   include/al/graphics/al_Graphics.hpp
   include/al/graphics/al_Image.hpp
@@ -116,8 +114,6 @@ set(sources
   src/graphics/al_EasyFBO.cpp
   src/graphics/al_EasyVAO.cpp
   src/graphics/al_FBO.cpp
-  src/graphics/al_GLEW.cpp
-  src/graphics/al_GLFW.cpp
   src/graphics/al_GPUObject.cpp
   src/graphics/al_Graphics.cpp
   src/graphics/al_Image.cpp
@@ -185,18 +181,13 @@ target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
 #  "$<INSTALL_INTERFACE:include>"
 #)
 
-target_include_directories(al PUBLIC include external/Gamma external/rtaudio external/rtmidi)
+target_include_directories(al PUBLIC include external/Gamma external/rtaudio external/rtmidi external/glew/include)
 
 # libs
 target_link_libraries(al PUBLIC
   ${OPENGL_gl_LIBRARY}
   Gamma glew_s glfw glad rtaudio rtmidi cpptoml
   nlohmann_json::nlohmann_json imgui oscpack stb)
-
-set_target_properties(al PROPERTIES AL_LINK_LIBRARIES "${libs_to_link}")
-set_target_properties(al PROPERTIES AL_DLL_LIBRARIES "${EXTENSIONS_DLLS}")
-set_target_properties(al PROPERTIES AL_LINK_DIRECTORIES "${link_dirs}")
-set_target_properties(al PROPERTIES AL_INCLUDE_DIRECTORIES "${dirs_to_include}")
 
 # Convenience function
 macro(Copy_dlls app_path app_name DLLS_TO_COPY)

@@ -1,5 +1,5 @@
 #include "al/graphics/al_BufferObject.hpp"
-#include "al/graphics/al_GLEW.hpp"
+#include "al/graphics/al_OpenGL.hpp"
 
 #include <iostream>
 

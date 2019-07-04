@@ -83,7 +83,7 @@ struct OmniRenderer : WindowApp
 };
 
 inline void OmniRenderer::start() {
-  glfw::init(is_verbose);
+  initializeWindowManager();
   onInit();
   check_if_in_sphere_and_setup_window_dimensions();
   Window::create(is_verbose);
@@ -101,7 +101,7 @@ inline void OmniRenderer::start() {
   }
   onExit();
   Window::destroy();
-  glfw::terminate(is_verbose);
+  terminateWindowManager();
 }
 
 inline void OmniRenderer::check_if_in_sphere_and_setup_window_dimensions() {

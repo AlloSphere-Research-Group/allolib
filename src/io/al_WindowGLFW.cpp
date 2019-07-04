@@ -1,15 +1,50 @@
-#include "al/graphics/al_GLEW.hpp"
-#include "al/graphics/al_GLFW.hpp"
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include "al/graphics/al_OpenGL.hpp"
+
 #include "al/io/al_Window.hpp"
 
 #include <cmath>
 #include <iostream>
 #include <map>
 #include <unordered_map>
+#include <cstdlib> // exit, EXIT_FAILURE
+#include <string>
 
 using namespace std;
 
+static void cbError(int code, const char* description) {
+  std::string err_msg = "glfw error [";
+  err_msg += std::to_string(code);
+  err_msg += "]: ";
+  err_msg += description;
+  err_msg += '\n';
+  std::cout << err_msg;
+}
+
 namespace al {
+
+void initializeWindowManager () {
+  if (!glfwInit()) {
+    std::cout << "ERROR: could not initialize GLFW\n";
+    exit(EXIT_FAILURE);
+  }
+  glfwSetErrorCallback(cbError);
+}
+
+void terminateWindowManager () {
+  glfwTerminate();
+}
+
+float getCurrentWindowPixelDensity () {
+  int fbw, fbh;
+  int winw, winh;
+  GLFWwindow* current_window = glfwGetCurrentContext();
+  glfwGetFramebufferSize(current_window, &fbw, &fbh);
+  glfwGetWindowSize(current_window, &winw, &winh);
+  float rpd = float(winw) / fbw; // reciprocal of pixel density
+  return rpd;
+}
 
 class WindowImpl {
  public:
@@ -60,12 +95,12 @@ class WindowImpl {
     if (!w) return;
 
     // loop through raw callbacks user registered
-    auto& handler_list = glfw::get_keycallback_handler_list();
-    if (handler_list.size()) { 
-      for (auto& h : handler_list) {
-        h.key_callback(window, key, scancode, action, mods);
-      }
-    }
+    // auto& handler_list = glfw::get_keycallback_handler_list();
+    // if (handler_list.size()) { 
+    //   for (auto& h : handler_list) {
+    //     h.key_callback(window, key, scancode, action, mods);
+    //   }
+    // }
 
     // first set modifiers
     Keyboard& k = w->mKeyboard;
@@ -225,7 +260,8 @@ Window::Window() { mImpl = make_unique<WindowImpl>(this); }
 Window::~Window() {}
 
 bool Window::implCreate(bool is_verbose) {
-  glfw::init();
+  initializeWindowManager();
+
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -294,7 +330,7 @@ bool Window::implCreate(bool is_verbose) {
     cout << "window opened, size: (" << mDim.w << ", " << mDim.h << "), "
          << "position: (" << mDim.l << ", " << mDim.t << ")" << endl;
 
-  glew::init();
+  al::gl::load();
 
   if (is_verbose) {
     const GLubyte* renderer = glGetString(GL_RENDERER);

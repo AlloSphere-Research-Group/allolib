@@ -413,6 +413,9 @@ operator| (const Window::DisplayMode& a, const Window::DisplayMode& b){ return W
 inline Window::DisplayMode
 operator& (const Window::DisplayMode& a, const Window::DisplayMode& b){ return Window::DisplayMode(+a & +b); }
 
+void initializeWindowManager ();
+void terminateWindowManager ();
+float getCurrentWindowPixelDensity ();
 
 } // al::
 

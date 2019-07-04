@@ -557,7 +557,7 @@ inline void DistributedApp<TSharedState>::start() {
     AudioApp::endAudio(); // AudioApp
   }
   Window::destroy();
-  glfw::terminate(is_verbose);
+  terminateWindowManager();
 
 }
 

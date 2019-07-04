@@ -121,11 +121,13 @@ void VAOMesh::draw() {
   vao().bind();
   if (indices().size() > 0) {
     indexBuffer().bind();
-    glDrawElements(vaoWrapper->GLPrimMode, indices().size(), GL_UNSIGNED_INT, NULL);
+    int num_indices = (int)indices().size();
+    glDrawElements(vaoWrapper->GLPrimMode, num_indices, GL_UNSIGNED_INT, NULL);
     // indexBuffer().unbind();
   }
   else {
-    glDrawArrays(vaoWrapper->GLPrimMode, 0, vertices().size());
+    int num_vertices = (int)vertices().size();
+    glDrawArrays(vaoWrapper->GLPrimMode, 0, num_vertices);
   }
   // vao().unbind();
 }

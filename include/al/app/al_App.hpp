@@ -112,7 +112,7 @@ inline void App::start() {
   postOnExit();
   AudioApp::endAudio(); // AudioApp
   Window::destroy();
-  glfw::terminate(is_verbose);
+  terminateWindowManager();
 }
 
 inline void App::preOnCreate() {

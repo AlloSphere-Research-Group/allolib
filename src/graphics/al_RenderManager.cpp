@@ -1,5 +1,10 @@
 #include "al/graphics/al_RenderManager.hpp"
-#include "al/graphics/al_GLFW.hpp"
+
+namespace al
+{
+  // from al_Window.hpp
+  float getCurrentWindowPixelDensity ();
+}
 
 using namespace al;
 
@@ -69,7 +74,7 @@ void RenderManager::translate(float x, float y, float z) {
 }
 
 void RenderManager::rotate(float angle, float x, float y, float z) {
-  mModelStack.mult(Matrix4f::rotate(M_2PI * angle / 360.0f, x, y, z));
+  mModelStack.mult(Matrix4f::rotate(float(M_2PI) * angle / 360.0f, x, y, z));
   mMatChanged = true;
 }
 
@@ -143,11 +148,7 @@ void RenderManager::camera(Viewpoint::SpecialType v) {
     } break;
 
     case Viewpoint::ORTHO_FOR_2D: {
-      int fbw, fbh;
-      int winw, winh;
-      glfwGetFramebufferSize(glfw::current_window(), &fbw, &fbh);
-      glfwGetWindowSize(glfw::current_window(), &winw, &winh);
-      float rpd = float(winw) / fbw; // reciprocal of pixel density
+      float rpd = getCurrentWindowPixelDensity(); // reciprocal of pixel density
       auto v = viewport(); // viewport in framebuffer unit
       mViewStack.setIdentity();
       mProjStack.set(Matrix4f::ortho(

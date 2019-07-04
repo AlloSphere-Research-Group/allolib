@@ -226,7 +226,7 @@ Window& Window::insert(WindowEventHandler& v, int i){
 }
 
 Window& Window::append(WindowEventHandler& v) {
-  return insert(v, mWindowEventHandlers.size());
+  return insert(v, (int)mWindowEventHandlers.size());
 }
 
 Window& Window::prepend(WindowEventHandler& v){

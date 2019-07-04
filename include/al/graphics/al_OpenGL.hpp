@@ -1,12 +1,16 @@
 #ifndef INCLUDE_AL_OPENGL_HPP
 #define INCLUDE_AL_OPENGL_HPP
 
-#include "al/graphics/al_GLEW.hpp"
-// #include "al/types/al_Color.hpp"
+#include "GL/glew.h"
 
 namespace al {
 
 namespace gl {
+
+bool load();
+bool loaded();
+
+const char* versionString ();
 
 /// Get current GPU error string
 /// \returns the error string or an empty string if no error

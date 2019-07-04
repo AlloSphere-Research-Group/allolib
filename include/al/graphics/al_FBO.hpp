@@ -44,7 +44,7 @@
 
 */
 
-#include "al/graphics/al_GLEW.hpp"
+#include "al/graphics/al_OpenGL.hpp"
 #include "al/graphics/al_GPUObject.hpp"
 #include "al/graphics/al_Texture.hpp"
 

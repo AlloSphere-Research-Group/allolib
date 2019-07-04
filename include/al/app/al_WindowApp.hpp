@@ -13,7 +13,6 @@
 
 #include "al/app/al_FPS.hpp"
 #include "al/io/al_Window.hpp"
-#include "al/graphics/al_GLFW.hpp"
 #include "al/graphics/al_Graphics.hpp"
 
 #include <atomic>

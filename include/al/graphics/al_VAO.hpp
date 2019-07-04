@@ -4,7 +4,7 @@
 /*  Keehong Youn, 2017, younkeehong@gmail.com
 */
 
-#include "al/graphics/al_GLEW.hpp"
+#include "al/graphics/al_OpenGL.hpp"
 #include "al/graphics/al_BufferObject.hpp"
 
 namespace al {

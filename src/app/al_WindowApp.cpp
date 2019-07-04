@@ -32,7 +32,7 @@ WindowApp::WindowApp() {
 }
 
 void WindowApp::start() {
-  glfw::init(is_verbose);
+  initializeWindowManager();
   onInit();
   Window::create(is_verbose);
   onCreate();
@@ -45,7 +45,7 @@ void WindowApp::start() {
   }
   onExit();
   Window::destroy();          // destroy window
-  glfw::terminate(is_verbose);  // this also closes existing windows
+  terminateWindowManager();
 }
 
 // call user event functions inside WindowEventHandler class
