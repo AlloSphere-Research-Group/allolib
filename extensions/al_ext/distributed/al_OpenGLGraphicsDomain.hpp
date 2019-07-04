@@ -89,6 +89,8 @@ public:
 
   Graphics &graphics() { return app.mGraphics;}
 
+  NavInputControl &navControl() {return mNavControl;}
+
   // TODO change WindowApp to OpenGLWindowDomain
   WindowApp app;
 

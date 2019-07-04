@@ -26,6 +26,7 @@ void BaseCompositeApp::start() {
       std::cerr << "ERROR cleaning up domain " << std::endl;
     }
   }
+  onExit();
 }
 
 void BaseCompositeApp::initializeDomains() {

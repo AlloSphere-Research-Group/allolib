@@ -51,6 +51,7 @@ public:
   virtual void onDraw(Graphics &g) { (void) g;}
   virtual void onSound(AudioIOData &io) { (void) io;}
   virtual void onMessage(osc::Message &m) { (void) m;}
+  virtual void onExit() {}
 
   void setOpenVRDrawFunction(std::function<void(Graphics &)> func) {
 #ifdef AL_EXT_OPENVR
@@ -103,6 +104,76 @@ protected:
   std::vector<std::shared_ptr<AsynchronousDomain>> mDomainList;
   std::stack<std::shared_ptr<AsynchronousDomain>> mRunningDomains;
 };
+
+
+class DistributedApp : public BaseCompositeApp {
+public:
+  DistributedApp(bool primary = true) : BaseCompositeApp() {
+
+    // State will be same memory for local, but will be synced on the network for separate instances
+
+    mOpenGLGraphicsDomain->removeSubDomain(simulationDomain());
+
+    // Replace Simulation domain with state simulation domain
+    mSimulationDomain = mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
+
+    mPrimary = primary;
+    if (mPrimary) {
+      std::cout << "Running Primary" << std::endl;
+
+    } else {
+      std::cout << "Running REPLICA" << std::endl;
+
+      mSimulationDomain->disableProcessingCallback(); // Replicas won't call onAnimate()
+    }
+  }
+
+
+  void setTitle(std::string title) {
+    graphicsDomain()->app.title(title);
+  }
+
+private:
+  bool mPrimary;
+};
+
+template <class TSharedState>
+class DistributedAppWithState : public DistributedApp {
+public:
+  DistributedAppWithState(uint16_t rank_) : DistributedApp(), rank(rank_) {
+
+    // State will be same memory for local, but will be synced on the network for separate instances
+
+    mOpenGLGraphicsDomain->removeSubDomain(simulationDomain());
+
+    // Replace Simulation domain with state simulation domain
+    mSimulationDomain = mOpenGLGraphicsDomain->newSubDomain<StateSimulationDomain<TSharedState>>(true);
+
+    if (rank == 0) {
+      std::cout << "Running primary" << std::endl;
+      auto sender = std::static_pointer_cast<StateSimulationDomain<TSharedState>>(mSimulationDomain)->addStateSender("state");
+      sender->configure(10101);
+    } else {
+      std::cout << "Running REPLICA" << std::endl;
+      auto receiver = std::static_pointer_cast<StateSimulationDomain<TSharedState>>(mSimulationDomain)->addStateReceiver("state");
+      receiver->configure(10101);
+      mSimulationDomain->disableProcessingCallback(); // Replicas won't call onAnimate()
+    }
+  }
+
+  TSharedState &state() {
+    return std::static_pointer_cast<StateSimulationDomain<TSharedState>>(mSimulationDomain)->state();
+  }
+
+  void setTitle(std::string title) {
+    graphicsDomain()->app.title(title);
+  }
+
+  uint16_t rank {0};
+  uint16_t group {0};
+private:
+};
+
 
 } // namespace al
 
