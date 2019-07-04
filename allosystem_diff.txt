@@ -1,0 +1,10 @@
+graphics/screenshot
+graphics/slab
+graphcis/stereographic
+io/rendertodisk
+system/info
+system/memory
+types/msgqueue
+types/msgtube
+
+alloutil
