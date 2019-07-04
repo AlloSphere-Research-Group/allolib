@@ -80,8 +80,7 @@ public:
 
 	/// @param[in] file			File name without directory
 	/// @param[in] path			Directory of file
-	FilePath(const std::string& file, const std::string& path)
-	:	mPath(path), mFile(file) {}
+    FilePath(const std::string& file, const std::string& path);
 
 	/// @param[in] fullpath		Full path to file (directory + file name)
 	explicit FilePath(const std::string& fullpath);
@@ -91,7 +90,7 @@ public:
 	const std::string& file() const { return mFile; }
 
 	/// Get path (directory) of file
-	const std::string& path() const { return mPath; }
+    const std::string& path() const { return mPath; }
 
 	/// Get file with directory
 	std::string filepath() const { return path() + file(); }

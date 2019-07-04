@@ -26,6 +26,8 @@ bool FileSelector::drawFileSelector() {
     return false;
   }
 
+  ImGui::PushID(this);
+
   std::string rootButtonText = mGlobalRoot;
 
   if (rootButtonText.size() != 0) { // Global root set.
@@ -70,14 +72,22 @@ bool FileSelector::drawFileSelector() {
 #endif
   for(auto item: items) {
     std::string itemText = item.file().c_str();
-    if (ImGui::Selectable(item.file().c_str(), item.file() == mSelectedItem)) {
+    if (File::isDirectory(item.filepath())) {
+      itemText = "[DIR] " + itemText;
+    }
+
+    if (ImGui::Selectable(itemText.c_str(), item.file() == mSelectedItem)) {
       mSelectedItem = item.file();
     }
     if (ImGui::IsItemClicked(0) && ImGui::IsMouseDoubleClicked(0)) {
+      std::string newPath;
       if (mCurrentDir.size() == 0) {
-        mCurrentDir = mSelectedItem;
+        newPath = mSelectedItem;
       } else {
-        mCurrentDir = mCurrentDir + "/" + mSelectedItem;
+        newPath = mCurrentDir + "/" + mSelectedItem;
+      }
+      if (File::isDirectory(newPath)) {
+        mCurrentDir = newPath;
       }
       mSelectedItem = "";
       itemClicked = true;
@@ -89,18 +99,24 @@ bool FileSelector::drawFileSelector() {
   }
   // FIXME push unique ids for these
   if (ImGui::Button("Select##Directory")) {
+    ImGui::PopID();
     return true;
   }
   ImGui::SameLine();
   if (ImGui::Button("Cancel##Directory")) {
     mActive = false;
   }
+  ImGui::PopID();
   return false;
 }
 
 FileList FileSelector::getSelection() {
   FileList list;
-  list.add(FilePath(mSelectedItem, mCurrentDir));
+  if (mSelectedItem.size() == 0) {
+    list.add(FilePath(mCurrentDir));
+  } else {
+    list.add(FilePath(mSelectedItem, mCurrentDir));
+  }
   return list;
 }
 

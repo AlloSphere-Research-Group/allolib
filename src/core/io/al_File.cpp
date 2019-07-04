@@ -318,6 +318,11 @@ bool File::searchBack(std::string& path, int maxDepth){
 
 
 
+FilePath::FilePath(const std::string &file, const std::string &path)
+  :	mPath(path), mFile(file) {
+  mPath = File::conformPathToOS(mPath);
+}
+
 FilePath::FilePath(const std::string& fullpath) {
   size_t found = fullpath.rfind(AL_FILE_DELIMITER);
   if (found!=std::string::npos) {

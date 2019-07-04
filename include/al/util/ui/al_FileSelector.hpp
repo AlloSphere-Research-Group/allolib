@@ -62,9 +62,11 @@ public:
    */
   bool drawFileSelector();
 
-  // TODO return File type instead of selection and directory separately
-
   FileList getSelection();
+
+  bool isActive() { return mActive;}
+
+  void cancel() { mActive = false;}
 
 protected:
 
