@@ -156,114 +156,47 @@ set(sources
   src/types/al_Color.cpp
 )
 
-# target
 add_library(al STATIC ${headers} ${sources})
 
-# paths
 set_target_properties(al PROPERTIES
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON
 )
 
-# flags
 if (AL_WINDOWS)
   target_compile_options(al PRIVATE "")
 else ()
   target_compile_options(al PRIVATE "-Wall")
 endif (AL_WINDOWS)
 
-# definitions
 target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
-
-#target_include_directories(al PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
-#  "$<INSTALL_INTERFACE:include>"
-#)
 
 target_include_directories(al PUBLIC include external/Gamma external/rtaudio external/rtmidi external/glew/include)
 
-# libs
 target_link_libraries(al PUBLIC
   ${OPENGL_gl_LIBRARY}
   Gamma glew_s glfw glad rtaudio rtmidi cpptoml
   nlohmann_json::nlohmann_json imgui oscpack stb)
 
-# Convenience function
-macro(Copy_dlls app_path app_name DLLS_TO_COPY)
-
-  if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-#    message("--- Copying dlls to ${app_path} for target ${app_name}: ${DLLS_TO_COPY}")
-
+macro(Copy_dlls dest_path target DLLS_TO_COPY)
+  if (DLLS_TO_COPY)
     foreach(LIBRARY ${DLLS_TO_COPY})
       get_filename_component(LIBRARY_DIR "${LIBRARY}" DIRECTORY)
       get_filename_component(LIBRARY_NAME "${LIBRARY}" NAME)
-#      message("${LIBRARY_DIR} ----- ${LIBRARY_NAME}")
-      list(APPEND post_build_command
-        robocopy "${LIBRARY_DIR}" "${app_path}/bin" "${LIBRARY_NAME}" &
-        )
+      list(APPEND post_build_command robocopy "${LIBRARY_DIR}" "${app_path}" "${LIBRARY_NAME}" &)
     endforeach(LIBRARY IN "${DLLS_TO_COPY}")
 
-    if (USE_PORTAUDIO)
-      list(APPEND post_build_command
-          robocopy ${CMAKE_CURRENT_LIST_DIR}/dependencies/portaudio/ ${app_path}/bin portaudio_x64.dll &
-        )
-    endif (USE_PORTAUDIO)
+    list(APPEND post_build_command IF %ERRORLEVEL% LEQ 1 exit 0)
 
-    if (USE_APR)
-      list(APPEND post_build_command
-          robocopy ${CMAKE_CURRENT_LIST_DIR}/dependencies/apr/ ${app_path}/bin libapr-1.dll &
-        )
-    endif (USE_APR)
-
-    if (FREEIMAGE_FOUND)
-      list(APPEND post_build_command
-          robocopy ${CMAKE_CURRENT_LIST_DIR}/dependencies/FreeImage/Dist/x64 ${app_path}/bin FreeImage.dll &
-        )
-    endif (FREEIMAGE_FOUND)
-
-    list(APPEND post_build_command
-      IF %ERRORLEVEL% LEQ 1 exit 0
-      )
-
-    add_custom_command(
-      TARGET ${app_name}
-      POST_BUILD
-      COMMAND ${post_build_command}
-      )
-  endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-
+    add_custom_command(TARGET ${target} POST_BUILD COMMAND ${post_build_command})
+  endif ()
 endmacro(Copy_dlls)
 
-# --- Testing -----------------------------------------
 if (ALLOLIB_BUILD_TESTS)
   add_subdirectory(test)
 endif()
 
-# ----- Examples -------------------------------------
-
 if (NOT NO_EXAMPLES)
   add_subdirectory(examples)
 endif()
-
-# ----- INSTALL ----------------------------------------------------------------
-#
-
-#install(TARGETS al
-#  EXPORT al-targets
-#  RUNTIME DESTINATION bin
-#  LIBRARY DESTINATION lib
-#  ARCHIVE DESTINATION lib
-#)
-
-# For some reason this line causes an error when including depencies that are inside the source
-# tree on windows.... What does it do anyway...?
-#install(EXPORT al-targets DESTINATION lib/cmake/al)
-#install(DIRECTORY include/al DESTINATION include)
-#install(DIRECTORY external/oscpack/ip DESTINATION include)
-#install(DIRECTORY external/oscpack/osc DESTINATION include)
-#install(FILES external/imgui/imgui.h DESTINATION include)
-#install(FILES external/imgui/imconfig.h DESTINATION include)
-#install(FILES external/rtaudio/RtAudio.h DESTINATION include)
-#install(FILES external/rtmidi/rtmidi_c.h external/rtmidi/RtMidi.h DESTINATION include)
-
