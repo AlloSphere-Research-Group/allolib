@@ -1,7 +1,8 @@
 #ifndef INCLUDE_AL_OPENGL_HPP
 #define INCLUDE_AL_OPENGL_HPP
 
-#include "GL/glew.h"
+// #include "GL/glew.h"
+#include "glad/glad.h"
 
 namespace al {
 

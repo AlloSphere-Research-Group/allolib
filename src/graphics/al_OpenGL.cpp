@@ -1,6 +1,5 @@
 #include "al/graphics/al_OpenGL.hpp"
 #include "al/system/al_Printing.hpp"
-#include <cstdlib> // exit, EXIT_FAILURE
 #include <iostream>
 #include <string>
 
@@ -9,13 +8,19 @@ static bool gl_loaded = false;
 bool al::gl::load () {
   if (gl_loaded) return true;
 
-  GLenum err = glewInit();
-  if (err != GLEW_OK) {
-    std::string err_msg = "[al::gl::load] Glew Error: ";
-    err_msg += (const char*)glewGetErrorString(err);
-    err_msg += '\n';
-    std::cerr << err_msg;
-    return false;
+  // GLenum err = glewInit();
+  // if (err != GLEW_OK) {
+  //   std::string err_msg = "[al::gl::load] Glew Error: ";
+  //   err_msg += (const char*)glewGetErrorString(err);
+  //   err_msg += '\n';
+  //   std::cerr << err_msg;
+  //   return false;
+  // }
+
+  int result = gladLoadGL();
+  if (!result)
+  {
+    std::cerr << "failed loading opengl functions\n";
   }
 
   gl_loaded = true;
@@ -27,7 +32,22 @@ bool al::gl::loaded () {
 }
 
 const char* al::gl::versionString () {
-  return (const char*)glewGetString(GLEW_VERSION);
+  // return (const char*)glewGetString(GLEW_VERSION);
+
+  int major = GLVersion.major;
+  int minor = GLVersion.minor;
+
+  if (major == 3 && minor == 2) return "OpenGL 3.2";
+  if (major == 3 && minor == 3) return "OpenGL 3.3";
+  if (major == 4 && minor == 0) return "OpenGL 4.0";
+  if (major == 4 && minor == 1) return "OpenGL 4.1";
+  if (major == 4 && minor == 2) return "OpenGL 4.2";
+  if (major == 4 && minor == 3) return "OpenGL 4.3";
+  if (major == 4 && minor == 4) return "OpenGL 4.4";
+  if (major == 4 && minor == 5) return "OpenGL 4.5";
+  if (major == 4 && minor == 6) return "OpenGL 4.6";
+
+  return "OpenGL unknown version";
 }
 
 const char * al::gl::errorString(bool verbose) {

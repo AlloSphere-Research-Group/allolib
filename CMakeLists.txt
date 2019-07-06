@@ -172,11 +172,17 @@ endif (AL_WINDOWS)
 
 target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
 
-target_include_directories(al PUBLIC include external/Gamma external/rtaudio external/rtmidi external/glew/include)
+target_include_directories(al PUBLIC
+  include
+  external/Gamma
+  external/rtaudio
+  external/rtmidi
+  external/glew/include
+)
 
 target_link_libraries(al PUBLIC
   ${OPENGL_gl_LIBRARY}
-  Gamma glew_s glfw glad rtaudio rtmidi cpptoml
+  Gamma glfw glad rtaudio rtmidi cpptoml
   nlohmann_json::nlohmann_json imgui oscpack stb)
 
 macro(Copy_dlls dest_path target DLLS_TO_COPY)

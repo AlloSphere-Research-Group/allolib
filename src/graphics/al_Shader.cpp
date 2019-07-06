@@ -16,7 +16,7 @@ GLenum gl_shader_type(Shader::Type v) {
     case Shader::VERTEX:
       return GL_VERTEX_SHADER;
     case Shader::GEOMETRY:
-      return GL_GEOMETRY_SHADER_EXT;
+      return GL_GEOMETRY_SHADER;
     default:
       return 0;
   }
@@ -60,9 +60,8 @@ Shader& Shader::compile() {
 
 bool Shader::compiled() const {
   GLint v;
-  GLhandleARB h = (GLhandleARB)id();
-  glGetObjectParameterivARB(h, GL_COMPILE_STATUS, &v);
-  return v;
+  glGetShaderiv(mID, GL_COMPILE_STATUS, &v);
+  return (v == GL_TRUE);
 }
 
 void Shader::get(int pname, void* params) const {
@@ -126,7 +125,7 @@ static ShaderProgram::Type param_type_from_gltype(GLenum gltype) {
       return ShaderProgram::SAMPLER_1D;
     case GL_SAMPLER_2D:
       return ShaderProgram::SAMPLER_2D;
-    case GL_SAMPLER_2D_RECT_ARB:
+    case GL_SAMPLER_2D_RECT:
       return ShaderProgram::SAMPLER_RECT;
     case GL_SAMPLER_3D:
       return ShaderProgram::SAMPLER_3D;
