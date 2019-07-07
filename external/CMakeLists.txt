@@ -30,13 +30,13 @@ set(BUILD_UTILS OFF CACHE BOOL "no utils for glew" FORCE)
 
 add_subdirectory(Gamma)
 add_subdirectory(glfw)
-# add_subdirectory(glew/build/cmake)
 add_subdirectory(glad)
 add_subdirectory(rtaudio)
 add_subdirectory(rtmidi)
 add_subdirectory(cpptoml)
 add_subdirectory(json)
 add_subdirectory(stb)
+add_subdirectory(dr_libs)
 
 add_library(imgui STATIC
     imgui/imgui.cpp

@@ -182,7 +182,7 @@ target_include_directories(al PUBLIC
 
 target_link_libraries(al PUBLIC
   ${OPENGL_gl_LIBRARY}
-  Gamma glfw glad rtaudio rtmidi cpptoml
+  Gamma glfw glad rtaudio rtmidi cpptoml dr_libs
   nlohmann_json::nlohmann_json imgui oscpack stb)
 
 macro(Copy_dlls dest_path target DLLS_TO_COPY)
