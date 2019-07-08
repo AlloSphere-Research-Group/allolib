@@ -181,6 +181,8 @@ public:
      * @param numFields number of fields to process
      * @return true if able to set the fields
      *
+     * Note that this function allways triggers any associated callbacks, unlike the other
+     * setTriggerParams() that take an argument determine this.
      */
   virtual bool setTriggerParams(float *pFields, int numFields = -1) {
     if (numFields < (int) mTriggerParams.size()) {
@@ -201,14 +203,20 @@ public:
      * Trigger parameters are parameters meant to be set at triggering,
      * but that then stay constant throughout the duration of the instance.
      */
-  virtual bool setTriggerParams(std::vector<float> &pFields) {
+  virtual bool setTriggerParams(std::vector<float> &pFields, bool noCalls = false) {
     if (pFields.size() < mTriggerParams.size()) {
       // std::cout << "pField count mismatch. Ignoring." << std::endl;
       return false;
     }
     auto it = pFields.begin();
-    for (auto &param:mTriggerParams) {
-      static_cast<Parameter *>(param)->setNoCalls(*it++);
+    if (noCalls) {
+      for (auto &param:mTriggerParams) {
+        static_cast<Parameter *>(param)->setNoCalls(*it++);
+      }
+    } else {
+      for (auto &param:mTriggerParams) {
+        static_cast<Parameter *>(param)->set(*it++);
+      }
     }
     return true;
   }
@@ -218,7 +226,7 @@ public:
      * @param pFields std::vector<float> containing the values
      * @return true if able to set the fields
      */
-  virtual bool setTriggerParams(std::vector<ParameterField> pFields) {
+  virtual bool setTriggerParams(std::vector<ParameterField> pFields, bool noCalls = false) {
     if (pFields.size() < mTriggerParams.size()) {
       // std::cout << "pField count mismatch. Ignoring." << std::endl;
       return false;
@@ -228,29 +236,56 @@ public:
     // this function as these values are initial "construction" values
     // If you need the callbacks to propagate, set the parameter values
     // directly instead of through these functions.
-    for (auto &param:mTriggerParams) {
-      if (it->type() == ParameterField::FLOAT) {
-        if (strcmp(typeid(*param).name(), typeid(Parameter).name() ) == 0) {
-          static_cast<Parameter *>(param)->setNoCalls(it->get<float>());
-        } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name() ) == 0) {
-          static_cast<ParameterInt *>(param)->setNoCalls(it->get<float>());
-        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
-          static_cast<ParameterMenu*>(param)->setNoCalls(it->get<float>());
-        } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
-          static_cast<ParameterString *>(param)->setNoCalls(std::to_string(it->get<float>()));
-        } else {
-          std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+    if (noCalls) {
+      for (auto &param:mTriggerParams) {
+        if (it->type() == ParameterField::FLOAT) {
+          if (strcmp(typeid(*param).name(), typeid(Parameter).name() ) == 0) {
+            static_cast<Parameter *>(param)->setNoCalls(it->get<float>());
+          } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name() ) == 0) {
+            static_cast<ParameterInt *>(param)->setNoCalls(it->get<float>());
+          } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+            static_cast<ParameterMenu*>(param)->setNoCalls(it->get<float>());
+          } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+            static_cast<ParameterString *>(param)->setNoCalls(std::to_string(it->get<float>()));
+          } else {
+            std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+          }
+        } else if (it->type() == ParameterField::STRING) {
+          if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+            static_cast<ParameterString *>(param)->setNoCalls(it->get<std::string>());
+          } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+            static_cast<ParameterMenu *>(param)->setCurrent(it->get<std::string>(), noCalls);
+          } else {
+            std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+          }
         }
-      } else if (it->type() == ParameterField::STRING) {
-        if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
-          static_cast<ParameterString *>(param)->setNoCalls(it->get<std::string>());
-        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
-          static_cast<ParameterMenu *>(param)->setCurrent(it->get<std::string>(), true);
-        } else {
-          std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
-        }
+        it++;
       }
-      it++;
+    } else {
+      for (auto &param:mTriggerParams) {
+        if (it->type() == ParameterField::FLOAT) {
+          if (strcmp(typeid(*param).name(), typeid(Parameter).name() ) == 0) {
+            static_cast<Parameter *>(param)->set(it->get<float>());
+          } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name() ) == 0) {
+            static_cast<ParameterInt *>(param)->set(it->get<float>());
+          } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+            static_cast<ParameterMenu*>(param)->set(it->get<float>());
+          } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+            static_cast<ParameterString *>(param)->set(std::to_string(it->get<float>()));
+          } else {
+            std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+          }
+        } else if (it->type() == ParameterField::STRING) {
+          if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+            static_cast<ParameterString *>(param)->set(it->get<std::string>());
+          } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+            static_cast<ParameterMenu *>(param)->setCurrent(it->get<std::string>(), noCalls);
+          } else {
+            std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+          }
+        }
+        it++;
+      }
     }
     return true;
   }

@@ -440,15 +440,42 @@ bool PositionedVoice::setTriggerParams(float *pFields, int numFields) {
     double qx = *pFields++;
     double qy = *pFields++;
     double qz = *pFields++;
-    mPose.setNoCalls({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
-    mSize.setNoCalls(*pFields);
+    mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+    mSize.set(*pFields);
   } else {
     ok = false;
   }
   return ok;
 }
 
-bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields) {
+bool PositionedVoice::setTriggerParams(std::vector<float> &pFields, bool noCalls) {
+
+  bool ok = SynthVoice::setTriggerParams(pFields, noCalls);
+  if (pFields.size() == mTriggerParams.size() + 8) { // If seven extra, it means pose and size are there too
+    size_t index = mTriggerParams.size();
+    double x = pFields[index++];
+    double y = pFields[index++];
+    double z = pFields[index++];
+    double qw = pFields[index++];
+    double qx = pFields[index++];
+    double qy = pFields[index++];
+    double qz = pFields[index++];
+    if (noCalls) {
+      mPose.setNoCalls({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+      mSize.setNoCalls(pFields[index++]);
+    } else {
+      mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+      mSize.set(pFields[index++]);
+    }
+  } else {
+    //            std::cout << "Not setting position for voice" << std::endl;
+    ok = false;
+  }
+  return ok;
+//  return setTriggerParams(pFields.data(), pFields.size(), noCalls);
+}
+
+bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields, bool noCalls) {
   bool ok = SynthVoice::setTriggerParams(pFields);
   if (pFields.size() == mTriggerParams.size() + 8) { // If seven extra, it means pose and size are there too
     size_t index = mTriggerParams.size();
@@ -459,10 +486,16 @@ bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields) {
     double qx = pFields[index++].get<float>();
     double qy = pFields[index++].get<float>();
     double qz = pFields[index++].get<float>();
-    mPose.setNoCalls({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
-    mSize.setNoCalls(pFields[index++].get<float>());
+    if (noCalls) {
+      mPose.setNoCalls({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+      mSize.setNoCalls(pFields[index++].get<float>());
+    } else {
+      mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+      mSize.set(pFields[index++].get<float>());
+    }
   } else {
     //            std::cout << "Not setting position for voice" << std::endl;
+    ok = false;
   }
   return ok;
 }
