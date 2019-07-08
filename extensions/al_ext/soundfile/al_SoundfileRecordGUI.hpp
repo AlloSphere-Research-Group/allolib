@@ -4,7 +4,7 @@
 
 #include "al/util/ui/al_ParameterGUI.hpp"
 
-#include "al/soundfile/al_OutputRecorder.hpp"
+#include "al_ext/soundfile/al_OutputRecorder.hpp"
 
 
 namespace al

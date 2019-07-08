@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     app.start();
 
   } else {
-    MyApp app;
+    MyApp app(0);
     app.setTitle("PRIMARY");
     app.start();
 
