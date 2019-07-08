@@ -13,6 +13,8 @@
 
 #include <openvr.h>
 
+static_assert(vr::k_nSteamVRVersionMinor == 1 && vr::k_nSteamVRVersionMinor <=1, "OpenVR support for version 1.1.3b and under.");
+
 namespace al {
     
 // TO DO: buttonPress event may sometimes crash the program for unknown reason.
