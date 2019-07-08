@@ -260,8 +260,6 @@ Window::Window() { mImpl = make_unique<WindowImpl>(this); }
 Window::~Window() {}
 
 bool Window::implCreate(bool is_verbose) {
-  initializeWindowManager();
-
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

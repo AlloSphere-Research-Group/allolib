@@ -76,6 +76,7 @@ set(headers
   include/al/io/al_ControlNav.hpp
   include/al/io/al_CSVReader.hpp
   include/al/io/al_File.hpp
+  include/al/io/al_Imgui.hpp
   include/al/io/al_MIDI.hpp
   include/al/io/al_Window.hpp
   include/al/math/al_Constants.hpp
@@ -135,6 +136,8 @@ set(sources
   src/io/al_ControlNav.cpp
   src/io/al_CSVReader.cpp
   src/io/al_File.cpp
+  src/io/al_Imgui.cpp
+  src/io/al_imgui_impl.cpp
   src/io/al_MIDI.cpp
   src/io/al_Window.cpp
   src/io/al_WindowGLFW.cpp

@@ -85,9 +85,9 @@ private:
 // ---------- IMPLEMENTATION ---------------------------------------------------
 
 inline void App::start() {
-  glfw::init(is_verbose);
+  initializeWindowManager();
   onInit();
-  Window::create(is_verbose);
+  Window::create();
   preOnCreate();
   onCreate();
   AudioApp::beginAudio(); // only begins if `initAudio` was called before
