@@ -159,6 +159,13 @@ PolySynth::~PolySynth() {
 
 int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id, void *userData) {
   assert(voice);
+  if (verbose()) {
+    std::cout << "Trigger on ";
+    for(auto *param: voice->triggerParameters()) {
+      std::cout << param->getName() << ":" << param->toFloat() << " ";
+    }
+    std::cout << std::endl;
+  }
   int thisId = id;
   if (thisId == -1) {
     if (voice->id() >= 0) {
