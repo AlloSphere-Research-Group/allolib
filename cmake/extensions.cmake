@@ -19,7 +19,7 @@ set(EXTENSIONS_INCLUDE_DIRS "${al_path}/extensions")
 
 foreach(subdir ${SUBDIRS})
   if (EXISTS "${al_path}/extensions/al_ext/${subdir}/extension.cmake")
-    message(" * Building extension: ${subdir}")
+    message(" * Extension: ${subdir}")
 
     set(CURRENT_EXTENSION_LIBRARIES)
     set(CURRENT_EXTENSION_LINK_DIRS)

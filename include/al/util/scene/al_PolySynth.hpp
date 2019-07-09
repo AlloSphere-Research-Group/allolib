@@ -390,6 +390,15 @@ public:
   virtual void onTriggerOff() {}
 
   /**
+    * @brief This function gets called after the voice is taken out of the processing chain
+    *
+    * It can be used to store final states of a voice for example. This function
+    * is currently called in the time master domain, so it might be important to not
+    * do any blocking operations here.
+    * */
+  virtual void onFree() {}
+
+  /**
    * @brief Trigger a note by calling onTriggerOn() and setting voice as active
    * @param offsetFrames
    *
@@ -1014,6 +1023,7 @@ protected:
             voice->next = mFreeVoices;
             mFreeVoices = voice; // Insert as head in free voices
             voice->id(-1); // Reset voice id
+            voice->onFree();
             voice = mActiveVoices; // prepare next iteration
           }
         }
