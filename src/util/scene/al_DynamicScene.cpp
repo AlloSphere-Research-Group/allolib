@@ -174,7 +174,7 @@ void DynamicScene::render(AudioIOData &io) {
     }
     io.zeroBus();
 
-    auto voice = mActiveVoices;
+    auto *voice = mActiveVoices;
     int fpb = internalAudioIO.framesPerBuffer();
     if (mAudioThreads.size() == 0 || !mThreadedAudio) { // Not using worker threads
         // Render active voices
@@ -288,7 +288,7 @@ void DynamicScene::update(double dt) {
     }
 
     if (!mWorkerThreads || !mThreadedUpdate) { // Not using worker threads
-        auto voice = mActiveVoices;
+        auto *voice = mActiveVoices;
         while (voice) {
             if (voice->active()) {
                 voice->update(dt);
@@ -297,7 +297,7 @@ void DynamicScene::update(double dt) {
         }
     } else { // Using worker threads
 
-        auto voice = mActiveVoices;
+        auto *voice = mActiveVoices;
         while (voice) {
             if (voice->active()) {
                 UpdateThreadFuncData data {voice, dt};

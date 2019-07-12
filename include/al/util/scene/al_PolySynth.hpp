@@ -407,8 +407,8 @@ public:
    */
   void triggerOn(int offsetFrames = 0) {
     mOnOffsetFrames = offsetFrames;
-    onTriggerOn();
     mActive = true;
+    onTriggerOn();
   }
 
   /**
@@ -589,7 +589,7 @@ protected:
 private:
 
   int mId {-1};
-  int mActive {false};
+  bool mActive {false};
   int mOnOffsetFrames {0};
   int mOffOffsetFrames {0};
   void *mUserData;
@@ -833,6 +833,15 @@ public:
   }
 
   /**
+     * @brief register a callback to be notified of a note is moved to the free pool from the active list
+     */
+  void registerFreeCallback(std::function<bool(int id, void *userData)> cb, void *userData = nullptr) {
+    FreeCallback cbNode(cb, userData);
+    mFreeCallbacks.push_back(cbNode);
+  }
+
+
+  /**
      * @brief register a callback to be notified of allocation of a voice.
      */
   void registerAllocateCallback(std::function<void(SynthVoice *voice, void *)> cb, void *userData = nullptr) {
@@ -945,17 +954,15 @@ protected:
     if (mVoiceToInsertLock.try_lock()) {
       if (mVoicesToInsert) {
         // If lock acquired insert queued voices
-        if (mActiveVoices) {
-
+        auto *voices = mActiveVoices;
+        if (voices) {
           auto voice = mVoicesToInsert;
           while (voice->next) { // Find last voice to insert
             voice = voice->next;
           }
-          voice->next = mActiveVoices; // Connect last inserted to previously active
-          mActiveVoices = mVoicesToInsert; // Put new voices in head
-        } else {
-          mActiveVoices = mVoicesToInsert;
+          voice->next = voices; // Connect last inserted to previously active
         }
+        mActiveVoices = mVoicesToInsert;
         if (verbose()) {
           std::cout << "Voice on "<<  mVoicesToInsert->id() << std::endl;
         }
@@ -967,17 +974,19 @@ protected:
     if (mAllNotesOff) {
       if (mFreeVoiceLock.try_lock()) {
         mAllNotesOff = false;
-        if (mActiveVoices) {
-          auto voice = mActiveVoices->next;
-          SynthVoice *previousVoice = mActiveVoices;
+        auto *voices = mActiveVoices;
+        if (voices) {
+          auto voice = voices->next;
+          SynthVoice *previousVoice = voices;
           previousVoice->id(-1);
           while(voice) {
             voice->id(-1);
+            voice->mActive = false;
             previousVoice = voice;
             voice = voice->next;
           }
           previousVoice->next = mFreeVoices; // Connect last active voice to first free voice
-          mFreeVoices = mActiveVoices; // Move all voices to free voices
+          mFreeVoices = voices; // Move all voices to free voices
           mActiveVoices = nullptr; // No active voices left
         }
         mFreeVoiceLock.unlock();
@@ -990,7 +999,7 @@ protected:
     size_t numVoicesToTurnOff;
     while ( (numVoicesToTurnOff = mVoiceIdsToTurnOff.read((char *) voicesToTurnOff, 16 * sizeof (int))) ) {
       for (size_t i = 0; i < numVoicesToTurnOff/int(sizeof (int)); i++) {
-        auto voice = mActiveVoices;
+        auto *voice = mActiveVoices;
         while (voice) {
           if (voice->id() == voicesToTurnOff[i]) {
 
@@ -1003,28 +1012,50 @@ protected:
         }
       }
     }
+    size_t numVoicesToFree;
+    int voicesToFree[16];
+    while ( (numVoicesToFree = mVoiceIdsToFree.read((char *) voicesToFree, 16 * sizeof (int))) ) {
+      for (size_t i = 0; i < numVoicesToFree/int(sizeof (int)); i++) {
+        auto *voice = mActiveVoices;
+        while (voice) {
+          if (voice->id() == voicesToFree[i]) {
+            voice->mActive = false;
+            if (mVerbose) {
+              std::cout << "Voice free "<<  voice->id() << std::endl;
+            }
+          }
+          voice = voice->next;
+        }
+      }
+    }
   }
 
   inline void processInactiveVoices() {
     // Move inactive voices to free queue
     if (mFreeVoiceLock.try_lock()) { // Attempt to remove inactive voices without waiting.
-      auto voice = mActiveVoices;
+      auto *voice = mActiveVoices;
       SynthVoice *previousVoice = nullptr;
       while(voice) {
         if (!voice->active()) {
+          int id = voice->id();
           if (previousVoice) {
             previousVoice->next = voice->next; // Remove from active list
             voice->next = mFreeVoices;
             mFreeVoices = voice; // Insert as head in free voices
             voice->id(-1); // Reset voice id
+            voice->onFree();
             voice = previousVoice; // prepare next iteration
           } else { // Inactive is head of the list
-            mActiveVoices = voice->next; // Remove voice from list
+            auto *nextVoice = voice->next;
+            mActiveVoices = nextVoice; // Remove voice from list
             voice->next = mFreeVoices;
             mFreeVoices = voice; // Insert as head in free voices
             voice->id(-1); // Reset voice id
             voice->onFree();
-            voice = mActiveVoices; // prepare next iteration
+            voice = voice->next; // prepare next iteration
+          }
+          for (auto cbNode: mFreeCallbacks) {
+            cbNode.first(id, cbNode.second);
           }
         }
         previousVoice = voice;
@@ -1070,7 +1101,7 @@ protected:
   // Internal voices are allocated in PolySynth and shared with the outside.
   SynthVoice *mVoicesToInsert {nullptr}; //Voices to be inserted in the realtime context
   SynthVoice *mFreeVoices {nullptr}; // Allocated voices available for reuse
-  SynthVoice *mActiveVoices {nullptr}; // Dynamic voices that are currently active. Only modified within the master domain (set by mMasterMode)
+  SynthVoice * mActiveVoices {nullptr}; // Dynamic voices that are currently active. Only modified within the master domain (set by mMasterMode)
   std::mutex mVoiceToInsertLock;
   std::mutex mFreeVoiceLock;
   std::mutex mGraphicsLock;
@@ -1085,6 +1116,7 @@ protected:
   AudioIOData internalAudioIO;
 
   SingleRWRingBuffer mVoiceIdsToTurnOff {64 * sizeof(int)};
+  SingleRWRingBuffer mVoiceIdsToFree {64 * sizeof(int)};
 
   TimeMasterMode mMasterMode;
 
@@ -1095,6 +1127,9 @@ protected:
 
   typedef std::pair<std::function<bool(int id, void *)>, void *> TriggerOffCallback;
   std::vector<TriggerOffCallback> mTriggerOffCallbacks;
+
+  typedef std::pair<std::function<bool(int id, void *)>, void *> FreeCallback;
+  std::vector<FreeCallback> mFreeCallbacks;
 
   typedef std::pair<std::function<void(SynthVoice *voice, void *)>, void *> AllocationCallback;
 

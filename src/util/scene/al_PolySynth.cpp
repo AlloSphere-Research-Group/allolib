@@ -266,7 +266,7 @@ void PolySynth::render(AudioIOData &io) {
     }
 
     // Render active voices
-    auto voice = mActiveVoices;
+    auto *voice = mActiveVoices;
     int fpb = io.framesPerBuffer();
     while (voice) {
         if (voice->active()) {
@@ -475,7 +475,7 @@ void PolySynth::print(std::ostream &stream) {
     }
     //
     {
-        auto voice = mActiveVoices;
+        auto *voice = mActiveVoices;
         int counter = 0;
         stream << " ---- Active Voices ----" << std:: endl;
         while(voice) {
