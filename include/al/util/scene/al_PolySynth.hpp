@@ -565,7 +565,7 @@ public:
      * It can also be used to force removal of a voice from the rendering chain
      * without going through the release phase.
      */
-  void free() {mActive = false; } // Mark this voice as done.
+  void free() { mActive = false; } // Mark this voice as done.
 
   SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
 
@@ -1016,13 +1016,13 @@ protected:
     int voicesToFree[16];
     while ( (numVoicesToFree = mVoiceIdsToFree.read((char *) voicesToFree, 16 * sizeof (int))) ) {
       for (size_t i = 0; i < numVoicesToFree/int(sizeof (int)); i++) {
+        if (mVerbose) {
+          std::cout << "Voice free "<<  voicesToFree[i] << std::endl;
+        }
         auto *voice = mActiveVoices;
         while (voice) {
           if (voice->id() == voicesToFree[i]) {
             voice->mActive = false;
-            if (mVerbose) {
-              std::cout << "Voice free "<<  voice->id() << std::endl;
-            }
           }
           voice = voice->next;
         }
@@ -1038,6 +1038,7 @@ protected:
       while(voice) {
         if (!voice->active()) {
           int id = voice->id();
+          std::cout << " ****((((())))) **** Remove inactive voice: " << voice << std::endl;
           if (previousVoice) {
             previousVoice->next = voice->next; // Remove from active list
             voice->next = mFreeVoices;
@@ -1056,6 +1057,7 @@ protected:
           }
           for (auto cbNode: mFreeCallbacks) {
             cbNode.first(id, cbNode.second);
+
           }
         }
         previousVoice = voice;
