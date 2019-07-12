@@ -187,6 +187,7 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id, void *user
     {
       std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
       voice->next = mVoicesToInsert;
+      voice->mActive = true; // We need to mark this here to avoid race conditions if active() is checked on separate thread, and the voice removed before it has been triggered.
       mVoicesToInsert = voice;
     }
     return thisId;

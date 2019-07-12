@@ -245,9 +245,9 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
       if (m.typeTags() == "i") {
           int id;
           m >> id;
-
+          mVoiceIdsToFree.write((const char*) &id, sizeof (int));
           if (verbose()) {
-            std::cout << "trigger off received " << id <<std::endl;
+            std::cout << "FREE received " << id << std::endl;
           }
           return true;
       }
