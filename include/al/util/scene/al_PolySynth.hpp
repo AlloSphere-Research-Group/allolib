@@ -964,7 +964,7 @@ protected:
         }
         mActiveVoices = mVoicesToInsert;
         if (verbose()) {
-          std::cout << "Voice on "<<  mVoicesToInsert->id() << std::endl;
+          std::cout << "Voice inserted "<<  mVoicesToInsert->id() << std::endl;
         }
 
         mVoicesToInsert = nullptr;
@@ -1004,7 +1004,7 @@ protected:
           if (voice->id() == voicesToTurnOff[i]) {
 
             if (mVerbose) {
-              std::cout << "Voice off "<<  voice->id() << std::endl;
+              std::cout << "Voice trigger off "<<  voice->id() << std::endl;
             }
             voice->triggerOff(); // TODO use offset for turn off
           }

@@ -99,9 +99,8 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
           p.beginMessage(prefix + "/remove");
           p << id;
           p.endMessage();
-          this->mVoiceIdsToFree.write((const char*) &id, sizeof (int));
-          std::cout << " -- Sending free message " << id << std::endl;
           if (verbose()) {
+            std::cout << " -- Sending free message " << id << std::endl;
           }
           this->mNotifier->send(p);
         }
