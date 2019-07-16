@@ -20,7 +20,7 @@ struct Thing {
 
 struct SimpleVoice : PositionedVoice {
   Sine<> oscillator;
-  LFO<> lfo; // 4 Hz Square wave for envelope
+  LFO<> lfo; // 4 Hz Square wave for envelopeY
 
   float lfoValue {0.0f};
 

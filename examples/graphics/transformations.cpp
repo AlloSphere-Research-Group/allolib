@@ -12,8 +12,7 @@ Lance Putnam, March 2015
 #include "al/core.hpp"
 using namespace al;
 
-class MyApp : public App{
-public:
+struct MyApp : public App{
 
 	Mesh mesh;
 

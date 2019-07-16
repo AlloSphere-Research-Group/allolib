@@ -27,8 +27,7 @@ Lance Putnam, Oct. 2014
 using namespace al;
 
 
-class MyApp : public App{
-public:
+struct MyApp : public App{
 
 	static const int Nx = 256, Ny = Nx;
 	float wave[Nx*Ny*2];// Values of wave for current and previous time step

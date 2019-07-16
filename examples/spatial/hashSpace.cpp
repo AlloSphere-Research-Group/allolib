@@ -1,8 +1,3 @@
-#include "al/core.hpp"
-#include "al/core/math/al_Random.hpp"
-#include "al/core/spatial/al_HashSpace.hpp"
-#include "al/core/math/al_Functions.hpp"
-
 /*
 Allocore Example: Hashspace for nearest neighbor lookup.
 
@@ -15,8 +10,12 @@ Graham Wakefield 2012
 */
 
 
-#include <stdio.h>
+#include "al/core.hpp"
+#include "al/core/math/al_Random.hpp"
+#include "al/core/spatial/al_HashSpace.hpp"
+#include "al/core/math/al_Functions.hpp"
 
+#include <stdio.h>
 #include <map>
 
 using namespace al;

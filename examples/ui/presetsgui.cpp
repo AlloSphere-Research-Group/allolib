@@ -8,9 +8,8 @@
 
 using namespace al;
 
-class MyApp : public App
+struct MyApp : public App
 {
-public:
     MyApp() {
         nav().pos(Vec3d(0, 0, 8));
 

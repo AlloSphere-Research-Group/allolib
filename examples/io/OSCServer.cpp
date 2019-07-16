@@ -17,8 +17,7 @@ Lance Putnam, Oct. 2014
 using namespace al;
 
 // App has osc::PacketHandler as base class
-class MyApp : public App{
-public:
+struct MyApp : public App{
 
 	// can give params in ctor
 	// osc::Recv server {16447, "", 0.05};

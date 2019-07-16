@@ -16,13 +16,13 @@
 
 using namespace al;
 
-#define BLOCK_SIZE (256)
+#define BLOCK_SIZE (256) 
 
 
 // 1) Create a speaker layout
 SpeakerLayout speakerLayout = HeadsetSpeakerLayout();
 
-// 2) Create a panner: DBAP, VBAP, Ambisonics, or Stereo
+// 2) Create a panner: DBAP, VBAP, Ambisonics, or Stereo 
 //Dbap* panner = new Dbap(speakerLayout);
 //Vbap* panner = new Vbap(speakerLayout);
 AmbisonicsSpatializer* panner = new AmbisonicsSpatializer(speakerLayout, 2, 1);  // dimension and order

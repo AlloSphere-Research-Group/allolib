@@ -16,8 +16,7 @@ Lance Putnam, Nov. 2013
 using namespace al;
 using namespace std;
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
 
 	Texture tex;
 	Mesh mesh;

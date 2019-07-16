@@ -11,8 +11,7 @@ Lance Putnam, March 2015
 #include "al/core.hpp"
 using namespace al;
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
 
 	// This mesh will contain the vertex positions and colors of our square.
 	Mesh mesh;

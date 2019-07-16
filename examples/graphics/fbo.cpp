@@ -29,7 +29,7 @@ RBO rbo;
 FBO fbo;
 bool mipmap = true;
 
-class MyApp : public App {
+struct MyApp : public App {
 
 	void onCreate()
 	{

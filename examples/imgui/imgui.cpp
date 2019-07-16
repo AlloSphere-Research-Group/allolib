@@ -6,8 +6,9 @@
 
 using namespace al;
 
-struct my_app : App
+struct my_app : public App
 {
+  
   float x = 0;
   Color clear_color {0, 0, 0};
   bool show_another_window = false;

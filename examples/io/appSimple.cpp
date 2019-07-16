@@ -55,8 +55,8 @@ Lance Putnam, June 2011
 using namespace al;
 
 // We inherit from App to create our own custom application
-class MyApp : public App{
-public:
+struct MyApp : public App{
+
 
 	Mesh mesh;
 	double phase = 0;
