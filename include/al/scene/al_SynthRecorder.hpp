@@ -45,8 +45,8 @@
 #include <chrono>
 #include <fstream>
 
-#include "al/core/io/al_File.hpp"
-#include "al/util/scene/al_SynthSequencer.hpp"
+#include "al/io/al_File.hpp"
+#include "al/scene/al_SynthSequencer.hpp"
 
 /**
  * @brief The SynthRecorder class records the events arriving at a PolySynth

@@ -42,9 +42,9 @@
 
 #include <mutex>
 
-#include "al/core/protocol/al_OSC.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_ParameterBundle.hpp"
+#include "al/protocol/al_OSC.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_ParameterBundle.hpp"
 
 namespace al
 {

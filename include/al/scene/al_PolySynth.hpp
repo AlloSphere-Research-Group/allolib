@@ -49,10 +49,10 @@
 #include <chrono>
 #include <typeindex>
 
-#include "al/core/graphics/al_Graphics.hpp"
-#include "al/core/io/al_AudioIOData.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/al_SingleRWRingBuffer.hpp"
+#include "al/graphics/al_Graphics.hpp"
+#include "al/io/al_AudioIOData.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/types/al_SingleRWRingBuffer.hpp"
 
 namespace al
 {

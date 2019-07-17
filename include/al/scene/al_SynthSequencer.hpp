@@ -52,11 +52,11 @@
 #include <thread>
 #include <cassert>
 
-#include "al/core/graphics/al_Graphics.hpp"
-#include "al/core/io/al_AudioIOData.hpp"
-#include "al/core/io/al_File.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/scene/al_PolySynth.hpp"
+#include "al/graphics/al_Graphics.hpp"
+#include "al/io/al_AudioIOData.hpp"
+#include "al/io/al_File.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/scene/al_PolySynth.hpp"
 
 //#include "Gamma/Domain.h"
 

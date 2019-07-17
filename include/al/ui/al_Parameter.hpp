@@ -54,10 +54,10 @@
 #include <memory>
 #include <algorithm>
 
-#include "al/core/math/al_Vec.hpp"
-#include "al/core/spatial/al_Pose.hpp"
-#include "al/core/types/al_Color.hpp"
-#include "al/core/protocol/al_OSC.hpp"
+#include "al/math/al_Vec.hpp"
+#include "al/spatial/al_Pose.hpp"
+#include "al/types/al_Color.hpp"
+#include "al/protocol/al_OSC.hpp"
 
 namespace al
 {

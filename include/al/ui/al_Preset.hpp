@@ -50,10 +50,10 @@
 #include <functional>
 #include <algorithm>
 
-#include "al/core/protocol/al_OSC.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_ParameterServer.hpp"
-#include "al/core/system/al_Time.hpp"
+#include "al/protocol/al_OSC.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_ParameterServer.hpp"
+#include "al/system/al_Time.hpp"
 
 namespace  al
 {

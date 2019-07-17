@@ -50,8 +50,8 @@
 #include <functional>
 #include <atomic>
 
-#include "al/core/protocol/al_OSC.hpp"
-#include "al/util/ui/al_Preset.hpp"
+#include "al/protocol/al_OSC.hpp"
+#include "al/ui/al_Preset.hpp"
 
 namespace al
 {

@@ -42,20 +42,20 @@
 
 #include <climits>
 
-#include "al/core/io/al_ControlNav.hpp"
-#include "al/core/io/al_AudioIO.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_Preset.hpp"
-#include "al/util/ui/al_PresetMIDI.hpp"
-#include "al/util/ui/al_PresetSequencer.hpp"
-#include "al/util/ui/al_ParameterBundle.hpp"
-#include "al/util/ui/al_ParameterMIDI.hpp"
-#include "al/util/ui/al_PresetSequencer.hpp"
-#include "al/util/ui/al_SequenceRecorder.hpp"
-#include "al/util/scene/al_SynthSequencer.hpp"
-#include "al/util/scene/al_SynthRecorder.hpp"
-#include "al/util/scene/al_DynamicScene.hpp"
-#include "al/util/imgui/al_Imgui.hpp"
+#include "al/io/al_ControlNav.hpp"
+#include "al/io/al_AudioIO.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_Preset.hpp"
+#include "al/ui/al_PresetMIDI.hpp"
+#include "al/ui/al_PresetSequencer.hpp"
+#include "al/ui/al_ParameterBundle.hpp"
+#include "al/ui/al_ParameterMIDI.hpp"
+#include "al/ui/al_PresetSequencer.hpp"
+#include "al/ui/al_SequenceRecorder.hpp"
+#include "al/scene/al_SynthSequencer.hpp"
+#include "al/scene/al_SynthRecorder.hpp"
+#include "al/scene/al_DynamicScene.hpp"
+#include "al/io/al_Imgui.hpp"
 
 namespace al {
 
@@ -64,11 +64,10 @@ class BundleGUIManager;
 class ParameterGUI {
 public:
 
-    static void initialize() { initIMGUI(); }
-    static void cleanup() { shutdownIMGUI(); }
+    static void initialize() { imguiInit(); }
+    static void cleanup() { imguiShutdown(); }
 
-    static void beginDraw() { beginIMGUI(); }
-    static void endDraw() { endIMGUI(); }
+    static void draw() { imguiDraw(); }
 
     static inline void draw(ParameterMeta *param) {drawParameterMeta(param);}
 
@@ -137,8 +136,8 @@ public:
     static void drawBundle(ParameterBundle * bundle);
     static void drawBundleManager(BundleGUIManager *manager);
 
-    static bool usingInput() {return imgui_is_using_input();}
-    static bool usingKeyboard() {return imgui_is_using_keyboard();}
+    static bool usingInput() {return isImguiUsingInput();}
+    static bool usingKeyboard() {return isImguiUsingKeyboard();}
 
     // Convenience function for use in ImGui::Combo
     static auto vector_getter(void* vec, int idx, const char** out_text)

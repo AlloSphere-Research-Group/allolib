@@ -40,8 +40,8 @@
 	Andrés Cabrera mantaraya36@gmail.com
 */
 
-#include "al/core/io/al_MIDI.hpp"
-#include "al/util/ui/al_Parameter.hpp"
+#include "al/io/al_MIDI.hpp"
+#include "al/ui/al_Parameter.hpp"
 
 #undef min
 #undef max
