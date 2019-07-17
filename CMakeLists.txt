@@ -203,9 +203,11 @@ macro(Copy_dlls dest_path target DLLS_TO_COPY)
 endmacro(Copy_dlls)
 
 if (ALLOLIB_BUILD_TESTS)
+  message("including allolib test")
   add_subdirectory(test)
 endif()
 
-if (NOT NO_EXAMPLES)
+if (BUILD_EXAMPLES)
+  message("including allolib examples")
   add_subdirectory(examples)
 endif()
