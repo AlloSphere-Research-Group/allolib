@@ -1,6 +1,6 @@
 #include <string>
 
-#include "al/util/ui/al_ParameterGUI.hpp"
+#include "al/ui/al_ParameterGUI.hpp"
 
 using namespace al;
 using namespace std;

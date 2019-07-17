@@ -1,6 +1,6 @@
 #include <memory>
 
-#include "al/util/scene/al_PolySynth.hpp"
+#include "al/scene/al_PolySynth.hpp"
 
 using namespace al;
 

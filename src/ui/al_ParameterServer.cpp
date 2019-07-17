@@ -3,7 +3,7 @@
 #include <cstring>
 #include <cctype>
 
-#include "al/util/ui/al_ParameterServer.hpp"
+#include "al/ui/al_ParameterServer.hpp"
 
 using namespace al;
 

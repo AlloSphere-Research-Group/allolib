@@ -6,8 +6,8 @@
 #include <cstring>
 #include <cassert>
 
-#include "al/util/ui/al_Preset.hpp"
-#include "al/core/io/al_File.hpp"
+#include "al/ui/al_Preset.hpp"
+#include "al/io/al_File.hpp"
 
 using namespace al;
 

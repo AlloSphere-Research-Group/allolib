@@ -1,6 +1,6 @@
 
-#include "al/util/ui/al_FileSelector.hpp"
-#include "al/util/imgui/al_Imgui.hpp"
+#include "al/ui/al_FileSelector.hpp"
+#include "al/io/al_Imgui.hpp"
 
 using namespace al;
 

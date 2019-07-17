@@ -45,8 +45,8 @@
 #include <vector>
 #include <thread>
 
-#include "al/util/ui/al_PresetSequencer.hpp"
-#include "al/util/ui/al_Preset.hpp"
+#include "al/ui/al_PresetSequencer.hpp"
+#include "al/ui/al_Preset.hpp"
 
 namespace al
 {

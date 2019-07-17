@@ -58,8 +58,8 @@
 
 #endif
 
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_Preset.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_Preset.hpp"
 
 namespace al
 {

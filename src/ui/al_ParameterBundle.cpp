@@ -3,8 +3,8 @@
 #include <string>
 
 
-#include "al/util/ui/al_ParameterBundle.hpp"
-#include "al/util/ui/al_ParameterServer.hpp"
+#include "al/ui/al_ParameterBundle.hpp"
+#include "al/ui/al_ParameterServer.hpp"
 
 using namespace al;
 

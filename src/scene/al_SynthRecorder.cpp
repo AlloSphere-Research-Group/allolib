@@ -1,5 +1,5 @@
 
-#include "al/util/scene/al_SynthRecorder.hpp"
+#include "al/scene/al_SynthRecorder.hpp"
 
 using namespace al;
 

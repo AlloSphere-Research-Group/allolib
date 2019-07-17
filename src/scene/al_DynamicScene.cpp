@@ -1,5 +1,5 @@
-#include "al/util/scene/al_DynamicScene.hpp"
-#include "al/core/graphics/al_Shapes.hpp"
+#include "al/scene/al_DynamicScene.hpp"
+#include "al/graphics/al_Shapes.hpp"
 
 using namespace std;
 using namespace al;

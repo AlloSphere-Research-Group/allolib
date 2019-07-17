@@ -44,17 +44,17 @@
 #include <string>
 #include <map>
 
-#include "al/core/io/al_ControlNav.hpp"
-#include "al/util/ui/al_ParameterGUI.hpp"
-#include "al/util/ui/al_ParameterMIDI.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_ParameterBundle.hpp"
-#include "al/util/ui/al_Preset.hpp"
-#include "al/util/ui/al_PresetSequencer.hpp"
-#include "al/util/scene/al_SynthSequencer.hpp"
-#include "al/util/scene/al_SynthRecorder.hpp"
-#include "al/util/scene/al_DynamicScene.hpp"
-#include "al/util/imgui/al_Imgui.hpp"
+#include "al/io/al_ControlNav.hpp"
+#include "al/ui/al_ParameterGUI.hpp"
+#include "al/ui/al_ParameterMIDI.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_ParameterBundle.hpp"
+#include "al/ui/al_Preset.hpp"
+#include "al/ui/al_PresetSequencer.hpp"
+#include "al/scene/al_SynthSequencer.hpp"
+#include "al/scene/al_SynthRecorder.hpp"
+#include "al/scene/al_DynamicScene.hpp"
+#include "al/io/al_Imgui.hpp"
 
 
 namespace al

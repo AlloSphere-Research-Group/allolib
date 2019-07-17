@@ -67,8 +67,6 @@ public:
     static void initialize() { imguiInit(); }
     static void cleanup() { imguiShutdown(); }
 
-    static void draw() { imguiDraw(); }
-
     static inline void draw(ParameterMeta *param) {drawParameterMeta(param);}
 
     // These functions require no state other than the parameter itself

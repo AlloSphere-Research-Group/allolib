@@ -1,6 +1,7 @@
-#include "al/util/ui/al_ControlGUI.hpp"
+#include "al/graphics/al_Graphics.hpp"
+#include "al/ui/al_ControlGUI.hpp"
 
-#include "al/util/ui/al_SequenceRecorder.hpp"
+#include "al/ui/al_SequenceRecorder.hpp"
 
 using namespace al;
 using namespace std;
@@ -120,21 +121,28 @@ void ControlGUI::init(int x, int y, bool manageImgui) {
     }
 
     if (mManageIMGUI) {
-        initIMGUI();
+        imguiInit();
     }
 }
 
 void ControlGUI::begin() {
-    beginIMGUI_minimal(true, mName.c_str(), mX, mY, mGUIBackgroundAlpha);
+  imguiBeginFrame();
+  ImGui::SetNextWindowPos(ImVec2(mX, mY));
+//  ImGui::SetNextWindowSize(ImVec2(width(), height()));
+  ImGui::SetNextWindowBgAlpha(mGUIBackgroundAlpha);
+  ImGui::Begin(mName.c_str(), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize );
 }
 
 void ControlGUI::end() {
-    endIMGUI_minimal(true);
+  ImGui::End();
+  if (mManageIMGUI) {
+    imguiDraw();
+  }
 }
 
 void ControlGUI::cleanup() {
     if (mManageIMGUI) {
-        shutdownIMGUI();
+        imguiShutdown();
     }
     for (size_t i = 0; i < 32; i++) {
         free(mSequencerItems[i]);

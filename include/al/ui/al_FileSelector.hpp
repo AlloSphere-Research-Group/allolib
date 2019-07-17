@@ -45,7 +45,7 @@
 #include <functional>
 
 
-#include "al/core/io/al_File.hpp"
+#include "al/io/al_File.hpp"
 
 namespace al {
 

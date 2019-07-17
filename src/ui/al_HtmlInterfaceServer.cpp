@@ -40,8 +40,8 @@
 	2016 Andres Cabrera andres@mat.ucsb.edu
 */
 
-#include "al/util/ui/al_HtmlInterfaceServer.hpp"
-#include "al/core/io/al_File.hpp"
+#include "al/ui/al_HtmlInterfaceServer.hpp"
+#include "al/io/al_File.hpp"
 #include <string>
 #include <algorithm>
 

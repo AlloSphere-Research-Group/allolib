@@ -5,8 +5,8 @@
 #include <sstream>
 #include <cassert>
 
-#include "al/util/ui/al_SequenceRecorder.hpp"
-#include "al/core/io/al_File.hpp"
+#include "al/ui/al_SequenceRecorder.hpp"
+#include "al/io/al_File.hpp"
 
 using namespace al;
 

@@ -7,7 +7,7 @@
 #include <climits>
 #include <typeinfo> // For class name instrospection
 
-#include "al/util/scene/al_SynthSequencer.hpp"
+#include "al/scene/al_SynthSequencer.hpp"
 
 using namespace al;
 

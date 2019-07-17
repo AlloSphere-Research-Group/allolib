@@ -4,10 +4,10 @@
 #include <fstream>
 #include <sstream>
 
-#include "al/util/ui/al_PresetSequencer.hpp"
-#include "al/util/ui/al_SequenceRecorder.hpp"
-#include "al/util/ui/al_Composition.hpp"
-#include "al/core/io/al_File.hpp"
+#include "al/ui/al_PresetSequencer.hpp"
+#include "al/ui/al_SequenceRecorder.hpp"
+#include "al/ui/al_Composition.hpp"
+#include "al/io/al_File.hpp"
 
 using namespace al;
 

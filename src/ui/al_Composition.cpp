@@ -2,9 +2,9 @@
 #include <sstream>
 #include <iostream>
 
-#include "al/util/ui/al_Composition.hpp"
-#include "al/core/system/al_Time.hpp"
-#include "al/core/io/al_File.hpp"
+#include "al/ui/al_Composition.hpp"
+#include "al/system/al_Time.hpp"
+#include "al/io/al_File.hpp"
 
 using namespace al;
 

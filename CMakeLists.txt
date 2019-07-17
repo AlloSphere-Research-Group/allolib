@@ -86,6 +86,12 @@ set(headers
   include/al/math/al_StdRandom.hpp
   include/al/math/al_Vec.hpp
   include/al/protocol/al_OSC.hpp
+  include/al/scene/al_DistributedScene.hpp
+  include/al/scene/al_PolySynth.hpp
+  include/al/scene/al_SynthRecorder.hpp
+  include/al/scene/al_DynamicScene.hpp
+  include/al/scene/al_SequencerMIDI.hpp
+  include/al/scene/al_SynthSequencer.hpp
   include/al/sound/al_Ambisonics.hpp
   include/al/sound/al_AudioScene.hpp
   include/al/sound/al_Biquad.hpp
@@ -104,6 +110,26 @@ set(headers
   include/al/system/al_Thread.hpp
   include/al/system/al_Time.hpp
   include/al/types/al_Color.hpp
+  include/al/ui/al_BoundingBox.hpp
+  include/al/ui/al_Parameter.hpp
+  include/al/ui/al_PickableRotateHandle.hpp
+  include/al/ui/al_Composition.hpp
+  include/al/ui/al_ParameterBundle.hpp
+  include/al/ui/al_Preset.hpp
+  include/al/ui/al_ControlGUI.hpp
+  include/al/ui/al_ParameterGUI.hpp
+  include/al/ui/al_PresetMapper.hpp
+  include/al/ui/al_Dialog.hpp
+  include/al/ui/al_ParameterMIDI.hpp
+  include/al/ui/al_PresetMIDI.hpp
+  include/al/ui/al_FileSelector.hpp
+  include/al/ui/al_ParameterServer.hpp
+  include/al/ui/al_PresetSequencer.hpp
+  include/al/ui/al_Gnomon.hpp
+  include/al/ui/al_Pickable.hpp
+  include/al/ui/al_SequenceRecorder.hpp
+  include/al/ui/al_HtmlInterfaceServer.hpp
+  include/al/ui/al_PickableManager.hpp
 )
 
 set(sources
@@ -143,6 +169,10 @@ set(sources
   src/io/al_WindowGLFW.cpp
   src/math/al_StdRandom.cpp
   src/protocol/al_OSC.cpp
+  src/scene/al_DynamicScene.cpp
+  src/scene/al_SynthRecorder.cpp
+  src/scene/al_PolySynth.cpp
+  src/scene/al_SynthSequencer.cpp
   src/sound/al_Ambisonics.cpp
   src/sound/al_AudioScene.cpp
   src/sound/al_Biquad.cpp
@@ -157,6 +187,20 @@ set(sources
   src/system/al_ThreadNative.cpp
   src/system/al_Time.cpp
   src/types/al_Color.cpp
+  src/ui/al_Composition.cpp
+  src/ui/al_ParameterBundle.cpp
+  src/ui/al_PresetMIDI.cpp
+  src/ui/al_ControlGUI.cpp
+  src/ui/al_ParameterGUI.cpp
+  src/ui/al_PresetSequencer.cpp
+  src/ui/al_FileSelector.cpp
+  src/ui/al_ParameterServer.cpp
+  src/ui/al_SequenceRecorder.cpp
+  src/ui/al_HtmlInterfaceServer.cpp
+  src/ui/al_Preset.cpp
+  src/ui/al_Parameter.cpp
+  src/ui/al_PresetMapper.cpp
+
 )
 
 add_library(al STATIC ${headers} ${sources})
