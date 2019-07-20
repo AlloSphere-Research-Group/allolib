@@ -92,7 +92,7 @@ public:
   virtual void print(std::ostream& stream = std::cout){}
 
   /// Get number of speakers
-  int numSpeakers() const { return mSpeakers.size(); }
+  int numSpeakers() const { return int(mSpeakers.size()); }
 
   /// Set number of frames
   virtual void numFrames(unsigned int v){ mNumFrames = v;}
