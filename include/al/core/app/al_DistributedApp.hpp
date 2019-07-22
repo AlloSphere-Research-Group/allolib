@@ -42,6 +42,17 @@ struct DefaultState {
 	Pose pose;
 };
 
+class AudioControl {
+public:
+    void registerAudioIO(AudioIO &io) {
+        gain.registerChangeCallback([&io](float value) {
+            io.gain(value);
+        });
+    }
+
+    Parameter gain{"gain", "sound", 1.0, "alloapp", 0.0, 2.0};
+};
+
 template<class TSharedState = DefaultState>
 class DistributedApp: public OmniRenderer,
            public AudioApp,
@@ -51,6 +62,7 @@ class DistributedApp: public OmniRenderer,
   Nav mNav; // is a Pose itself and also handles manipulation of pose
   Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
   NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse
+  AudioControl mAudioControl;
 
 public:
 
@@ -235,6 +247,8 @@ public:
         }
 
       }
+      mAudioControl.registerAudioIO(audioIO());
+      *mParameterServer << mAudioControl.gain;
   }
 
   std::string name() {
