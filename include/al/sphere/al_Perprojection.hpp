@@ -5,14 +5,14 @@
 #include <iostream>
 #include <vector>
 
-#include "al/core/math/al_Matrix4.hpp"
-#include "al/core/graphics/al_Viewpoint.hpp"
-#include "al/core/graphics/al_FBO.hpp"
-#include "al/core/graphics/al_Shader.hpp"
-#include "al/core/graphics/al_Texture.hpp"
-#include "al/core/graphics/al_VAOMesh.hpp"
-#include "al/core/graphics/al_Graphics.hpp"
-#include "al/core/graphics/al_Shapes.hpp"
+#include "al/math/al_Matrix4.hpp"
+#include "al/graphics/al_Viewpoint.hpp"
+#include "al/graphics/al_FBO.hpp"
+#include "al/graphics/al_Shader.hpp"
+#include "al/graphics/al_Texture.hpp"
+#include "al/graphics/al_VAOMesh.hpp"
+#include "al/graphics/al_Graphics.hpp"
+#include "al/graphics/al_Shapes.hpp"
 
 
 #ifdef AL_WINDOWS

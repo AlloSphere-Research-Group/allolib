@@ -42,10 +42,10 @@
 	Graham Wakefield, 2010, grrrwaaa@gmail.com
 */
 
-#include "al/core/graphics/al_Texture.hpp"
-#include "al/core/graphics/al_Mesh.hpp"
-#include "al/core/graphics/al_Graphics.hpp"
-#include "al/core/system/al_Printing.hpp"
+#include "al/graphics/al_Texture.hpp"
+#include "al/graphics/al_Mesh.hpp"
+#include "al/graphics/al_Graphics.hpp"
+#include "al/system/al_Printing.hpp"
 #include <string>
 #include <stdarg.h>
 #include <cstdio>

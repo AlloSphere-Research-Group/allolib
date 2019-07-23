@@ -7,18 +7,18 @@
 
 #include "al/app/al_WindowApp.hpp"
 #include "al/app/al_AudioApp.hpp"
-#include "al/util/al_FlowAppParameters.hpp"
-#include "al/util/ui/al_Parameter.hpp"
+//#include "al/util/al_FlowAppParameters.hpp"
+#include "al/ui/al_Parameter.hpp"
 #include "al/protocol/al_OSC.hpp"
-#include "al/graphics/al_GLFW.hpp"
+//#include "al/al_GLFW.hpp"
 #include "al/io/al_Window.hpp"
 #include "al/graphics/al_Graphics.hpp"
 #include "al/io/al_ControlNav.hpp"
 #include "al/sphere/al_OmniRenderer.hpp"
-#include "al/util/al_Toml.hpp"
-#include "al/util/al_Socket.hpp"
-#include "al/util/scene/al_DynamicScene.hpp"
-#include "al/util/scene/al_DistributedScene.hpp"
+#include "al/app/al_Toml.hpp"
+#include "al/al_Socket.hpp"
+#include "al/scene/al_DynamicScene.hpp"
+#include "al/scene/al_DistributedScene.hpp"
 
 #include <iostream>
 #include <map>
@@ -45,7 +45,7 @@ struct DefaultState {
 template<class TSharedState = DefaultState>
 class DistributedApp: public OmniRenderer,
            public AudioApp,
-           public FlowAppParameters,
+//           public FlowAppParameters,
            public osc::PacketHandler
 {
   Nav mNav; // is a Pose itself and also handles manipulation of pose

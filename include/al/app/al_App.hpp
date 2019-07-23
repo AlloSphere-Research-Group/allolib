@@ -8,7 +8,7 @@
 #include "al/app/al_AudioApp.hpp"
 #include "al/protocol/al_OSC.hpp"
 #include "al/io/al_ControlNav.hpp"
- #include "al/ui/al_ParameterServer.hpp"
+#include "al/ui/al_ParameterServer.hpp"
 // #include "al/util/al_FlowAppParameters.hpp"
 
 #include <iostream>
@@ -17,9 +17,9 @@
 namespace al {
 
 class App: public WindowApp,
-           public AudioApp,
-           public osc::PacketHandler
-           // public FlowAppParameters,
+    public AudioApp,
+    public osc::PacketHandler
+    // public FlowAppParameters,
 {
 public:
 
@@ -121,16 +121,16 @@ inline void App::preOnCreate() {
 }
 
 inline void App::preOnAnimate(double dt) {
-    mNav.smooth(std::pow(0.0001, dt));
-    mNav.step(dt * fps());
+  mNav.smooth(std::pow(0.0001, dt));
+  mNav.step(dt * fps());
 }
 
 inline void App::preOnDraw() {
-    mGraphics.framebuffer(FBO::DEFAULT);
-    mGraphics.viewport(0, 0, fbWidth(), fbHeight());
-    mGraphics.resetMatrixStack();
-    mGraphics.camera(mView);
-    mGraphics.color(1, 1, 1);
+  mGraphics.framebuffer(FBO::DEFAULT);
+  mGraphics.viewport(0, 0, fbWidth(), fbHeight());
+  mGraphics.resetMatrixStack();
+  mGraphics.camera(mView);
+  mGraphics.color(1, 1, 1);
 }
 
 inline void App::postOnDraw() {

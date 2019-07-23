@@ -3,7 +3,7 @@
 #define __AL_ROTATE_HANDLE_HPP__
 
 #include <cfloat>
-#include <al/util/ui/al_Pickable.hpp>
+#include <al/ui/al_Pickable.hpp>
 
 namespace al {
 

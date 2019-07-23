@@ -1,6 +1,11 @@
 
-#ifndef __BOUNDINGBOX_HPP__
-#define __BOUNDINGBOX_HPP__
+#ifndef _AL_BOUNDINGBOX_HPP__
+#define _AL_BOUNDINGBOX_HPP__
+
+#include "al/math/al_Vec.hpp"
+#include "al/graphics/al_Graphics.hpp"
+#include "al/graphics/al_Mesh.hpp"
+#include "al/graphics/al_Shapes.hpp"
 
 namespace al {
 
@@ -134,4 +139,4 @@ struct BoundingBox {
 
 } //::al
 
-#endif
+#endif //_AL_BOUNDINGBOX_HPP__

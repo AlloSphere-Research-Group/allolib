@@ -46,9 +46,9 @@
 
 #include "imgui.h"
 
-#include "al/core/io/al_Window.hpp"
-#include "al/core/graphics/al_Graphics.hpp"
-#include "al/util/imgui/al_Imgui.hpp"
+#include "al/io/al_Window.hpp"
+#include "al/graphics/al_Graphics.hpp"
+#include "al/io/al_Imgui.hpp"
 
 
 namespace al {
@@ -94,7 +94,7 @@ public:
         Window::dimensions(200, 100);
         Window::title(mTitle);
         Window::create(is_verbose);
-        initIMGUI();
+        imguiInit();
         mDone = false;
         while (!mDone) {
             onDraw(mDialogGraphics);
@@ -103,15 +103,15 @@ public:
             // display, even if this dialog is modal.
         }
         std::cout << "done" << std::endl;
-        shutdownIMGUI();
+        imguiShutdown();
         Window::close();
-        initIMGUI();
+        imguiInit();
         return mReturnValue;
     }
 
 protected:
     void onDraw(Graphics &g) {
-        beginIMGUI();
+        imguiBeginFrame();
 //        ImGui::SetNextWindowBgAlpha(alpha);
 
         ImGuiWindowFlags window_flags = 0;
@@ -159,8 +159,9 @@ protected:
             ImGui::SameLine();
         }
 
+        imguiEndFrame();
         ImGui::End();
-        endIMGUI();
+
     }
 
     bool keyDown(Keyboard const &k) final {

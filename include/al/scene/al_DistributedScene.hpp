@@ -1,9 +1,9 @@
 #ifndef AL_DISTRIBUTEDSCENE_HPP
 #define AL_DISTRIBUTEDSCENE_HPP
 
-#include "al/core/protocol/al_OSC.hpp"
-#include "al/util/scene/al_DynamicScene.hpp"
-#include "al/util/ui/al_ParameterServer.hpp"
+#include "al/protocol/al_OSC.hpp"
+#include "al/scene/al_DynamicScene.hpp"
+#include "al/ui/al_ParameterServer.hpp"
 
 
 namespace al

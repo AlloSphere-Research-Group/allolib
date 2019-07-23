@@ -4,11 +4,11 @@
 
 #include <vector>
 
-#include "al/util/al_Ray.hpp"
-#include "al/util/ui/al_BoundingBox.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_ParameterBundle.hpp"
-#include "al/core/graphics/al_Graphics.hpp"
+#include "al/math/al_Ray.hpp"
+#include "al/ui/al_BoundingBox.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_ParameterBundle.hpp"
+#include "al/graphics/al_Graphics.hpp"
 
 namespace al {
 

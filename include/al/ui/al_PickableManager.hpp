@@ -5,9 +5,9 @@
 #include <vector>
 // #include <map>
 
-#include "al/core/graphics/al_Graphics.hpp"
-#include "al/util/al_Ray.hpp"
-#include "al/util/ui/al_Pickable.hpp"
+#include "al/graphics/al_Graphics.hpp"
+#include "al/math/al_Ray.hpp"
+#include "al/ui/al_Pickable.hpp"
 
 namespace al {
 

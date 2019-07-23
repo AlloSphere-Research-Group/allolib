@@ -935,4 +935,4 @@ void ParameterWrapper<ParameterType>::registerChangeCallback(typename ParameterW
 #endif // AL_PARAMETER_H
 
 // For backward compatibility, as ParameterServer was included in this file. Should be removed at some point.
-//#include "al/util/ui/al_ParameterServer.hpp"
+//#include "al/ui/al_ParameterServer.hpp"

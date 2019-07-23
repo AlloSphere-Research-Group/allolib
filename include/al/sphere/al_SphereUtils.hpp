@@ -12,8 +12,8 @@
     #include <unistd.h>
 #endif
 
-#include "al/core/graphics/al_GLFW.hpp"
-#include "al/core/math/al_Constants.hpp"
+#include "al/graphics/al_GLFW.hpp"
+#include "al/math/al_Constants.hpp"
 
 std::string al_get_hostname()
 {
