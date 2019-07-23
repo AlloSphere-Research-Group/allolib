@@ -8,7 +8,7 @@
 #include "al/app/al_AudioApp.hpp"
 #include "al/protocol/al_OSC.hpp"
 #include "al/io/al_ControlNav.hpp"
-// #include "al/util/ui/al_ParameterServer.hpp"
+ #include "al/ui/al_ParameterServer.hpp"
 // #include "al/util/al_FlowAppParameters.hpp"
 
 #include <iostream>
@@ -39,8 +39,8 @@ public:
   Lens& lens() { return mView.lens(); }
   Lens const& lens() const { return mView.lens(); }
 
-  // ParameterServer& parameterServer() override { return mParameterServer; }
-  // ParameterServer const& parameterServer() const { return mParameterServer; }
+  ParameterServer& parameterServer() { return mParameterServer; }
+  ParameterServer const& parameterServer() const { return mParameterServer; }
 
   Graphics& graphics() { return mGraphics; }
 
@@ -78,7 +78,7 @@ private:
   Nav mNav; // is a Pose itself and also handles manipulation of pose
   Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
   NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse
-  // ParameterServer mParameterServer {"0.0.0.0", 9010};
+  ParameterServer mParameterServer {"0.0.0.0", 9010};
 };
 
 
