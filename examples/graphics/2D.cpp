@@ -10,7 +10,8 @@ Lance Putnam, Feb. 2012
 Keehong Youn, 2017
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+
 using namespace al;
 
 struct MyApp : public App {

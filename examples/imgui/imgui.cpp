@@ -1,8 +1,8 @@
 // based on dear imgui's example `examples/opengl3_example/main.cpp`
 // (https://github.com/ocornut/imgui.git)
 
-#include "al/core.hpp"
-#include "al/util/imgui/al_Imgui.hpp"
+#include "al/app/al_App.hpp"
+#include "al/io/al_Imgui.hpp"
 
 using namespace al;
 

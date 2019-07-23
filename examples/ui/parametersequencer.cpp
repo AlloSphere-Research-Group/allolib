@@ -1,9 +1,9 @@
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 
 #include "al/util/ui/al_PresetSequencer.hpp"
 #include "al/util/ui/al_SequenceRecorder.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_ControlGUI.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_ControlGUI.hpp"
 
 using namespace al;
 using namespace std;

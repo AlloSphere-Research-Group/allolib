@@ -16,7 +16,9 @@ Author:
 Lance Putnam, 12/8/2010 (putnam.lance at gmail dot com)
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+#include "al/math/al_Random.hpp"
+#include "al/graphics/al_Shapes.hpp"
 
 using namespace al;
 

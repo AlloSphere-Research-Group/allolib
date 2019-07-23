@@ -8,7 +8,8 @@ Author:
 Tim Wood, Nov. 2015
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
 #include <iostream>
 
 using namespace al;

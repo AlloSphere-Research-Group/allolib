@@ -4,7 +4,7 @@ Allocore Example: searchpath
 Description:
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include <iostream>
 
 using namespace al;

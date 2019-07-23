@@ -15,7 +15,10 @@ Author: Karl Yerkes, November 2018
 
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
+#include "al/math/al_Random.hpp"
+
 using namespace al;
 
 #define N (1000)

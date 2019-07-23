@@ -27,7 +27,7 @@ MinGW	\\\\.\\COM3
 #include <iostream>
 #include <cstdio>
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al_ext/serial/al_Serial.hpp"
 
 using namespace std;

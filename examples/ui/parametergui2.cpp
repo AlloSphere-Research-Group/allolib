@@ -34,11 +34,11 @@ public:
     void onCreate() override
     {
         // We must initialize ImGUI ourselves:
-        ParameterGUI::initialize();
+        imguiInit();
     }
 
     void onExit() override {
-        ParameterGUI::cleanup();
+        imguiShutdown();
     }
 
     virtual void onDraw(Graphics &g) override {
@@ -53,7 +53,6 @@ public:
         // You are responsible for wrapping all your ImGUI code
         // between beginIMGUI() and endIMGUI()
         // Don't forget this or this will crash or not work!
-        ParameterGUI::beginDraw();
 
         // Each begin()/end() pair creates a separate "window"
         ParameterGUI::beginPanel("Position Control");
@@ -68,8 +67,8 @@ public:
 
         ParameterGUI::drawParameterMeta(&color);
         ParameterGUI::endPanel();
-        ParameterGUI::endDraw();
 
+        imguiDraw();
     }
 
 private:

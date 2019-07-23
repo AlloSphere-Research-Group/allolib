@@ -11,7 +11,8 @@ Requirements:
 stereographic rendering
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
 #include "al/sound/al_Ambisonics.hpp"
 #include "al/sound/al_AudioScene.hpp"
 

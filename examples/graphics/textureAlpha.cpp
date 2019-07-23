@@ -13,7 +13,7 @@ For examples of more OpenGL blending modes, see
 Author:
 Lance Putnam, Feb. 2015
 */
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 using namespace al;
 using namespace std;
 

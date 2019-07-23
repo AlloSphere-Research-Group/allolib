@@ -11,7 +11,7 @@
 #include "Gamma/Oscillator.h"
 #include "Gamma/Envelope.h"
 
-#include "al/util/scene/al_DynamicScene.hpp"
+#include "al/scene/al_DynamicScene.hpp"
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 

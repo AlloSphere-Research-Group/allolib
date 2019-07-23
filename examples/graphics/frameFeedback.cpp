@@ -13,7 +13,7 @@ Lance Putnam, Nov. 2014
 Keehong Youn, 2017
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include <iostream>
 
 using namespace al;

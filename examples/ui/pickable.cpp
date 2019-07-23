@@ -13,7 +13,7 @@ Tim Wood, May 2019
 
 #include "al/graphics/al_Shapes.hpp"
 
-#include "al/ui/al_Ray.hpp"
+#include "al/math/al_Ray.hpp"
 #include "al/ui/al_BoundingBox.hpp"
 #include "al/ui/al_Pickable.hpp"
 

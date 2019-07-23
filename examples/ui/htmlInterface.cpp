@@ -1,8 +1,8 @@
 
 
-#include "al/util/ui/al_HtmlInterfaceServer.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_ControlGUI.hpp"
+#include "al/ui/al_HtmlInterfaceServer.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_ControlGUI.hpp"
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 

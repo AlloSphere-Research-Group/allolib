@@ -9,9 +9,10 @@ Author:
 Lance Putnam, 9/2011
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al/types/al_Buffer.hpp"
 #include "al/math/al_Functions.hpp"
+#include "al/math/al_Random.hpp"
 
 using namespace al;
 

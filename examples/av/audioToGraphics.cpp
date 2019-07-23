@@ -11,7 +11,7 @@ Author:
 Lance Putnam, 10/2012, putnam.lance@gmail.com
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al/types/al_Buffer.hpp"
 
 using namespace al;

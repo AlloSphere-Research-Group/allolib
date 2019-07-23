@@ -2,9 +2,9 @@
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-#include "al/util/ui/al_ControlGUI.hpp"
-#include "al/util/ui/al_ParameterMIDI.hpp"
-#include "al/util/ui/al_HtmlInterfaceServer.hpp"
+#include "al/ui/al_ControlGUI.hpp"
+#include "al/ui/al_ParameterMIDI.hpp"
+#include "al/ui/al_HtmlInterfaceServer.hpp"
 #include "al/math/al_Random.hpp"
 
 using namespace al;
@@ -24,7 +24,7 @@ public:
     }
 
     virtual void onCreate() override {
-        ParameterGUI::initialize();
+        imguiInit();
     }
 
     virtual void onDraw(Graphics &g) override
@@ -37,12 +37,14 @@ public:
             g.draw(mMesh);
             g.popMatrix();
         }
-        ParameterGUI::beginDraw();
+        imguiBeginFrame();
+        ImGui::Begin("test");
         ParameterGUI::beginPanel("IO");
         ParameterGUI::drawAudioIO(&audioIO());
         ParameterGUI::drawParameterMIDI(&parameterMidi);
         ParameterGUI::endPanel();
-        ParameterGUI::endDraw();
+        ImGui::End();
+        imguiDraw();
     }
     virtual void onSound(AudioIOData &io) {
         while(io()) {

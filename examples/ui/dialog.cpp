@@ -1,7 +1,7 @@
 
 #include "al/app/al_App.hpp"
-#include "al/util/ui/al_Dialog.hpp"
-#include "al/util/al_FontModule.hpp"
+#include "al/ui/al_Dialog.hpp"
+#include "al/graphics/al_Font.hpp"
 
 using namespace al;
 using namespace std;
@@ -9,7 +9,8 @@ using namespace std;
 class MyApp : public App {
 
     void onCreate() override {
-        font.loadDefault(32); 
+      // FIXME load some default
+        font.load("arial.ttf");
     }
 
     void onDraw(Graphics &g) override {
@@ -18,7 +19,7 @@ class MyApp : public App {
         g.blendAdd();
         g.blending(true);
 
-        font.render(g, "Press space bar to show dialog", 0.1);
+        font.render(g, "Press space bar to show dialog");
     }
 
     void onKeyDown(const Keyboard &k) override {
@@ -37,7 +38,7 @@ class MyApp : public App {
 
 private:
     float mBrightness {0.5};
-    FontModule font;
+    Font font;
 };
 
 int main(int argc, char *argv[])

@@ -9,8 +9,8 @@ Windows	COM6
 #include <iostream>
 #include <cstdio>
 
-#include "al/core.hpp"
-#include "al/core/graphics/al_Shapes.hpp"
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
 #include "al_ext/serial/al_Arduino.hpp"
 
 using namespace al;

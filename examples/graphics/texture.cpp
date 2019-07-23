@@ -8,7 +8,7 @@ Author:
 Lance Putnam, Nov. 2013
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al/math/al_Functions.hpp"
 #include <vector>
 #include <iostream>

@@ -13,7 +13,7 @@ Lance Putnam, Oct. 2014
 
 #include <iostream>
 #include <string>
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 using namespace al;
 
 // App has osc::PacketHandler as base class

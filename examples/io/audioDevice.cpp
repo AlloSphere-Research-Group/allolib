@@ -10,7 +10,7 @@ Lance Putnam, 4/25/2011
 */
 
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 using namespace al;
 
 // A user defined class that can be accessed from the audio callback

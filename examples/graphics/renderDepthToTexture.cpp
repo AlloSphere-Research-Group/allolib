@@ -8,7 +8,9 @@ Author:
 Lance Putnam, 2015
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+#include "al/math/al_Random.hpp"
+#include "al/graphics/al_Shapes.hpp"
 #include <iostream>
 
 using namespace al;

@@ -1,4 +1,4 @@
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 
 #include <iostream>
 #include <string>

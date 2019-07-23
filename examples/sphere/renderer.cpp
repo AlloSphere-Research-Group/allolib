@@ -1,5 +1,5 @@
 #ifdef AL_USE_CUTTLEBONE
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al/sphere/al_OmniRenderer.hpp"
 #include "Cuttlebone/Cuttlebone.hpp"
 

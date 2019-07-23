@@ -11,7 +11,7 @@ Lance Putnam, 4/25/2011
 
 #include <assert.h>
 #include <stdio.h>
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 using namespace al;
 
 

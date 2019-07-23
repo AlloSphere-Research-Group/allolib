@@ -10,7 +10,7 @@
   Adapted from Lance Putnam's 2D Drawing example code
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al/math/al_Random.hpp"
 
 using namespace al;

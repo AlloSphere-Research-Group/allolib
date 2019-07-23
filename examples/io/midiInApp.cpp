@@ -10,7 +10,7 @@ Lance Putnam, 9/2013
 */
 
 #include <stdio.h>
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al/io/al_MIDI.hpp"
 using namespace al;
 

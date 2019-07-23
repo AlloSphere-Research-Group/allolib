@@ -44,10 +44,11 @@ public:
         g.draw(mMesh);
         g.popMatrix();
 
-        beginIMGUI();
+        imguiBeginFrame();
         mPositionGUI.draw(g);
         mColorGUI.draw(g);
-        endIMGUI();
+        imguiEndFrame();
+        imguiDraw();
     }
 
 private:

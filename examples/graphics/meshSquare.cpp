@@ -8,7 +8,7 @@ Author:
 Lance Putnam, March 2015
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 using namespace al;
 
 struct MyApp : public App {

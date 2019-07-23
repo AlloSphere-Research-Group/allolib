@@ -10,7 +10,7 @@ Tim Wood, April 2016
 */
 
 #include "al/app/al_App.hpp"
-#include "al/ui/al_Ray.hpp"
+#include "al/math/al_Ray.hpp"
 #include "al/ui/al_Pickable.hpp"
 #include "al/ui/al_PickableRotateHandle.hpp"
 

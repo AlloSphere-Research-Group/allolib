@@ -2,9 +2,9 @@
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_ParameterBundle.hpp"
-#include "al/util/ui/al_ControlGUI.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_ParameterBundle.hpp"
+#include "al/ui/al_ControlGUI.hpp"
 
 using namespace al;
 

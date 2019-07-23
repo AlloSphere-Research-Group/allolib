@@ -3,7 +3,7 @@
 //
 //
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al/app/al_DistributedApp.hpp"
 
 using namespace al;

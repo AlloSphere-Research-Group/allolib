@@ -1,5 +1,5 @@
 #include "al/util/al_FontModule.hpp"
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 
 // This file needs an asset stored in git lfs. Make sure you have git lfs.
 

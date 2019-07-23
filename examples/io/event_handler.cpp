@@ -1,4 +1,6 @@
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+#include "al/math/al_Random.hpp"
+#include "al/graphics/al_Shapes.hpp"
 #include <iostream>
 
 // how to use WindowEventHandler interface to implement interaction behaviour
@@ -31,8 +33,8 @@ struct ObjectTransformHandler : WindowEventHandler
     Matrix4f rot_mat;
     quat.toMatrix(rot_mat.elems());
     return Matrix4f::translation(pos)
-         * rot_mat
-         * Matrix4f::scaling(scale);
+        * rot_mat
+        * Matrix4f::scaling(scale);
   }
 
   bool keyDown(const Keyboard& k) override {
@@ -76,7 +78,7 @@ struct MyApp : App
   ObjectTransformHandler object_transform;
   Mesh m;
 
-	void onCreate() override {
+  void onCreate() override {
     // remove App's default camera control
     remove(navControl());
     // use object control for model matrix
@@ -86,7 +88,7 @@ struct MyApp : App
     for (int i = 0; i < m.vertices().size(); i += 1) {
       m.color(rnd::uniform(), rnd::uniform(), rnd::uniform());
     }
-	}
+  }
 
   void onAnimate(double dt) override {
     object_transform.step();
@@ -108,7 +110,7 @@ struct MyApp : App
 
     g.clear(0);
     g.polygonMode(Graphics::FILL);
-    g.depthTesting(true);    
+    g.depthTesting(true);
     g.meshColor();
     
     // then individual transform can be done
@@ -137,12 +139,12 @@ struct MyApp : App
     g.draw(m);
     g.popMatrix();
 
-	}
+  }
 
 };
 
 int main() {
-	MyApp app;
-	app.start();
+  MyApp app;
+  app.start();
 }
 

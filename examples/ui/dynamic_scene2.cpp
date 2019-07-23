@@ -2,7 +2,7 @@
 
 #include "Gamma/Oscillator.h"
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al/app/al_DistributedApp.hpp"
 
 // This example shows how to have "always on" voices in a DynamicScene

@@ -1,6 +1,8 @@
-#include "al/core.hpp"
 #include <string>
 #include <sstream>
+
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
 
 using namespace al;
 using namespace std;

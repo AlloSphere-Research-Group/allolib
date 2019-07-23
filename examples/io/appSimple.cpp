@@ -49,7 +49,8 @@ Author:
 Lance Putnam, June 2011
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
 #include <iostream>
 
 using namespace al;

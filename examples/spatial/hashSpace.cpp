@@ -1,4 +1,4 @@
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al/math/al_Random.hpp"
 #include "al/spatial/al_HashSpace.hpp"
 #include "al/math/al_Functions.hpp"
@@ -15,10 +15,10 @@ Graham Wakefield 2012
 */
 
 
-// #include "al/core.hpp"
-#include "al/core/math/al_Random.hpp"
-#include "al/core/spatial/al_HashSpace.hpp"
-#include "al/core/math/al_Functions.hpp"
+// #include "al/app/al_App.hpp"
+#include "al/math/al_Random.hpp"
+#include "al/spatial/al_HashSpace.hpp"
+#include "al/math/al_Functions.hpp"
 
 #include <stdio.h>
 #include <map>

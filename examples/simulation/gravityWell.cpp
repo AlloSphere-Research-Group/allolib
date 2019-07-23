@@ -11,8 +11,11 @@ Author:
 Lance Putnam, Nov. 2015
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "al/types/al_Conversion.hpp" // clone
+
+#include "al/math/al_Random.hpp"
+#include "al/graphics/al_Shapes.hpp"
 #include <algorithm> // max
 #include <cmath>
 

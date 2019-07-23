@@ -9,7 +9,9 @@ Author(s):
 Lance Putnam, 4/25/2011
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+#include "al/math/al_Random.hpp"
+
 using namespace al;
 
 struct Particle{

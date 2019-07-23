@@ -2,9 +2,9 @@
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_ParameterBundle.hpp"
-#include "al/util/ui/al_ControlGUI.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_ParameterBundle.hpp"
+#include "al/ui/al_ControlGUI.hpp"
 
 using namespace al;
 
@@ -30,7 +30,7 @@ public:
     void draw(Graphics &g) {
         g.pushMatrix();
         // Rotate and color according to bundle index to help differentiate
-        g.color(0.4 + 0.2* bundle.bundleIndex());
+        g.color(0.4f + 0.2f* bundle.bundleIndex());
         g.translate(X, Y, -8.0);
         g.rotate(30 + 15* bundle.bundleIndex(), 1.0, 0.0, 0.0);
         g.draw(mesh);

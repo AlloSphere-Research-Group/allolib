@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_ParameterServer.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_ParameterServer.hpp"
 
 using namespace al;
 using namespace std;

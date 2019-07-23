@@ -17,7 +17,7 @@
 
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 // TODO: figure out how to handle include dirs for modules
 #include "module/img/loadImage.hpp"
 
