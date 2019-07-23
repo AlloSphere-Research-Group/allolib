@@ -1,6 +1,11 @@
-#include "al/core.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_Preset.hpp"
+
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
+
+#include "al/math/al_Random.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_Preset.hpp"
+
 
 using namespace al;
 using namespace std;

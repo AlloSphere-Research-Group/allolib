@@ -1,9 +1,9 @@
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-#include "al/util/ui/al_ControlGUI.hpp"
-#include "al/util/ui/al_ParameterMIDI.hpp"
-#include "al/util/ui/al_HtmlInterfaceServer.hpp"
+#include "al/ui/al_ControlGUI.hpp"
+#include "al/ui/al_ParameterMIDI.hpp"
+#include "al/ui/al_HtmlInterfaceServer.hpp"
 
 using namespace al;
 
@@ -24,7 +24,7 @@ public:
         addSphere(mMesh, 0.1);
         mMesh.primitive(Mesh::LINES);
 
-        initIMGUI(); // We need to call initIMGUI manually as we want two control windows
+        imguiInit(); // We need to call initIMGUI manually as we want two control windows
         mPositionGUI.init(5, 5, false);
         mPositionGUI << x << y << z;
         mColorGUI.init(300, 5, false);

@@ -1,9 +1,11 @@
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 
-#include "al/util/ui/al_PresetSequencer.hpp"
-#include "al/util/ui/al_Parameter.hpp"
-#include "al/util/ui/al_Preset.hpp"
-#include "al/util/ui/al_ControlGUI.hpp"
+#include "al/graphics/al_Shapes.hpp"
+
+#include "al/ui/al_PresetSequencer.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_Preset.hpp"
+#include "al/ui/al_ControlGUI.hpp"
 
 #include <fstream>
 
@@ -89,7 +91,7 @@ preset2:1.5:2.0
 
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     writeExamplePresets();
     MyApp().start();

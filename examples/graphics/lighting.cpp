@@ -13,7 +13,10 @@ Author:
 Lance Putnam, Dec. 2010
 */
 
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Graphics.hpp"
+#include "al/graphics/al_Shapes.hpp"
+
 using namespace al;
 
 struct MyApp : public App {

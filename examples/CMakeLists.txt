@@ -12,20 +12,20 @@ ENDMACRO()
 
 # Ignore examples that wont work in CI
 set(EXAMPLES_TO_IGNORE
-    examples/user_flags/main.cpp
-    examples/openvr/openvr.cpp
-    examples/openvr/openvr-app.cpp
-    examples/one-line-of-c/main.cpp
-    examples/sound/multiFilePlayer.cpp 
-    examples/sound/sound_file.cpp 
-    examples/sound/ambiPlayer.cpp
-    examples/graphics/textureImage.cpp
-    examples/graphics/font.cpp
-    examples/graphics/asset.cpp
-    examples/user_flags/main.cpp
-    examples/openvr/openvr.cpp
-    examples/openvr/openvr-app.cpp
-    examples/one-line-of-c/main.cpp
+    user_flags/main.cpp
+    openvr/openvr.cpp
+    openvr/openvr-app.cpp
+    one-line-of-c/main.cpp
+    sound/multiFilePlayer.cpp
+    sound/sound_file.cpp
+    sound/ambiPlayer.cpp
+    graphics/textureImage.cpp
+    graphics/font.cpp
+    graphics/asset.cpp
+    user_flags/main.cpp
+    openvr/openvr.cpp
+    openvr/openvr-app.cpp
+    one-line-of-c/main.cpp
 )
 
 #if(AL_WINDOWS EQUAL 1 AND APPVEYOR_BUILD EQUAL 1) 
@@ -83,6 +83,7 @@ foreach(dir ${EXAMPLE_DIRS})
 
   foreach(example_src ${EXAMPLE_FILES})
     list (FIND EXAMPLES_TO_IGNORE "${example_src}" _index)
+    message("${example_src} -- ${_index}")
     if (${_index} EQUAL -1)
       BuildExample("${example_src}" "${dir}")
     else()

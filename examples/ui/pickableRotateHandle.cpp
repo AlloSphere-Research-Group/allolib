@@ -9,10 +9,10 @@ Author:
 Tim Wood, April 2016
 */
 
-#include "al/core.hpp"
-#include "al/util/al_Ray.hpp"
-#include "al/util/ui/al_Pickable.hpp"
-#include "al/util/ui/al_PickableRotateHandle.hpp"
+#include "al/app/al_App.hpp"
+#include "al/ui/al_Ray.hpp"
+#include "al/ui/al_Pickable.hpp"
+#include "al/ui/al_PickableRotateHandle.hpp"
 
 
 using namespace al;

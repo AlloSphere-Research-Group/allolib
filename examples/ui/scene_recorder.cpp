@@ -12,12 +12,12 @@
 #include "Gamma/Gamma.h"
 
 //#include "al/io/al_AudioIO.hpp"
-#include "al/util/scene/al_DynamicScene.hpp"
+#include "al/scene/al_DynamicScene.hpp"
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-#include "al/util/ui/al_ControlGUI.hpp"
-#include "al/util/scene/al_SynthRecorder.hpp"
-#include "al/util/scene/al_SynthSequencer.hpp"
+#include "al/ui/al_ControlGUI.hpp"
+#include "al/scene/al_SynthRecorder.hpp"
+#include "al/scene/al_SynthSequencer.hpp"
 
 using namespace gam;
 using namespace al;
@@ -53,18 +53,18 @@ public:
     }
 
     // The update function will change the position of the
-    virtual void update(double dt) override {
+    virtual void update(double /*dt*/) override {
 
-        mFreq = mFreq * 0.995;
+        mFreq = mFreq * 0.995f;
         Pose p = pose();
-        p.vec().y = mAmpEnv.value()*3;
-        p.vec().x = mFreq/440.0;
+        p.vec().y = double(mAmpEnv.value()*3.0f);
+        p.vec().x = double(mFreq/440.0f);
         setPose(p);
     }
 
     virtual void onProcess(AudioIOData& io) override {
         while(io()){
-            io.out(0) += mOsc() * mAmpEnv() * 0.05;
+            io.out(0) += mOsc() * mAmpEnv() * 0.05f;
         }
         if(mAmpEnv.done()) { std::cout << "free" << std::endl; free();}
     }
@@ -79,7 +79,7 @@ public:
     virtual void onTriggerOn() override {
 
         Pose p = pose();
-        p.vec() = {mFreq/440.0 , 0.0, -10.0};
+        p.vec() = {double(mFreq/440.0f) , 0.0, -10.0};
         setPose(p);
         mAmpEnv.reset();
     }

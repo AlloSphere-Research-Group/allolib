@@ -9,10 +9,13 @@ Author:
 Tim Wood, May 2019
 */
 
-#include "al/core.hpp"
-#include "al/util/al_Ray.hpp"
-#include "al/util/ui/al_BoundingBox.hpp"
-#include "al/util/ui/al_Pickable.hpp"
+#include "al/app/al_App.hpp"
+
+#include "al/graphics/al_Shapes.hpp"
+
+#include "al/ui/al_Ray.hpp"
+#include "al/ui/al_BoundingBox.hpp"
+#include "al/ui/al_Pickable.hpp"
 
 using namespace al;
 

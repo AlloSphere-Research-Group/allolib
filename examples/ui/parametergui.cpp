@@ -1,9 +1,9 @@
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-#include "al/util/ui/al_ControlGUI.hpp"
-#include "al/util/ui/al_ParameterMIDI.hpp"
-#include "al/util/ui/al_HtmlInterfaceServer.hpp"
+#include "al/ui/al_ControlGUI.hpp"
+#include "al/ui/al_ParameterMIDI.hpp"
+#include "al/ui/al_HtmlInterfaceServer.hpp"
 
 using namespace al;
 

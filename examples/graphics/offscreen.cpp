@@ -1,4 +1,5 @@
-#include "al/core.hpp"
+#include "al/graphics/al_Graphics.hpp"
+#include "al/app/al_App.hpp"
 
 using namespace al;
 

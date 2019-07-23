@@ -1,6 +1,8 @@
-#include "al/core.hpp"
-#include "al/util/ui/al_Pickable.hpp"
-#include "al/util/ui/al_PickableManager.hpp"
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
+
+#include "al/ui/al_Pickable.hpp"
+#include "al/ui/al_PickableManager.hpp"
 
 using namespace al;
 
