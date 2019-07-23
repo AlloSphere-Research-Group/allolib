@@ -3,7 +3,7 @@
 
 using namespace al;
 
-struct sine_app : App
+struct MyApp : App
 {
   gam::Sine<> osc;
 
@@ -28,7 +28,7 @@ struct sine_app : App
 
 int main()
 {
-  sine_app app;
+  MyApp app;
   app.initAudio(44100, 512, 2, 0);
   app.start();
 }

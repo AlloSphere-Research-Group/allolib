@@ -1,4 +1,4 @@
-// OutputMaster example
+// Filter explorer example
 // By Andrés Cabrera mantaraya36@gmail.com
 // July 2018
 
@@ -15,8 +15,9 @@ using namespace al;
 
 #define STFT_SIZE 4096
 
-class MyApp : public App {
-public:
+struct MyApp : public App {
+
+  // Parameters
   Parameter filterFrequency {"filterFrequency", "", 1200, "", 5, 5000};
   Parameter filterResonance {"filterResonance", "", 1.0, "", 0.1f, 20};
   ParameterMenu filterType {"filterType"};
@@ -24,18 +25,27 @@ public:
 
   ControlGUI gui;
 
+  // Sound generators
+  gam::Biquad<> mFilter {};
+  gam::NoiseWhite<> mNoise;
+
+  // Spectrum analysis
+  gam::STFT stft {STFT_SIZE,2048, 0, gam::WindowType::HANN, gam::MAG_PHASE};
+  float spectrum[STFT_SIZE];
 
   void onInit() override {
     gam::sampleRate(audioIO().framesPerSecond());
 
     navControl().disable();
 
+    // Register callbacks to change filter settings when parameters change
     filterFrequency.registerChangeCallback([this](float value) {
       mFilter.freq(value);
     });
     filterResonance.registerChangeCallback([this](float value) {
       mFilter.res(value);
     });
+
     filterType.setElements({"low pass", "high pass", "resonant", "band reject",
                            "all_pass", "peaking", "low_shelf", "high shelf", "smoothing"});
 
@@ -50,6 +60,7 @@ public:
 
   void onCreate() override {
 
+    // Register parameters with GUI
     gui << filterType << filterFrequency <<filterResonance << resetFilterState;
     gui.init();
   }
@@ -96,14 +107,6 @@ public:
   void onExit() override {
     gui.cleanup();
   }
-
-private:
-
-  gam::Biquad<> mFilter {};
-  gam::NoiseWhite<> mNoise;
-
-  gam::STFT stft {STFT_SIZE,2048, 0, gam::WindowType::HANN, gam::MAG_PHASE};
-  float spectrum[STFT_SIZE];
 
 };
 
