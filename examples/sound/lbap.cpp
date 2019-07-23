@@ -1,9 +1,10 @@
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
 #include "al/sound/al_Lbap.hpp"
 #include "al/sound/al_Speaker.hpp"
 #include "al/math/al_Random.hpp"
-#include "al/util/al_AlloSphereSpeakerLayout.hpp"
-#include "al/util/ui/al_Parameter.hpp"
+#include "al/sphere/al_AlloSphereSpeakerLayout.hpp"
+#include "al/ui/al_Parameter.hpp"
 
 #include <atomic>
 #include <vector>

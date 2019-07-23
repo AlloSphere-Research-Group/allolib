@@ -403,8 +403,6 @@ void Window::implSetDimensions() {
 }
 
 void Window::implSetFullScreen() {
-// glfwSetWindowMonitor available since glfw 3.2
-#if 10 * GLFW_VERSION_MAJOR + GLFW_VERSION_MINOR > 31
   if (mFullScreen) {
     // TODO: selection for multi-monitor
 
@@ -418,7 +416,6 @@ void Window::implSetFullScreen() {
                          mDim.h, GLFW_DONT_CARE);
     vsync(mVSync);
   }
-#endif
 }
 
 void Window::implSetTitle() { glfwSetWindowTitle(mImpl->mGLFWwindow, mTitle.c_str());	}

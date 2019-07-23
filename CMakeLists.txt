@@ -98,6 +98,7 @@ set(headers
   include/al/sound/al_Crossover.hpp
   include/al/sound/al_Dbap.hpp
   include/al/sound/al_Lbap.hpp
+  include/al/sound/al_OutputMaster.hpp
   include/al/sound/al_Reverb.hpp
   include/al/sound/al_Spatializer.hpp
   include/al/sound/al_Speaker.hpp
@@ -180,6 +181,7 @@ set(sources
   src/sound/al_Vbap.cpp
   src/sound/al_Spatializer.cpp
   src/sound/al_StereoPanner.cpp
+  src/sound/al_OutputMaster.cpp
   src/spatial/al_HashSpace.cpp
   src/spatial/al_Pose.cpp
   src/system/al_PeriodicThread.cpp

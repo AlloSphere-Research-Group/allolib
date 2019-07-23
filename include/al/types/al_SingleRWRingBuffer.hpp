@@ -117,7 +117,7 @@ inline uint32_t next_power_of_two(uint32_t v){
 }
 
 inline SingleRWRingBuffer :: SingleRWRingBuffer(size_t sz)
-:	mSize(next_power_of_two(sz)),
+:	mSize(size_t(next_power_of_two(uint32_t(sz)))),
 	mWrap(mSize-1),
 	mRead(0),
 	mWrite(0)

@@ -1,4 +1,4 @@
-#include "al/core.hpp"
+#include "al/app/al_App.hpp"
 #include "Gamma/Oscillator.h"
 
 using namespace al;
@@ -19,7 +19,7 @@ struct sine_app : App
   void onSound(AudioIOData& io) override {
     while (io()) {
       float s = osc(); // Generate next sine wave sample
-      s *= 0.2; // Scale the sample down a bit for output
+      s *= 0.2f; // Scale the sample down a bit for output
       io.out(0) = s;
       io.out(1) = s;
     }

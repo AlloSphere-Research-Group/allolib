@@ -50,9 +50,9 @@
 #include <deque>
 #include <atomic>
 
-#include "al/core/io/al_AudioIO.hpp"
-#include "al/core/types/al_SingleRWRingBuffer.hpp"
-#include "al/core/system/al_Time.hpp"
+#include "al/io/al_AudioIO.hpp"
+#include "al/types/al_SingleRWRingBuffer.hpp"
+#include "al/system/al_Time.hpp"
 
 #include "Gamma/Filter.h"
 

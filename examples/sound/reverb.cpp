@@ -8,7 +8,7 @@ Author:
 Lance Putnam, 4/25/2011, putnam.lance@gmail.com
 */
 
-#include "al/core.hpp"
+#include "al/io/al_AudioIO.hpp"
 #include "al/sound/al_Reverb.hpp"
 using namespace al;
 

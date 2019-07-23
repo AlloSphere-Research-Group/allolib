@@ -3,15 +3,15 @@
 
 struct MyApp : al::App {
 
-  void onCreate() override {
+  void onCreate () override {
     al::imguiInit();
   }
   
-  void onAnimate(double dt) override {
+  void onAnimate (double dt) override {
     // start writing ui
     al::imguiBeginFrame();
 
-    // do palin imgui stuff
+    // do plain imgui stuff
     ImGui::Begin("my window");
     ImGui::Text("text widget");
     ImGui::End();
@@ -20,20 +20,18 @@ struct MyApp : al::App {
     al::imguiEndFrame();
   }
   
-  void onDraw(al::Graphics& g) override {
+  void onDraw (al::Graphics& g) override {
     g.clear(0);
     // actual ui drawing
     al::imguiDraw();
   }
   
-  void onExit() override {
+  void onExit () override {
     al::imguiShutdown();
   }
 };
 
-
-int main(int argc, char *argv[])
-{
+int main (int argc, char *argv[]) {
     MyApp app;
     app.dimensions(640, 480);
     app.start();

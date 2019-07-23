@@ -2,7 +2,7 @@
 
 */
 
-#include "al/core.hpp"
+#include "al/io/al_AudioIO.hpp"
 #include <iostream>
 #include <cstdlib>
 
@@ -44,7 +44,7 @@ int main (int argc, char * argv[])
     double durSecs = 0.4; // duration of each burst
 
     userdata_t ud;
-    ud.gain = 0.01;
+    ud.gain = 0.01f;
     ud.count = 0;
     ud.numSamps = (int)(sr *durSecs);
     ud.curOutput = 0;

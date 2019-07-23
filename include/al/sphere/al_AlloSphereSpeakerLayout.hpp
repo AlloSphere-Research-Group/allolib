@@ -1,7 +1,7 @@
 #ifndef AL_ALLOSPHERE_SPEAKER_LAYOUT_H
 #define AL_ALLOSPHERE_SPEAKER_LAYOUT_H
 
-#include "al/core/sound/al_Speaker.hpp"
+#include "al/sound/al_Speaker.hpp"
 
 #define NUM_SPEAKERS 54
 

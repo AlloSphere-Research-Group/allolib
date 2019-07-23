@@ -5,9 +5,8 @@
 #include <iostream>
 
 
-#include "al/core.hpp"
 #include "al/app/al_App.hpp"
-#include "al/util/ui/al_ControlGUI.hpp"
+#include "al/ui/al_ControlGUI.hpp"
 #include "Gamma/Filter.h"
 #include "Gamma/Noise.h"
 #include "Gamma/DFT.h"

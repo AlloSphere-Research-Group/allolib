@@ -8,11 +8,12 @@ Author:
 Graham Wakefield, 2011
 */
 
-#include "al/core.hpp"
-#include <iostream>
+#include "al/io/al_AudioIO.hpp"
+#include "al/math/al_StdRandom.hpp"
+#include <cstdio>
+#include <vector>
 
 using namespace al;
-using namespace std;
 
 int channels;
 bool started = false;
@@ -38,9 +39,9 @@ void audioCB(AudioIOData& io){
 	}
 
 	while(io()){
-		float t1 = 1.f - fmod(cnt / sr, 1.);	// time in seconds
+		float t1 = 1.f - float(fmod(cnt / sr, 1.0));	// time in seconds
 		for (int i=0; i<channels; i++) {
-			float t2 = fmod(t1 * (i+1), 1.);
+			float t2 = fmod(t1 * (i+1), 1.0f);
 			io.out(i) = rnd::uniformS() * gains[i] * amp * t2 * t1;
 		}
 		cnt++;

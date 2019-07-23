@@ -10,6 +10,75 @@
 
 #define BLOCK_SIZE (2048)
 
+/// Current arrangement of speakers in AlloSphere
+al::SpeakerLayout alloSphereSpeakerLayout () {
+  const int numSpeakers = 54;
+  al::Speaker alloSpeakers[numSpeakers] = {
+    al::Speaker(1-1, -77.660913f, 41.000000f, 4.992118f),
+    al::Speaker(2-1, -45.088015f, 41.000000f, 5.571107f),
+    al::Speaker(3-1, -14.797289f, 41.000000f, 5.900603f),
+    al::Speaker(4-1, 14.797289f, 41.000000f, 5.900603f),
+    al::Speaker(5-1, 45.088015f, 41.000000f, 5.571107f),
+    al::Speaker(6-1, 77.660913f, 41.000000f, 4.992118f),
+    al::Speaker(7-1, 102.339087f, 41.000000f, 4.992118f),
+    al::Speaker(8-1, 134.911985f, 41.000000f, 5.571107f),
+    al::Speaker(9-1, 165.202711f, 41.000000f, 5.900603f),
+    al::Speaker(10-1, -165.202711f, 41.000000f, 5.900603f),
+    al::Speaker(11-1, -134.911985f, 41.000000f, 5.571107f),
+    al::Speaker(12-1, -102.339087f, 41.000000f, 4.992118f),
+    al::Speaker(17-1, -77.660913f, 0.000000f, 4.992118f),
+    al::Speaker(18-1, -65.647587f, 0.000000f, 5.218870f),
+    al::Speaker(19-1, -54.081600f, 0.000000f, 5.425483f),
+    al::Speaker(20-1, -42.869831f, 0.000000f, 5.604350f),
+    al::Speaker(21-1, -31.928167f, 0.000000f, 5.749461f),
+    al::Speaker(22-1, -21.181024f, 0.000000f, 5.856274f),
+    al::Speaker(23-1, -10.559657f, 0.000000f, 5.921613f),
+    al::Speaker(24-1, 0.000000f, 0.000000f, 5.943600f),
+    al::Speaker(25-1, 10.559657f, 0.000000f, 5.921613f),
+    al::Speaker(26-1, 21.181024f, 0.000000f, 5.856274f),
+    al::Speaker(27-1, 31.928167f, 0.000000f, 5.749461f),
+    al::Speaker(28-1, 42.869831f, 0.000000f, 5.604350f),
+    al::Speaker(29-1, 54.081600f, 0.000000f, 5.425483f),
+    al::Speaker(30-1, 65.647587f, 0.000000f, 5.218870f),
+    al::Speaker(31-1, 77.660913f, 0.000000f, 4.992118f),
+    al::Speaker(32-1, 102.339087f, 0.000000f, 4.992118f),
+    al::Speaker(33-1, 114.352413f, 0.000000f, 5.218870f),
+    al::Speaker(34-1, 125.918400f, 0.000000f, 5.425483f),
+    al::Speaker(35-1, 137.130169f, 0.000000f, 5.604350f),
+    al::Speaker(36-1, 148.071833f, 0.000000f, 5.749461f),
+    al::Speaker(37-1, 158.818976f, 0.000000f, 5.856274f),
+    al::Speaker(38-1, 169.440343f, 0.000000f, 5.921613f),
+    al::Speaker(39-1, 180.000000f, 0.000000f, 5.943600f),
+    al::Speaker(40-1, -169.440343f, 0.000000f, 5.921613f),
+    al::Speaker(41-1, -158.818976f, 0.000000f, 5.856274f),
+    al::Speaker(42-1, -148.071833f, 0.000000f, 5.749461f),
+    al::Speaker(43-1, -137.130169f, 0.000000f, 5.604350f),
+    al::Speaker(44-1, -125.918400f, 0.000000f, 5.425483f),
+    al::Speaker(45-1, -114.352413f, 0.000000f, 5.218870f),
+    al::Speaker(46-1, -102.339087f, 0.000000f, 4.992118f),
+    al::Speaker(49-1, -77.660913f, -32.500000f, 4.992118f),
+    al::Speaker(50-1, -45.088015f, -32.500000f, 5.571107f),
+    al::Speaker(51-1, -14.797289f, -32.500000f, 5.900603f),
+    al::Speaker(52-1, 14.797289f, -32.500000f, 5.900603f),
+    al::Speaker(53-1, 45.088015f, -32.500000f, 5.571107f),
+    al::Speaker(54-1, 77.660913f, -32.500000f, 4.992118f),
+    al::Speaker(55-1, 102.339087f, -32.500000f, 4.992118f),
+    al::Speaker(56-1, 134.911985f, -32.500000f, 5.571107f),
+    al::Speaker(57-1, 165.202711f, -32.500000f, 5.900603f),
+    al::Speaker(58-1, -165.202711f, -32.500000f, 5.900603f),
+    al::Speaker(59-1, -134.911985f, -32.500000f, 5.571107f),
+    al::Speaker(60-1, -102.339087f, -32.500000f, 4.992118f),
+  };
+
+  al::SpeakerLayout layout;
+  layout.speakers().reserve(numSpeakers);
+  for(int i=0; i<numSpeakers; ++i)
+  {
+    layout.addSpeaker(alloSpeakers[i]);
+  }
+  return layout;
+}
+
 static al::SpeakerLayout StereoLayout (unsigned int deviceChannelStart=0, float angle=30.f, float distance=1.f, float gain=1.f)
 {
   al::Speaker mLeft(deviceChannelStart, angle, 0, 0, distance, gain);
@@ -45,10 +114,9 @@ struct MyApp : public App
 
   void onInit () override {
 
-    speakerLayout = ringLayout(16);
+    speakerLayout = alloSphereSpeakerLayout();
 
     panner = std::make_unique<Vbap>(speakerLayout, true);
-    panner->set3D(false);
     panner->makePhantomChannel(12, {0,1,2,3,4,5,6,7,8,9,10,11}); // assigned speakers top
     panner->makePhantomChannel(13, {0,1,2,3,4,5,6,7,8,9,10,11}); // assigned speakers bottom
     panner->compile();

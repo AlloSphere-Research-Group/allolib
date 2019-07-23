@@ -4,9 +4,9 @@
 
 #include <iostream>
 
-
-#include "al/core.hpp"
-#include "al/util/sound/al_OutputMaster.hpp"
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
+#include "al/sound/al_OutputMaster.hpp"
 
 using namespace al;
 
@@ -19,8 +19,8 @@ public:
 
     void onSound(AudioIOData &io) override {
         while(io()) {
-            io.out(0) = io.in(0)* 0.1;
-            io.out(1) = io.in(1)* 0.1;
+            io.out(0) = io.in(0)* 0.1f;
+            io.out(1) = io.in(1)* 0.1f;
         }
         mOutputMaster.onAudioCB(io);
     }
@@ -31,7 +31,7 @@ public:
         // Copies the current values to the array passed
         mOutputMaster.getCurrentValues(values);
         Mesh m;
-        addQuad(m, 0.2, 0.2);
+        addQuad(m, 0.2f, 0.2f);
 
         g.color(1.0);
         g.pushMatrix();

@@ -134,7 +134,7 @@ public:
   void translate(float x, float y, float z=0.);
   /// Translate current matrix
   template <class T>
-  void translate(const Vec<3,T>& v){ translate(v[0],v[1],v[2]); }
+  void translate(const Vec<3,T>& v){ translate(float(v[0]),float(v[1]),float(v[2])); }
   /// Translate current matrix
   template <class T>
   void translate(const Vec<2,T>& v){ translate(v[0],v[1]); }

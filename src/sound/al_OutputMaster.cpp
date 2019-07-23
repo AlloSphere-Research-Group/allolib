@@ -3,8 +3,8 @@
 #include <sstream>
 #include <float.h> // for FLT_MAX and FLT_MIN
 
-#include "al/util/sound/al_OutputMaster.hpp"
-#include "al/core/system/al_Time.hpp"
+#include "al/sound/al_OutputMaster.hpp"
+#include "al/system/al_Time.hpp"
 
 using namespace al;
 
