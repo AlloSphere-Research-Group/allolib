@@ -2,59 +2,59 @@
 
 */
 
-#include "al/io/al_AudioIO.hpp"
+#include "al/app/al_App.hpp"
+#include "al/math/al_Random.hpp"
+
+#include "al/ui/al_ControlGUI.hpp"
 #include <iostream>
 #include <cstdlib>
 
 using namespace al;
 using namespace std;
 
-#define AUDIO_BLOCK_SIZE 512
+struct MyApp: App {
 
-typedef struct {
-    int count;
-    int numSamps;
-    int curOutput;
-    float gain;
-} userdata_t;
+  Parameter gain {"gain", "", 0.1f, "", 0.0f, 1.0f};
+  Parameter durSecs {"duration", "", 0.4f, "", 0.05, 1.0}; // duration of each burst
 
+  ControlGUI gui;
 
-void audioCB(AudioIOData& io)
-{
-    userdata_t * ud = (userdata_t *) io.user();
-	int numFrames = io.framesPerBuffer();
+  int count; // sample counter to determine when to switch speaker
+  int numSamps; // number of samples to play on each speaker
+  int curOutput; // current speaker index playing
 
-    for (int j = 0; j < numFrames; j++) {
-        float noise = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-        io.out(ud->curOutput, j) = ud->gain * noise;
-        ud->count++;
-        if (ud->count == ud->numSamps) {
-            ud->count = 0;
-            ud->curOutput++;
-            ud->curOutput = ud->curOutput%io.channelsOut();
-            std::cout << "Channel " << ud->curOutput << std::endl;
-        }
+  void onCreate() override {
+    gui << gain << durSecs;
+    gui.init();
+    durSecs.registerChangeCallback([&](float value) {numSamps = audioIO().framesPerSecond() * durSecs;});
+  }
+
+  void onDraw(Graphics &g) override {
+    g.clear();
+    gui.draw(g);
+  }
+
+  void onSound(AudioIOData& io) override {
+    while (io()) {
+      float noise = rnd::uniformS();
+      io.out(curOutput) = gain * noise;
+      count++;
+      if (count == numSamps) {
+        count = 0;
+        curOutput++;
+        curOutput = curOutput%io.channelsOut();
+        std::cout << "Playing on Channel " << curOutput << std::endl;
+      }
     }
-}
+  }
+};
 
-int main (int argc, char * argv[])
+
+
+int main ()
 {
-    const int numSpeakers = 60;
-    double sr = 44100;
-    double durSecs = 0.4; // duration of each burst
-
-    userdata_t ud;
-    ud.gain = 0.01f;
-    ud.count = 0;
-    ud.numSamps = (int)(sr *durSecs);
-    ud.curOutput = 0;
-
-    AudioDevice::printAll();
-
-    AudioIO audioIO;
-    audioIO.init(audioCB, &ud, AUDIO_BLOCK_SIZE, sr, numSpeakers, 0);
-    audioIO.open();
-    audioIO.start();
-
-    printf("\nPress 'enter' to quit...\n"); getchar();
+    MyApp app;
+    app.initAudio();
+    app.start();
+    return 0;
 }
