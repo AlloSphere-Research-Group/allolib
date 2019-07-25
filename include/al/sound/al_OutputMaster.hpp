@@ -164,7 +164,7 @@ public:
      * @param sendPort The port to which messages will be sent
      * @param msg_timeout Time out for the socket listener (see documentation for al::osc::Recv)
      */
-    OutputMaster(unsigned int num_chnls, double sampleRate);
+    OutputMaster(unsigned int num_chnls = 2, double sampleRate = 44100);
     ~OutputMaster() override;
 
     /**

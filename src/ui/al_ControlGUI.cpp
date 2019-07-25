@@ -136,6 +136,7 @@ void ControlGUI::begin() {
 void ControlGUI::end() {
   ImGui::End();
   if (mManageIMGUI) {
+    imguiEndFrame();
     imguiDraw();
   }
 }
