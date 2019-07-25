@@ -14,12 +14,12 @@ class MyApp : public App
 public:
     MyApp() {
         nav().pos(Vec3d(0, 0, 8));
-
         addCone(mMesh);
         mMesh.generateNormals();
 
         // Disable mouse nav to avoid naving while changing gui controls.
         navControl().useMouse(false);
+        parameterMidi.connectControl(Number, 7, 1);
 
     }
 
@@ -44,19 +44,19 @@ public:
         ParameterGUI::drawParameterMIDI(&parameterMidi);
         ParameterGUI::endPanel();
         ImGui::End();
+        imguiEndFrame();
         imguiDraw();
     }
-    virtual void onSound(AudioIOData &io) {
+    virtual void onSound(AudioIOData &io) override {
         while(io()) {
             io.out(0) = rnd::uniformS() * 0.2;
         }
     }
 
 private:
-    ParameterInt Number{ "Number", "", 1, "", 0, 16 };
+    Parameter Number{ "Number", "", 1, "", 0, 16 };
     ParameterMIDI parameterMidi;
 
-    Light light;
     Mesh mMesh;
 };
 
