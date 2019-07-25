@@ -83,7 +83,6 @@ foreach(dir ${EXAMPLE_DIRS})
 
   foreach(example_src ${EXAMPLE_FILES})
     list (FIND EXAMPLES_TO_IGNORE "${example_src}" _index)
-    message("${example_src} -- ${_index}")
     if (${_index} EQUAL -1)
       BuildExample("${example_src}" "${dir}")
     else()

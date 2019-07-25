@@ -32,6 +32,7 @@ struct MyApp : public App {
   // Spectrum analysis
   gam::STFT stft {STFT_SIZE,2048, 0, gam::WindowType::HANN, gam::MAG_PHASE};
   float spectrum[STFT_SIZE];
+  Mesh spectrumMesh;
 
   void onInit() override {
     gam::sampleRate(audioIO().framesPerSecond());
@@ -84,19 +85,23 @@ struct MyApp : public App {
 
   }
 
+  void onAnimate(double dt) override {
+
+    spectrumMesh.reset();
+    spectrumMesh.primitive(Mesh::LINE_STRIP);
+    for (int i = 0 ; i < STFT_SIZE/2; i++) {
+      spectrumMesh.color(HSV(0.5 - spectrum[i]* 100));
+      spectrumMesh.vertex(i, spectrum[i], 0.0);
+    }
+  }
+
   void onDraw(Graphics &g) override {
     g.clear();
 
-    Mesh spectrumMesh;
-    spectrumMesh.primitive(Mesh::LINE_STRIP);
-    for (int i = 0 ; i < STFT_SIZE/2; i++) {
-      spectrumMesh.vertex(i, spectrum[i], 0.0);
-    }
-
-    g.color(1.0);
+    g.meshColor(); // Use the color in the mesh
     g.pushMatrix();
-    g.translate(-8.0/STFT_SIZE,0, -4.0);
-    g.scale(4.0/STFT_SIZE, 100, 0.0);
+    g.translate(-1.0, 0, -4.0);
+    g.scale(4.0/STFT_SIZE, 100, 1.0);
     g.draw(spectrumMesh);
 
     g.popMatrix();
