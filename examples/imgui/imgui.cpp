@@ -3,6 +3,7 @@
 
 #include "al/app/al_App.hpp"
 #include "al/io/al_Imgui.hpp"
+#include "al/graphics/al_Shapes.hpp"
 
 using namespace al;
 
@@ -17,30 +18,26 @@ struct my_app : public App
   Mesh m;
 
   void onCreate() override {
-    initIMGUI();
+    imguiInit();
     addSphere(m);
     nav().pos(0, 0, 10);
     nav().setHome();
   }
 
   void onAnimate(double dt) override {
-    // call beginIMGUI before everything, so info about gui status can be used
-    // to update app state
-    beginIMGUI();
 
     // don't nav if imgui's using inputs
     // ex) prevents camera rotation when mouse dragging scroll bar
     // nav is update after onAnimate and before onDraw.
     // so need to flag active/inactive here
-    auto& io = ImGui::GetIO();
-    bool using_gui = io.WantCaptureMouse | io.WantCaptureKeyboard
-                                         | io.WantTextInput;
-    navControl().active(!using_gui);
-  }
+    navControl().active(!isImguiUsingInput());
 
-  void onDraw(Graphics& g) override {
+    // call beginIMGUI before everything, so info about gui status can be used
+    // to update app state
+    imguiBeginFrame();
 
     {
+      ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
       // Display some text (you can use a format string too)
       ImGui::Text("Hello, world!"); 
       // Edit 1 float using a slider from 0.0f to 1.0f
@@ -61,6 +58,7 @@ struct my_app : public App
 
       ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                   1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+      ImGui::End();
     }
 
     // 2. Show another simple window. In most cases you will use an explicit
@@ -84,16 +82,22 @@ struct my_app : public App
       ImGui::ShowDemoWindow(&show_demo_window);
     }
 
+    // finish writing UI elements
+    imguiEndFrame();
+  }
+
+  void onDraw(Graphics& g) override {
+
     g.clear(clear_color);
     g.translate(x, 0, 0);
     g.color(1);
     g.draw(m);
 
-    endIMGUI(); // after everything, actual rendering happens here
+    imguiDraw(); // after everything, actual rendering happens here
   }
 
   void onExit() override {
-    shutdownIMGUI();
+    imguiShutdown();
   }
 };
 

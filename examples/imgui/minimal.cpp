@@ -1,42 +1,58 @@
 #include "al/app/al_App.hpp"
-#include "al/util/imgui/al_Imgui.hpp"
+#include "al/graphics/al_Shapes.hpp"
+#include "al/io/al_Imgui.hpp"
 
 using namespace al;
 
 struct MyApp : App
 {
-  float grayscale = 1;;
+  float grayscale = 1;
   Color clear_color {0, 0, 0};
   bool show_gui = true;
   Mesh m;
 
   void onCreate()  {
-    initIMGUI();
+    imguiInit();
     addSphere(m);
     nav().pos(0, 0, 10);
     nav().setHome();
   }
 
   void onAnimate(double dt)  {
-    // pass show_gui for use_input param to turn off interactions
-    // when not showing gui
-    beginIMGUI_minimal(show_gui);
-    navControl().active(!imgui_is_using_input());
+    navControl().active(!isImguiUsingInput());
+
+    if (show_gui)
+    {
+        imguiBeginFrame();
+
+        ImGui::SetNextWindowSize(ImVec2(0, 0));
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGuiWindowFlags flags = 0;
+        flags |= ImGuiWindowFlags_NoTitleBar;
+        flags |= ImGuiWindowFlags_NoResize;
+        flags |= ImGuiWindowFlags_NoMove;
+        flags |= ImGuiWindowFlags_NoScrollbar;
+        flags |= ImGuiWindowFlags_NoCollapse;
+        flags |= ImGuiWindowFlags_AlwaysAutoResize;
+        flags |= ImGuiWindowFlags_NoBackground;
+        ImGui::Begin("my window", NULL, flags);
+        ImGui::ColorEdit3("clear color", clear_color.components);
+        ImGui::SliderFloat("grayscale", &grayscale, 0, 1);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                    1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
+
+        imguiEndFrame();
+    }
   }
 
   void onDraw(Graphics& g)  {
-
-    // Edit 3 floats representing a color
-    ImGui::ColorEdit3("clear color", clear_color.components);
-    ImGui::SliderFloat("grayscale", &grayscale, 0, 1);
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
     g.clear(clear_color);
     g.color(grayscale);
     g.draw(m);
 
-    endIMGUI_minimal(show_gui);
+    if (show_gui) imguiDraw();
   }
 
   void onKeyDown(const Keyboard& k)  {
@@ -46,7 +62,7 @@ struct MyApp : App
   }
 
   void onExit()  {
-    shutdownIMGUI();
+    imguiShutdown();
   }
 };
 
