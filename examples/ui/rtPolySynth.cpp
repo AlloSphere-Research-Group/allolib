@@ -3,7 +3,7 @@
 #include "Gamma/Envelope.h"
 
 #include "al/io/al_AudioIO.hpp"
-#include "al/util/scene/al_PolySynth.hpp"
+#include "al/scene/al_PolySynth.hpp"
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 

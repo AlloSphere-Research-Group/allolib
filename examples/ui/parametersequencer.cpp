@@ -1,7 +1,8 @@
 #include "al/app/al_App.hpp"
+#include "al/graphics/al_Shapes.hpp"
 
-#include "al/util/ui/al_PresetSequencer.hpp"
-#include "al/util/ui/al_SequenceRecorder.hpp"
+#include "al/ui/al_PresetSequencer.hpp"
+#include "al/ui/al_SequenceRecorder.hpp"
 #include "al/ui/al_Parameter.hpp"
 #include "al/ui/al_ControlGUI.hpp"
 
@@ -11,7 +12,7 @@ using namespace std;
 
 struct MyApp : App
 {
-	Mesh m;
+    Mesh m;
 
     Parameter X{"x", "", 0.0, "", -2, 2};
     Parameter Y{"y", "", 0.0, "", -2, 2};
@@ -22,9 +23,9 @@ struct MyApp : App
     PresetSequencer sequencer;
     SequenceRecorder recorder;
 
-	void onCreate() override {
-		addSphere(m, 0.2);
-		nav().pullBack(4);
+    void onCreate() override {
+        addSphere(m, 0.2);
+        nav().pullBack(4);
         navControl().disable();
 
         sequencer.setDirectory("presets");
@@ -36,24 +37,24 @@ struct MyApp : App
         gui.init();
         gui << X << Y << Z;
         gui << presetHandler;
-	}
+    }
 
-	void onDraw(Graphics &g) override {
-		g.clear(0);
+    void onDraw(Graphics &g) override {
+        g.clear(0);
         g.translate(X, Y, Z);
         if (recorder.recording()) {
-			g.color(1.0,0.0,0.0);
-		} else if (sequencer.running()) {
-			g.color(0.0,1.0,0.0);
-		} else {
-			g.color(0.0,0.0,1.0);
-		}
-		g.draw(m);
+            g.color(1.0,0.0,0.0);
+        } else if (sequencer.running()) {
+            g.color(0.0,1.0,0.0);
+        } else {
+            g.color(0.0,0.0,1.0);
+        }
+        g.draw(m);
         gui.draw(g);
-	}
+    }
 
-	void onMouseDown(const Mouse &m) override {
-	}
+    void onMouseDown(const Mouse &m) override {
+    }
 
     void onKeyDown(const Keyboard &k) override {
         if (k.key() == ' ') {
@@ -84,6 +85,6 @@ struct MyApp : App
 
 int main(int argc, char* argv[])
 {
-	MyApp().start();
+    MyApp().start();
 }
 

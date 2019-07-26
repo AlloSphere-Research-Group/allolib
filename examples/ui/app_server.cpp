@@ -8,11 +8,17 @@
 
 using namespace al;
 
-class MyApp : public App {
-public:
+// This example shows registering parameters with an App's parameter server
+// Pressing the 'a' and 'd' keys send OSC messages on localhost that will
+// be picked up by this server.
 
+struct MyApp : public App {
     Parameter X {"X", "", 0.0f, "", -1.0f, 1.0f};
     Parameter Y {"Y", "", 0.0f, "", -1.0f, 1.0f};
+
+    ControlGUI gui;
+
+    Mesh mesh;
 
     MyApp() {
         navControl().disable(); // Disable Keyboard and mouse navigaion
@@ -59,10 +65,6 @@ public:
 
     }
 
-private:
-    ControlGUI gui;
-
-    Mesh mesh;
 };
 
 
