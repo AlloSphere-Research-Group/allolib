@@ -77,6 +77,7 @@ set(headers
   include/al/io/al_CSVReader.hpp
   include/al/io/al_File.hpp
   include/al/io/al_Imgui.hpp
+  include/al/io/al_Serial.hpp
   include/al/io/al_MIDI.hpp
   include/al/io/al_Window.hpp
   include/al/math/al_Constants.hpp
@@ -166,6 +167,7 @@ set(sources
   src/io/al_Imgui.cpp
   src/io/al_imgui_impl.cpp
   src/io/al_MIDI.cpp
+  src/io/al_Serial.cpp
   src/io/al_Window.cpp
   src/io/al_WindowGLFW.cpp
   src/math/al_StdRandom.cpp
@@ -232,7 +234,7 @@ target_include_directories(al PUBLIC
 target_link_libraries(al PUBLIC
   ${OPENGL_gl_LIBRARY}
   Gamma glfw glad rtaudio rtmidi cpptoml dr_libs
-  nlohmann_json::nlohmann_json imgui oscpack stb)
+  nlohmann_json::nlohmann_json imgui oscpack stb serial)
 
 macro(Copy_dlls dest_path target DLLS_TO_COPY)
   if (DLLS_TO_COPY)

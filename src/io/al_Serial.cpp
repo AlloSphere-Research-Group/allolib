@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "al_Serial.hpp"
+#include "al/io/al_Serial.hpp"
 
-#include "al/core/system/al_Time.hpp"
+#include "al/system/al_Time.hpp"
 
 using namespace al;
 

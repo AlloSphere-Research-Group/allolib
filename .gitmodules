@@ -16,3 +16,6 @@
 [submodule "external/cpptoml"]
 	path = external/cpptoml
 	url = https://github.com/skystrife/cpptoml.git
+[submodule "external/serial"]
+	path = external/serial
+	url = https://github.com/wjwwood/serial

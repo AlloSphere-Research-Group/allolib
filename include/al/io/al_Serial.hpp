@@ -6,7 +6,7 @@
 
 #include "serial/serial.h"
 
-#include "al/core/types/al_SingleRWRingBuffer.hpp"
+#include "al/types/al_SingleRWRingBuffer.hpp"
 
 namespace al {
 
