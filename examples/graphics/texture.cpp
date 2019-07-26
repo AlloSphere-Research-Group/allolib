@@ -85,7 +85,7 @@ struct MyApp : public App {
 
 		// We must tell the GPU to use the texture when rendering primitives
 		tex.bind();
-		g.texture();
+        g.texture(); // Use texture for mesh coloring
 		g.draw(mesh);
 		tex.unbind();
 	}

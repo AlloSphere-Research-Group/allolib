@@ -6,9 +6,9 @@
 #include "al/sphere/al_Perprojection.hpp"
 #include "al/sphere/al_SphereUtils.hpp"
 
-#include "al/core/app/al_WindowApp.hpp"
-#include "al/core/graphics/al_GLFW.hpp"
-#include "al/core/graphics/al_Graphics.hpp"
+#include "al/app/al_WindowApp.hpp"
+#include "al/graphics/al_GLFW.hpp"
+#include "al/graphics/al_Graphics.hpp"
 
 
 namespace al {
