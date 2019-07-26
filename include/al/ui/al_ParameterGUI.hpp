@@ -150,11 +150,11 @@ public:
                       ImGuiWindowFlags window_flags = 0) {
         if (x >= 0 || y >= 0) {
             ImGui::SetNextWindowPos(ImVec2(x, y));
-            window_flags |= ImGuiWindowFlags_NoMove; // if (no_move)
+//            window_flags |= ImGuiWindowFlags_NoMove; // if (no_move)
         }
         if (width >= 0 || height >=0) {
             ImGui::SetNextWindowSize(ImVec2(width, height));
-            window_flags |= ImGuiWindowFlags_NoResize; // if (no_resize)
+//            window_flags |= ImGuiWindowFlags_NoResize; // if (no_resize)
         }
 //        ImGuiWindowFlags window_flags = 0;
 //        window_flags |= ImGuiWindowFlags_NoTitleBar; // if (no_titlebar)

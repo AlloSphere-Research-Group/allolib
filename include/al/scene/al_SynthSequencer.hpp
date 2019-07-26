@@ -322,18 +322,10 @@ private:
 
 template<class TSynthVoice>
 TSynthVoice &SynthSequencer::add(double startTime, double duration) {
-    std::list<SynthSequencerEvent>::iterator insertedEvent;
     TSynthVoice *newVoice = mPolySynth->getVoice<TSynthVoice>();
-    std::unique_lock<std::mutex> lk(mEventLock);
-    // Insert into event list, sorted.
-    auto position = mEvents.begin();
-    while(position != mEvents.end() && position->startTime < startTime) {
-        position++;
+    if (newVoice) {
+        addVoice<TSynthVoice>(newVoice, startTime, duration);
     }
-    insertedEvent = mEvents.insert(position, SynthSequencerEvent());
-    insertedEvent->startTime = startTime;
-    insertedEvent->duration = duration;
-    insertedEvent->voice = newVoice;
     return *newVoice;
 }
 

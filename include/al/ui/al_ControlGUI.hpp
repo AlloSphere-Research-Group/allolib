@@ -162,6 +162,10 @@ public:
     ControlGUI & operator<< (GUIMarker marker) { return registerMarker(marker); }
     ControlGUI& add(GUIMarker marker) { return registerMarker(marker); }
 
+    void setTitle(std::string title) {mName = title;}
+
+    void fixedPosition(bool fixed = true) { mFixed = fixed;}
+
     /**
      * @brief draws the GUI
      */
@@ -280,6 +284,7 @@ private:
     Nav *mNav {nullptr};
 
     std::string mName;
+    bool mFixed {true};
     int mX, mY;
 
     float mGUIBackgroundAlpha = 0;

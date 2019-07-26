@@ -21,6 +21,8 @@ void ControlGUI::draw(Graphics &g) {
     } else {
         ImGui::SetNextWindowBgAlpha(mGUIBackgroundAlpha);
         ParameterGUI::beginPanel(mName, mX, mY);
+
+//        imguiBeginFrame();
     }
 //    ImGui::SetNextWindowSize(ImVec2(300, 450), ImGuiCond_FirstUseEver);
 //    ImGui::SetNextWindowPos(ImVec2(mX, mY), ImGuiCond_FirstUseEver);
@@ -113,7 +115,9 @@ void ControlGUI::init(int x, int y, bool manageImgui) {
     mX = x;
     mY = y;
     mManageIMGUI = manageImgui;
-    mName = "__ControlGUI_" + std::to_string(winCounter++);
+    if (mName == "") {
+      mName = "__ControlGUI_" + std::to_string(winCounter++);
+    }
 
     mSequencerItems = (char **) malloc(32 * sizeof(char *));
     for (size_t i = 0; i < 32; i++) {
@@ -126,10 +130,10 @@ void ControlGUI::init(int x, int y, bool manageImgui) {
 }
 
 void ControlGUI::begin() {
-  imguiBeginFrame();
   ImGui::SetNextWindowPos(ImVec2(mX, mY));
 //  ImGui::SetNextWindowSize(ImVec2(width(), height()));
   ImGui::SetNextWindowBgAlpha(mGUIBackgroundAlpha);
+  imguiBeginFrame();
   ImGui::Begin(mName.c_str(), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize );
 }
 
