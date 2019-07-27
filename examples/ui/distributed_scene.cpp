@@ -54,8 +54,10 @@ public:
     }
 
     virtual void update(double dt) override {
-        pose().vec().y = mAmpEnv.value();
-        pose().vec().x = mFreq/440.0;
+        auto newPose = pose();
+        newPose.vec().y = mAmpEnv.value();
+        newPose.vec().x = mFreq/440.0;
+        setPose(newPose);
     }
 
     virtual void onProcess(AudioIOData& io) override {
@@ -105,8 +107,10 @@ struct MyApp : public DistributedApp<>
             // Trigger one voice manually
             auto *freeVoice = scene.getVoice<SimpleVoice>();
             std::vector<float> params{440.0f}; 
-            freeVoice->setParamFields(params);
-            freeVoice->pose().vec().z = -10.0;
+            freeVoice->setTriggerParams(params);
+            auto pose = freeVoice->pose();
+            pose.vec().z = -10.0;
+            freeVoice->setPose(pose);
             scene.triggerOn(freeVoice);
         } else {
             title("Replica");
@@ -148,8 +152,10 @@ struct MyApp : public DistributedApp<>
         if (k.key() == ' ') {
             auto *freeVoice = scene.getVoice<SimpleVoice>();
             std::vector<float> params{440.0f}; 
-            freeVoice->setParamFields(params);
-            freeVoice->pose().vec().z = -10.0;
+            freeVoice->setTriggerParams(params);
+            auto pose = freeVoice->pose();
+            pose.vec().z = -10.0;
+            freeVoice->setPose(pose);
             scene.triggerOn(freeVoice);
         }
     }

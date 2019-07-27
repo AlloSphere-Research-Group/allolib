@@ -15,8 +15,8 @@
 #include "al/graphics/al_Graphics.hpp"
 #include "al/io/al_ControlNav.hpp"
 #include "al/sphere/al_OmniRenderer.hpp"
-#include "al/app/al_Toml.hpp"
-#include "al/al_Socket.hpp"
+#include "al/io/al_Toml.hpp"
+#include "al/io/al_Socket.hpp"
 #include "al/scene/al_DynamicScene.hpp"
 #include "al/scene/al_DistributedScene.hpp"
 
@@ -326,7 +326,7 @@ public:
   const Viewpoint& view() const { return mView; }
 
   // Nav& nav() override { return mNav; }
-  Nav& nav() override { return mNav; }
+  Nav& nav() { return mNav; }
   const Nav& nav() const { return mNav; }
 
   Pose& pose() override { return mNav; }
@@ -400,7 +400,7 @@ public:
       std::cout << name() << ":" << logText << std::endl;
   }
 
-  ParameterServer &parameterServer() override { return *mParameterServer; }
+  ParameterServer &parameterServer() /*override*/ { return *mParameterServer; }
 
 //  static bool shouldRunDistributed() {
 //    TomlLoader appConfig("distributed_app.toml");
@@ -464,7 +464,8 @@ private:
 template<class TSharedState>
 inline void DistributedApp<TSharedState>::start() {
 
-  glfw::init(is_verbose);
+    initializeWindowManager();
+//  glfw::init(is_verbose);
   initialize();
 
   std::cout << name() << ":" << roleName()  << " before onInit" << std::endl;
@@ -483,8 +484,10 @@ inline void DistributedApp<TSharedState>::start() {
   }
 
   //  std::cout << name() << ":" << roleName() << " before init flow" << std::endl;
-  if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) initFlowApp(true);
-  else initFlowApp(false);
+
+  // FIXME put back FlowApp
+  //  if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) initFlowApp(true);
+//  else initFlowApp(false);
   
   if (mParameterServer) {
     mParameterServer->registerOSCListener(this); // Have the parameter server pass unhandled messages to this app's onMessage virtual function

@@ -56,6 +56,7 @@ set(headers
   include/al/graphics/al_EasyFBO.hpp
   include/al/graphics/al_EasyVAO.hpp
   include/al/graphics/al_FBO.hpp
+#  include/al/graphics/al_Font.hpp
   include/al/graphics/al_GPUObject.hpp
   include/al/graphics/al_Graphics.hpp
   include/al/graphics/al_Image.hpp
@@ -144,6 +145,7 @@ set(sources
   src/graphics/al_EasyFBO.cpp
   src/graphics/al_EasyVAO.cpp
   src/graphics/al_FBO.cpp
+#  src/graphics/al_Font.cpp
   src/graphics/al_GPUObject.cpp
   src/graphics/al_Graphics.cpp
   src/graphics/al_Image.cpp

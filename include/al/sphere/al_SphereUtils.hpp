@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <cassert>
 
 // gethostname
 #ifdef AL_WINDOWS
@@ -12,7 +13,7 @@
     #include <unistd.h>
 #endif
 
-#include "al/graphics/al_GLFW.hpp"
+//#include "al/graphics/al_GLFW.hpp"
 #include "al/math/al_Constants.hpp"
 
 std::string al_get_hostname()
@@ -74,20 +75,24 @@ void get_fullscreen_dimension(int* width, int* height)
     // donghaoren@cs.ucsb.edu
 
     int count;
-    GLFWmonitor** monitors = glfwGetMonitors(&count);
 
     *width = 0;
     *height = 0;
 
-    for (int i = 0; i < count; i += 1) {
-        int x, y;
-        glfwGetMonitorPos(monitors[i], &x, &y);
-        const GLFWvidmode* vm = glfwGetVideoMode(monitors[i]);
-        int xmax = x + vm->width;
-        int ymax = y + vm->height;
-        if (*width < xmax) *width = xmax;
-        if (*height < ymax) *height = ymax;
-    }
+    assert(0 == 1);
+
+    //FIXME implement
+//    GLFWmonitor** monitors = glfwGetMonitors(&count);
+
+//    for (int i = 0; i < count; i += 1) {
+//        int x, y;
+//        glfwGetMonitorPos(monitors[i], &x, &y);
+//        const GLFWvidmode* vm = glfwGetVideoMode(monitors[i]);
+//        int xmax = x + vm->width;
+//        int ymax = y + vm->height;
+//        if (*width < xmax) *width = xmax;
+//        if (*height < ymax) *height = ymax;
+//    }
 }
 
 std::string config_directory(std::string const& dir_if_not_renderer) {
