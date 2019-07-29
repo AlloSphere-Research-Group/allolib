@@ -46,7 +46,7 @@ struct PickableRotateHandle : Pickable {
   }
 
   void draw(Graphics &g) {
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
+//    glPushAttrib(GL_ALL_ATTRIB_BITS);
     Mesh m;
     m.primitive(Mesh::LINE_STRIP);
 
@@ -81,7 +81,7 @@ struct PickableRotateHandle : Pickable {
         g.draw(m);
       }
     }
-    glPopAttrib();
+//    glPopAttrib();
   }
 
   Hit intersect(Rayd r) override {
