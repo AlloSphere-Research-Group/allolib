@@ -43,7 +43,7 @@
 */
 
 
-#include "al/core/math/al_Vec.hpp"
+#include "al/math/al_Vec.hpp"
 
 namespace al {
 

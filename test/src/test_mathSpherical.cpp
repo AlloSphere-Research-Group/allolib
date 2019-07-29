@@ -3,7 +3,7 @@
 
 #include <math.h>
 
-#include "al/util/al_Spherical.hpp"
+#include "al/math/al_Spherical.hpp"
 
 using namespace al;
 

@@ -8,9 +8,9 @@
 #include "al/math/al_Mat.hpp"
 #include "al/math/al_Functions.hpp"
 // #include "al/math/al_Random.hpp"
-#include "al/util/al_Frustum.hpp"
-#include "al/util/al_Complex.hpp"
-#include "al/util/al_Interval.hpp"
+#include "al/math/al_Frustum.hpp"
+#include "al/math/al_Complex.hpp"
+#include "al/math/al_Interval.hpp"
 
 using namespace al;
 

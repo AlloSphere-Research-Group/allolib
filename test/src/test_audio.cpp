@@ -3,6 +3,7 @@
 
 #include "catch.hpp"
 
+#include "al/math/al_Constants.hpp"
 #include "al/io/al_AudioIO.hpp"
 #include "al/system/al_Time.hpp"
 
