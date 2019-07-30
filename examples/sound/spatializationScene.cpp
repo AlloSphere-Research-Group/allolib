@@ -18,39 +18,68 @@ using namespace std;
 
 #define BLOCK_SIZE (512)
 
-// This file demonstrates the different spatialization techniques
-// doing block rendering in the Spatializer dervide classes.
+// This file demosntrates the different spatialization techniques
+// available through a DynamicScene class that renders a
+// PositionedVoice both visually and sonically
 
+
+// Sound source
+struct Source: public PositionedVoice {
+
+  Mesh mMarker;
+  unsigned long counter = 0; // overall sample counter
+
+  void init() override {
+    addDodecahedron(mMarker);
+  }
+
+  void onProcess(Graphics& g) override {
+    //Draw the source
+    g.pushMatrix();
+    g.polygonFill();
+    g.scale(0.8f);
+    g.color(0.4f, 0.4f, 0.4f, 0.5f);
+    g.draw(mMarker);
+    g.popMatrix();
+  }
+
+  void onProcess(AudioIOData & io) override {
+    // Render signal to be panned
+    while (io()) {
+      float env = (22050 - (counter % 22050))/22050.0f;
+      io.out(0) = 0.5f * rnd::uniform() * env;
+      ++counter;
+    }
+  }
+};
 
 class MyApp : public App
 {
+  DynamicScene mScene;
 
-  Spatializer *spatializer {nullptr};
-
-  Mesh mMarker;
+  Mesh mPoly;
   float speedMult = 0.04f;
   double mElapsedTime = 0.0;
 
   ParameterVec3 srcpos {"srcPos", "", {0.0,0.0,0.0}};
   atomic<float> *mPeaks {nullptr};
 
+  Source *mSource;
+
   SpeakerLayout speakerLayout;
 
   int speakerType = 0;
   int spatializerType = 0;
-  unsigned long counter = 0; // overall sample counter
 
 public:
   MyApp()  {
-    audioIO().channelsBus(1);
   }
 
   ~MyApp() override {
     if (mPeaks) { free(mPeaks); }
-
   }
   void initSpeakers(int type = -1) {
-    if (type < 0 ) {
+    if (type == -1 ) {
       type = (speakerType + 1)%3;
     }
     if (type == 0) {
@@ -63,7 +92,6 @@ public:
     speakerType = type;
     if (mPeaks) { free(mPeaks); }
     mPeaks = new atomic<float>[speakerLayout.speakers().size()]; // Not being freed in this example
-
   }
 
   void initSpatializer(int type = -1) {
@@ -71,31 +99,33 @@ public:
       type = spatializerType + 1;
       if (type == 7) type = 1;
     }
-    if (spatializer) {
-      delete spatializer;
-    }
     spatializerType = type;
     if (type == 1) {
-      spatializer = new Lbap(speakerLayout);
+      mScene.setSpatializer<Lbap>(speakerLayout);
     } else if (type == 2) {
-      spatializer = new Vbap(speakerLayout, speakerType == 0);
+      mScene.setSpatializer<Vbap>(speakerLayout);
     } else if (type == 3) {
-      spatializer = new AmbisonicsSpatializer(speakerLayout, 3, 1, 1);
+      auto ambiSpatializer = mScene.setSpatializer<AmbisonicsSpatializer>(speakerLayout);
+      ambiSpatializer->configure(3, 1, 1);
     } else if (type == 4) {
-      spatializer = new AmbisonicsSpatializer(speakerLayout, 3, 2, 1);
+      auto ambiSpatializer = mScene.setSpatializer<AmbisonicsSpatializer>(speakerLayout);
+      ambiSpatializer->configure(3, 2, 1);
     } else if (type == 5) {
-      spatializer = new AmbisonicsSpatializer(speakerLayout, 3, 3, 1);
+      auto ambiSpatializer = mScene.setSpatializer<AmbisonicsSpatializer>(speakerLayout);
+      ambiSpatializer->configure(3, 3, 1);
     } else if (type == 6) {
-      spatializer = new StereoPanner(speakerLayout);
+      mScene.setSpatializer<StereoPanner>(speakerLayout);
     }
-    spatializer->compile();
   }
 
   void onInit() override {
 
-    addDodecahedron(mMarker);
+    addDodecahedron(mPoly);
     initSpeakers(0);
     initSpatializer(1);
+
+    mSource = mScene.getVoice<Source>();
+    mScene.triggerOn(mSource);
 
     nav().pos(0, 3, 25);
     nav().faceToward({0,0,0});
@@ -110,13 +140,13 @@ public:
     float y = 5.0f*sin(2.8f * tta);
     float z = 6.0f*sin(tta);
 
-    srcpos.set(Vec3d(x,y,z));
+    mSource->setPose(Pose(Vec3d(x,y,z)));
   }
 
   void onDraw(Graphics& g) override {
     g.clear(0);
 
-    g.blending(true);
+    g.blendOn();
     g.blendModeTrans();
     //Draw the speakers
     Speakers sp = speakerLayout.speakers();
@@ -130,13 +160,13 @@ public:
       g.scale(0.02 +  fabs(peak) * 5);
       g.color(HSV(0.5 + (peak * 4)));
       g.polygonLine();
-      g.draw(mMarker);
+      g.draw(mPoly);
       g.popMatrix();
     }
 
     // Draw line to source position
     g.color(1);
-    auto srcPosDraw = srcpos.get();
+    Vec3d srcPosDraw = mSource->pose().vec();
     Mesh lineMesh;
     lineMesh.vertex(0.0,0.0, 0.0);
     lineMesh.vertex(srcPosDraw.x,0.0, srcPosDraw.z);
@@ -150,26 +180,11 @@ public:
     lineMesh.primitive(Mesh::LINES);
     g.draw(lineMesh);
 
-    //Draw the source
-    g.pushMatrix();
-    g.polygonFill();
-    g.scale(0.8f);
-    g.color(0.4f, 0.4f, 0.4f, 0.5f);
-    g.draw(mMarker);
-    g.popMatrix();
+    mScene.render(g);
   }
 
   virtual void onSound(AudioIOData & io) override {
-    // Render signal to be panned
-    while (io()) {
-      float env = (22050 - (counter % 22050))/22050.0f;
-      io.bus(0) = 0.5f * rnd::uniform() * env;
-      ++counter;
-    }
-//    // Spatialize
-    spatializer->prepare(io);
-    spatializer->renderBuffer(io, Pose(srcpos.get()), io.busBuffer(0), io.framesPerBuffer());
-    spatializer->finalize(io);
+    mScene.render(io);
 
     // Now compute RMS to display the signal level for each speaker
     Speakers &speakers = speakerLayout.speakers();
