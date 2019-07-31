@@ -149,7 +149,8 @@ private:
  * It can be controlled by OSC over UDP.
  *
  */
-class OutputMaster : /*public osc::Recv,*/ public al::AudioCallback
+
+class [[deprecated]] OutputMaster : /*public osc::Recv,*/ public al::AudioCallback
 {
 public:
   OutputMaster() {}
