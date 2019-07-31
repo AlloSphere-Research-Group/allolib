@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 {
   MyApp app;
   app.dimensions(800, 600);
-  app.title("Presets GUI");
+  app.title("Audio IO");
   app.fps(30);
   app.initAudio(44100, 256, 2, 2);
   app.start();
