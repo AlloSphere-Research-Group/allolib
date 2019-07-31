@@ -51,6 +51,14 @@ set(headers
   # include/al/app/al_DistributedApp.hpp
   include/al/app/al_FPS.hpp/
   include/al/app/al_WindowApp.hpp
+
+  include/al/domains/al_AudioDomain.hpp
+  include/al/domains/al_ComputationDomain.hpp
+  include/al/domains/al_OpenGLGraphicsDomain.hpp
+  include/al/domains/al_OSCDomain.hpp
+  include/al/domains/al_SimulationDomain.hpp
+#  include/al/domains/al_StateDistributionDomain.hpp
+
   include/al/graphics/al_BufferObject.hpp
   include/al/graphics/al_DefaultShaders.hpp
   include/al/graphics/al_EasyFBO.hpp
@@ -140,6 +148,14 @@ set(sources
   src/app/al_AudioApp.cpp
   src/app/al_FPS.cpp
   src/app/al_WindowApp.cpp
+
+  src/domains/al_AudioDomain.cpp
+  src/domains/al_ComputationDomain.cpp
+#  src/domains/al_OpenGLGraphicsDomain.cpp
+  src/domains/al_OSCDomain.cpp
+  src/domains/al_SimulationDomain.cpp
+#  srcl/domains/al_StateDistributionDomain.cpp
+
   src/graphics/al_BufferObject.cpp
   src/graphics/al_DefaultShaders.cpp
   src/graphics/al_EasyFBO.cpp
