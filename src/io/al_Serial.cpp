@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 
 #include "al/io/al_Serial.hpp"
 
