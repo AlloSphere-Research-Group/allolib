@@ -48,42 +48,6 @@ void WindowApp::start() {
   terminateWindowManager();
 }
 
-// call user event functions inside WindowEventHandler class
-bool WindowApp::keyDown(const Keyboard& k) {
-  onKeyDown(k);
-  return true;
-}
-
-bool WindowApp::keyUp(const Keyboard& k) {
-  onKeyUp(k);
-  return true;
-}
-
-bool WindowApp::mouseDown(const Mouse& m) {
-  onMouseDown(m);
-  return true;
-}
-
-bool WindowApp::mouseDrag(const Mouse& m) {
-  onMouseDrag(m);
-  return true;
-}
-
-bool WindowApp::mouseMove(const Mouse& m) {
-  onMouseMove(m);
-  return true;
-}
-
-bool WindowApp::mouseUp(const Mouse& m) {
-  onMouseUp(m);
-  return true;
-}
-
-bool WindowApp::mouseScroll(const Mouse& m) {
-  onMouseScroll(m);
-  return true;
-}
-
 bool WindowApp::resize(int dw, int dh) {
   onResize(dw, dh);
   return true;

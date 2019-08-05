@@ -36,13 +36,13 @@ void AppNew::initializeDomains() {
     if (strcmp(typeid(*domainPtr).name(), typeid(OpenGLGraphicsDomain).name()) == 0) {
       dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->onCreate = std::bind(&AppNew::onCreate, this);
       dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->onDraw = std::bind(&AppNew::onDraw, this, std::placeholders::_1);
-      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->onKeyDown  = std::bind(&AppNew::onKeyDown, this, std::placeholders::_1);
-      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->onKeyUp = std::bind(&AppNew::onKeyUp, this, std::placeholders::_1);
-      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->onMouseDown = std::bind(&AppNew::onMouseDown, this, std::placeholders::_1);
-      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->onMouseUp  = std::bind(&AppNew::onMouseUp, this, std::placeholders::_1);
-      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->onMouseDrag  = std::bind(&AppNew::onMouseDrag, this, std::placeholders::_1);
-      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->onMouseMove  = std::bind(&AppNew::onMouseMove, this, std::placeholders::_1);
-      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->onMouseScroll  = std::bind(&AppNew::onMouseScroll, this, std::placeholders::_1);
+      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->app.onKeyDown  = std::bind(&AppNew::onKeyDown, this, std::placeholders::_1);
+      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->app.onKeyUp = std::bind(&AppNew::onKeyUp, this, std::placeholders::_1);
+      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->app.onMouseDown = std::bind(&AppNew::onMouseDown, this, std::placeholders::_1);
+      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->app.onMouseUp  = std::bind(&AppNew::onMouseUp, this, std::placeholders::_1);
+      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->app.onMouseDrag  = std::bind(&AppNew::onMouseDrag, this, std::placeholders::_1);
+      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->app.onMouseMove  = std::bind(&AppNew::onMouseMove, this, std::placeholders::_1);
+      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->app.onMouseScroll  = std::bind(&AppNew::onMouseScroll, this, std::placeholders::_1);
 
       mSimulationDomain->simulationFunction = std::bind(&AppNew::onAnimate, this, std::placeholders::_1);
     } else if (strcmp(typeid(*domainPtr).name(), typeid(AudioDomain).name()) == 0) {

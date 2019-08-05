@@ -141,7 +141,7 @@ struct MyApp : public AppNew {
 
 
   // This is called whenever a key is pressed.
-  void onKeyDown(const Keyboard& k) override {
+  bool onKeyDown(const Keyboard& k) override {
 
     // Use a switch to do something when a particular key is pressed
     switch(k.key()){
@@ -159,10 +159,11 @@ struct MyApp : public AppNew {
     case Keyboard::DELETE: printf("Pressed delete.\n"); break;
     case Keyboard::F1: printf("Pressed F1.\n"); break;
     }
+    return true;
   }
 
   // This is called whenever a mouse button is pressed.
-  void onMouseDown(const Mouse& m) override {
+  bool onMouseDown(const Mouse& m) override {
     switch(m.button()){
     case Mouse::LEFT: printf("Pressed left mouse button.\n"); break;
     case Mouse::RIGHT: printf("Pressed right mouse button.\n"); break;
@@ -170,8 +171,9 @@ struct MyApp : public AppNew {
     default:
       printf("Pressed button %i.\n", m.button()); break;
     }
+    return true;
   }
-  void onMouseUp (const Mouse& m) override {
+  bool onMouseUp (const Mouse& m) override {
     switch(m.button()){
     case Mouse::LEFT: printf("Released left mouse button.\n"); break;
     case Mouse::RIGHT: printf("Released right mouse button.\n"); break;
@@ -179,14 +181,16 @@ struct MyApp : public AppNew {
     default:
       printf("Released button %i.\n", m.button()); break;
     }
+    return true;
   }
 
   // This is called whenever the mouse is dragged.
-  void onMouseDrag(const Mouse& m){
+  bool onMouseDrag(const Mouse& m) override {
     // Get mouse coordinates, in pixels, relative to top-left corner of window
     int x = m.x();
     int y = m.y();
     printf("Mouse dragged: %3d, %3d\n", x,y);
+    return true;
   }
 
   // *****************************************************

@@ -51,6 +51,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <memory>
+#include <functional>
 
 namespace al{
 
@@ -322,6 +323,17 @@ public:
   void vsync(bool v); ///< Set whether to sync the frame rate to the monitor's refresh rate
   void decorated(bool b);
 
+  // callbacks from window class, will call user event functions like `on***`
+  // return false is the event has been consumed and should not propagate further.
+
+  std::function<bool(Keyboard const&)> onKeyDown  = [](Keyboard const&){ return true; };
+  std::function<bool(Keyboard const&)> onKeyUp = [](Keyboard const&){ return true; };
+  std::function<bool(Mouse const&)> onMouseDown = [](Mouse const&){ return true; };
+  std::function<bool(Mouse const&)> onMouseUp  = [](Mouse const&){ return true; };
+  std::function<bool(Mouse const&)> onMouseDrag  = [](Mouse const&){ return true; };
+  std::function<bool(Mouse const&)> onMouseMove  = [](Mouse const&){ return true; };
+  std::function<bool(Mouse const&)> onMouseScroll  = [](Mouse const&){ return true; };
+
   WindowEventHandlers const& windowEventHandlers() const {
     return mWindowEventHandlers;
   }
@@ -391,13 +403,13 @@ protected:
       if(false == mWindowEventHandlers[i]->e) break;\
     }\
   }
-  void callHandlersMouseDown(){ CALL(mouseDown(mMouse)); }
-  void callHandlersMouseDrag(){ CALL(mouseDrag(mMouse)); }
-  void callHandlersMouseMove(){ CALL(mouseMove(mMouse)); }
-  void callHandlersMouseUp(){ CALL(mouseUp(mMouse)); }
-  void callHandlersMouseScroll(){ CALL(mouseScroll(mMouse)); }
-  void callHandlersKeyDown(){ CALL(keyDown(mKeyboard)); }
-  void callHandlersKeyUp(){ CALL(keyUp(mKeyboard)); }
+  void callHandlersMouseDown(){ CALL(mouseDown(mMouse)); onMouseDown(mMouse); }
+  void callHandlersMouseDrag(){ CALL(mouseDrag(mMouse)); onMouseDrag(mMouse); }
+  void callHandlersMouseMove(){ CALL(mouseMove(mMouse)); onMouseMove(mMouse); }
+  void callHandlersMouseUp(){ CALL(mouseUp(mMouse)); onMouseUp(mMouse); }
+  void callHandlersMouseScroll(){ CALL(mouseScroll(mMouse)); onMouseScroll(mMouse);  }
+  void callHandlersKeyDown(){ CALL(keyDown(mKeyboard)); onKeyDown(mKeyboard); }
+  void callHandlersKeyUp(){ CALL(keyUp(mKeyboard)); onKeyUp(mKeyboard); }
   void callHandlersResize(int w, int h){ CALL(resize(w, h)); }
   void callHandlersVisibility(bool v){ CALL(visibility(v)); }
   #undef CALL

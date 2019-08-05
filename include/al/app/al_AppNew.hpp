@@ -120,13 +120,13 @@ public:
   virtual void onMessage(osc::Message &m) { (void) m;}
   virtual void onExit() {}
 
-  virtual void onKeyDown(Keyboard const& k) {}
-  virtual void onKeyUp(Keyboard const& k) {}
-  virtual void onMouseDown(Mouse const& m) {}
-  virtual void onMouseUp(Mouse const& m) {}
-  virtual void onMouseDrag(Mouse const& m) {}
-  virtual void onMouseMove(Mouse const& m) {}
-  virtual void onMouseScroll(Mouse const& m) {}
+  virtual bool onKeyDown(Keyboard const& k) { return true; }
+  virtual bool onKeyUp(Keyboard const& k) { return true; }
+  virtual bool onMouseDown(Mouse const& m) { return true; }
+  virtual bool onMouseUp(Mouse const& m) { return true; }
+  virtual bool onMouseDrag(Mouse const& m) { return true; }
+  virtual bool onMouseMove(Mouse const& m) { return true; }
+  virtual bool onMouseScroll(Mouse const& m) { return true; }
 //  virtual void onResize(int w, int h) {}
 //  virtual void onVisibility(bool v) {}
 

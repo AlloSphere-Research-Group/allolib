@@ -16,6 +16,7 @@
 #include "al/graphics/al_Graphics.hpp"
 
 #include <atomic>
+#include <functional>
 
 namespace al {
 
@@ -46,25 +47,10 @@ class WindowApp : public Window, public WindowEventHandler, public FPS {
   virtual void onAnimate(double dt) {}
   virtual void onDraw(Graphics& g) {}
   virtual void onExit() {}
-  virtual void onKeyDown(Keyboard const& k) {}
-  virtual void onKeyUp(Keyboard const& k) {}
-  virtual void onMouseDown(Mouse const& m) {}
-  virtual void onMouseUp(Mouse const& m) {}
-  virtual void onMouseDrag(Mouse const& m) {}
-  virtual void onMouseMove(Mouse const& m) {}
-  virtual void onMouseScroll(Mouse const& m) {}
+
   virtual void onResize(int w, int h) {}
   virtual void onVisibility(bool v) {}
 
-  // callbacks from window class, will call user event functions like `on***`
-  // return false is the event has been consumed and should not propagate further.
-  bool keyDown(const Keyboard& k) final;
-  bool keyUp(const Keyboard& k) final;
-  bool mouseDown(const Mouse& m) final;
-  bool mouseDrag(const Mouse& m) final;
-  bool mouseMove(const Mouse& m) final;
-  bool mouseUp(const Mouse& m) final;
-  bool mouseScroll(const Mouse& m) final;
   bool resize(int dw, int dh) final;
   bool visibility(bool v) final;
 };

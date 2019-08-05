@@ -52,13 +52,13 @@ public:
   std::function<void(Graphics &)> onDraw = [](Graphics &){};
   std::function<void()> onExit = [](){};
 
-  std::function<void(Keyboard const&)> onKeyDown  = [](Keyboard const&){};
-  std::function<void(Keyboard const&)> onKeyUp = [](Keyboard const&){};
-  std::function<void(Mouse const&)> onMouseDown = [](Mouse const&){};
-  std::function<void(Mouse const&)> onMouseUp  = [](Mouse const&){};
-  std::function<void(Mouse const&)> onMouseDrag  = [](Mouse const&){};
-  std::function<void(Mouse const&)> onMouseMove  = [](Mouse const&){};
-  std::function<void(Mouse const&)> onMouseScroll  = [](Mouse const&){};
+//  std::function<void(Keyboard const&)> onKeyDown  = [](Keyboard const&){};
+//  std::function<void(Keyboard const&)> onKeyUp = [](Keyboard const&){};
+//  std::function<void(Mouse const&)> onMouseDown = [](Mouse const&){};
+//  std::function<void(Mouse const&)> onMouseUp  = [](Mouse const&){};
+//  std::function<void(Mouse const&)> onMouseDrag  = [](Mouse const&){};
+//  std::function<void(Mouse const&)> onMouseMove  = [](Mouse const&){};
+//  std::function<void(Mouse const&)> onMouseScroll  = [](Mouse const&){};
 
   // Virtual functions to override
 
