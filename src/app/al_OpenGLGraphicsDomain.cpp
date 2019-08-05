@@ -1,19 +1,20 @@
 #include <iostream>
 #include <cstring>
 
-#include "al/domains/al_OpenGLGraphicsDomain.hpp"
+#include "al/app/al_OpenGLGraphicsDomain.hpp"
+#include "al/io/al_Window.hpp"
 
 using namespace al;
 
 bool OpenGLGraphicsDomain::initialize(ComputationDomain *parent) {
   bool ret = true;
-  glfw::init(app.is_verbose);
-  ret &= glfwInit();
+  initializeWindowManager();
+//  glfw::init(app.is_verbose);
+//  ret &= glfwInit();
 
-  if (app.is_verbose) std::cout << "Initialized GLFW " << glfwGetVersionString() << std::endl;
-  glfwSetErrorCallback([](int code, const char* description){std::cout << "glfw error [" << code << "]: " << description << std::endl;});
+//  if (app.is_verbose) std::cout << "Initialized GLFW " << glfwGetVersionString() << std::endl;
+//  glfwSetErrorCallback([](int code, const char* description){std::cout << "glfw error [" << code << "]: " << description << std::endl;});
 
-  onInit();
   callInitializeCallbacks();
   return ret;
 }
@@ -77,7 +78,7 @@ bool OpenGLGraphicsDomain::stop() {
 
 bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
   callCleanupCallbacks();
-  glfw::terminate(app.is_verbose);
+  terminateWindowManager();
   return true;
 }
 

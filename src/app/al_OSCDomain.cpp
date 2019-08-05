@@ -1,4 +1,4 @@
-#include "al/domains/al_OSCDomain.hpp"
+#include "al/app/al_OSCDomain.hpp"
 
 using namespace al;
 

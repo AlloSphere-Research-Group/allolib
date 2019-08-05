@@ -1,17 +1,19 @@
-#include "al/domains/al_AudioDomain.hpp"
+#include "al/app/al_AudioDomain.hpp"
 
 using namespace al;
 
 
 bool AudioDomain::initialize(ComputationDomain *parent) {
+  bool ret = true;
+
   callInitializeCallbacks();
-  return true;
+  ret &= audioIO().open();
+  gam::Domain::spu(audioIO().framesPerSecond());
+  return ret;
 }
 
 bool AudioDomain::start() {
   bool ret = true;
-  ret &= audioIO().open();
-  gam::Domain::spu(audioIO().framesPerSecond());
   ret &= audioIO().start();
   return ret;
 }

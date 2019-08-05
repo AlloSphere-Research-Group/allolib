@@ -48,10 +48,17 @@ public:
     removeSubDomain(std::static_pointer_cast<SynchronousDomain>(windowDomain));
   }
 
-  std::function<void(void)> onInit = [](){};
   std::function<void(void)> onCreate = [](){};
   std::function<void(Graphics &)> onDraw = [](Graphics &){};
   std::function<void()> onExit = [](){};
+
+  std::function<void(Keyboard const&)> onKeyDown  = [](Keyboard const&){};
+  std::function<void(Keyboard const&)> onKeyUp = [](Keyboard const&){};
+  std::function<void(Mouse const&)> onMouseDown = [](Mouse const&){};
+  std::function<void(Mouse const&)> onMouseUp  = [](Mouse const&){};
+  std::function<void(Mouse const&)> onMouseDrag  = [](Mouse const&){};
+  std::function<void(Mouse const&)> onMouseMove  = [](Mouse const&){};
+  std::function<void(Mouse const&)> onMouseScroll  = [](Mouse const&){};
 
   // Virtual functions to override
 
@@ -59,7 +66,6 @@ public:
     app.append(mNavControl);
     app.mGraphics.init();
   }
-
 
   virtual void onNewFrame() {
       mTimeDrift = app.dt_sec();
@@ -94,10 +100,11 @@ public:
   // TODO change WindowApp to OpenGLWindowDomain
   WindowApp app;
 
-private:
   Nav mNav; // is a Pose itself and also handles manipulation of pose
   Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
   NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse
+
+private:
 
   bool mRunning {false};
 };

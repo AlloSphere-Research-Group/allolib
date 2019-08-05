@@ -13,7 +13,7 @@
 #include "al/spatial/al_Pose.hpp"
 #include "al/protocol/al_OSC.hpp"
 
-#include "al/domains/al_ComputationDomain.hpp"
+#include "al/app/al_ComputationDomain.hpp"
 #include "Gamma/Domain.h"
 
 //#undef AL_USE_CUTTLEBONE

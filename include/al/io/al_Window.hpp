@@ -340,11 +340,6 @@ public:
   /// Destroy all created windows
   static void destroyAll();
 
-protected:
-  friend class WindowImpl;
-
-  // class WindowImpl * mImpl;
-  std::unique_ptr<class WindowImpl> mImpl;
   Keyboard mKeyboard;
   Mouse mMouse;
   WindowEventHandlers mWindowEventHandlers;
@@ -363,6 +358,13 @@ protected:
   float mHighresFactor = 0;
   int mFramebufferWidth = 0;
   int mFramebufferHeight = 0;
+
+protected:
+  friend class WindowImpl;
+
+  // class WindowImpl * mImpl;
+  std::unique_ptr<class WindowImpl> mImpl;
+
 
   // Must be defined in pimpl-specific file
   bool implCreate(bool is_verbose=false);
