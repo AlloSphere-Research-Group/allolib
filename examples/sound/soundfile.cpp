@@ -1,5 +1,6 @@
 #include "al/app/al_App.hpp"
 #include "al/sound/al_SoundFile.hpp"
+#include "al/io/al_Imgui.hpp"
 #include <iostream>
 #include <vector>
 
@@ -7,32 +8,57 @@ using namespace al;
 
 struct MyApp : App
 {
-  SoundFile soundFile;
-  SoundFilePlayer player;
+  SoundFilePlayerTS playerTS;
   std::vector<float> buffer;
+  bool loop = true;
 
-  void onCreate() {
-    player.soundFile = &soundFile;
-    player.loop = true;
-    player.pause = false;
-    soundFile.open("data/count.wav");
-    std::cout << "sampleRate: " <<  soundFile.sampleRate << std::endl;
-    std::cout << "channels: " <<  soundFile.channels << std::endl;
-    std::cout << "frameCount: " <<  soundFile.frameCount << std::endl;
+  void onCreate() override {
+    playerTS.open("data/count.wav");
+    std::cout << "sampleRate: " <<  playerTS.soundFile.sampleRate << std::endl;
+    std::cout << "channels: " <<  playerTS.soundFile.channels << std::endl;
+    std::cout << "frameCount: " <<  playerTS.soundFile.frameCount << std::endl;
+    playerTS.setLoop();
+    playerTS.setPlay();
+    imguiInit();
   }
 
-  void onDraw(Graphics& g) {
-    g.clear(1, 0, 0);
+  void onDraw(Graphics& g) override {
+    imguiBeginFrame();
+    ImGui::Begin("control window");
+    if (ImGui::Button("play")) {
+      playerTS.setPlay();
+    }
+    if (ImGui::Button("pause")) {
+      playerTS.setPause();
+    }
+    if (ImGui::Button("toggle pause")) {
+      playerTS.togglePause();
+    }
+    if (ImGui::Button("rewind")) {
+      playerTS.setRewind();
+    }
+    if (ImGui::Checkbox("loop", &loop)) {
+      if (loop) {
+        playerTS.setLoop();
+      }
+      else {
+        playerTS.setNoLoop();
+      }
+    }
+    ImGui::End();
+    imguiEndFrame();
+    g.clear(0, 0, 0);
+    imguiDraw();
   }
 
-  void onSound(AudioIOData& io) {
+  void onSound(AudioIOData& io) override {
     int frames = (int)io.framesPerBuffer();
-    int channels = soundFile.channels;
+    int channels = playerTS.soundFile.channels;
     int bufferLength = frames * channels;
     if ((int)buffer.size() < bufferLength) {
       buffer.resize(bufferLength);
     }
-    player.getFrames(frames, buffer.data(), (int)buffer.size());
+    playerTS.getFrames(frames, buffer.data(), (int)buffer.size());
     int second = (channels < 2)? 0 : 1;
     while (io()) {
       int frame = (int)io.frame();
@@ -40,6 +66,10 @@ struct MyApp : App
       io.out(0) = buffer[idx];
       io.out(1) = buffer[idx + second];
     }
+  }
+
+  void onExit() override {
+    imguiShutdown();
   }
 };
 

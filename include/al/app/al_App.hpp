@@ -54,15 +54,16 @@ public:
   void onAnimate(double dt) override {}
   void onDraw (Graphics& g) override {}
   void onExit() override {}
-  void onKeyDown(Keyboard const& k) {}
-  void onKeyUp(Keyboard const& k) {}
-  void onMouseDown(Mouse const& m) {}
-  void onMouseUp(Mouse const& m) {}
-  void onMouseDrag(Mouse const& m) {}
-  void onMouseMove(Mouse const& m) {}
-  void onMouseScroll(Mouse const& m) {}
   void onResize(int w, int h) override {}
   void onVisibility(bool v) override {}
+
+  virtual void onKeyDown(Keyboard const& k) {}
+  virtual void onKeyUp(Keyboard const& k) {}
+  virtual void onMouseDown(Mouse const& m) {}
+  virtual void onMouseUp(Mouse const& m) {}
+  virtual void onMouseDrag(Mouse const& m) {}
+  virtual void onMouseMove(Mouse const& m) {}
+  virtual void onMouseScroll(Mouse const& m) {}
 
   // extra functionalities to be handled
   virtual void preOnCreate();

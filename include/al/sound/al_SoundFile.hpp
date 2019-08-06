@@ -77,11 +77,11 @@ struct SoundFilePlayerTS
       player.soundFile = &soundFile;
   }
 
-  void setPlay () { pauseSignal.store(true); }
-  void setPause () { pauseSignal.store(false); }
-  void togglePause () { pauseSignal.store(pauseSignal.load()); }
+  void setPlay () { pauseSignal.store(false); }
+  void setPause () { pauseSignal.store(true); }
+  void togglePause () { pauseSignal.store(!pauseSignal.load()); }
 
-  void rewind () { rewindSignal.store(true); }
+  void setRewind () { rewindSignal.store(true); }
 
   void setLoop () { loopSignal.store(true); }
   void setNoLoop () {loopSignal.store(false); }
