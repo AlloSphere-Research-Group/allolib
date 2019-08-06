@@ -1,5 +1,5 @@
 #include "al/app/al_App.hpp"
-#include "soundfile/al_SoundFile_headeronly.hpp"
+#include "al/sound/al_SoundFile.hpp"
 #include <iostream>
 #include <vector>
 

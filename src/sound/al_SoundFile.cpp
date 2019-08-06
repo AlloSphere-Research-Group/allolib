@@ -1,4 +1,4 @@
-#include "al_SoundFile.hpp"
+#include "al/sound/al_SoundFile.hpp"
 
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"

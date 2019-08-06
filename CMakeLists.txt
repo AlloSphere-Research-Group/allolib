@@ -116,6 +116,7 @@ set(headers
   include/al/sound/al_Speaker.hpp
   include/al/sound/al_StereoPanner.hpp
   include/al/sound/al_Vbap.hpp
+  include/al/sound/al_SoundFile.hpp
   include/al/spatial/al_HashSpace.hpp
   include/al/spatial/al_Pose.hpp
   include/al/system/al_PeriodicThread.hpp
@@ -206,6 +207,7 @@ set(sources
   src/sound/al_Spatializer.cpp
   src/sound/al_StereoPanner.cpp
   src/sound/al_OutputMaster.cpp
+  src/sound/al_SoundFile.cpp
   src/spatial/al_HashSpace.cpp
   src/spatial/al_Pose.cpp
   src/system/al_PeriodicThread.cpp

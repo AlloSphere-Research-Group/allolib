@@ -2,6 +2,7 @@
 #define INCLUDE_AL_SOUNDFILE_HPP
 
 #include <vector>
+#include <atomic>
 
 namespace al {
 
@@ -52,6 +53,48 @@ struct SoundFilePlayer
 
 // only supports wav
 //void writeSoundFile (const char* filename, float* data, int frameCount, int sampleRate, int channels);
+
+struct SoundFilePlayerTS
+{
+  SoundFile soundFile;
+  SoundFilePlayer player;
+  std::atomic<bool> pauseSignal;
+  std::atomic<bool> loopSignal;
+  std::atomic<bool> rewindSignal;
+  // TODO - volume and fading
+
+  SoundFilePlayerTS () = default;
+  SoundFilePlayerTS (const SoundFilePlayerTS& other) = default;
+  SoundFilePlayerTS (SoundFilePlayerTS&& other) = default;
+
+  SoundFilePlayerTS& operator= (const SoundFilePlayerTS& other) = default;
+  SoundFilePlayerTS& operator= (SoundFilePlayerTS&& other) = default;
+
+  ~SoundFilePlayerTS () = default;
+
+  void open (const char* path) {
+      soundFile.open(path);
+      player.soundFile = &soundFile;
+  }
+
+  void setPlay () { pauseSignal.store(true); }
+  void setPause () { pauseSignal.store(false); }
+  void togglePause () { pauseSignal.store(pauseSignal.load()); }
+
+  void rewind () { rewindSignal.store(true); }
+
+  void setLoop () { loopSignal.store(true); }
+  void setNoLoop () {loopSignal.store(false); }
+
+  void getFrames (int numFrames, float* buffer, int bufferLength) {
+    player.pause = pauseSignal.load();
+    player.loop = loopSignal.load();
+    if (rewindSignal.exchange(false)) {
+        player.frame = 0;
+    }
+    player.getFrames(numFrames, buffer, bufferLength);
+  }
+};
 
 } // namespace al
 
