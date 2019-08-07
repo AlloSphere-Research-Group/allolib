@@ -164,8 +164,8 @@ struct MyApp : public App {
   }
 
   bool onMouseMove(const Mouse& m) override {
-    mx = float(m.x()) / graphicsDomain()->app.width();
-    my = float(m.y()) / graphicsDomain()->app.height();
+    mx = float(m.x()) / defaultWindow().width();
+    my = float(m.y()) / defaultWindow().height();
     return true;
   }
 };
