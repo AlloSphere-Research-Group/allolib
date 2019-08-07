@@ -212,7 +212,7 @@ class Graphics : public RenderManager {
   }
 
   // extended, predefined render managing --------------------------------------
-  static void init();
+  void init();
 
   // set overall tint, regardless of rendering mode
   void tint(Color const& c) { mTint = c; mUniformChanged = true; }
@@ -334,76 +334,76 @@ class Graphics : public RenderManager {
   void blendOff() { blending(false); }
 
 private:
-  static Color mClearColor;
-  static float mClearDepth;
-  static Color mColor;
-  static Color mTint;
 
-  static Lens mLens;
-  static float mEye;
+  Color mClearColor {0, 0, 0, 1};
+  float mClearDepth = 1;
+  Color mColor {1, 1, 1, 1};
+  Color mTint {1, 1, 1, 1};
 
-  static ColoringMode mColoringMode;
-  static bool mLightingEnabled;
-  static bool mRenderModeChanged;
-  static bool mUniformChanged;
+  Graphics::ColoringMode mColoringMode = ColoringMode::UNIFORM;
+  bool mRenderModeChanged = true;
+  bool mUniformChanged = true;
+  bool mLightingEnabled = false;
 
-  static ShaderProgram color_shader;
-  static ShaderProgram mesh_shader;
-  static ShaderProgram tex_shader;
+  ShaderProgram mesh_shader;
+  ShaderProgram color_shader;
+  ShaderProgram tex_shader;
 
-  static int color_location;
-  static int color_tint_location;
-  static int mesh_tint_location;
-  static int tex_tint_location;
+  int color_location = 0;
+  int color_tint_location = 0;
+  int mesh_tint_location = 0;
+  int tex_tint_location = 0;
 
-  static Material mMaterial;
-  static Light mLights[al_max_num_lights()];
-  static bool mLightOn[al_max_num_lights()];
-  static int num_lights;
+  Material mMaterial;
+  Light mLights[al_max_num_lights()];
+  bool mLightOn[al_max_num_lights()];
+  int num_lights = 1;
 
-  static ShaderProgram lighting_color_shader[al_max_num_lights()];
-  static ShaderProgram lighting_mesh_shader[al_max_num_lights()];
-  static ShaderProgram lighting_tex_shader[al_max_num_lights()];
-  static ShaderProgram lighting_material_shader[al_max_num_lights()];
+  ShaderProgram lighting_color_shader[al_max_num_lights()];
+  ShaderProgram lighting_mesh_shader[al_max_num_lights()];
+  ShaderProgram lighting_tex_shader[al_max_num_lights()];
+  ShaderProgram lighting_material_shader[al_max_num_lights()];
 
-  static int lighting_color_location[al_max_num_lights()];
-  static int lighting_color_tint_location[al_max_num_lights()];
-  static int lighting_mesh_tint_location[al_max_num_lights()];
-  static int lighting_tex_tint_location[al_max_num_lights()];
-  static int lighting_material_tint_location[al_max_num_lights()];
+  int lighting_color_location[al_max_num_lights()];
+  int lighting_color_tint_location[al_max_num_lights()];
+  int lighting_mesh_tint_location[al_max_num_lights()];
+  int lighting_tex_tint_location[al_max_num_lights()];
+  int lighting_material_tint_location[al_max_num_lights()];
 
-  static lighting_shader_uniforms lighting_color_uniforms[al_max_num_lights()];
-  static lighting_shader_uniforms lighting_mesh_uniforms[al_max_num_lights()];
-  static lighting_shader_uniforms lighting_tex_uniforms[al_max_num_lights()];
-  static lighting_shader_uniforms lighting_material_uniforms[al_max_num_lights()];
-  
-  static bool is_omni;
+  lighting_shader_uniforms lighting_color_uniforms[al_max_num_lights()];
+  lighting_shader_uniforms lighting_mesh_uniforms[al_max_num_lights()];
+  lighting_shader_uniforms lighting_tex_uniforms[al_max_num_lights()];
+  lighting_shader_uniforms lighting_material_uniforms[al_max_num_lights()];
 
-  static ShaderProgram omni_color_shader;
-  static ShaderProgram omni_mesh_shader;
-  static ShaderProgram omni_tex_shader;
+  bool is_omni = false;
 
-  static int omni_color_location;
-  static int omni_color_tint_location;
-  static int omni_mesh_tint_location;
-  static int omni_tex_tint_location;
+  ShaderProgram omni_mesh_shader;
+  ShaderProgram omni_color_shader;
+  ShaderProgram omni_tex_shader;
 
-  static ShaderProgram omni_lighting_color_shader[al_max_num_lights()];
-  static ShaderProgram omni_lighting_mesh_shader[al_max_num_lights()];
-  static ShaderProgram omni_lighting_tex_shader[al_max_num_lights()];
-  static ShaderProgram omni_lighting_material_shader[al_max_num_lights()];
+  int omni_color_location = 0;
+  int omni_color_tint_location = 0;
+  int omni_mesh_tint_location = 0;
+  int omni_tex_tint_location = 0;
 
-  static int omni_lighting_color_location[al_max_num_lights()];
-  static int omni_lighting_color_tint_location[al_max_num_lights()];
-  static int omni_lighting_mesh_tint_location[al_max_num_lights()];
-  static int omni_lighting_tex_tint_location[al_max_num_lights()];
-  static int omni_lighting_material_tint_location[al_max_num_lights()];
+  ShaderProgram omni_lighting_color_shader[al_max_num_lights()];
+  ShaderProgram omni_lighting_mesh_shader[al_max_num_lights()];
+  ShaderProgram omni_lighting_tex_shader[al_max_num_lights()];
+  ShaderProgram omni_lighting_material_shader[al_max_num_lights()];
 
-  static lighting_shader_uniforms omni_lighting_color_uniforms[al_max_num_lights()];
-  static lighting_shader_uniforms omni_lighting_mesh_uniforms[al_max_num_lights()];
-  static lighting_shader_uniforms omni_lighting_tex_uniforms[al_max_num_lights()];
-  static lighting_shader_uniforms omni_lighting_material_uniforms[al_max_num_lights()];
+  int omni_lighting_color_location[al_max_num_lights()];
+  int omni_lighting_color_tint_location[al_max_num_lights()];
+  int omni_lighting_mesh_tint_location[al_max_num_lights()];
+  int omni_lighting_tex_tint_location[al_max_num_lights()];
+  int omni_lighting_material_tint_location[al_max_num_lights()];
 
+  lighting_shader_uniforms omni_lighting_color_uniforms[al_max_num_lights()];
+  lighting_shader_uniforms omni_lighting_mesh_uniforms[al_max_num_lights()];
+  lighting_shader_uniforms omni_lighting_tex_uniforms[al_max_num_lights()];
+  lighting_shader_uniforms omni_lighting_material_uniforms[al_max_num_lights()];
+
+  Lens mLens;
+  float mEye = 0.0f;
 };
 
 }  // namespace al

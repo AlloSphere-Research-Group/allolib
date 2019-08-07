@@ -63,11 +63,11 @@ class GLFWOpenGLWindowDomain : public SynchronousDomain {
   bool cleanup(ComputationDomain *parent = nullptr) override;
 
   std::function<void()> preOnDraw = [this]() {
-    mGraphics.framebuffer(FBO::DEFAULT);
-    mGraphics.viewport(0, 0, mWindow->fbWidth(), mWindow->fbHeight());
-    mGraphics.resetMatrixStack();
-    mGraphics.camera(mView);
-    mGraphics.color(1, 1, 1);
+    mGraphics->framebuffer(FBO::DEFAULT);
+    mGraphics->viewport(0, 0, mWindow->fbWidth(), mWindow->fbHeight());
+    mGraphics->resetMatrixStack();
+    mGraphics->camera(mView);
+    mGraphics->color(1, 1, 1);
   };
 
   virtual void onNewFrame() {
@@ -91,12 +91,12 @@ class GLFWOpenGLWindowDomain : public SynchronousDomain {
 
   Window &window() { return *mWindow; }
 
-  Graphics &graphics() { return mGraphics; }
+  Graphics &graphics() { return *mGraphics; }
 
  private:
   std::unique_ptr<Window> mWindow;
 
-  Graphics mGraphics;
+  std::unique_ptr<Graphics> mGraphics;
 
   OpenGLGraphicsDomain *mParent;
 

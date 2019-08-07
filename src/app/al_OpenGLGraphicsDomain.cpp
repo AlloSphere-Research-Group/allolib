@@ -63,6 +63,7 @@ bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
 
 GLFWOpenGLWindowDomain::GLFWOpenGLWindowDomain() {
   mWindow = std::make_unique<Window>();
+  mGraphics = std::make_unique<Graphics>();
 }
 
 bool GLFWOpenGLWindowDomain::initialize(ComputationDomain *parent) {
@@ -76,9 +77,12 @@ bool GLFWOpenGLWindowDomain::initialize(ComputationDomain *parent) {
   if (!mWindow) {
     mWindow = std::make_unique<Window>();
   }
+  if (!mGraphics) {
+    mGraphics = std::make_unique<Graphics>();
+  }
   if (!mWindow->created()) {
     bool ret = mWindow->create();
-    mGraphics.init();
+    mGraphics->init();
     return ret;
   }
 
@@ -90,7 +94,7 @@ bool GLFWOpenGLWindowDomain::tick() {
   onNewFrame();
   mWindow->makeCurrent();
   preOnDraw();
-  onDraw(mGraphics);
+  onDraw(*mGraphics);
   postOnDraw();
   mWindow->refresh();
   return true;
@@ -100,6 +104,9 @@ bool GLFWOpenGLWindowDomain::cleanup(ComputationDomain *parent) {
   if (mWindow) {
     mWindow->destroy();
     mWindow = nullptr;
+  }
+  if (mGraphics) {
+    mGraphics = nullptr;
   }
   return true;
 }
