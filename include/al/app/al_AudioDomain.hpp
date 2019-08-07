@@ -31,24 +31,12 @@ public:
   AudioIO& audioIO(){ return mAudioIO; }
   const AudioIO& audioIO() const { return mAudioIO; }
 
-
-  // initialize audio with default values from default device
-  enum AudioIOConfig : unsigned int {
-    IN_ONLY = 0b1,
-    OUT_ONLY = 0b10,
-    IN_AND_OUT = 0b11
-  };
-
-  void configure(double audioRate, int audioBlockSize,
-      int audioOutputs, int audioInputs,
-      int device = -1);
+  void configure(double audioRate = 44100, int audioBlockSize = 512,
+      int audioOutputs = -1, int audioInputs = -1);
 
   void configure(AudioDevice &dev,
                  double audioRate, int audioBlockSize,
                  int audioOutputs, int audioInputs);
-
-  void configure(AudioIOConfig config = OUT_ONLY);
-
 
   std::function<void(AudioIOData &io)> onSound = [](AudioIOData &){};
 

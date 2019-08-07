@@ -47,7 +47,7 @@ add_subdirectory(external)
 
 set(headers
   include/al/app/al_App.hpp
-  include/al/app/al_AppNew.hpp
+#  include/al/app/al_AppNew.hpp
   include/al/app/al_AudioApp.hpp
   # include/al/app/al_DistributedApp.hpp
   include/al/app/al_FPS.hpp/
@@ -147,7 +147,7 @@ set(headers
 )
 
 set(sources
-  src/app/al_AppNew.cpp
+  src/app/al_App.cpp
   src/app/al_AudioApp.cpp
   src/app/al_FPS.cpp
   src/app/al_WindowApp.cpp

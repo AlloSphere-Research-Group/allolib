@@ -39,7 +39,7 @@ struct MyApp : App
     g.draw(m);
   }
 
-  void onKeyDown(const Keyboard& k) override {
+  bool onKeyDown(const Keyboard& k) override {
     switch (k.key()) {
     case 'r': recorder.startRecord();
       break;
@@ -52,6 +52,7 @@ struct MyApp : App
     case '3': presetHandler.recallPreset("preset3");
       break;
     }
+    return true;
   }
 };
 

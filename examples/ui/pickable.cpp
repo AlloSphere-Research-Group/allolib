@@ -127,29 +127,35 @@ struct MyApp : public App {
   }
 
   // allow event propagation to children pickables while shift key down
-  virtual void onKeyDown(const Keyboard &k) override{
+  bool onKeyDown(const Keyboard &k) override{
     pickable.testChildren = k.shift();
+    return true;
   }
-  virtual void onKeyUp(const Keyboard &k) override{
+  bool onKeyUp(const Keyboard &k) override{
     pickable.testChildren = k.shift();
+    return true;
   }
 
-  virtual void onMouseMove(const Mouse &m) override {
+  bool onMouseMove(const Mouse &m) override {
     // make a ray from mouse location
     Rayd r = getPickRay(m.x(), m.y());
     pickable.event(PickEvent(Point, r));
+    return true;
   }
-  virtual void onMouseDown(const Mouse& m) override {
+  bool onMouseDown(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
     pickable.event(PickEvent(Pick, r));
+    return true;
   }
-  virtual void onMouseDrag(const Mouse& m) override {
+  bool onMouseDrag(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
     pickable.event(PickEvent(Drag, r));
+    return true;
   }
-  virtual void onMouseUp(const Mouse& m) override {
+  bool onMouseUp(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
     pickable.event(PickEvent(Unpick, r));
+    return true;
   }
 };
 

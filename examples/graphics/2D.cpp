@@ -39,7 +39,7 @@ struct MyApp : public App {
     // We update drawing according to current width and height
     float w = float(width());
     float h = float(height());
-    float s = float(sec());
+    float s = float(al_sec());
     verts2.reset();
     for (int i = 0; i < N; i += 1) {
       float t = float(i) / (N - 1);

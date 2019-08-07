@@ -60,17 +60,21 @@ struct MyApp : public App {
 
   }
 
-  virtual void onMouseMove(const Mouse &m){
+  virtual bool onMouseMove(const Mouse &m) override {
     mPickableManager.onMouseMove(graphics(), m, width(), height());
+    return true;
   }
-  virtual void onMouseDown(const Mouse &m){
+  virtual bool onMouseDown(const Mouse &m) override {
     mPickableManager.onMouseDown(graphics(), m, width(), height());
+    return true;
   }
-  virtual void onMouseDrag(const Mouse &m){
+  virtual bool onMouseDrag(const Mouse &m) override {
     mPickableManager.onMouseDrag(graphics(), m, width(), height());
+    return true;
   }
-  virtual void onMouseUp(const Mouse &m){
+  virtual bool onMouseUp(const Mouse &m) override  {
     mPickableManager.onMouseUp(graphics(), m, width(), height());
+    return true;
   }
 };
 

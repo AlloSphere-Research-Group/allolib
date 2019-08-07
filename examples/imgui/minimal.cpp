@@ -46,7 +46,7 @@ struct MyApp : App
     }
   }
 
-  void onDraw(Graphics& g)  {
+  void onDraw(Graphics& g) override {
 
     g.clear(clear_color);
     g.color(grayscale);
@@ -55,13 +55,14 @@ struct MyApp : App
     if (show_gui) imguiDraw();
   }
 
-  void onKeyDown(const Keyboard& k)  {
+  bool onKeyDown(const Keyboard& k) override {
     if (k.key() == 'g') {
       show_gui = !show_gui;
     }
+    return true;
   }
 
-  void onExit()  {
+  void onExit() override {
     imguiShutdown();
   }
 };

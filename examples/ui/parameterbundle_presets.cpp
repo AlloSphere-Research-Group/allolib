@@ -65,12 +65,13 @@ struct MyApp : public App {
     gui.draw(g);
   }
 
-  void onKeyDown(Keyboard const& k) override {
+  bool onKeyDown(Keyboard const& k) override {
     if (k.key() == '1') {
       presetHandler.storePreset("bundles");
     } else if (k.key() == '2') {
       presetHandler.recallPreset("bundles");
     }
+    return true;
   }
 
 private:

@@ -50,7 +50,7 @@ int main(){
 
   MyApp app;
   AudioDevice dev = AudioDevice::defaultOutput();
-  app.initAudio(dev, 44100, 256, 2, 2);
+  app.configureAudio(dev, 44100, 256, 2, 2);
   app.start();
   return 0;
 }

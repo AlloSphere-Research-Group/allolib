@@ -3,6 +3,7 @@
 
 #include "al/app/al_AudioDomain.hpp"
 #include "al/graphics/al_Shapes.hpp"
+#include "al/system/al_Time.hpp"
 
 #include "Gamma/Oscillator.h"
 

@@ -63,7 +63,7 @@ struct MyOmniRendererApp : OmniRenderer
         }
     }
 
-    void onKeyDown(const Keyboard& k) override {
+    void onKeyDown(const Keyboard& k) /*override*/ {
         if (k.key() == 'b') {
             DO_BLENDING = !DO_BLENDING;
             cout << "blending: " << DO_BLENDING << endl;

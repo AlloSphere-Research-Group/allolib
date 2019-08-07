@@ -75,7 +75,7 @@ struct MyApp : public App {
       io.out(0) = filtered;
       io.out(1) = filtered;
       if (stft(filtered)) {
-        for (int i = 0 ; i < STFT_SIZE/2; i ++) {
+        for (unsigned int i = 0 ; i < STFT_SIZE/2; i ++) {
           stft(); // Ignore phase
           spectrum[i] = stft.bin(i).real();
         }
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
   MyApp app;
   app.dimensions(640, 480);
   app.title("Biquad Explorer");
-  app.initAudio();
+  app.configureAudio();
   app.start();
   return 0;
 }

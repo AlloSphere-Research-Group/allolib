@@ -71,7 +71,7 @@ struct MyApp: App {
 int main ()
 {
     MyApp app;
-    app.initAudio();
+    app.configureAudio();
     app.start();
     return 0;
 }

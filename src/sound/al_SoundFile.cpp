@@ -7,6 +7,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <cstdint>
 
 void al::SoundFile::open (const char* path) {
   auto len = std::strlen(path);
@@ -19,7 +20,7 @@ void al::SoundFile::open (const char* path) {
   const char* ext3 = path + (len-4);
   if (std::strcmp(ext3, ".wav") == 0) {
     unsigned int c, s;
-    unsigned long long int f;
+    uint64_t f;
     float* file_data = drwav_open_file_and_read_pcm_frames_f32(path, &c, &s, &f);
     if (file_data) {
       channels = (int)c;
@@ -47,7 +48,7 @@ void al::SoundFile::open (const char* path) {
   const char* ext4 = path + (len-5);
   if (std::strcmp(ext4, ".flac") == 0) {
     unsigned int c, s;
-    unsigned long long int f;
+    drflac_uint64 f;
     float* file_data = drflac_open_file_and_read_pcm_frames_f32(path, &c, &s, &f);
     if (file_data) {
       channels = (int)c;

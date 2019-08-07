@@ -77,7 +77,7 @@ struct CieColor : public App {
     printInstructions();
   }
 
-  virtual void onKeyDown(const Keyboard& k) {
+  bool onKeyDown(const Keyboard& k) override {
     // cout << "KEY PRESSED: " << k.key() << endl;
     updateScene = true;
     // change gradient type
@@ -104,9 +104,10 @@ struct CieColor : public App {
     } else {
       updateScene = false;
     }
+    return true;
   }
 
-  virtual void onDraw(Graphics& g) {
+  void onDraw(Graphics& g) override {
     if (updateScene) {
       // pick new swatches
 

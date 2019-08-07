@@ -50,6 +50,10 @@ al_nsec al_steady_time_nsec() {
   );
 }
 
+double al_seconds() {
+  return al_steady_time_nsec()* al_time_ns2s;
+}
+
 /// Sleep for an interval of seconds
 void al_sleep(al_sec dt) {
   al_sleep_nsec(dt * al_time_s2ns);

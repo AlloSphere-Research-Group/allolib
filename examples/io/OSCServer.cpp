@@ -43,7 +43,7 @@ struct MyApp : public App{
 
 		// Register ourself (osc::PacketHandler) with the server so onMessage
 		// gets called.
-		server.handler(*this);
+		server.handler(oscDomain()->handler());
 
 		// Start a thread to handle incoming packets
 		server.start();

@@ -53,7 +53,7 @@ int main (){
 
   // You must initialize audio device before starting application to enable audio
   // You will often want to set all values from the device itself (except block size):
-  app.initAudio(dev, dev.defaultSampleRate(), 256, dev.channelsOutMax(), dev.channelsInMax());
+  app.configureAudio(dev, dev.defaultSampleRate(), 256, dev.channelsOutMax(), dev.channelsInMax());
   // Or you can use defaults for everything
 //  app.initAudio();
   app.start();

@@ -185,7 +185,7 @@ public:
     }
   }
 
-  void onKeyDown(Keyboard const &k) override {
+  bool onKeyDown(Keyboard const &k) override {
     audioIO().stop();
     if (k.key() == ' ') {
       initSpeakers();
@@ -206,6 +206,7 @@ public:
       initSpatializer(6);
     }
     audioIO().start();
+    return true;
   }
 };
 
@@ -216,7 +217,7 @@ int main ()
 
   // Set up Audio
   AudioDevice::printAll();
-  app.initAudio(44100, BLOCK_SIZE, 60, 0);
+  app.configureAudio(44100, BLOCK_SIZE, 60, 0);
   // Use this for sphere
   //    app.initAudio(AudioDevice("ECHO X5"),44100, BLOCK_SIZE, -1, -1);
 

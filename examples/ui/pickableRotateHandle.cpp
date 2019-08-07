@@ -27,7 +27,7 @@ struct MyApp : public App {
   // TranslateHandle th;
   PickableRotateHandle rh;
 
-  void onCreate(){
+  void onCreate() override {
 
     // position camera, disable mouse to look
     nav().pos(0,0,10);
@@ -46,7 +46,7 @@ struct MyApp : public App {
     // pickable.addChild(th);
   }
 
-  void onDraw(Graphics& g){
+  void onDraw(Graphics& g) override {
 
     g.clear(0);
 
@@ -91,22 +91,28 @@ struct MyApp : public App {
     return r;
   }
 
-  virtual void onMouseMove(const Mouse& m){
+  virtual bool onMouseMove(const Mouse& m) override {
     // make a ray from mouse location
     Rayd r = getPickRay(m.x(), m.y());
     pickable.event(PickEvent(Point, r));
+    return true;
   }
-  virtual void onMouseDown(const Mouse& m){
+
+  virtual bool onMouseDown(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
     pickable.event(PickEvent(Pick, r));
+    return true;
+
   }
-  virtual void onMouseDrag(const Mouse& m){
+  virtual bool onMouseDrag(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
     pickable.event(PickEvent(Drag, r));
+    return true;
   }
-  virtual void onMouseUp(const Mouse& m){
+  virtual bool onMouseUp(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
     pickable.event(PickEvent(Unpick, r));
+    return true;
   }
 };
 

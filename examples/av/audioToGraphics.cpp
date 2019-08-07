@@ -92,6 +92,6 @@ public:
 
 int main(){
 	MyApp app;
-	app.initAudio(); // init with out only
+	app.configureAudio(); // init with out only
 	app.start();
 }

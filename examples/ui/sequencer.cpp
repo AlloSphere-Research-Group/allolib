@@ -52,7 +52,7 @@ struct MyApp : App
 		g.draw(m);
 	}
 
-	void onMouseDown(const Mouse &m) override {
+	bool onMouseDown(const Mouse &m) override {
 		if (sequencer.running()) {
 			sequencer.stopSequence();
 			cout << "Sequencer stopped" << endl;
@@ -60,6 +60,7 @@ struct MyApp : App
 			sequencer.playSequence("seq");
 			cout << "Sequencer started" << endl;
 		}
+        return true;
 	}
 };
 

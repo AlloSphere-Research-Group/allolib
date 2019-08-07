@@ -22,7 +22,7 @@ class MyApp : public App {
 //        font.render(g, "Press space bar to show dialog");
     }
 
-    void onKeyDown(const Keyboard &k) override {
+    bool onKeyDown(const Keyboard &k) override {
         if (k.key() == ' ') {
             std::cout << "space" << std::endl;
             Dialog d("Question", "How are you?",
@@ -34,6 +34,7 @@ class MyApp : public App {
                 std::cout << "Dialog returned CANCEL " << std::endl;
             }
         }
+        return true;
     }
 
 private:

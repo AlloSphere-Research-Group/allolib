@@ -47,7 +47,7 @@ struct MyApp : public App {
         g.popMatrix();
     }
 
-    void onKeyDown(const Keyboard &k) override {
+    bool onKeyDown(const Keyboard &k) override {
         // Use keyboard to control position of element
         switch (k.key()) {
         case 'w':
@@ -65,6 +65,7 @@ struct MyApp : public App {
         default:
             break;
         }
+        return true;
     }
 };
 

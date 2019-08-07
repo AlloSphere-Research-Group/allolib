@@ -10,32 +10,42 @@
 using namespace al;
 using namespace std;
 
-Parameter X("X", "Position", 0.0, "", -1.0, 1.0);
-Parameter Y("Y", "Position", 0.0, "", -1.0, 1.0);
-Parameter Size("Scale", "Size", 0.0, "", 0.1, 3.0);
-
-// set the preset root directory here
-PresetHandler presets("data/presets-example");
-
 struct MyApp : App
 {
+
+  Parameter X{"X", "Position", 0.0, "", -1.0f, 1.0f};
+  Parameter Y{"Y", "Position", 0.0, "", -1.0f, 1.0f};
+  Parameter Size{"Scale", "Size", 0.0, "", 0.1f, 3.0f};
+
+  // set the preset root directory here
+  PresetHandler presets{"data/presets-example"};
+  PresetServer presetServer{"127.0.0.1", 9012};
+
   Light light;
   Mesh m;
 
   void onCreate() override {
+    cout << "Press 1, 2 or 3 to recall preset, add alt key to store." << endl;
+    presets << X << Y << Size; // Add parameters to preset handling
+    presets.setSubDirectory("bank1");
+
+    presetServer << presets; // Expose preset management through OSC
+    // This address will be notified whenever the preset changes
+    presetServer.addListener("127.0.0.1", 13560);
+
     addCone(m);
     nav().pos(Vec3d(0, 0, 8));
     nav().setHome();
   }
 
-  void onAnimate(double dt) override {
+  void onAnimate(double /*dt*/) override {
       static int counter = 0;
       counter++;
       // Update the positions every 15 frames
       if (counter == 30) {
-          X = rnd::uniform(-1.0, 1.0);
-          Y = rnd::uniform(-1.0, 1.0);
-          Size = rnd::uniform(0.01, 0.6);
+          X = rnd::uniform(-1.0f, 1.0f);
+          Y = rnd::uniform(-1.0f, 1.0f);
+          Size = rnd::uniform(0.01f, 0.6f);
           counter = 0;
       }
   }
@@ -51,7 +61,7 @@ struct MyApp : App
     g.popMatrix();
   }
 
-  virtual void onKeyDown(const Keyboard &k) override {
+  bool onKeyDown(const Keyboard &k) override {
     if (k.alt()) {
       switch (k.key()) {
       case '1':
@@ -84,23 +94,17 @@ struct MyApp : App
         break;
       }
     }
+    return true;
   }
 
 };
 
-int main(int argc, char *argv[]) {
-  cout << "Press 1, 2 or 3 to recall preset, add alt key to store." << endl;
-  presets << X << Y << Size; // Add parameters to preset handling
-  presets.setSubDirectory("bank1");
-
-  PresetServer presetServer("127.0.0.1", 9012);
-  presetServer << presets; // Expose preset management through OSC
-  // This address will be notified whenever the preset changes
-  presetServer.addListener("127.0.0.1", 13560);
+int main() {
 
   MyApp app;
   app.dimensions(800, 600);
   app.title("Presets");
   app.fps(30);
   app.start();
+  return 0;
 }

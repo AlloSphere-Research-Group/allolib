@@ -49,14 +49,14 @@ Author:
 Lance Putnam, June 2011
 */
 
-#include "al/app/al_AppNew.hpp"
+#include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include <iostream>
 
 using namespace al;
 
 // We inherit from App to create our own custom application
-struct MyApp : public AppNew {
+struct MyApp : public App {
 
   Mesh mesh;
   double phase = 0;

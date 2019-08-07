@@ -1,5 +1,5 @@
-#include <iostream>
 #include <cstring>
+#include <iostream>
 
 #include "al/app/al_OpenGLGraphicsDomain.hpp"
 #include "al/io/al_Window.hpp"
@@ -9,12 +9,6 @@ using namespace al;
 bool OpenGLGraphicsDomain::initialize(ComputationDomain *parent) {
   bool ret = true;
   initializeWindowManager();
-//  glfw::init(app.is_verbose);
-//  ret &= glfwInit();
-
-//  if (app.is_verbose) std::cout << "Initialized GLFW " << glfwGetVersionString() << std::endl;
-//  glfwSetErrorCallback([](int code, const char* description){std::cout << "glfw error [" << code << "]: " << description << std::endl;});
-
   callInitializeCallbacks();
   return ret;
 }
@@ -24,32 +18,18 @@ bool OpenGLGraphicsDomain::start() {
     mRunning = true;
     bool ret = true;
     ret &= initializeSubdomains(true);
-    app.startFPS(); // WindowApp (FPS)
-    gam::Domain::spu(app.fps());
-    app.create(app.is_verbose);
+    startFPS();  // WindowApp (FPS)
     ret &= initializeSubdomains(false);
 
     preOnCreate();
     onCreate();
     callStartCallbacks();
-    while (!app.shouldQuit()) {
-      // to quit, call WindowApp::quit() or click close button of window,
-      // or press ctrl + q
-      onNewFrame();
-
+    while (!shouldQuit()) {
       mSubdomainLock.lock();
       tickSubdomains(true);
-
-      app.makeCurrent();
-
-      preOnDraw();
-      onDraw(app.mGraphics);
-      postOnDraw();
-      app.refresh();
-
+      tickFPS();
       tickSubdomains(false);
       mSubdomainLock.unlock();
-      app.tickFPS();
     }
 
     ret &= stop();
@@ -60,16 +40,13 @@ bool OpenGLGraphicsDomain::start() {
 }
 
 bool OpenGLGraphicsDomain::stop() {
-
   bool ret = true;
   callStopCallbacks();
 
-
   ret &= cleanupSubdomains(true);
 
-  onExit(); // user defined
+  onExit();  // user defined
   postOnExit();
-  app.destroy();
 
   ret &= cleanupSubdomains(false);
   mRunning = false;
@@ -82,27 +59,47 @@ bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
   return true;
 }
 
-/// Window Domain
+/// Window Domain ----------------------
 
-bool OpenGLWindowDomain::initialize(ComputationDomain *parent) {
-  if (strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) == 0) {
-    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
-  }
-
-  return mWindow.create();
+GLFWOpenGLWindowDomain::GLFWOpenGLWindowDomain() {
+  mWindow = std::make_unique<Window>();
 }
 
-bool OpenGLWindowDomain::tick() {
-  /* Make the window's context current */
-  mWindow.makeCurrent();
-  preOnDraw();
-  onDraw(*mGraphics);
-  postOnDraw();
-  mWindow.refresh();
+bool GLFWOpenGLWindowDomain::initialize(ComputationDomain *parent) {
+  //  if (strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
+  //  0) {
+  //    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
+  //  }
+  assert(strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
+         0);
+  mParent = static_cast<OpenGLGraphicsDomain *>(parent);
+  if (!mWindow) {
+    mWindow = std::make_unique<Window>();
+  }
+  if (!mWindow->created()) {
+    bool ret = mWindow->create();
+    mGraphics.init();
+    return ret;
+  }
+
   return true;
 }
 
-bool OpenGLWindowDomain::cleanup(ComputationDomain *parent) {
-  mWindow.destroy();
+bool GLFWOpenGLWindowDomain::tick() {
+  /* Make the window's context current */
+  onNewFrame();
+  mWindow->makeCurrent();
+  preOnDraw();
+  onDraw(mGraphics);
+  postOnDraw();
+  mWindow->refresh();
+  return true;
+}
+
+bool GLFWOpenGLWindowDomain::cleanup(ComputationDomain *parent) {
+  if (mWindow) {
+    mWindow->destroy();
+    mWindow = nullptr;
+  }
   return true;
 }

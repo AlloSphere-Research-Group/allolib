@@ -161,10 +161,11 @@ struct MyApp : public App{
     g.draw(box);
   }
 
-  void onKeyDown(const Keyboard& k){
+  bool onKeyDown(const Keyboard& k){
     switch(k.key()){
     case 'r': resetBoids(); break;
     }
+    return true;
   }
 };
 
