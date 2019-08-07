@@ -6,66 +6,53 @@
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-#include "al/sound/al_OutputMaster.hpp"
 
-// This example shows usage of the OutputMaster class to do
-// metering.
+// This example shows a simple input level meter
 
 using namespace al;
 
 struct MyApp : public App {
+  float *meterValues;
 
-  OutputMaster mOutputMaster {2,  44100};
-
-  void onCreate() override {
-    // Initialize
-    mOutputMaster.initialize(audioIO().channelsOut(), audioIO().framesPerSecond());
-    // Enable metering of output
-    mOutputMaster.setMeterOn(true);
-    // Choose how often the meter values are updated
-    mOutputMaster.setMeterUpdateFreq(10);
-    // You can append OutputMaster to audioIO()
-    // OutputMaster will be run automatically after the onSound() callback
-    audioIO().append(mOutputMaster);
-  }
+  void onCreate() override { meterValues = new float(audioIO().channelsIn()); }
 
   void onSound(AudioIOData &io) override {
-    while(io()) {
-      io.out(0) = io.in(0)* 0.1f;
-      io.out(1) = io.in(1)* 0.1f;
+    while (io()) {
+      for (auto i = 0; i < io.channelsOut(); i++) {
+        // Write meter values. This is only safe because float is atomic on
+        // desktops.
+        if (meterValues[i] < fabs(io.in(0))) {
+          meterValues[i] = io.in(0);
+        }
+      }
     }
   }
 
   void onDraw(Graphics &g) override {
     g.clear(0);
-    float values[2];
     // Copies the current values to the array passed
-    mOutputMaster.getCurrentValues(values);
     Mesh m;
     addQuad(m, 0.2f, 0.2f);
 
     g.color(1.0);
-    g.pushMatrix();
-    g.translate(-0.5, values[0]* 2, -2);
-    g.draw(m);
-    g.popMatrix();
-    g.pushMatrix();
-    g.translate(0.5, values[1]* 2, -2);
-    g.draw(m);
-    g.popMatrix();
 
+    for (auto i = 0; i < audioIO().channelsOut(); i++) {
+      g.pushMatrix();
+      g.color(HSV(0.5f + 0.5f * meterValues[i]));
+      g.translate(-1.0f + (2.0f * i / (audioIO().channelsOut() - 1.0f)),
+                  -0.5f + meterValues[i], -4);
+      meterValues[i] = 0;
+      g.draw(m);
+      g.popMatrix();
+    }
   }
-
 };
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   MyApp app;
-  app.dimensions(640, 480);
   app.title("Stereo Audio Scene");
   app.fps(30);
   app.configureAudio(44100, 256, 2, 2);
   app.start();
   return 0;
 }
-

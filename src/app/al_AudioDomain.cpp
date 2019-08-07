@@ -2,7 +2,6 @@
 
 using namespace al;
 
-
 bool AudioDomain::initialize(ComputationDomain *parent) {
   bool ret = true;
 
@@ -13,7 +12,7 @@ bool AudioDomain::initialize(ComputationDomain *parent) {
 bool AudioDomain::start() {
   bool ret = true;
   ret &= audioIO().open();
-  gam::Domain::spu(audioIO().framesPerSecond());
+  gam::sampleRate(audioIO().framesPerSecond());
   ret &= audioIO().start();
   return ret;
 }
@@ -25,22 +24,34 @@ bool AudioDomain::stop() {
   return true;
 }
 
-bool AudioDomain::cleanup(ComputationDomain */*parent*/) {
+bool AudioDomain::cleanup(ComputationDomain * /*parent*/) {
   callCleanupCallbacks();
   return true;
 }
 
-void AudioDomain::configure(double audioRate, int audioBlockSize, int audioOutputs, int audioInputs) {
+void AudioDomain::configure(double audioRate, int audioBlockSize,
+                            int audioOutputs, int audioInputs) {
   AudioDevice dev = AudioDevice::defaultOutput();
-  configure(dev, audioRate, audioBlockSize,
-            audioOutputs, audioInputs);
+  configure(dev, audioRate, audioBlockSize, audioOutputs, audioInputs);
 }
 
-void AudioDomain::configure(AudioDevice &dev, double audioRate, int audioBlockSize, int audioOutputs, int audioInputs)
-{
-  audioIO().init(AudioDomain::AppAudioCB, this, audioBlockSize, audioRate, audioOutputs, audioInputs);
+void AudioDomain::configure(AudioDevice &dev, double audioRate,
+                            int audioBlockSize, int audioOutputs,
+                            int audioInputs) {
+  audioIO().init(AudioDomain::AppAudioCB, this, audioBlockSize, audioRate,
+                 audioOutputs, audioInputs);
   audioIO().device(dev);
   // mAudioIO.device() resets the channels to the device default number
   audioIO().channelsIn(audioInputs);
   audioIO().channelsOut(audioOutputs);
+}
+
+// -----
+bool GammaAudioDomain::start() {
+  bool ret = true;
+  ret &= audioIO().open();
+  gam::Domain::spu(audioIO().framesPerSecond());
+  gam::sampleRate(audioIO().framesPerSecond());
+  ret &= audioIO().start();
+  return ret;
 }

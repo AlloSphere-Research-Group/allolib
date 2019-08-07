@@ -1,14 +1,14 @@
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-#include "al/sound/al_Lbap.hpp"
-#include "al/sound/al_Vbap.hpp"
-#include "al/sound/al_Ambisonics.hpp"
-#include "al/sound/al_StereoPanner.hpp"
-#include "al/sound/al_Speaker.hpp"
 #include "al/math/al_Random.hpp"
+#include "al/scene/al_DynamicScene.hpp"
+#include "al/sound/al_Ambisonics.hpp"
+#include "al/sound/al_Lbap.hpp"
+#include "al/sound/al_Speaker.hpp"
+#include "al/sound/al_StereoPanner.hpp"
+#include "al/sound/al_Vbap.hpp"
 #include "al/sphere/al_AlloSphereSpeakerLayout.hpp"
 #include "al/ui/al_Parameter.hpp"
-#include "al/scene/al_DynamicScene.hpp"
 
 #include <atomic>
 #include <vector>
@@ -21,49 +21,51 @@ using namespace std;
 // This file demonstrates the different spatialization techniques
 // doing block rendering in the Spatializer dervide classes.
 
-
-struct MyApp : public App
-{
-  Spatializer *spatializer {nullptr};
+struct MyApp : public App {
+  Spatializer *spatializer{nullptr};
 
   Mesh mMarker;
   float speedMult = 0.04f;
   double mElapsedTime = 0.0;
 
-  ParameterVec3 srcpos {"srcPos", "", {0.0,0.0,0.0}};
-  atomic<float> *mPeaks {nullptr};
+  ParameterVec3 srcpos{"srcPos", "", {0.0, 0.0, 0.0}};
+  atomic<float> *mPeaks{nullptr};
 
   SpeakerLayout speakerLayout;
 
   int speakerType = 0;
   int spatializerType = 0;
-  unsigned long counter = 0; // overall sample counter
+  unsigned long counter = 0;  // overall sample counter
 
-  MyApp()  {
+  MyApp() {
     audioIO().channelsBus(1);
     initSpeakers(0);
     initSpatializer(1);
   }
 
   ~MyApp() override {
-    if (mPeaks) { free(mPeaks); }
-
+    if (mPeaks) {
+      free(mPeaks);
+    }
   }
   void initSpeakers(int type = -1) {
-    if (type < 0 ) {
-      type = (speakerType + 1)%3;
+    if (type < 0) {
+      type = (speakerType + 1) % 3;
     }
     if (type == 0) {
       speakerLayout = AlloSphereSpeakerLayout();
     } else if (type == 1) {
-      speakerLayout = SpeakerRingLayout<8>(0,0, 5);
+      speakerLayout = SpeakerRingLayout<8>(0, 0, 5);
     } else if (type == 2) {
       speakerLayout = StereoSpeakerLayout(0, 30, 5);
     }
     speakerType = type;
-    if (mPeaks) { free(mPeaks); }
-    mPeaks = new atomic<float>[speakerLayout.speakers().size()]; // Not being freed in this example
-
+    if (mPeaks) {
+      free(mPeaks);
+    }
+    mPeaks =
+        new atomic<float>[speakerLayout.speakers().size()];  // Not being freed
+                                                             // in this example
   }
 
   void initSpatializer(int type = -1) {
@@ -92,13 +94,12 @@ struct MyApp : public App
   }
 
   void onInit() override {
-
     addDodecahedron(mMarker);
     initSpeakers(0);
     initSpatializer(1);
 
     nav().pos(0, 3, 25);
-    nav().faceToward({0,0,0});
+    nav().faceToward({0, 0, 0});
   }
 
   void onAnimate(double dt) override {
@@ -106,29 +107,28 @@ struct MyApp : public App
     mElapsedTime += dt;
     float tta = mElapsedTime * speedMult * 2.0f * M_PI;
 
-    float x = 6.0f*cos(tta);
-    float y = 5.0f*sin(2.8f * tta);
-    float z = 6.0f*sin(tta);
+    float x = 6.0f * cos(tta);
+    float y = 5.0f * sin(2.8f * tta);
+    float z = 6.0f * sin(tta);
 
-    srcpos.set(Vec3d(x,y,z));
+    srcpos.set(Vec3d(x, y, z));
   }
 
-  void onDraw(Graphics& g) override {
+  void onDraw(Graphics &g) override {
     g.clear(0);
 
     g.blending(true);
     g.blendModeTrans();
-    //Draw the speakers
+    // Draw the speakers
     Speakers sp = speakerLayout.speakers();
-    for(int i = 0; i < (int) sp.size(); ++i){
-
+    for (size_t i = 0; i < sp.size(); ++i) {
       g.pushMatrix();
       float xyz[3];
       sp[i].posCart(xyz);
       g.translate(-xyz[1], xyz[2], -xyz[0]);
       float peak = mPeaks[i].load();
-      g.scale(0.02 +  fabs(peak) * 5);
-      g.color(HSV(0.5 + (peak * 4)));
+      g.scale(0.02f + fabs(peak) * 5);
+      g.color(HSV(0.5f + (peak * 4)));
       g.polygonLine();
       g.draw(mMarker);
       g.popMatrix();
@@ -138,8 +138,8 @@ struct MyApp : public App
     g.color(1);
     auto srcPosDraw = srcpos.get();
     Mesh lineMesh;
-    lineMesh.vertex(0.0,0.0, 0.0);
-    lineMesh.vertex(srcPosDraw.x,0.0, srcPosDraw.z);
+    lineMesh.vertex(0.0, 0.0, 0.0);
+    lineMesh.vertex(srcPosDraw.x, 0.0, srcPosDraw.z);
     lineMesh.vertex(srcPosDraw);
     lineMesh.index(0);
     lineMesh.index(1);
@@ -150,7 +150,7 @@ struct MyApp : public App
     lineMesh.primitive(Mesh::LINES);
     g.draw(lineMesh);
 
-    //Draw the source
+    // Draw the source
     g.pushMatrix();
     g.polygonFill();
     g.scale(0.8f);
@@ -159,28 +159,29 @@ struct MyApp : public App
     g.popMatrix();
   }
 
-  virtual void onSound(AudioIOData & io) override {
+  virtual void onSound(AudioIOData &io) override {
     // Render signal to be panned
     while (io()) {
-      float env = (22050 - (counter % 22050))/22050.0f;
+      float env = (22050 - (counter % 22050)) / 22050.0f;
       io.bus(0) = 0.5f * rnd::uniform() * env;
       ++counter;
     }
-//    // Spatialize
+    //    // Spatialize
     spatializer->prepare(io);
-    spatializer->renderBuffer(io, Pose(srcpos.get()), io.busBuffer(0), io.framesPerBuffer());
+    spatializer->renderBuffer(io, Pose(srcpos.get()), io.busBuffer(0),
+                              io.framesPerBuffer());
     spatializer->finalize(io);
 
     // Now compute RMS to display the signal level for each speaker
     Speakers &speakers = speakerLayout.speakers();
-    for (int speaker = 0; speaker < (int) speakers.size(); speaker++) {
+    for (size_t speaker = 0; speaker < speakers.size(); speaker++) {
       float rms = 0;
-      for (int i = 0; i < (int) io.framesPerBuffer(); i++) {
-        int deviceChannel = speakers[speaker].deviceChannel;
+      for (unsigned int i = 0; i < io.framesPerBuffer(); i++) {
+        unsigned int deviceChannel = speakers[speaker].deviceChannel;
         float sample = io.out(deviceChannel, i);
         rms += sample * sample;
       }
-      rms = sqrt(rms/io.framesPerBuffer());
+      rms = sqrt(rms / io.framesPerBuffer());
       mPeaks[speaker].store(rms);
     }
   }
@@ -210,20 +211,15 @@ struct MyApp : public App
   }
 };
 
-
-int main ()
-{
+int main() {
   MyApp app;
 
   // Set up Audio
   AudioDevice::printAll();
   app.configureAudio(44100, BLOCK_SIZE, 60, 0);
   // Use this for sphere
-  //    app.initAudio(AudioDevice("ECHO X5"),44100, BLOCK_SIZE, -1, -1);
+  //    app.configureAudio(AudioDevice("ECHO X5"),44100, BLOCK_SIZE, -1, -1);
 
   app.start();
   return 0;
 }
-
-
-

@@ -1,14 +1,14 @@
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-#include "al/sound/al_Lbap.hpp"
-#include "al/sound/al_Vbap.hpp"
-#include "al/sound/al_Ambisonics.hpp"
-#include "al/sound/al_StereoPanner.hpp"
-#include "al/sound/al_Speaker.hpp"
 #include "al/math/al_Random.hpp"
+#include "al/scene/al_DynamicScene.hpp"
+#include "al/sound/al_Ambisonics.hpp"
+#include "al/sound/al_Lbap.hpp"
+#include "al/sound/al_Speaker.hpp"
+#include "al/sound/al_StereoPanner.hpp"
+#include "al/sound/al_Vbap.hpp"
 #include "al/sphere/al_AlloSphereSpeakerLayout.hpp"
 #include "al/ui/al_Parameter.hpp"
-#include "al/scene/al_DynamicScene.hpp"
 
 #include <atomic>
 #include <vector>
@@ -22,19 +22,15 @@ using namespace std;
 // available through a DynamicScene class that renders a
 // PositionedVoice both visually and sonically
 
-
 // Sound source
-struct Source: public PositionedVoice {
-
+struct Source : public PositionedVoice {
   Mesh mMarker;
-  unsigned long counter = 0; // overall sample counter
+  unsigned long counter = 0;  // overall sample counter
 
-  void init() override {
-    addDodecahedron(mMarker);
-  }
+  void init() override { addDodecahedron(mMarker); }
 
-  void onProcess(Graphics& g) override {
-    //Draw the source
+  void onProcess(Graphics &g) override {
+    // Draw the source
     g.pushMatrix();
     g.polygonFill();
     g.scale(0.8f);
@@ -43,26 +39,25 @@ struct Source: public PositionedVoice {
     g.popMatrix();
   }
 
-  void onProcess(AudioIOData & io) override {
+  void onProcess(AudioIOData &io) override {
     // Render signal to be panned
     while (io()) {
-      float env = (22050 - (counter % 22050))/22050.0f;
+      float env = (22050 - (counter % 22050)) / 22050.0f;
       io.out(0) = 0.5f * rnd::uniform() * env;
       ++counter;
     }
   }
 };
 
-struct MyApp : public App
-{
+struct MyApp : public App {
   DynamicScene mScene;
 
   Mesh mPoly;
   float speedMult = 0.04f;
   double mElapsedTime = 0.0;
 
-  ParameterVec3 srcpos {"srcPos", "", {0.0,0.0,0.0}};
-  atomic<float> *mPeaks {nullptr};
+  ParameterVec3 srcpos{"srcPos", "", {0.0, 0.0, 0.0}};
+  atomic<float> *mPeaks{nullptr};
 
   Source *mSource;
 
@@ -71,26 +66,31 @@ struct MyApp : public App
   int speakerType = 0;
   int spatializerType = 0;
 
-  MyApp() : App() {
-  }
+  MyApp() : App() {}
 
   ~MyApp() override {
-    if (mPeaks) { free(mPeaks); }
+    if (mPeaks) {
+      free(mPeaks);
+    }
   }
   void initSpeakers(int type = -1) {
-    if (type == -1 ) {
-      type = (speakerType + 1)%3;
+    if (type == -1) {
+      type = (speakerType + 1) % 3;
     }
     if (type == 0) {
       speakerLayout = AlloSphereSpeakerLayout();
     } else if (type == 1) {
-      speakerLayout = SpeakerRingLayout<8>(0,0, 5);
+      speakerLayout = SpeakerRingLayout<8>(0, 0, 5);
     } else if (type == 2) {
       speakerLayout = StereoSpeakerLayout(0, 30, 5);
     }
     speakerType = type;
-    if (mPeaks) { free(mPeaks); }
-    mPeaks = new atomic<float>[speakerLayout.speakers().size()]; // Not being freed in this example
+    if (mPeaks) {
+      free(mPeaks);
+    }
+    mPeaks =
+        new atomic<float>[speakerLayout.speakers().size()];  // Not being freed
+                                                             // in this example
   }
 
   void initSpatializer(int type = -1) {
@@ -104,13 +104,16 @@ struct MyApp : public App
     } else if (type == 2) {
       mScene.setSpatializer<Vbap>(speakerLayout);
     } else if (type == 3) {
-      auto ambiSpatializer = mScene.setSpatializer<AmbisonicsSpatializer>(speakerLayout);
+      auto ambiSpatializer =
+          mScene.setSpatializer<AmbisonicsSpatializer>(speakerLayout);
       ambiSpatializer->configure(3, 1, 1);
     } else if (type == 4) {
-      auto ambiSpatializer = mScene.setSpatializer<AmbisonicsSpatializer>(speakerLayout);
+      auto ambiSpatializer =
+          mScene.setSpatializer<AmbisonicsSpatializer>(speakerLayout);
       ambiSpatializer->configure(3, 2, 1);
     } else if (type == 5) {
-      auto ambiSpatializer = mScene.setSpatializer<AmbisonicsSpatializer>(speakerLayout);
+      auto ambiSpatializer =
+          mScene.setSpatializer<AmbisonicsSpatializer>(speakerLayout);
       ambiSpatializer->configure(3, 3, 1);
     } else if (type == 6) {
       mScene.setSpatializer<StereoPanner>(speakerLayout);
@@ -118,7 +121,6 @@ struct MyApp : public App
   }
 
   void onInit() override {
-
     addDodecahedron(mPoly);
     initSpeakers(0);
     initSpatializer(1);
@@ -127,7 +129,7 @@ struct MyApp : public App
     mScene.triggerOn(mSource);
 
     nav().pos(0, 3, 25);
-    nav().faceToward({0,0,0});
+    nav().faceToward({0, 0, 0});
   }
 
   void onAnimate(double dt) override {
@@ -135,28 +137,27 @@ struct MyApp : public App
     mElapsedTime += dt;
     float tta = mElapsedTime * speedMult * 2.0f * M_PI;
 
-    float x = 6.0f*cos(tta);
-    float y = 5.0f*sin(2.8f * tta);
-    float z = 6.0f*sin(tta);
+    float x = 6.0f * cos(tta);
+    float y = 5.0f * sin(2.8f * tta);
+    float z = 6.0f * sin(tta);
 
-    mSource->setPose(Pose(Vec3d(x,y,z)));
+    mSource->setPose(Pose(Vec3d(x, y, z)));
   }
 
-  void onDraw(Graphics& g) override {
+  void onDraw(Graphics &g) override {
     g.clear(0);
 
     g.blendOn();
     g.blendModeTrans();
-    //Draw the speakers
+    // Draw the speakers
     Speakers sp = speakerLayout.speakers();
-    for(int i = 0; i < (int) sp.size(); ++i){
-
+    for (int i = 0; i < (int)sp.size(); ++i) {
       g.pushMatrix();
       float xyz[3];
       sp[i].posCart(xyz);
       g.translate(-xyz[1], xyz[2], -xyz[0]);
       float peak = mPeaks[i].load();
-      g.scale(0.02 +  fabs(peak) * 5);
+      g.scale(0.02 + fabs(peak) * 5);
       g.color(HSV(0.5 + (peak * 4)));
       g.polygonLine();
       g.draw(mPoly);
@@ -167,8 +168,8 @@ struct MyApp : public App
     g.color(1);
     Vec3d srcPosDraw = mSource->pose().vec();
     Mesh lineMesh;
-    lineMesh.vertex(0.0,0.0, 0.0);
-    lineMesh.vertex(srcPosDraw.x,0.0, srcPosDraw.z);
+    lineMesh.vertex(0.0, 0.0, 0.0);
+    lineMesh.vertex(srcPosDraw.x, 0.0, srcPosDraw.z);
     lineMesh.vertex(srcPosDraw);
     lineMesh.index(0);
     lineMesh.index(1);
@@ -182,19 +183,19 @@ struct MyApp : public App
     mScene.render(g);
   }
 
-  virtual void onSound(AudioIOData & io) override {
+  virtual void onSound(AudioIOData &io) override {
     mScene.render(io);
 
     // Now compute RMS to display the signal level for each speaker
     Speakers &speakers = speakerLayout.speakers();
-    for (int speaker = 0; speaker < (int) speakers.size(); speaker++) {
+    for (int speaker = 0; speaker < (int)speakers.size(); speaker++) {
       float rms = 0;
-      for (int i = 0; i < (int) io.framesPerBuffer(); i++) {
+      for (int i = 0; i < (int)io.framesPerBuffer(); i++) {
         int deviceChannel = speakers[speaker].deviceChannel;
         float sample = io.out(deviceChannel, i);
         rms += sample * sample;
       }
-      rms = sqrt(rms/io.framesPerBuffer());
+      rms = sqrt(rms / io.framesPerBuffer());
       mPeaks[speaker].store(rms);
     }
   }
@@ -224,9 +225,7 @@ struct MyApp : public App
   }
 };
 
-
-int main ()
-{
+int main() {
   MyApp app;
 
   // Set up Audio
@@ -238,6 +237,3 @@ int main ()
   app.start();
   return 0;
 }
-
-
-

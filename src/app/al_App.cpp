@@ -5,13 +5,12 @@ using namespace al;
 App::App() {
   mOSCDomain = newDomain<OSCDomain>();
 
-  mAudioDomain = newDomain<AudioDomain>();
+  mAudioDomain = newDomain<GammaAudioDomain>();
   mAudioDomain->configure();
 
   mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
   mSimulationDomain =
       mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
-
 
   initializeDomains();
   mDefaultWindowDomain = graphicsDomain()->newWindow();
@@ -162,7 +161,8 @@ ParameterServer &App::parameterServer() {
 }
 
 void App::start() {
-  onInit(); // onInit() can't be called in constructor as it is virtual. But it is good enough here.
+  onInit();  // onInit() can't be called in constructor as it is virtual. But it
+             // is good enough here.
   for (auto &domain : mDomainList) {
     mRunningDomains.push(domain);
     if (!domain->start()) {
@@ -197,6 +197,10 @@ void App::initializeDomains() {
 
       mSimulationDomain->simulationFunction =
           std::bind(&App::onAnimate, this, std::placeholders::_1);
+    } else if (strcmp(typeid(*domainPtr).name(),
+                      typeid(GammaAudioDomain).name()) == 0) {
+      dynamic_cast<GammaAudioDomain *>(domainPtr)->onSound =
+          std::bind(&App::onSound, this, std::placeholders::_1);
     } else if (strcmp(typeid(*domainPtr).name(), typeid(AudioDomain).name()) ==
                0) {
       dynamic_cast<AudioDomain *>(domainPtr)->onSound =

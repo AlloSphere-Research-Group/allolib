@@ -2,19 +2,19 @@
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-#include "al/ui/al_ControlGUI.hpp"
-#include "al/ui/al_ParameterMIDI.hpp"
-#include "al/ui/al_HtmlInterfaceServer.hpp"
 #include "al/math/al_Random.hpp"
+#include "al/ui/al_ControlGUI.hpp"
+#include "al/ui/al_HtmlInterfaceServer.hpp"
+#include "al/ui/al_ParameterMIDI.hpp"
 
 using namespace al;
 
-// This example shows the guis created for audio IO and for the ParameterMIDI classes
+// This example shows the guis created for audio IO and for the ParameterMIDI
+// classes
 
-struct MyApp : public App
-{
-  Parameter Number{ "Number", "", 1, "", 0, 16 };
-  Parameter Gain{ "Gain", "", 0.1, "", 0.0, 0.2 };
+struct MyApp : public App {
+  Parameter Number{"Number", "", 1, "", 0, 16};
+  Parameter Gain{"Gain", "", 0.1, "", 0.0, 0.2};
   ParameterMIDI parameterMidi;
 
   Mesh mMesh;
@@ -32,12 +32,9 @@ struct MyApp : public App
     parameterMidi.connectControl(Gain, 7, 1);
   }
 
-  virtual void onCreate() override {
-    imguiInit();
-  }
+  virtual void onCreate() override { imguiInit(); }
 
-  virtual void onDraw(Graphics &g) override
-  {
+  virtual void onDraw(Graphics &g) override {
     g.clear(0);
     // The Number parameter determines how many times the cone is drawn
     for (int i = 0; i < Number.get(); ++i) {
@@ -61,22 +58,17 @@ struct MyApp : public App
     imguiDraw();
   }
   virtual void onSound(AudioIOData &io) override {
-    float gain = Gain; // Just update once per block;
-    while(io()) {
+    float gain = Gain;  // Just update once per block;
+    while (io()) {
       // Play white noise on speaker 1
       io.out(0) = rnd::uniformS() * gain;
     }
   }
-
 };
 
-
-int main(int argc, char *argv[])
-{
+int main() {
   MyApp app;
-  app.dimensions(800, 600);
   app.title("Audio IO");
-  app.fps(30);
   app.configureAudio(44100, 256, 2, 2);
   app.start();
   return 0;
