@@ -19,10 +19,10 @@ struct SoundFile
 
   SoundFile () = default;
   SoundFile (const SoundFile& other) = default;
-  SoundFile (SoundFile&& other) = default;
+  SoundFile (SoundFile&& other) noexcept = default;
 
   SoundFile& operator= (const SoundFile& other) = default;
-  SoundFile& operator= (SoundFile&& other) = default;
+  SoundFile& operator= (SoundFile&& other) noexcept = default;
 
   ~SoundFile () = default;
 
@@ -41,10 +41,10 @@ struct SoundFilePlayer
 
   SoundFilePlayer () = default;
   SoundFilePlayer (const SoundFilePlayer& other) = default;
-  SoundFilePlayer (SoundFilePlayer&& other) = default;
+  SoundFilePlayer (SoundFilePlayer&& other) noexcept = default;
 
   SoundFilePlayer& operator= (const SoundFilePlayer& other) = default;
-  SoundFilePlayer& operator= (SoundFilePlayer&& other) = default;
+  SoundFilePlayer& operator= (SoundFilePlayer&& other) noexcept = default;
 
   ~SoundFilePlayer () = default;
 
@@ -65,10 +65,10 @@ struct SoundFilePlayerTS
 
   SoundFilePlayerTS () = default;
   SoundFilePlayerTS (const SoundFilePlayerTS& other) = default;
-  SoundFilePlayerTS (SoundFilePlayerTS&& other) = default;
+  SoundFilePlayerTS (SoundFilePlayerTS&& other) noexcept = default;
 
   SoundFilePlayerTS& operator= (const SoundFilePlayerTS& other) = default;
-  SoundFilePlayerTS& operator= (SoundFilePlayerTS&& other) = default;
+  SoundFilePlayerTS& operator= (SoundFilePlayerTS&& other) noexcept = default;
 
   ~SoundFilePlayerTS () = default;
 
