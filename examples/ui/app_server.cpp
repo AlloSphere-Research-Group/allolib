@@ -49,7 +49,7 @@ struct MyApp : public App {
         gui.draw(g);
     }
 
-    void onKeyDown(Keyboard const& k) override {
+    bool onKeyDown(Keyboard const& k) override {
         // Use the 'd' and 'a' keys to change the X value
         // This sends an OSC message that will be receieved by the
         // parameter server
@@ -62,7 +62,7 @@ struct MyApp : public App {
             osc::Send sender(parameterServer().serverPort());
             sender.send("/X", X - 0.1f);
         }
-
+        return true;
     }
 
 };

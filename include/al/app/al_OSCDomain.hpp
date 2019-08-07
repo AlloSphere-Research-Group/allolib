@@ -26,6 +26,8 @@ public:
 
   bool running() { return mParameterServer.serverRunning();}
 
+  osc::PacketHandler & handler() {return mHandler;}
+
   ParameterServer& parameterServer() { return mParameterServer; }
   ParameterServer const& parameterServer() const { return mParameterServer; }
 

@@ -110,7 +110,7 @@ public:
         scene.registerSynthClass<SimpleVoice>();
         // Preallocate 300 voices
         scene.allocatePolyphony("SimpleVoice", 30);
-        scene.prepare(audioIO());
+//        scene.prepare(audioIO());
         gui.init();
         gui << recorder;
         gui << sequencer;
@@ -136,20 +136,22 @@ public:
         gui.draw(g);
     }
 
-    virtual void onKeyDown(const Keyboard &k) override {
+    bool onKeyDown(const Keyboard &k) override {
 
         // Trigger one new voice every 0.05 seconds
-            // First get a free voice of type SimpleVoice
-            auto *freeVoice = scene.getVoice<SimpleVoice>();
-            std::string text = std::to_string(char(k.key()));
-            freeVoice->setTriggerParams({440.f, text});
-            // Set a position for it
-            // Trigger it (this inserts it into the chain)
-            scene.triggerOn(freeVoice, 0, k.key());
+        // First get a free voice of type SimpleVoice
+        auto *freeVoice = scene.getVoice<SimpleVoice>();
+        std::string text = std::to_string(char(k.key()));
+        freeVoice->setTriggerParams({440.f, text});
+        // Set a position for it
+        // Trigger it (this inserts it into the chain)
+        scene.triggerOn(freeVoice, 0, k.key());
+        return true;
     }
 
-    virtual void onKeyUp(const Keyboard &k) {
+    bool onKeyUp(const Keyboard &k) override {
         scene.triggerOff(k.key());
+        return true;
     }
 
 
@@ -166,7 +168,7 @@ int main(){
     MyApp app;
 
     // Start everything
-    app.initAudio(44100., 256, 2,2);
+    app.configureAudio(44100., 256, 2,2);
     Domain::master().spu(app.audioIO().framesPerSecond());
     app.start();
 }

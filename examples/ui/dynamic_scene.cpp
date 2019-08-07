@@ -64,7 +64,7 @@ struct SimpleVoice : public PositionedVoice {
         mFreq = mFreq * 0.995f;
         auto p = pose();
         p.vec().y = mAmpEnv.value()*3;
-        p.vec().x = mFreq/440.0;
+        p.vec().x = mFreq/440.0f;
         setPose(p);
     }
 
@@ -116,7 +116,7 @@ struct MyApp : public App
         scene.registerSynthClass<SimpleVoice>();
         // Preallocate 300 voices
         scene.allocatePolyphony("SimpleVoice", 300);
-        scene.prepare(audioIO());
+//        scene.prepare(audioIO());
     }
 
     virtual void onAnimate(double dt) override {
@@ -151,7 +151,7 @@ struct MyApp : public App
 int main(){
     MyApp app;
     // tell Gamma the sample rate
-    app.initAudio(44100., 512, 2,2);
+    app.configureAudio(44100., 512, 2,2);
     Domain::master().spu(app.audioIO().framesPerSecond());
     app.start();
 }

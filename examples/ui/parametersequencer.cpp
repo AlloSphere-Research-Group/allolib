@@ -53,10 +53,7 @@ struct MyApp : App
         gui.draw(g);
     }
 
-    void onMouseDown(const Mouse &m) override {
-    }
-
-    void onKeyDown(const Keyboard &k) override {
+    bool onKeyDown(const Keyboard &k) override {
         if (k.key() == ' ') {
             if (recorder.recording()) {
                 recorder.stopRecord();
@@ -80,11 +77,13 @@ struct MyApp : App
                 cout << "Sequencer started" << endl;
             }
         }
+        return true;
     }
 };
 
-int main(int argc, char* argv[])
+int main()
 {
     MyApp().start();
+    return 0;
 }
 

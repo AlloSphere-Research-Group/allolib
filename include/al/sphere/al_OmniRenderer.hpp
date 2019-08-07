@@ -62,12 +62,12 @@ struct OmniRenderer : WindowApp
   void onAnimate(double dt) override {}
   void onDraw(Graphics &g) override {}
   void onExit() override {}
-  void onKeyDown(Keyboard const &k) override {}
-  void onKeyUp(Keyboard const &k) override {}
-  void onMouseDown(Mouse const &m) override {}
-  void onMouseUp(Mouse const &m) override {}
-  void onMouseDrag(Mouse const &m) override {}
-  void onMouseMove(Mouse const &m) override {}
+//  void onKeyDown(Keyboard const &k) override {}
+//  void onKeyUp(Keyboard const &k) override {}
+//  void onMouseDown(Mouse const &m) override {}
+//  void onMouseUp(Mouse const &m) override {}
+//  void onMouseDrag(Mouse const &m) override {}
+//  void onMouseMove(Mouse const &m) override {}
   void onResize(int w, int h) override {}
   void onVisibility(bool v) override {}
 

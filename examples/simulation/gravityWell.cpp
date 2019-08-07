@@ -15,6 +15,7 @@ Lance Putnam, Nov. 2015
 #include "al/types/al_Conversion.hpp" // clone
 
 #include "al/math/al_Random.hpp"
+#include "al/system/al_Time.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include <algorithm> // max
 #include <cmath>
@@ -137,7 +138,7 @@ public:
 		g.light(light2, 1);
 
 		Light l3;
-		l3.pos(5 * sin(2 * sec()), -1, 5 * cos(2 * sec()));
+		l3.pos(5 * sin(2 * al_sec()), -1, 5 * cos(2 * al_sec()));
 		l3.diffuse({1, 0, 0});
 		g.light(l3, 2);
 
@@ -155,15 +156,16 @@ public:
 		}
 
 		// cout << "\rfps: " << fps() << rnd::uniform() << flush;
-		cout << "\rfps: " << fps() << "   " << rnd::uniform() << flush;
+//		cout << "\rfps: " << fps() << "   " << rnd::uniform() << flush;
 	}
 
-	void onKeyDown(const Keyboard& k){
+	bool onKeyDown(const Keyboard& k) override {
 		reset(k.key());
 
 		if (k.key() == ' ') {
 			graphics().toggleLight(1);
 		}
+        return true;
 	}
 };
 

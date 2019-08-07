@@ -88,7 +88,7 @@ struct PickRayDemo : App {
     return r;
   }
 
-  virtual void onMouseMove(const Mouse& m){
+  bool onMouseMove(const Mouse& m) override {
     // make a ray from mouse location
     Rayd r = getPickRay(m.x(), m.y());
 
@@ -100,7 +100,7 @@ struct PickRayDemo : App {
       hover[i] = t > 0.f;
     }
   }
-  virtual void onMouseDown(const Mouse& m){
+  bool onMouseDown(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
 
     for(int i=0; i<N; i++){
@@ -114,7 +114,7 @@ struct PickRayDemo : App {
       }
     }
   }
-  virtual void onMouseDrag(const Mouse& m){
+  bool onMouseDrag(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
 
     for(int i=0; i<N; i++){
@@ -125,7 +125,7 @@ struct PickRayDemo : App {
       }
     }
   }
-  virtual void onMouseUp(const Mouse& m){
+  bool onMouseUp(const Mouse& m) override {
     // deselect all spheres
     for(int i=0; i<N; i++) selected[i] = false;
   }

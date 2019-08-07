@@ -65,7 +65,7 @@ public:
         gui.draw(g);
     }
 
-    void onKeyDown(Keyboard const& k) override {
+    bool onKeyDown(Keyboard const& k) override {
         // Use the 'd' and 'a' keys to change the X value for first "thing"
         // This sends an OSC message that will be receieved by the
         // parameter server
@@ -113,8 +113,7 @@ public:
             osc::Send sender(parameterServer().serverPort());
             sender.send("/thing/_current", 2);
         }
-
-
+        return true;
     }
 
 private:

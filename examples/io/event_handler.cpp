@@ -115,7 +115,7 @@ struct MyApp : App
     
     // then individual transform can be done
     g.pushMatrix();
-    g.rotate(sec());
+    g.rotate(al_sec());
     g.draw(m);
     g.popMatrix();
 

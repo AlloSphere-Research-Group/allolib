@@ -23,18 +23,16 @@ Keehong Youn, 2017
 using namespace al;
 using namespace std;
 
-int w = 256;
-int h = 256;
-
-Texture fbotex;
-RBO rbo;
-FBO fbo;
-bool mipmap = true;
-
 struct MyApp : public App {
+    int w = 256;
+    int h = 256;
 
-	void onCreate()
-	{
+    Texture fbotex;
+    RBO rbo;
+    FBO fbo;
+    bool mipmap = true;
+
+	void onCreate() override {
 		// both depth and color attachees must be valid on the GPU before use:
 		rbo.create(w, h);
 		fbotex.create2D(w, h);
@@ -46,7 +44,7 @@ struct MyApp : public App {
 		cout << "fbo status " << fbo.statusString() << endl;
 	}
 
-	void onDraw (Graphics& g) {
+	void onDraw (Graphics& g) override {
 
 		// capture green-world to texture:
 		g.framebuffer(fbo);
@@ -85,12 +83,13 @@ struct MyApp : public App {
 
 	}
 
-	void onKeyDown(const Keyboard& k)
+	bool onKeyDown(const Keyboard& k) override
 	{
 		if (k.key() == ' ') {
 			mipmap = !mipmap;
 			cout << "mipmap: " << mipmap << endl;
 		}
+        return true;
 	}
 };
 

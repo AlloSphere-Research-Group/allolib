@@ -156,16 +156,17 @@ struct MyApp : public App {
     }
   }
 
-  void onKeyDown(const Keyboard& k){
+  bool onKeyDown(const Keyboard& k) override {
     switch(k.key()){
     case 'f': wireframe  ^=true; break;
     case 'l': vertexLight^=true; break;
     }
   }
 
-  void onMouseMove(const Mouse& m){
-    mx = float(m.x()) / window().width();
-    my = float(m.y()) / window().height();
+  bool onMouseMove(const Mouse& m) override {
+    mx = float(m.x()) / graphicsDomain()->app.width();
+    my = float(m.y()) / graphicsDomain()->app.height();
+    return true;
   }
 };
 

@@ -205,7 +205,7 @@ struct MyApp : App {
 
   }
 
-  void onKeyDown(const Keyboard& k) override {
+  bool onKeyDown(const Keyboard& k) override {
     if (k.key() == ' ') {
       USE_INSTANCING = !USE_INSTANCING;
       cout << "instancing: " << USE_INSTANCING << endl;
@@ -213,6 +213,7 @@ struct MyApp : App {
     if (k.key() == 'p') {
       PAUSE = !PAUSE;
     }
+    return true;
   }
 
 };

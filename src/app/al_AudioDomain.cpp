@@ -25,29 +25,22 @@ bool AudioDomain::stop() {
   return true;
 }
 
-bool AudioDomain::cleanup(ComputationDomain *parent) {
+bool AudioDomain::cleanup(ComputationDomain */*parent*/) {
   callCleanupCallbacks();
   return true;
 }
 
-void AudioDomain::configure(double audioRate, int audioBlockSize, int audioOutputs, int audioInputs, int device) {
-  AudioDevice dev = AudioDevice(device);
+void AudioDomain::configure(double audioRate, int audioBlockSize, int audioOutputs, int audioInputs) {
+  AudioDevice dev = AudioDevice::defaultOutput();
   configure(dev, audioRate, audioBlockSize,
             audioOutputs, audioInputs);
 }
 
 void AudioDomain::configure(AudioDevice &dev, double audioRate, int audioBlockSize, int audioOutputs, int audioInputs)
 {
-
   audioIO().init(AudioDomain::AppAudioCB, this, audioBlockSize, audioRate, audioOutputs, audioInputs);
   audioIO().device(dev);
   // mAudioIO.device() resets the channels to the device default number
   audioIO().channelsIn(audioInputs);
   audioIO().channelsOut(audioOutputs);
-}
-
-void AudioDomain::configure(AudioDomain::AudioIOConfig config) {
-  bool use_in = (config & IN_ONLY) ? true : false;
-  bool use_out = (config & OUT_ONLY) ? true : false;
-  audioIO().initWithDefaults(AppAudioCB, this, use_out, use_in);
 }

@@ -82,9 +82,9 @@ struct MyApp : App
         g.popMatrix();
     }
 
-    void onAnimate(double dt)
+    void onAnimate(double /*dt*/)
     {
-        light.pos(8 * cos(2 * sec()), 10, 2 + 5 * sin(2 * sec()));
+        light.pos(8 * cos(2 * al_sec()), 10, 2 + 5 * sin(2 * al_sec()));
     }
 
     void onDraw(Graphics& g)

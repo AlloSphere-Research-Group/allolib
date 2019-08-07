@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
   app.dimensions(800, 600);
   app.title("Audio IO");
   app.fps(30);
-  app.initAudio(44100, 256, 2, 2);
+  app.configureAudio(44100, 256, 2, 2);
   app.start();
   return 0;
 }

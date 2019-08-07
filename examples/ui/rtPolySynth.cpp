@@ -84,7 +84,7 @@ struct  MyApp : public App
         pSynth.render(g);
     }
 
-    void onKeyDown(Keyboard const& k) override {
+    bool onKeyDown(Keyboard const& k) override {
         int midiNote = asciiToMIDI(k.key());
         if (midiNote > 0) {
             float frequency = ::pow(2., (midiNote - 69.)/12.) * 440.;
@@ -92,12 +92,15 @@ struct  MyApp : public App
             voice->freq(frequency);
             pSynth.triggerOn(voice, 0, midiNote);
         }
+        return true;
     }
-    void onKeyUp(Keyboard const& k) override {
+
+    bool onKeyUp(Keyboard const& k) override {
         int midiNote = asciiToMIDI(k.key());
         if (midiNote > 0) {
             pSynth.triggerOff(midiNote);
         }
+        return true;
     }
 
 };
@@ -114,7 +117,7 @@ int main(){
     app.navControl().active(false); // Disable navigation via keyboard, since we will be using keyboard for note triggering
 
     // Start audio
-    app.initAudio(44100., 256, 2, 0);
+    app.configureAudio(44100., 256, 2, 0);
 
     // Set up sampling rate for Gamma objects
     Domain::master().spu(app.audioIO().framesPerSecond());

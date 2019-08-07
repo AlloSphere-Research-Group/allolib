@@ -75,10 +75,6 @@ struct MyApp : public App{
 		g.quadViewport(tex, -0.9, -0.9, 1.8, 1.8);
 	}
 
-	void onKeyDown(Keyboard const& k) {
-		// nav().pullBack(nav().pullBack() + 1);
-		// cout << nav().pullBack() << endl;
-	}
 };
 
 int main(){

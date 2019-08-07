@@ -121,7 +121,7 @@ int main(){
     makeLine(app.s, 31, 10, 1.0, 880, 440);
 
     // Start everything
-    app.initAudio(44100., 256, 2, 0);
+    app.configureAudio(44100., 256, 2, 0);
     Domain::master().spu(app.audioIO().framesPerSecond());
     app.start();
 }

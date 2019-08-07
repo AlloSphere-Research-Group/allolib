@@ -30,6 +30,6 @@ int main()
 {
   MyApp app;
   // Enable audio with 2 channels of output.
-  app.initAudio(44100, 512, 2, 0);
+  app.configureAudio(44100, 512, 2, 0);
   app.start();
 }

@@ -29,7 +29,7 @@ struct SimpleVoice : PositionedVoice {
   virtual void onProcess(AudioIOData& io) override {
     while (io()) {
       lfoValue = lfo.downU();
-      io.out(0) = oscillator() * lfoValue * 0.1;
+      io.out(0) = oscillator() * lfoValue * 0.1f;
     }
   }
 
@@ -53,19 +53,19 @@ struct MyApp : App {
   void onCreate() override {
     // Set thing to be the default user data for any allocated voices in the scene
     scene.setDefaultUserData(&thing);
-    // Don't forget to prepare the scene!
-    scene.prepare(audioIO());
+//    // Don't forget to prepare the scene!
+//    scene.prepare(audioIO());
 
     // Prepare the mesh to be shared by all objects
     addCube(thing.mesh);
 
     // We will instantiate all visible objects at startup, i.e. they are always on
-    for (int i = 0.1; i < 11; ++i) {
+    for (float i = 0.1f; i < 11; ++i) {
       // First allocate voice
       auto* freeVoice = scene.getVoice<SimpleVoice>();
       // Then configure voice
       freeVoice->oscillator.freq(330 * i);
-      freeVoice->lfo.freq(0.3 + i * 0.25);
+      freeVoice->lfo.freq(0.3f + i * 0.25f);
       Pose p = freeVoice->pose();
       p.vec() = Vec3f(rnd::uniformS(4), rnd::uniformS(4), -3 - rnd::uniform(2));
       freeVoice->setPose(p);
@@ -74,12 +74,12 @@ struct MyApp : App {
     }
   }
 
-  void onAnimate(double dt) {
+  void onAnimate(double /*dt*/) {
     scene.listenerPose(nav()); // Set the scene listener to the current nav
   }
 
   void onDraw(Graphics& g) override {
-    g.clear(0.2);
+    g.clear(0.2f);
     g.polygonLine();
     g.depthTesting(true);
     scene.render(g);
@@ -92,7 +92,7 @@ struct MyApp : App {
 
 int main() {
   MyApp app;
-  app.initAudio();
+  app.configureAudio();
   Domain::master().spu(app.audioIO().framesPerSecond());
   app.start();
 }

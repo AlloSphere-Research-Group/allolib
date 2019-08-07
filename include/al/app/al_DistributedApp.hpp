@@ -38,11 +38,11 @@
 
 namespace al {
 
-struct DefaultState {
+struct DefaultStateDistributedApp {
 	Pose pose;
 };
 
-template<class TSharedState = DefaultState>
+template<class TSharedState = DefaultStateDistributedApp>
 class DistributedApp: public OmniRenderer,
            public AudioApp,
 //           public FlowAppParameters,
@@ -348,12 +348,12 @@ public:
   void onAnimate(double dt) override {(void) dt;}
   void onDraw (Graphics& g) override {(void) g;}
   void onExit() override {}
-  void onKeyDown(Keyboard const& k) override {(void) k;}
-  void onKeyUp(Keyboard const& k) override {(void) k;}
-  void onMouseDown(Mouse const& m) override {(void) m;}
-  void onMouseUp(Mouse const& m) override {(void) m;}
-  void onMouseDrag(Mouse const& m) override {(void) m;}
-  void onMouseMove(Mouse const& m) override {(void) m;}
+//  void onKeyDown(Keyboard const& k) override {(void) k;}
+//  void onKeyUp(Keyboard const& k) override {(void) k;}
+//  void onMouseDown(Mouse const& m) override {(void) m;}
+//  void onMouseUp(Mouse const& m) override {(void) m;}
+//  void onMouseDrag(Mouse const& m) override {(void) m;}
+//  void onMouseMove(Mouse const& m) override {(void) m;}
   void onResize(int w, int h) override {(void) w;(void) h;}
   void onVisibility(bool v) override {(void) v;}
 

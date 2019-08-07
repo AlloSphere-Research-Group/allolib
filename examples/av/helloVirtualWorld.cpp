@@ -122,11 +122,11 @@ struct MyWindow : App
     }
   }
 
-  void onKeyDown(const Keyboard& k) override {
-    // if (k.key() == Keyboard::TAB) {
-    //  stereo.stereo(!stereo.stereo());
-    // }
-  }
+//  void onKeyDown(const Keyboard& k) override {
+//    // if (k.key() == Keyboard::TAB) {
+//    //  stereo.stereo(!stereo.stereo());
+//    // }
+//  }
 
   void onSound(AudioIOData& io) override {
     for (unsigned i = 0; i < agents.size(); ++i) {
@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
   }
 
   MyWindow win;
-  win.initAudio(44100, AUDIO_BLOCK_SIZE, 2, 0);
+  win.configureAudio(44100, AUDIO_BLOCK_SIZE, 2, 0);
   win.start();
 
 }

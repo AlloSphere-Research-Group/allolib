@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
   app.dimensions(640, 480);
   app.title("Stereo Audio Scene");
   app.fps(30);
-  app.initAudio(44100, 256, 2, 2);
+  app.configureAudio(44100, 256, 2, 2);
   app.start();
   return 0;
 }
