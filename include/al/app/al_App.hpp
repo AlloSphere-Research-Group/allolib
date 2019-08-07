@@ -84,14 +84,6 @@ class App {
   int fbHeight();
   int fbWidth();
 
-  virtual void onKeyDown(Keyboard const& k) {}
-  virtual void onKeyUp(Keyboard const& k) {}
-  virtual void onMouseDown(Mouse const& m) {}
-  virtual void onMouseUp(Mouse const& m) {}
-  virtual void onMouseDrag(Mouse const& m) {}
-  virtual void onMouseMove(Mouse const& m) {}
-  virtual void onMouseScroll(Mouse const& m) {}
-
   float highresFactor();
 
   bool decorated();
