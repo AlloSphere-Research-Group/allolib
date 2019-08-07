@@ -147,17 +147,17 @@ struct MyApp : public App {
     switch(k.key()){
 
     // For printable keys, we just use its character symbol:
-    case '1': printf("Pressed 1.\n"); break;
-    case 'y': printf("Pressed y.\n"); break;
-    case 'n': printf("Pressed n.\n"); break;
-    case '.': printf("Pressed period.\n"); break;
-    case ' ': printf("Pressed space bar.\n"); break;
+    case '1': std::cout << "Pressed 1." << std::endl; break;
+    case 'y': std::cout << "Pressed y." << std::endl; break;
+    case 'n': std::cout << "Pressed n." << std::endl; break;
+    case '.': std::cout << "Pressed period." << std::endl; break;
+    case ' ': std::cout << "Pressed space bar." << std::endl; break;
 
       // For non-printable keys, we have to use the enums described in the
       // Keyboard class:
-    case Keyboard::RETURN: printf("Pressed return.\n"); break;
-    case Keyboard::DELETE: printf("Pressed delete.\n"); break;
-    case Keyboard::F1: printf("Pressed F1.\n"); break;
+    case Keyboard::RETURN: std::cout << "Pressed return." << std::endl; break;
+    case Keyboard::DELETE: std::cout << "Pressed delete." << std::endl; break;
+    case Keyboard::F1: std::cout << "Pressed F1." << std::endl; break;
     }
     return true;
   }
@@ -165,21 +165,21 @@ struct MyApp : public App {
   // This is called whenever a mouse button is pressed.
   bool onMouseDown(const Mouse& m) override {
     switch(m.button()){
-    case Mouse::LEFT: printf("Pressed left mouse button.\n"); break;
-    case Mouse::RIGHT: printf("Pressed right mouse button.\n"); break;
-    case Mouse::MIDDLE: printf("Pressed middle mouse button.\n"); break;
+    case Mouse::LEFT: std::cout << "Pressed left mouse button." << std::endl; break;
+    case Mouse::RIGHT: std::cout << "Pressed right mouse button." << std::endl; break;
+    case Mouse::MIDDLE: std::cout << "Pressed middle mouse button." << std::endl; break;
     default:
-      printf("Pressed button %i.\n", m.button()); break;
+      std::cout << "Pressed button " << m.button() << std::endl; break;
     }
     return true;
   }
   bool onMouseUp (const Mouse& m) override {
     switch(m.button()){
-    case Mouse::LEFT: printf("Released left mouse button.\n"); break;
-    case Mouse::RIGHT: printf("Released right mouse button.\n"); break;
-    case Mouse::MIDDLE: printf("Released middle mouse button.\n"); break;
+    case Mouse::LEFT: std::cout << "Released left mouse button." << std::endl; break;
+    case Mouse::RIGHT: std::cout << "Released right mouse button." << std::endl; break;
+    case Mouse::MIDDLE: std::cout << "Released middle mouse button." << std::endl; break;
     default:
-      printf("Released button %i.\n", m.button()); break;
+      std::cout << "Released button " << m.button() << std::endl; break;
     }
     return true;
   }
@@ -189,7 +189,7 @@ struct MyApp : public App {
     // Get mouse coordinates, in pixels, relative to top-left corner of window
     int x = m.x();
     int y = m.y();
-    printf("Mouse dragged: %3d, %3d\n", x,y);
+    std::cout << "Mouse dragged: " << x << "," << y << std::endl;
     return true;
   }
 

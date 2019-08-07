@@ -8,18 +8,6 @@ namespace al
 
 using namespace al;
 
-ShaderProgram* RenderManager::mShaderPtr = nullptr;
-std::unordered_map<unsigned int, int> RenderManager::modelviewLocs;
-std::unordered_map<unsigned int, int> RenderManager::projLocs;
-bool RenderManager::mShaderChanged = false;
-bool RenderManager::mMatChanged = false;
-ViewportStack RenderManager::mViewportStack;
-EasyVAO RenderManager::mInternalVAO;
-// unsigned int RenderManager::mFBOID = 0;
-FBOStack RenderManager::mFBOStack;
-
-
-
 //______________________________________________________________________________
 
 MatrixStack::MatrixStack() { stack.emplace_back(); stack.reserve(10); }

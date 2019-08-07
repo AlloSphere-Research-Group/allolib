@@ -99,6 +99,7 @@ struct PickRayDemo : App {
       float t = r.intersectSphere(pos[i], 0.5f);
       hover[i] = t > 0.f;
     }
+    return true;
   }
   bool onMouseDown(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
@@ -113,6 +114,7 @@ struct PickRayDemo : App {
         dist[i] = t;
       }
     }
+    return true;
   }
   bool onMouseDrag(const Mouse& m) override {
     Rayd r = getPickRay(m.x(), m.y());
@@ -124,10 +126,12 @@ struct PickRayDemo : App {
         pos[i].set(newPos);
       }
     }
+    return true;
   }
   bool onMouseUp(const Mouse& m) override {
     // deselect all spheres
     for(int i=0; i<N; i++) selected[i] = false;
+    return true;
   }
 
 };

@@ -318,12 +318,19 @@ class Graphics : public RenderManager {
   }
 
   // deprecated
+  [[deprecated]]
   void blendOn() { blending(true); }
+  [[deprecated]]
   void blendAdd() {blendModeAdd(); }
+  [[deprecated]]
   void blendSub() {blendModeSub(); }
+  [[deprecated]]
   void blendScreen() {blendModeScreen(); }
+  [[deprecated]]
   void blendMul() {blendModeMul(); }
+  [[deprecated]]
   void blendTrans() {blendModeTrans(); }
+  [[deprecated]]
   void blendOff() { blending(false); }
 
 private:

@@ -161,6 +161,7 @@ struct MyApp : public App {
     case 'f': wireframe  ^=true; break;
     case 'l': vertexLight^=true; break;
     }
+    return true;
   }
 
   bool onMouseMove(const Mouse& m) override {
