@@ -12,6 +12,7 @@ App::App() {
   mSimulationDomain =
       mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
 
+
   initializeDomains();
   mDefaultWindowDomain = graphicsDomain()->newWindow();
 
@@ -34,6 +35,8 @@ App::App() {
   mDefaultWindowDomain->window().append(stdControls);
   stdControls.app = this;
   stdControls.mWindow = &mDefaultWindowDomain->window();
+
+  append(mDefaultWindowDomain->navControl());
 }
 
 Window &App::defaultWindow() { return mDefaultWindowDomain->window(); }
@@ -159,11 +162,7 @@ ParameterServer &App::parameterServer() {
 }
 
 void App::start() {
-  initializeDomains();
-  onInit();
-
-  append(mDefaultWindowDomain->navControl());
-
+  onInit(); // onInit() can't be called in constructor as it is virtual. But it is good enough here.
   for (auto &domain : mDomainList) {
     mRunningDomains.push(domain);
     if (!domain->start()) {

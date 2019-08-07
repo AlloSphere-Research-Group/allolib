@@ -184,10 +184,10 @@ class Graphics : public RenderManager {
   void clearColorBuffer(float k, float a, int drawbuffer) { clearColorBuffer(k, k, k, a, drawbuffer); }
   void clearColorBuffer(Color const &c, int drawbuffer) { clearColorBuffer(c.r, c.g, c.b, c.a, drawbuffer); }
 
-  void clearColor() { clearColorBuffer(0); };
+  void clearColor() { clearColorBuffer(0); }
   void clearColor(float r, float g, float b, float a = 1) { clearColorBuffer(r, g, b, a, 0); }
   void clearColor(float k, float a = 1) { clearColorBuffer(k, k, k, a, 0); }
-  void clearColor(Color const &c)  { clearColorBuffer(c.r, c.g, c.b, c.a, 0); };
+  void clearColor(Color const &c)  { clearColorBuffer(c.r, c.g, c.b, c.a, 0); }
 
   void setClearDepth(float d);
   void clearDepth();

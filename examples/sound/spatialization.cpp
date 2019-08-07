@@ -22,9 +22,8 @@ using namespace std;
 // doing block rendering in the Spatializer dervide classes.
 
 
-class MyApp : public App
+struct MyApp : public App
 {
-
   Spatializer *spatializer {nullptr};
 
   Mesh mMarker;
@@ -40,9 +39,10 @@ class MyApp : public App
   int spatializerType = 0;
   unsigned long counter = 0; // overall sample counter
 
-public:
   MyApp()  {
     audioIO().channelsBus(1);
+    initSpeakers(0);
+    initSpatializer(1);
   }
 
   ~MyApp() override {

@@ -53,7 +53,7 @@ struct Source: public PositionedVoice {
   }
 };
 
-class MyApp : public App
+struct MyApp : public App
 {
   DynamicScene mScene;
 
@@ -71,8 +71,7 @@ class MyApp : public App
   int speakerType = 0;
   int spatializerType = 0;
 
-public:
-  MyApp()  {
+  MyApp() : App() {
   }
 
   ~MyApp() override {

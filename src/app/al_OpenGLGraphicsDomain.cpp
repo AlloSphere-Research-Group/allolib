@@ -28,6 +28,7 @@ bool OpenGLGraphicsDomain::start() {
       mSubdomainLock.lock();
       tickSubdomains(true);
       tickFPS();
+      mTimeDrift = dt_sec();
       tickSubdomains(false);
       mSubdomainLock.unlock();
     }

@@ -71,7 +71,6 @@ class GLFWOpenGLWindowDomain : public SynchronousDomain {
   };
 
   virtual void onNewFrame() {
-    mTimeDrift = mParent->dt_sec();
     mNav.smooth(std::pow(0.0001, mTimeDrift));
     mNav.step(mTimeDrift * mParent->fps());
   }

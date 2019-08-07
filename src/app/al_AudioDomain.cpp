@@ -7,13 +7,13 @@ bool AudioDomain::initialize(ComputationDomain *parent) {
   bool ret = true;
 
   callInitializeCallbacks();
-  ret &= audioIO().open();
-  gam::Domain::spu(audioIO().framesPerSecond());
   return ret;
 }
 
 bool AudioDomain::start() {
   bool ret = true;
+  ret &= audioIO().open();
+  gam::Domain::spu(audioIO().framesPerSecond());
   ret &= audioIO().start();
   return ret;
 }
