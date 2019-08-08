@@ -1,27 +1,28 @@
-#include "al/sound/al_SoundFile.hpp"
+﻿#include "al/sound/al_SoundFile.hpp"
 
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
 #define DR_FLAC_IMPLEMENTATION
 #include "dr_flac.h"
 
+#include <cstdint>
 #include <cstring>
 #include <iostream>
-#include <cstdint>
 
-void al::SoundFile::open (const char* path) {
+bool al::SoundFile::open(const char* path) {
   auto len = std::strlen(path);
 
   if (len < 5) {
     std::cerr << "not a valid file name: " << path << std::endl;
-    return;
+    return false;
   }
 
-  const char* ext3 = path + (len-4);
+  const char* ext3 = path + (len - 4);
   if (std::strcmp(ext3, ".wav") == 0) {
     unsigned int c, s;
     uint64_t f;
-    float* file_data = drwav_open_file_and_read_pcm_frames_f32(path, &c, &s, &f);
+    float* file_data =
+        drwav_open_file_and_read_pcm_frames_f32(path, &c, &s, &f);
     if (file_data) {
       channels = (int)c;
       sampleRate = (int)s;
@@ -30,26 +31,27 @@ void al::SoundFile::open (const char* path) {
       data.resize(n);
       std::memcpy(data.data(), file_data, sizeof(float) * n);
       drwav_free(file_data);
-    }
-    else {
+    } else {
       std::cerr << "failed to open file: " << path << std::endl;
+      return false;
     }
-    return;
-  }
-  else if (std::strcmp(ext3, ".mp3") == 0) {
+    return true;
+  } else if (std::strcmp(ext3, ".mp3") == 0) {
     std::cerr << "mp3 currently not supported\n";
+    return false;
   }
 
   if (len < 6) {
     std::cerr << "not a valid file name: " << path << std::endl;
-    return;
+    return false;
   }
 
-  const char* ext4 = path + (len-5);
+  const char* ext4 = path + (len - 5);
   if (std::strcmp(ext4, ".flac") == 0) {
     unsigned int c, s;
     drflac_uint64 f;
-    float* file_data = drflac_open_file_and_read_pcm_frames_f32(path, &c, &s, &f);
+    float* file_data =
+        drflac_open_file_and_read_pcm_frames_f32(path, &c, &s, &f);
     if (file_data) {
       channels = (int)c;
       sampleRate = (int)s;
@@ -58,24 +60,27 @@ void al::SoundFile::open (const char* path) {
       data.resize(n);
       std::memcpy(data.data(), file_data, sizeof(float) * n);
       drflac_free(file_data);
-    }
-    else {
+    } else {
       std::cerr << "failed to open file: " << path << std::endl;
+      return false;
     }
-    return;
+    return true;
   }
+  return false;
 }
 
-float* al::SoundFile::getFrame (long long int frame) {
+float* al::SoundFile::getFrame(long long int frame) {
   return data.data() + frame * channels;
 }
 
-al::SoundFile al::getResampledSoundFile (SoundFile* toConvert, unsigned int newSampleRate) {
+al::SoundFile al::getResampledSoundFile(SoundFile* toConvert,
+                                        unsigned int newSampleRate) {
   // TODO!
   return {};
 }
- 
-void al::SoundFilePlayer::getFrames (int numFrames, float* buffer, int bufferLength) {
+
+void al::SoundFilePlayer::getFrames(int numFrames, float* buffer,
+                                    int bufferLength) {
   if (pause || !soundFile) {
     for (int i = 0; i < bufferLength; i += 1) {
       buffer[i] = 0.0f;
@@ -86,8 +91,7 @@ void al::SoundFilePlayer::getFrames (int numFrames, float* buffer, int bufferLen
   if (frame >= soundFile->frameCount) {
     if (loop) {
       frame = 0;
-    }
-    else {
+    } else {
       pause = true;
     }
     for (int i = 0; i < bufferLength; i += 1) {
@@ -102,13 +106,12 @@ void al::SoundFilePlayer::getFrames (int numFrames, float* buffer, int bufferLen
     n = (int)(soundFile->frameCount - frame);
   }
   if (n * c >= bufferLength) {
-    std::memcpy(buffer, soundFile->getFrame(frame), sizeof(float) * bufferLength);
-  }
-  else {
+    std::memcpy(buffer, soundFile->getFrame(frame),
+                sizeof(float) * bufferLength);
+  } else {
     std::memcpy(buffer, soundFile->getFrame(frame), sizeof(float) * n * c);
-    for (int i = n * c; i < bufferLength; i += 1)
-    {
-        buffer[i] = 0.0f;
+    for (int i = n * c; i < bufferLength; i += 1) {
+      buffer[i] = 0.0f;
     }
   }
   frame += n;
