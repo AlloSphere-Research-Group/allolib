@@ -1,26 +1,32 @@
-#include "al/app/al_App.hpp"
-#include "al/sound/al_SoundFile.hpp"
-#include "al/io/al_Imgui.hpp"
 #include <iostream>
 #include <vector>
+#include "al/app/al_App.hpp"
+#include "al/io/al_Imgui.hpp"
+#include "al/sound/al_SoundFile.hpp"
 
 using namespace al;
 
-struct MyApp : App
-{
+// Sound file reading
+
+struct MyApp : App {
   SoundFilePlayerTS playerTS;
   std::vector<float> buffer;
   bool loop = true;
 
-  void onCreate() override {
-    playerTS.open("data/count.wav");
-    std::cout << "sampleRate: " <<  playerTS.soundFile.sampleRate << std::endl;
-    std::cout << "channels: " <<  playerTS.soundFile.channels << std::endl;
-    std::cout << "frameCount: " <<  playerTS.soundFile.frameCount << std::endl;
+  void onInit() override {
+    const char name[] = "data/count.wav";
+    if (!playerTS.open(name)) {
+      std::cerr << "File not found: " << name << std::endl;
+      quit();
+    }
+    std::cout << "sampleRate: " << playerTS.soundFile.sampleRate << std::endl;
+    std::cout << "channels: " << playerTS.soundFile.channels << std::endl;
+    std::cout << "frameCount: " << playerTS.soundFile.frameCount << std::endl;
     playerTS.setLoop();
     playerTS.setPlay();
-    imguiInit();
   }
+
+  void onCreate() override { imguiInit(); }
 
   void onDraw(Graphics& g) override {
     imguiBeginFrame();
@@ -40,8 +46,7 @@ struct MyApp : App
     if (ImGui::Checkbox("loop", &loop)) {
       if (loop) {
         playerTS.setLoop();
-      }
-      else {
+      } else {
         playerTS.setNoLoop();
       }
     }
@@ -59,7 +64,7 @@ struct MyApp : App
       buffer.resize(bufferLength);
     }
     playerTS.getFrames(frames, buffer.data(), (int)buffer.size());
-    int second = (channels < 2)? 0 : 1;
+    int second = (channels < 2) ? 0 : 1;
     while (io()) {
       int frame = (int)io.frame();
       int idx = frame * channels;
@@ -68,9 +73,7 @@ struct MyApp : App
     }
   }
 
-  void onExit() override {
-    imguiShutdown();
-  }
+  void onExit() override { imguiShutdown(); }
 };
 
 int main() {
