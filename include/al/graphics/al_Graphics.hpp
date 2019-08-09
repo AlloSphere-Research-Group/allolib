@@ -53,7 +53,8 @@
 namespace al {
 
 class Graphics : public RenderManager {
- public:
+public:
+  [[deprecated("use GL_* enums with al::gl::* functions")]]
   enum BlendFunc : unsigned int {
     SRC_ALPHA = GL_SRC_ALPHA,                     /**< */
     ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA, /**< */
@@ -68,6 +69,7 @@ class Graphics : public RenderManager {
     SRC_ALPHA_SATURATE = GL_SRC_ALPHA_SATURATE    /**< */
   };
 
+  [[deprecated("use GL_* enums with al::gl::* functions")]]
   enum BlendEq : unsigned int {
     FUNC_ADD = GL_FUNC_ADD,           /**< Source + destination */
     FUNC_SUBTRACT = GL_FUNC_SUBTRACT, /**< Source - destination */
@@ -77,6 +79,7 @@ class Graphics : public RenderManager {
     MAX = GL_MAX  /**< Maximum value of source and destination */
   };
 
+  [[deprecated("use GL_* enums with al::gl::* functions")]]
   enum Capability : unsigned int {
     BLEND = GL_BLEND, /**< Blend rather than replacing with new color */
     DEPTH_TEST = GL_DEPTH_TEST, /**< Test depth of incoming fragments */
@@ -85,12 +88,14 @@ class Graphics : public RenderManager {
     CULL_FACE = GL_CULL_FACE /**< Cull faces */
   };
 
+  [[deprecated("use GL_* enums with al::gl::* functions")]]
   enum Face : unsigned int {
     FRONT = GL_FRONT,                  /**< Front face */
     BACK = GL_BACK,                    /**< Back face */
     FRONT_AND_BACK = GL_FRONT_AND_BACK /**< Front and back face */
   };
 
+  [[deprecated("use GL_* enums with al::gl::* functions")]]
   enum PolygonMode : unsigned int {
     POINT = GL_POINT, /**< Render only points at each vertex */
     LINE = GL_LINE,   /**< Render only lines along vertex path */
