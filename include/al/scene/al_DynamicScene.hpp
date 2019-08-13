@@ -102,16 +102,14 @@ public:
      * @param pFields std::vector<float> containing the values
      * @return true if able to set the fields
      */
-    virtual bool setTriggerParams(std::vector<float> &pFields) override {
-        return setTriggerParams(pFields.data(), pFields.size());
-    }
+    virtual bool setTriggerParams(std::vector<float> &pFields, bool noCalls = false) override;
 
     /**
      * @brief Set parameter values
      * @param pFields std::vector<float> containing the values
      * @return true if able to set the fields
      */
-    virtual bool setTriggerParams(std::vector<ParameterField> pFields) override;
+    virtual bool setTriggerParams(std::vector<ParameterField> pFields, bool noCalls = false) override;
 
     /**
      * @brief For PositionedVoice, the pose (7 floats) and the size are appended to the pfields

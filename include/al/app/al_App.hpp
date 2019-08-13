@@ -234,6 +234,17 @@ class App {
   std::stack<std::shared_ptr<AsynchronousDomain>> mRunningDomains;
 };
 
+class AudioControl {
+public:
+    void registerAudioIO(AudioIO &io) {
+        gain.registerChangeCallback([&io](float value) {
+            io.gain(value);
+        });
+    }
+
+    Parameter gain{"gain", "sound", 1.0, "alloapp", 0.0, 2.0};
+};
+
 class DistributedApp : public App {
  public:
   DistributedApp(bool primary = true) : App() {
@@ -245,6 +256,8 @@ class DistributedApp : public App {
     // Replace Simulation domain with state simulation domain
     mSimulationDomain =
         mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
+    mAudioControl.registerAudioIO(audioIO());
+    parameterServer() << mAudioControl.gain;
 
     mPrimary = primary;
     if (mPrimary) {
@@ -260,6 +273,7 @@ class DistributedApp : public App {
 
  private:
   bool mPrimary;
+  AudioControl mAudioControl;
 };
 
 template <class TSharedState>
