@@ -475,7 +475,7 @@ bool PositionedVoice::setTriggerParams(std::vector<float> &pFields, bool noCalls
 }
 
 
-bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields) {
+bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields, bool noCalls) {
   bool ok = SynthVoice::setTriggerParams(pFields);
   if (pFields.size() == mTriggerParams.size() + 8) { // If seven extra, it means pose and size are there too
     size_t index = mTriggerParams.size();
@@ -486,8 +486,13 @@ bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields) {
     double qx = pFields[index++].get<float>();
     double qy = pFields[index++].get<float>();
     double qz = pFields[index++].get<float>();
-    mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
-    mSize.set(pFields[index++].get<float>());
+    if (noCalls) {
+        mPose.setNoCalls({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+        mSize.setNoCalls(pFields[index++].get<float>());
+    } else {
+        mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
+        mSize.set(pFields[index++].get<float>());
+    }
   } else {
     //            std::cout << "Not setting position for voice" << std::endl;
     ok = false;
