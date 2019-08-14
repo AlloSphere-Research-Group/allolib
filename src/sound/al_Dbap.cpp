@@ -6,7 +6,7 @@ Dbap::Dbap(const SpeakerLayout &sl, float focus)
 	:	Spatializer(sl), mNumSpeakers(0), mFocus(focus)
 {
 	mNumSpeakers = mSpeakers.size();
-	printf("DBAP Compiled with %d speakers\n", mNumSpeakers);
+    std::cout << "DBAP Compiled with " << mNumSpeakers << " speakers" << std::endl;
 
 	for(unsigned int i = 0; i < mNumSpeakers; i++)
 	{
@@ -15,7 +15,7 @@ Dbap::Dbap(const SpeakerLayout &sl, float focus)
 	}
 }
 
-void Dbap::renderSample(AudioIOData &io, const Pose &listeningPose, const float &sample, const int &frameIndex)
+void Dbap::renderSample(AudioIOData &io, const Pose &listeningPose, const float &sample, const unsigned int &frameIndex)
 {
 	Vec3d relpos = listeningPose.vec();
 
@@ -27,15 +27,15 @@ void Dbap::renderSample(AudioIOData &io, const Pose &listeningPose, const float 
 	{
 		float gain = 1.f;
 		Vec3d vec = relpos - mSpeakerVecs[i];
-		float dist = vec.mag();
-		gain = 1.f / (1.f + dist);
+        double dist = vec.mag();
+        gain = 1.f / (1.f + float(dist));
 		gain = powf(gain, mFocus);
 
 		io.out(mDeviceChannels[i], frameIndex) += gain*sample;
 	}
 }
 
-void Dbap::renderBuffer(AudioIOData &io, const Pose &listeningPose, const float *samples, const int &numFrames)
+void Dbap::renderBuffer(AudioIOData &io, const Pose &listeningPose, const float *samples, const unsigned int &numFrames)
 {
 	Vec3d relpos = listeningPose.vec();
 
@@ -50,7 +50,7 @@ void Dbap::renderBuffer(AudioIOData &io, const Pose &listeningPose, const float 
 
 		Vec3d vec = relpos - mSpeakerVecs[k];
 		double dist = vec.mag();
-		gain = 1.0 / (1.0 + dist);
+        gain = 1.0f / (1.0f + float(dist));
 		gain = powf(gain, mFocus);
 
 		float * out = io.outBuffer(mDeviceChannels[k]);

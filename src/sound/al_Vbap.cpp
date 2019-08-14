@@ -388,7 +388,7 @@ void Vbap::makePhantomChannel(int channelIndex,
 //}
 
 void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
-                        const float *samples, const int &numFrames) {
+                        const float *samples, const unsigned int &numFrames) {
   // FIMXE AC use cached index
   //	unsigned currentTripletIndex = src.cachedIndex();
   unsigned currentTripletIndex = 0;
@@ -474,7 +474,7 @@ void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
 }
 
 void Vbap::renderSample(AudioIOData &io, const Pose &listeningPose,
-                        const float &sample, const int &frameIndex) {
+                        const float &sample, const unsigned int &frameIndex) {
   // FIXME AC use cached index
   //	unsigned currentTripletIndex = src.cachedIndex();
   // unsigned currentTripletIndex = mCachedTripletIndex; // Cached source

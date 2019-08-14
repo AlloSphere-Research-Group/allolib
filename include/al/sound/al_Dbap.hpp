@@ -67,8 +67,8 @@ public:
 	/// @param[in] focus	Amplitude focus to nearby speakers
 	Dbap(const SpeakerLayout &sl, float focus = 1.f);
 
-	virtual void renderSample(AudioIOData& io, const Pose& listeningPose, const float& sample, const int& frameIndex) override;
-	virtual void renderBuffer(AudioIOData& io, const Pose& listeningPose, const float *samples, const int& numFrames) override;
+    virtual void renderSample(AudioIOData& io, const Pose& listeningPose, const float& sample, const unsigned int &frameIndex) override;
+    virtual void renderBuffer(AudioIOData& io, const Pose& listeningPose, const float *samples, const unsigned int& numFrames) override;
 
 	/// focus is an exponent determining the amplitude focus to nearby speakers.
 
@@ -82,7 +82,7 @@ private:
 //	Listener * mListener;
 	Vec3f mSpeakerVecs[DBAP_MAX_NUM_SPEAKERS];
 	unsigned int mDeviceChannels[DBAP_MAX_NUM_SPEAKERS];
-	unsigned int mNumSpeakers;
+    size_t mNumSpeakers;
 	float mFocus;
 };
 

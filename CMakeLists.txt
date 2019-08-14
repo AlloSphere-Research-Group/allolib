@@ -202,6 +202,7 @@ set(sources
   src/sound/al_AudioScene.cpp
   src/sound/al_Biquad.cpp
   src/sound/al_Dbap.cpp
+  src/sound/al_Lbap.cpp
   src/sound/al_Vbap.cpp
   src/sound/al_Spatializer.cpp
   src/sound/al_StereoPanner.cpp

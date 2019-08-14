@@ -326,12 +326,12 @@ public:
 	virtual void renderBuffer(AudioIOData& io,
 	                  const Pose& listeningPose,
 	                  const float *samples,
-	                  const int& numFrames
+                      const unsigned int& numFrames
 	                  ) override;
 
 	virtual void renderSample(AudioIOData& io, const Pose& listeningPose,
 	                          const float& sample,
-	                          const int& frameIndex) override;
+                              const unsigned int& frameIndex) override;
 
 	virtual void finalize(AudioIOData& io) override;
 

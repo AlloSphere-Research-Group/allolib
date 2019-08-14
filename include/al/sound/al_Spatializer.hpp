@@ -77,13 +77,13 @@ public:
   virtual void renderBuffer(AudioIOData& io,
                             const Pose& listeningPose,
                             const float *samples,
-                            const int& numFrames
+                            const unsigned int& numFrames
                             ) = 0;
 
   /// Render audio sample in position
   virtual void renderSample(AudioIOData& io, const Pose& listeningPose,
                             const float& sample,
-                            const int& frameIndex) = 0;
+                            const unsigned int& frameIndex) = 0;
 
   /// Called once per listener, after sources are rendered. ex. ambisonics decode
   virtual void finalize(AudioIOData& io){}

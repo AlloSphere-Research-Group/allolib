@@ -452,7 +452,7 @@ void AmbisonicsSpatializer::prepare(AudioIOData& io){
 void AmbisonicsSpatializer::renderBuffer(AudioIOData& io,
                           const Pose& listeningPose,
                           const float *samples,
-                          const int& numFrames
+                          const unsigned int& numFrames
                           )
 {
 //	// compute azimuth & elevation of relative position in current listener's coordinate frame:
@@ -491,7 +491,7 @@ void AmbisonicsSpatializer::renderBuffer(AudioIOData& io,
 
 void AmbisonicsSpatializer::renderSample(AudioIOData& io, const Pose& listeningPose,
                           const float& sample,
-                          const int& frameIndex)
+                          const unsigned int& frameIndex)
 {
 	// compute azimuth & elevation of relative position in current listener's coordinate frame:
 //    Vec3d urel(relpos);
