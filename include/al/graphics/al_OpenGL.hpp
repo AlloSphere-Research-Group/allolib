@@ -86,11 +86,11 @@ inline void blendScreen () {
 }
 inline void blendMult () {
   blending(true);
-  blendMode(DST_COLOR, ZERO, FUNC_ADD);
+  blendMode(GL_DST_COLOR, GL_ZERO, GL_FUNC_ADD);
 }
 inline void blendTrans () {
   blending(true);
-  blendMode(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, FUNC_ADD);
+  blendMode(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_FUNC_ADD);
 }
 
 } // gl::

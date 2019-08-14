@@ -101,56 +101,56 @@ template<> GLenum al::gl::toDataType<unsigned int>(){ return GL_UNSIGNED_INT; }
 template<> GLenum al::gl::toDataType<float>(){ return GL_FLOAT; }
 template<> GLenum al::gl::toDataType<double>(){ return GL_DOUBLE; }
 
-void al::blending (bool doBlend) {
+void al::gl::blending (bool doBlend) {
   if (doBlend) glEnable(GL_BLEND);
   else glDisable(GL_BLEND);
 }
-void al::depthMask (bool maskDepth) {
+void al::gl::depthMask (bool maskDepth) {
   glDepthMask(maskDepth? GL_TRUE : GL_FALSE);
 }
-void al::depthTest (bool testDepth) {
+void al::gl::depthTest (bool testDepth) {
   if (testDepth) glEnable(GL_DEPTH_TEST);
   else glDisable(GL_DEPTH_TEST);
 }
-void al::viewport (int left, int bottom, int width, int height) {
+void al::gl::viewport (int left, int bottom, int width, int height) {
   glViewport(left, bottom, width, height);
 }
-void al::scissorTest (bool testScissor) {
+void al::gl::scissorTest (bool testScissor) {
   if (testScissor) glEnable(GL_SCISSOR_TEST);
   else glDisable(GL_SCISSOR_TEST);
 }
-void al::scissorArea (int left, int bottom, int width, int height) {
+void al::gl::scissorArea (int left, int bottom, int width, int height) {
   glScissor(left, bottom, width, height);
 }
-void al::faceCulling (bool doCulling) {
+void al::gl::faceCulling (bool doCulling) {
   if (doCulling) glEnable(GL_CULL_FACE);
   else glDisable(GL_CULL_FACE);
 }
-void al::faceToCull (unsigned int face) {
+void al::gl::faceToCull (unsigned int face) {
   glCullFace(face);
 }
-void al::pointSize (float size) {
+void al::gl::pointSize (float size) {
   glPointSize(size);
 }
-void al::polygonMode (unsigned int mode) {
+void al::gl::polygonMode (unsigned int mode) {
   glPolygonMode(GL_FRONT_AND_BACK, mode);
 }
-void al::blendMode (unsigned int src, unsigned int dst, unsigned int eq) {
+void al::gl::blendMode (unsigned int src, unsigned int dst, unsigned int eq) {
   glBlendEquation(eq);
   glBlendFunc(src, dst);
 }
-void al::clearColor (float r, float g, float b, float a) {
+void al::gl::clearColor (float r, float g, float b, float a) {
   float c[] = {r, g, b, a};
   glClearBufferfv(GL_COLOR, 0, c);
 }
-void al::clearDepth (float d) {
+void al::gl::clearDepth (float d) {
   float depth = d;
   glClearBufferfv(GL_DEPTH, 0, &depth);
 }
-void al::clearBuffer (int buffer, float r, float g, float b, float a) {
+void al::gl::clearBuffer (int buffer, float r, float g, float b, float a) {
   float c[] = {r, g, b, a};
   glClearBufferfv(GL_COLOR, buffer, c);
 }
-void al::bufferToDraw (unsigned int buffer) {
+void al::gl::bufferToDraw (unsigned int buffer) {
     glDrawBuffer(buffer);
 }
