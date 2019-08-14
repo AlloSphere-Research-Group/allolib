@@ -90,11 +90,30 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize, PolySyn
 
     });
 
+    PolySynth::registerFreeCallback(
+        [this](int id, void *userData) {
+            if (this->mNotifier) {
+                osc::Packet p;
+                std::string prefix = "/" + this->name();
+                if (prefix.size() == 1) { prefix = ""; }
+                p.beginMessage(prefix + "/remove");
+                p << id;
+                p.endMessage();
+                if (verbose()) {
+                    std::cout << " -- Sending free message " << id << std::endl;
+                }
+                this->mNotifier->send(p);
+            }
+            return true;
+
+        });
+
     PolySynth::registerAllocateCallback(
                 [this](SynthVoice *voice, void *userData) {
         if (verbose()) {
           std::cout << "voice allocated " << std::endl;
         }
+        if (!this->mNotifier) {return;}
         for (auto *param : voice->triggerParameters()) {
             if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
                 dynamic_cast<Parameter *>(param)->registerChangeCallback(
@@ -201,10 +220,10 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
                   }
                 }
                 voice->setTriggerParams(params);
-                triggerOn(voice, offset, id);
                 if (verbose()) {
                   std::cout << "trigger on received " <<std::endl;
                 }
+                triggerOn(voice, offset, id);
                 return true;
             } else {
                 std::cerr << "Can't get free voice of type: " << voiceName<< std::endl;
@@ -219,6 +238,16 @@ bool DistributedScene::consumeMessage(osc::Message &m, std::string rootOSCPath) 
             triggerOff(id);
             if (verbose()) {
               std::cout << "trigger off received " << id <<std::endl;
+            }
+            return true;
+        }
+    } else if (address == "/remove") {
+        if (m.typeTags() == "i") {
+            int id;
+            m >> id;
+            mVoiceIdsToFree.write((const char*) &id, sizeof (int));
+            if (verbose()) {
+                std::cout << "FREE received " << id << std::endl;
             }
             return true;
         }
