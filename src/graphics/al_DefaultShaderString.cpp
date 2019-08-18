@@ -208,7 +208,8 @@ layout (location = 0) in vec3 vertexPosition;
     vertexShaderStereoHeader(isStereo),
     vertexShaderLightingHeader(doLighting),
     isStereo? al::stereoVertexDisplaceFunctionString(isOmni) : "\n",
-    R"(int main () {)",
+    R"(void main () {)",
+
     vertexShaderCommonBody(isStereo),
     vertexShaderLightingBody(doLighting),
     "}"
@@ -229,7 +230,8 @@ out vec4 vColor;
     vertexShaderStereoHeader(isStereo),
     vertexShaderLightingHeader(doLighting),
     isStereo? al::stereoVertexDisplaceFunctionString(isOmni) : "\n",
-    R"(int main () {)",
+    R"(void main () {)",
+
     vertexShaderCommonBody(isStereo),
     vertexShaderLightingBody(doLighting),
     R"(
@@ -253,7 +255,8 @@ out vec2 vTexcoord;
     vertexShaderLightingHeader(doLighting),
     isStereo? al::stereoVertexDisplaceFunctionString(isOmni) : "\n",
     R"(
-int main () {
+void main () {
+
 )",
     vertexShaderCommonBody(isStereo),
     vertexShaderLightingBody(doLighting),
@@ -274,7 +277,8 @@ uniform vec4 uColor;
 
 layout (location = 0) out vec4 fragColor;
 
-int main () {
+void main () {
+
   vec4 c = uColor;
 )",
   fragmentShaderLightingBody(doLighting),
@@ -295,7 +299,7 @@ in vec4 vColor;
 
 layout (location = 0) out vec4 fragColor;
 
-int main () {
+void main () {
   vec4 c = vColor;
 )",
   fragmentShaderLightingBody(doLighting),
@@ -317,7 +321,7 @@ in vec2 vTexcoord;
 
 layout (location = 0) out vec4 fragColor;
 
-int main () {
+void main () {
   vec4 c = texture(tex0, vTexcoord);
 )",
   fragmentShaderLightingBody(doLighting),
