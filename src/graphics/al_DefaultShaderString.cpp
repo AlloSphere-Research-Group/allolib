@@ -126,31 +126,32 @@ static const char* vertexShaderLightingHeader (bool doLighting) {
 layout (location = 3) in vec3 vertexNormal;
 uniform mat4 alNormalMatrix;
 out vec3 normalEyeCoord;
+out vec3 vertEyeCoord;
 )";
 }
 
 static const char* vertexShaderCommonBody (bool isStereo) {
   if (isStereo) {
     return R"(
+  vec4 ve = alModelViewMatrix * vec4(vertexPosition, 1.0);
   gl_Position = alProjectionMatrix
-              * stereoDisplace(alModelViewMatrix
-                             * vec4(vertexPosition.xyz, 1.0),
-                               eyeOffset, focalLength);
+              * stereoDisplace(ve, eyeOffset, focalLength);
 )";
   }
   else {
     return R"(
-  gl_Position = alProjectionMatrix
-              * alModelViewMatrix * vec4(vertexPosition.xyz, 1.0);
+  vec4 ve = alModelViewMatrix * vec4(vertexPosition, 1.0);
+  gl_Position = alProjectionMatrix * ve;
 )";
   }
 }
 
 static const char* vertexShaderLightingBody (bool doLighting) {
   if (!doLighting) return "\n";
-  // vertPositionInEyeCoord should be defined in previous function body (MV * p)
+  // `ve` should be defined in previous function body (MV * p)
   return R"(
   normalEyeCoord = (alNormalMatrix * vec4(normalize(vertexNormal), 0.0)).xyz;
+  vertEyeCoord = ve.xyz;
 )";
 }
 
@@ -159,6 +160,7 @@ static const char* fragmentShaderLightingHeader (bool doLighting) {
   return R"(
 uniform vec4 lightPositionEyeCoord;
 in vec3 normalEyeCoord;
+in vec3 vertEyeCoord;
 )";
 }
 
