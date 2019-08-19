@@ -123,6 +123,7 @@ public:
 	 * Will only have effect on parameters that have a single internal value and have implemented this function
 	 */
     virtual void fromFloat(float value) {
+      (void) value;
 		return;
 	}
 
@@ -733,7 +734,7 @@ public:
         mElementsLock.lock();
         auto position = std::find(mElements.begin(), mElements.end(), element);
         bool found = position != mElements.end();
-        auto foundPosition = std::distance(mElements.begin(), position);
+        int foundPosition = std::distance(mElements.begin(), position);
         mElementsLock.unlock();
         if (found) {
           if (noCalls) {
