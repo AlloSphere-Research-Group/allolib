@@ -58,6 +58,7 @@ set(headers
   include/al/app/al_OpenGLGraphicsDomain.hpp
   include/al/app/al_OSCDomain.hpp
   include/al/app/al_SimulationDomain.hpp
+  include/al/app/al_OmniRendererDomain.hpp
 #  include/al/app/al_StateDistributionDomain.hpp
 
   include/al/graphics/al_BufferObject.hpp

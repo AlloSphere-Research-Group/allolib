@@ -139,7 +139,7 @@ public:
   // Access to OSC domain
   ParameterServer &parameterServer();
 
-  void start();
+  virtual void start();
 
   // Domain access
   std::shared_ptr<OSCDomain> oscDomain() { return mOSCDomain; }

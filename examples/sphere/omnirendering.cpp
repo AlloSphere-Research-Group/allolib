@@ -1,12 +1,45 @@
 
 #include "al/app/al_App.hpp"
-#include "al/sphere/al_OmniRenderer.hpp"
+#include "al/app/al_OmniRendererDomain.hpp"
 #include <iostream>
 
 using namespace std;
 using namespace al;
 
-struct MyOmniRendererApp : OmniRenderer
+struct DistributedApp_: public App {
+public:
+  void start() override {
+    onInit();  // onInit() can't be called in constructor as it is virtual. But it
+               // is good enough here.
+    graphicsDomain()->removeSubDomain(mDefaultWindowDomain);
+    auto omniRendering = graphicsDomain()->newSubDomain<GLFWOpenGLOmniRendererDomain>();
+    omniRendering->window().append(stdControls);
+    for (auto &domain : mDomainList) {
+      mRunningDomains.push(domain);
+      if (!domain->start()) {
+        std::cerr << "ERROR starting domain " << std::endl;
+        break;
+      }
+    }
+
+    while (mRunningDomains.size() > 0) {
+      if (!mRunningDomains.top()->stop()) {
+        std::cerr << "ERROR stopping domain " << std::endl;
+      }
+      mRunningDomains.pop();
+    }
+
+    onExit();
+    mDefaultWindowDomain = nullptr;
+    for (auto &domain : mDomainList) {
+      if (!domain->cleanup()) {
+        std::cerr << "ERROR cleaning up domain " << std::endl;
+      }
+    }
+  }
+};
+
+struct MyOmniRendererApp : DistributedApp_
 {
     VAOMesh mesh;
     
@@ -18,7 +51,6 @@ struct MyOmniRendererApp : OmniRenderer
     float alpha = 0.9;
 
     void onCreate() override {
-        append(mNavControl);
 
         addIcosahedron(mesh);
         mesh.update();
@@ -26,11 +58,10 @@ struct MyOmniRendererApp : OmniRenderer
 
     void onAnimate(double dt) override {
         mNav.step();
-        pose(mView.pose()); // should not be in onDraw
     }
 
     void onDraw(Graphics& g) override {
-        g.clear(0);
+        g.clear(0, 0, 1);
 
         if (DO_BLENDING) {
             g.depthTesting(false);
@@ -49,8 +80,8 @@ struct MyOmniRendererApp : OmniRenderer
             if(aa == 0 && bb == 0 && cc == 0) continue;
             g.pushMatrix();
             g.translate(aa * 2, bb * 2, cc * 2);
-            g.rotate(sin(2 * sec()), 0, 0, 1);
-            g.rotate(sin(3 * sec()), 0, 1, 0);
+//            g.rotate(sin(2 * al::seconds()), 0, 0, 1);
+//            g.rotate(sin(3 * sec()), 0, 1, 0);
             g.scale(0.3, 0.3, 0.3);
             if (DO_BLENDING) {
                 g.color((aa + 5)/10.0, (bb + 5)/10.0, (cc + 5)/10.0, alpha);
@@ -63,7 +94,7 @@ struct MyOmniRendererApp : OmniRenderer
         }
     }
 
-    void onKeyDown(const Keyboard& k) /*override*/ {
+    bool onKeyDown(const Keyboard& k) /*override*/ {
         if (k.key() == 'b') {
             DO_BLENDING = !DO_BLENDING;
             cout << "blending: " << DO_BLENDING << endl;
@@ -72,6 +103,7 @@ struct MyOmniRendererApp : OmniRenderer
             alpha = 1 - alpha;
             cout << "alpha: " << alpha << endl;
         }
+        return true;
     }
 };
 
