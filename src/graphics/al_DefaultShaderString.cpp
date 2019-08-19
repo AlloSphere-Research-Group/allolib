@@ -14,7 +14,7 @@ al::ShaderString::ShaderString (al::ShaderString&& other) noexcept {
 }
 
 al::ShaderString& al::ShaderString::operator= (const al::ShaderString& other) {
-  delete[] str;
+  std::free(str);
   auto size = std::strlen(other.str) + 1;
   str = (char*)std::malloc(size);
   std::memcpy(str, other.str, size);
@@ -29,7 +29,7 @@ al::ShaderString& al::ShaderString::operator= (al::ShaderString&& other) noexcep
 }
 
 al::ShaderString::~ShaderString () {
-  delete[] str;
+  std::free(str);
 }
 
 static al::ShaderString makeString (const char* str) {
