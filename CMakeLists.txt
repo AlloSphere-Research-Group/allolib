@@ -62,6 +62,7 @@ set(headers
 
   include/al/graphics/al_BufferObject.hpp
   include/al/graphics/al_DefaultShaders.hpp
+  include/al/graphics/al_DefaultShaderString.hpp
   include/al/graphics/al_EasyFBO.hpp
   include/al/graphics/al_EasyVAO.hpp
   include/al/graphics/al_FBO.hpp
@@ -160,6 +161,7 @@ set(sources
 
   src/graphics/al_BufferObject.cpp
   src/graphics/al_DefaultShaders.cpp
+  src/graphics/al_DefaultShaderString.cpp
   src/graphics/al_EasyFBO.cpp
   src/graphics/al_EasyVAO.cpp
   src/graphics/al_FBO.cpp

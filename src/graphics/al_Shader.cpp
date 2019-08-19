@@ -257,6 +257,14 @@ int ShaderProgram::attribute(const char* name) const {
   return loc;
 }
 
+void ShaderProgram::uniform4f (int loc, float v0, float v1, float v2, float v3) const {
+  glUniform4f(loc, v0, v1, v2, v3);
+}
+
+void ShaderProgram::uniformMat4f (int loc, float* data) const {
+  glUniformMatrix4fv(loc, 1, GL_FALSE, data);
+}
+
 const ShaderProgram& ShaderProgram::uniform(int loc, int v) const {
   glUniform1i(loc, v);
   return *this;
