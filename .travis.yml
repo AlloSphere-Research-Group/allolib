@@ -1,6 +1,6 @@
-branches:
-  except:
-  - devel
+#branches:
+#  except:
+#  - devel
 language: cpp
 dist: trusty
 os:
