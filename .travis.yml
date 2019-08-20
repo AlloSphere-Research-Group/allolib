@@ -10,10 +10,7 @@ compiler:
 - gcc
 - clang
 before_install:
-( wget https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4-Linux-x86_64.sh
-chmod a+x cmake-3.13.4-Linux-x86_64.sh
-mkdir cmake
-./cmake-3.13.4-Linux-x86_64.sh --skip-license --prefix=./cmake )
+- ( wget https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4-Linux-x86_64.sh; chmod a+x cmake-3.13.4-Linux-x86_64.sh;mkdir cmake;./cmake-3.13.4-Linux-x86_64.sh --skip-license --prefix=./cmake )
   # - ( git clone -b devel https://github.com/AlloSphere-Research-Group/Gamma /tmp/Gamma )
   # - ( git clone -b cmake https://github.com/AlloSphere-Research-Group/GLV /tmp/GLV )
   # - ( git clone https://github.com/rbtsx/cuttlebone.git /tmp/cuttlebone )
@@ -42,8 +39,8 @@ addons:
 script:
     - mkdir allolib_build
     - cd allolib_build
-    - cmake .. -DTRAVIS_BUILD=1 -DBUILD_EXAMPLES=1 -DCMAKE_BUILD_TYPE=Debug -DALLOLIB_BUILD_TESTS=1 -DALLOLIB_RUN_TESTS=1
-    - cmake --build .
+    - ../cmake/bin/cmake .. -DTRAVIS_BUILD=1 -DBUILD_EXAMPLES=1 -DCMAKE_BUILD_TYPE=Debug -DALLOLIB_BUILD_TESTS=1 -DALLOLIB_RUN_TESTS=1
+    - ../cmake/bin/cmake --build .
 sudo: false
 notifications:
   email:
