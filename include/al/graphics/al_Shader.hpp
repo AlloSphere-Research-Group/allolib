@@ -222,6 +222,9 @@ public:
     return uniform4(name, c.components);
   }
 
+  void uniform4f (int loc, float v0, float v1, float v2, float v3) const;
+  void uniformMat4f (int loc, float* data) const;
+
   const ShaderProgram& uniform(int loc, int v) const;
   const ShaderProgram& uniform(int loc, float v) const;
   const ShaderProgram& uniform(int loc, double v) const { return uniform(loc, float(v)); }

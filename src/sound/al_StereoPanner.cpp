@@ -3,7 +3,7 @@
 #include "al/sound/al_StereoPanner.hpp"
 
 
-void al::StereoPanner::renderSample(al::AudioIOData &io, const al::Pose &listeningPose, const float &sample, const int &frameIndex)
+void al::StereoPanner::renderSample(al::AudioIOData &io, const al::Pose &listeningPose, const float &sample, const unsigned int &frameIndex)
 {
   Vec3d vec = listeningPose.vec();
   Quatd srcRot = listeningPose.quat();
@@ -21,7 +21,7 @@ void al::StereoPanner::renderSample(al::AudioIOData &io, const al::Pose &listeni
 
 }
 
-void al::StereoPanner::renderBuffer(al::AudioIOData &io, const al::Pose &listeningPose, const float *samples, const int &numFrames)
+void al::StereoPanner::renderBuffer(al::AudioIOData &io, const al::Pose &listeningPose, const float *samples, const unsigned int &numFrames)
 {
   Vec3d vec = listeningPose.vec();
   Quatd srcRot = listeningPose.quat();

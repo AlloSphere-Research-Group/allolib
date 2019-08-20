@@ -228,8 +228,8 @@ inline int base36To10(char v){
 }
 
 inline uint32_t bitsToUInt(const char * string){
-  uint32_t v=0; int n = strlen(string);
-  for(int i=0; i<n; ++i) if(string[i] == '1') v |= 1<<(n-1-i);
+  uint32_t v=0; size_t n = strlen(string);
+  for(size_t i=0; i<n; ++i) if(string[i] == '1') v |= 1<<(n-1-i);
   return v;
 }
 

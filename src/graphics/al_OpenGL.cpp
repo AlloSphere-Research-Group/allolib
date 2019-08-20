@@ -100,3 +100,57 @@ template<> GLenum al::gl::toDataType<int>(){ return GL_INT; }
 template<> GLenum al::gl::toDataType<unsigned int>(){ return GL_UNSIGNED_INT; }
 template<> GLenum al::gl::toDataType<float>(){ return GL_FLOAT; }
 template<> GLenum al::gl::toDataType<double>(){ return GL_DOUBLE; }
+
+void al::gl::blending (bool doBlend) {
+  if (doBlend) glEnable(GL_BLEND);
+  else glDisable(GL_BLEND);
+}
+void al::gl::depthMask (bool maskDepth) {
+  glDepthMask(maskDepth? GL_TRUE : GL_FALSE);
+}
+void al::gl::depthTest (bool testDepth) {
+  if (testDepth) glEnable(GL_DEPTH_TEST);
+  else glDisable(GL_DEPTH_TEST);
+}
+void al::gl::viewport (int left, int bottom, int width, int height) {
+  glViewport(left, bottom, width, height);
+}
+void al::gl::scissorTest (bool testScissor) {
+  if (testScissor) glEnable(GL_SCISSOR_TEST);
+  else glDisable(GL_SCISSOR_TEST);
+}
+void al::gl::scissorArea (int left, int bottom, int width, int height) {
+  glScissor(left, bottom, width, height);
+}
+void al::gl::faceCulling (bool doCulling) {
+  if (doCulling) glEnable(GL_CULL_FACE);
+  else glDisable(GL_CULL_FACE);
+}
+void al::gl::faceToCull (unsigned int face) {
+  glCullFace(face);
+}
+void al::gl::pointSize (float size) {
+  glPointSize(size);
+}
+void al::gl::polygonMode (unsigned int mode) {
+  glPolygonMode(GL_FRONT_AND_BACK, mode);
+}
+void al::gl::blendMode (unsigned int src, unsigned int dst, unsigned int eq) {
+  glBlendEquation(eq);
+  glBlendFunc(src, dst);
+}
+void al::gl::clearColor (float r, float g, float b, float a) {
+  float c[] = {r, g, b, a};
+  glClearBufferfv(GL_COLOR, 0, c);
+}
+void al::gl::clearDepth (float d) {
+  float depth = d;
+  glClearBufferfv(GL_DEPTH, 0, &depth);
+}
+void al::gl::clearBuffer (int buffer, float r, float g, float b, float a) {
+  float c[] = {r, g, b, a};
+  glClearBufferfv(GL_COLOR, buffer, c);
+}
+void al::gl::bufferToDraw (unsigned int buffer) {
+    glDrawBuffer(buffer);
+}

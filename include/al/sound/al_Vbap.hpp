@@ -116,8 +116,8 @@ public:
     /// recomputed
     void set3D(bool is3D) {mIs3D = is3D;}
 
-	virtual void renderSample(AudioIOData& io, const Pose& reldir, const float& sample, const int& frameIndex) override;
-	virtual void renderBuffer(AudioIOData& io, const Pose& reldir, const float *samples, const int& numFrames) override;
+    virtual void renderSample(AudioIOData& io, const Pose& reldir, const float& sample, const unsigned int& frameIndex) override;
+    virtual void renderBuffer(AudioIOData& io, const Pose& reldir, const float *samples, const unsigned int& numFrames) override;
 
 	virtual void print(std::ostream &stream = std::cout) override;
 

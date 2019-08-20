@@ -181,6 +181,8 @@ public:
      * @param numFields number of fields to process
      * @return true if able to set the fields
      *
+     * Note that this function allways triggers any associated callbacks, unlike the other
++    * setTriggerParams() that take an argument determine this.
      */
   virtual bool setTriggerParams(float *pFields, int numFields = -1) {
     if (numFields < (int) mTriggerParams.size()) {
@@ -201,14 +203,20 @@ public:
      * Trigger parameters are parameters meant to be set at triggering,
      * but that then stay constant throughout the duration of the instance.
      */
-  virtual bool setTriggerParams(std::vector<float> &pFields) {
+  virtual bool setTriggerParams(std::vector<float> &pFields, bool noCalls = false) {
     if (pFields.size() < mTriggerParams.size()) {
       // std::cout << "pField count mismatch. Ignoring." << std::endl;
       return false;
     }
     auto it = pFields.begin();
-    for (auto &param:mTriggerParams) {
-      static_cast<Parameter *>(param)->setNoCalls(*it++);
+    if (noCalls) {
+      for (auto &param:mTriggerParams) {
+        static_cast<Parameter *>(param)->setNoCalls(*it++);
+      }
+    } else {
+      for (auto &param:mTriggerParams) {
+        static_cast<Parameter *>(param)->set(*it++);
+      }
     }
     return true;
   }
@@ -218,7 +226,7 @@ public:
      * @param pFields std::vector<float> containing the values
      * @return true if able to set the fields
      */
-  virtual bool setTriggerParams(std::vector<ParameterField> pFields) {
+  virtual bool setTriggerParams(std::vector<ParameterField> pFields, bool noCalls = false) {
     if (pFields.size() < mTriggerParams.size()) {
       // std::cout << "pField count mismatch. Ignoring." << std::endl;
       return false;
@@ -229,28 +237,58 @@ public:
     // If you need the callbacks to propagate, set the parameter values
     // directly instead of through these functions.
     for (auto &param:mTriggerParams) {
-      if (it->type() == ParameterField::FLOAT) {
-        if (strcmp(typeid(*param).name(), typeid(Parameter).name() ) == 0) {
-          static_cast<Parameter *>(param)->setNoCalls(it->get<float>());
-        } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name() ) == 0) {
-          static_cast<ParameterInt *>(param)->setNoCalls(it->get<float>());
-        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
-          static_cast<ParameterMenu*>(param)->setNoCalls(it->get<float>());
-        } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
-          static_cast<ParameterString *>(param)->setNoCalls(std::to_string(it->get<float>()));
-        } else {
-          std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+
+      if (noCalls) {
+        for (auto &param:mTriggerParams) {
+          if (it->type() == ParameterField::FLOAT) {
+            if (strcmp(typeid(*param).name(), typeid(Parameter).name() ) == 0) {
+              static_cast<Parameter *>(param)->setNoCalls(it->get<float>());
+            } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name() ) == 0) {
+              static_cast<ParameterInt *>(param)->setNoCalls(it->get<float>());
+            } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+              static_cast<ParameterMenu*>(param)->setNoCalls(it->get<float>());
+            } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+              static_cast<ParameterString *>(param)->setNoCalls(std::to_string(it->get<float>()));
+            } else {
+              std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+            }
+          } else if (it->type() == ParameterField::STRING) {
+            if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+              static_cast<ParameterString *>(param)->setNoCalls(it->get<std::string>());
+            } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+              static_cast<ParameterMenu *>(param)->setCurrent(it->get<std::string>(), noCalls);
+            } else {
+              std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+            }
+          }
+          it++;
         }
-      } else if (it->type() == ParameterField::STRING) {
-        if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
-          static_cast<ParameterString *>(param)->setNoCalls(it->get<std::string>());
-        } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
-          static_cast<ParameterMenu *>(param)->setCurrent(it->get<std::string>(), true);
-        } else {
-          std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+      } else {
+        for (auto &param:mTriggerParams) {
+          if (it->type() == ParameterField::FLOAT) {
+            if (strcmp(typeid(*param).name(), typeid(Parameter).name() ) == 0) {
+              static_cast<Parameter *>(param)->set(it->get<float>());
+            } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name() ) == 0) {
+              static_cast<ParameterInt *>(param)->set(it->get<float>());
+            } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+              static_cast<ParameterMenu*>(param)->set(it->get<float>());
+            } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+              static_cast<ParameterString *>(param)->set(std::to_string(it->get<float>()));
+            } else {
+              std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+            }
+          } else if (it->type() == ParameterField::STRING) {
+            if (strcmp(typeid(*param).name(), typeid(ParameterString).name() ) == 0) {
+              static_cast<ParameterString *>(param)->set(it->get<std::string>());
+            } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name() ) == 0) {
+              static_cast<ParameterMenu *>(param)->setCurrent(it->get<std::string>(), noCalls);
+            } else {
+              std::cerr << "ERROR: p-field string not setting parameter. Invalid parameter type for parameter " << param->getFullAddress() << std::endl;
+            }
+          }
+          it++;
         }
       }
-      it++;
     }
     return true;
   }
@@ -355,6 +393,15 @@ public:
   virtual void onTriggerOff() {}
 
   /**
+    * @brief This function gets called after the voice is taken out of the processing chain
+    *
+    * It can be used to store final states of a voice for example. This function
+    * is currently called in the time master domain, so it might be important to not
+    * do any blocking operations here.
+    * */
+  virtual void onFree() {}
+
+  /**
    * @brief Trigger a note by calling onTriggerOn() and setting voice as active
    * @param offsetFrames
    *
@@ -363,8 +410,8 @@ public:
    */
   void triggerOn(int offsetFrames = 0) {
     mOnOffsetFrames = offsetFrames;
-    onTriggerOn();
     mActive = true;
+    onTriggerOn();
   }
 
   /**
@@ -521,7 +568,7 @@ public:
      * It can also be used to force removal of a voice from the rendering chain
      * without going through the release phase.
      */
-  void free() {mActive = false; } // Mark this voice as done.
+  void free() { mActive = false; } // Mark this voice as done.
 
   SynthVoice *next {nullptr}; // To support SynthVoices as linked lists
 
@@ -545,7 +592,7 @@ protected:
 private:
 
   int mId {-1};
-  int mActive {false};
+  bool mActive {false};
   int mOnOffsetFrames {0};
   int mOffOffsetFrames {0};
   void *mUserData;
@@ -787,6 +834,13 @@ public:
     TriggerOffCallback cbNode(cb, userData);
     mTriggerOffCallbacks.push_back(cbNode);
   }
+  /**
+    * @brief register a callback to be notified of a note is moved to the free pool from the active list
+    */
+  void registerFreeCallback(std::function<bool(int id, void *userData)> cb, void *userData = nullptr) {
+      FreeCallback cbNode(cb, userData);
+      mFreeCallbacks.push_back(cbNode);
+  }
 
   /**
      * @brief register a callback to be notified of allocation of a voice.
@@ -946,12 +1000,12 @@ protected:
     size_t numVoicesToTurnOff;
     while ( (numVoicesToTurnOff = mVoiceIdsToTurnOff.read((char *) voicesToTurnOff, 16 * sizeof (int))) ) {
       for (size_t i = 0; i < numVoicesToTurnOff/int(sizeof (int)); i++) {
-        auto voice = mActiveVoices;
+        auto *voice = mActiveVoices;
         while (voice) {
           if (voice->id() == voicesToTurnOff[i]) {
 
             if (mVerbose) {
-              std::cout << "Voice off "<<  voice->id() << std::endl;
+              std::cout << "Voice trigger off "<<  voice->id() << std::endl;
             }
             voice->triggerOff(); // TODO use offset for turn off
           }
@@ -959,27 +1013,51 @@ protected:
         }
       }
     }
+    size_t numVoicesToFree;
+    int voicesToFree[16];
+    while ( (numVoicesToFree = mVoiceIdsToFree.read((char *) voicesToFree, 16 * sizeof (int))) ) {
+        for (size_t i = 0; i < numVoicesToFree/int(sizeof (int)); i++) {
+            if (mVerbose) {
+                std::cout << "Voice free "<<  voicesToFree[i] << std::endl;
+            }
+            auto *voice = mActiveVoices;
+            while (voice) {
+                if (voice->id() == voicesToFree[i]) {
+                    voice->mActive = false;
+                }
+                voice = voice->next;
+            }
+        }
+    }
   }
 
   inline void processInactiveVoices() {
     // Move inactive voices to free queue
     if (mFreeVoiceLock.try_lock()) { // Attempt to remove inactive voices without waiting.
-      auto voice = mActiveVoices;
+      auto *voice = mActiveVoices;
       SynthVoice *previousVoice = nullptr;
       while(voice) {
         if (!voice->active()) {
+          int id = voice->id();
+//          std::cout << " ****((((())))) **** Remove inactive voice: " << voice << std::endl;
           if (previousVoice) {
             previousVoice->next = voice->next; // Remove from active list
             voice->next = mFreeVoices;
             mFreeVoices = voice; // Insert as head in free voices
             voice->id(-1); // Reset voice id
+            voice->onFree();
             voice = previousVoice; // prepare next iteration
           } else { // Inactive is head of the list
-            mActiveVoices = voice->next; // Remove voice from list
+            auto *nextVoice = voice->next;
+            mActiveVoices = nextVoice; // Remove voice from list
             voice->next = mFreeVoices;
             mFreeVoices = voice; // Insert as head in free voices
             voice->id(-1); // Reset voice id
-            voice = mActiveVoices; // prepare next iteration
+            voice->onFree();
+            voice = voice->next; // prepare next iteration
+          }
+          for (auto cbNode: mFreeCallbacks) {
+              cbNode.first(id, cbNode.second);
           }
         }
         previousVoice = voice;
@@ -1040,6 +1118,7 @@ protected:
   AudioIOData internalAudioIO;
 
   SingleRWRingBuffer mVoiceIdsToTurnOff {64 * sizeof(int)};
+  SingleRWRingBuffer mVoiceIdsToFree {64 * sizeof(int)};
 
   TimeMasterMode mMasterMode;
 
@@ -1051,8 +1130,11 @@ protected:
   typedef std::pair<std::function<bool(int id, void *)>, void *> TriggerOffCallback;
   std::vector<TriggerOffCallback> mTriggerOffCallbacks;
 
-  typedef std::pair<std::function<void(SynthVoice *voice, void *)>, void *> AllocationCallback;
 
+  typedef std::pair<std::function<bool(int id, void *)>, void *> FreeCallback;
+  std::vector<FreeCallback> mFreeCallbacks;
+
+  typedef std::pair<std::function<void(SynthVoice *voice, void *)>, void *> AllocationCallback;
   std::vector<AllocationCallback> mAllocationCallbacks;
 
   float mAudioGain {1.0f};

@@ -1,6 +1,6 @@
 
-#include "al/ui/al_FileSelector.hpp"
-#include "al/io/al_Imgui.hpp"
+#include "al/util/ui/al_FileSelector.hpp"
+#include "al/util/imgui/al_Imgui.hpp"
 
 using namespace al;
 
@@ -25,6 +25,8 @@ bool FileSelector::drawFileSelector() {
   if (!mActive) {
     return false;
   }
+
+  ImGui::PushID(this);
 
   std::string rootButtonText = mGlobalRoot;
 
@@ -97,12 +99,14 @@ bool FileSelector::drawFileSelector() {
   }
   // FIXME push unique ids for these
   if (ImGui::Button("Select##Directory")) {
+    ImGui::PopID();
     return true;
   }
   ImGui::SameLine();
   if (ImGui::Button("Cancel##Directory")) {
     mActive = false;
   }
+  ImGui::PopID();
   return false;
 }
 

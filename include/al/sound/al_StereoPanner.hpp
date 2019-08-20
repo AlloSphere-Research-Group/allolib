@@ -27,10 +27,10 @@ public:
 	}
 
 	///Per Sample Processing
-	virtual void renderSample(AudioIOData& io, const Pose& listeningPose, const float& sample, const int& frameIndex) override;
+    virtual void renderSample(AudioIOData& io, const Pose& listeningPose, const float& sample, const unsigned int& frameIndex) override;
 
 	/// Per Buffer Processing
-    virtual void renderBuffer(AudioIOData& io, const Pose& listeningPose, const float *samples, const int& numFrames) override;
+    virtual void renderBuffer(AudioIOData& io, const Pose& listeningPose, const float *samples, const unsigned int& numFrames) override;
 
 
 private:

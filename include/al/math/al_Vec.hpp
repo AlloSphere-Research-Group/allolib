@@ -171,10 +171,10 @@ public:
   const T * end() const { return elems() + N; }
 
   /// Set element at index with no bounds checking
-  T& operator[](int i){ return elems()[i];}
+  T& operator[](size_t i){ return elems()[i];}
 
   /// Get element at index with no bounds checking
-  const T& operator[](int i) const { return elems()[i]; }
+  const T& operator[](size_t i) const { return elems()[i]; }
 
   /// Return true if objects are element-wise equal, false otherwise
   bool operator ==(const Vec& v) const { IT(N){ if((*this)[i] != v[i]) return false; } return true; }

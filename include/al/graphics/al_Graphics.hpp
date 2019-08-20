@@ -53,8 +53,9 @@
 namespace al {
 
 class Graphics : public RenderManager {
- public:
-  enum BlendFunc : unsigned int {
+public:
+
+  enum [[deprecated("use GL_* enums with al::gl::* functions")]] BlendFunc : unsigned int {
     SRC_ALPHA = GL_SRC_ALPHA,                     /**< */
     ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA, /**< */
     SRC_COLOR = GL_SRC_COLOR,                     /**< */
@@ -68,7 +69,7 @@ class Graphics : public RenderManager {
     SRC_ALPHA_SATURATE = GL_SRC_ALPHA_SATURATE    /**< */
   };
 
-  enum BlendEq : unsigned int {
+  enum [[deprecated("use GL_* enums with al::gl::* functions")]] BlendEq : unsigned int {
     FUNC_ADD = GL_FUNC_ADD,           /**< Source + destination */
     FUNC_SUBTRACT = GL_FUNC_SUBTRACT, /**< Source - destination */
     FUNC_REVERSE_SUBTRACT =
@@ -77,7 +78,7 @@ class Graphics : public RenderManager {
     MAX = GL_MAX  /**< Maximum value of source and destination */
   };
 
-  enum Capability : unsigned int {
+  enum [[deprecated("use GL_* enums with al::gl::* functions")]] Capability : unsigned int {
     BLEND = GL_BLEND, /**< Blend rather than replacing with new color */
     DEPTH_TEST = GL_DEPTH_TEST, /**< Test depth of incoming fragments */
     SCISSOR_TEST =
@@ -85,13 +86,13 @@ class Graphics : public RenderManager {
     CULL_FACE = GL_CULL_FACE /**< Cull faces */
   };
 
-  enum Face : unsigned int {
+  enum [[deprecated("use GL_* enums with al::gl::* functions")]] Face : unsigned int {
     FRONT = GL_FRONT,                  /**< Front face */
     BACK = GL_BACK,                    /**< Back face */
     FRONT_AND_BACK = GL_FRONT_AND_BACK /**< Front and back face */
   };
 
-  enum PolygonMode : unsigned int {
+  enum [[deprecated("use GL_* enums with al::gl::* functions")]] PolygonMode : unsigned int {
     POINT = GL_POINT, /**< Render only points at each vertex */
     LINE = GL_LINE,   /**< Render only lines along vertex path */
     FILL = GL_FILL    /**< Render vertices normally according to primitive */

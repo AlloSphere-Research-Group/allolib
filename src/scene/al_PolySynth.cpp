@@ -159,6 +159,13 @@ PolySynth::~PolySynth() {
 
 int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id, void *userData) {
   assert(voice);
+  if (verbose()) {
+    std::cout << "Trigger on ";
+    for(auto *param: voice->triggerParameters()) {
+      std::cout << param->getName() << ":" << param->toFloat() << " ";
+    }
+    std::cout << std::endl;
+  }
   int thisId = id;
   if (thisId == -1) {
     if (voice->id() >= 0) {
@@ -180,6 +187,7 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id, void *user
     {
       std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
       voice->next = mVoicesToInsert;
+      voice->mActive = true; // We need to mark this here to avoid race conditions if active() is checked on separate thread, and the voice removed before it has been triggered.
       mVoicesToInsert = voice;
     }
     return thisId;
@@ -259,7 +267,7 @@ void PolySynth::render(AudioIOData &io) {
     }
 
     // Render active voices
-    auto voice = mActiveVoices;
+    auto *voice = mActiveVoices;
     int fpb = io.framesPerBuffer();
     while (voice) {
         if (voice->active()) {
@@ -468,7 +476,7 @@ void PolySynth::print(std::ostream &stream) {
     }
     //
     {
-        auto voice = mActiveVoices;
+        auto *voice = mActiveVoices;
         int counter = 0;
         stream << " ---- Active Voices ----" << std:: endl;
         while(voice) {
