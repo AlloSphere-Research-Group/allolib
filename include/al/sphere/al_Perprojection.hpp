@@ -415,6 +415,9 @@ public:
 
   //void load_and_init_as_desktop_config(float near=0.1, float far=1000, float radius = 1e10) {
   void load_and_init_as_desktop_config(const al::Lens& lens) {
+    static bool initialized = false;
+    if (initialized) {return;}
+    initialized = true;
     // add six projection infos that will serve as each face of cubemap
     // https://www.khronos.org/opengl/wiki/Cubemap_Texture
     // 0: GL_TEXTURE_CUBE_MAP_POSITIVE_X

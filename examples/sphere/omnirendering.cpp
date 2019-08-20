@@ -13,6 +13,8 @@ public:
                // is good enough here.
     graphicsDomain()->removeSubDomain(mDefaultWindowDomain);
     auto omniRendering = graphicsDomain()->newSubDomain<GLFWOpenGLOmniRendererDomain>();
+    omniRendering->onDraw =
+        std::bind(&App::onDraw, this, std::placeholders::_1);
     omniRendering->window().append(stdControls);
     for (auto &domain : mDomainList) {
       mRunningDomains.push(domain);
@@ -94,7 +96,7 @@ struct MyOmniRendererApp : DistributedApp_
         }
     }
 
-    bool onKeyDown(const Keyboard& k) /*override*/ {
+    bool onKeyDown(const Keyboard& k) override {
         if (k.key() == 'b') {
             DO_BLENDING = !DO_BLENDING;
             cout << "blending: " << DO_BLENDING << endl;

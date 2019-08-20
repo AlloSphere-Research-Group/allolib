@@ -146,8 +146,9 @@ bool GLFWOpenGLOmniRendererDomain::initialize(ComputationDomain *parent) {
   }
   if (!mWindow->created()) {
     bool ret = mWindow->create();
-    mGraphics->init();
-    return ret;
+    if (ret) {
+        mGraphics->init();
+    }
   }
 
   if (sphere::is_renderer()) {
@@ -287,7 +288,7 @@ inline void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
     } else { // rendering mono on display other than sphere
       // std::cout << "sampling mono on flat display" << std::endl;
       glDrawBuffer(GL_BACK_LEFT);
-//      mGraphics->clearColor(0.2, 0.2, 0.2);
+      mGraphics->clearColor(0.2, 0.2, 0.2);
       mGraphics->clearDepth(1);
       pp_render.composite_desktop(
           *mGraphics,
