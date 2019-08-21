@@ -45,6 +45,7 @@
 */
 
 #include <map>
+#include <memory>
 
 #include "al/math/al_Vec.hpp"
 #include "al/sound/al_Speaker.hpp"

@@ -68,11 +68,7 @@ struct MyApp : public App {
                                                              // in this example
   }
 
-  void initSpatializer(int type = -1) {
-    if (type == -1) {
-      type = spatializerType + 1;
-      if (type == 7) type = 1;
-    }
+  void initSpatializer(int type) {
     if (spatializer) {
       delete spatializer;
     }
