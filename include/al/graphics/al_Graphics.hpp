@@ -335,6 +335,7 @@ public:
   void blendOff() { blending(false); }
 
 private:
+  bool initialized = false;
 
   Color mClearColor {0, 0, 0, 1};
   float mClearDepth = 1;

@@ -76,7 +76,6 @@ void Graphics::clearBuffer(float r, float g, float b, float a, float d, int draw
 }
 
 void Graphics::init() {
-  static bool initialized = false;
   if (initialized) return;
 
   compileDefaultShader(color_shader, ShaderType::COLOR);
