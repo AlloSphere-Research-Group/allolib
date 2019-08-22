@@ -382,7 +382,7 @@ class Window {
     return true;
   };
 
-  WindowEventHandlers const& windowEventHandlers() const {
+  WindowEventHandlers & windowEventHandlers() {
     return mWindowEventHandlers;
   }
 
@@ -439,7 +439,7 @@ class Window {
   void implSetVSync();
   void implHide();
   void implIconify();
-  void implSetDecorated();
+  void implSetDecorated(bool decorated);
   bool implShouldClose();
   void implClose();
 

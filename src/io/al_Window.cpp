@@ -63,7 +63,7 @@ WindowEventHandler::~WindowEventHandler() {
   removeFromWindow();
 }
 void WindowEventHandler::removeFromWindow(){
-  if(attached()){ window().remove(this); }
+  if(attached()){ window().remove(this); mWindow = nullptr; }
 }
 
 
@@ -78,7 +78,16 @@ bool Window::create(bool verbose) {
 bool Window::created() const {return implCreated(); }
 void Window::makeCurrent() { implMakeCurrent(); }
 void Window::refresh() { implRefresh(); }
-void Window::destroy(){ if(created()){ implDestroy(); } }
+void Window::destroy()
+{
+  if(created()) {
+    implDestroy();
+
+    for (auto handler: windowEventHandlers()) {
+      handler->removeFromWindow();
+    }
+  }
+}
 
 void Window::close () { if (created()) implClose(); }
 
@@ -203,8 +212,7 @@ void Window::decorated (bool b)
 {
     mDecorated = b;
     if(created()) {
-      // TODO change decoration even if already created.
-      // if (created()) implSetDecorated();
+      implSetDecorated(b);
 
       std::cout << "decorated() called after window created. Ignored." << std::endl;
     }

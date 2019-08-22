@@ -263,7 +263,7 @@ bool Window::implCreate(bool is_verbose) {
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_DECORATED, mDecorated);
+//  glfwWindowHint(GLFW_DECORATED, mDecorated);
   glfwWindowHint(GLFW_OPENGL_PROFILE,
                  GLFW_OPENGL_CORE_PROFILE);          // Ignored when creating ES
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);  // if OSX, this is a must
@@ -283,12 +283,12 @@ bool Window::implCreate(bool is_verbose) {
   glfwWindowHint(GLFW_STEREO, should_create_stereo);
 
   mImpl->mGLFWwindow =
-      glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), NULL, NULL);
+      glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), nullptr, nullptr);
   if (!mImpl->created()) {
     if (should_create_stereo) {
       glfwWindowHint(GLFW_STEREO, false);
       mImpl->mGLFWwindow =
-          glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), NULL, NULL);
+          glfwCreateWindow(mDim.w, mDim.h, mTitle.c_str(), nullptr, nullptr);
       if (!mImpl->created()) {
         if (is_verbose)
           std::cout << "failed to create stereo window, and also failed to "
@@ -427,7 +427,9 @@ void Window::implHide() {}
 
 void Window::implIconify() {}
 
-void Window::implSetDecorated () {}
+void Window::implSetDecorated (bool decorated) {
+  glfwWindowHint(GLFW_DECORATED, decorated? GLFW_TRUE : GLFW_FALSE);
+}
 
 void Window::destroyAll() {
   // printf("Window::destroyAll\n");

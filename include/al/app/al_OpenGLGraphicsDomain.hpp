@@ -17,6 +17,17 @@ namespace al {
 
 class GLFWOpenGLWindowDomain;
 
+struct WindowSetupProperties {
+  Window::Cursor cursor = Window::Cursor::POINTER;
+  bool cursorVisible = true;
+  Window::Dim dimensions {50, 50, 640, 480};
+  Window::DisplayMode displayMode {Window::DEFAULT_BUF};
+  bool fullScreen = false;
+  std::string title = "Alloapp";
+  bool vsync = true;
+  bool decorated = true;
+};
+
 class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
  public:
   virtual ~OpenGLGraphicsDomain() {}
@@ -30,14 +41,14 @@ class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
   void quit() { mShouldQuitApp = true; }
   bool shouldQuit() { return mShouldQuitApp || mSubDomainList.size() == 0; }
 
-  std::shared_ptr<GLFWOpenGLWindowDomain> newWindow() {
-    auto newWindowDomain = newSubDomain<GLFWOpenGLWindowDomain>();
-    return newWindowDomain;
-  }
+  std::shared_ptr<GLFWOpenGLWindowDomain> newWindow();
 
   void closeWindow(std::shared_ptr<GLFWOpenGLWindowDomain> windowDomain) {
     removeSubDomain(std::static_pointer_cast<SynchronousDomain>(windowDomain));
   }
+
+  // Next window details
+  WindowSetupProperties nextWindowProperties;
 
   std::function<void(void)> onCreate = []() {};
   std::function<void()> onExit = []() {};

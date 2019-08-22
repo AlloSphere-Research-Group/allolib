@@ -3,6 +3,7 @@
 using namespace al;
 
 App::App() {
+
   mOSCDomain = newDomain<OSCDomain>();
 
   mAudioDomain = newDomain<GammaAudioDomain>();
@@ -11,36 +12,32 @@ App::App() {
   mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
   mSimulationDomain =
       mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
-
-  initializeDomains();
-  mDefaultWindowDomain = graphicsDomain()->newWindow();
-
-  mDefaultWindowDomain->onDraw =
-      std::bind(&App::onDraw, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onKeyDown =
-      std::bind(&App::onKeyDown, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onKeyUp =
-      std::bind(&App::onKeyUp, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onMouseDown =
-      std::bind(&App::onMouseDown, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onMouseUp =
-      std::bind(&App::onMouseUp, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onMouseDrag =
-      std::bind(&App::onMouseDrag, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onMouseMove =
-      std::bind(&App::onMouseMove, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onMouseScroll =
-      std::bind(&App::onMouseScroll, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().append(stdControls);
-  stdControls.app = this;
-  stdControls.mWindow = &mDefaultWindowDomain->window();
-
-  append(mDefaultWindowDomain->navControl());
 }
+
+void App::quit() { graphicsDomain()->quit(); }
+
+bool App::shouldQuit() {
+  return graphicsDomain()->shouldQuit(); /*|| graphicsDomain()->shouldClose();*/
+}
+
+void App::fps(double f) { graphicsDomain()->fps(f); }
 
 Window &App::defaultWindow() { return mDefaultWindowDomain->window(); }
 
 Graphics &App::graphics() { return mDefaultWindowDomain->graphics(); }
+
+Viewpoint &App::view() { return mDefaultWindowDomain->view(); }
+
+Nav &App::nav() { return mDefaultWindowDomain->nav(); }
+
+Pose &App::pose() { return mDefaultWindowDomain->nav(); }
+
+NavInputControl &App::navControl() {
+  return mDefaultWindowDomain->navControl();
+}
+
+Lens &App::lens() { return mDefaultWindowDomain->view().lens(); }
+
 
 Keyboard &App::keyboard() { return defaultWindow().mKeyboard; }
 
@@ -80,55 +77,12 @@ float App::highresFactor() { return defaultWindow().mHighresFactor; }
 
 bool App::decorated() { return defaultWindow().decorated(); }
 
-void App::cursor(Window::Cursor v) { defaultWindow().cursor(v); }
-
-void App::cursorHide(bool v) { defaultWindow().cursorHide(v); }
-
 void App::cursorHideToggle() { defaultWindow().cursorHideToggle(); }
-
-void App::dimensions(const Window::Dim &v) { defaultWindow().dimensions(v); }
-
-void App::dimensions(int w, int h) { defaultWindow().dimensions(w, h); }
-
-void App::dimensions(int x, int y, int w, int h) {
-  defaultWindow().dimensions(x, y, w, h);
-}
-
-void App::displayMode(Window::DisplayMode v) { defaultWindow().displayMode(v); }
-
-void App::fullScreen(bool on) { defaultWindow().fullScreen(on); }
-
 void App::fullScreenToggle() { defaultWindow().fullScreenToggle(); }
 
 void App::hide() { defaultWindow().hide(); }
 
 void App::iconify() { defaultWindow().iconify(); }
-
-void App::title(const std::string &v) { defaultWindow().title(v); }
-
-void App::vsync(bool v) { defaultWindow().vsync(v); }
-
-void App::decorated(bool b) { defaultWindow().decorated(b); }
-
-Viewpoint &App::view() { return mDefaultWindowDomain->view(); }
-
-Nav &App::nav() { return mDefaultWindowDomain->nav(); }
-
-Pose &App::pose() { return mDefaultWindowDomain->nav(); }
-
-NavInputControl &App::navControl() {
-  return mDefaultWindowDomain->navControl();
-}
-
-Lens &App::lens() { return mDefaultWindowDomain->view().lens(); }
-
-void App::quit() { graphicsDomain()->quit(); }
-
-bool App::shouldQuit() {
-  return graphicsDomain()->shouldQuit(); /*|| graphicsDomain()->shouldClose();*/
-}
-
-void App::fps(double f) { graphicsDomain()->fps(f); }
 
 void App::append(WindowEventHandler &handler) {
   defaultWindow().append(handler);
@@ -140,6 +94,88 @@ void App::prepend(WindowEventHandler &handler) {
 
 void App::remove(WindowEventHandler &handler) {
   defaultWindow().remove(handler);
+}
+
+void App::cursor(Window::Cursor v) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().cursor(v);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.cursor = v;
+  }
+}
+
+void App::cursorHide(bool v) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().cursorHide(v);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.cursorVisible =!v;
+  }
+}
+
+void App::dimensions(const Window::Dim &v) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().dimensions(v);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.dimensions = v;
+  }
+}
+
+void App::dimensions(int w, int h) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().dimensions(w,h);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.dimensions = Window::Dim(mOpenGLGraphicsDomain->nextWindowProperties.dimensions.t,
+                                                                         mOpenGLGraphicsDomain->nextWindowProperties.dimensions.l,
+                                                                         w, h);
+  }
+}
+
+void App::dimensions(int x, int y, int w, int h) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().dimensions(x,y,w,h);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.dimensions = Window::Dim(x, y, w, h);
+  }
+}
+
+void App::displayMode(Window::DisplayMode v) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().displayMode(v);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.displayMode = v;
+  }
+}
+
+void App::fullScreen(bool on) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().fullScreen(on);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.fullScreen = on;
+  }
+}
+
+void App::title(const std::string &v) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().title(v);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.title = v;
+  }
+}
+
+void App::vsync(bool v) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().vsync(v);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.vsync = v;
+  }
+}
+
+void App::decorated(bool b) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().decorated(b);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.decorated = b;
+  }
 }
 
 AudioIO &App::audioIO() { return audioDomain()->audioIO(); }
@@ -161,8 +197,33 @@ ParameterServer &App::parameterServer() {
 }
 
 void App::start() {
-  onInit();  // onInit() can't be called in constructor as it is virtual. But it
-             // is good enough here.
+
+  initializeDomains();
+  mDefaultWindowDomain = graphicsDomain()->newWindow();
+  mDefaultWindowDomain->initialize(graphicsDomain().get());
+
+  mDefaultWindowDomain->onDraw =
+      std::bind(&App::onDraw, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onKeyDown =
+      std::bind(&App::onKeyDown, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onKeyUp =
+      std::bind(&App::onKeyUp, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onMouseDown =
+      std::bind(&App::onMouseDown, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onMouseUp =
+      std::bind(&App::onMouseUp, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onMouseDrag =
+      std::bind(&App::onMouseDrag, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onMouseMove =
+      std::bind(&App::onMouseMove, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onMouseScroll =
+      std::bind(&App::onMouseScroll, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().append(stdControls);
+  stdControls.app = this;
+  stdControls.mWindow = &mDefaultWindowDomain->window();
+
+  defaultWindow().append(mDefaultWindowDomain->navControl());
+  onInit();
   for (auto &domain : mDomainList) {
     mRunningDomains.push(domain);
     if (!domain->start()) {

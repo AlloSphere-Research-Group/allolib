@@ -204,11 +204,11 @@ std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
   auto newDomain = std::make_shared<DomainType>();
   assert(dynamic_cast<SynchronousDomain *>(newDomain.get()));
   if (newDomain) {
-    if (newDomain->initialize(this)) {
-      mSubDomainList.push_back({newDomain, prepend});
-    } else {
-      newDomain = nullptr;
-    }
+    mSubDomainList.push_back({newDomain, prepend});
+//    if (newDomain->initialize(this)) {
+//    } else {
+//      newDomain = nullptr;
+//    }
   }
   return newDomain;
 }

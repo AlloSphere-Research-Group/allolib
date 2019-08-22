@@ -53,10 +53,22 @@ public:
   //  virtual void onResize(int w, int h) {}
   //  virtual void onVisibility(bool v) {}
 
-  // Access to graphics domain and default window.
+  void quit(); ///< Requests domain to quit.
+  bool shouldQuit();
 
+  // Access to graphics domain properties
   Window &defaultWindow();
   Graphics &graphics();
+
+  Viewpoint &view();
+  Pose &pose();
+  Lens &lens();
+  Nav &nav();
+  NavInputControl &navControl();
+  void fps(double f);
+
+  // Access to default window domain
+  // These functions are only valid after start() has been called.
   Keyboard &keyboard(); ///< Get current keyboard state
   Mouse &mouse();       ///< Get current mouse state
 
@@ -73,6 +85,11 @@ public:
   bool visible();                      ///< Get whether window is visible
   bool vsync();                        ///< Get whether v-sync is enabled
 
+  void fullScreenToggle(); ///< Toggle fullscreen
+  void hide();             ///< Hide window (if showing)
+  void iconify();          ///< Iconify window
+  // void show(); ///< Show window (if hidden)
+
   int height(); ///< Get window height, in pixels
   int width();  ///< Get window width, in pixels
 
@@ -85,7 +102,6 @@ public:
   float highresFactor();
 
   bool decorated();
-
   void cursor(Window::Cursor v);               ///< Set cursor type
   void cursorHide(bool v);                     ///< Set cursor hiding
   void cursorHideToggle();                     ///< Toggle cursor hiding
@@ -98,26 +114,10 @@ public:
   /// This will make the window go fullscreen without borders and,
   /// if posssible, without changing the display resolution.
   void fullScreen(bool on);
-  void fullScreenToggle(); ///< Toggle fullscreen
-  void hide();             ///< Hide window (if showing)
-  void iconify();          ///< Iconify window
-  // void show(); ///< Show window (if hidden)
   void title(const std::string &v); ///< Set title
   void vsync(bool v); ///< Set whether to sync the frame rate to the monitor's
                       ///< refresh rate
   void decorated(bool b);
-
-  Viewpoint &view();
-  Pose &pose();
-  Lens &lens();
-  Nav &nav();
-  NavInputControl &navControl();
-
-  void quit();
-
-  bool shouldQuit();
-
-  void fps(double f);
 
   // Event handlers
   [[deprecated("Call through graphicsDomain()")]] void

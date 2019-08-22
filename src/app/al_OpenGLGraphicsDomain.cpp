@@ -60,6 +60,20 @@ bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
   return true;
 }
 
+std::shared_ptr<GLFWOpenGLWindowDomain> OpenGLGraphicsDomain::newWindow() {
+  auto newWindowDomain = newSubDomain<GLFWOpenGLWindowDomain>();
+  newWindowDomain->window().decorated(nextWindowProperties.decorated);
+  newWindowDomain->window().cursor(nextWindowProperties.cursor);
+  newWindowDomain->window().cursorHide(!nextWindowProperties.cursorVisible);
+  newWindowDomain->window().dimensions(nextWindowProperties.dimensions);
+  newWindowDomain->window().displayMode(nextWindowProperties.displayMode);
+  newWindowDomain->window().fullScreen(nextWindowProperties.fullScreen);
+  newWindowDomain->window().title(nextWindowProperties.title);
+  newWindowDomain->window().vsync(nextWindowProperties.vsync);
+
+  return newWindowDomain;
+}
+
 /// Window Domain ----------------------
 
 GLFWOpenGLWindowDomain::GLFWOpenGLWindowDomain() {
