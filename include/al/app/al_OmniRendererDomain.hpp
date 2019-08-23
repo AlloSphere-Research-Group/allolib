@@ -127,6 +127,8 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 
 GLFWOpenGLOmniRendererDomain::GLFWOpenGLOmniRendererDomain() {
   mWindow = std::make_unique<Window>();
+
+  mWindow->append(navControl());
   mGraphics = std::make_unique<Graphics>();
 }
 

@@ -218,6 +218,10 @@ class WindowImpl {
     win->callHandlersResize(dimCurr.w, dimCurr.h);
   }
 
+  static void cbClose(GLFWwindow* window) {
+    glfwSetWindowShouldClose(window, 1);
+  }
+
   void registerCBs() {
     glfwSetWindowSizeCallback(mGLFWwindow, cbReshape);
     glfwSetFramebufferSizeCallback(mGLFWwindow, cbReshapeFb);
@@ -225,8 +229,7 @@ class WindowImpl {
     glfwSetMouseButtonCallback(mGLFWwindow, cbMouse);
     glfwSetCursorPosCallback(mGLFWwindow, cbMotion);
     glfwSetScrollCallback(mGLFWwindow, cbScroll);
-    // glfwSetWindowPosCallback(mGLFWwindow, cbReshape);
-    // glfwSetWindowCloseCallback(mGLFWwindow, window_close_callback);
+     glfwSetWindowCloseCallback(mGLFWwindow, cbClose);
     // glfwSetWindowRefreshCallback(window, cb_windowrefresh);
     // glfwSetWindowFocusCallback(window, cb_windowfocus);
   }
@@ -412,7 +415,7 @@ void Window::implSetFullScreen() {
                          mode->height, mode->refreshRate);
     vsync(mVSync);
   } else {
-    glfwSetWindowMonitor(mImpl->mGLFWwindow, NULL, mDim.l, mDim.t, mDim.w,
+    glfwSetWindowMonitor(mImpl->mGLFWwindow, nullptr, mDim.l, mDim.t, mDim.w,
                          mDim.h, GLFW_DONT_CARE);
     vsync(mVSync);
   }
@@ -443,6 +446,8 @@ void Window::destroyAll() {
     }
   }
 }
+
+
 
 WindowImpl::KeyMap WindowImpl::make_glfw_keymap() {
   KeyMap km;

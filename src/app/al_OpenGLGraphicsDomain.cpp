@@ -106,6 +106,9 @@ bool GLFWOpenGLWindowDomain::initialize(ComputationDomain *parent) {
 
 bool GLFWOpenGLWindowDomain::tick() {
   /* Make the window's context current */
+  if (mWindow->shouldClose()) {
+    return false;
+  }
   onNewFrame();
   mWindow->makeCurrent();
   preOnDraw();

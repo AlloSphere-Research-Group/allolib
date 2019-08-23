@@ -9,13 +9,22 @@ using namespace al;
 struct DistributedApp_: public App {
 public:
   void start() override {
-    onInit();  // onInit() can't be called in constructor as it is virtual. But it
-               // is good enough here.
+
+    initializeDomains();
     graphicsDomain()->removeSubDomain(mDefaultWindowDomain);
     auto omniRendering = graphicsDomain()->newSubDomain<GLFWOpenGLOmniRendererDomain>();
     omniRendering->onDraw =
         std::bind(&App::onDraw, this, std::placeholders::_1);
+    omniRendering->initialize(graphicsDomain().get());
     omniRendering->window().append(stdControls);
+    stdControls.app = this;
+    stdControls.mWindow = &omniRendering->window();
+
+    omniRendering->window().append(omniRendering->navControl());
+    omniRendering->navControl().nav(omniRendering->nav());
+
+    onInit();
+
     for (auto &domain : mDomainList) {
       mRunningDomains.push(domain);
       if (!domain->start()) {
