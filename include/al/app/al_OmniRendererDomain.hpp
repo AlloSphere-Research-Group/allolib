@@ -165,6 +165,9 @@ bool GLFWOpenGLOmniRendererDomain::initialize(ComputationDomain *parent) {
 }
 
 bool GLFWOpenGLOmniRendererDomain::tick() {
+  if (mWindow->shouldClose()) {
+    return false;
+  }
   /* Make the window's context current */
   onNewFrame();
   mWindow->makeCurrent();

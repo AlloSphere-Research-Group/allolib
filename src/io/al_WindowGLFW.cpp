@@ -219,7 +219,7 @@ class WindowImpl {
   }
 
   static void cbClose(GLFWwindow* window) {
-    glfwSetWindowShouldClose(window, 1);
+    glfwSetWindowShouldClose(window, true);
   }
 
   void registerCBs() {
@@ -229,7 +229,7 @@ class WindowImpl {
     glfwSetMouseButtonCallback(mGLFWwindow, cbMouse);
     glfwSetCursorPosCallback(mGLFWwindow, cbMotion);
     glfwSetScrollCallback(mGLFWwindow, cbScroll);
-     glfwSetWindowCloseCallback(mGLFWwindow, cbClose);
+    glfwSetWindowCloseCallback(mGLFWwindow, cbClose);
     // glfwSetWindowRefreshCallback(window, cb_windowrefresh);
     // glfwSetWindowFocusCallback(window, cb_windowfocus);
   }

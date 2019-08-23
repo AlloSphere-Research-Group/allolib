@@ -24,12 +24,13 @@ bool OpenGLGraphicsDomain::start() {
     preOnCreate();
     onCreate();
     callStartCallbacks();
-    while (!shouldQuit()) {
+    bool subdomainsOk = true;
+    while (!shouldQuit() && subdomainsOk) {
       mSubdomainLock.lock();
-      tickSubdomains(true);
+      subdomainsOk &= tickSubdomains(true);
       tickFPS();
       mTimeDrift = dt_sec();
-      tickSubdomains(false);
+      subdomainsOk &= tickSubdomains(false);
       mSubdomainLock.unlock();
     }
 
@@ -105,11 +106,11 @@ bool GLFWOpenGLWindowDomain::initialize(ComputationDomain *parent) {
 }
 
 bool GLFWOpenGLWindowDomain::tick() {
-  /* Make the window's context current */
   if (mWindow->shouldClose()) {
     return false;
   }
   onNewFrame();
+  /* Make the window's context current */
   mWindow->makeCurrent();
   preOnDraw();
   onDraw(*mGraphics);
