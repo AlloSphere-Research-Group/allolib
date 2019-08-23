@@ -2,10 +2,15 @@
 #include <iostream>
 
 #include "al/app/al_AudioDomain.hpp"
+#include "al/app/al_ConsoleDomain.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include "al/system/al_Time.hpp"
 
 #include "Gamma/Oscillator.h"
+
+// This example shows how to build an app class using only an
+// AudioDomain to do audio I/O and a ConsoleDomain to
+// keep the application running
 
 using namespace al;
 
@@ -14,6 +19,7 @@ public:
 
   // The app will run an "AudioDomain"
   AudioDomain audioDomain;
+  ConsoleDomain consoleDomain;
 
   gam::Sine<> mOsc {440};
 
@@ -27,11 +33,22 @@ public:
   // then exits
   void start() {
     audioDomain.initialize();
+    consoleDomain.initialize();
     // Set audio callback through a lambda
     audioDomain.onSound = [this](AudioIOData &io) {
       while(io()) {
         io.out(0) =  mOsc() * 0.1f;
       }
+    };
+
+    consoleDomain.onLine = [this](std::string line) {
+      if (line.size() == 0) {
+        return false;
+      } else {
+        std::cout << "Frequency:" << line<< std::endl;
+        mOsc.freq(std::stof(line));
+      }
+      return true;
     };
     // Set sample rate of Gamma from rate configured in audio domain
     gam::sampleRate(audioDomain.audioIO().framesPerSecond());
@@ -40,11 +57,14 @@ public:
     // application alive by calling al_sleep()
     audioDomain.start();
 
-    al_sleep(3.0);
+    std::cout << "Enter a number to set the frequency. Press enter to quit." << std::endl;
+    consoleDomain.start(); // Console Domain is a blocking domain
 
     // stop and cleanup domains
     audioDomain.stop();
+    consoleDomain.stop();
     audioDomain.cleanup();
+    consoleDomain.cleanup();
   }
 
 };
