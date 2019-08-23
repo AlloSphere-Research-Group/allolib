@@ -218,9 +218,9 @@ class WindowImpl {
     win->callHandlersResize(dimCurr.w, dimCurr.h);
   }
 
-  static void cbClose(GLFWwindow* window) {
-    glfwSetWindowShouldClose(window, true);
-  }
+//  static void cbClose(GLFWwindow* window) {
+//    glfwSetWindowShouldClose(window, true);
+//  }
 
   void registerCBs() {
     glfwSetWindowSizeCallback(mGLFWwindow, cbReshape);
@@ -229,7 +229,7 @@ class WindowImpl {
     glfwSetMouseButtonCallback(mGLFWwindow, cbMouse);
     glfwSetCursorPosCallback(mGLFWwindow, cbMotion);
     glfwSetScrollCallback(mGLFWwindow, cbScroll);
-    glfwSetWindowCloseCallback(mGLFWwindow, cbClose);
+//    glfwSetWindowCloseCallback(mGLFWwindow, cbClose);
     // glfwSetWindowRefreshCallback(window, cb_windowrefresh);
     // glfwSetWindowFocusCallback(window, cb_windowfocus);
   }
@@ -379,7 +379,7 @@ void Window::implRefresh() {
 
 void Window::implDestroy() { mImpl->destroy(); }
 
-void Window::implClose() { glfwSetWindowShouldClose(mImpl->mGLFWwindow, true); }
+void Window::implClose() { /*glfwSetWindowShouldClose(mImpl->mGLFWwindow, true);*/ }
 
 bool Window::implShouldClose() {
   if (glfwWindowShouldClose(mImpl->mGLFWwindow)) {

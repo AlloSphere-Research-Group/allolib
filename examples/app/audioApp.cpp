@@ -54,7 +54,7 @@ public:
     gam::sampleRate(audioDomain.audioIO().framesPerSecond());
     audioDomain.audioIO().print();
     // start audio domain. This domain is non blocking, so we will keep the
-    // application alive by calling al_sleep()
+    // application alive by starting the console domain
     audioDomain.start();
 
     std::cout << "Enter a number to set the frequency. Press enter to quit." << std::endl;

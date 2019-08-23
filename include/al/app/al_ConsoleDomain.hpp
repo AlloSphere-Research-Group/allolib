@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <string>
 
 #include "al_ComputationDomain.hpp"
 
@@ -11,15 +12,14 @@ namespace al {
 class ConsoleDomain: public AsynchronousDomain {
 public:
   bool initialize(ComputationDomain *parent = nullptr) override {
-    mRunning = true;
     return true;
   }
 
   bool start() override {
-    char inChar[128];
+    std::string line;
     do {
-      std::cin.getline(inChar, 128);
-    } while(onLine(inChar));
+      std::getline(std::cin, line);
+    } while(onLine(line));
     return true;
   }
 
@@ -28,17 +28,15 @@ public:
   }
 
   bool cleanup(ComputationDomain *parent = nullptr) override {
-    mRunning = false;
     return true;
   }
 
-  std::function<bool(std::string)> onLine = [](std::string line) {
-    if (line.size() == 0) { return false;}
+  std::function<bool(const std::string &)> onLine = [](const std::string &line) {
+    if (line.size() == 0) { return false; }
     return true;
   };
 
 private:
-    bool mRunning;
 };
 
 
