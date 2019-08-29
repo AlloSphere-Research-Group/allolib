@@ -18,16 +18,16 @@ using namespace al;
 /*
 
 The Arduino sketch for this example should be:
-const int analogInPin = A0;
-int sensorValue = 0;
 
 void setup() {
   Serial.begin(9600);
 }
 
 void loop() {
-  sensorValue = analogRead(analogInPin);
-  Serial.println(sensorValue);
+  Serial.print("0:");
+  Serial.println(analogRead(A0));
+  Serial.print("1:");
+  Serial.println(analogRead(A1));
   delay(0.1);
 }
 
@@ -39,27 +39,37 @@ public:
   Arduino arduino;
 
   float x = 0;
+  float y = 0;
 
   void onInit() {
     // Query ports and print port list
     std::vector<serial::PortInfo> ports = serial::list_ports();
 
+    // Show port information
     for (auto port: ports) {
       std::cout << port.port << ":" << port.description << " -- HWID:" << port.hardware_id <<  std::endl;
     }
 
-    // Hard code COM port for now. This should be auto detected
-    std::string port("COM6");
-    arduino.initialize(port);
+    // Use last port, likely the right one on Windows
+    auto lastPort = ports.back().port;
+    // Initialize serial port
+    arduino.initialize(lastPort, 9600);
   }
 
   void onAnimate(double dt) {
     // Read lines from Arduino serial port
     auto lines = arduino.getLines();
     for (auto line: lines) {
-      std::cout << line << std::endl;
-      // Convert to float and scale
-      x = std::stof(line) / 1023.0f;
+      auto separatorIndex = line.find(":");
+      std::string id = line.substr(0, separatorIndex);
+      std::string value = line.substr(separatorIndex + 1);
+      std::cout << "id: " << id << " value: " << value << std::endl;
+      if (id == "0") {
+        // Convert to float and scale
+        x = std::stof(value) / 1023.0f;
+      } else if (id == "1") {
+        y = std::stof(value) / 1023.0f;
+      }
     }
   }
 
@@ -68,7 +78,7 @@ public:
     addSphere(m);
     g.clear();
     // Use the data from the Arduino to position the sphere.
-    g.translate(x, 0.0, -4);
+    g.translate(x, y, -4);
     g.draw(m);
   }
 

@@ -1,8 +1,8 @@
 #ifndef AL_ARDUINO_HPP
 #define AL_ARDUINO_HPP
 
-#include <memory>
 #include <thread>
+#include <functional>
 
 #include "serial/serial.h"
 
@@ -10,29 +10,51 @@
 
 namespace al {
 
-
 class Arduino {
 public:
-  bool initialize(std::string port = "", unsigned long baud = 9600);
+
+  Arduino(size_t ringBufferSize = 256)
+    : mRingBuffer(ringBufferSize)
+  {}
+
+  /**
+   * @brief initialize serial port and reader thread
+   * @param port serial port name
+   * @param baud baud rate
+   * @param granularity the maximum time for port updates in nanoseconds
+   * @return true if port was opened succesfully
+   *
+   * The granularity time determines the maximum time for port, but time might
+   * less if the internal buffer fills
+   */
+
+  bool initialize(std::string port = "", unsigned long baud = 9600,
+                  uint32_t granularity = 50);
+
+  void cleanup();
 
   bool isOpen() { return mRunning && mReaderThread;}
 
+  /**
+   * @brief getLines received from serial port and remove them from input buffer
+   * @return vector of lines that h
+   */
   std::vector<std::string> getLines();
 
-
-  void cleanup();
+  std::function<void(uint8_t *, size_t)> onInput = [](uint8_t *, size_t) {};
 
 private:
 
   void readFunction();
 
   std::unique_ptr<serial::Serial> serialPort;
-  SingleRWRingBuffer ringBuffer;
+  SingleRWRingBuffer mRingBuffer;
 
   bool mRunning {false};
   std::unique_ptr<std::thread> mReaderThread;
 
-  std::string lineBuffer;
+  std::string mLineBuffer;
+  uint32_t mGranularity;
 
 };
 

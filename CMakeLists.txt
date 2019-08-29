@@ -84,6 +84,7 @@ set(headers
   include/al/graphics/al_VAO.hpp
   include/al/graphics/al_VAOMesh.hpp
   include/al/graphics/al_Viewpoint.hpp
+  include/al/io/al_Arduino.hpp
   include/al/io/al_AudioIO.hpp
   include/al/io/al_AudioIOData.hpp
   include/al/io/al_ControlNav.hpp
@@ -184,6 +185,7 @@ set(sources
   src/graphics/al_VAO.cpp
   src/graphics/al_VAOMesh.cpp
   src/graphics/al_Viewpoint.cpp
+  src/io/al_Arduino.cpp
   src/io/al_AudioIO.cpp
   src/io/al_AudioIOData.cpp
   src/io/al_ControlNav.cpp
