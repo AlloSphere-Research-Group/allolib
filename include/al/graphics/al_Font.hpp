@@ -42,13 +42,14 @@
 	Graham Wakefield, 2010, grrrwaaa@gmail.com
 */
 
+// TODO - Minimize api so the font class does not do render
+//        Rather, user will be able to get a mesh written
+//        for wanted tex. Then user can render the mesh with
+//        the texture got from same font object.
+
 #include "al/graphics/al_Texture.hpp"
 #include "al/graphics/al_Mesh.hpp"
 #include "al/graphics/al_Graphics.hpp"
-#include "al/system/al_Printing.hpp"
-#include <string>
-#include <stdarg.h>
-#include <cstdio>
 
 #define ASCII_SIZE 256	// number of characters to use
 
@@ -57,9 +58,7 @@ namespace al{
 /// Interface for loading fonts and rendering text
 ///
 
-
-class [[deprecated("use FontModule instead")]] Font {
-public:
+struct Font {
 
 	/// Metrics of a single font character
 	struct FontCharacter{
@@ -69,13 +68,18 @@ public:
 		int y_offset;
 	};
 
-
 	Font();
 
 	/// \param[in] filename		path to font file
 	/// \param[in] fontSize		size of font
 	/// \param[in] antialias	whether to apply antialiasing
-	Font(const std::string& filename, int fontSize=10, bool antialias=true);
+	Font(const char* filename, int fontSize=10, bool antialias=true);
+
+    Font(const Font& other) = delete;
+    Font& operator=(const Font& other) = delete;
+
+    Font(Font&& other) noexcept;
+    Font& operator=(Font&& other) noexcept;
 
 	~Font();
 
@@ -86,17 +90,17 @@ public:
 	/// \param[in] fontSize		size of font
 	/// \param[in] antialias	whether to apply antialiasing
 	/// \returns whether font loaded successfully
-	bool load(const std::string& filename, int fontSize=10, bool antialias=true);
+	bool load(const char* filename, int fontSize=10, bool antialias=true);
 
 
 	/// Get metrics of a particular character (idx 0..255)
 	const FontCharacter& character(int idx) const { return mChars[idx & 255]; }
 
 	/// Returns the width of a text string, in pixels
-	float width(const std::string& text) const;
+	float width(const char* text) const;
 
 	/// Returns the width of a character, in pixels
-	float width(unsigned char c) const { return mChars[int(c)].width; }
+	float width(unsigned char c) const { return (float)mChars[int(c)].width; }
 
 	/// Returns the "above-line" height of the font, in pixels
 	float ascender() const;
@@ -105,7 +109,7 @@ public:
 	float descender() const;
 
 	/// Returns the total height of the font, in pixels
-	float size() const { return mFontSize; }
+	float size() const { return (float)mFontSize; }
 
 
 	/// Set alignment of rendered text strings
@@ -133,16 +137,16 @@ public:
 		</pre>
 
 	*/
-	void write(Mesh& mesh, const std::string& text);
+	void write(Mesh& mesh, const char* text);
 
+    // TODO - deprecate
 	/*!
 		Renders using an internal mesh (reset for each render() call)
 		For rendering large volumes of text, use write() instead.
 	*/
-	void render(Graphics& g, const std::string& text);
-	void renderf(Graphics& g, const char * fmt, ...);
+	void render(Graphics& g, const char* text);
 
-	// TODO:
+	// TODO - implement
 	//int outline(int idx, Array *vertex, Array *index);
 
 	// accessor so that the font texture can be bound separately:
@@ -162,32 +166,6 @@ protected:
 	float mAlign[2];
 	bool mAntiAliased;
 };
-
-inline void Font :: renderf(Graphics& g, const char * fmt, ...) {
-	static char line[1024];
-	va_list args;
-	va_start(args, fmt);
-	// AL_VSNPRINTF(line, 1024, fmt, args);
-	std::vsnprintf(line, 1024, fmt, args);
-	va_end(args);
-	render(g, line);
-}
-
-inline void Font :: render(Graphics& g, const std::string& text) {
-	write(mMesh, text);
-	mTex.bind(0);
-	g.texture();
-	g.draw(mMesh);
-	mTex.unbind(0);
-}
-
-inline float Font :: width(const std::string& text) const {
-	float total = 0.f;
-	for (unsigned i=0; i < text.size(); i++) {
-		total += mChars[ (int)text[i] ].width;
-	}
-	return total;
-}
 
 } // al::
 

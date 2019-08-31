@@ -1,11 +1,11 @@
-#include <algorithm> // transform
+// #include <algorithm> // transform
 #include <cctype> // tolower
 #include <map>
 #include <set>
-#include <string>
-#include <vector>
+// #include <string>
 #include <fstream>
-#include <cstdint>
+// #include <cstdint>
+#include <stdio.h>
 #include "al/graphics/al_Mesh.hpp"
 #include "al/system/al_Printing.hpp"
 
@@ -153,7 +153,7 @@ void Mesh::createNormalsMesh(Mesh& mesh, float length, bool perFace){
       AL_WARN_ONCE("createNormalsMesh only valid for indexed meshes");
     }
   } else {
-    int Ni = (int)std::min(vertices().size(), normals().size());
+    int Ni = (int)(vertices().size() < normals().size()? vertices().size() : normals().size());
     F::initMesh(mesh, Ni*2);
 
     for(int i=0; i<Ni; ++i){
@@ -582,8 +582,8 @@ void Mesh::getBounds(Vec3f& min, Vec3f& max) const {
     for(size_t v=1; v<vertices().size(); ++v){
       const Vertex& vt = vertices()[v];
       for(int i=0; i<3; ++i){
-        min[i] = std::min(min[i], vt[i]);
-        max[i] = std::max(max[i], vt[i]);
+        min[i] = (min[i] < vt[i])? min[i] : vt[i];
+        max[i] = (max[i] > vt[i])? max[i] : vt[i];
       }
     }
   }
@@ -607,7 +607,8 @@ void Mesh::unitize(bool proportional) {
 
   // adjust to use scale of largest axis:
   if (proportional) {
-    float s = std::min(scale.x, std::min(scale.y, scale.z));
+    float minxy = (scale.x < scale.y)? scale.x : scale.y;
+    float s = (minxy < scale.z)? minxy : scale.z;
     scale.x = scale.y = scale.z = s;
   }
 
@@ -705,7 +706,7 @@ void Mesh::toTriangles(){
   }
 }
 
-bool Mesh::saveSTL(const std::string& filePath, const std::string& solidName) const {
+bool Mesh::saveSTL(const char* filePath, const char* solidName) const {
   int prim = primitive();
 
   if(TRIANGLES != prim && TRIANGLE_STRIP != prim){
@@ -748,7 +749,7 @@ bool Mesh::saveSTL(const std::string& filePath, const std::string& solidName) co
   return true;
 }
 
-bool Mesh::savePLY(const std::string& filePath, const std::string& solidName, bool binary) const {
+bool Mesh::savePLY(const char* filePath, const char* solidName, bool binary) const {
   // Ref: http://paulbourke.net/dataformats/ply/
 
   int prim = primitive();
@@ -881,20 +882,32 @@ bool Mesh::savePLY(const std::string& filePath, const std::string& solidName, bo
   return true;
 }
 
-bool Mesh::save(const std::string& filePath, const std::string& solidName, bool binary) const {
+bool Mesh::save(const char* filePath, const char* solidName, bool binary) const {
 
-  auto pos = filePath.find_last_of(".");
-  if(std::string::npos == pos) return false;
-  auto ext = filePath.substr(pos+1);
-  std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+  // auto pos = filePath.find_last_of(".");
+  // if(std::string::npos == pos) return false;
+  // auto ext = filePath.substr(pos+1);
+  // std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
-  if("ply" == ext){
-    return savePLY(filePath, solidName, binary);
+  size_t len = std::strlen(filePath);
+  if (len < 5) {
+      return false;
   }
-  else if("stl" == ext){
+
+  const char* ext3 = filePath + (len - 4);
+  const char lowerExt3[] = {
+    ext3[0],
+    (char)std::tolower(ext3[1]),
+    (char)std::tolower(ext3[2]),
+    (char)std::tolower(ext3[3]),
+    '\0'
+  };
+
+  if(std::strcmp(lowerExt3, ".ply")){
+    return savePLY(filePath, solidName, binary);
+  } else if(std::strcmp(lowerExt3, ".stl")){
     return saveSTL(filePath, solidName);
   }
-
   return false;
 }
 

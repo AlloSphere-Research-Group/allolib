@@ -47,9 +47,7 @@
 
 #include "al/graphics/al_GPUObject.hpp"
 #include "al/graphics/al_OpenGL.hpp"
-#include "al/types/al_Color.hpp"
-
-#include <vector>
+// #include "al/types/al_Color.hpp"
 
 /*
 https://www.khronos.org/opengl/wiki/Shader#Resource_limitations
@@ -304,12 +302,12 @@ class Texture : public GPUObject {
   void submit(const void* pixels, unsigned int format, unsigned int type);
   void submit(const void* pixels) { submit(pixels, format(), type()); }
 
-  void submit(std::vector<Colori> const& pixels) {
-    submit(pixels.data(), Texture::RGBA, Texture::UBYTE);
-  }
-  void submit(std::vector<Color> const& pixels) {
-    submit(pixels.data(), Texture::RGBA, Texture::FLOAT);
-  }
+  // void submit(std::vector<Colori> const& pixels) {
+  //   submit(pixels.data(), Texture::RGBA, Texture::UBYTE);
+  // }
+  // void submit(std::vector<Color> const& pixels) {
+  //   submit(pixels.data(), Texture::RGBA, Texture::FLOAT);
+  // }
 
   // update the changes in params or settings
   // void update(bool force=false);

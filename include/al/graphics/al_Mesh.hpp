@@ -46,8 +46,6 @@
 
 */
 
-#include <stdio.h>
-#include <string>
 #include <vector>
 #include "al/math/al_Vec.hpp"
 #include "al/math/al_Mat.hpp"
@@ -348,7 +346,7 @@ public:
   /// @param[in] solidName  solid name defined within the file (optional)
   /// @param[in] binary    write data in binary form as opposed to ASCII
   /// \returns true on successful save, otherwise false
-  bool save(const std::string& filePath, const std::string& solidName = "", bool binary=true) const;
+  bool save(const char* filePath, const char* solidName = "", bool binary=true) const;
 
   /// Save mesh to an STL file
 
@@ -360,7 +358,7 @@ public:
   /// @param[in] filePath    path of file to save to
   /// @param[in] solidName  solid name defined within the file (optional)
   /// \returns true on successful save, otherwise false
-  bool saveSTL(const std::string& filePath, const std::string& solidName = "") const;
+  bool saveSTL(const char* filePath, const char* solidName = "") const;
 
   /// Save mesh to a PLY file
 
@@ -370,7 +368,7 @@ public:
   /// @param[in] solidName  solid name defined within the file (optional)
   /// @param[in] binary    write data in binary form as opposed to ASCII
   /// \returns true on successful save, otherwise false
-  bool savePLY(const std::string& filePath, const std::string& solidName = "", bool binary=true) const;
+  bool savePLY(const char* filePath, const char* solidName = "", bool binary=true) const;
 
 
   /// Print information about Mesh
