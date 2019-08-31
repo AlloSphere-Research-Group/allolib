@@ -6,6 +6,7 @@
 #include <fstream>
 // #include <cstdint>
 #include <stdio.h>
+#include <cstring>
 #include "al/graphics/al_Mesh.hpp"
 #include "al/system/al_Printing.hpp"
 
