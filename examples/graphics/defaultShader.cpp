@@ -51,10 +51,10 @@ struct MyApp : al::App {
     mesh.update();
 
     al::ShaderSources un = al::defaultShaderUniformColor(false, false, false);
-    shaders[0].compile(un.vert.str, un.frag.str);
+    shaders[0].compile(un.vert.c_str(), un.frag.c_str());
 
     al::ShaderSources ul = al::defaultShaderUniformColor(false, false, true);
-    shaders[1].compile(ul.vert.str, ul.frag.str);
+    shaders[1].compile(ul.vert.c_str(), ul.frag.c_str());
 
     t = 0.0;
   }

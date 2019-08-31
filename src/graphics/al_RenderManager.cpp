@@ -213,16 +213,33 @@ void RenderManager::draw(EasyVAO& vao) {
   vao.draw();
 }
 
+static void updateVAO(EasyVAO& vao, const Mesh& m) {
+    vao.primitive(m.primitive());
+    vao.validate();
+    vao.bind();
+    vao.mNumVertices = static_cast<unsigned int>(m.vertices().size());
+    vao.updateWithoutBinding(m.vertices().data(), sizeof(Vec3f),
+                             m.vertices().size(), vao.mPositionAtt);
+    vao.updateWithoutBinding(m.colors().data(), sizeof(Vec4f),
+                             m.colors().size(), vao.mColorAtt);
+    vao.updateWithoutBinding(m.texCoord2s().data(), sizeof(Vec2f),
+                             m.texCoord2s().size(), vao.mTexcoord2dAtt);
+    vao.updateWithoutBinding(m.normals().data(), sizeof(Vec3f),
+                             m.normals().size(), vao.mNormalAtt);
+    // unbind();
+    vao.updateIndices(m.indices().data(), m.indices().size());
+}
+
 void RenderManager::draw(const Mesh& mesh) {
   // uses internal vao object.
-  mInternalVAO.update(mesh);
+  updateVAO(mInternalVAO, mesh);
   update();
   mInternalVAO.draw();
 }
 
 void RenderManager::draw(Mesh&& mesh) {
   // uses internal vao object.
-  mInternalVAO.update(mesh);
+  updateVAO(mInternalVAO, mesh);
   update();
   mInternalVAO.draw();
 }

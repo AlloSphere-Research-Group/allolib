@@ -49,6 +49,8 @@
 
 namespace al{
 
+#if 0
+
 /// Buffer
 
 /// This buffer automatically expands itself as new elements are added.
@@ -181,7 +183,7 @@ private:
   void setSize(int n){ mSize=n; }
 };
 
-
+#endif
 
 
 /// Ring buffer

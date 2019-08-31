@@ -27,6 +27,9 @@ void EasyFBO::init(int width, int height, EasyFBOSetting const& setting) {
     mFbo.attachTexture2D(mDepthTex, GL_DEPTH_ATTACHMENT);
   else
     mFbo.attachRBO(mRbo);
+
+  // clear color attachments to black and depth to 1
+  // prevents glitchy output for first frame
   float c[] = {0, 0, 0, 0};
   float d = 1;
   glClearBufferfv(GL_COLOR, 0, c);

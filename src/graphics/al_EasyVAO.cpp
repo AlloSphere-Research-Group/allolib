@@ -17,9 +17,33 @@ void EasyVAO::updateIndices(const unsigned int* data, size_t size)
 
 void EasyVAO::update(void* data, size_t typeSize, size_t arraySize, MeshAttrib& attrib, unsigned int dataType)
 {
+    if (!data) return;
     validate();
     bind();
-    updateWithoutBinding(data, typeSize, arraySize, attrib, dataType);
+
+    // only enable attribs with content
+    if (arraySize > 0) {
+        enableAttrib(attrib.layoutIndex);
+    }
+    else {
+        disableAttrib(attrib.layoutIndex);
+        return;
+    }
+
+    // buffer yet created, make it and set vao to point to it
+    // TODO - ??? note: data should be in floats!
+    if (!attrib.buffer.created()) {
+        attrib.buffer.create();
+        attribPointer(attrib.layoutIndex, attrib.buffer,
+                      attrib.dataDimension, dataType);
+    }
+
+    // upload CPU size data to buffer in GPU
+    attrib.buffer.bind();
+    attrib.buffer.data(typeSize * arraySize, data);
+    // attrib.buffer.unbind();
+
+    // no need to unbind
     // unbind();
 }
 
@@ -44,19 +68,6 @@ void EasyVAO::updateWithoutBinding(const void* data, size_t typeSize, size_t arr
     attrib.buffer.bind();
     attrib.buffer.data(typeSize * arraySize, data);
     // attrib.buffer.unbind();
-}
-
-void EasyVAO::update(const Mesh& m) {
-    primitive(m.primitive());
-    validate();
-    bind();
-    mNumVertices = static_cast<unsigned int>(m.vertices().size());
-    updateWithoutBinding(m.vertices().data(), sizeof(Vec3f), m.vertices().size(), mPositionAtt);
-    updateWithoutBinding(m.colors().data(), sizeof(Vec4f), m.colors().size(), mColorAtt);
-    updateWithoutBinding(m.texCoord2s().data(), sizeof(Vec2f), m.texCoord2s().size(), mTexcoord2dAtt);
-    updateWithoutBinding(m.normals().data(), sizeof(Vec3f), m.normals().size(), mNormalAtt);
-    // unbind();
-    updateIndices(m.indices().data(), m.indices().size());
 }
 
 void EasyVAO::primitive(unsigned int prim)
