@@ -1,5 +1,7 @@
 #include "al/app/al_OmniRendererDomain.hpp"
 
+#include <cstring>
+
 using namespace al;
 
 GLFWOpenGLOmniRendererDomain::GLFWOpenGLOmniRendererDomain() {
