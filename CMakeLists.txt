@@ -67,7 +67,7 @@ set(headers
   include/al/graphics/al_EasyFBO.hpp
   include/al/graphics/al_EasyVAO.hpp
   include/al/graphics/al_FBO.hpp
-#  include/al/graphics/al_Font.hpp
+  include/al/graphics/al_Font.hpp
   include/al/graphics/al_GPUObject.hpp
   include/al/graphics/al_Graphics.hpp
   include/al/graphics/al_Image.hpp
@@ -90,7 +90,7 @@ set(headers
   include/al/io/al_CSVReader.hpp
   include/al/io/al_File.hpp
   include/al/io/al_Imgui.hpp
-  include/al/io/al_Serial.hpp
+  # include/al/io/al_Serial.hpp
   include/al/io/al_MIDI.hpp
   include/al/io/al_Toml.hpp
   include/al/io/al_Window.hpp
@@ -169,7 +169,7 @@ set(sources
   src/graphics/al_EasyFBO.cpp
   src/graphics/al_EasyVAO.cpp
   src/graphics/al_FBO.cpp
-#  src/graphics/al_Font.cpp
+  src/graphics/al_Font.cpp
   src/graphics/al_GPUObject.cpp
   src/graphics/al_Graphics.cpp
   src/graphics/al_Image.cpp
@@ -195,7 +195,7 @@ set(sources
   src/io/al_Imgui.cpp
   src/io/al_imgui_impl.cpp
   src/io/al_MIDI.cpp
-  src/io/al_Serial.cpp
+  # src/io/al_Serial.cpp
   src/io/al_Toml.cpp
   src/io/al_Window.cpp
   src/io/al_WindowGLFW.cpp

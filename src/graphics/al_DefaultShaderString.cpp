@@ -2,61 +2,19 @@
 #include <cstring>
 #include <cstdlib>
 
-al::ShaderString::ShaderString (const al::ShaderString& other) {
-  auto size  = std::strlen(other.str) + 1;
-  str = (char*)std::malloc(size);
-  std::memcpy(str, other.str, size);
-}
-
-al::ShaderString::ShaderString (al::ShaderString&& other) noexcept {
-  str = other.str;
-  other.str = nullptr;
-}
-
-al::ShaderString& al::ShaderString::operator= (const al::ShaderString& other) {
-  std::free(str);
-  auto size = std::strlen(other.str) + 1;
-  str = (char*)std::malloc(size);
-  std::memcpy(str, other.str, size);
-  return *this;
-}
-
-al::ShaderString& al::ShaderString::operator= (al::ShaderString&& other) noexcept {
-  char* temp = str;
-  str = other.str;
-  other.str = temp;
-  return *this;
-}
-
-al::ShaderString::~ShaderString () {
-  std::free(str);
-}
-
-static al::ShaderString makeString (const char* str) {
-  al::ShaderString result;
-  auto size = std::strlen(str) + 1;
-  result.str = (char*)std::malloc(size);
-  std::memcpy(result.str, str, size);
-  return result;
-}
-
-static al::ShaderString concatShaderStrings (const char** strings, int num) {
+// alloc only once with reserve
+static std::string concatShaderStrings (const char** strings, int num) {
   size_t totalSize = 0;
   for (int i = 0; i < num; i += 1) {
     totalSize += std::strlen(strings[i]);
   }
   totalSize += 1; // null terminator
-  al::ShaderString result;
-  // TODO - check result of alloc?
-  result.str = (char*)std::malloc(totalSize);
+  std::string result;
+  result.reserve(totalSize);
 
-  size_t offset = 0;
   for (int i = 0; i < num; i += 1) {
-    size_t len = std::strlen(strings[i]);
-    std::memcpy(result.str + offset, strings[i], len);
-    offset += len;
+    result += strings[i];
   }
-  result.str[totalSize-1] = '\0';
   return result;
 }
 
@@ -199,8 +157,9 @@ const char* al::stereoVertexDisplaceFunctionString (bool isOmni) {
   }
 }
 
-al::ShaderString al::vertexShaderStringP (int major, int minor, bool isStereo,
-                                          bool isOmni, bool doLighting) {
+std::string al::vertexShaderStringP (int major, int minor, bool isStereo,
+                                     bool isOmni, bool doLighting)
+{
   const char* sources[] = {
     al::shaderVersionString(major, minor),
     vertexShaderMatricesHeader(),
@@ -219,8 +178,9 @@ layout (location = 0) in vec3 vertexPosition;
   return concatShaderStrings(sources, 10);
 }
 
-al::ShaderString al::vertexShaderStringPC (int major, int minor, bool isStereo,
-                                           bool isOmni, bool doLighting) {
+std::string al::vertexShaderStringPC (int major, int minor, bool isStereo,
+                                           bool isOmni, bool doLighting)
+{
   const char* sources[] = {
     al::shaderVersionString(major, minor),
     vertexShaderMatricesHeader(),
@@ -243,8 +203,9 @@ out vec4 vColor;
   return concatShaderStrings(sources, 10);
 }
 
-al::ShaderString al::vertexShaderStringPT (int major, int minor, bool isStereo,
-                                           bool isOmni, bool doLighting) {
+std::string al::vertexShaderStringPT (int major, int minor, bool isStereo,
+                                      bool isOmni, bool doLighting)
+{
   const char* sources[] = {
     al::shaderVersionString(major, minor),
     vertexShaderMatricesHeader(),
@@ -269,8 +230,9 @@ void main () {
   return concatShaderStrings(sources, 10);
 }
 
-al::ShaderString al::fragShaderStringU (int major, int minor,
-                                        bool doLighting) {
+std::string al::fragShaderStringU (int major, int minor,
+                                   bool doLighting)
+{
   const char* sources[] = {
     al::shaderVersionString(major, minor),
     fragmentShaderLightingHeader(doLighting),
@@ -291,8 +253,9 @@ void main () {
   return concatShaderStrings(sources, 5);
 }
 
-al::ShaderString al::fragShaderStringC (int major, int minor,
-                                        bool doLighting) {
+std::string al::fragShaderStringC (int major, int minor,
+                                   bool doLighting)
+{
   const char* sources[] = {
     al::shaderVersionString(major, minor),
     fragmentShaderLightingHeader(doLighting),
@@ -312,8 +275,9 @@ void main () {
   return concatShaderStrings(sources, 5);
 }
 
-al::ShaderString al::fragShaderStringT (int major, int minor,
-                                        bool doLighting) {
+std::string al::fragShaderStringT (int major, int minor,
+                                   bool doLighting)
+{
   const char* sources[] = {
     al::shaderVersionString(major, minor),
     fragmentShaderLightingHeader(doLighting),

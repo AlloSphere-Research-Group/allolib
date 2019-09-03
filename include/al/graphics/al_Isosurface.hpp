@@ -240,7 +240,9 @@ protected:
 	typedef std::unordered_map<int, int, IsosurfaceHashInt> EdgeToVertex;
 
 	EdgeToVertex mEdgeToVertex;					// map from edge ID to vertex
-	al::Buffer<EdgeTriangle> mEdgeTriangles;	// surface triangles in terms of edge IDs
+
+    // TODO - This never gets used???
+	std::vector<EdgeTriangle> mEdgeTriangles;	// surface triangles in terms of edge IDs
 
 	std::vector<int> mEdgeToVertexArray;
 //	al::Buffer<int> mTempEdges;

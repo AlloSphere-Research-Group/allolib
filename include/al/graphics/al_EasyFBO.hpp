@@ -42,23 +42,43 @@
   Keehong Youn, 2017, younkeehong@gmail.com
 */
 
+/*
+
+    simple fbo + color attachment + depth attachment wrapper
+    only supports one color attaachment
+    but user and attach more by getting fbo member object
+    and calling attach functions manually
+
+*/
+
 #include "al/graphics/al_FBO.hpp"
 #include "al/graphics/al_Texture.hpp"
 
 namespace al {
 
 struct EasyFBOSetting {
-    int internal = GL_RGBA8;
-    unsigned int format = GL_RGBA;
-    unsigned int type = GL_UNSIGNED_BYTE;
-    unsigned int depth_format = GL_DEPTH_COMPONENT24;
-    int wrapS = GL_CLAMP_TO_EDGE;
-    int wrapT = GL_CLAMP_TO_EDGE;
-    int wrapR = GL_CLAMP_TO_EDGE;
-    int filterMin = GL_NEAREST;
-    int filterMag = GL_NEAREST;
-    bool mUseMipmap = false;
-    bool use_depth_texture = false;
+  // color attachment texture config
+  int internal = GL_RGBA8;
+  unsigned int format = GL_RGBA;
+  unsigned int type = GL_UNSIGNED_BYTE;
+
+  // format for depth attachment
+  unsigned int depth_format = GL_DEPTH_COMPONENT24;
+
+  // wrapping option for color texture
+  int wrapS = GL_CLAMP_TO_EDGE;
+  int wrapT = GL_CLAMP_TO_EDGE;
+  int wrapR = GL_CLAMP_TO_EDGE;
+
+  // filtering option for color texture
+  int filterMin = GL_NEAREST;
+  int filterMag = GL_NEAREST;
+
+  bool mUseMipmap = false; // config mipmap levels for result texture?
+
+  bool use_depth_texture = false; // if true, use texture with depth_format
+                                  // for depth recording.
+                                  // else use rbo for depth recording
 };
 
 /// Encapsulates FBO, depth buffer, and texture

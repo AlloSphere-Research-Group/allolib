@@ -433,7 +433,7 @@ void Isosurface::addEdgeVertex(int ix, int iy, int iz, int cellID, int edgeNo, c
 			ev.pos[1] = iy;
 			ev.pos[2] = iz;
 
-			int vIdx = Mesh::vertices().size();
+			int vIdx = (int)Mesh::vertices().size();
 			mEdgeToVertexArray[eIdx] = vIdx;
 
 			Mesh::vertex(ev.x, ev.y, ev.z);
@@ -453,7 +453,7 @@ void Isosurface::addEdgeVertex(int ix, int iy, int iz, int cellID, int edgeNo, c
 			ev.pos[2] = iz;
 	//		ev.idx = cellID/3;
 
-			int vIdx = Mesh::vertices().size();
+			int vIdx = (int)Mesh::vertices().size();
 			mEdgeToVertex[eIdx] = vIdx;
 
 			Mesh::vertex(ev.x, ev.y, ev.z);
@@ -505,9 +505,9 @@ Isosurface::calcIntersection(int ix, int iy, int iz, int edgeNo, const float * v
 	float mu = float((level() - val1)/(val2 - val1));
 
 	EdgeVertex r;
-	r.x = (ix + e1[0] + mu*ed[0]) * mL[0];
-	r.y = (iy + e1[1] + mu*ed[1]) * mL[1];
-	r.z = (iz + e1[2] + mu*ed[2]) * mL[2];
+	r.x = (float)((ix + e1[0] + mu*ed[0]) * mL[0]);
+	r.y = (float)((iy + e1[1] + mu*ed[1]) * mL[1]);
+	r.z = (float)((iz + e1[2] + mu*ed[2]) * mL[2]);
 
 //	r.corners[0] = i0;
 //	r.corners[1] = i1;
@@ -553,14 +553,14 @@ void Isosurface::compressTriangles(){
 	// This is slower, but uses less memory
 	else{
         for(size_t i=0; i<indices().size(); ++i){
-            size_t ei = indices()[i];
-			int vi = mEdgeToVertex[ei];
+            int ei = (int)indices()[i];
+			unsigned int vi = (unsigned int)mEdgeToVertex[ei];
 			indices()[i] = vi;
 		}
 	}
 
 	mEdgeToVertex.clear();
-	mEdgeTriangles.reset();
+	mEdgeTriangles.clear();
 }
 
 

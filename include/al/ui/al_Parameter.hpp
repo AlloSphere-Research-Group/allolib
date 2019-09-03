@@ -734,7 +734,7 @@ public:
         mElementsLock.lock();
         auto position = std::find(mElements.begin(), mElements.end(), element);
         bool found = position != mElements.end();
-        int foundPosition = std::distance(mElements.begin(), position);
+        int foundPosition = (int)std::distance(mElements.begin(), position);
         mElementsLock.unlock();
         if (found) {
           if (noCalls) {
