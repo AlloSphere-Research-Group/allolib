@@ -44,7 +44,7 @@ struct MyApp : public App{
 			c.a = exp(-16*z*z);
 			pix[j*Nx + i] = c; // assignment converts float color to integer color
 		}}
-		tex.submit(pix);
+        tex.submit(pix.data());
 
 		// Load an image having an alpha channel
 		//Image img("myImage.png");
