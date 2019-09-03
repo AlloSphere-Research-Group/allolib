@@ -57,7 +57,7 @@ public:
 
 };
 
-class MyApp : public DistributedApp<>
+class MyApp : public DistributedApp
 {
 public:
 
@@ -157,4 +157,5 @@ int main(){
   MyApp app;
   app.fps(30);
   app.start();
+  return 0;
 }

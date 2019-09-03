@@ -304,6 +304,8 @@ public:
      */
     void registerOSCListener(osc::PacketHandler *handler);
 
+    void clearOSCListeners() {mPacketHandlers.clear();}
+
     void registerOSCConsumer(osc::MessageConsumer *consumer, std::string rootPath = "");
 
     void notifyAll();

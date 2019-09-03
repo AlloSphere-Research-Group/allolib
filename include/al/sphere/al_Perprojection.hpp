@@ -22,80 +22,11 @@
 
 namespace al {
 
-Mat4f get_cube_mat(int face) {
-  switch (face) {
-    // GL_TEXTURE_CUBE_MAP_POSITIVE_X
-    // vertex.xyz = vec3(-vertex.z, -vertex.y, -vertex.x);
-    case 0: return Mat4f {
-      0, 0,-1, 0,
-      0,-1, 0, 0,
-      -1, 0, 0, 0,
-      0, 0, 0, 1
-    };
-    // GL_TEXTURE_CUBE_MAP_NEGATIVE_X
-    // vertex.xyz = vec3(vertex.z, -vertex.y, vertex.x);
-    case 1: return Mat4f {
-      0, 0, 1, 0,
-      0, -1, 0, 0,
-      1, 0, 0, 0,
-      0, 0, 0, 1
-    };
-    // GL_TEXTURE_CUBE_MAP_POSITIVE_Y
-    // vertex.xyz = vec3(vertex.x, vertex.z, -vertex.y);
-    case 2: return Mat4f {
-      1, 0, 0, 0,
-      0, 0, 1, 0,
-      0, -1, 0, 0,
-      0, 0, 0, 1
-    };
-    // GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
-    // vertex.xyz = vec3(vertex.x, -vertex.z, vertex.y);
-    case 3: return Mat4f {
-      1, 0, 0, 0,
-      0, 0, -1, 0,
-      0, 1, 0, 0,
-      0, 0, 0, 1
-    };
-    // GL_TEXTURE_CUBE_MAP_POSITIVE_Z
-    // vertex.xyz = vec3(vertex.x, -vertex.y, -vertex.z);
-    case 4: return Mat4f {
-      1, 0, 0, 0,
-      0, -1, 0, 0,
-      0, 0, -1, 0,
-      0, 0, 0, 1
-    };
-    // GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-    // vertex.xyz = vec3(-vertex.x, -vertex.y, vertex.z);
-    case 5: return Mat4f {
-      -1, 0, 0, 0,
-      0, -1, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1
-    };
-  }
-  return Mat4f::identity();
-}
+Mat4f get_cube_mat(int face);
 
 struct bhlw { float b; float h; float l; float w; };
 
-bhlw viewport_for_cubemap_face(int idx) {
-  /*
-    _________
-    | |2|   |
-    |1|5|0|4|
-    | |3|   |
-    '''''''''
-  */
-  bhlw v;
-  v.h = 0.33f; v.w = 0.25f;
-  if      (idx == 0) { v.b = 0.33f; v.l = 0.5f;  }
-  else if (idx == 1) { v.b = 0.33f; v.l = 0.0f;  }
-  else if (idx == 2) { v.b = 0.66f; v.l = 0.25f; }
-  else if (idx == 3) { v.b = 0.0f;  v.l = 0.25f; }
-  else if (idx == 4) { v.b = 0.33f; v.l = 0.75f; }
-  else if (idx == 5) { v.b = 0.33f; v.l = 0.25f; }
-  return v;
-}
+bhlw viewport_for_cubemap_face(int idx);
 
 class PerProjectionRenderConstants {
 public:
@@ -103,7 +34,8 @@ public:
   static int const textures_bidning_point = 11;
 };
 
-inline std::string perprojection_samplevert() { return R"(
+inline std::string perprojection_samplevert() {
+  return R"(
 #version 330
 uniform mat4 al_ModelViewMatrix;
 uniform mat4 al_ProjectionMatrix;
@@ -114,12 +46,13 @@ layout (location = 2) in vec2 texcoord;
 out vec2 texcoord_;
 
 void main() {
-  gl_Position = al_ProjectionMatrix * al_ModelViewMatrix * vec4(position, 1.0);
-  texcoord_ = texcoord;
+gl_Position = al_ProjectionMatrix * al_ModelViewMatrix * vec4(position, 1.0);
+texcoord_ = texcoord;
 }
 )";}
 
-inline std::string perprojection_samplefrag() { return R"(
+inline std::string perprojection_samplefrag() {
+  return R"(
 #version 330
 uniform sampler2D sample_tex;
 uniform sampler2D color_tex;
@@ -128,13 +61,13 @@ uniform float tanFovDiv2;
 in vec2 texcoord_;
 out vec4 frag_color;
 void main() {
-  vec4 sample = texture(sample_tex, texcoord_);
-  vec3 dir = sample.rgb;
-  vec3 p_coord = (R * vec4(dir, 0)).xyz;
-  p_coord.xy /= -p_coord.z;
-  p_coord.xy /= tanFovDiv2;
-  vec3 sampled_color = texture(color_tex, p_coord.xy / 2.0 + 0.5).rgb;
-  frag_color = vec4(sampled_color * sample.a, 1.0);
+vec4 sample = texture(sample_tex, texcoord_);
+vec3 dir = sample.rgb;
+vec3 p_coord = (R * vec4(dir, 0)).xyz;
+p_coord.xy /= -p_coord.z;
+p_coord.xy /= tanFovDiv2;
+vec3 sampled_color = texture(color_tex, p_coord.xy / 2.0 + 0.5).rgb;
+frag_color = vec4(sampled_color * sample.a, 1.0);
 }
 )";}
 

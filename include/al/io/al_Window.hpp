@@ -53,6 +53,8 @@
 #include <string>
 #include <vector>
 
+#undef DELETE
+
 namespace al {
 
 class Window;

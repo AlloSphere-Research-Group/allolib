@@ -8,7 +8,7 @@
 
 namespace al {
 
-class AudioApp {
+class [[deprecated("Use AudioDomain instead")]]  AudioApp {
 public:
   AudioIO mAudioIO;
   AudioIO& audioIO(){ return mAudioIO; }

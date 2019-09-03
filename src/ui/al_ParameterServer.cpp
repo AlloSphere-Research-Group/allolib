@@ -176,7 +176,7 @@ bool ParameterServer::listen(int oscPort, std::string oscAddress)
             return false;
         }
     } else {
-        std::cout << "Error starting OSC server." << std::endl;
+        std::cout << "Error starting OSC server on port " << oscPort << std::endl;
         return false;
     }
     return true;

@@ -16,124 +16,35 @@
 //#include "al/graphics/al_GLFW.hpp"
 #include "al/math/al_Constants.hpp"
 
-std::string al_get_hostname()
-{
-    char hostname[256];
-#ifdef AL_WINDOWS
-    gethostname(hostname, 256);
-#else
-    gethostname(hostname, 256);
-#endif
-    return std::string {hostname};
-}
+std::string al_get_hostname();
 
 namespace al {
 
 namespace sphere {
 
-bool is_simulator(std::string const& host)
-{
-    return (host.substr(0, 5) == "audio");
-}
+bool is_simulator(std::string const& host);
 
-bool is_simulator()
-{
-    return is_simulator(al_get_hostname());
-}
+bool is_simulator();
 
-bool is_renderer(std::string const& host)
-{
-    return (host.substr(0, 2) == "gr");
-}
+bool is_renderer(std::string const& host);
 
-bool is_renderer()
-{
-    return is_renderer(al_get_hostname());
-}
+bool is_renderer();
 
-std::string renderer_hostname(std::string const& fallback) {
-    auto const host = al_get_hostname();
-    if (is_renderer(host)) return host;
-    else return fallback;
-}
+std::string renderer_hostname(std::string const& fallback);
 
-bool is_in_sphere()
-{
-    auto const host = al_get_hostname();
-    return is_simulator(host) || is_renderer(host);
-}
+bool is_in_sphere();
 
-void get_fullscreen_dimension(int* width, int* height)
-{
-    // Window Size in AlloSphere
-    
-    // considering Mosaic'ed displays as one bing screen
-    // (since glfw can't see Mosaic settings)
+void get_fullscreen_dimension(int* width, int* height);
 
-    // original code by Donghao Ren
-    // https://github.com/donghaoren
-    // donghaoren@cs.ucsb.edu
+std::string config_directory(std::string const& dir_if_not_renderer);
 
-    int count;
+std::string renderer_config_file_path(std::string const& host);
 
-    *width = 0;
-    *height = 0;
+std::string renderer_config_file_path();
 
-    assert(0 == 1);
+std::string config_file_path(std::string const& path_if_not_renderer);
 
-    //FIXME implement
-//    GLFWmonitor** monitors = glfwGetMonitors(&count);
-
-//    for (int i = 0; i < count; i += 1) {
-//        int x, y;
-//        glfwGetMonitorPos(monitors[i], &x, &y);
-//        const GLFWvidmode* vm = glfwGetVideoMode(monitors[i]);
-//        int xmax = x + vm->width;
-//        int ymax = y + vm->height;
-//        if (*width < xmax) *width = xmax;
-//        if (*height < ymax) *height = ymax;
-//    }
-}
-
-std::string config_directory(std::string const& dir_if_not_renderer) {
-    if (is_renderer()) return "/home/sphere/calibration-current/";
-    else return dir_if_not_renderer;
-}
-
-std::string renderer_config_file_path(std::string const& host)
-{
-    return "/home/sphere/calibration-current/" + host + ".txt";
-}
-
-std::string renderer_config_file_path()
-{
-    return renderer_config_file_path(al_get_hostname());
-}
-
-std::string config_file_path(std::string const& path_if_not_renderer)
-{
-    auto const host = al_get_hostname();
-    if (is_renderer(host)) return renderer_config_file_path(host);
-    else return path_if_not_renderer;
-}
-
-std::vector<float> generate_equirect_sampletex(int width, int height)
-{
-    std::vector<float> arr;
-    arr.resize(width * height * 4);
-    for (int i = 0; i < width; i++) {
-        float longi = float(i / width * M_2PI);
-        for (int j = 0; j < height; j++) {
-            int idx = i + width * j;
-            float latti = float((j /height - 0.5) * M_PI);
-            arr[4 * idx + 0] = std::cos(longi) * std::cos(latti);
-            arr[4 * idx + 1] = std::sin(latti);
-            arr[4 * idx + 2] = std::sin(longi) * std::cos(latti);
-            arr[4 * idx + 3] = 0.0f;
-        }
-    }
-    return arr;
-}
+std::vector<float> generate_equirect_sampletex(int width, int height);
 
 } // namespace sphere
 

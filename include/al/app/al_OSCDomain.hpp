@@ -33,16 +33,21 @@ public:
 
   // PacketHandler
   std::function<void(osc::Message&)> onMessage = [](osc::Message &m){std::cout << "Received unhandled message." <<std::endl; m.print();};
+
+  std::string interfaceIP = "0.0.0.0";
+  uint16_t port = 9010;
 private:
 
   class Handler: public osc::PacketHandler {
   public:
     OSCDomain *mOscDomain;
     void onMessage(osc::Message &m) {
-      this->onMessage(m);
+      mOscDomain->onMessage(m);
     }
   } mHandler;
     ParameterServer mParameterServer {"0.0.0.0", 9010, false};
+
+
 };
 
 } // namespace al

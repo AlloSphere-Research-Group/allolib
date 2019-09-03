@@ -96,7 +96,7 @@ protected:
 // make an app that contains a SynthSequencer class
 // use the render() functions from the SynthSequencer to produce audio and
 // graphics in the corresponding callback
-struct MyApp : public DistributedApp<>
+struct MyApp : public DistributedApp
 {
 
     void onCreate()  {
@@ -148,7 +148,7 @@ struct MyApp : public DistributedApp<>
 //        scene.consumeMessage(m);
 //    }
 
-    void onKeyDown(Keyboard const &k){
+    bool onKeyDown(Keyboard const &k){
         if (k.key() == ' ') {
             auto *freeVoice = scene.getVoice<SimpleVoice>();
             std::vector<float> params{440.0f}; 
@@ -158,6 +158,7 @@ struct MyApp : public DistributedApp<>
             freeVoice->setPose(pose);
             scene.triggerOn(freeVoice);
         }
+        return true;
     }
 
     DistributedScene scene{PolySynth::TIME_MASTER_CPU};
@@ -169,7 +170,7 @@ int main(){
     MyApp app;
 
     // Start everything
-    app.initAudio(48000., 1024, 2,0);
+    app.configureAudio(48000., 1024, 2,0);
     Domain::master().spu(app.audioIO().framesPerSecond());
     app.start();
 }

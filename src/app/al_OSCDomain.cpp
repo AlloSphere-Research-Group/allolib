@@ -10,9 +10,26 @@ bool OSCDomain::initialize(ComputationDomain *parent) {
 }
 
 bool OSCDomain::start() {
-  bool ret = true;
-  ret &= mParameterServer.listen();
-  return ret;
+  if (mParameterServer.listen(port, interfaceIP)) {
+    mParameterServer.startHandshakeServer();
+    return true;
+  } else {
+    uint16_t primaryPort = port;
+    uint16_t portOffset = UINT16_MAX;
+    int maxInstances = 100;
+    while (!parameterServer().serverRunning() && ++portOffset < maxInstances) {
+      parameterServer().listen(primaryPort + portOffset, interfaceIP);
+    }
+    if (parameterServer().serverRunning()) {
+      port = portOffset + port;
+      parameterServer().startCommandListener(interfaceIP);
+      std::cout << "Application is replica on port: " << parameterServer().serverPort() << std::endl;
+    } else {
+      port = 0;
+      std::cerr << "Warning: Application could not start network role." << std::endl;
+    }
+  }
+  return parameterServer().serverRunning();
 }
 
 bool OSCDomain::stop() {
@@ -24,10 +41,12 @@ bool OSCDomain::stop() {
 bool OSCDomain::cleanup(ComputationDomain *parent)
 {
   (void) parent;
+  mParameterServer.clearOSCListeners();
   return true;
 }
 
-bool OSCDomain::configure(uint16_t port, std::string address) {
-  mParameterServer.configure(port, address);
+bool OSCDomain::configure(uint16_t port_, std::string address) {
+  port = port_;
+  interfaceIP = address;
   return true;
 }

@@ -47,9 +47,8 @@ add_subdirectory(external)
 
 set(headers
   include/al/app/al_App.hpp
-#  include/al/app/al_AppNew.hpp
   include/al/app/al_AudioApp.hpp
-  # include/al/app/al_DistributedApp.hpp
+  include/al/app/al_DistributedApp.hpp
   include/al/app/al_FPS.hpp/
   include/al/app/al_WindowApp.hpp
 
@@ -154,9 +153,11 @@ set(sources
   src/app/al_AudioApp.cpp
   src/app/al_FPS.cpp
   src/app/al_WindowApp.cpp
+  src/app/al_DistributedApp.cpp
 
   src/app/al_AudioDomain.cpp
   src/app/al_ComputationDomain.cpp
+  src/app/al_OmniRendererDomain.cpp
   src/app/al_OpenGLGraphicsDomain.cpp
   src/app/al_OSCDomain.cpp
   src/app/al_SimulationDomain.cpp
@@ -200,6 +201,7 @@ set(sources
   src/io/al_WindowGLFW.cpp
   src/math/al_StdRandom.cpp
   src/protocol/al_OSC.cpp
+  src/scene/al_DistributedScene.cpp
   src/scene/al_DynamicScene.cpp
   src/scene/al_SynthRecorder.cpp
   src/scene/al_PolySynth.cpp
@@ -215,6 +217,8 @@ set(sources
   src/sound/al_SoundFile.cpp
   src/spatial/al_HashSpace.cpp
   src/spatial/al_Pose.cpp
+  src/sphere/al_SphereUtils.cpp
+  src/sphere/al_PerProjection.cpp
   src/system/al_PeriodicThread.cpp
   src/system/al_Printing.cpp
   src/system/al_ThreadNative.cpp

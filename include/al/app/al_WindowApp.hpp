@@ -20,7 +20,7 @@
 
 namespace al {
 
-class WindowApp : public Window, public WindowEventHandler, public FPS {
+class [[deprecated("Use domains instead")]] WindowApp : public Window, public WindowEventHandler, public FPS {
  public:
   // basic window app keyboard actions: fullscreen, quit, ...
   struct StandardWindowAppKeyControls : WindowEventHandler {
