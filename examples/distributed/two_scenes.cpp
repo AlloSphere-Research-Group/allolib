@@ -61,48 +61,51 @@ class MyApp : public DistributedApp
 {
 public:
 
+  ParameterPose navParameter {"nav"};
+
   virtual void onCreate() override {
 
     scene1.registerSynthClass<SimpleVoice>();
     scene2.registerSynthClass<SimpleVoice>();
-    scene1.verbose(true);
+//    scene1.verbose(true);
 
     registerDynamicScene(scene1); // scene1 is broadcast from primary
 
     // Now connect scene2 so that it is broadcast from replica
     // If distributed scene, connect according to this app's role
     if (isPrimary()) {
-      parameterServer().registerOSCConsumer(
-            &scene2, scene2.name());
+//      parameterServer().registerOSCConsumer(
+//            &scene2, scene2.name());
       scene1.allNotesOff(); // To turn off any events that might remain in a replica scene
     } else {
       scene2.registerNotifier(parameterServer());
-      parameterServer().addListener("localhost", 9010);
+//      parameterServer().addListener("localhost", 9010);
       scene2.allNotesOff(); // To turn off any events that might remain in a replica scene
     }
 
     addDisc(mMesh1, 0.5);
     mMesh1.primitive(Mesh::LINE_STRIP);
     mMesh1.update();
-    scene1.setDefaultUserData((void *) &mMesh1);
+    scene1.setDefaultUserData(&mMesh1);
 
     addTetrahedron(mMesh2);
     mMesh2.primitive(Mesh::LINE_STRIP);
     mMesh2.update();
-    scene2.setDefaultUserData((void *) &mMesh2);
+    scene2.setDefaultUserData(&mMesh2);
 
     if (isPrimary()) {
       title("Primary");
     } else {
       title("Replica");
     }
+    parameterServer() << navParameter;
     parameterServer().print();
     parameterServer().verbose(true);
   }
 
   virtual void onAnimate(double dt) override {
     counter++;
-    if (counter == 30) {
+    if (counter >= 30) {
       // Regularly add voices to scene depending on app's role
       counter = 0;
       if (isPrimary()) {
@@ -123,14 +126,19 @@ public:
       }
     }
     if (isPrimary()) {
+      navParameter.set(nav());
       scene1.update(dt);
     } else {
       scene2.update(dt);
+      view().pose() = navParameter.get();;
+//      if (nav().pos() != navParameter.get().pos()) {
+//        nav() =
+//      }
     }
   }
 
   virtual void onDraw(Graphics &g) override {
-    g.clear();
+    g.clear(0);
     scene1.render(g); // Render graphics
     scene2.render(g); // Render graphics
   }

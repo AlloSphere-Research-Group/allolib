@@ -112,26 +112,41 @@ void DistributedApp::initialize() {
 void DistributedApp::start() {
   initialize();
   initializeDomains();
-  if (isPrimary()) {
-    std::cout << "Running Primary" << std::endl;
+  stdControls.app = this;
 
-  } else {
-    std::cout << "Running REPLICA" << std::endl;
-
-    mSimulationDomain
-        ->disableProcessingCallback(); // Replicas won't call onAnimate()
-  }
-  graphicsDomain()->removeSubDomain(mDefaultWindowDomain);
   omniRendering = graphicsDomain()->newSubDomain<GLFWOpenGLOmniRendererDomain>();
   omniRendering->onDraw =
       std::bind(&App::onDraw, this, std::placeholders::_1);
   omniRendering->initialize(graphicsDomain().get());
   omniRendering->window().append(stdControls);
-  stdControls.app = this;
-  stdControls.mWindow = &omniRendering->window();
 
   omniRendering->window().append(omniRendering->navControl());
   omniRendering->navControl().nav(omniRendering->nav());
+  stdControls.mWindow = &omniRendering->window();
+  omniRendering->window().onKeyDown =
+      std::bind(&App::onKeyDown, this, std::placeholders::_1);
+  omniRendering->window().onKeyUp =
+      std::bind(&App::onKeyUp, this, std::placeholders::_1);
+  omniRendering->window().onMouseDown =
+      std::bind(&App::onMouseDown, this, std::placeholders::_1);
+  omniRendering->window().onMouseUp =
+      std::bind(&App::onMouseUp, this, std::placeholders::_1);
+  omniRendering->window().onMouseDrag =
+      std::bind(&App::onMouseDrag, this, std::placeholders::_1);
+  omniRendering->window().onMouseMove =
+      std::bind(&App::onMouseMove, this, std::placeholders::_1);
+  omniRendering->window().onMouseScroll =
+      std::bind(&App::onMouseScroll, this, std::placeholders::_1);
+
+  if (isPrimary()) {
+    std::cout << "Running Primary" << std::endl;
+    omniRendering->drawOmni = false;
+  } else {
+    std::cout << "Running REPLICA" << std::endl;
+    omniRendering->drawOmni = true;
+    mSimulationDomain
+        ->disableProcessingCallback(); // Replicas won't call onAnimate()
+  }
 
   onInit();
 

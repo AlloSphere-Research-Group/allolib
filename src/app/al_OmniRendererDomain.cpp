@@ -121,7 +121,7 @@ void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
   // so updating those in onDraw will not have effect in rendering
   // will setting up omni rendering,
   // begin also pushes fbo, viewport, viewmat, projmat, lens, shader
-  pp_render.begin(*mGraphics, mGraphics->lens(), mPose);
+  pp_render.begin(*mGraphics, mGraphics->lens(), mView.pose());
   glDrawBuffer(GL_COLOR_ATTACHMENT0); // for fbo's output
   if (render_stereo) {
     for (int eye = 0; eye < 2; eye += 1) {
