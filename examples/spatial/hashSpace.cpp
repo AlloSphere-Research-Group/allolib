@@ -92,7 +92,7 @@ public:
 				// jiggle the objects around:
 				double x = 0.5 + o.pos.x * 0.05;
 				double y = 0.5 + o.pos.y * 0.05;
-				double speed = 0.2 * sin(al_sec() + atan2(y,x));
+                double speed = 0.2 * sin(al_steady_time() + atan2(y,x));
 				space.move(id, o.pos + Vec3d(speed*rng.uniformS(), speed*rng.uniformS(), 0.));
 
 				m.vertex(o.pos);

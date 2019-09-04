@@ -14,8 +14,8 @@ stereographic rendering
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include "al/math/al_Random.hpp"
-#include "al/sound/al_Ambisonics.hpp"
-#include "al/sound/al_AudioScene.hpp"
+//#include "al/sound/al_Ambisonics.hpp"
+#include "al/scene/al_DynamicScene.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -24,46 +24,39 @@ using namespace al;
 
 #define AUDIO_BLOCK_SIZE 256
 
-struct Agent : SoundSource, Nav {
-  Agent() : oscPhase(0), oscEnv(1) {}
+// Create an agent,
+struct Agent : PositionedVoice, Nav {
 
-  virtual ~Agent() {}
+  float oscPhase {0}, oscFreq {220.0}, speed;
 
-  void onProcess(AudioIOData& io) {
+  void onProcess(AudioIOData& io) override {
+    // Play a sine tone
     while (io()) {
-      // float s = io.in(0);
-      // float s = rnd::uniform(); // make noise, just to hear something
-      float s = sin(oscPhase * M_2PI);
-      // float s = al::rnd::uniformS();
-      // s *= (oscEnv*=0.999);
-
-      // if (oscEnv < 0.00001) {
-      //   oscEnv = 1;
-      //   oscPhase = 0;
-      // }
-
-      // float s = phase * 2 - 1;
-      // oscPhase += 440. / io.framesPerSecond();
-      oscPhase += 220. / io.framesPerSecond();
+      float s = std::sin(oscPhase * M_2PI);
+      oscPhase += oscFreq / io.framesPerSecond();
       if (oscPhase >= 1) oscPhase -= 1;
-      writeSample(s * 0.1);
+      io.out(0) = s * 0.1f;
     }
   }
 
-  virtual void onUpdateNav() {
+  void update(double dt) override
+  {
+    // Update internal smoothed nav
     smooth(0.9);
     spin(M_2PI / 360, M_2PI / 397, 0);
-    moveF(0.04);
+    moveF(speed);
     step();
-    SoundSource::pose(*this);
+    // Now update the current agent's position from the smoothed nav
+    setPose(*this);
   }
 
-  virtual void onDraw(Graphics& g) {
+  void onProcess(Graphics& g) override {
 
-    g.pushMatrix(Mat4f{Pose::matrix()});
+    // draw
+    g.pushMatrix(/*Mat4f{Pose::matrix()}*/);
 
     Mesh m{Mesh::TRIANGLES};
-    float ds = 0.5;
+    float ds = -0.5;
 
     m.color(1, 1, 1);
     m.vertex(0, 0, ds * 2);
@@ -91,35 +84,52 @@ struct Agent : SoundSource, Nav {
     g.popMatrix();
   }
 
-  double oscPhase, oscEnv;
 };
 
-AudioScene scene(AUDIO_BLOCK_SIZE);
-Listener* listener;
-std::vector<Agent> agents(1);
-Nav navMaster(Vec3d(0,0,50), 0.95);
 
-struct MyWindow : App
+struct MyApp : App
 {
+
+  DynamicScene scene;
   void onCreate() override {
-    // set keyboard/mouse to control navMaster
-    navControl().nav(navMaster);
+    // Set initial pose
+    nav() = {Vec3d(0,0,50), 0.95};
+
+    auto us10 = [] { return 10.0 * rnd::uniformS(); };
+
+    for (unsigned i = 0; i < 4; ++i) {
+      auto* ai = scene.getVoice<Agent>();
+      ai->oscFreq = 220.0f + (us10() * 220.0f);
+      ai->speed = 0.1f + 0.1f * rnd::uniform();
+      // randomize position and orientation
+      // We can do it this way because the agent inherits from Nav
+      ai->Pose::pos(us10(), us10(), us10());
+      ai->faceToward({us10(), us10(), us10()});
+      // Now insert into the scene
+      scene.triggerOn(ai);
+    }
+
+    // Make distance changes more noticeable
+    scene.distanceAttenuation().law(AttenuationLaw::ATTEN_INVERSE_SQUARE);
+  }
+
+  void onAnimate(double dt) override {
+    // Uncomment this line to make listener pose be the viewing pose;
+//    scene.listenerPose(pose());
+    scene.update(dt);
   }
 
   void onDraw(Graphics& g) override {
     g.clear(0);
-    // use controlled nav as view matrix
-    g.viewMatrix(al::view_mat(navMaster));
     g.pushMatrix();
     g.scale(10);
     Mesh wb;
     addWireBox(wb);
+    g.color(1);
     g.draw(wb);
     g.popMatrix();
 
-    for (unsigned i = 0; i < agents.size(); ++i) {
-      agents[i].onDraw(g);
-    }
+    scene.render(g);
   }
 
 //  void onKeyDown(const Keyboard& k) override {
@@ -129,50 +139,16 @@ struct MyWindow : App
 //  }
 
   void onSound(AudioIOData& io) override {
-    for (unsigned i = 0; i < agents.size(); ++i) {
-      io.frame(0);
-      agents[i].onUpdateNav();
-      agents[i].onProcess(io);
-    }
-    navMaster.step(0.5);
-    listener->pose(navMaster);
-    io.frame(0);
     scene.render(io);
   }
 
 };
 
-int main(int argc, char* argv[]) {
-  // Set speaker layout
-  // const int numSpeakers = 2;
-  Speaker speakers[] = {
-      Speaker(0, 45, 0), Speaker(1, -45, 0),
-  };
-  SpeakerLayout speakerLayout;
-  speakerLayout.addSpeaker(speakers[0]);
-  speakerLayout.addSpeaker(speakers[1]);
+int main() {
 
-  // Create spatializer
-  AmbisonicsSpatializer* spat = new AmbisonicsSpatializer(speakerLayout, 2, 1);
-  scene.usePerSampleProcessing(true);  // per sample processing is less
-                                       // efficient than per buffer (default),
-                                       // but provides higher quality Doppler
-
-  // Create listener to render audio
-  listener = scene.createListener(spat);
-
-  // Now do some visuals
-  auto us10 = [] { return 10 * rnd::uniformS(); };
-  for (unsigned i = 0; i < agents.size(); ++i) {
-    auto& ai = agents[i];
-    // randomize position and orientation
-    ai.Pose::pos(us10(), us10(), us10());
-    ai.faceToward({us10(), us10(), us10()});
-    scene.addSource(agents[i]);
-  }
-
-  MyWindow win;
+  MyApp win;
   win.configureAudio(44100, AUDIO_BLOCK_SIZE, 2, 0);
   win.start();
 
+  return  0;
 }

@@ -11,6 +11,7 @@ Keehong Youn, 2017
 */
 
 #include "al/app/al_App.hpp"
+#include "al/system/al_Time.hpp"
 #include <iostream>
 
 // Drawing on a 2D canvas using pixel coordinates
@@ -21,6 +22,8 @@ struct MyApp : public App {
 
   Mesh verts;
   Mesh verts2 {Mesh::LINES};
+
+  double timeAccum {0};
 
   void onCreate () {
     verts.primitive(Mesh::LINE_STRIP);
@@ -39,7 +42,7 @@ struct MyApp : public App {
     // We update drawing according to current width and height
     float w = float(width());
     float h = float(height());
-    float s = float(al_sec());
+    float s = float(al_steady_time());
     verts2.reset();
     for (int i = 0; i < N; i += 1) {
       float t = float(i) / (N - 1);

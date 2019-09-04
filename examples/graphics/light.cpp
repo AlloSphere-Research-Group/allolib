@@ -84,7 +84,7 @@ struct MyApp : App
 
     void onAnimate(double /*dt*/)
     {
-        light.pos(8 * cos(2 * al_sec()), 10, 2 + 5 * sin(2 * al_sec()));
+        light.pos(8 * cos(2 * al_steady_time()), 10, 2 + 5 * sin(2 * al_steady_time()));
     }
 
     void onDraw(Graphics& g)

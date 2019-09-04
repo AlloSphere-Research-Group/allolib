@@ -138,7 +138,7 @@ public:
 		g.light(light2, 1);
 
 		Light l3;
-		l3.pos(5 * sin(2 * al_sec()), -1, 5 * cos(2 * al_sec()));
+        l3.pos(5 * sin(2 * al_steady_time()), -1, 5 * cos(2 * al_steady_time()));
 		l3.diffuse({1, 0, 0});
 		g.light(l3, 2);
 

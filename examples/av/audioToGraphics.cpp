@@ -12,86 +12,83 @@ Lance Putnam, 10/2012, putnam.lance@gmail.com
 */
 
 #include "al/app/al_App.hpp"
-#include "al/types/al_Buffer.hpp"
+#include "al/types/al_SingleRWRingBuffer.hpp"
 
 using namespace al;
+
+// This example shows how to use a Buffer class to pass data from the
+// audio context to the graphics context.
 
 class MyApp : public App{
 public:
 
-	double phase = 0;
-	RingBuffer<Vec2f> ring;
-	Mesh curve;
+  const size_t bufferSize = 8192;
 
-	void onCreate()
-	{
-		ring.resize(1024);
-		nav().pos(0,0,4);
-	}
+  float bufferData[8192];
+  double phase = 0;
+  // Create ring buffer with size 2048, we will use this buffer to inter
+  // leave the stereo samples from the audio callback
+  SingleRWRingBuffer ringBuffer{bufferSize * sizeof (float)};
+  Mesh curve;
 
-	// Audio callback
-	void onSound(AudioIOData& io){
+  void onCreate()
+  {
+    nav().pos(0,0,4);
+  }
 
-		// Set the base frequency to 55 Hz
-		double freq = 55/io.framesPerSecond();
+  // Audio callback
+  void onSound(AudioIOData& io){
 
-		while(io()){
+    // Set the base frequency to 55 Hz
+    double freq = 55/io.framesPerSecond();
+    float out[2];
 
-			// Update the oscillators' phase
-			phase += freq;
-			if(phase > 1) phase -= 1;
+    while(io()){
 
-			// Generate two sine waves at the 5th and 4th harmonics
-			float out1 = cos(5*phase * 2*M_PI);
-			float out2 = sin(4*phase * 2*M_PI);
+      // Update the oscillators' phase
+      phase += freq;
+      if(phase > 1) phase -= 1;
 
-			/* Write the waveforms to the ring buffer.
-			Note that this call CANNOT block or wait on a lock from somewhere
-			else. The audio	thread must keep writing to the buffer without
-			regard for what other threads might be reading from it. */
-			ring.write(Vec2f(out1, out2));
+      // Generate two sine waves at the 5th and 4th harmonics
+      out[0] = cos(5*phase * 2*M_PI);
+      out[1] = sin(4*phase * 2*M_PI);
 
-			// Send scaled waveforms to output...
-			io.out(0) = out1*0.2;
-			io.out(1) = out2*0.2;
-		}
-	}
+      // Write the waveforms to the ring buffer.
+      ringBuffer.write((const char *) out, 2 * sizeof (float));
+
+      // Send scaled waveforms to output...
+      io.out(0) = out[0]*0.2f;
+      io.out(1) = out[1]*0.2f;
+    }
+  }
 
 
-	void onAnimate(double dt){
+  void onAnimate(double dt){
 
-		curve.primitive(Mesh::LINE_STRIP);
-		curve.reset();
+    curve.primitive(Mesh::LINE_STRIP);
+    curve.reset();
 
-		/* We first need to determine the oldest sample we will attempt read
-		from the buffer. Note that we do not want to attempt to read the entire
-		history. We have to keep in mind that the audio thread will keep writing
-		to the buffer no matter what. Therefore, it is very likely that the very
-		oldest samples will get overwritten while we are reading. */
-		int oldest = ring.size()-4;
+    size_t samplesRead = ringBuffer.read((char *) bufferData, bufferSize * sizeof (float));
 
-		/* Here we cache the current write position of the ring buffer. We want
-		this to remain fixed while we are reading. */
-		int wpos = ring.pos();
+    // Now we read samples from the buffer into the meash to be displayed
+    for(size_t i=0; i < samplesRead/sizeof (float); i = i+2){
+      curve.vertex(bufferData[i], bufferData[i+1]);
+      // The redder the lines, the closer we are to a full ring buffer
+      curve.color(HSV(0.5 *float(bufferSize)/(bufferSize - i)));
+    }
+  }
 
-		/* Now we read samples directly from the buffer from oldest to newest.
-		As long as the amount of time between reading samples is faster than
-		that of writing, we can expect to stay ahead of the audio thread... */
-		for(int i=oldest; i>=0; --i){
-			Vec2f point = ring.readFrom(wpos, i);
-			curve.vertex(point.x, point.y);
-		}
-	}
-
-	void onDraw(Graphics& g){
-		g.clear(0);
-		g.draw(curve);
-	}
+  void onDraw(Graphics& g){
+    g.clear(0);
+    g.meshColor();
+    g.draw(curve);
+  }
 };
 
 
 int main(){
-	MyApp app;
-	app.configureAudio(); // init with out only
-	app.start();
+  MyApp app;
+  app.configureAudio(); // init with out only
+  app.start();
+  return 0;
 }
