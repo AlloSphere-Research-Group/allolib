@@ -57,8 +57,8 @@ public:
   bool shouldQuit();
 
   // Access to graphics domain properties
-  Window &defaultWindow();
-  Graphics &graphics();
+  virtual Window &defaultWindow();
+  virtual Graphics &graphics();
 
   Viewpoint &view();
   Pose &pose();
@@ -208,8 +208,6 @@ public:
 
   Parameter gain{"gain", "sound", 1.0, "alloapp", 0.0, 2.0};
 };
-
-
 
 } // namespace al
 

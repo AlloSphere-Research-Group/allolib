@@ -60,6 +60,22 @@ public:
 
   void registerDynamicScene(DynamicScene &scene);
 
+  Graphics &graphics() override {
+    if (hasCapability(CAP_OMNIRENDERING)) {
+      return omniRendering->graphics();
+    } else {
+      return mDefaultWindowDomain->graphics();
+    }
+  }
+
+  Window &defaultWindow() override {
+    if (hasCapability(CAP_OMNIRENDERING)) {
+      return omniRendering->window();
+    } else {
+      return mDefaultWindowDomain->window();
+    }
+  }
+
   uint16_t rank{0};
   uint16_t group{0};
   std::shared_ptr<GLFWOpenGLOmniRendererDomain> omniRendering;
