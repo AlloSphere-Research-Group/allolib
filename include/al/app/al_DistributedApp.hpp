@@ -3,21 +3,21 @@
 
 /* Keehong Youn, 2017, younkeehong@gmail.com
  * Andres Cabrera, 2018, 2019, mantaraya36@gmail.com
-*/
+ */
 
 #include "al/app/al_App.hpp"
 #include "al/app/al_OmniRendererDomain.hpp"
-#include "al/io/al_Toml.hpp"
 #include "al/io/al_Socket.hpp"
-#include "al/scene/al_DynamicScene.hpp"
+#include "al/io/al_Toml.hpp"
 #include "al/scene/al_DistributedScene.hpp"
+#include "al/scene/al_DynamicScene.hpp"
 
 #include <iostream>
 #include <map>
 
 /*
  * MPI and cuttlebone are optional.
-*/
+ */
 #ifdef AL_BUILD_MPI
 #include <mpi.h>
 #include <unistd.h>
@@ -27,15 +27,12 @@
 #include "Cuttlebone/Cuttlebone.hpp"
 #endif
 
-
 namespace al {
 
 // TODO flow parameters
 
-
-struct DistributedApp: public App {
+struct DistributedApp : public App {
 public:
-
   typedef enum {
     CAP_NONE = 0,
     CAP_SIMULATOR = 1 << 1,
@@ -44,11 +41,12 @@ public:
     CAP_AUDIO_IO = 1 << 4,
     CAP_OSC = 1 << 5,
     CAP_CONSOLE_IO = 1 << 6,
-    CAP_USER  = 1 << 7 // User defined capabilities can add from here through bitshifting
+    CAP_USER =
+        1
+        << 7 // User defined capabilities can add from here through bitshifting
   } Capability;
 
   DistributedApp();
-
 
   void start() override;
 
@@ -56,9 +54,9 @@ public:
 
   void initialize();
 
-  bool hasCapability(Capability cap) {return cap & mCapabilites;}
+  bool hasCapability(Capability cap) { return cap & mCapabilites; }
 
-  bool isPrimary() {return rank == 0;}
+  bool isPrimary() { return rank == 0; }
 
   void registerDynamicScene(DynamicScene &scene);
 
@@ -71,9 +69,8 @@ private:
   std::string mGlobalDataRootPath;
 
   std::map<std::string, std::string> mRoleMap;
-  Capability mCapabilites {CAP_NONE};
+  Capability mCapabilites{CAP_NONE};
 };
-
 
 template <class TSharedState>
 class DistributedAppWithState : public DistributedApp {
@@ -87,7 +84,7 @@ public:
     // Replace Simulation domain with state simulation domain
     mSimulationDomain =
         mOpenGLGraphicsDomain
-        ->newSubDomain<StateSimulationDomain<TSharedState>>(true);
+            ->newSubDomain<StateSimulationDomain<TSharedState>>(true);
 
     if (rank == 0) {
       std::cout << "Running primary" << std::endl;
@@ -116,16 +113,15 @@ public:
 
   void setTitle(std::string title) { defaultWindow().title(title); }
 
-
 private:
 };
 
-//struct DefaultStateDistributedApp {
+// struct DefaultStateDistributedApp {
 //	Pose pose;
 //};
 
-//template<class TSharedState = DefaultStateDistributedApp>
-//class DistributedApp: public OmniRenderer,
+// template<class TSharedState = DefaultStateDistributedApp>
+// class DistributedApp: public OmniRenderer,
 //           public AudioApp,
 ////           public FlowAppParameters,
 //           public osc::PacketHandler
@@ -134,7 +130,7 @@ private:
 //  Viewpoint mView {mNav.transformed()};  // Pose with Lens and acts as camera
 //  NavInputControl mNavControl {mNav}; // interaction with keyboard and mouse
 
-//public:
+// public:
 
 //  typedef enum {
 //      ROLE_NONE = 0,
@@ -145,7 +141,8 @@ private:
 //      ROLE_INTERFACE = 1 << 5, // For interface server
 //      ROLE_DESKTOP = 1 << 6, // Application runs as single desktop app
 //      ROLE_DESKTOP_REPLICA = 1 << 7, // Application runs as single desktop app
-//      ROLE_USER  = 1 << 8 // User defined roles can add from here through bitshifting
+//      ROLE_USER  = 1 << 8 // User defined roles can add from here through
+//      bitshifting
 //  } Role;
 
 //  typedef enum {
@@ -157,7 +154,8 @@ private:
 //    CAP_FLOW_CLIENT = 1 << 6,
 //    CAP_CUTTLEBONE = 1 << 7,
 //    CAP_OPENVR = 1 << 7,
-//    CAP_USER = 1 << 10 // User defined roles can add from here through bitshifting
+//    CAP_USER = 1 << 10 // User defined roles can add from here through
+//    bitshifting
 //  } Capability;
 
 //  DistributedApp() { }
@@ -171,7 +169,6 @@ private:
 //      }
 //#endif
 //  }
-
 
 //  std::string dataRoot() { return mGlobalDataRootPath;}
 
@@ -222,24 +219,29 @@ private:
 //      std::cout << "Processor: " << processor_name
 //                << " Rank: " << world_rank
 //                << " Of: " << world_size << std::endl;
-//      std::cout << name() << ":" << world_rank << " set role to " << roleName() << std::endl;
+//      std::cout << name() << ":" << world_rank << " set role to " <<
+//      roleName() << std::endl;
 //#else
-//      stream << "DistributedApp: Not using MPI. Role: " << roleName() << std::endl;
+//      stream << "DistributedApp: Not using MPI. Role: " << roleName() <<
+//      std::endl;
 //#endif
 //  }
 
 //  virtual void initAudio (double audioRate, int audioBlockSize,
 //                          int audioOutputs, int audioInputs,
 //                          int device = -1) override {
-//    if (hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) ||  hasRole(ROLE_DESKTOP_REPLICA)) {
-//      AudioApp::initAudio(audioRate, audioBlockSize, audioOutputs, audioInputs, device);
+//    if (hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) ||
+//    hasRole(ROLE_DESKTOP_REPLICA)) {
+//      AudioApp::initAudio(audioRate, audioBlockSize, audioOutputs,
+//      audioInputs, device);
 //    } else {
 //      std::cout << "Audio disabled on this node.";
 //    }
 //  }
 
 //  virtual void initAudio (AudioIOConfig config = OUT_ONLY) override {
-//    if (hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) ||  hasRole(ROLE_DESKTOP_REPLICA)) {
+//    if (hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) ||
+//    hasRole(ROLE_DESKTOP_REPLICA)) {
 //      AudioApp::initAudio(config);
 //    } else {
 //      std::cout << "Audio disabled on this node.";
@@ -262,8 +264,8 @@ private:
 //  Lens& lens() override { return mView.lens(); }
 //  Lens const& lens() const override { return mView.lens(); }
 
-//  // overrides (WindowApp & Omnirenderer)'s start to also initiate AudioApp and etc.
-//  void start() override;
+//  // overrides (WindowApp & Omnirenderer)'s start to also initiate AudioApp
+//  and etc. void start() override;
 
 //  // interface from WindowApp
 //  // users override these
@@ -324,7 +326,8 @@ private:
 //      std::cout << name() << ":" << logText << std::endl;
 //  }
 
-//  ParameterServer &parameterServer() /*override*/ { return *mParameterServer; }
+//  ParameterServer &parameterServer() /*override*/ { return *mParameterServer;
+//  }
 
 ////  static bool shouldRunDistributed() {
 ////    TomlLoader appConfig("distributed_app.toml");
@@ -353,7 +356,7 @@ private:
 
 //    scene.prepare(audioIO());
 //  }
-//private:
+// private:
 
 //#ifdef AL_BUILD_MPI
 //  // MPI data
@@ -382,11 +385,11 @@ private:
 
 //};
 
+//// ---------- IMPLEMENTATION
+///---------------------------------------------------
 
-//// ---------- IMPLEMENTATION ---------------------------------------------------
-
-//template<class TSharedState>
-//inline void DistributedApp<TSharedState>::start() {
+// template<class TSharedState>
+// inline void DistributedApp<TSharedState>::start() {
 
 //    initializeWindowManager();
 ////  glfw::init(is_verbose);
@@ -400,22 +403,26 @@ private:
 
 //  Window::create(is_verbose);
 //  preOnCreate();
-//  //  std::cout << name() << ":" << roleName()  << " before onCreate" << std::endl;
-//  onCreate();
+//  //  std::cout << name() << ":" << roleName()  << " before onCreate" <<
+//  std::endl; onCreate();
 
-//  if(hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) || hasRole(ROLE_DESKTOP_REPLICA)) {
+//  if(hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) ||
+//  hasRole(ROLE_DESKTOP_REPLICA)) {
 //    AudioApp::beginAudio(); // only begins if `initAudio` was called before
 //  }
 
-//  //  std::cout << name() << ":" << roleName() << " before init flow" << std::endl;
+//  //  std::cout << name() << ":" << roleName() << " before init flow" <<
+//  std::endl;
 
 //  // FIXME put back FlowApp
 //  //  if (role() & ROLE_SIMULATOR || role() & ROLE_DESKTOP) initFlowApp(true);
 ////  else initFlowApp(false);
-  
+
 //  if (mParameterServer) {
-//    mParameterServer->registerOSCListener(this); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
-//    std::cout << "Registered parameter server with Distributed App network socket" <<std::endl;
+//    mParameterServer->registerOSCListener(this); // Have the parameter server
+//    pass unhandled messages to this app's onMessage virtual function std::cout
+//    << "Registered parameter server with Distributed App network socket"
+//    <<std::endl;
 //  }
 
 //  FPS::startFPS(); // WindowApp (FPS)
@@ -438,7 +445,8 @@ private:
 //      }
 //#else
 //      if (!mRunDistributed) {
-//      // You shouldn't get here if you are relying on cuttlebone for state syncing
+//      // You shouldn't get here if you are relying on cuttlebone for state
+//      syncing
 //        mQueuedStates = 1;
 //      }
 //#endif
@@ -447,16 +455,15 @@ private:
 //    preOnAnimate(dt_sec());
 //    onAnimate(dt_sec());
 //    bool forceOmni = false;
-//    bool drawOmni = (hasRole(ROLE_RENDERER) && running_in_sphere_renderer) || forceOmni;
-//    if (drawOmni) {
+//    bool drawOmni = (hasRole(ROLE_RENDERER) && running_in_sphere_renderer) ||
+//    forceOmni; if (drawOmni) {
 //      draw_using_perprojection_capture();
 //    }
 //    else { // Not Omni
 //      if (render_stereo) {
 //        preOnDraw();
-//        // check stereo window and do below to render in stereo when not in sphere
-//        glDrawBuffer(GL_BACK_LEFT);
-//        mGraphics.eye(Graphics::LEFT_EYE);
+//        // check stereo window and do below to render in stereo when not in
+//        sphere glDrawBuffer(GL_BACK_LEFT); mGraphics.eye(Graphics::LEFT_EYE);
 //        onDraw(mGraphics);
 //        postOnDraw();
 
@@ -467,7 +474,7 @@ private:
 //        postOnDraw();
 //        glDrawBuffer(GL_BACK_LEFT);
 //        mGraphics.eye(Graphics::MONO_EYE);
-        
+
 //      } else {
 //        preOnDraw();
 //        onDraw(mGraphics);
@@ -480,7 +487,8 @@ private:
 
 //  onExit(); // user defined
 //  postOnExit();
-//  if(hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) || hasRole(ROLE_DESKTOP_REPLICA)) {
+//  if(hasRole(ROLE_AUDIO) || hasRole(ROLE_DESKTOP) ||
+//  hasRole(ROLE_DESKTOP_REPLICA)) {
 //    AudioApp::endAudio(); // AudioApp
 //  }
 //  Window::destroy();
@@ -488,13 +496,14 @@ private:
 
 //}
 
-//template<class TSharedState>
-//inline void DistributedApp<TSharedState>::preOnCreate() {
+// template<class TSharedState>
+// inline void DistributedApp<TSharedState>::preOnCreate() {
 //  append(mNavControl);
 //#ifdef AL_USE_CUTTLEBONE
 //  if (role() & ROLE_SIMULATOR) {
 //      std::string broadcastAddress = configLoader.gets("broadcastAddress");
-//      mMaker = std::make_unique<cuttlebone::Maker<TSharedState>>(broadcastAddress.c_str());
+//      mMaker =
+//      std::make_unique<cuttlebone::Maker<TSharedState>>(broadcastAddress.c_str());
 //      mMaker->start();
 //  } else if (role() & ROLE_RENDERER){
 //      mTaker = std::make_unique<cuttlebone::Taker<TSharedState>>();
@@ -512,14 +521,14 @@ private:
 //  }
 //}
 
-//template<class TSharedState>
-//inline void DistributedApp<TSharedState>::preOnAnimate(double dt) {
+// template<class TSharedState>
+// inline void DistributedApp<TSharedState>::preOnAnimate(double dt) {
 //    mNav.smooth(std::pow(0.0001, dt));
 //    mNav.step(dt * fps());
 //}
 
-//template<class TSharedState>
-//inline void DistributedApp<TSharedState>::preOnDraw() {
+// template<class TSharedState>
+// inline void DistributedApp<TSharedState>::preOnDraw() {
 //    mGraphics.framebuffer(FBO::DEFAULT);
 //    mGraphics.viewport(0, 0, fbWidth(), fbHeight());
 //    mGraphics.resetMatrixStack();
@@ -527,17 +536,16 @@ private:
 //    mGraphics.color(1, 1, 1);
 //}
 
-//template<class TSharedState>
-//inline void DistributedApp<TSharedState>::postOnDraw() {
+// template<class TSharedState>
+// inline void DistributedApp<TSharedState>::postOnDraw() {
 //  //
 //}
 
-//template<class TSharedState>
-//inline void DistributedApp<TSharedState>::postOnExit() {
+// template<class TSharedState>
+// inline void DistributedApp<TSharedState>::postOnExit() {
 //  //
 //}
 
-}
-
+} // namespace al
 
 #endif

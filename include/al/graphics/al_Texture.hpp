@@ -88,7 +88,7 @@ namespace al {
 /// A simple wrapper around an OpenGL Texture
 /// @ingroup allocore
 class Texture : public GPUObject {
- public:
+public:
   enum DataType : unsigned int /* GLenum */ {
     BYTE = GL_BYTE,             /**< */
     UBYTE = GL_UNSIGNED_BYTE,   /**< */
@@ -176,20 +176,20 @@ class Texture : public GPUObject {
   Texture();
   virtual ~Texture();
 
-  void create1D(GLsizei width, GLint internal = GL_RGBA8, GLenum format = GL_RGBA,
-                GLenum type = GL_UNSIGNED_BYTE);
+  void create1D(GLsizei width, GLint internal = GL_RGBA8,
+                GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
 
   void create2D(unsigned int width, unsigned int height,
                 int internal = GL_RGBA8, unsigned int format = GL_RGBA,
-                unsigned int type = GL_UNSIGNED_BYTE  // or GL_FLOAT is used
+                unsigned int type = GL_UNSIGNED_BYTE // or GL_FLOAT is used
   );
 
   // TODO
   // void create3D();
 
-  void createCubemap(
-      unsigned int size, int internal = GL_RGBA8, unsigned int format = GL_RGBA,
-      unsigned int type = GL_UNSIGNED_BYTE  // or GL_FLOAT is used
+  void createCubemap(unsigned int size, int internal = GL_RGBA8,
+                     unsigned int format = GL_RGBA,
+                     unsigned int type = GL_UNSIGNED_BYTE // or GL_FLOAT is used
   );
 
   /// Bind the texture (to a multitexture unit)
@@ -261,8 +261,11 @@ class Texture : public GPUObject {
 
   /// Resize 2D texture
   // void resize (unsigned w, unsigned h) { }
-  bool resize(unsigned int w, unsigned int h, int internal, unsigned int format, unsigned int type);
-  bool resize(unsigned int w, unsigned int h) { return resize(w, h, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE); }
+  bool resize(unsigned int w, unsigned int h, int internal, unsigned int format,
+              unsigned int type);
+  bool resize(unsigned int w, unsigned int h) {
+    return resize(w, h, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+  }
 
   /// Resize 3D texture
   void resize(unsigned w, unsigned h, unsigned d) {}
@@ -288,19 +291,19 @@ class Texture : public GPUObject {
   /// Set wrapping mode for all dimensions
   void wrap(int v) { wrap(v, v, v); }
 
-  void wrapS(int v) { wrap(v, mWrapT, mWrapR); };
-  void wrapT(int v) { wrap(mWrapS, v, mWrapR); };
-  void wrapR(int v) { wrap(mWrapS, mWrapT, v); };
+  void wrapS(int v) { wrap(v, mWrapT, mWrapR); }
+  void wrapT(int v) { wrap(mWrapS, v, mWrapR); }
+  void wrapR(int v) { wrap(mWrapS, mWrapT, v); }
 
   /// Set whether to generate mipmaps
-  void mipmap(bool b){ mUseMipmap = b; };
+  void mipmap(bool b) { mUseMipmap = b; }
 
   /// Copy client pixels to GPU texels
   /// NOTE: the graphics context (e.g. Window) must have been created
   /// If pixels is NULL, then the only effect is to resize the texture
   /// remotely.
-  void submit(const void* pixels, unsigned int format, unsigned int type);
-  void submit(const void* pixels) { submit(pixels, format(), type()); }
+  void submit(const void *pixels, unsigned int format, unsigned int type);
+  void submit(const void *pixels) { submit(pixels, format(), type()); }
 
   // void submit(std::vector<Colori> const& pixels) {
   //   submit(pixels.data(), Texture::RGBA, Texture::UBYTE);
@@ -331,9 +334,11 @@ class Texture : public GPUObject {
   static int numComponents(Texture::Format v);
 
   /// Get number of components per pixel
-  unsigned numComponents() const { return numComponents(Texture::Format(format())); }
+  unsigned numComponents() const {
+    return numComponents(Texture::Format(format()));
+  }
 
- protected:
+protected:
   void onCreate() override;
   void onDestroy() override;
 
@@ -343,8 +348,7 @@ class Texture : public GPUObject {
 
   // Pattern for setting a variable that when changed sets a notification flag
   // if v != var, update var and set flag to true
-  template <class T>
-  void update_param(const T& v, T& var, bool& flag) {
+  template <class T> void update_param(const T &v, T &var, bool &flag) {
     if (v != var) {
       var = v;
       flag = true;
@@ -360,13 +364,13 @@ class Texture : public GPUObject {
   int mWrapS = GL_CLAMP_TO_EDGE, mWrapT = GL_CLAMP_TO_EDGE,
       mWrapR = GL_CLAMP_TO_EDGE;
   int mFilterMin = GL_NEAREST, mFilterMag = GL_NEAREST;
-  bool mUseMipmap = false;  // by default no mipmap
+  bool mUseMipmap = false; // by default no mipmap
 
-  bool mFilterUpdated = true;  // Flags change in texture params (wrap, filter)
-  bool mWrapUpdated = true;    // Flags change in texture params (wrap, filter)
+  bool mFilterUpdated = true; // Flags change in texture params (wrap, filter)
+  bool mWrapUpdated = true;   // Flags change in texture params (wrap, filter)
   bool mUsingMipmapUpdated = true;
 };
 
-}  // namespace al
+} // namespace al
 
 #endif
