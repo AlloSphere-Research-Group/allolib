@@ -34,6 +34,11 @@ struct MyApp : App
     g.draw(mesh);
     g.popMatrix();
   }
+
+  bool onKeyDown(Keyboard const & k) override {
+    decorated(!decorated());
+    return true;
+  }
 };
 
 int main ()

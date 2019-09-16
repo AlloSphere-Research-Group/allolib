@@ -431,7 +431,7 @@ void Window::implHide() {}
 void Window::implIconify() {}
 
 void Window::implSetDecorated (bool decorated) {
-  glfwWindowHint(GLFW_DECORATED, decorated? GLFW_TRUE : GLFW_FALSE);
+  glfwSetWindowAttrib(mImpl->mGLFWwindow, GLFW_DECORATED, decorated? GLFW_TRUE : GLFW_FALSE);
 }
 
 void Window::destroyAll() {

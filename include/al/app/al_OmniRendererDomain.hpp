@@ -78,7 +78,7 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 
   bool drawOmni {true};
   Lens mLens;
-  Pose mPose;
+//  Pose mPose;
 
  private:
   std::unique_ptr<Window> mWindow;

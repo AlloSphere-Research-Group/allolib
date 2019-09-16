@@ -213,8 +213,6 @@ void Window::decorated (bool b)
     mDecorated = b;
     if(created()) {
       implSetDecorated(b);
-
-      std::cout << "decorated() called after window created. Ignored." << std::endl;
     }
 }
 
