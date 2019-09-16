@@ -21,7 +21,8 @@ struct MyApp : public App {
     mSphere.primitive(Mesh::LINE_STRIP);
     mSphere.update();
     addWireBox(mBox, 0.1f);
-    mBox.scale(1,0.1,1);
+    mBox.scale(1,0.1f,1);
+    mBox.translate(0.1, 0, 0);
     mBox.update();
 
     // create some pickables
@@ -33,6 +34,7 @@ struct MyApp : public App {
       
       PickableBB *child = new PickableBB;
       child->set(mBox);
+      child->pose = Pose(Vec3f(-0.1,0,0),Quatf());
       p->addChild(child);
       mPickableManager += p;
     }
