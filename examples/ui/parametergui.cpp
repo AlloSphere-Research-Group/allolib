@@ -11,77 +11,85 @@ using namespace al;
 // control over layout and style, but requires a bit more
 // knowledge of how ImGUI works
 
-class MyApp : public App
+struct MyApp : public App
 {
-public:
-    Parameter x{"X", "", 0, "", -2.0, 2.0};
-    Parameter y{"Y", "", 0, "", -2.0, 2.0};
-    Parameter z{"Z", "", 0, "", -2.0, 2.0};
+  Parameter x{"X", "", 0, "", -2.0, 2.0};
+  Parameter y{"Y", "", 0, "", -2.0, 2.0};
+  Parameter z{"Z", "", 0, "", -2.0, 2.0};
 
-    ParameterColor color {"Color"};
+  ParameterColor color {"Color"};
 
-    MyApp()
-    {
-        nav() = Vec3d(0, 0, 2);
+  ImVec4 textColor = {1.0, 0.3f, 0.1f, 1.0};
 
-        addSphere(mMesh, 0.1);
-        mMesh.primitive(Mesh::LINES);
+  Mesh mMesh;
 
-        // Disable mouse nav to avoid naving while changing gui controls.
-        navControl().useMouse(false);
-    }
+  void onCreate() override
+  {
+    addSphere(mMesh, 0.1);
+    mMesh.primitive(Mesh::LINES);
 
-    void onCreate() override
-    {
-        // We must initialize ImGUI ourselves:
-        imguiInit();
-    }
+    nav() = Vec3d(0, 0, 2);
+    // We must initialize ImGUI ourselves:
+    imguiInit();
+    // Disable mouse nav to avoid naving while changing gui controls.
+    navControl().useMouse(false);
+  }
 
-    void onExit() override {
-        imguiShutdown();
-    }
-
-    virtual void onDraw(Graphics &g) override {
-        g.clear(0);
-        g.pushMatrix();
-        g.translate(x, y, z);
-        g.color(color);
-        g.draw(mMesh);
-        g.popMatrix();
+  virtual void onDraw(Graphics &g) override {
+    g.clear(0);
+    g.pushMatrix();
+    g.translate(x, y, z);
+    g.color(color);
+    g.draw(mMesh);
+    g.popMatrix();
 
 
-        // You are responsible for wrapping all your ImGUI code
-        // between beginIMGUI() and endIMGUI()
-        // Don't forget this or this will crash or not work!
+    // You are responsible for wrapping all your ImGUI code
+    // between imguiBeginFrame() and imguiEndFrame()
+    // Don't forget this or this will crash or not work!
 
-        // Each begin()/end() pair creates a separate "window"
-        ParameterGUI::beginPanel("Position Control");
-        ParameterGUI::drawParameterMeta(&x);
-        ParameterGUI::drawParameterMeta(&y);
-        ParameterGUI::drawParameterMeta(&z);
-        ParameterGUI::endPanel();
+    imguiBeginFrame();
 
-        // Specifying position and/or width makes the position/width fixed
-        // A value of -1 in width or height sets automatic width
-        ParameterGUI::beginPanel("Control Color", 5, 100, 150, -1);
+    // The ParameterGUI class provides static functions to assist drawing
+    // parameters and GUIs
+    // Each beginPanel()/endPanel() pair creates a separate "window"
+    ParameterGUI::beginPanel("Position Control");
+    // The ParameterGUI::drawParameter() can take any parameter and will
+    // draw and appropriate GUI
+    ParameterGUI::drawParameter(&x);
+    ParameterGUI::drawParameter(&y);
+    ParameterGUI::drawParameter(&z);
+    // The following are direct calls to ImGUI
+    ImGui::TextColored(textColor, "Colored Text");
+    ImGui::Separator();
+    ImGui::ColorPicker3("Choose Color for text", (float *) &textColor,
+                        ImGuiColorEditFlags_Uint8|ImGuiColorEditFlags_DisplayRGB|ImGuiColorEditFlags_InputRGB);
+    ParameterGUI::endPanel();
 
-        ParameterGUI::drawParameterMeta(&color);
-        ParameterGUI::endPanel();
+    // Specifying position and/or width makes the position/width fixed
+    // A value of -1 in width or height sets automatic width
+    ParameterGUI::beginPanel("Control Color", 5, 100, 150, -1);
+    ParameterGUI::drawParameterMeta(&color);
+    ParameterGUI::endPanel();
 
-        imguiDraw();
-    }
+    imguiEndFrame();
 
-private:
-    Mesh mMesh;
+    // Finally, draw the GUI
+    imguiDraw();
+  }
+
+
+  void onExit() override {
+    imguiShutdown();
+  }
 };
 
 
 int main(int argc, char *argv[])
 {
-    MyApp app;
-    app.dimensions(800, 600);
-    app.title("Parameter GUI");
-    app.fps(30);
-    app.start();
+  MyApp app;
+  app.title("Parameter GUI");
+  app.start();
+  return 0;
 }
 
