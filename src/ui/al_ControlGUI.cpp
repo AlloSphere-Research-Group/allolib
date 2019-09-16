@@ -134,7 +134,7 @@ void ControlGUI::begin() {
 //  ImGui::SetNextWindowSize(ImVec2(width(), height()));
   ImGui::SetNextWindowBgAlpha(mGUIBackgroundAlpha);
   imguiBeginFrame();
-  ImGui::Begin(mName.c_str(), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize );
+  ImGui::Begin(mName.c_str(), nullptr, ImGuiWindowFlags_None );
 }
 
 void ControlGUI::end() {

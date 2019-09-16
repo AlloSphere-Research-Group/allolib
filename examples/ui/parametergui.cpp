@@ -2,78 +2,77 @@
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include "al/ui/al_ControlGUI.hpp"
-#include "al/ui/al_ParameterMIDI.hpp"
-#include "al/ui/al_HtmlInterfaceServer.hpp"
 
 using namespace al;
 
+// This example shows how to use the ControlGUI class. This class provides
+// a quick and simple way to create GUIs from Parameter classes.
+// If you need greater control over the GUI layout or properties, use the
+// facilites provided by the ParameterGUI class
 
 class MyApp : public App
 {
 public:
-    Parameter x{"X", "", 0, "", -2.0, 2.0};
-    Parameter y{"Y", "", 0, "", -2.0, 2.0};
-    Parameter z{"Z", "", 0, "", -2.0, 2.0};
+  // Define parameters
+  Parameter x{"X", "", 0, "", -2.0, 2.0};
+  Parameter y{"Y", "", 0, "", -2.0, 2.0};
+  Parameter z{"Z", "", -1.0, "", -4.0, -0.1f};
 
-    ParameterColor color {"Color"};
+  ParameterBool show{"Show", "", 1.0};
 
-    MyApp()
-    {
-        // Add parameters to GUI
-        // You can pipe any Parameter type (ParameterColor, ParameterVec3f, ParameterBool, etc.) and the
-        // GUI will generate the appropriate controls
-        mParameterGUI << x << y << z << color;
-        nav() = Vec3d(0, 0, 2);
-        // Add parameters to OSC server
-        parameterServer() << x << y << z << color;
-        parameterServer().print();
+  ParameterColor color {"Color"};
 
-        // Expose parameter server in html interface
-        //mInterfaceServer << mServer;
+  ControlGUI mControlGUI; // Control GUI class in charge of generating GUi window
 
-        addSphere(mMesh, 0.1);
-        mMesh.primitive(Mesh::LINES);
+  Mesh mMesh;
 
-        // Connect MIDI CC #1 on channel 1 to parameter x
-        mParameterMIDI.connectControl(x, 1, 1);
+  void onInit() override {
 
-        // Broadcast parameter changes to localhost por 9011
-        parameterServer().addListener("localhost", 9011);
+    // Add parameters to GUI
+    // You can pipe any Parameter type (ParameterColor, ParameterVec3f, ParameterBool, etc.) and the
+    // GUI will generate the appropriate controls
+    mControlGUI << x << y << z << show << color;
 
-        // Disable mouse nav to avoid naving while changing gui controls.
-        navControl().useMouse(false);
+    addSphere(mMesh, 0.01);
+    mMesh.primitive(Mesh::LINES);
+  }
+
+  void onCreate() override
+  {
+    // Always call init() for ControlGUI in onCreate() as it needs a
+    // graphics context.
+    mControlGUI.init();
+    mControlGUI.setTitle("Parameters");
+    // You can force the GUI to have a fixed position:
+//    mControlGUI.fixedPosition(true);
+  }
+
+  void onDraw(Graphics &g) override {
+    // Disable mouse nav to avoid naving while changing gui controls.
+    navControl().useMouse(!mControlGUI.usingInput());
+
+    // Draw the "scene"
+    g.clear(0);
+    if (show == 1.0f) {
+      g.pushMatrix();
+      g.translate(x, y, z);
+      g.color(color);
+      g.draw(mMesh);
+      g.popMatrix();
     }
 
-    void onCreate()
-    {
-        Light::globalAmbient({ 0.2, 1, 0.2 });
-        mParameterGUI.init();
-    }
+    // Draw the control GUI
+    mControlGUI.draw(g);
+  }
 
-    virtual void onDraw(Graphics &g) {
-        g.clear(0);
-        g.pushMatrix();
-        g.translate(x, y, z);
-        g.color(color);
-        g.draw(mMesh);
-        g.popMatrix();
-        mParameterGUI.draw(g);
-    }
-
-private:
-    ControlGUI mParameterGUI;
-    ParameterMIDI mParameterMIDI;
-
-    Mesh mMesh;
 };
 
 
-int main(int argc, char *argv[])
+int main()
 {
-    MyApp app;
-    app.dimensions(800, 600);
-    app.title("Presets GUI");
-    app.fps(30);
-    app.start();
+  MyApp app;
+  app.title("Control GUI");
+  app.start();
+  return 0;
 }
 
