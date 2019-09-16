@@ -1057,15 +1057,21 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
             // but for now we assume that parameters have exactly the same
             // order inside bundles to be able to group them
             for (unsigned int i = 0; i < bundleGroup[0]->parameters().size(); i++) {
-                std::vector<ParameterMeta *> params;
+                std::vector<Parameter *> params;
+                std::vector<ParameterBool *> boolParams;
                 std::string paramName = bundleGroup[0]->parameters()[i]->getName();
                 for (auto *bundle: bundleGroup) {
                     auto &parameters = bundle->parameters();
                     if (parameters[i]->getName() == paramName) {
-                        params.push_back(parameters[i]);
+                      if (strcmp(typeid(*parameters[i]).name(), typeid(Parameter).name() ) == 0) {
+                        params.push_back(dynamic_cast<Parameter *>(parameters[i]));
+                      } else if (strcmp(typeid(*parameters[i]).name(), typeid(ParameterBool).name() ) == 0) {
+                        boolParams.push_back(dynamic_cast<ParameterBool *>(parameters[i]));
+                      }
                     }
                 }
-                drawParameterMeta(params, suffix, index);
+                drawParameter(params, suffix, index);
+                drawParameterBool(boolParams, suffix, index);
             }
 
         } else {

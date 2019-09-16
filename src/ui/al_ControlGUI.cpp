@@ -116,7 +116,7 @@ void ControlGUI::init(int x, int y, bool manageImgui) {
     mY = y;
     mManageIMGUI = manageImgui;
     if (mName == "") {
-      mName = "__ControlGUI_" + std::to_string(winCounter++);
+      mName = "ControlGUI_" + std::to_string(winCounter++);
     }
 
     mSequencerItems = (char **) malloc(32 * sizeof(char *));
