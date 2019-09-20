@@ -28,8 +28,9 @@ std::string al::demangle(const char* name) {
 
 // does nothing if not g++
 std::string al::demangle(const char* name) {
-    // Windows prepends "class " here, so remove it
-    return std::string(name).substr(6);
+    // Windows prepends "struct " or "class " here, so remove it
+    auto demangled = std::string(name);
+    return demangled.substr(demangled.find(' ') + 1);
 }
 
 #else

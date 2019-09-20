@@ -106,7 +106,7 @@ void ParameterGUI::drawParameterMeta(std::vector<ParameterMeta *> params, string
 
 void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix, int index)
 {
-    if (params.size() == 0) return;
+    if (params.size() == 0 || index >= (int) params.size()) return;
     assert(index < (int) params.size());
     auto &param = params[index];
     if (param->getHint("hide") == 1.0) return;

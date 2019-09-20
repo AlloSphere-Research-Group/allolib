@@ -75,6 +75,15 @@ struct  MyApp : public App
 {
   PolySynth pSynth;
 
+  void onCreate() override {
+
+    // Pre-allocate voice to avoid real-time allocation
+    pSynth.allocatePolyphony<SineEnv>(16);
+
+    navControl().active(false); // Disable navigation via keyboard, since we will be using keyboard for note triggering
+
+  }
+
     void onSound(AudioIOData &io) override {
         pSynth.render(io); // Render audio
     }
@@ -110,11 +119,6 @@ int main(){
 
     // Create app instance
     MyApp app;
-
-    // Pre-allocate voice to avoid real-time allocation
-    app.pSynth.allocatePolyphony<SineEnv>(16);
-
-    app.navControl().active(false); // Disable navigation via keyboard, since we will be using keyboard for note triggering
 
     // Start audio
     app.configureAudio(44100., 256, 2, 0);

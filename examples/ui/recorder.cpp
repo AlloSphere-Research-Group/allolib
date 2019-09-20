@@ -21,20 +21,22 @@ struct MyApp : App
   SequenceRecorder recorder;
   Mesh m;
 
-  void onInit() {
-
+  void onInit() override {
     presetHandler << X << Y;   // Register parameters with preset handler
     recorder << presetHandler; // Register preset handler with sequencer
-
   }
 
   void onCreate() override{
+
+    // Disable mouse nav to avoid naving while changing gui controls.
+    navControl().useMouse(false);
 
     addSphere(m, 0.2);
     nav().pullBack(4);
   }
 
   void onDraw(Graphics& g) override {
+    g.clear();
     g.translate(X.get(), Y.get(), 0);
     g.draw(m);
   }
@@ -56,9 +58,8 @@ struct MyApp : App
   }
 };
 
-int main(int argc, char* argv[])
+int main()
 {
-
   MyApp().start();
   return 0;
 }

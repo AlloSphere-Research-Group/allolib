@@ -24,25 +24,24 @@ struct MyApp : public App {
     Mesh m;
 
     void onCreate() override {
-          // Set the function to be called whenever the value of the "X"
-          // parameter changes
-          X.registerChangeCallback([&](float newX){
-              cout << "X has changed from " << X.get() << " to " << newX << endl;
-          });
+        // Set the function to be called whenever the value of the "X"
+        // parameter changes
+        X.registerChangeCallback([&](float newX){
+            cout << "X has changed from " << X.get() << " to " << newX << endl;
+        });
 
-          // Have something to draw in a mesh
-          addTorus(m);
-          m.primitive(Mesh::LINE_STRIP);
-          navControl().disable(); // Disable keyboard control of navigation
+        // Have something to draw in a mesh
+        addTorus(m);
+        m.primitive(Mesh::LINE_STRIP);
+        navControl().disable(); // Disable keyboard control of navigation
+        std::cout << "Press 'w', 'x', 'a' or 'd'." << std::endl;
     }
 
     void onDraw(Graphics &g) override {
         g.clear();
-        g.translate(0.0, 0.0, -6.0); // Draw a reference mesh at 0,0
-        g.draw(m);
         g.pushMatrix();
         // You can use the parameters as if they were regular floats (in most cases)
-        g.translate(X, Y, 0.0); // Draw a mesh at X,Y
+        g.translate(X, Y, -6.0); // Draw a mesh at X,Y
         g.draw(m);
         g.popMatrix();
     }
@@ -69,7 +68,7 @@ struct MyApp : public App {
     }
 };
 
-int main(int argc, char *argv[])
+int main()
 {
 
     MyApp app;

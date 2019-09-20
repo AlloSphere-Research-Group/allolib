@@ -14,6 +14,7 @@
 #include "al/scene/al_DynamicScene.hpp"
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
+#include "al/math/al_Random.hpp"
 
 using namespace gam;
 using namespace al;
@@ -63,8 +64,8 @@ struct SimpleVoice : public PositionedVoice {
     virtual void update(double dt) override {
         mFreq = mFreq * 0.995f;
         auto p = pose();
-        p.vec().y = mAmpEnv.value()*3;
-        p.vec().x = mFreq/440.0f;
+        p.vec().y = mAmpEnv.value()*3 - 1.5;
+        p.vec().x = mFreq/220.0f - 2.0;
         setPose(p);
     }
 
@@ -115,24 +116,24 @@ struct MyApp : public App
         scene.showWorldMarker(false);
         scene.registerSynthClass<SimpleVoice>();
         // Preallocate 300 voices
-        scene.allocatePolyphony("SimpleVoice", 300);
+        scene.allocatePolyphony("SimpleVoice", 100);
 //        scene.prepare(audioIO());
     }
 
     virtual void onAnimate(double dt) override {
         static double timeAccum = 0.1;
         timeAccum += dt;
-        if (timeAccum > 0.1) {
+        if (timeAccum > 0.7) {
         // Trigger one new voice every 0.05 seconds
             // First get a free voice of type SimpleVoice
             auto *freeVoice = scene.getVoice<SimpleVoice>();
             // Then set its parameters (this voice only has one parameter Freq)
-            auto params = std::vector<float>{880.0f};
+            std::vector<float> params = {rnd::uniform(880.0f, 440.0f)};
             freeVoice->setTriggerParams(params);
             // Set a position for it
             // Trigger it (this inserts it into the chain)
             scene.triggerOn(freeVoice);
-            timeAccum -= 0.1;
+            timeAccum -= 0.7;
         }
 
         scene.update(dt); // Update all nodes in the scene

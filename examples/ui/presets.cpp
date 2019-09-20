@@ -102,9 +102,7 @@ struct MyApp : App
 int main() {
 
   MyApp app;
-  app.dimensions(800, 600);
   app.title("Presets");
-  app.fps(30);
   app.start();
   return 0;
 }

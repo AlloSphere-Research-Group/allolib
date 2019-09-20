@@ -1,12 +1,13 @@
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-
 #include "al/ui/al_ParameterMIDI.hpp"
 
 #include <cmath>
 
 using namespace al;
+
+// This example shows how to connect MIDI CC messages to Parameter values
 
 
 struct MyApp : App
@@ -20,8 +21,12 @@ struct MyApp : App
   ParameterMIDI parameterMIDI;
 
   void onInit() override {
+//    Connect parameters to MIDI CC messages
     parameterMIDI.connectControl(Size, 1, 1);
     parameterMIDI.connectControl(Speed, 10, 1);
+
+    // Open MIDI device 0
+    parameterMIDI.init(0);
   }
 
   void onCreate() override {
@@ -44,8 +49,9 @@ struct MyApp : App
 
 };
 
-int main(int argc, char* argv[])
+int main()
 {
   MyApp().start();
+  return 0;
 }
 

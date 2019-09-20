@@ -53,10 +53,10 @@ struct MyApp : public App {
             // Register its parameter bundle with the ControlGUI
             gui << newThing->bundle;
         }
-        navControl().disable();
     }
 
     void onCreate() override {
+        navControl().disable();
         gui.init();
     }
 

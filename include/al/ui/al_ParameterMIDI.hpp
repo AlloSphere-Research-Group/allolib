@@ -60,6 +60,8 @@ namespace al
 
     parameterMIDI.connectControl(Size, 1, 1);
     parameterMIDI.connectControl(Speed, 10, 1);
+
+    parameterMIDI.init(0); // Open MIDI device
 @endcode
  *
  */

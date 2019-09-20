@@ -11,7 +11,6 @@ using namespace al;
 struct MyApp : public App
 {
     MyApp() {
-        nav().pos(Vec3d(0, 0, 8));
 
         presets << Number << Size << Red << Green << Blue; // Add parameters to preset handling
 
@@ -34,12 +33,14 @@ struct MyApp : public App
         addCone(mMesh);
         mMesh.generateNormals();
 
-        // Disable mouse nav to avoid naving while changing gui controls.
-        navControl().useMouse(false);
 
     }
 
     virtual void onCreate() override {
+        nav().pos(Vec3d(0, 0, 8));
+        // Disable mouse nav to avoid naving while changing gui controls.
+        navControl().useMouse(false);
+
         gui.init();
     }
 
