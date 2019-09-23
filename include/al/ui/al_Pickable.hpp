@@ -301,7 +301,7 @@ struct PickableBB : Pickable {
             // std::cout << "min: " << p->bb.min << " max: " << p->bb.max << "
             // scale: " << scaleVec.get() << " hdim: " << bb.dim / 2  <<
             // std::endl;
-            newPos -= bb.dim / 2;
+            // newPos -= bb.dim / 2;
           }
         }
         pose = Pose(newPos, pose.get().quat());
