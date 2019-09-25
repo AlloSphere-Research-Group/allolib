@@ -62,6 +62,139 @@
 namespace al
 {
 
+
+class ParameterField {
+public:
+	typedef enum { FLOAT, INT32, STRING } ParameterDataType;
+
+	ParameterField(const float value) {
+		mType = FLOAT;
+		mData = new float;
+		*static_cast<float *>(mData) = value;
+	}
+
+	ParameterField(const double value) {
+		mType = FLOAT;
+		mData = new float;
+		*static_cast<float *>(mData) = value;
+	}
+
+	ParameterField(const int32_t value) {
+		mType = INT32;
+		mData = new int32_t;
+		*static_cast<int32_t *>(mData) = value;
+	}
+
+	ParameterField(const std::string value) {
+		mType = STRING;
+		mData = new std::string;
+		*static_cast<std::string *>(mData) = value;
+	}
+
+	ParameterField(const char *value) {
+		mType = STRING;
+		mData = new std::string;
+		*static_cast<std::string *>(mData) = value;
+	}
+
+	ParameterField(const ParameterField &paramField) : mType(paramField.mType) {
+		switch (mType) {
+		case FLOAT:
+			mData = new float;
+			*static_cast<float *>(mData) = *static_cast<float *>(paramField.mData);
+			break;
+		case STRING:
+			mData = new std::string;
+			*static_cast<std::string *>(mData) = *static_cast<std::string *>(paramField.mData);
+			break;
+		case INT32:
+			mData = new int32_t;
+			*static_cast<int32_t *>(mData) = *static_cast<int32_t *>(paramField.mData);
+			break;
+		}
+	}
+
+	virtual ~ParameterField() {
+		switch (mType) {
+		case FLOAT:
+			delete static_cast<float *>(mData);
+			break;
+		case STRING:
+			delete static_cast<std::string *>(mData);
+			break;
+		case INT32:
+			delete static_cast<int32_t *>(mData);
+			break;
+		}
+	}
+
+	ParameterDataType type() { return mType; }
+
+	//    float get() {
+	//        assert(mType == FLOAT);
+	//        return *static_cast<float *>(mData);
+	//    }
+
+	template<typename type>
+	type get() {
+		//        assert(mType == STRING);
+		return *static_cast<type *>(mData);
+	}
+
+	template<typename type>
+	void set(type value) {
+		if (std::is_same<type, float>::value) {
+			if (mType == FLOAT) {
+				*static_cast<type *>(mData) = value;
+			}
+			else {
+				std::cerr << "ERROR: Unexpected type for parameter field set(). Ignoring." << std::endl;
+			}
+		} else if (std::is_same<type, double>::value) {
+			if (mType == FLOAT) {
+				*static_cast<float *>(mData) = value;
+			}
+			else {
+				std::cerr << "ERROR: Unexpected type for parameter field set(). Ignoring." << std::endl;
+			}
+		} else if (std::is_same<type, std::string>::value) {
+			if (mType == STRING) {
+				*static_cast<type *>(mData) = value;
+			}
+			else {
+				std::cerr << "ERROR: Unexpected type for parameter field set(). Ignoring." << std::endl;
+			}
+		} else if (std::is_same<type, char *>::value) {
+			if (mType == STRING) {
+				*static_cast<std::string *>(mData) = value;
+			}
+			else {
+				std::cerr << "ERROR: Unexpected type for parameter field set(). Ignoring." << std::endl;
+			}
+		} else if (std::is_same<type, int32_t>::value) {
+			if (mType == INT32) {
+				*static_cast<type *>(mData) = value;
+			}
+			else {
+				std::cerr << "ERROR: Unexpected type for parameter field set(). Ignoring." << std::endl;
+			}
+		}
+		else if (std::is_same<type, int>::value) {
+			if (mType == INT32) {
+				*static_cast<int32_t *>(mData) = value;
+			}
+			else {
+				std::cerr << "ERROR: Unexpected type for parameter field set(). Ignoring." << std::endl;
+			}
+		}
+	}
+
+private:
+	ParameterDataType mType;
+	void *mData;
+};
+
+
 class Parameter;
 
 /**
@@ -146,6 +279,14 @@ public:
 
         return value;
     }
+
+		virtual void get(std::vector<ParameterField> &fields) {
+			std::cout << "get(std::vector<ParameteterField> &fields) not implemented for " << typeid(*this).name() << std::endl;
+		}
+
+		virtual void set(std::vector<ParameterField> &fields) {
+			std::cout << "set(std::vector<ParameteterField> &fields) not implemented for " << typeid(*this).name() << std::endl;
+		}
 
     virtual void sendValue(osc::Send &sender, std::string prefix = "") {
         std::cout << "sendValue function not implemented for " << typeid(*this).name() << std::endl;
@@ -448,9 +589,21 @@ public:
 
 	float operator= (const float value) { this->set(value); return value; }
 
-    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-        sender.send(prefix + getFullAddress(), get());
-    }
+	virtual void get(std::vector<ParameterField> &fields) override {
+		fields.emplace_back(ParameterField(get()));
+	}
+
+	virtual void set(std::vector<ParameterField> &fields) override {
+		if (fields.size() == 1) {
+			set(fields[0].get<float>());
+		} else{
+			std::cout << "Wrong number of parameters for " << getFullAddress() << std::endl;
+		}
+	}
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+      sender.send(prefix + getFullAddress(), get());
+  }
 
 private:
 	float mFloatValue;
@@ -460,6 +613,7 @@ private:
 class ParameterInt : public ParameterWrapper<int32_t>
 {
 public:
+
 	/**
 	* @brief ParameterInt
    *
@@ -523,11 +677,23 @@ public:
         set(int32_t(value));
 	}
 
-    float operator= (const int32_t value) { this->set(value); return float(value); }
+  float operator= (const int32_t value) { this->set(value); return float(value); }
 
-    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-        sender.send(prefix + getFullAddress(), get());
-    }
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+      sender.send(prefix + getFullAddress(), get());
+  }
+		
+	virtual void get(std::vector<ParameterField> &fields) override {
+		fields.emplace_back(ParameterField(get()));
+	}
+
+	virtual void set(std::vector<ParameterField> &fields) override {
+		if (fields.size() == 1) {
+			set(fields[0].get<int32_t>());
+		} else{
+			std::cout << "Wrong number of parameters for " << getFullAddress() << std::endl;
+		}
+	}
 
 private:
 	int32_t mIntValue;
@@ -536,6 +702,8 @@ private:
 class ParameterBool : public Parameter
 {
 public:
+	using Parameter::get;
+	using Parameter::set;
 	/**
 	* @brief ParameterBool
    *
@@ -557,7 +725,7 @@ public:
 	          float max = 1.0
             );
 
-    bool operator= (const bool value) { this->set(value == 1.0); return value == 1.0; }
+    bool operator= ( bool value) { this->set(value ? 1.0f: 0.0f); return value == 1.0; }
 
 	virtual float toFloat() override {
 		return get();
@@ -566,6 +734,20 @@ public:
 	virtual void fromFloat(float value) override {
 		set(value);
 	}
+
+	virtual void get(std::vector<ParameterField> &fields) override {
+		fields.emplace_back(ParameterField(get() == 1.0 ? 1 : 0));
+	}
+
+	virtual void set(std::vector<ParameterField> &fields) override {
+		if (fields.size() == 1) {
+			set(fields[0].get<int32_t>() == 1? 1.0f: 0.0f);
+		}
+		else {
+			std::cout << "Wrong number of parameters for " << getFullAddress() << std::endl;
+		}
+	}
+
 };
 
 // Symbolizes a distributed action that
@@ -603,6 +785,10 @@ public:
 class ParameterString: public ParameterWrapper<std::string>
 {
 public:
+
+	using ParameterWrapper<std::string>::get;
+	using ParameterWrapper<std::string>::set;
+
     ParameterString(std::string parameterName, std::string Group = "",
                   std::string  defaultValue = "",
 	              std::string prefix = "") :
@@ -624,14 +810,30 @@ public:
 		set(std::to_string(value));
 	}
 
-    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-        sender.send(prefix + getFullAddress(), get());
-    }
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+      sender.send(prefix + getFullAddress(), get());
+  }
+
+	virtual void get(std::vector<ParameterField> &fields) override {
+		fields.emplace_back(ParameterField(get()));
+	}
+
+	virtual void set(std::vector<ParameterField> &fields) override {
+		if (fields.size() == 1) {
+			set(fields[0].get<std::string>());
+		}
+		else {
+			std::cout << "Wrong number of parameters for " << getFullAddress() << std::endl;
+		}
+	}
 };
 
 class ParameterVec3: public ParameterWrapper<al::Vec3f>
 {
 public:
+	using ParameterWrapper<al::Vec3f>::get;
+	using ParameterWrapper<al::Vec3f>::set;
+
     ParameterVec3(std::string parameterName, std::string Group = "",
                   al::Vec3f defaultValue = al::Vec3f(),
 	              std::string prefix = "") :
@@ -640,20 +842,41 @@ public:
 
 	ParameterVec3 operator=(const Vec3f vec) {this->set(vec); return *this;}
 
-    float operator[](size_t index) {
-      assert(index < INT_MAX); // Hack to remove
-      Vec3f vec = this->get(); return vec[int(index)];
-    }
+  float operator[](size_t index) {
+    assert(index < INT_MAX); // Hack to remove
+    Vec3f vec = this->get(); return vec[int(index)];
+  }
 
-    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-        Vec3f vec = get();
-        sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z);
-    }
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+      Vec3f vec = get();
+      sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z);
+  }
+
+	virtual void get(std::vector<ParameterField> &fields) override {
+		Vec3f vec = this->get();
+		fields.emplace_back(ParameterField(vec.x));
+		fields.emplace_back(ParameterField(vec.y));
+		fields.emplace_back(ParameterField(vec.z));
+	}
+
+	virtual void set(std::vector<ParameterField> &fields) override {
+		if (fields.size() == 3) {
+			Vec3f vec(fields[0].get<float>(), fields[1].get<float>(), fields[2].get<float>());
+			set(vec);
+		}
+		else {
+			std::cout << "Wrong number of parameters for " << getFullAddress() << std::endl;
+		}
+	}
 };
 
 class ParameterVec4: public ParameterWrapper<al::Vec4f>
 {
 public:
+
+	using ParameterWrapper<al::Vec4f>::get;
+	using ParameterWrapper<al::Vec4f>::set;
+
     ParameterVec4(std::string parameterName, std::string Group = "",
                   al::Vec4f defaultValue = al::Vec4f(),
 	              std::string prefix = "") :
@@ -662,20 +885,42 @@ public:
 
 	ParameterVec4 operator=(const Vec4f vec) {this->set(vec); return *this;}
 
-    float operator[](size_t index) {
-      Vec4f vec = this->get(); return vec[index];
-    }
+  float operator[](size_t index) {
+    Vec4f vec = this->get(); return vec[index];
+  }
 
-    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-        Vec4f vec = get();
-        sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z, vec.w);
-    }
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+      Vec4f vec = get();
+      sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z, vec.w);
+  }
+
+	virtual void get(std::vector<ParameterField> &fields) override {
+		Vec4f vec = this->get();
+		fields.emplace_back(ParameterField(vec.x));
+		fields.emplace_back(ParameterField(vec.y));
+		fields.emplace_back(ParameterField(vec.z));
+		fields.emplace_back(ParameterField(vec.w));
+	}
+
+	virtual void set(std::vector<ParameterField> &fields) override {
+		if (fields.size() == 4) {
+			Vec4f vec(fields[0].get<float>(), fields[1].get<float>(), fields[2].get<float>(), fields[3].get<float>());
+			set(vec);
+		}
+		else {
+			std::cout << "Wrong number of parameters for " << getFullAddress() << std::endl;
+		}
+	}
 };
 
 
 class ParameterPose: public ParameterWrapper<al::Pose>
 {
 public:
+	using ParameterWrapper<al::Pose>::get;
+	using ParameterWrapper<al::Pose>::set;
+
+
     ParameterPose(std::string parameterName, std::string Group = "",
                   al::Pose defaultValue = al::Pose(),
                   std::string prefix = "") :
@@ -695,12 +940,38 @@ public:
     void setPos(const al::Vec3d v){ this->set(al::Pose(v,this->get().quat())); }
     void setQuat(const al::Quatd q){ this->set(al::Pose(this->get().pos(),q)); }
 //    float operator[](size_t index) { Pose vec = this->get(); return vec[index];}
-};
 
+		virtual void get(std::vector<ParameterField> &fields) override {
+			Quatf quat = get().quat();
+			Vec4f pos = get().pos();
+			fields.emplace_back(ParameterField(pos.x));
+			fields.emplace_back(ParameterField(pos.y));
+			fields.emplace_back(ParameterField(pos.z));
+			fields.emplace_back(ParameterField(quat.x));
+			fields.emplace_back(ParameterField(quat.y));
+			fields.emplace_back(ParameterField(quat.z));
+			fields.emplace_back(ParameterField(quat.w));
+		}
+
+		virtual void set(std::vector<ParameterField> &fields) override {
+			if (fields.size() == 7) {
+				Pose vec(Vec3f(fields[0].get<float>(), fields[1].get<float>(), fields[2].get<float>()),
+					Quatf(fields[3].get<float>(), fields[4].get<float>(), fields[5].get<float>(), fields[6].get<float>()));
+				set(vec);
+			}
+			else {
+				std::cout << "Wrong number of parameters for " << getFullAddress() << std::endl;
+			}
+		}
+};
 
 class ParameterMenu : public ParameterWrapper<int>
 {
 public:
+
+	using ParameterWrapper<int>::set;
+	using ParameterWrapper<int>::get;
+
 	ParameterMenu(std::string parameterName, std::string Group = "",
 		int defaultValue = 0,
 		std::string prefix = "") :
@@ -756,9 +1027,23 @@ public:
 		set( (int) value);
 	}
 
-    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-        sender.send(prefix + getFullAddress(), get());
-    }
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+      sender.send(prefix + getFullAddress(), get());
+  }
+
+	virtual void get(std::vector<ParameterField> &fields) override {
+		fields.emplace_back(ParameterField(getCurrent()));
+	}
+
+	virtual void set(std::vector<ParameterField> &fields) override {
+		// TODO an option should be added to allow storing the current element as index instead of text.
+		if (fields.size() == 1) {
+			setCurrent(fields[0].get<std::string>());
+		}
+		else {
+			std::cout << "Wrong number of parameters for " << getFullAddress() << std::endl;
+		}
+	}
 
 private:
     std::mutex mElementsLock;
@@ -776,6 +1061,9 @@ private:
 class ParameterChoice : public ParameterWrapper<uint16_t>
 {
 public:
+	using ParameterWrapper<uint16_t>::get;
+	using ParameterWrapper<uint16_t>::set;
+
     ParameterChoice(std::string parameterName, std::string Group = "",
         uint16_t defaultValue = 0,
         std::string prefix = "") :
@@ -836,9 +1124,24 @@ public:
 	virtual void fromFloat(float value) override {
 		set( (int) value);
 	}
-    virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-        sender.send(prefix + getFullAddress(), get());
-    }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+      sender.send(prefix + getFullAddress(), get());
+  }
+
+	virtual void get(std::vector<ParameterField> &fields) override {
+		fields.emplace_back(ParameterField(get()));
+	}
+
+	virtual void set(std::vector<ParameterField> &fields) override {
+		// TODO an option should be added to allow storing the current element as index instead of text.
+		if (fields.size() == 1) {
+			set(fields[0].get<int32_t>());
+		}
+		else {
+			std::cout << "Wrong number of parameters for " << getFullAddress() << std::endl;
+		}
+	}
 
 private:
     std::vector<std::string> mElements;
@@ -847,6 +1150,9 @@ private:
 class ParameterColor: public ParameterWrapper<al::Color>
 {
 public:
+	using ParameterWrapper<al::Color>::set;
+	using ParameterWrapper<al::Color>::get;
+
     ParameterColor(std::string parameterName, std::string Group = "",
                   al::Color defaultValue = al::Color(),
                   std::string prefix = "") :
@@ -859,6 +1165,24 @@ public:
         Color c = get();
         sender.send(prefix + getFullAddress(), c.r, c.g, c.b, c.a);
     }
+
+		virtual void get(std::vector<ParameterField> &fields) override {
+			Color vec = this->get();
+			fields.emplace_back(ParameterField(vec.r));
+			fields.emplace_back(ParameterField(vec.g));
+			fields.emplace_back(ParameterField(vec.b));
+			fields.emplace_back(ParameterField(vec.a));
+		}
+
+		virtual void set(std::vector<ParameterField> &fields) override {
+			if (fields.size() == 4) {
+				Color vec(fields[0].get<float>(), fields[1].get<float>(), fields[2].get<float>(), fields[3].get<float>());
+				set(vec);
+			}
+			else {
+				std::cout << "Wrong number of parameters for " << getFullAddress() << std::endl;
+			}
+		}
 };
 
 

@@ -159,7 +159,9 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite)
 	}
     ParameterStates values;
 	for(ParameterMeta *p: mParameters) {
-        values[p->getFullAddress()] = getParameterValue(p);
+		std::vector<ParameterField> fields;
+		p->get(fields);
+    values[p->getFullAddress()] = fields;
 	}
     for (auto bundleGroup: mBundles) {
         std::string bundleName = "/" + bundleGroup.first + "/";
@@ -167,7 +169,9 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite)
         for(unsigned int i = 0; i < bundleGroup.second.size(); i++) {
             std::string bundlePrefix = bundleName + std::to_string(i);
             for(ParameterMeta *p: bundleGroup.second.at(i)->parameters()) {
-                values[bundlePrefix + p->getFullAddress()] = getParameterValue(p);
+							std::vector<ParameterField> fields;
+							p->get(fields);
+							values[bundlePrefix + p->getFullAddress()] = fields;
             }
             for(auto subBundle: bundleGroup.second.at(i)->bundles()) {
                 auto bundleStates = getBundleStates(subBundle.second, subBundle.first);
@@ -232,11 +236,15 @@ void PresetHandler::setInterpolatedPreset(std::string presetName1, std::string p
                 mTargetValues[value.first] = value.second;
                 for (ParameterMeta *param: mParameters) {
                     if (param->getFullAddress() == value.first) {
-                        std::vector<float> newValues;
+                        std::vector<ParameterField> newValues;
                         for (unsigned int index = 0; index < value.second.size(); index++) {
-                            newValues.push_back(value.second[index] + (values2[value.first][index] - value.second[index])* factor);
+													if (value.second[index].type() == ParameterField::FLOAT) {
+														newValues.push_back(value.second[index].get<float>() + (values2[value.first][index].get<float>() - value.second[index].get<float>())* factor);
+													} else {
+														newValues.push_back(value.second[index]);
+													}
                         }
-                        setParameterValues(param, newValues);
+                        setParameterValues(param, newValues, factor);
                     }
                 }
             }
@@ -251,7 +259,7 @@ void PresetHandler::setInterpolatedPreset(std::string presetName1, std::string p
             if (values2.count(value.first) > 0) { // if para std::cout << meter name match exists
                 mTargetValues[value.first] = value.second;
                 for (unsigned int index = 0; index < value.second.size(); index++) {
-                    mTargetValues[value.first][index] = value.second[index] + (values2[value.first][index] - value.second[index])* factor;
+                    mTargetValues[value.first][index] = value.second[index].get<float>() + (values2[value.first][index].get<float>() - value.second[index].get<float>())* factor;
                 }
             }
         }
@@ -322,7 +330,8 @@ void PresetHandler::recallPresetSynchronous(std::string name)
 		mTargetValues = loadPresetValues(name);
 	}
 	for (ParameterMeta *param: mParameters) {
-		if (mTargetValues.find(param->getFullAddress()) != mTargetValues.end()) { 
+		if (mTargetValues.find(param->getFullAddress()) != mTargetValues.end()) {
+ 
             setParameterValues(param, mTargetValues[param->getFullAddress()]);
 		}
 	}
@@ -591,16 +600,22 @@ void PresetHandler::storeCurrentPresetMap(std::string mapName, bool useSubDirect
 	f.close();
 }
 
-void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &values, double factor) {
+void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<ParameterField> &values, double factor) {
     // We do a runtime check to determine the type of the parameter to determine how to draw it.
+	if (factor = 1.0f) {
+		p->set(values);
+	}
+	else {
+
+		// TODO this is a fallback for now. What would be a good way of doing it?
     if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) == 0) { // ParameterBool
         ParameterBool *param = dynamic_cast<ParameterBool *>(p);
         // No interpolation for parameter bool. Should we change exactly in the middle?
-        param->set(values[0]);
+        param->set(values[0].get<int32_t>());
     } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {// Parameter
         Parameter *param = dynamic_cast<Parameter *>(p);
         float paramValue = param->get();
-        float difference = values[0] - paramValue;
+        float difference = values[0].get<float>() - paramValue;
         //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
         if (factor > 0) {
             difference = difference * factor;
@@ -622,15 +637,15 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
 //            param->set(newVal);
 //        }
         // The interpolation above is broken, no easy way to fix for things as they are now...
-        param->set(int(values[0]));
+        param->set(values[0].get<int32_t>());
     } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0) {// Parameter pose
         ParameterPose *param = dynamic_cast<ParameterPose *>(p);
         if (values.size() == 7) {
             Pose paramValue = param->get();
             Pose difference;
            // TODO better interpolation of quaternion
-            Vec3d differenceVec = Vec3d(values[0],values[1],values[2]) - paramValue.vec();
-            Quatd differenceQuat = Quatd(values[3],values[4],values[5],values[6]) - paramValue.quat();
+            Vec3d differenceVec = Vec3d(values[0].get<float>(),values[1].get<float>(),values[2].get<float>()) - paramValue.vec();
+            Quatd differenceQuat = Quatd(values[3].get<float>(),values[4].get<float>(),values[5].get<float>(),values[6].get<float>()) - paramValue.quat();
             //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
             if (factor > 0) {
                 differenceVec = differenceVec * factor;
@@ -645,12 +660,12 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
     } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) == 0) {// Parameter
         ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
         if (factor == 0) {
-            param->set(values[0]);
+            param->setCurrent(values[0].get<std::string>());
         }
     } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter
         ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
         if (factor == 0) {
-            param->set((uint16_t) values[0]);
+            param->set((uint16_t) values[0].get<int32_t>());
         }
     } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) == 0) {// Parameter
         ParameterVec3 *param = dynamic_cast<ParameterVec3 *>(p);
@@ -669,7 +684,7 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
         ParameterVec4 *param = dynamic_cast<ParameterVec4 *>(p);
         if (values.size() == 4) {
             Vec4f paramValue = param->get();
-            Vec4f difference = Vec4f((float *)values.data()) - paramValue;
+            Vec4f difference = Vec4f(values[0].get<float>(), values[1].get<float>(), values[2].get<float>()) - paramValue;
             //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
             if (factor > 0) {
                 difference = difference * factor;
@@ -681,13 +696,13 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
     } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) == 0) {// Parameter
         ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
         if (factor == 0) {
-            param->set(values[0]);
+            param->set(values[0].get<int32_t>());
         }
     }  else if (strcmp(typeid(*p).name(), typeid(ParameterColor).name()) == 0) {// Parameter
         ParameterColor *param = dynamic_cast<ParameterColor *>(p);
         if (values.size() == 4) {
             Color paramValue = param->get();
-            Color difference = Color(values[0],values[1],values[2],values[3]) - paramValue;
+            Color difference = Color(values[0].get<float>(),values[1].get<float>(),values[2].get<float>(),values[3].get<float>()) - paramValue;
             //int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
             if (factor > 0) {
                 difference = difference * factor;
@@ -699,6 +714,8 @@ void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<float> &val
     } else {
         std::cout << "Unsupported Parameter " << p->getFullAddress() << std::endl;
     }
+	}
+
 }
 void PresetHandler::setParametersInBundle(ParameterBundle *bundle, std::string bundlePrefix, PresetHandler *handler, float factor) {
     for (ParameterMeta *p : bundle->parameters()) {
@@ -761,7 +778,8 @@ PresetHandler::ParameterStates PresetHandler::getBundleStates(ParameterBundle *b
     ParameterStates values;
     std::string bundlePrefix = bundle->name() + "/" + id;
     for(ParameterMeta *p: bundle->parameters()) {
-        values[bundlePrefix + p->getFullAddress()] = getParameterValue(p);
+			values[bundlePrefix + p->getFullAddress()] = std::vector<ParameterField>();
+			p->get(values[bundlePrefix + p->getFullAddress()]);
     }
     for(auto b: bundle->bundles()) {
         auto subBundleValues = getBundleStates(b.second, b.first);
@@ -805,12 +823,25 @@ PresetHandler::ParameterStates PresetHandler::loadPresetValues(std::string name)
                 }
 				std::stringstream ss(line);
                 std::string address, type;
-                std::vector<float> values;
+                std::vector<ParameterField> values;
 				std::getline(ss, address, ' ');
                 std::getline(ss, type, ' ');
                 std::string value;
+								auto currentType = type.begin();
+								// FIXME parse strings correctly to allow spaces in strings
                 while (std::getline(ss, value, ' ')) {
-                    values.push_back(std::stof(value));
+									if (currentType == type.end()) {
+										std::cerr << "ERROR: Inconsistent type tags. Ingnoring extra values" << std::endl;
+										break;
+									}
+									if (*currentType == 'f') {
+										values.push_back(std::stof(value));
+									} else if (*currentType == 's') {
+										values.push_back(value);
+									} else if (*currentType == 'i') {
+										values.push_back(std::stoi(value));
+									}
+									++currentType;
                 }
 
                 if (address.size() > 0 && address[0] != '#' && type.size() > 0
@@ -856,9 +887,18 @@ bool PresetHandler::savePresetValues(const ParameterStates &values, std::string 
 	f << "::" + presetName << std::endl;
 	for(auto value: values) {
             std::string types, valueString;
-            for (float &floatValue: value.second) {
-                types += "f";
-                valueString += std::to_string(floatValue) + " ";
+            for (auto &value: value.second) {
+							if (value.type() == ParameterField::FLOAT) {
+								types += "f";
+                valueString += std::to_string(value.get<float>()) + " ";
+							} else if (value.type() == ParameterField::STRING) {
+								types += "s";
+								valueString += value.get<std::string>() + " ";
+							}
+							else if (value.type() == ParameterField::INT32) {
+								types += "i";
+								valueString += std::to_string(value.get<int32_t>()) + " ";
+							}
             }
             // TODO chop last blank space
             std::string line = value.first + " " + types + " " + valueString;
