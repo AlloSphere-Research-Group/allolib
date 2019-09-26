@@ -28,6 +28,10 @@ struct WindowSetupProperties {
   bool decorated = true;
 };
 
+/**
+ * @brief OpenGLGraphicsDomain class
+ * @ingroup App
+ */
 class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
  public:
   virtual ~OpenGLGraphicsDomain() {}

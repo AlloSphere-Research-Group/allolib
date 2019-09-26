@@ -48,6 +48,8 @@
 #include "al/io/al_File.hpp"
 #include "al/scene/al_SynthSequencer.hpp"
 
+namespace al {
+
 /**
  * @brief The SynthRecorder class records the events arriving at a PolySynth
  *
@@ -85,9 +87,6 @@
  * @endcode
  *
  */
-
-namespace al {
-
 class SynthRecorder {
 public:
 

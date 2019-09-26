@@ -12,6 +12,10 @@
 
 namespace al {
 
+	/**
+	 * @brief OSCDomain class
+	 * @ingroup App
+	 */
 class OSCDomain: public AsynchronousDomain {
 public:
 

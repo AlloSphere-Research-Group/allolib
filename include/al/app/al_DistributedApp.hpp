@@ -31,6 +31,10 @@ namespace al {
 
 // TODO flow parameters
 
+/**
+ * @brief DistributedApp class
+ * @ingroup App
+ */
 struct DistributedApp : public App {
 public:
   typedef enum {

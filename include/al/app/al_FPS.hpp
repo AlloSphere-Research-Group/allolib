@@ -8,6 +8,10 @@
 
 namespace al {
 
+	/**
+	 * @brief FPS class
+	 * @ingroup App
+	 */
 class FPS {
 public:
   al_nsec interval = 16666666ll; // 60 fps by default

@@ -18,8 +18,17 @@
 
 #include "al/app/al_WindowApp.hpp"
 
+	/** @defgroup App Application building tools
+ *  
+ */
+
 namespace al {
 
+
+/**
+ * @brief Simple App class
+ * @ingroup App
+ */
 class App {
 public:
   App();

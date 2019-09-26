@@ -15,6 +15,10 @@
 
 namespace al {
 
+	/**
+	 * @brief SimulationDomain class
+	 * @ingroup App
+	 */
 class SimulationDomain: public SynchronousDomain {
 public:
 

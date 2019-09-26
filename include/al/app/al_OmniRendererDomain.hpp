@@ -12,6 +12,10 @@
 
 namespace al {
 
+	/**
+	 * @brief GLFWOpenGLOmniRendererDomain class
+	 * @ingroup App
+	 */
 class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
  public:
   GLFWOpenGLOmniRendererDomain();

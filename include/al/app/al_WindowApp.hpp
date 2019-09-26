@@ -20,6 +20,10 @@
 
 namespace al {
 
+	/**
+	 * @brief WindowApp class
+	 * @ingroup App
+	 */
 class [[deprecated("Use domains instead")]] WindowApp : public Window, public WindowEventHandler, public FPS {
  public:
   // basic window app keyboard actions: fullscreen, quit, ...

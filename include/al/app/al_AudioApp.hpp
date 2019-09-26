@@ -8,6 +8,10 @@
 
 namespace al {
 
+	/**
+	 * @brief Simple AudioApp class
+	 * @ingroup App
+	 */
 class [[deprecated("Use AudioDomain instead")]]  AudioApp {
 public:
   AudioIO mAudioIO;

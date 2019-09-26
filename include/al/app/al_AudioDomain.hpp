@@ -15,6 +15,10 @@
 
 namespace al {
 
+	/**
+	 * @brief AsynchronousDomain class
+	 * @ingroup App
+	 */
 class AudioDomain : public AsynchronousDomain {
  public:
   virtual ~AudioDomain() {}

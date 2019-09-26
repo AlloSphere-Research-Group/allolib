@@ -35,6 +35,12 @@ class StateReceiveDomain;
 template<class TSharedState>
 class StateSendDomain;
 
+
+
+/**
+ * @brief StateDistributionDomain class
+ * @ingroup App
+ */
 class StateDistributionDomain : public SynchronousDomain {
 public:
 

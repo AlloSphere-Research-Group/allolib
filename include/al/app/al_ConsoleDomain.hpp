@@ -9,6 +9,10 @@
 
 namespace al {
 
+	/**
+	 * @brief ConsoleDomain class
+	 * @ingroup App
+	 */
 class ConsoleDomain: public AsynchronousDomain {
 public:
   bool initialize(ComputationDomain *parent = nullptr) override {

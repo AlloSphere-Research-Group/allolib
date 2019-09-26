@@ -12,6 +12,10 @@
 namespace al {
 class SynchronousDomain;
 
+/**
+ * @brief ComputationDomain class
+ * @ingroup App
+ */
 class ComputationDomain {
  public:
   /**
