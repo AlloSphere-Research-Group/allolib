@@ -602,11 +602,9 @@ void PresetHandler::storeCurrentPresetMap(std::string mapName, bool useSubDirect
 
 void PresetHandler::setParameterValues(ParameterMeta *p, std::vector<ParameterField> &values, double factor) {
     // We do a runtime check to determine the type of the parameter to determine how to draw it.
-	if (factor = 1.0f) {
+	if (factor == 1.0f) {
 		p->set(values);
-	}
-	else {
-
+	} else {
 		// TODO this is a fallback for now. What would be a good way of doing it?
     if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) == 0) { // ParameterBool
         ParameterBool *param = dynamic_cast<ParameterBool *>(p);
