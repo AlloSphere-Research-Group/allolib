@@ -51,6 +51,8 @@
 #include <algorithm>
 #include <cstring>
 
+namespace al {
+
 /**
  * @brief The CSVReader class reads simple CSV files
  *
@@ -186,5 +188,7 @@ private:
 
   std::string mBasePath;
 };
+
+}
 
 #endif // INCLUDE_AL_CSVREADER_HPP

@@ -3,6 +3,8 @@
 
 #include "al/io/al_CSVReader.hpp"
 
+using namespace al;
+
 CSVReader::~CSVReader() {
   for (auto row: mData) {
     delete[] row;
