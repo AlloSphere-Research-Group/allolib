@@ -1,6 +1,8 @@
 
 #include "al/io/al_CSVReader.hpp"
 
+using namespace al;
+
 typedef struct {
   char s[32];
   double val1, val2, val3;
