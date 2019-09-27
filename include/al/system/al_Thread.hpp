@@ -77,7 +77,7 @@ struct CThreadFunction : public ThreadFunction{
 
 /// Thread
 ///
-/// @ingroup allocore
+/// @ingroup System
 class Thread{
 public:
 
@@ -141,7 +141,7 @@ protected:
 
 /// Multiple threads acting as a single work unit
 ///
-/// @ingroup allocore
+/// @ingroup System
 template <class ThreadFunction>
 class Threads{
 public:

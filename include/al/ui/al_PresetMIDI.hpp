@@ -48,7 +48,7 @@ namespace al
 
 /**
  * @brief The PresetMIDI class connects PresetHandler objects to MIDI messages
- *
+ * @ingroup UI
  *
 @code
 

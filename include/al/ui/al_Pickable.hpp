@@ -52,6 +52,8 @@ struct Hit {
   Vec3d operator()() { return hit ? ray(t) : Vec3d(); }
 };
 
+/// Pickable
+/// @ingroup UI
 struct Pickable {
   std::string name;
 
@@ -213,6 +215,7 @@ struct Pickable {
 };
 
 /// Bounding Box PickableMesh
+/// @ingroup UI
 struct PickableBB : Pickable {
   Mesh *mesh{nullptr}; // pointer to mesh that is wrapped
   BoundingBox bb;      // original bounding box

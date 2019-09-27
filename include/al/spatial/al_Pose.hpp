@@ -59,7 +59,7 @@ namespace al {
 /// Local coordinate bases are referred to as r, u, and f which stand for
 /// right, up, and forward, respectively.
 ///
-/// @ingroup allocore
+/// @ingroup Spatial
 class Pose {
  public:
   /// @param[in] pos    Initial position
@@ -232,7 +232,7 @@ class Pose {
 /// This Pose approaches the stored target Pose exponentially
 /// with a curvature determined by psmooth and qsmooth
 ///
-/// @ingroup allocore
+/// @ingroup Spatial
 class SmoothPose : public Pose {
  public:
   SmoothPose(const Pose& init = Pose(), double psmooth = 0.9,

@@ -60,6 +60,7 @@ namespace  al
 
 /**
  * @brief The PresetHandler class handles sorting and recalling of presets.
+ * @ingroup UI
  *
  * Presets are saved by name with the ".preset" suffix.
  */
@@ -373,6 +374,7 @@ private:
 	std::string mCurrentPresetName;
 };
 
+///@ingroup UI
 class PresetServer : public osc::PacketHandler, public OSCNotifier
 {
 public:

@@ -71,7 +71,7 @@ namespace al{
 
 /// Base class for allocated resources on the GPU
 ///
-/// @ingroup allocore
+/// @ingroup Graphics
 class GPUObject{
 public:
   GPUObject();

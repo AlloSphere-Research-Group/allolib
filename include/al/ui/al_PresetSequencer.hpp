@@ -61,6 +61,7 @@ class Composition;
 
 /**
  * @brief The PresetSequencer class allows triggering presets from a PresetHandler over time.
+ * @ingroup UI
  *
  * In order to use a preset sequencer you must register a preset handler with
  * the sequencer:
@@ -327,7 +328,8 @@ private:
     float mTimeChangeMinTimeDelta = 0;
 };
 
-
+/// SequenceServer
+/// @ingroup UI
 class SequenceServer : public osc::PacketHandler, public OSCNotifier
 {
 public:

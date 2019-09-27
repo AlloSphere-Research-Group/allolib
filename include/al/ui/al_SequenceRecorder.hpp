@@ -57,6 +57,7 @@ namespace al
 
 /**
  * @brief The SequenceRecorder class records preset changes in a ".sequence" file
+ * @ingroup UI
  *
  * The sequences recorded can be played back using the PresetSequencer class.
  *

@@ -50,7 +50,7 @@ namespace al{
 
 /// A network socket
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class Socket{
 public:
 
@@ -181,7 +181,7 @@ private:
 /// (e.g., a request to a server) and possibly receives data from
 /// (e.g., a response from a server).
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class SocketClient : public Socket {
 public:
 
@@ -211,7 +211,7 @@ protected:
 /// After accepting an incoming connection, data is received and possibly sent
 /// through the accepted socket.
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class SocketServer : public Socket {
 public:
 

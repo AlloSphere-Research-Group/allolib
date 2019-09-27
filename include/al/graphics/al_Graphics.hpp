@@ -52,6 +52,14 @@
 
 namespace al {
 
+/**
+@defgroup Graphics Graphics
+*/
+
+/**
+@brief Interface for loading fonts and rendering text
+@ingroup Graphics
+*/
 class Graphics : public RenderManager {
 public:
 

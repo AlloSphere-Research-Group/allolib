@@ -15,6 +15,10 @@
 
 namespace al {
 
+/**
+@brief TomlLoader class
+@ingroup IO
+*/
 struct TomlLoader
 {
   std::shared_ptr<cpptoml::table> root;

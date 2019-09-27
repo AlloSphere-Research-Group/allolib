@@ -5,6 +5,10 @@
 
 namespace al {
 
+/**
+@brief Light class
+@ingroup Graphics
+*/
 struct Light
 {
     Light& pos(float x, float y, float z) { mPos[0] = x; mPos[1] = y; mPos[2] = z; mPos[3] = 1; return *this; }
@@ -36,6 +40,10 @@ private:
     static Color mGlobalAmbient; // {0.2, 0.2, 0.2, 1.0}
 };
 
+/**
+@brief Material class
+@ingroup Graphics
+*/
 struct Material
 {
     Material& ambient(const Color& v) { mAmbient = v; return *this; }

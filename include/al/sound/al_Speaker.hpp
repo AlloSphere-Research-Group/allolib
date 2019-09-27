@@ -51,7 +51,7 @@ namespace al{
 
 /// Spatial definition of a speaker in a listening space
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class Speaker {
 public:
 
@@ -138,7 +138,7 @@ typedef std::vector<Speaker> Speakers;
 
 /// Base class for a configuration of multiple speakers
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class SpeakerLayout{
 public:
 
@@ -163,7 +163,7 @@ protected:
 
 /// Generic layout of N speakers spaced equidistantly in a ring
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 template <int N>
 class SpeakerRingLayout : public SpeakerLayout{
 public:
@@ -191,7 +191,7 @@ public:
 
 /// Stereo speaker layout
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class StereoSpeakerLayout : public SpeakerLayout{
 public:
     StereoSpeakerLayout(unsigned int deviceChannelStart=0, float angle=30.f, float distance=1.f, float gain=1.f):
@@ -209,7 +209,7 @@ private:
 
 /// Octophonic ring speaker layout
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 typedef SpeakerRingLayout<8> OctalSpeakerLayout;
 
 

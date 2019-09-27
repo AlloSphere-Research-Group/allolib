@@ -99,7 +99,7 @@ template<class T> struct VecElems<4,T>{
 /// by the compiler and to avoid an extra 'size' data member for small-sized
 /// arrays.
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <int N, class T>
 class Vec : public VecElems<N,T>{
 public:

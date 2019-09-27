@@ -24,8 +24,13 @@ enum AttribLayout: unsigned int {
   // ATTRIB_TEXCOORD_1D = 5, //
 };
 
-// stores gpu objects as shared pointer to that this class can be copied for moved
-// this is usefule for storing this class in std::vector, etc.
+/**
+@brief VAOMesh class
+@ingroup Graphics
+Stores gpu objects as shared pointer to that this class can be copied for moved
+ this is useful for storing this class in std::vector, etc.
+*/
+
 class VAOMesh : public Mesh {
 public:
     struct MeshAttrib {

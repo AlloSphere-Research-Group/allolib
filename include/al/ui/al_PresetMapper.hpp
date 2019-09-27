@@ -53,6 +53,7 @@ namespace al
 
 /**
  * @brief The PresetMapper class allows archiving and recalling preset maps
+ * @ingroup UI
  *
  * Preset maps are saved as a directory containing the presets as well as a
  * preset map file that lists the presets in the map as well as assigning

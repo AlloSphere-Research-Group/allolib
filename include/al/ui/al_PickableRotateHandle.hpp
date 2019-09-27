@@ -7,6 +7,8 @@
 
 namespace al {
 
+/// PickableRotateHandle
+/// @ingroup UI
 struct PickableRotateHandle : Pickable {
 
   Vec3f downPos, newPos;

@@ -42,7 +42,7 @@ namespace al {
 /// w.watch("foo");
 /// Watcher::notify("foo", "bar");
 ///
-/// @ingroup allocore
+/// @ingroup System
 class Watcher {
 public:
   /// destructor automatically un-registers:

@@ -44,13 +44,14 @@
 #include <vector>
 
 #include "al/ui/al_Parameter.hpp"
-#include "al/protocol/al_OSC.hpp"
 
 namespace al
 {
 
 class OSCNotifier;
 
+/// ParameterBundle
+/// @ingroup UI
 class ParameterBundle
 {
 public:

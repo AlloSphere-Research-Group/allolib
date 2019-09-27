@@ -41,6 +41,11 @@
 	Andrés Cabrera mantaraya36@gmail.com
 */
 
+#include "al/math/al_Vec.hpp"
+#include "al/spatial/al_Pose.hpp"
+#include "al/types/al_Color.hpp"
+#include "al/protocol/al_OSC.hpp"
+
 #include <string>
 #include <map>
 #include <mutex>
@@ -54,15 +59,11 @@
 #include <memory>
 #include <algorithm>
 
-#include "al/math/al_Vec.hpp"
-#include "al/spatial/al_Pose.hpp"
-#include "al/types/al_Color.hpp"
-#include "al/protocol/al_OSC.hpp"
-
 namespace al
 {
 
-
+// ParameterField
+// @ingroup UI
 class ParameterField {
 public:
 	typedef enum { FLOAT, INT32, STRING } ParameterDataType;
@@ -199,6 +200,7 @@ class Parameter;
 
 /**
  * @brief The ParameterMeta class defines the base interface for Parameter metadata
+ * @ingroup UI
  */
 class ParameterMeta {
 public:
@@ -307,6 +309,7 @@ protected:
 
 /**
  * @brief The ParameterWrapper class provides a generic thread safe Parameter class from the ParameterType template parameter
+ * @ingroup UI
  */
 template<class ParameterType>
 class ParameterWrapper : public ParameterMeta {
@@ -489,6 +492,7 @@ private:
 
 /**
  * @brief The Parameter class
+ * @ingroup UI
  *
  * The Parameter class offers a simple way to encapsulate float values. It is
  * not inherently thread safe, but since floats are atomic on most platforms
@@ -609,7 +613,8 @@ private:
 	float mFloatValue;
 };
 
-
+/// ParamaterInt
+/// @ingroup UI
 class ParameterInt : public ParameterWrapper<int32_t>
 {
 public:
@@ -699,6 +704,8 @@ private:
 	int32_t mIntValue;
 };
 
+/// ParamaterBool
+/// @ingroup UI
 class ParameterBool : public Parameter
 {
 public:
@@ -782,6 +789,10 @@ public:
 // like the audio callback. The classes were explicitly defined to overcome
 // the issues related to the > and < operators needed when validating minumum
 // and maximum values for the parameter
+
+
+/// ParameterString
+/// @ingroup UI
 class ParameterString: public ParameterWrapper<std::string>
 {
 public:
@@ -870,6 +881,8 @@ public:
 	}
 };
 
+/// ParameterVec4
+/// @ingroup UI
 class ParameterVec4: public ParameterWrapper<al::Vec4f>
 {
 public:
@@ -914,6 +927,8 @@ public:
 };
 
 
+/// ParameterPose
+/// @ingroup UI
 class ParameterPose: public ParameterWrapper<al::Pose>
 {
 public:
@@ -965,6 +980,8 @@ public:
 		}
 };
 
+/// ParameterMenu
+/// @ingroup UI
 class ParameterMenu : public ParameterWrapper<int>
 {
 public:
@@ -1053,6 +1070,7 @@ private:
 
 /**
  * @brief A parameter representing selected items from a list
+ * @ingroup UI
  *
  * The unsigned int value is a bit field, each bit representing
  * whether an element is selected or not.
@@ -1147,6 +1165,8 @@ private:
     std::vector<std::string> mElements;
 };
 
+/// ParameterColor
+/// @ingroup UI
 class ParameterColor: public ParameterWrapper<al::Color>
 {
 public:

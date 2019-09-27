@@ -16,7 +16,7 @@ namespace al{
 ///
 /// \brief The StereoPanner class
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class StereoPanner : public Spatializer{
 public:
 	StereoPanner(SpeakerLayout &sl) : Spatializer(sl), numSpeakers(0) {

@@ -101,9 +101,11 @@
 
 namespace al{
 
+/// @defgroup Sound Sound
+
 /// Ambisonic base class
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class AmbiBase{
 public:
 
@@ -170,7 +172,7 @@ protected:
 
 /// Higher Order Ambisonic Decoding class
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class AmbiDecode : public AmbiBase{
 public:
 
@@ -246,7 +248,7 @@ protected:
 
 /// Higher Order Ambisonic encoding class
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class AmbiEncode : public AmbiBase{
 public:
 
@@ -301,7 +303,7 @@ public:
 
 /// Ambisonic coder
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class AmbisonicsSpatializer : public Spatializer {
 public:
 

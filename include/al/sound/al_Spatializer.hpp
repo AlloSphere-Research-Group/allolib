@@ -56,7 +56,7 @@ namespace al {
 
 /// Abstract class for all spatializers: Ambisonics, DBAP, VBAP, etc.
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class Spatializer {
 public:
 

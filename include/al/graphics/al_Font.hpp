@@ -55,8 +55,11 @@
 
 namespace al{
 
-/// Interface for loading fonts and rendering text
-///
+
+/**
+@brief Interface for loading fonts and rendering text
+@ingroup Graphics
+*/
 
 struct Font {
 

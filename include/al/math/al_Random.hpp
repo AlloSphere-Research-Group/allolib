@@ -72,7 +72,7 @@ inline static uint32_t seed(){
 
 /// Random distribution generator
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <class RNG=al::rnd::Tausworthe>
 class Random{
 public:

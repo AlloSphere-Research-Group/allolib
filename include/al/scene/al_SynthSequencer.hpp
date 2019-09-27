@@ -63,6 +63,10 @@
 namespace al
 {
 
+/**
+@brief SynthSequencerEvent class
+@ingroup Scene
+*/
 class SynthSequencerEvent {
 public:
     SynthSequencerEvent () {}
@@ -111,6 +115,7 @@ struct SynthEvent {
 
 /**
  * @brief Event Sequencer triggering audio visual "notes"
+ * @ingroup Scene
  *
  * Sequences can be created programatically:
  * @code

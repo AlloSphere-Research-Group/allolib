@@ -6,9 +6,10 @@
 
 namespace al {
 
-// Read sound file and store the data in float array (interleaved)
-// Reading supports wav, flac
-// Implementation uses "dr libs" (https://github.com/mackron/dr_libs)
+/// @brief Read sound file and store the data in float array (interleaved)
+/// @ingroup Sound
+/// Reading supports wav, flac
+/// Implementation uses "dr libs" (https://github.com/mackron/dr_libs)
 
 struct SoundFile {
   std::vector<float> data;
@@ -41,6 +42,8 @@ SoundFile getResampledSoundFile(SoundFile* toConvert,
 // void writeSoundFile (const char* filename, float* data, int frameCount,
 //                      int sampleRate, int channels);
 
+/// @brief Soundfile player class
+/// @ingroup Sound
 struct SoundFilePlayer {
   long long int frame = 0;
   bool pause = true;
@@ -63,6 +66,8 @@ struct SoundFilePlayer {
   void getFrames(int numFrames, float* buffer, int bufferLength);
 };
 
+/// @brief Soundfile player class
+/// @ingroup Sound
 struct SoundFilePlayerTS {
   SoundFile soundFile;
   SoundFilePlayer player;

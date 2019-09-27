@@ -53,6 +53,7 @@ namespace al {
 /**
  * @brief The SynthRecorder class records the events arriving at a PolySynth
  *
+ * @ingroup Scene
  *
  * Events are stored in a text file that looks like:
  *

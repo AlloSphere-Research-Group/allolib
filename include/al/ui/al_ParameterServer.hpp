@@ -204,6 +204,7 @@ private:
 
 /**
  * @brief The ParameterServer class creates an OSC server to receive parameter values
+ * @ingroup UI
  *
  * Parameter objects that are registered with a ParameterServer will receive
  * incoming messages on their OSC address.

@@ -96,7 +96,7 @@ class SoundSource;
 /// scene object and a buffer of previous positions that can be used to
 /// generate smooth, "zipper"-free trajectories at audio rate.
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class [[deprecated("use DynamicScene instead")]] AudioSceneObject{
 public:
 
@@ -131,7 +131,7 @@ protected:
 /// class.
 /// A Listener is tied to a spatialization technique when it is created.
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class [[deprecated("use DynamicScene instead")]] Listener : public AudioSceneObject {
 
 	friend class SoundSource;
@@ -172,7 +172,7 @@ enum DopplerType{
 /// The attenuation policy may be different per source, i.e., because a bee has
 /// a different attenuation characteristic than an airplane.
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class [[deprecated("use DynamicScene instead")]] SoundSource : public AudioSceneObject, public DistAtten<double> {
 public:
 
@@ -343,7 +343,7 @@ private:
 
 /// An audio scene consisting of Listeners and Sources.
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class [[deprecated("use DynamicScene instead")]]  AudioScene {
 public:
 

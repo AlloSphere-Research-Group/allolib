@@ -58,7 +58,7 @@ enum AttenuationLaw{
 
 /// Maps a distance into an attenuation factor
 ///
-/// @ingroup allocore
+/// @ingroup Spatial
 template <class T = float>
 class DistAtten{
 public:

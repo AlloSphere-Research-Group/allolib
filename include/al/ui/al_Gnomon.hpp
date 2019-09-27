@@ -2,9 +2,15 @@
 #define INCLUDE_AL_GNOMON_HPP
 
 // #include "al/util/al_Font.hpp"
+#include "al/graphics/al_Mesh.hpp"
+#include "al/types/al_Color.hpp"
+#include "al/graphics/al_Shapes.hpp"
+#include "al/graphics/al_Graphics.hpp"
 
 namespace al {
 
+/// Gnomon
+/// @ingroup UI
 struct Gnomon {
   Mesh gnomonMesh;
   Mesh arrowMesh;

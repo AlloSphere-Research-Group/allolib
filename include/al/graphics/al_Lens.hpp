@@ -51,7 +51,7 @@
 namespace al {
 
 /// Stores optics settings important for rendering
-/// @ingroup allocore
+/// @ingroup Graphics
 class Lens {
 public:
 

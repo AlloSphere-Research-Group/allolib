@@ -10,6 +10,7 @@ namespace al
 {
 /**
  * @brief The DistributedScene class
+ * @ingroup Scene
  */
 class DistributedScene :
         public DynamicScene,

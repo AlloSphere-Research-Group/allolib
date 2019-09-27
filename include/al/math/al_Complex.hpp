@@ -59,7 +59,7 @@ typedef Complex<double>  Complexd;
 
 /// Polar number
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <class T>
 class Polar{
 public:
@@ -88,7 +88,7 @@ public:
 
 /// Complex number
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <class T>
 class Complex{
 public:
@@ -221,7 +221,7 @@ VecN rotate(const VecN& v, const VecN& p, const Complex<T>& a){
 
 /// Rotates two vectors by angle in plane formed from bivector v1 ^ v2
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <class VecN, class T>
 void rotatePlane(VecN& v1, VecN& v2, const Complex<T>& a){
   VecN t = al::rotate(v1, v2, a);
@@ -232,7 +232,7 @@ void rotatePlane(VecN& v1, VecN& v2, const Complex<T>& a){
 
 /// Stereographically project complex number onto Riemann sphere
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <class Vec3, class T>
 Vec3 sterProj(const al::Complex<T>& c){
   T magSqr = c.magSqr();

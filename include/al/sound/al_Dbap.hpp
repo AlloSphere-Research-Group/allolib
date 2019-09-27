@@ -55,7 +55,7 @@ namespace al{
 
 /// Distance-based amplitude panner
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class Dbap : public Spatializer{
 
 	// do not hide base class functions

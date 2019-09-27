@@ -73,7 +73,7 @@ namespace al{
 
 /// A pair of path (folder/directory) and file name
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class FilePath {
 public:
 	FilePath(){}
@@ -114,7 +114,7 @@ protected:
 #if 0 /* commenting out FileInfo */
 /// File information
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class FileInfo{
 public:
 
@@ -154,7 +154,7 @@ private:
 /// Used to retrieve data from and store data to disk.
 /// The term 'path' means a file or directory.
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class File{
 public:
 
@@ -354,7 +354,7 @@ protected:
 
 /// Filesystem directory
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class Dir{
 public:
 
@@ -410,7 +410,7 @@ private:
 
 /// Keeps a list of files
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class FileList {
 public:
 	typedef std::vector<FilePath>::iterator iterator;
@@ -449,7 +449,7 @@ protected:
 
 /// A handy way to manage several possible search paths
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class SearchPaths {
 public:
 	typedef std::pair<std::string, bool> searchpath;

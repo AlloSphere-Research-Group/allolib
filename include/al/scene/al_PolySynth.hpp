@@ -66,6 +66,7 @@ int asciiToMIDI(int asciiKey, int offset = 0);
 
 /**
  * @brief The SynthVoice class
+ * @ingroup Scene
  *
  * When inheriting this class you must provide a default construct that takes no arguments
 */
@@ -200,6 +201,7 @@ public:
      * @param pFields a pre-allocated array where the parameter fields will be written.
      * @param maxParams the maximum number of parameters to process (i.e. the allocated size of pFields)
      * @return the number of parameters written
+     * @ingroup Scene
      *
      * Copy the values from the internal parameters that have been
      * registered using registerParameterAsField or the << operator.
@@ -501,6 +503,10 @@ private:
   unsigned int mNumOutChannels {1};
 };
 
+/**
+@brief PolySynth class
+@ingroup Scene
+*/
 class PolySynth {
 public:
   typedef enum {

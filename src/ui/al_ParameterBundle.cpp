@@ -3,6 +3,7 @@
 #include <string>
 
 
+#include "al/protocol/al_OSC.hpp"
 #include "al/ui/al_ParameterBundle.hpp"
 #include "al/ui/al_ParameterServer.hpp"
 

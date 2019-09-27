@@ -58,9 +58,13 @@
 
 namespace al
 {
+/**
+@defgroup Scene Dynamic Scene
+*/
 
 /**
  * @brief The PositionedVoice class
+ * @ingroup Scene
  */
 class PositionedVoice : public SynthVoice {
 public:
@@ -190,6 +194,7 @@ void ThreadPool::enqueue(F&& f, UpdateThreadFuncData &data)
 
 /**
  * @brief The DynamicScene class
+ * @ingroup Scene
  */
 class DynamicScene : public PolySynth
 {

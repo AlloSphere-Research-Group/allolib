@@ -74,7 +74,7 @@ static struct MatNoInit{} MAT_NO_INIT;
 
 /// Elements are stored in column-major format.
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <int N, class T>
 class Mat{
 public:

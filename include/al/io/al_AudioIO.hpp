@@ -58,7 +58,7 @@ class AudioDevice;
 
 /// Abstract audio backend
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class AudioBackend {
  public:
   AudioBackend();
@@ -111,7 +111,7 @@ class AudioBackend {
 
 /// Audio device
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class AudioDevice : public AudioDeviceInfo {
  public:
   /// Stream mode
@@ -158,7 +158,7 @@ inline AudioDevice::StreamMode operator|(const AudioDevice::StreamMode &a,
 
 /// Audio input/output streaming
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class AudioIO : public AudioIOData {
  public:
   /// Creates AudioIO using default I/O devices.

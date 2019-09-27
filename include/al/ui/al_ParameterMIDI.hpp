@@ -50,6 +50,7 @@ namespace al
 
 /**
  * @brief The ParameterMIDI class connects Parameter objects to MIDI messages
+ * @ingroup UI
  *
  *
 @code

@@ -39,9 +39,11 @@
 
 namespace al {
 
+/// @defgroup Math Math
+
 /// A way to analyse data acquired gradually:
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template<typename T=double>
 class MinMeanMax {
 public:

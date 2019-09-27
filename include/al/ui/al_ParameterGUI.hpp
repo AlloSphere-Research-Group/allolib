@@ -61,6 +61,8 @@ namespace al {
 
 class BundleGUIManager;
 
+/// ParameterGUI
+/// @ingroup UI
 class ParameterGUI {
 public:
 
@@ -174,6 +176,8 @@ public:
 };
 
 
+/// BundleGUIManager
+/// @ingroup UI
 class BundleGUIManager {
 public:
 
@@ -215,6 +219,8 @@ private:
     bool mBundleGlobal {false};
 };
 
+/// SynthGUIManager
+/// @ingroup UI
 template<class VoiceType>
 class SynthGUIManager {
 public:

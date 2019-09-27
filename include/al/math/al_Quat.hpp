@@ -60,7 +60,7 @@ typedef Quat<double>  Quatd;  ///< Double-precision quaternion
 
 /// Quaternion
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template<typename T=double>
 class Quat {
 public:

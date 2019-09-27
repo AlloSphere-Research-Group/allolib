@@ -9,6 +9,10 @@
 
 namespace al {
 
+/// @defgroup UI UI
+
+/// BoundingBox
+/// @ingroup UI
 struct BoundingBox {
   Vec3f min, max;
   Vec3f cen, dim;

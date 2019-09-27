@@ -53,6 +53,9 @@
 
 namespace al {
 
+
+	/// Dialog
+	/// @ingroup UI
 class Dialog : public Window, public WindowEventHandler {
 public:
 

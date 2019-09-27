@@ -10,6 +10,13 @@
 
 namespace al {
 
+/**
+@defgroup IO I/O
+*/
+/**
+@brief Arduino class
+@ingroup IO
+*/
 class Arduino {
 public:
 

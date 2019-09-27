@@ -55,6 +55,7 @@ namespace al {
 
 /**
  * @brief The CSVReader class reads simple CSV files
+ * @ingroup IO
  *
  * To use, first create a CSVReader object and call addType() to add the type of a
  * column. Then call readFile().

@@ -77,6 +77,10 @@ GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32F
 GL_DEPTH24_STENCIL8, GL_DEPTH32F_STENCIL8
 */
 
+/**
+@brief RBO class
+@ingroup Graphics
+*/
 class RBO : public GPUObject {
 public:
 
@@ -144,7 +148,7 @@ protected:
 /// must have the same pixel format. These are standard requirements of an FBO,
 /// not an implementation-imposed limitation.
 ///
-/// @ingroup allocore
+/// @ingroup Graphics
 
 class FBO : public GPUObject {
 public:

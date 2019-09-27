@@ -72,7 +72,7 @@ namespace al{
 
 
 /// Isosurface generated using marching cubes
-/// @ingroup allocore
+/// @ingroup Graphics
 class Isosurface : public Mesh {
 public:
 

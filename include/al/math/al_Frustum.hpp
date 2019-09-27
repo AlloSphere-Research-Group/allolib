@@ -61,7 +61,7 @@ typedef Frustum<double> Frustumd;  ///< Double precision frustrum
 /// "OpenGL @ Lighthouse 3D - View Frustum Culling Tutorial",
 /// http://www.lighthouse3d.com/opengl/viewfrustum/index.php?intro
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <class T>
 class Frustum{
 public:

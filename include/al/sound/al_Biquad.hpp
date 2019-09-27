@@ -29,7 +29,7 @@ enum BIQUADTYPE {
 ///
 /// \brief The BiQuad class
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class BiQuad
 {
 public:
@@ -54,7 +54,7 @@ private:
 /// Cascaded Biquad to acheive steeper filters
 /// Default params of numFilters = 8 and bandwidth = 0.26 work well for an anti-aliasing LPF filter @ 19k
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class BiQuadNX
 {
 public:

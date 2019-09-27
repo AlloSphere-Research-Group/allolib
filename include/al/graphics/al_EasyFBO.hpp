@@ -82,7 +82,7 @@ struct EasyFBOSetting {
 };
 
 /// Encapsulates FBO, depth buffer, and texture
-/// @ingroup allocore
+/// @ingroup Graphics
 ///
 class EasyFBO {
   int mWidth, mHeight;

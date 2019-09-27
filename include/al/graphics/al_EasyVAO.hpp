@@ -16,6 +16,10 @@
 
 namespace al {
 
+/**
+@brief EasyVAO class
+@ingroup Graphics
+*/
 struct EasyVAO : VAO {
 
     // attribute locations specified in default shader

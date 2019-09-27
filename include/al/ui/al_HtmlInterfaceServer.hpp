@@ -75,6 +75,8 @@ namespace al
  * the registered parameters. Because it uses Parameter obejcts, the HTML
  * GUI can be kept in sync with other control interfaces like ParameterGUI
  * and other devices that set the parameters via OSC.
+
+ * @ingroup UI
  */
 class HtmlInterfaceServer {
 public:

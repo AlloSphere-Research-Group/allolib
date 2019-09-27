@@ -51,7 +51,7 @@ namespace al {
 /// describes a 0-sphere. Order is strongly enforced so that the endpoints will
 /// always satisfy min <= max.
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <class T>
 class Interval{
 public:

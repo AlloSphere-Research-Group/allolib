@@ -57,6 +57,17 @@ namespace al {
     Implementation uses stb_image.h >> https://github.com/nothings/stb
 */
 
+
+/**
+@brief Interface for loading image files
+
+		Loads image as 8-bit 4 channels RGBA
+		Supported formats: PNG, JPG, ...
+		Implementation uses stb_image.h from https://github.com/nothings/stb
+
+@ingroup Graphics
+*/
+
 struct Image {
   struct RGBAPix {
     uint8_t r, g, b, a;

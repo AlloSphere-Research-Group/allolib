@@ -93,7 +93,7 @@ Vec<N-1,T> sterProj(const Vec<N,T>& v);
 /// component, phi, is the angle from the +z axis. The magnitude of theta
 /// should always be 1, while the magnitude of phi is the radius.
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <class T>
 class SphereCoord {
 public:
@@ -160,7 +160,7 @@ public:
 /// (zonal). Other values of m produce a checkerboard pattern (tesseral).
 /// Th Condon-Shortley phase factor of (-1)^m is included.
 ///
-/// @ingroup allocore
+/// @ingroup Math
 template <int L_MAX=16>
 class SphericalHarmonic{
 public:

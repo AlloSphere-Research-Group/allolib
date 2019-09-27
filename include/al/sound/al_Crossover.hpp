@@ -55,7 +55,7 @@ namespace al {
 ///
 ///
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 template<typename T=double>
 class Crossover {
 public:

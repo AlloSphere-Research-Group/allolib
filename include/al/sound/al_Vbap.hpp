@@ -83,7 +83,7 @@ struct SpeakerTriple{
 
 /// Vector-based amplitude panner
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class Vbap : public Spatializer{
 public:
 

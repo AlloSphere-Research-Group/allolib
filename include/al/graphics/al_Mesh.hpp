@@ -58,7 +58,7 @@ namespace al{
 
 /// A mesh is a collection of buffers storing vertices, colors, indices, etc.
 /// that define the geometry and coloring/shading of a graphical object.
-/// @ingroup allocore
+/// @ingroup Graphics
 class Mesh {
 public:
 

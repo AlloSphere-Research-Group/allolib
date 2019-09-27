@@ -8,6 +8,10 @@
 #include "al/graphics/al_BufferObject.hpp"
 
 namespace al {
+/**
+@brief VAO class
+@ingroup Graphics
+*/
 
 class VAO : public GPUObject {
 public:

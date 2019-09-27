@@ -25,22 +25,22 @@
 namespace al{
 
 // Internal classes to maintain backward compatibility
-class MIDIIn : public RtMidiIn {};
+class [[depreacated("User RtMidiIn directly")]] MIDIIn : public RtMidiIn {};
 
-class MIDIOut : public RtMidiOut {};
+class[[depreacated("User RtMidiOut directly")]] MIDIOut : public RtMidiOut {};
 
-class MIDIError : public RtMidiError {};
+class[[depreacated("User RtMidiError directly")]] MIDIError : public RtMidiError {};
 
 
 /// Convert note number to Hz value
 ///
-/// @ingroup allocore
+/// @ingroup IO
 double noteToHz(double noteNumber);
 
 
 /// Utilities for parsing MIDI bytes
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class MIDIByte{
 public:
 
@@ -111,7 +111,7 @@ public:
 
 /// MIDI message
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class MIDIMessage {
 public:
 	unsigned char bytes[3];
@@ -177,7 +177,7 @@ protected:
 
 /// Handles receipt of MIDI messages
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class MIDIMessageHandler{
 public:
 	virtual ~MIDIMessageHandler(){}

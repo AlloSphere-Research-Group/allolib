@@ -54,7 +54,7 @@ namespace al {
 /// The smoothing is done using a one-pole low-pass filter which
 /// produces an exponential ease-out type of transition.
 ///
-/// @ingroup allocore
+/// @ingroup IO
 
 class Nav : public Pose {
 public:

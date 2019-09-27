@@ -47,6 +47,8 @@
 #include "al/system/al_Time.hpp"
 
 namespace al{
+/// @defgroup System
+
 
 /// Thread that calls a function periodically
 
@@ -54,7 +56,7 @@ namespace al{
 /// user-supplied thread function. This prevents drift that would occur in a
 /// more simplistic implementation using a fixed sleep interval.
 ///
-/// @ingroup allocore
+/// @ingroup System
 class PeriodicThread : public Thread{
 public:
 

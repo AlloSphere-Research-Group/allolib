@@ -66,7 +66,7 @@ class Window;
 
 /// Keyboard state
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class Keyboard {
  public:
   /// Non-printable keys
@@ -138,7 +138,7 @@ class Keyboard {
 
 /// Mouse state
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class Mouse {
  public:
   enum {
@@ -187,7 +187,7 @@ class Mouse {
 /// The return value of the event handlers determines whether or not
 /// the event should be propagated to other handlers.
 ///
-/// @ingroup allocore
+/// @ingroup IO
 class WindowEventHandler {
  public:
   WindowEventHandler();
@@ -243,7 +243,7 @@ class WindowEventHandler {
 /// Upon construction, the Window will add itself to its list of input event
 /// handlers and its list of window event handlers.
 ///
-/// @ingroup allocore
+/// @ingroup IO
 // class Window : public InputEventHandler, public WindowEventHandler {
 class Window {
  public:

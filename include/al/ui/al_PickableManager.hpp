@@ -11,7 +11,8 @@
 
 namespace al {
 
-
+/// PickableManager
+/// @ingroup UI
 class PickableManager {
 public:
 	PickableManager(){}

@@ -44,14 +44,13 @@
 
 */
 
-#include <vector>
 #include "al/graphics/al_GPUObject.hpp"
 #include "al/graphics/al_OpenGL.hpp"
 
+#include <vector>
+
 namespace al{
 
-/// Generic buffer object
-/// @ingroup allocore
 
 /**
 Vertex Buffer Objects (VBOs) create buffer memory for vertex attributes in
@@ -70,6 +69,8 @@ Another important advantage of VBO is sharing the buffer objects with many
 clients, like display lists and textures. Since VBO is on the server's side,
 multiple clients will be able to access the same buffer with the corresponding
 identifier.
+
+ @ingroup Graphics
 */
 
 class BufferObject : public GPUObject {

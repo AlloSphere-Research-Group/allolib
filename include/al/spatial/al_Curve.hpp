@@ -56,7 +56,7 @@ void frenet(const V3& d1, const V3& d2, V3& t, V3& n, V3& b);
 template <class V3>
 void frenet(const V3& p2, const V3& p1, const V3& p0, V3& t, V3& n, V3& b);
 
-
+/// @defgroup Spatial Spatial
 
 /// Frenet frame generator
 
@@ -69,7 +69,7 @@ void frenet(const V3& p2, const V3& p1, const V3& p0, V3& t, V3& n, V3& b);
 /// and B = T x N.
 /// \tparam Vec3  3-vector type
 ///
-/// @ingroup allocore
+/// @ingroup Spatial
 template <class Vec3>
 struct Frenet{
 

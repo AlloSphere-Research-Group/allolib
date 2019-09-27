@@ -81,6 +81,7 @@ private:
  * @brief The ControlGUI class
  *
  * You must call init() before any draw calls.
+ * @ingroup UI
  */
 class ControlGUI {
 public:

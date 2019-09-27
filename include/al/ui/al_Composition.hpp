@@ -51,12 +51,16 @@
 namespace al
 {
 
+/// CompositionStep
+/// @ingroup UI
 class CompositionStep {
 public:
 	std::string sequenceName;
 	float deltaTime;
 };
 
+/// Composition
+/// @ingroup UI
 class Composition : public osc::MessageConsumer
 {
 public:

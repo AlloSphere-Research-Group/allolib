@@ -49,6 +49,8 @@
 
 namespace al {
 
+/// FileSelector
+/// @ingroup UI
 class FileSelector {
 public:
 

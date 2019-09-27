@@ -44,7 +44,7 @@ namespace al {
 Matrix4f view_mat(Pose const&);
 
 /// A framed area on a display screen
-/// @ingroup allocore
+/// @ingroup Graphics
 struct Viewport {
   int l, b, w, h; ///< left, bottom, width, height
 

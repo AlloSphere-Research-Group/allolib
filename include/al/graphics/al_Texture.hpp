@@ -86,7 +86,7 @@ create2D (internally called)
 namespace al {
 
 /// A simple wrapper around an OpenGL Texture
-/// @ingroup allocore
+/// @ingroup Graphics
 class Texture : public GPUObject {
 public:
   enum DataType : unsigned int /* GLenum */ {

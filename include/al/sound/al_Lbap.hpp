@@ -75,7 +75,7 @@ class LdapRing {
 
 /// Layer-based amplitude panner
 ///
-/// @ingroup allocore
+/// @ingroup Sound
 class Lbap : public Spatializer {
  public:
   typedef enum {

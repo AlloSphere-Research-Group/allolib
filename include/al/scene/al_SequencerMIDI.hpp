@@ -40,14 +40,15 @@
 	Andrés Cabrera mantaraya36@gmail.com
 */
 
-#include "al/core/io/al_MIDI.hpp"
-#include "al/util/scene/al_SynthSequencer.hpp"
+#include "al/io/al_MIDI.hpp"
+#include "al/scene/al_SynthSequencer.hpp"
 
 namespace al
 {
 
 /**
  * @brief The PresetMIDI class connects PresetHandler objects to MIDI messages
+ * @ingroup Scene
  *
  *
 @code

@@ -71,7 +71,7 @@ namespace al {
 
 #include <climits>
 
-/// @ingroup allocore
+/// @ingroup Spatial
 class HashSpace {
 public:
 
@@ -115,6 +115,8 @@ public:
       Object * o = query[i];
       ...
     }
+
+		@ingroup Spatial
   */
   struct Query {
 

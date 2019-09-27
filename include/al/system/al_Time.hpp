@@ -83,7 +83,7 @@ std::string toTimecode(al_nsec t, const std::string& format="D:H:M:S:m:u");
 
 /// Timer with stopwatch-like functionality for benchmarking, etc.
 ///
-/// @ingroup allocore
+/// @ingroup System
 class Timer {
 public:
   Timer(bool setStartTime=true){
@@ -119,7 +119,7 @@ private:
 ///    by interpolating between t0 and t1
 ///  @see http://kokkinizita.linuxaudio.org/papers/usingdll.pdf
 ///
-/// @ingroup allocore
+/// @ingroup System
 class DelayLockedLoop {
 public:
 
@@ -172,7 +172,7 @@ protected:
 
 /// A timing source that can be locked to realtime or driven manually
 ///
-/// @ingroup allocore
+/// @ingroup System
 class Clock {
 public:
 
