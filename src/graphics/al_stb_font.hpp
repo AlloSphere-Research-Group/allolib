@@ -4,14 +4,14 @@
 #include <vector>
 #include <cstdint>
 
-namespace font_module {
+namespace al_stb {
 
 // Wrapper for all the data needed for font rendering
 struct FontData {
     struct BakedChar {
         unsigned short x0, y0, x1, y1;
         float xoff, yoff, xadvance;
-    }; // to be casted to stbtt_backedchar in the implementation
+    }; // to be casted to stbtt_bakedchar in the implementation
        // user will not need to use this struct
 
     float pixelHeight = -1;
@@ -29,14 +29,12 @@ struct CharData {
 
 // pixelHeight is max height of each character in font texture
 // value larger than 128 might result not all fonts fitting in the texture
-FontData loadFont(const char* filename, float pixelHeight);
+FontData loadFont(const char* filename, float pixelHeight, int bitmapSize);
 
 // caching the results of this function might give better performance
 // x0, y0, x1, y1, and xAdvance of returned CharData are in fontData.pixelHeight scale
-CharData getCharData(const FontData& fontData, int charIndex);
+CharData getCharData(FontData* fontData, int charIndex);
 
 }
-
-namespace fontModule = font_module;
 
 #endif

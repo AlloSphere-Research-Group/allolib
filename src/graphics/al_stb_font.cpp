@@ -1,36 +1,40 @@
-#include "loadFont.hpp"
+#define _CRT_SECURE_NO_WARNINGS
+
+#include "al_stb_font.hpp"
 #include <iostream>
+#include <cstddef> // offsetof
+
 
 #define STB_TRUETYPE_IMPLEMENTATION  // force following include to generate implementation
-#define STBTT_STATIC
 #include "stb_truetype.h"
 
 #define ASCII_FIRST_CHAR 32 // ascii 0 to 31 are special characters
 #define CHAR_DATA_LEN 95 // ASCII 32..126 is 95 glyphs
-#define FONT_BITMAP_SIZE 1024 // 512 for speed?
 
-using namespace std;
-
-font_module::FontData font_module::loadFont(const char* filename, float pixelHeight) {
+al_stb::FontData al_stb::loadFont(const char* filename, float pixelHeight, int bitmapSize) {
     FontData fontData;
     FILE* fontFile = fopen(filename, "rb");
     if (fontFile) {
-        vector<uint8_t> buffer (1 << 20);
+        std::vector<uint8_t> buffer (1 << 20);
         size_t bytesRead = fread(buffer.data(), sizeof(uint8_t), buffer.size(), fontFile);
         fclose(fontFile);
-        if (!bytesRead) return fontData;
+        if (!bytesRead) {
+            std::cerr << "[al_stb::loadFont] no bytes read from font file: " << filename << '\n';
+            return fontData;
+        }
         fontData.charData.resize(CHAR_DATA_LEN);
-        fontData.bitmap.resize(FONT_BITMAP_SIZE * FONT_BITMAP_SIZE);
+        fontData.bitmap.resize(bitmapSize * bitmapSize);
+        // no guarantee this fits!
         stbtt_BakeFontBitmap(buffer.data(), 0, pixelHeight,
-                             fontData.bitmap.data(), FONT_BITMAP_SIZE, FONT_BITMAP_SIZE,
+                             fontData.bitmap.data(), bitmapSize, bitmapSize,
                              ASCII_FIRST_CHAR, CHAR_DATA_LEN,
-                             reinterpret_cast<stbtt_bakedchar*>(fontData.charData.data())); // no guarantee this fits!
-        fontData.width = FONT_BITMAP_SIZE;
-        fontData.height = FONT_BITMAP_SIZE;
+                             (stbtt_bakedchar*)fontData.charData.data()); 
+        fontData.width = bitmapSize;
+        fontData.height = bitmapSize;
         fontData.pixelHeight = pixelHeight;
     }
     else {
-        cout << "[font_module::loadFont] could not open font file: " << filename << endl;
+        std::cerr << "[al_stb::loadFont] could not open font file: " << filename << '\n';
     }
     return fontData;
 }
@@ -38,12 +42,12 @@ font_module::FontData font_module::loadFont(const char* filename, float pixelHei
 // mod ver of stbtt_GetBakedQuad
 // assumes opengl use (no d3d)
 static void GetBakedChar(const stbtt_bakedchar* bakedchars, int pw, int ph,
-                         int char_index, font_module::CharData* c)
+                         int char_index, al_stb::CharData* c)
 {
    float ipw = 1.0f / pw, iph = 1.0f / ph;
    const stbtt_bakedchar* b = bakedchars + char_index;
-   int round_x = STBTT_ifloor(b->xoff + 0.5f);
-   int round_y = STBTT_ifloor(b->yoff + 0.5f);
+   float round_x = (float)STBTT_ifloor(b->xoff + 0.5f);
+   float round_y = (float)STBTT_ifloor(b->yoff + 0.5f);
 
    c->x0 = round_x;
    c->y0 = round_y;
@@ -58,10 +62,10 @@ static void GetBakedChar(const stbtt_bakedchar* bakedchars, int pw, int ph,
    c->xAdvance = b->xadvance;
 }
 
-font_module::CharData font_module::getCharData(const FontData& fontData, int charIndex) {
-    font_module::CharData charData;
-    GetBakedChar(reinterpret_cast<const stbtt_bakedchar*>(fontData.charData.data()),
-                 FONT_BITMAP_SIZE, FONT_BITMAP_SIZE,
+al_stb::CharData al_stb::getCharData(FontData* fontData, int charIndex) {
+    al_stb::CharData charData;
+    GetBakedChar((stbtt_bakedchar*)fontData->charData.data(),
+                 fontData->width, fontData->height,
                  charIndex - ASCII_FIRST_CHAR, &charData);
     return charData;
 }

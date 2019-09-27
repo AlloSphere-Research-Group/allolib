@@ -174,6 +174,7 @@ set(sources
   src/graphics/al_Graphics.cpp
   src/graphics/al_Image.cpp
   src/graphics/al_stb_image.cpp
+  src/graphics/al_stb_font.cpp
   src/graphics/al_Isosurface.cpp
   src/graphics/al_Lens.cpp
   src/graphics/al_Light.cpp
