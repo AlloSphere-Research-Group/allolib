@@ -12,20 +12,12 @@ ENDMACRO()
 
 # Ignore examples that wont work in CI
 set(EXAMPLES_TO_IGNORE
-    user_flags/main.cpp
-    openvr/openvr.cpp
-    openvr/openvr-app.cpp
     one-line-of-c/main.cpp
     sound/multiFilePlayer.cpp
     sound/sound_file.cpp
     sound/ambiPlayer.cpp
     graphics/textureImage.cpp
-    graphics/font.cpp
     graphics/asset.cpp
-    user_flags/main.cpp
-    openvr/openvr.cpp
-    openvr/openvr-app.cpp
-    one-line-of-c/main.cpp
 )
 
 #if(AL_WINDOWS EQUAL 1 AND APPVEYOR_BUILD EQUAL 1) 

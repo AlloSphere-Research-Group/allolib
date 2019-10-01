@@ -20,19 +20,21 @@ struct MyApp : public App {
   Mesh mMesh;
 
   MyApp() {
-    nav().pos(Vec3d(0, 0, 8));
     addCone(mMesh);
     mMesh.primitive(Mesh::LINES);
 
-    // Disable mouse nav to avoid naving while changing gui controls.
-    navControl().useMouse(false);
     // Connect MIDI CC # 1 to "Number" parameter
     parameterMidi.connectControl(Number, 1, 1);
     // Connect MIDI CC # 7 to "Gain" parameter
     parameterMidi.connectControl(Gain, 7, 1);
   }
 
-  virtual void onCreate() override { imguiInit(); }
+  virtual void onCreate() override { 
+		imguiInit();
+    nav().pos(Vec3d(0, 0, 8));
+    // Disable mouse nav to avoid naving while changing gui controls.
+    navControl().useMouse(false);
+	}
 
   virtual void onDraw(Graphics &g) override {
     g.clear(0);
