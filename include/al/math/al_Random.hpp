@@ -429,47 +429,47 @@ using StdRandom = al::rnd::Random<StdRnd>;
 namespace rnd {
 
 template<>
-float StdRandom::uniform() {
+inline float StdRandom::uniform() {
     return mRNG();
 }
 
 template<>
 template<typename T>
-T StdRandom::uniform(T const& hi) {
+inline T StdRandom::uniform(T const& hi) {
     return static_cast<T>(mRNG(float(hi)));
 }
 
 template<>
 template<typename T>
-T StdRandom::uniform(T const& hi, T const& lo) {
+inline T StdRandom::uniform(T const& hi, T const& lo) {
     return static_cast<T>(mRNG(float(lo), float(hi)));
 }
 
 template<>
-float StdRandom::uniformS() {
+inline float StdRandom::uniformS() {
     return mRNG(-1.0f, 1.0f);
 }
 
 template<>
 template<typename T>
-T StdRandom::uniformS(T const& lim) {
+inline T StdRandom::uniformS(T const& lim) {
     return static_cast<T>(mRNG(float(-lim), float(lim)));
 }
 
 template <>
-float StdRandom::triangle() {
+inline float StdRandom::triangle() {
     return 0.5f * (uniformS() + uniformS());
 }
 
 template <>
-float StdRandom::sign(float x) {
+inline float StdRandom::sign(float x) {
     static float arr[2] = {-1.0f, 1.0f};
     return x * arr[mRNG.randi(0, 1)];
 }
 
 template <>
 template <class T>
-void StdRandom::shuffle(T * arr, uint32_t len) {
+inline void StdRandom::shuffle(T * arr, uint32_t len) {
     for (uint32_t i = len-1; i > 0; i -= 1) {
         uint32_t j = mRNG.randi(i+1);
         T t = arr[i];
