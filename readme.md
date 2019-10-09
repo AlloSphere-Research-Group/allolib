@@ -64,15 +64,3 @@ On a bash shell on Windows, Linux and OS X do:
 
 The library will be built in build/lib.
 
-# TODO
-
-- fullscreen with specific monitor
-
-# Optional Dependencies
-
-- freeimage (optional)
-- freetype (optional)
-- assimp (optional)
-
-If these are avaialble, the classes that use them will be built. A simple alternative is to use the image/font/asset loading provided in the modeules directory. These classes depend on header only libraries that are included in these sources.
-

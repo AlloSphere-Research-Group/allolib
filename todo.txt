@@ -1,2 +1,0 @@
-stdrandom & random: cleanup, into one file?
-speakerlayout: not inheritance but as functions
