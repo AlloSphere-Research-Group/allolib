@@ -19,7 +19,7 @@ The API documentation can be found at: https://allosphere-research-group.github.
 
 ## Dependencies
 
-Allolib only depends on Cmake version 3.8 (as the build tool), OpenGL and glew. See platform specific instructions below.
+Allolib depends on Cmake version 3.8 (as the build tool), OpenGL and glew. See platform specific instructions below.
 
 ### Windows
 
@@ -57,24 +57,12 @@ On a bash shell on Windows, Linux and OS X do:
     git clone https://github.com/AlloSphere-Research-Group/allolib
     cd allolib
     git submodule update --recursive --init
+    mkdir build
+    cd build
+    cmake .. -DBUILD_EXAMPLES=1
+    cmake . --build
 
-To run an example:
-
-    ./run.sh examples/graphics/2D.cpp
-
-# Running allolib
-
-## On Bash shell
-
-The simplest way to compile and run a single file in allolib is by using the run.sh script:
-
-    ./run.sh path/to/file.cpp
-
-This will build allolib, and create an executable for the file.cpp called 'file' inside the '''path/to/bin''' directory. It will then run the application.
-
-You can add a file called '''flags.cmake''' in the '''path/to/''' directory which will be added to the build scripts. Here you can add dependencies, include directories, linking and anything else that cmake could be used for. See the example in '''examples/user_flags'''.
-
-For more complex projects follow the example provided in the empty/project directory. This requires writing a CMakeLists.txt to specify sources, dependencies and linkage.
+The library will be built in build/lib.
 
 # TODO
 
