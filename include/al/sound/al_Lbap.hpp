@@ -96,8 +96,7 @@ class Lbap : public Spatializer {
 
   void prepare(AudioIOData &io) override;
 
-  void renderSample(AudioIOData &io, const Pose &reldir,
-                    const float &sample,
+  void renderSample(AudioIOData &io, const Pose &reldir, const float &sample,
                     const unsigned int &frameIndex) override;
 
   void renderBuffer(AudioIOData &io, const Pose &listeningPose,

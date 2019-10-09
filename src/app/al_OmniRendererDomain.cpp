@@ -43,7 +43,6 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
   return true;
 }
 
-
 bool GLFWOpenGLOmniRendererDomain::tick() {
   if (mWindow->shouldClose()) {
     return false;
@@ -75,14 +74,12 @@ bool GLFWOpenGLOmniRendererDomain::cleanup(ComputationDomain *parent) {
 
 void GLFWOpenGLOmniRendererDomain::loopEyeForDesktopMode() {
   eye_to_render += 1;
-  if (eye_to_render > 1)
-    eye_to_render = -1;
+  if (eye_to_render > 1) eye_to_render = -1;
 }
 
 void GLFWOpenGLOmniRendererDomain::setEyeToRenderForDesktopMode(int eye) {
   eye_to_render = eye;
-  if (eye_to_render < -1 || eye_to_render > 1)
-    eye_to_render = -1;
+  if (eye_to_render < -1 || eye_to_render > 1) eye_to_render = -1;
 }
 
 void GLFWOpenGLOmniRendererDomain::spanAllDesktop() {
@@ -97,13 +94,14 @@ void GLFWOpenGLOmniRendererDomain::spanAllDesktop() {
   }
 }
 
-void GLFWOpenGLOmniRendererDomain::loadPerProjectionConfiguration(bool desktop) {
+void GLFWOpenGLOmniRendererDomain::loadPerProjectionConfiguration(
+    bool desktop) {
   if (!desktop) {
     // need to be called before pp_render.init
     pp_render.load_calibration_data(
-          sphere::config_directory("data").c_str(),   // path
-          sphere::renderer_hostname("config").c_str() // hostname
-          ); // parameters will be used to look for file ${path}/${hostname}.txt
+        sphere::config_directory("data").c_str(),    // path
+        sphere::renderer_hostname("config").c_str()  // hostname
+    );  // parameters will be used to look for file ${path}/${hostname}.txt
     pp_render.init(mGraphics->lens());
   } else {
     // load fake projection data for desktop rendering
@@ -112,17 +110,16 @@ void GLFWOpenGLOmniRendererDomain::loadPerProjectionConfiguration(bool desktop) 
 }
 
 void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
-
   // start drawing to perprojection fbos
   //  std::cout << "hhh" << std::endl;
 
-  mGraphics->omni(true); // set true to use omni default shaders when drawing
+  mGraphics->omni(true);  // set true to use omni default shaders when drawing
   // lens and pose for rendering is set in PerProjectionRender::begin
   // so updating those in onDraw will not have effect in rendering
   // will setting up omni rendering,
   // begin also pushes fbo, viewport, viewmat, projmat, lens, shader
   pp_render.begin(*mGraphics, mGraphics->lens(), mView.pose());
-  glDrawBuffer(GL_COLOR_ATTACHMENT0); // for fbo's output
+  glDrawBuffer(GL_COLOR_ATTACHMENT0);  // for fbo's output
   if (render_stereo) {
     for (int eye = 0; eye < 2; eye += 1) {
       pp_render.set_eye(eye);
@@ -145,16 +142,18 @@ void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
       onDraw(*mGraphics);
     }
   }
-  pp_render.end(); // pops everything pushed before
+  pp_render.end();  // pops everything pushed before
 
   /* Settings for warp and blend composition sampling
-  */
-  mGraphics->omni(false); // warp and blend composition done on flat rendering
-  mGraphics->eye(Graphics::MONO_EYE);     // stereo handled at capture stage
-  mGraphics->polygonMode(Graphics::FILL); // to draw viewport filling quad
-  mGraphics->blending(false);     // blending already done when capturing
-  mGraphics->depthTesting(false); // no depth testing when drawing viewport slab
-  mGraphics->pushViewport(0, 0, mWindow->fbWidth(), mWindow->fbHeight()); // filling the whole window
+   */
+  mGraphics->omni(false);  // warp and blend composition done on flat rendering
+  mGraphics->eye(Graphics::MONO_EYE);      // stereo handled at capture stage
+  mGraphics->polygonMode(Graphics::FILL);  // to draw viewport filling quad
+  mGraphics->blending(false);  // blending already done when capturing
+  mGraphics->depthTesting(
+      false);  // no depth testing when drawing viewport slab
+  mGraphics->pushViewport(0, 0, mWindow->fbWidth(),
+                          mWindow->fbHeight());  // filling the whole window
 
   // now sample the results
   if (running_in_sphere_renderer) {
@@ -168,7 +167,7 @@ void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
       mGraphics->clearColor(0, 0, 0);
       mGraphics->clearDepth(1);
       pp_render.composite(*mGraphics, 1);
-    } else { // rendering mono in sphere
+    } else {  // rendering mono in sphere
       // std::cout << "sampling mono in sphere setup" << std::endl;
       glDrawBuffer(GL_BACK_LEFT);
       mGraphics->clearColor(1, 0, 0);
@@ -181,22 +180,22 @@ void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
       glDrawBuffer(GL_BACK_LEFT);
       mGraphics->clearColor(0, 0, 0);
       mGraphics->clearDepth(1);
-      pp_render.composite_desktop(*mGraphics, 0); // texture[0]: left
+      pp_render.composite_desktop(*mGraphics, 0);  // texture[0]: left
       glDrawBuffer(GL_BACK_RIGHT);
       mGraphics->clearColor(0, 0, 0);
       mGraphics->clearDepth(1);
-      pp_render.composite_desktop(*mGraphics, 1); // texture[1]: right
-    } else { // rendering mono on display other than sphere
+      pp_render.composite_desktop(*mGraphics, 1);  // texture[1]: right
+    } else {  // rendering mono on display other than sphere
       // std::cout << "sampling mono on flat display" << std::endl;
       glDrawBuffer(GL_BACK_LEFT);
       mGraphics->clearColor(0.2, 0.2, 0.2);
       mGraphics->clearDepth(1);
       pp_render.composite_desktop(
-            *mGraphics,
-            (eye_to_render == 1) ? 1 : 0 // mono and left eye is
-                                   // rendered on texture[0],
-                                   // right eye is on texture[1]
-                                   );
+          *mGraphics,
+          (eye_to_render == 1) ? 1 : 0  // mono and left eye is
+                                        // rendered on texture[0],
+                                        // right eye is on texture[1]
+      );
     }
   }
   mGraphics->popViewport();

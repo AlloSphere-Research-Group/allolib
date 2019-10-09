@@ -1,16 +1,16 @@
-#include <iostream>
 #include <cstring>
+#include <iostream>
 
 #include "al/app/al_ComputationDomain.hpp"
 
 using namespace al;
 
-bool ComputationDomain::initializeSubdomains(bool pre)
-{
+bool ComputationDomain::initializeSubdomains(bool pre) {
   bool ret = true;
-  for (auto subDomain: mSubDomainList) {
+  for (auto subDomain : mSubDomainList) {
     if (subDomain.second == pre) {
-      auto syncSubDomain = std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
+      auto syncSubDomain =
+          std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
       if (syncSubDomain) {
         ret &= syncSubDomain->initialize(this);
       }
@@ -21,9 +21,10 @@ bool ComputationDomain::initializeSubdomains(bool pre)
 
 bool ComputationDomain::tickSubdomains(bool pre) {
   bool ret = true;
-  for (auto subDomain: mSubDomainList) {
+  for (auto subDomain : mSubDomainList) {
     if (subDomain.second == pre) {
-      auto syncSubDomain = std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
+      auto syncSubDomain =
+          std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
       if (syncSubDomain) {
         syncSubDomain->mTimeDrift = mTimeDrift;
         ret &= syncSubDomain->tick();
@@ -33,12 +34,12 @@ bool ComputationDomain::tickSubdomains(bool pre) {
   return ret;
 }
 
-bool ComputationDomain::cleanupSubdomains(bool pre)
-{
+bool ComputationDomain::cleanupSubdomains(bool pre) {
   bool ret = true;
-  for (auto subDomain: mSubDomainList) {
+  for (auto subDomain : mSubDomainList) {
     if (subDomain.second == pre) {
-      auto syncSubDomain = std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
+      auto syncSubDomain =
+          std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
       if (syncSubDomain) {
         ret &= syncSubDomain->cleanup(this);
       }
@@ -59,10 +60,11 @@ bool ComputationDomain::cleanup(ComputationDomain *parent) {
   return ret;
 }
 
-void ComputationDomain::removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain)
-{
+void ComputationDomain::removeSubDomain(
+    std::shared_ptr<SynchronousDomain> subDomain) {
   // Only Synchronous domains are allowed as subdomains
-  for (auto existingSubDomain = mSubDomainList.begin(); existingSubDomain != mSubDomainList.end(); existingSubDomain++) {
+  for (auto existingSubDomain = mSubDomainList.begin();
+       existingSubDomain != mSubDomainList.end(); existingSubDomain++) {
     if (existingSubDomain->first == subDomain) {
       existingSubDomain->first->cleanup();
       mSubDomainList.erase(existingSubDomain);
@@ -71,7 +73,7 @@ void ComputationDomain::removeSubDomain(std::shared_ptr<SynchronousDomain> subDo
   }
 }
 
-bool SynchronousDomain::tick()  {
+bool SynchronousDomain::tick() {
   bool ret = tickSubdomains(true);
   ret &= tickSubdomains(false);
   return ret;

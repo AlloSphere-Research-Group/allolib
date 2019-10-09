@@ -46,9 +46,9 @@
 */
 
 #include "al/graphics/al_DefaultShaders.hpp"
+#include "al/graphics/al_Light.hpp"
 #include "al/graphics/al_OpenGL.hpp"
 #include "al/graphics/al_RenderManager.hpp"
-#include "al/graphics/al_Light.hpp"
 
 namespace al {
 
@@ -61,49 +61,53 @@ namespace al {
 @ingroup Graphics
 */
 class Graphics : public RenderManager {
-public:
-
-  enum [[deprecated("use GL_* enums with al::gl::* functions")]] BlendFunc : unsigned int {
-    SRC_ALPHA = GL_SRC_ALPHA,                     /**< */
-    ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA, /**< */
-    SRC_COLOR = GL_SRC_COLOR,                     /**< */
-    ONE_MINUS_SRC_COLOR = GL_ONE_MINUS_SRC_COLOR, /**< */
-    DST_ALPHA = GL_DST_ALPHA,                     /**< */
-    ONE_MINUS_DST_ALPHA = GL_ONE_MINUS_DST_ALPHA, /**< */
-    DST_COLOR = GL_DST_COLOR,                     /**< */
-    ONE_MINUS_DST_COLOR = GL_ONE_MINUS_DST_COLOR, /**< */
-    ZERO = GL_ZERO,                               /**< */
-    ONE = GL_ONE,                                 /**< */
-    SRC_ALPHA_SATURATE = GL_SRC_ALPHA_SATURATE    /**< */
+ public:
+  enum[[deprecated(
+      "use GL_* enums with al::gl::* functions")]] BlendFunc : unsigned int{
+      SRC_ALPHA = GL_SRC_ALPHA,                     /**< */
+      ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA, /**< */
+      SRC_COLOR = GL_SRC_COLOR,                     /**< */
+      ONE_MINUS_SRC_COLOR = GL_ONE_MINUS_SRC_COLOR, /**< */
+      DST_ALPHA = GL_DST_ALPHA,                     /**< */
+      ONE_MINUS_DST_ALPHA = GL_ONE_MINUS_DST_ALPHA, /**< */
+      DST_COLOR = GL_DST_COLOR,                     /**< */
+      ONE_MINUS_DST_COLOR = GL_ONE_MINUS_DST_COLOR, /**< */
+      ZERO = GL_ZERO,                               /**< */
+      ONE = GL_ONE,                                 /**< */
+      SRC_ALPHA_SATURATE = GL_SRC_ALPHA_SATURATE    /**< */
   };
 
-  enum [[deprecated("use GL_* enums with al::gl::* functions")]] BlendEq : unsigned int {
-    FUNC_ADD = GL_FUNC_ADD,           /**< Source + destination */
-    FUNC_SUBTRACT = GL_FUNC_SUBTRACT, /**< Source - destination */
-    FUNC_REVERSE_SUBTRACT =
-        GL_FUNC_REVERSE_SUBTRACT, /**< Destination - source */
-    MIN = GL_MIN, /**< Minimum value of source and destination */
-    MAX = GL_MAX  /**< Maximum value of source and destination */
+  enum[[deprecated(
+      "use GL_* enums with al::gl::* functions")]] BlendEq : unsigned int{
+      FUNC_ADD = GL_FUNC_ADD,           /**< Source + destination */
+      FUNC_SUBTRACT = GL_FUNC_SUBTRACT, /**< Source - destination */
+      FUNC_REVERSE_SUBTRACT =
+          GL_FUNC_REVERSE_SUBTRACT, /**< Destination - source */
+      MIN = GL_MIN, /**< Minimum value of source and destination */
+      MAX = GL_MAX  /**< Maximum value of source and destination */
   };
 
-  enum [[deprecated("use GL_* enums with al::gl::* functions")]] Capability : unsigned int {
-    BLEND = GL_BLEND, /**< Blend rather than replacing with new color */
-    DEPTH_TEST = GL_DEPTH_TEST, /**< Test depth of incoming fragments */
-    SCISSOR_TEST =
-        GL_SCISSOR_TEST,     /**< Crop fragments according to scissor region */
-    CULL_FACE = GL_CULL_FACE /**< Cull faces */
+  enum[[deprecated(
+      "use GL_* enums with al::gl::* functions")]] Capability : unsigned int{
+      BLEND = GL_BLEND, /**< Blend rather than replacing with new color */
+      DEPTH_TEST = GL_DEPTH_TEST, /**< Test depth of incoming fragments */
+      SCISSOR_TEST =
+          GL_SCISSOR_TEST, /**< Crop fragments according to scissor region */
+      CULL_FACE = GL_CULL_FACE /**< Cull faces */
   };
 
-  enum [[deprecated("use GL_* enums with al::gl::* functions")]] Face : unsigned int {
-    FRONT = GL_FRONT,                  /**< Front face */
-    BACK = GL_BACK,                    /**< Back face */
-    FRONT_AND_BACK = GL_FRONT_AND_BACK /**< Front and back face */
+  enum[[deprecated(
+      "use GL_* enums with al::gl::* functions")]] Face : unsigned int{
+      FRONT = GL_FRONT,                  /**< Front face */
+      BACK = GL_BACK,                    /**< Back face */
+      FRONT_AND_BACK = GL_FRONT_AND_BACK /**< Front and back face */
   };
 
-  enum [[deprecated("use GL_* enums with al::gl::* functions")]] PolygonMode : unsigned int {
-    POINT = GL_POINT, /**< Render only points at each vertex */
-    LINE = GL_LINE,   /**< Render only lines along vertex path */
-    FILL = GL_FILL    /**< Render vertices normally according to primitive */
+  enum[[deprecated(
+      "use GL_* enums with al::gl::* functions")]] PolygonMode : unsigned int{
+      POINT = GL_POINT, /**< Render only points at each vertex */
+      LINE = GL_LINE,   /**< Render only lines along vertex path */
+      FILL = GL_FILL    /**< Render vertices normally according to primitive */
   };
 
   enum class ColoringMode : unsigned int {
@@ -184,19 +188,25 @@ public:
   void blendModeTrans() { blendMode(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, FUNC_ADD); }
 
   void scissor(int left, int bottom, int width, int height);
-  
+
   void setClearColor(float r, float g, float b, float a = 1);
   void setClearColor(Color const& c);
 
   void clearColorBuffer(int drawbuffer);
   void clearColorBuffer(float r, float g, float b, float a, int drawbuffer);
-  void clearColorBuffer(float k, float a, int drawbuffer) { clearColorBuffer(k, k, k, a, drawbuffer); }
-  void clearColorBuffer(Color const &c, int drawbuffer) { clearColorBuffer(c.r, c.g, c.b, c.a, drawbuffer); }
+  void clearColorBuffer(float k, float a, int drawbuffer) {
+    clearColorBuffer(k, k, k, a, drawbuffer);
+  }
+  void clearColorBuffer(Color const& c, int drawbuffer) {
+    clearColorBuffer(c.r, c.g, c.b, c.a, drawbuffer);
+  }
 
   void clearColor() { clearColorBuffer(0); }
-  void clearColor(float r, float g, float b, float a = 1) { clearColorBuffer(r, g, b, a, 0); }
+  void clearColor(float r, float g, float b, float a = 1) {
+    clearColorBuffer(r, g, b, a, 0);
+  }
   void clearColor(float k, float a = 1) { clearColorBuffer(k, k, k, a, 0); }
-  void clearColor(Color const &c)  { clearColorBuffer(c.r, c.g, c.b, c.a, 0); }
+  void clearColor(Color const& c) { clearColorBuffer(c.r, c.g, c.b, c.a, 0); }
 
   void setClearDepth(float d);
   void clearDepth();
@@ -204,13 +214,19 @@ public:
 
   void clearBuffer(int drawbuffer);
   void clearBuffer(float r, float g, float b, float a, float d, int drawbuffer);
-  void clearBuffer(float k, float a, float d, int drawbuffer) { clearBuffer(k, k, k, a, d, drawbuffer); }
-  void clearBuffer(Color const &c, float d, int drawbuffer) { clearBuffer(c.r, c.g, c.b, c.a, d, drawbuffer); }
+  void clearBuffer(float k, float a, float d, int drawbuffer) {
+    clearBuffer(k, k, k, a, d, drawbuffer);
+  }
+  void clearBuffer(Color const& c, float d, int drawbuffer) {
+    clearBuffer(c.r, c.g, c.b, c.a, d, drawbuffer);
+  }
 
   void clear() { clearBuffer(0); }
-  void clear(float r, float g, float b, float a = 1) { clearBuffer(r, g, b, a, 1, 0); }
+  void clear(float r, float g, float b, float a = 1) {
+    clearBuffer(r, g, b, a, 1, 0);
+  }
   void clear(float k, float a = 1) { clearBuffer(k, k, k, a, 1, 0); }
-  void clear(Color const &c) { clearBuffer(c.r, c.g, c.b, c.a, 1, 0); }
+  void clear(Color const& c) { clearBuffer(c.r, c.g, c.b, c.a, 1, 0); }
 
   // GL_NONE       /  GL_COLOR_ATTACHMENTn
   // GL_FRONT_LEFT /  GL_FRONT_RIGHT
@@ -224,12 +240,17 @@ public:
   void init();
 
   // set overall tint, regardless of rendering mode
-  void tint(Color const& c) { mTint = c; mUniformChanged = true; }
+  void tint(Color const& c) {
+    mTint = c;
+    mUniformChanged = true;
+  }
   void tint(float r, float g, float b, float a = 1.0f) {
     mTint.set(r, g, b, a);
     mUniformChanged = true;
   }
-  void tint(float grayscale, float a = 1.0f) { tint(grayscale, grayscale, grayscale, a); }
+  void tint(float grayscale, float a = 1.0f) {
+    tint(grayscale, grayscale, grayscale, a);
+  }
 
   // set to uniform color mode, using previously set uniform color
   void color();
@@ -260,33 +281,40 @@ public:
   void numLight(int n);
 
   // turn on/off light at specified index.
-  // if light is off it still gets calculated in the shader but zero is multiplied as intensity.
-  // to prevent calculation, reorder lights and call `numLight` function
-  // to change shader to one with less number of lights
+  // if light is off it still gets calculated in the shader but zero is
+  // multiplied as intensity. to prevent calculation, reorder lights and call
+  // `numLight` function to change shader to one with less number of lights
   void enableLight(int idx);
   void disableLight(int idx);
   void toggleLight(int idx);
 
   // does not enable lighting, call lighting(true) to enable lighting
-  void light(Light const& l, int idx=0);
+  void light(Light const& l, int idx = 0);
 
   void quad(Texture& tex, float x, float y, float w, float h);
-  void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2, float h = 2);
+  void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2,
+                    float h = 2);
 
-  // use user made non-default shader. with this call user should set uniforms manually
-  // (but stiil use allolib interface for mesh and model/view/proj matrices)
-  void shader(ShaderProgram& s) { mColoringMode = ColoringMode::CUSTOM; RenderManager::shader(s); }
+  // use user made non-default shader. with this call user should set uniforms
+  // manually (but stiil use allolib interface for mesh and model/view/proj
+  // matrices)
+  void shader(ShaderProgram& s) {
+    mColoringMode = ColoringMode::CUSTOM;
+    RenderManager::shader(s);
+  }
   ShaderProgram& shader() { return RenderManager::shader(); }
   ShaderProgram* shaderPtr() { return RenderManager::shaderPtr(); }
 
-  using RenderManager::camera; // makes camera(Viewpoint::SpecialType v) accessible
+  using RenderManager::camera;  // makes camera(Viewpoint::SpecialType v)
+                                // accessible
   void camera(Viewpoint const& v) override {
     mLens = v.lens();
     mUniformChanged = true;
     RenderManager::camera(v);
   }
 
-  void send_lighting_uniforms(ShaderProgram& s, lighting_shader_uniforms const& u);
+  void send_lighting_uniforms(ShaderProgram& s,
+                              lighting_shader_uniforms const& u);
   void update() override;
 
   // to pass to the shader, combined with mLens.eyeSep(),
@@ -299,13 +327,9 @@ public:
     mUniformChanged = true;
   }
 
-  float eye() {
-    return mEye;
-  }
+  float eye() { return mEye; }
 
-  Lens const& lens() const {
-    return mLens;
-  }
+  Lens const& lens() const { return mLens; }
 
   Lens& lens() {
     mUniformChanged = true;
@@ -316,39 +340,38 @@ public:
     mUniformChanged = true;
     mLens = l;
   }
-  
+
   void omni(bool b) {
     is_omni = b;
     mRenderModeChanged = true;
   }
-  
-  bool omni() {
-    return is_omni;
-  }
+
+  bool omni() { return is_omni; }
 
   // deprecated
-  [[deprecated]]
-  void blendOn() { blending(true); }
-  [[deprecated]]
-  void blendAdd() {blendModeAdd(); }
-  [[deprecated]]
-  void blendSub() {blendModeSub(); }
-  [[deprecated]]
-  void blendScreen() {blendModeScreen(); }
-  [[deprecated]]
-  void blendMul() {blendModeMul(); }
-  [[deprecated]]
-  void blendTrans() {blendModeTrans(); }
-  [[deprecated]]
-  void blendOff() { blending(false); }
+  [[deprecated]] void blendOn() {
+    blending(true);
+  }[[deprecated]] void blendAdd() {
+    blendModeAdd();
+  }
+  [[deprecated]] void blendSub() {
+    blendModeSub();
+  }[[deprecated]] void blendScreen() {
+    blendModeScreen();
+  }
+  [[deprecated]] void blendMul() {
+    blendModeMul();
+  }[[deprecated]] void blendTrans() {
+    blendModeTrans();
+  }
+  [[deprecated]] void blendOff() { blending(false); }
 
-private:
-  bool initialized = false;
+  private : bool initialized = false;
 
-  Color mClearColor {0, 0, 0, 1};
+  Color mClearColor{0, 0, 0, 1};
   float mClearDepth = 1;
-  Color mColor {1, 1, 1, 1};
-  Color mTint {1, 1, 1, 1};
+  Color mColor{1, 1, 1, 1};
+  Color mTint{1, 1, 1, 1};
 
   Graphics::ColoringMode mColoringMode = ColoringMode::UNIFORM;
   bool mRenderModeChanged = true;

@@ -9,9 +9,7 @@ using namespace al;
 
 // This example shows how to connect MIDI CC messages to Parameter values
 
-
-struct MyApp : App
-{
+struct MyApp : App {
   float x = 0;
   Mesh m;
 
@@ -21,7 +19,7 @@ struct MyApp : App
   ParameterMIDI parameterMIDI;
 
   void onInit() override {
-//    Connect parameters to MIDI CC messages
+    //    Connect parameters to MIDI CC messages
     parameterMIDI.connectControl(Size, 1, 1);
     parameterMIDI.connectControl(Speed, 10, 1);
 
@@ -46,12 +44,9 @@ struct MyApp : App
       x -= M_2PI;
     }
   }
-
 };
 
-int main()
-{
+int main() {
   MyApp().start();
   return 0;
 }
-

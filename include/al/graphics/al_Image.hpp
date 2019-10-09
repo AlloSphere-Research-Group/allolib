@@ -57,13 +57,13 @@ namespace al {
     Implementation uses stb_image.h >> https://github.com/nothings/stb
 */
 
-
 /**
 @brief Interface for loading image files
 
-		Loads image as 8-bit 4 channels RGBA
-		Supported formats: PNG, JPG, ...
-		Implementation uses stb_image.h from https://github.com/nothings/stb
+                Loads image as 8-bit 4 channels RGBA
+                Supported formats: PNG, JPG, ...
+                Implementation uses stb_image.h from
+https://github.com/nothings/stb
 
 @ingroup Graphics
 */
@@ -117,10 +117,14 @@ struct Image {
   const std::vector<uint8_t> &array() const { return mArray; }
 
   /// Get pointer to pixels
-  template <typename T = RGBAPix> T *pixels() { return (T *)(mArray.data()); }
+  template <typename T = RGBAPix>
+  T *pixels() {
+    return (T *)(mArray.data());
+  }
 
   /// Get pointer to pixels (read-only)
-  template <typename T = RGBAPix> const T *pixels() const {
+  template <typename T = RGBAPix>
+  const T *pixels() const {
     return (const T *)(mArray.data());
   }
 
@@ -164,7 +168,8 @@ struct Image {
 
   /// Warning: doesn't check that Pix has matching type/component count.
   /// Warning: no bounds checking performed on x and y.
-  template <typename Pix = RGBAPix> Pix &at(unsigned x, unsigned y) {
+  template <typename Pix = RGBAPix>
+  Pix &at(unsigned x, unsigned y) {
     auto pixel_index = x + y * width();
     return *reinterpret_cast<RGBAPix *>(mArray.data() + 4 * pixel_index);
     // return *array().cell<Pix>(x, y);
@@ -204,7 +209,8 @@ struct Image {
   /// @param[in] dimY		number of pixels in y direction
   /// @param[in] format	pixel color format
   /// \returns True on success; false otherwise.
-  template <typename T> bool resize(int dimX, int dimY /*, Format format */) {
+  template <typename T>
+  bool resize(int dimX, int dimY /*, Format format */) {
     mArray.resize(4 * dimX * dimY);
     // mArray.formatAligned(components(format), Array::type<T>(), dimX, dimY,
     // 1);
@@ -250,9 +256,9 @@ struct Image {
   //	virtual ~Impl() {};
   //	virtual bool load(const std::string& filename, Array& lat) = 0;
   //	virtual bool save(const std::string& filename, const Array& lat, int
-  //compressFlags) = 0;
+  // compressFlags) = 0;
   //};
 };
 
-} // namespace al
+}  // namespace al
 #endif

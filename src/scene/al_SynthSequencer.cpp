@@ -1,34 +1,35 @@
 
-#include <iostream>
-#include <cassert>
-#include <sstream>
-#include <fstream>
 #include <algorithm>
+#include <cassert>
 #include <climits>
-#include <typeinfo> // For class name instrospection
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <typeinfo>  // For class name instrospection
 
 #include "al/scene/al_SynthSequencer.hpp"
 
 using namespace al;
 
 void SynthSequencer::render(AudioIOData &io) {
-    if (mMasterMode ==  PolySynth::TIME_MASTER_AUDIO) {
-        double timeIncrement = mNormalizedTempo * io.framesPerBuffer()/(double) io.framesPerSecond();
-        double blockStartTime = mMasterTime;
-        mMasterTime += timeIncrement;
-        processEvents(blockStartTime, mNormalizedTempo * io.framesPerSecond());
-    }
-    mPolySynth->render(io);
+  if (mMasterMode == PolySynth::TIME_MASTER_AUDIO) {
+    double timeIncrement =
+        mNormalizedTempo * io.framesPerBuffer() / (double)io.framesPerSecond();
+    double blockStartTime = mMasterTime;
+    mMasterTime += timeIncrement;
+    processEvents(blockStartTime, mNormalizedTempo * io.framesPerSecond());
+  }
+  mPolySynth->render(io);
 }
 
 void SynthSequencer::render(Graphics &g) {
-    if (mMasterMode == PolySynth::TIME_MASTER_GRAPHICS) {
-        double timeIncrement = 1.0/mFps;
-        double blockStartTime = mMasterTime;
-        mMasterTime += timeIncrement;
-        processEvents(blockStartTime, mNormalizedTempo * mFps);
-    }
-    mPolySynth->render(g);
+  if (mMasterMode == PolySynth::TIME_MASTER_GRAPHICS) {
+    double timeIncrement = 1.0 / mFps;
+    double blockStartTime = mMasterTime;
+    mMasterTime += timeIncrement;
+    processEvents(blockStartTime, mNormalizedTempo * mFps);
+  }
+  mPolySynth->render(g);
 }
 
 void SynthSequencer::print() {
@@ -38,11 +39,13 @@ void SynthSequencer::print() {
 
 bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   //        synth().allNotesOff();
-  // Add an offset of 0.1 to make sure the allNotesOff message gets processed before the sequence
+  // Add an offset of 0.1 to make sure the allNotesOff message gets processed
+  // before the sequence
   mMasterTime = startTime;
   double currentMasterTime = mMasterTime;
   const double startPad = 0.1;
-  std::list<SynthSequencerEvent> events = loadSequence(sequenceName, currentMasterTime - startTime + startPad);
+  std::list<SynthSequencerEvent> events =
+      loadSequence(sequenceName, currentMasterTime - startTime + startPad);
   std::unique_lock<std::mutex> lk(mEventLock);
   mLastSequencePlayed = sequenceName;
   mEvents = events;
@@ -50,7 +53,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   mPlaybackStartTime = currentMasterTime - startTime + startPad;
   mPlaying = true;
   lk.unlock();
-  for (auto cb: mSequenceBeginCallbacks) {
+  for (auto cb : mSequenceBeginCallbacks) {
     cb(mLastSequencePlayed);
   }
   if (mMasterMode == PolySynth::TIME_MASTER_CPU) {
@@ -66,11 +69,13 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
           }
         }
         lk.unlock();
-        double timeIncrement = granularityns/ 1.0e-9;
+        double timeIncrement = granularityns / 1.0e-9;
         double blockStartTime = mMasterTime;
         mMasterTime += timeIncrement;
-        processEvents(blockStartTime, 1.0e9/granularityns);
-        std::this_thread::sleep_until(startTime + std::chrono::nanoseconds(uint32_t(mMasterTime * 1.0e9)));
+        processEvents(blockStartTime, 1.0e9 / granularityns);
+        std::this_thread::sleep_until(
+            startTime +
+            std::chrono::nanoseconds(uint32_t(mMasterTime * 1.0e9)));
       }
     });
   }
@@ -79,7 +84,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
 
 void SynthSequencer::stopSequence() {
   std::unique_lock<std::mutex> lk(mEventLock);
-  for (auto &event: mEvents) {
+  for (auto &event : mEvents) {
     if (event.type == SynthSequencerEvent::EVENT_VOICE) {
       // Give back allocated voice to synth
       if (event.voice) {
@@ -95,11 +100,11 @@ void SynthSequencer::stopSequence() {
 
 void SynthSequencer::setTime(float newTime) {
   synth().allNotesOff();
-//  mPlaybackStartTime = newTime;
+  //  mPlaybackStartTime = newTime;
   mMasterTime = newTime;
   mNextEvent = 0;
 
-//  std::cout << "Setting time not implemented" <<std::endl;
+  //  std::cout << "Setting time not implemented" <<std::endl;
 }
 
 void SynthSequencer::setDirectory(std::string directory) {
@@ -107,25 +112,26 @@ void SynthSequencer::setDirectory(std::string directory) {
   mDirectory = directory;
 }
 
-void SynthSequencer::registerTimeChangeCallback(std::function<void (float)> func, float minTimeDeltaSec)
-{
+void SynthSequencer::registerTimeChangeCallback(std::function<void(float)> func,
+                                                float minTimeDeltaSec) {
   if (mEventLock.try_lock()) {
     mTimeAccumCallbackNs.push_back(0.0);
-    mTimeChangeCallbacks.push_back({func,minTimeDeltaSec}) ;
-//    mTimeChangeMinTimeDelta = minTimeDeltaSec;
+    mTimeChangeCallbacks.push_back({func, minTimeDeltaSec});
+    //    mTimeChangeMinTimeDelta = minTimeDeltaSec;
     mEventLock.unlock();
   } else {
-    std::cerr << "ERROR: Failed to set time change callback. Sequencer running" <<std::endl;
+    std::cerr << "ERROR: Failed to set time change callback. Sequencer running"
+              << std::endl;
   }
 }
 
-void SynthSequencer::registerSequenceBeginCallback(std::function<void (std::string)> func)
-{
+void SynthSequencer::registerSequenceBeginCallback(
+    std::function<void(std::string)> func) {
   mSequenceBeginCallbacks.push_back(func);
 }
 
-void SynthSequencer::registerSequenceEndCallback(std::function<void (std::string)> func)
-{
+void SynthSequencer::registerSequenceEndCallback(
+    std::function<void(std::string)> func) {
   mSequenceEndCallbacks.push_back(func);
 }
 
@@ -137,21 +143,22 @@ void SynthSequencer::registerSynth(PolySynth &synth) {
   mMasterMode = mPolySynth->mMasterMode;
 }
 
-std::string SynthSequencer::buildFullPath(std::string sequenceName)
-{
+std::string SynthSequencer::buildFullPath(std::string sequenceName) {
   std::string fullName = mDirectory;
 
   if (fullName.back() != '/') {
     fullName += "/";
   }
-  if (sequenceName.size() < 14 || sequenceName.substr(sequenceName.size() - 14) != ".synthSequence") {
+  if (sequenceName.size() < 14 ||
+      sequenceName.substr(sequenceName.size() - 14) != ".synthSequence") {
     sequenceName += ".synthSequence";
   }
   fullName += sequenceName;
   return fullName;
 }
 
-std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequenceName, double timeOffset, double timeScale) {
+std::list<SynthSequencerEvent> SynthSequencer::loadSequence(
+    std::string sequenceName, double timeOffset, double timeScale) {
   std::unique_lock<std::mutex> lk(mLoadingLock);
   std::list<SynthSequencerEvent> events;
   std::string fullName = buildFullPath(sequenceName);
@@ -195,31 +202,32 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
       std::string stringAccum;
       size_t currentIndex = 0;
 
-      auto isFloat = []( std::string myString ) {
+      auto isFloat = [](std::string myString) {
         std::istringstream iss(myString);
         float f;
-        iss >> std::noskipws >> f; // noskipws considers leading whitespace invalid
-        // Check the entire string was consumed and if either failbit or badbit is set
+        iss >> std::noskipws >>
+            f;  // noskipws considers leading whitespace invalid
+        // Check the entire string was consumed and if either failbit or badbit
+        // is set
         return iss.eof() && !iss.fail();
       };
 
-      while(currentIndex < fieldsString.size()) {
+      while (currentIndex < fieldsString.size()) {
         if (fieldsString[currentIndex] == '"') {
-          if (processingString) { // String end
+          if (processingString) {  // String end
             pFields.push_back(stringAccum);
             stringAccum.clear();
             processingString = false;
-          } else { // String begin
+          } else {  // String begin
             processingString = true;
           }
-        } else if (fieldsString[currentIndex] == ' '
-                   || fieldsString[currentIndex] == '\t'
-                   || fieldsString[currentIndex] == '\n'
-                   || fieldsString[currentIndex] == '\r'
-                   ) {
+        } else if (fieldsString[currentIndex] == ' ' ||
+                   fieldsString[currentIndex] == '\t' ||
+                   fieldsString[currentIndex] == '\n' ||
+                   fieldsString[currentIndex] == '\r') {
           if (processingString) {
             stringAccum += fieldsString[currentIndex];
-          } else if (stringAccum.size() > 0) { // accumulate
+          } else if (stringAccum.size() > 0) {  // accumulate
             if (isFloat(stringAccum)) {
               pFields.push_back(stof(stringAccum));
             } else {
@@ -228,7 +236,7 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
             //                            std::cout << stringAccum << std::endl;
             stringAccum.clear();
           }
-        } else { // Accumulate character
+        } else {  // Accumulate character
           stringAccum += fieldsString[currentIndex];
         }
         currentIndex++;
@@ -241,22 +249,25 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
         }
       }
 
-
-      if (false) { // Insert event as EVENT_VOICE. This is not good as it forces preallocating all the events...
+      if (false) {  // Insert event as EVENT_VOICE. This is not good as it
+                    // forces preallocating all the events...
         SynthVoice *newVoice = mPolySynth->getVoice(name);
         if (newVoice) {
           if (!newVoice->setTriggerParams(pFields)) {
-            std::cout << "Error setting pFields for voice of type " << name << ". Fields: ";
-            for (auto &field: pFields) {
+            std::cout << "Error setting pFields for voice of type " << name
+                      << ". Fields: ";
+            for (auto &field : pFields) {
               std::cout << field.type() << " ";
             }
             std::cout << std::endl;
-            mPolySynth->insertFreeVoice(newVoice); // Return voice to sequencer.
+            mPolySynth->insertFreeVoice(
+                newVoice);  // Return voice to sequencer.
           } else {
             double absoluteTime = timeOffset + startTime;
             // Insert into event list, sorted.
             auto position = events.begin();
-            while(position != events.end() && position->startTime < absoluteTime) {
+            while (position != events.end() &&
+                   position->startTime < absoluteTime) {
               position++;
             }
             auto insertedEvent = events.insert(position, SynthSequencerEvent());
@@ -265,14 +276,16 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
             insertedEvent->startTime = absoluteTime;
             insertedEvent->duration = duration;
             insertedEvent->voice = newVoice;
-            //                        std::cout << "Inserted event " << events.size() << " at time " << absoluteTime << std::endl;
+            //                        std::cout << "Inserted event " <<
+            //                        events.size() << " at time " <<
+            //                        absoluteTime << std::endl;
           }
         }
       } else {
         double absoluteTime = timeOffset + startTime;
         // Insert into event list, sorted.
         auto position = events.begin();
-        while(position != events.end() && position->startTime < absoluteTime) {
+        while (position != events.end() && position->startTime < absoluteTime) {
           position++;
         }
         auto insertedEvent = events.insert(position, SynthSequencerEvent());
@@ -282,7 +295,8 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
         insertedEvent->duration = duration;
         insertedEvent->fields.name = name;
         insertedEvent->voice = nullptr;
-        insertedEvent->fields.pFields = pFields; // TODO it would be nice not to have to copy here...
+        insertedEvent->fields.pFields =
+            pFields;  // TODO it would be nice not to have to copy here...
       }
 
       //                std::cout << "Done reading sequence" << std::endl;
@@ -315,7 +329,8 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
       if (newVoice) {
         newVoice->id(id);
         if (!newVoice->setTriggerParams(pFields, numFields)) {
-          std::cerr << "Error setting pFields for voice of type " << name << ". Fields: ";
+          std::cerr << "Error setting pFields for voice of type " << name
+                    << ". Fields: ";
           for (int i = 0; i < numFields; i++) {
             std::cerr << pFields[i] << " ";
           }
@@ -326,7 +341,8 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
           {
             //                            // Insert into event list, sorted.
             auto position = events.begin();
-            while(position != events.end() && position->startTime < absoluteTime) {
+            while (position != events.end() &&
+                   position->startTime < absoluteTime) {
               position++;
             }
             insertedEvent = events.insert(position, SynthSequencerEvent());
@@ -334,13 +350,17 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
           // Add 0.1 padding to ensure all events play.
           insertedEvent->type = SynthSequencerEvent::EVENT_VOICE;
           insertedEvent->startTime = absoluteTime;
-          insertedEvent->duration = -1; // Turn on events have undetermined duration until a turn off is found later
+          insertedEvent->duration =
+              -1;  // Turn on events have undetermined duration until a turn off
+                   // is found later
           insertedEvent->voice = newVoice;
-          //                        std::cout << "Inserted event " << id << " at time " << startTime << std::endl;
+          //                        std::cout << "Inserted event " << id << " at
+          //                        time " << startTime << std::endl;
         }
       } else {
         if (verbose()) {
-          std::cout << "Warning: Unable to get free voice from PolySynth." << std::endl;
+          std::cout << "Warning: Unable to get free voice from PolySynth."
+                    << std::endl;
         }
       }
     } else if (command == '-' && ss.get() == ' ') {
@@ -349,14 +369,16 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
       std::getline(ss, idText);
       int id = std::stoi(idText);
       double eventTime = std::stod(time) * timeScale * tempoFactor;
-      for (SynthSequencerEvent &event: events) {
-        if (event.voice->id() == id && event.duration < 0 && event.type == SynthSequencerEvent::EVENT_VOICE) {
+      for (SynthSequencerEvent &event : events) {
+        if (event.voice->id() == id && event.duration < 0 &&
+            event.type == SynthSequencerEvent::EVENT_VOICE) {
           double duration = eventTime - event.startTime + timeOffset;
           if (duration < 0) {
             duration = 0;
           }
           event.duration = duration;
-          //                        std::cout << "Set event duration " << id << " to " << duration << std::endl;
+          //                        std::cout << "Set event duration " << id <<
+          //                        " to " << duration << std::endl;
           break;
         }
       }
@@ -372,16 +394,18 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
         sequenceName = sequenceName.substr(0, sequenceName.size() - 1);
       }
       lk.unlock();
-      auto newEvents = loadSequence(sequenceName, stod(time) + timeOffset, stod(timeScaleInFile) * tempoFactor);
+      auto newEvents = loadSequence(sequenceName, stod(time) + timeOffset,
+                                    stod(timeScaleInFile) * tempoFactor);
       lk.lock();
       events.insert(events.end(), newEvents.begin(), newEvents.end());
       // FIXME: This sorting only works if both the existing sequence and
       // the incoming sequence use absolute event times. Sorting
       // anything else results in chaos... This should be detected
       // and acted on
-      events.sort([](const SynthSequencerEvent &a, const SynthSequencerEvent &b) {
-        return a.startTime < b.startTime;
-      });
+      events.sort(
+          [](const SynthSequencerEvent &a, const SynthSequencerEvent &b) {
+            return a.startTime < b.startTime;
+          });
     } else if (command == '>' && ss.get() == ' ') {
       std::string time;
       std::getline(ss, time);
@@ -389,10 +413,10 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(std::string sequence
     } else if (command == 't' && ss.get() == ' ') {
       std::string tempo;
       std::getline(ss, tempo);
-      tempoFactor = 60.0/std::stod(tempo);
+      tempoFactor = 60.0 / std::stod(tempo);
     } else {
       if (command > 0) {
-        if(verbose()) {
+        if (verbose()) {
           std::cout << "Line ignored. Command: " << command << std::endl;
         }
       }
@@ -413,25 +437,33 @@ std::vector<std::string> SynthSequencer::getSequenceList() {
   }
 
   // get list of files ending in ".synthSequence"
-  FileList sequence_files = filterInDir(path, [](const FilePath& f){
-    if (al::checkExtension(f, ".synthSequence")) return true;
-    else return false;
+  FileList sequence_files = filterInDir(path, [](const FilePath &f) {
+    if (al::checkExtension(f, ".synthSequence"))
+      return true;
+    else
+      return false;
   });
 
   // store found preset files
   for (int i = 0; i < sequence_files.count(); i += 1) {
-    const FilePath& path = sequence_files[i];
-    const std::string& name = path.file();
+    const FilePath &path = sequence_files[i];
+    const std::string &name = path.file();
     // exclude extension when adding to sequence list
-    sequenceList.push_back(name.substr(0, name.size()-14));
+    sequenceList.push_back(name.substr(0, name.size() - 14));
   }
 
+  std::sort(sequenceList.begin(), sequenceList.end(),
+            [](const auto &lhs, const auto &rhs) {
+              const auto result =
+                  mismatch(lhs.cbegin(), lhs.cend(), rhs.cbegin(), rhs.cend(),
+                           [](const auto &lhs, const auto &rhs) {
+                             return tolower(lhs) == tolower(rhs);
+                           });
 
-  std::sort(sequenceList.begin(), sequenceList.end(), [](const auto& lhs, const auto& rhs){
-    const auto result = mismatch(lhs.cbegin(), lhs.cend(), rhs.cbegin(), rhs.cend(), [](const auto& lhs, const auto& rhs){return tolower(lhs) == tolower(rhs);});
-
-    return result.second != rhs.cend() && (result.first == lhs.cend() || tolower(*result.first) < tolower(*result.second));
-  });
+              return result.second != rhs.cend() &&
+                     (result.first == lhs.cend() ||
+                      tolower(*result.first) < tolower(*result.second));
+            });
 
   return sequenceList;
 }
@@ -439,7 +471,7 @@ std::vector<std::string> SynthSequencer::getSequenceList() {
 double SynthSequencer::getSequenceDuration(std::string sequenceName) {
   std::list<SynthSequencerEvent> events = loadSequence(sequenceName, 0.0);
   double dur = 0.0;
-  for (auto const &event: events) {
+  for (auto const &event : events) {
     if (event.startTime + event.duration > dur) {
       dur = event.startTime + event.duration;
     }
@@ -449,45 +481,51 @@ double SynthSequencer::getSequenceDuration(std::string sequenceName) {
 
 void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
   if (mEventLock.try_lock()) {
-
     if (mNextEvent < mEvents.size()) {
-
       int i = 0;
-      for (auto cb: mTimeChangeCallbacks) {
-        mTimeAccumCallbackNs[i] += (mMasterTime - blockStartTime)* 1.0e9;
-//        std::cout << mTimeAccumCallbackNs[i] << std::endl;
-        if (mTimeAccumCallbackNs[i]*1.0e-9 > cb.second) {
+      for (auto cb : mTimeChangeCallbacks) {
+        mTimeAccumCallbackNs[i] += (mMasterTime - blockStartTime) * 1.0e9;
+        //        std::cout << mTimeAccumCallbackNs[i] << std::endl;
+        if (mTimeAccumCallbackNs[i] * 1.0e-9 > cb.second) {
           cb.first(float(blockStartTime - mPlaybackStartTime));
-          mTimeAccumCallbackNs[i] -= cb.second* 1.0e9;
+          mTimeAccumCallbackNs[i] -= cb.second * 1.0e9;
         }
         i++;
       }
       auto iter = mEvents.begin();
       std::advance(iter, mNextEvent);
       auto event = iter;
-      while (event != mEvents.end() && event->startTime <= mMasterTime - blockStartTime) {
+      while (event != mEvents.end() &&
+             event->startTime <= mMasterTime - blockStartTime) {
         event++;
       }
       while (event->startTime <= mMasterTime) {
-        event->offsetCounter = (event->startTime - blockStartTime)*fpsAdjusted;
+        event->offsetCounter =
+            (event->startTime - blockStartTime) * fpsAdjusted;
         if (event->type == SynthSequencerEvent::EVENT_VOICE) {
           mPolySynth->triggerOn(event->voice, event->offsetCounter);
           event->voiceId = event->voice->id();
-          event->voice = nullptr; // Voice has been consumed, all voices reamining in the event list are put back in the synth's free voice pool
-        } else if (event->type == SynthSequencerEvent::EVENT_PFIELDS){
+          event->voice = nullptr;  // Voice has been consumed, all voices
+                                   // reamining in the event list are put back
+                                   // in the synth's free voice pool
+        } else if (event->type == SynthSequencerEvent::EVENT_PFIELDS) {
           auto *voice = mPolySynth->getVoice(event->fields.name);
           if (voice) {
             voice->setTriggerParams(event->fields.pFields);
             mPolySynth->triggerOn(voice, event->offsetCounter);
             event->voiceId = voice->id();
-//            event->voice = voice;
+            //            event->voice = voice;
           } else {
-            std::cerr << "SynthSequencer::processEvents: Could not get free voice '" << event->fields.name << "' for sequencer!" << std::endl;
+            std::cerr
+                << "SynthSequencer::processEvents: Could not get free voice '"
+                << event->fields.name << "' for sequencer!" << std::endl;
           }
-        } else if (event->type == SynthSequencerEvent::EVENT_TEMPO){
+        } else if (event->type == SynthSequencerEvent::EVENT_TEMPO) {
           // TODO support tempo events
         }
-        //                std::cout << "Event " << mNextEvent << " " << event->startTime << " " << typeid(*event->voice).name() << std::endl;
+        //                std::cout << "Event " << mNextEvent << " " <<
+        //                event->startTime << " " <<
+        //                typeid(*event->voice).name() << std::endl;
         mNextEvent++;
         iter++;
         if (iter == mEvents.end()) {
@@ -506,17 +544,20 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
       if (event.voiceId >= 0 && eventTermination <= mMasterTime) {
         mPolySynth->triggerOff(event.voiceId);
         event.voiceId = -1;
-//        std::cout << "trigger off " <<  event.voice->id() << " " << eventTermination << " " << mMasterTime  << std::endl;
-//        event.voice = nullptr; // When an event gives up a voice, it is done.
+        //        std::cout << "trigger off " <<  event.voice->id() << " " <<
+        //        eventTermination << " " << mMasterTime  << std::endl;
+        //        event.voice = nullptr; // When an event gives up a voice, it
+        //        is done.
         triggerOffThisBlock = true;
       }
       if (eventTermination > mMasterTime) {
         allEventsDone = false;
       }
     }
-    if (allEventsDone && triggerOffThisBlock) { // This block marks the end of the sequence
+    if (allEventsDone &&
+        triggerOffThisBlock) {  // This block marks the end of the sequence
       mPlaying = false;
-      for (auto cb: mSequenceEndCallbacks) {
+      for (auto cb : mSequenceEndCallbacks) {
         cb(mLastSequencePlayed);
       }
     }

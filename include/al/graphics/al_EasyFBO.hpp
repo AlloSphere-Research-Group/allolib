@@ -74,11 +74,11 @@ struct EasyFBOSetting {
   int filterMin = GL_NEAREST;
   int filterMag = GL_NEAREST;
 
-  bool mUseMipmap = false; // config mipmap levels for result texture?
+  bool mUseMipmap = false;  // config mipmap levels for result texture?
 
-  bool use_depth_texture = false; // if true, use texture with depth_format
-                                  // for depth recording.
-                                  // else use rbo for depth recording
+  bool use_depth_texture = false;  // if true, use texture with depth_format
+                                   // for depth recording.
+                                   // else use rbo for depth recording
 };
 
 /// Encapsulates FBO, depth buffer, and texture
@@ -91,8 +91,9 @@ class EasyFBO {
   RBO mRbo;
   FBO mFbo;
 
-public:
-  void init(int width, int height, EasyFBOSetting const& setting = EasyFBOSetting{});
+ public:
+  void init(int width, int height,
+            EasyFBOSetting const& setting = EasyFBOSetting{});
   int width() { return mWidth; }
   int height() { return mHeight; }
   FBO& fbo() { return mFbo; }
@@ -104,6 +105,6 @@ public:
   void bind() { mFbo.bind(); }
 };
 
-} // al::
+}  // namespace al
 
 #endif

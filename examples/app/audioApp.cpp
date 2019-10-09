@@ -1,5 +1,5 @@
-#include <memory>
 #include <iostream>
+#include <memory>
 
 #include "al/app/al_AudioDomain.hpp"
 #include "al/app/al_ConsoleDomain.hpp"
@@ -15,16 +15,16 @@
 using namespace al;
 
 class MyAudioApp {
-public:
-
+ public:
   // The app will run an "AudioDomain"
   AudioDomain audioDomain;
   ConsoleDomain consoleDomain;
 
-  gam::Sine<> mOsc {440};
+  gam::Sine<> mOsc{440};
 
   // Configure function
-  void configure(double sampleRate, int blockSize, int audioOutputs, int audioInputs) {
+  void configure(double sampleRate, int blockSize, int audioOutputs,
+                 int audioInputs) {
     // This configures the audio domain.
     audioDomain.configure(sampleRate, blockSize, audioOutputs, audioInputs);
   }
@@ -36,8 +36,8 @@ public:
     consoleDomain.initialize();
     // Set audio callback through a lambda
     audioDomain.onSound = [this](AudioIOData &io) {
-      while(io()) {
-        io.out(0) =  mOsc() * 0.1f;
+      while (io()) {
+        io.out(0) = mOsc() * 0.1f;
       }
     };
 
@@ -45,7 +45,7 @@ public:
       if (line.size() == 0) {
         return false;
       } else {
-        std::cout << "Frequency:" << line<< std::endl;
+        std::cout << "Frequency:" << line << std::endl;
         mOsc.freq(std::stof(line));
       }
       return true;
@@ -57,8 +57,9 @@ public:
     // application alive by starting the console domain
     audioDomain.start();
 
-    std::cout << "Enter a number to set the frequency. Press enter to quit." << std::endl;
-    consoleDomain.start(); // Console Domain is a blocking domain
+    std::cout << "Enter a number to set the frequency. Press enter to quit."
+              << std::endl;
+    consoleDomain.start();  // Console Domain is a blocking domain
 
     // stop and cleanup domains
     audioDomain.stop();
@@ -66,12 +67,9 @@ public:
     audioDomain.cleanup();
     consoleDomain.cleanup();
   }
-
 };
 
-
-int main()
-{
+int main() {
   MyAudioApp app;
   app.configure(44100, 256, 2, 0);
   app.start();

@@ -12,7 +12,9 @@ namespace al {
 //==============================================================================
 
 AudioDeviceInfo::AudioDeviceInfo(int deviceNum)
-    : mID(deviceNum), mChannelsInMax(0), mChannelsOutMax(0),
+    : mID(deviceNum),
+      mChannelsInMax(0),
+      mChannelsOutMax(0),
       mDefaultSampleRate(0.0) {}
 
 bool AudioDeviceInfo::valid() const { return true; }
@@ -36,11 +38,19 @@ void AudioDeviceInfo::setDefaultSampleRate(double rate) {
 //==============================================================================
 
 AudioIOData::AudioIOData(void *userData)
-    : mGain(1), mGainPrev(1),
+    : mGain(1),
+      mGainPrev(1),
       mUser(userData),
-      mFrame(0), mFramesPerBuffer(512), mFramesPerSecond(44100),
-      mBufI(nullptr), mBufO(nullptr), mBufB(nullptr), mBufT(nullptr),
-      mNumI(0), mNumO(0), mNumB(0) {}
+      mFrame(0),
+      mFramesPerBuffer(512),
+      mFramesPerSecond(44100),
+      mBufI(nullptr),
+      mBufO(nullptr),
+      mBufB(nullptr),
+      mBufT(nullptr),
+      mNumI(0),
+      mNumO(0),
+      mNumB(0) {}
 
 AudioIOData::~AudioIOData() {
   deleteBuf(mBufI);
@@ -51,7 +61,6 @@ AudioIOData::~AudioIOData() {
 
 void AudioIOData::zeroBus() { zero(mBufB, framesPerBuffer() * mNumB); }
 void AudioIOData::zeroOut() { zero(mBufO, channelsOut() * framesPerBuffer()); }
-
 
 void AudioIOData::channelsBus(int num) {
   resize(mBufB, num * mFramesPerBuffer);
@@ -74,15 +83,14 @@ void AudioIOData::channels(int num, bool forOutput) {
 void AudioIOData::channelsIn(int n) { channels(n, false); }
 void AudioIOData::channelsOut(int n) { channels(n, true); }
 
-
-void AudioIOData::framesPerSecond(double v) {  // printf("AudioIO::fps(%f)\n", v);
+void AudioIOData::framesPerSecond(
+    double v) {  // printf("AudioIO::fps(%f)\n", v);
   if (framesPerSecond() != v) {
     mFramesPerSecond = v;
   }
 }
 
 void AudioIOData::framesPerBuffer(unsigned int n) {
-
   if (framesPerBuffer() != n) {
     mFramesPerBuffer = n;
     resizeBuffer(true);
@@ -93,17 +101,16 @@ void AudioIOData::framesPerBuffer(unsigned int n) {
 }
 
 void AudioIOData::resizeBuffer(bool forOutput) {
-    float *&buffer = forOutput ? mBufO : mBufI;
-    unsigned int &chans = forOutput ? mNumO : mNumI;
+  float *&buffer = forOutput ? mBufO : mBufI;
+  unsigned int &chans = forOutput ? mNumO : mNumI;
 
-    if (chans > 0 && mFramesPerBuffer > 0) {
-        int n = resize(buffer, chans * mFramesPerBuffer);
-        if (0 == n) chans = 0;
-    } else {
-        deleteBuf(buffer);
-    }
+  if (chans > 0 && mFramesPerBuffer > 0) {
+    int n = resize(buffer, chans * mFramesPerBuffer);
+    if (0 == n) chans = 0;
+  } else {
+    deleteBuf(buffer);
+  }
 }
-
 
 int AudioIOData::channels(bool forOutput) const {
   return forOutput ? channelsOut() : channelsIn();
@@ -119,4 +126,4 @@ double AudioIOData::secondsPerBuffer() const {
   return (double)framesPerBuffer() / framesPerSecond();
 }
 
-} // al::
+}  // namespace al

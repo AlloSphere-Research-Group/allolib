@@ -2,45 +2,46 @@
 #define AL_SYNTHRECORDER_HPP
 
 /*	Allocore --
-	Multimedia / virtual environment application class library
+        Multimedia / virtual environment application class library
 
-	Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology, UCSB.
-	Copyright (C) 2012-2018. The Regents of the University of California.
-	All rights reserved.
+        Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
+   UCSB. Copyright (C) 2012-2018. The Regents of the University of California.
+        All rights reserved.
 
-	Redistribution and use in source and binary forms, with or without
-	modification, are permitted provided that the following conditions are met:
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are
+   met:
 
-		Redistributions of source code must retain the above copyright notice,
-		this list of conditions and the following disclaimer.
+                Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-		Redistributions in binary form must reproduce the above copyright
-		notice, this list of conditions and the following disclaimer in the
-		documentation and/or other materials provided with the distribution.
+                Redistributions in binary form must reproduce the above
+   copyright notice, this list of conditions and the following disclaimer in the
+                documentation and/or other materials provided with the
+   distribution.
 
-		Neither the name of the University of California nor the names of its
-		contributors may be used to endorse or promote products derived from
-		this software without specific prior written permission.
+                Neither the name of the University of California nor the names
+   of its contributors may be used to endorse or promote products derived from
+                this software without specific prior written permission.
 
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-	AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-	IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-	ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-	LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-	CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-	SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-	INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-	CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-	ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-	POSSIBILITY OF SUCH DAMAGE.
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+   IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+   OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-	File description:
-	SynthVoice sequence recorder
+        File description:
+        SynthVoice sequence recorder
 
-	File author(s):
-	Andrés Cabrera mantaraya36@gmail.com
+        File author(s):
+        Andrés Cabrera mantaraya36@gmail.com
 */
-
 
 #include <chrono>
 #include <fstream>
@@ -89,135 +90,143 @@ namespace al {
  *
  */
 class SynthRecorder {
-public:
+ public:
+  typedef enum {
+    SEQUENCER_EVENT,     // Events have duration (uses '@' command only)
+    SEQUENCER_TRIGGERS,  // Store events as they were received trigger on and
+                         // trigger off can be separate entries (uses '+' and
+                         // '-' text commands)
+    CPP_FORMAT,          // Saves code that can be copy-pasted into C++
+    NONE
+  } TextFormat;
 
-    typedef enum {
-        SEQUENCER_EVENT, // Events have duration (uses '@' command only)
-        SEQUENCER_TRIGGERS, // Store events as they were received trigger on and trigger off can be separate entries (uses '+' and '-' text commands)
-        CPP_FORMAT, // Saves code that can be copy-pasted into C++
-        NONE
-    } TextFormat;
+  SynthRecorder(TextFormat format = SEQUENCER_EVENT) { mFormat = format; }
 
-    SynthRecorder(TextFormat format = SEQUENCER_EVENT) { mFormat = format;}
-
-    void setDirectory(std::string path) {
-      if (!File::exists(path)) {
-          if (!Dir::make(path)) {
-              std::cout << "Error creating directory: " << path << std::endl;
-          }
+  void setDirectory(std::string path) {
+    if (!File::exists(path)) {
+      if (!Dir::make(path)) {
+        std::cout << "Error creating directory: " << path << std::endl;
       }
-      mDirectory = path;
     }
+    mDirectory = path;
+  }
 
-    void startRecord(std::string name = "", bool overwrite = false, bool startOnEvent = true);
+  void startRecord(std::string name = "", bool overwrite = false,
+                   bool startOnEvent = true);
 
-    void stopRecord();
+  void stopRecord();
 
-    void setMaxRecordTime(al_sec maxTime) { mMaxRecordTime = maxTime; }
+  void setMaxRecordTime(al_sec maxTime) { mMaxRecordTime = maxTime; }
 
-    void verbose(bool verbose) {mVerbose = true;}
-    bool verbose() {return mVerbose;}
+  void verbose(bool verbose) { mVerbose = true; }
+  bool verbose() { return mVerbose; }
 
-    //	std::string lastSequenceName();
-    //	std::string lastSequenceSubDir();
+  //	std::string lastSequenceName();
+  //	std::string lastSequenceSubDir();
 
-    //	std::string getCurrentPath() { return mPresetHandler->getCurrentPath(); }
+  //	std::string getCurrentPath() { return mPresetHandler->getCurrentPath();
+  //}
 
-    SynthRecorder & operator<< (PolySynth &handler) { registerPolySynth(handler);  return *this; }
+  SynthRecorder &operator<<(PolySynth &handler) {
+    registerPolySynth(handler);
+    return *this;
+  }
 
-    void registerPolySynth(PolySynth &polySynth);
+  void registerPolySynth(PolySynth &polySynth);
 
-    /**
-     * @brief onTriggerOn callback for trigger on events
-     * @param voice
-     * @param offsetFrames
-     * @param id
-     * @param userData
-     */
-    static bool onTriggerOn(SynthVoice *voice, int offsetFrames, int id, void *userData)
-    {
-        std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
-        SynthRecorder *rec = static_cast<SynthRecorder *>(userData);
-        if (rec->mRecording) {
-            std::unique_lock<std::mutex> lk(rec->mSequenceLock);
-            if (rec->mStartOnEvent) {
-                rec->mSequenceStart = now;
-                rec->mStartOnEvent = false;
-            }
-            std::chrono::duration<double> diff = now - rec->mSequenceStart;
-            std::vector<ParameterField> pFields = voice->getTriggerParams();
+  /**
+   * @brief onTriggerOn callback for trigger on events
+   * @param voice
+   * @param offsetFrames
+   * @param id
+   * @param userData
+   */
+  static bool onTriggerOn(SynthVoice *voice, int offsetFrames, int id,
+                          void *userData) {
+    std::chrono::high_resolution_clock::time_point now =
+        std::chrono::high_resolution_clock::now();
+    SynthRecorder *rec = static_cast<SynthRecorder *>(userData);
+    if (rec->mRecording) {
+      std::unique_lock<std::mutex> lk(rec->mSequenceLock);
+      if (rec->mStartOnEvent) {
+        rec->mSequenceStart = now;
+        rec->mStartOnEvent = false;
+      }
+      std::chrono::duration<double> diff = now - rec->mSequenceStart;
+      std::vector<ParameterField> pFields = voice->getTriggerParams();
 
-            SynthEvent event;
-            event.type = SynthEventType::TRIGGER_ON;
-            event.id = voice->id();
-            event.time = diff.count();
-            event.synthName = demangle(typeid (*voice).name() );
-            event.duration = -1;
-            event.pFields = pFields;
-            rec->mSequence.push_back(event);
-            if (rec->verbose()) {
-              std::cout << "trigger at " << event.time << ":" << event.synthName << ":" << voice->id() << std::endl;
-            }
-
-        }
-        return true;
+      SynthEvent event;
+      event.type = SynthEventType::TRIGGER_ON;
+      event.id = voice->id();
+      event.time = diff.count();
+      event.synthName = demangle(typeid(*voice).name());
+      event.duration = -1;
+      event.pFields = pFields;
+      rec->mSequence.push_back(event);
+      if (rec->verbose()) {
+        std::cout << "trigger at " << event.time << ":" << event.synthName
+                  << ":" << voice->id() << std::endl;
+      }
     }
+    return true;
+  }
 
-    /**
-     * @brief onTriggerOff callback for trigger off events
-     * @param id
-     * @param userData
-     */
-    static bool onTriggerOff(int id, void *userData) {
-        std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
-        SynthRecorder *rec = static_cast<SynthRecorder *>(userData);
-        if (rec->mRecording) {
-            std::unique_lock<std::mutex> lk(rec->mSequenceLock);
-//            if (rec->mStartOnEvent) {
-//                rec->mSequenceStart = now;
-//                rec->mStartOnEvent = false;
-//            }
-            std::chrono::duration<double> diff = now - rec->mSequenceStart;
+  /**
+   * @brief onTriggerOff callback for trigger off events
+   * @param id
+   * @param userData
+   */
+  static bool onTriggerOff(int id, void *userData) {
+    std::chrono::high_resolution_clock::time_point now =
+        std::chrono::high_resolution_clock::now();
+    SynthRecorder *rec = static_cast<SynthRecorder *>(userData);
+    if (rec->mRecording) {
+      std::unique_lock<std::mutex> lk(rec->mSequenceLock);
+      //            if (rec->mStartOnEvent) {
+      //                rec->mSequenceStart = now;
+      //                rec->mStartOnEvent = false;
+      //            }
+      std::chrono::duration<double> diff = now - rec->mSequenceStart;
 
-            SynthEvent event;
-            event.type = SynthEventType::TRIGGER_OFF;
-            event.id = id;
-            event.time = diff.count();
-            //            event.synthName = demangle(typeid (*voice).name() );
-            event.duration = -1;
-            //            for (int i = 0; i < numFields; i++) {
-            //                event.pFields.push_back(pFields[i]);
-            //            }
-            rec->mSequence.push_back(event);
-            if (rec->verbose()) {
-              std::cout << "trigger OFF at " << event.time << ":" << event.synthName << ":" << id << std::endl;
-            }
-        }
-        return true;
+      SynthEvent event;
+      event.type = SynthEventType::TRIGGER_OFF;
+      event.id = id;
+      event.time = diff.count();
+      //            event.synthName = demangle(typeid (*voice).name() );
+      event.duration = -1;
+      //            for (int i = 0; i < numFields; i++) {
+      //                event.pFields.push_back(pFields[i]);
+      //            }
+      rec->mSequence.push_back(event);
+      if (rec->verbose()) {
+        std::cout << "trigger OFF at " << event.time << ":" << event.synthName
+                  << ":" << id << std::endl;
+      }
     }
+    return true;
+  }
 
-private:
+ private:
+  std::string mDirectory;
+  PolySynth *mPolySynth{nullptr};
+  TextFormat mFormat;
+  bool mVerbose;
 
-    std::string mDirectory;
-    PolySynth *mPolySynth {nullptr};
-    TextFormat mFormat;
-    bool mVerbose;
+  bool mOverwrite;
+  std::string mSequenceName;
 
-    bool mOverwrite;
-    std::string mSequenceName;
+  std::mutex mSequenceLock;
 
-    std::mutex mSequenceLock;
+  bool mRecording{false};
+  bool mStartOnEvent{true};
 
-    bool mRecording {false};
-    bool mStartOnEvent {true};
-
-    al_sec mMaxRecordTime;
-    std::chrono::high_resolution_clock::time_point mSequenceStart;
-    std::vector<SynthEvent> mSequence;
+  al_sec mMaxRecordTime;
+  std::chrono::high_resolution_clock::time_point mSequenceStart;
+  std::vector<SynthEvent> mSequence;
 };
 
 // Implementation
 
-}
+}  // namespace al
 
-#endif // AL_SYNTHSEQUENCER_HPP
+#endif  // AL_SYNTHSEQUENCER_HPP

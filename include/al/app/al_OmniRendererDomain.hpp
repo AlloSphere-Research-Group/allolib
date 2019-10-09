@@ -12,10 +12,10 @@
 
 namespace al {
 
-	/**
-	 * @brief GLFWOpenGLOmniRendererDomain class
-	 * @ingroup App
-	 */
+/**
+ * @brief GLFWOpenGLOmniRendererDomain class
+ * @ingroup App
+ */
 class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
  public:
   GLFWOpenGLOmniRendererDomain();
@@ -78,11 +78,11 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
   bool render_stereo = true;
   bool running_in_sphere_renderer = false;
   bool window_is_stereo_buffered = false;
-  int eye_to_render = -1; // -1 for mono, 0: left, 1: right
+  int eye_to_render = -1;  // -1 for mono, 0: left, 1: right
 
-  bool drawOmni {true};
+  bool drawOmni{true};
   Lens mLens;
-//  Pose mPose;
+  //  Pose mPose;
 
  private:
   std::unique_ptr<Window> mWindow;
@@ -94,11 +94,9 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
   Nav mNav;  // is a Pose itself and also handles manipulation of pose
   Viewpoint mView{mNav.transformed()};  // Pose with Lens and acts as camera
   NavInputControl mNavControl{mNav};    // interaction with keyboard and mouse
-
 };
 
-
-//inline void GLFWOpenGLOmniRendererDomain::start() {
+// inline void GLFWOpenGLOmniRendererDomain::start() {
 //  initializeWindowManager();
 //  onInit();
 //  check_if_in_sphere_and_setup_window_dimensions();
@@ -120,20 +118,21 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //  terminateWindowManager();
 //}
 
-
-//GLFWOpenGLOmniRendererDomain::GLFWOpenGLOmniRendererDomain() {
+// GLFWOpenGLOmniRendererDomain::GLFWOpenGLOmniRendererDomain() {
 //  mWindow = std::make_unique<Window>();
 
 //  mWindow->append(navControl());
 //  mGraphics = std::make_unique<Graphics>();
 //}
 
-//bool GLFWOpenGLOmniRendererDomain::initialize(ComputationDomain *parent) {
-//  //  if (strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
+// bool GLFWOpenGLOmniRendererDomain::initialize(ComputationDomain *parent) {
+//  //  if (strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name())
+//  ==
 //  //  0) {
 //  //    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
 //  //  }
-//  assert(strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
+//  assert(strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name())
+//  ==
 //         0);
 //  mParent = static_cast<OpenGLGraphicsDomain *>(parent);
 //  if (!mWindow) {
@@ -160,7 +159,7 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //  return true;
 //}
 
-//bool GLFWOpenGLOmniRendererDomain::tick() {
+// bool GLFWOpenGLOmniRendererDomain::tick() {
 //  if (mWindow->shouldClose()) {
 //    return false;
 //  }
@@ -174,7 +173,7 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //  return true;
 //}
 
-//bool GLFWOpenGLOmniRendererDomain::cleanup(ComputationDomain *parent) {
+// bool GLFWOpenGLOmniRendererDomain::cleanup(ComputationDomain *parent) {
 //  if (mWindow) {
 //    mWindow->destroy();
 //    mWindow = nullptr;
@@ -185,7 +184,7 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //  return true;
 //}
 
-//inline void GLFWOpenGLOmniRendererDomain::spanAllDesktop() {
+// inline void GLFWOpenGLOmniRendererDomain::spanAllDesktop() {
 //    int width, height;
 //    sphere::get_fullscreen_dimension(&width, &height);
 //    if (width != 0 && height != 0) {
@@ -197,7 +196,8 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //    }
 //}
 
-//inline void GLFWOpenGLOmniRendererDomain::loadPerProjectionConfiguration(bool desktop) {
+// inline void GLFWOpenGLOmniRendererDomain::loadPerProjectionConfiguration(bool
+// desktop) {
 //  if (!desktop) {
 //    // need to be called before pp_render.init
 //    pp_render.load_calibration_data(
@@ -211,7 +211,7 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //  }
 //}
 
-//inline void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
+// inline void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
 
 //  // start drawing to perprojection fbos
 ////  std::cout << "hhh" << std::endl;
@@ -253,8 +253,9 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //  mGraphics->eye(Graphics::MONO_EYE);     // stereo handled at capture stage
 //  mGraphics->polygonMode(Graphics::FILL); // to draw viewport filling quad
 //  mGraphics->blending(false);     // blending already done when capturing
-//  mGraphics->depthTesting(false); // no depth testing when drawing viewport slab
-//  mGraphics->pushViewport(0, 0, mWindow->fbWidth(), mWindow->fbHeight()); // filling the whole window
+//  mGraphics->depthTesting(false); // no depth testing when drawing viewport
+//  slab mGraphics->pushViewport(0, 0, mWindow->fbWidth(), mWindow->fbHeight());
+//  // filling the whole window
 
 //  // now sample the results
 //  if (running_in_sphere_renderer) {
@@ -308,7 +309,6 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //};
 //>>>>>>> Stashed changes
 
-
-} // namespace al
+}  // namespace al
 
 #endif

@@ -22,9 +22,9 @@ struct Thing {
 
 struct SimpleVoice : PositionedVoice {
   Sine<> oscillator;
-  LFO<> lfo; // 4 Hz Square wave for envelopeY
+  LFO<> lfo;  // 4 Hz Square wave for envelopeY
 
-  float lfoValue {0.0f};
+  float lfoValue{0.0f};
 
   virtual void onProcess(AudioIOData& io) override {
     while (io()) {
@@ -41,9 +41,7 @@ struct SimpleVoice : PositionedVoice {
 
   // Notice we haven't written onTriggerOn() and onTriggerOff() functions
   // As these voices are meant to be always on.
-
 };
-
 
 struct MyApp : App {
   DynamicScene scene{8};
@@ -51,15 +49,17 @@ struct MyApp : App {
   Thing thing;
 
   void onCreate() override {
-    // Set thing to be the default user data for any allocated voices in the scene
+    // Set thing to be the default user data for any allocated voices in the
+    // scene
     scene.setDefaultUserData(&thing);
-//    // Don't forget to prepare the scene!
-//    scene.prepare(audioIO());
+    //    // Don't forget to prepare the scene!
+    //    scene.prepare(audioIO());
 
     // Prepare the mesh to be shared by all objects
     addCube(thing.mesh);
 
-    // We will instantiate all visible objects at startup, i.e. they are always on
+    // We will instantiate all visible objects at startup, i.e. they are always
+    // on
     for (float i = 0.1f; i < 11; ++i) {
       // First allocate voice
       auto* freeVoice = scene.getVoice<SimpleVoice>();
@@ -75,7 +75,7 @@ struct MyApp : App {
   }
 
   void onAnimate(double /*dt*/) {
-    scene.listenerPose(nav()); // Set the scene listener to the current nav
+    scene.listenerPose(nav());  // Set the scene listener to the current nav
   }
 
   void onDraw(Graphics& g) override {
@@ -85,9 +85,7 @@ struct MyApp : App {
     scene.render(g);
   }
 
-  virtual void onSound(AudioIOData& io) override {
-    scene.render(io);
-  }
+  virtual void onSound(AudioIOData& io) override { scene.render(io); }
 };
 
 int main() {

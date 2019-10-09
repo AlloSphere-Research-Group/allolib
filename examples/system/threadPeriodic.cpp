@@ -12,30 +12,28 @@ Lance Putnam, Nov. 2014
 #include "al/system/al_PeriodicThread.hpp"
 using namespace al;
 
-int main(){
+int main() {
+  // Our thread function object
+  struct Func : ThreadFunction {
+    // Our thread function will just print the current time
+    void operator()() {
+      // Current minute in milliseconds
+      unsigned ms = unsigned(al::timeNow() * 1000) % 60000;
+      printf("%5u\n", ms);
+    }
+  };
 
-	// Our thread function object
-	struct Func : ThreadFunction{
+  // This is a special thread that periodically calls its thread function.
+  // This is unlike an ordinary thread which only calls its thread function
+  // once.
+  PeriodicThread t;
 
-		// Our thread function will just print the current time
-		void operator()(){
-			// Current minute in milliseconds
-			unsigned ms = unsigned(al::timeNow() * 1000) % 60000;
-			printf("%5u\n", ms);
-		}
-	};
+  // Set the calling period, in seconds
+  t.period(1);
 
-	// This is a special thread that periodically calls its thread function.
-	// This is unlike an ordinary thread which only calls its thread function
-	// once.
-	PeriodicThread t;
+  // Bind a function to the thread and start the thread
+  Func f;
+  t.start(f);
 
-	// Set the calling period, in seconds
-	t.period(1);
-
-	// Bind a function to the thread and start the thread
-	Func f;
-	t.start(f);
-
-	getchar();
+  getchar();
 }

@@ -42,8 +42,7 @@ class ComputationDomain {
    * itself, but it is blocking, so there are no guarantees that it will not
    * interefere with the timely running of the domain.
    */
-  std::shared_ptr<DomainType>
-  newSubDomain(bool prepend = false);
+  std::shared_ptr<DomainType> newSubDomain(bool prepend = false);
 
   /**
    * @brief Remove a subdomain
@@ -209,10 +208,10 @@ std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
   assert(dynamic_cast<SynchronousDomain *>(newDomain.get()));
   if (newDomain) {
     mSubDomainList.push_back({newDomain, prepend});
-//    if (newDomain->initialize(this)) {
-//    } else {
-//      newDomain = nullptr;
-//    }
+    //    if (newDomain->initialize(this)) {
+    //    } else {
+    //      newDomain = nullptr;
+    //    }
   }
   return newDomain;
 }

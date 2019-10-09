@@ -42,7 +42,6 @@
   Lance Putnam, 2011, putnam.lance@gmail.com
 */
 
-
 #include "al/math/al_Vec.hpp"
 
 namespace al {
@@ -51,12 +50,11 @@ namespace al {
 ///
 /// @ingroup Math
 template <class T>
-class Plane{
-public:
+class Plane {
+ public:
+  typedef al::Vec<3, T> Vec3;
 
-  typedef al::Vec<3,T> Vec3;
-
-  Plane(): mNormal(1,0,0), mD(0){}
+  Plane() : mNormal(1, 0, 0), mD(0) {}
   Plane(const Vec3& v1, const Vec3& v2, const Vec3& v3);
 
   /// Get normal perpendicular to plane (a, b, and c components)
@@ -72,7 +70,7 @@ public:
   bool inNegativeSpace(const Vec3& p) const { return mNormal.dot(p) < -d(); }
 
   /// Returns whether a point is in the positive half-space of the plane
-  bool inPositiveSpace(const Vec3& p) const { return mNormal.dot(p) >=-d(); }
+  bool inPositiveSpace(const Vec3& p) const { return mNormal.dot(p) >= -d(); }
 
   /// Set from three points lying on the plane
 
@@ -86,39 +84,41 @@ public:
   /// Set plane from coefficients
   Plane& fromCoefficients(T a, T b, T c, T d);
 
-protected:
+ protected:
   Vec3 mNormal;  // plane orientation as perp. unit vector
-  T mD;      // plane position as translation factor along normal
+  T mD;          // plane position as translation factor along normal
 };
 
-
 template <class T>
-Plane<T>::Plane(const Vec3& v1, const Vec3& v2, const Vec3& v3){
-  from3Points(v1,v2,v3);
+Plane<T>::Plane(const Vec3& v1, const Vec3& v2, const Vec3& v3) {
+  from3Points(v1, v2, v3);
 }
 
 template <class T>
-Plane<T>& Plane<T>::from3Points(const Vec3& v1, const Vec3& v2, const Vec3& v3){
-//  return fromNormalAndPoint(cross(v1-v2, v3-v2).normalize(), v2); // left-handed
-  return fromNormalAndPoint(cross(v3-v2, v1-v2).normalize(), v2); // right-handed
+Plane<T>& Plane<T>::from3Points(const Vec3& v1, const Vec3& v2,
+                                const Vec3& v3) {
+  //  return fromNormalAndPoint(cross(v1-v2, v3-v2).normalize(), v2); //
+  //  left-handed
+  return fromNormalAndPoint(cross(v3 - v2, v1 - v2).normalize(),
+                            v2);  // right-handed
 }
 
 template <class T>
-Plane<T>& Plane<T>::fromNormalAndPoint(const Vec3& nrm, const Vec3& point){
+Plane<T>& Plane<T>::fromNormalAndPoint(const Vec3& nrm, const Vec3& point) {
   mNormal = nrm;
   mD = -(mNormal.dot(point));
   return *this;
 }
 
 template <class T>
-Plane<T>& Plane<T>::fromCoefficients(T a, T b, T c, T d){
-  mNormal(a,b,c);
+Plane<T>& Plane<T>::fromCoefficients(T a, T b, T c, T d) {
+  mNormal(a, b, c);
   T l = mNormal.mag();
-  mNormal(a/l,b/l,c/l);
-  mD = d/l;
+  mNormal(a / l, b / l, c / l);
+  mD = d / l;
   return *this;
 }
 
-} // ::al::
+}  // namespace al
 
 #endif

@@ -51,7 +51,7 @@ void DistributedApp::initialize() {
       mRoleMap[host] = role;
       if (table->contains("dataRoot") &&
           strncmp(name().c_str(), host.c_str(), name().size()) ==
-              0) { // Set configuration for this node when found
+              0) {  // Set configuration for this node when found
         std::string dataRootValue = *table->get_as<std::string>("dataRoot");
         mGlobalDataRootPath = File::conformPathToOS(dataRootValue);
       } else {
@@ -72,7 +72,7 @@ void DistributedApp::initialize() {
                   << std::endl;
       }
     }
-  } else { // No nodes table in config file. Use desktop role
+  } else {  // No nodes table in config file. Use desktop role
     mCapabilites =
         (Capability)(CAP_SIMULATOR | CAP_RENDERING | CAP_AUDIO_IO | CAP_OSC);
     group = 0;
@@ -90,7 +90,6 @@ void DistributedApp::initialize() {
 
   //      }
   if (hasCapability(CAP_SIMULATOR)) {
-
     TomlLoader configLoader;
     configLoader.setFile("distributed_app.toml");
     configLoader.setDefaultValue("broadcastAddress",
@@ -155,7 +154,6 @@ void DistributedApp::start() {
       omniRendering->drawOmni = true;
     }
   } else if (hasCapability(CAP_RENDERING)) {
-
     std::cout << "Running Primary" << std::endl;
     mDefaultWindowDomain = graphicsDomain()->newWindow();
     mDefaultWindowDomain->initialize(graphicsDomain().get());
@@ -185,7 +183,7 @@ void DistributedApp::start() {
 
   if (!isPrimary()) {
     mSimulationDomain
-        ->disableProcessingCallback(); // Replicas won't call onAnimate()
+        ->disableProcessingCallback();  // Replicas won't call onAnimate()
   }
 
   onInit();

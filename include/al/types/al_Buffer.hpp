@@ -47,7 +47,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace al{
+namespace al {
 
 #if 0
 
@@ -185,28 +185,23 @@ private:
 
 #endif
 
-
 /// Ring buffer
 
 /// This buffer allows potentially large amounts of data to be buffered without
 /// moving memory. This is accomplished by use of a moving write tap.
 ///
 /// @ingroup allocore
-template <class T, class Alloc=std::allocator<T> >
+template <class T, class Alloc = std::allocator<T> >
 class RingBuffer : protected Alloc {
-public:
-
+ public:
   /// Default constructor; does not allocate memory
-  RingBuffer(): mPos(-1), mFill(0){}
+  RingBuffer() : mPos(-1), mFill(0) {}
 
   /// @param[in] size    number of elements
   /// @param[in] v    value to initialize elements to
-  explicit RingBuffer(unsigned size, const T& v=T())
-  :  mPos(size), mFill(0)
-  {
-    resize(size,v);
+  explicit RingBuffer(unsigned size, const T& v = T()) : mPos(size), mFill(0) {
+    resize(size, v);
   }
-
 
   /// Get number of elements
   int size() const { return mElems.size(); }
@@ -217,13 +212,11 @@ public:
   /// Get fill amount of buffer
   int fill() const { return mFill; }
 
-
   /// Get element at absolute index
-  T& operator[](int i){ return mElems[i]; }
+  T& operator[](int i) { return mElems[i]; }
 
   /// Get element at absolute index (read-only)
   const T& operator[](int i) const { return mElems[i]; }
-
 
   /// Obtain next element in buffer
 
@@ -232,19 +225,20 @@ public:
   /// constructing a new object, but instead returns the oldest element in
   /// the buffer. The returned reference should be assumed to be in an unknown
   /// state, thus should be initialized properly.
-  T& next(){
-    if(mFill < size()) ++mFill;
-    ++mPos; if(pos() == size()){ mPos=0; }
+  T& next() {
+    if (mFill < size()) ++mFill;
+    ++mPos;
+    if (pos() == size()) {
+      mPos = 0;
+    }
     return mElems[pos()];
   }
 
   /// Write new element
-  void write(const T& v){
-    Alloc::construct(&next(), v);
-  }
+  void write(const T& v) { Alloc::construct(&next(), v); }
 
   /// Get reference to element relative to newest element
-  T& read(int i){ return mElems[wrapOnce(pos()-i, size())]; }
+  T& read(int i) { return mElems[wrapOnce(pos() - i, size())]; }
 
   /// Get reference to element relative to newest element (read-only)
   const T& read(int i) const { return readFrom(pos(), i); }
@@ -252,21 +246,21 @@ public:
   /// Get reference to older element relative to some newer element (read-only)
 
   /// @param[in] from    absolute index the read is relative to
-  /// @param[in] dist    distance into past relative to 'from' of the returned element
+  /// @param[in] dist    distance into past relative to 'from' of the returned
+  /// element
   const T& readFrom(int from, int dist) const {
-    return mElems[wrapOnce(from-dist, size())];
+    return mElems[wrapOnce(from - dist, size())];
   }
 
   /// \returns reference to newest element
-  T& newest(){ return mElems[pos()]; }
+  T& newest() { return mElems[pos()]; }
 
   /// \returns reference to newest element (read-only)
   const T& newest() const { return mElems[pos()]; }
 
-
   /// Set write position to start of array and zero fill amount
-  void reset(){
-    mPos = size()-1;
+  void reset() {
+    mPos = size() - 1;
     mFill = 0;
   }
 
@@ -274,25 +268,23 @@ public:
 
   /// @param[in] n  number of elements
   /// @param[in] v  initialization value of newly allocated elements
-  void resize(int n, const T& v=T()){
-    mElems.resize(n,v);
-    if(mPos >=n) mPos = n-1;
+  void resize(int n, const T& v = T()) {
+    mElems.resize(n, v);
+    if (mPos >= n) mPos = n - 1;
   }
 
-protected:
+ protected:
   std::vector<T, Alloc> mElems;
   int mPos;
   int mFill;
 
   // Moves value one period closer to interval [0, max)
-  static int wrapOnce(int v, int max){
-    if(v <  0)   return v+max;
-    if(v >= max) return v-max;
+  static int wrapOnce(int v, int max) {
+    if (v < 0) return v + max;
+    if (v >= max) return v - max;
     return v;
   }
 };
-
-
 
 /// Constant size shift buffer
 
@@ -303,47 +295,44 @@ protected:
 ///
 /// @ingroup allocore
 template <int N, class T>
-class ShiftBuffer{
-public:
-
+class ShiftBuffer {
+ public:
   /// @param[in] v  Value to initialize all elements to
-  ShiftBuffer(const T& v=T()){ assign(v); }
+  ShiftBuffer(const T& v = T()) { assign(v); }
 
   /// Get number of elements
-  static int size(){ return N; }
+  static int size() { return N; }
 
   /// Get pointer to elements (read-only)
-  const T * elems() const { return &mElems[0]; }
+  const T* elems() const { return &mElems[0]; }
 
   /// Get pointer to elements
-  T * elems(){ return &mElems[0]; }
+  T* elems() { return &mElems[0]; }
 
   /// Get reference to element at index
-  T& operator[](int i){ return mElems[i];}
+  T& operator[](int i) { return mElems[i]; }
 
   /// Get reference to element at index (read-only)
   const T& operator[](int i) const { return mElems[i]; }
 
-
   /// Push new element onto buffer. Newest element is at index 0.
-  void operator()(const T& v){
-    for(int i=N-1; i>0; --i) mElems[i] = mElems[i-1];
-    mElems[0]=v;
+  void operator()(const T& v) {
+    for (int i = N - 1; i > 0; --i) mElems[i] = mElems[i - 1];
+    mElems[0] = v;
   }
 
-
   /// Set all elements to argument
-  void assign(const T& v){ for(int i=0;i<N;++i) mElems[i]=v; }
+  void assign(const T& v) {
+    for (int i = 0; i < N; ++i) mElems[i] = v;
+  }
 
   /// Zero bytes of all elements
-  void zero(){ memset(mElems, 0, N * sizeof(T)); }
+  void zero() { memset(mElems, 0, N * sizeof(T)); }
 
-protected:
+ protected:
   T mElems[N];
 };
 
-
-
-} // al::
+}  // namespace al
 
 #endif

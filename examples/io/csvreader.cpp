@@ -16,7 +16,6 @@ typedef struct {
 } RowTypes2;
 
 int main(int argc, char *argv[]) {
-
   CSVReader reader;
   reader.addType(CSVReader::STRING);
   reader.addType(CSVReader::REAL);
@@ -26,26 +25,22 @@ int main(int argc, char *argv[]) {
   reader.readFile("data/test.csv");
 
   // print column names
-  for(auto name: reader.getColumnNames()) {
+  for (auto name : reader.getColumnNames()) {
     std::cout << name << " | ";
   }
   std::cout << std::endl << "---------------" << std::endl;
 
   // Copy data to struct
   std::vector<RowTypes> rows = reader.copyToStruct<RowTypes>();
-  for(auto row: rows) {
-    std::cout << std::string(row.s) << " : "
-              << row.val1 << "   "
-              << row.val2 << "   "
-              << row.val3 << "   "
-              << (row.b ? "+" : "-")
-              << std::endl;
+  for (auto row : rows) {
+    std::cout << std::string(row.s) << " : " << row.val1 << "   " << row.val2
+              << "   " << row.val3 << "   " << (row.b ? "+" : "-") << std::endl;
   }
   std::cout << " ---------- Num rows:" << rows.size() << std::endl;
 
   // Get data by column
   std::vector<double> column1 = reader.getColumn(1);
-  for(auto value: column1) {
+  for (auto value : column1) {
     std::cout << value << std::endl;
   }
 
@@ -61,18 +56,14 @@ int main(int argc, char *argv[]) {
 
   reader.readFile("data/test2.txt");
 
-  for(auto name: reader.getColumnNames()) {
+  for (auto name : reader.getColumnNames()) {
     std::cout << name << " | ";
   }
   std::cout << std::endl << "---------------" << std::endl;
   auto rowsFromTxt = reader.copyToStruct<RowTypes2>();
-  for(auto row: rowsFromTxt) {
-    std::cout << std::string(row.s) << " : "
-              << row.intVal << "   "
-              << row.val1 << "   "
-              << row.val2 << "   "
-              << row.val3 << "   "
-              << row.val4
+  for (auto row : rowsFromTxt) {
+    std::cout << std::string(row.s) << " : " << row.intVal << "   " << row.val1
+              << "   " << row.val2 << "   " << row.val3 << "   " << row.val4
               << std::endl;
   }
 

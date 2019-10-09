@@ -42,13 +42,14 @@
   Lance Putnam, 2012, putnam.lance@gmail.com
 */
 
-namespace al{
+namespace al {
 
 /// Compute Frenet frame (tangent, normal) from 1st difference
 template <class V2>
 void frenet(const V2& d1, V2& t, V2& n);
 
-/// Compute Frenet frame (tangent, normal, binormal) from 1st and 2nd differences
+/// Compute Frenet frame (tangent, normal, binormal) from 1st and 2nd
+/// differences
 template <class V3>
 void frenet(const V3& d1, const V3& d2, V3& t, V3& n, V3& b);
 
@@ -71,17 +72,15 @@ void frenet(const V3& p2, const V3& p1, const V3& p0, V3& t, V3& n, V3& b);
 ///
 /// @ingroup Spatial
 template <class Vec3>
-struct Frenet{
-
-  Vec3 T;    ///< Tangent vector of current frame
-  Vec3 N;    ///< Normal vector of current frame
-  Vec3 B;    ///< Binormal vector of current frame
-
+struct Frenet {
+  Vec3 T;  ///< Tangent vector of current frame
+  Vec3 N;  ///< Normal vector of current frame
+  Vec3 B;  ///< Binormal vector of current frame
 
   /// @param[in] p2  two points back
   /// @param[in] p1  one point back
-  Frenet(const Vec3& p2=Vec3(0,-0.01,0), const Vec3& p1=Vec3(0,0,0)){
-    init(p2,p1);
+  Frenet(const Vec3& p2 = Vec3(0, -0.01, 0), const Vec3& p1 = Vec3(0, 0, 0)) {
+    init(p2, p1);
   }
 
   /// Get point one ahead of currently stored frame
@@ -96,9 +95,8 @@ struct Frenet{
   /// Get (central) second difference
   Vec3 d2() const { return mdf - mdb; }
 
-
   /// Compute Frenet frame one point back from input point
-  void operator()(const Vec3& p0){ next<1,1,1,1,1>(p0); }
+  void operator()(const Vec3& p0) { next<1, 1, 1, 1, 1>(p0); }
 
   /// Compute Frenet frame one point back from input point
 
@@ -106,19 +104,19 @@ struct Frenet{
   /// duplicate points. Colinear points result in ambiguous normal and
   /// binormal vectors. Duplicated points make the first derivative undefined.
   /// Both of these situations are guaranteed to wreak numerical havok.
-  template<bool NormalizeT, bool NormalizeN, bool NormalizeB, bool ComputeN, bool ComputeB>
-  void next(const Vec3& p0){
-
-    mdb = mdf;      // bwd diff is previous fwd diff
-    mdf = p0 - mp1;    // compute new fwd diff
-    mp1 = p0;      // store previous
+  template <bool NormalizeT, bool NormalizeN, bool NormalizeB, bool ComputeN,
+            bool ComputeB>
+  void next(const Vec3& p0) {
+    mdb = mdf;       // bwd diff is previous fwd diff
+    mdf = p0 - mp1;  // compute new fwd diff
+    mp1 = p0;        // store previous
 
     // Consecutive points equal? If so, use previous frame...
-    //if(mdb == Vec3(0) || mdf == Vec3(0)) return;
+    // if(mdb == Vec3(0) || mdf == Vec3(0)) return;
 
-    T = mdb + mdf;    // central diff
-              // (really half this, but we only need eigenvector)
-    if(NormalizeT) T.normalize();
+    T = mdb + mdf;  // central diff
+                    // (really half this, but we only need eigenvector)
+    if (NormalizeT) T.normalize();
 
     // Colinear? If so, use previous binormal and normal...
     /*if(angle(mdf, mdb) < 0.001){
@@ -126,53 +124,51 @@ struct Frenet{
       return;
     }*/
 
-    if(ComputeB || ComputeN){
+    if (ComputeB || ComputeN) {
       B = cross(mdb, mdf);
-      //B = cross(T, mdf - mdb); // formally, we use 2nd difference
+      // B = cross(T, mdf - mdb); // formally, we use 2nd difference
     }
 
-    if(ComputeN){
+    if (ComputeN) {
       N = cross(B, T);
-      if(NormalizeN) N.normalize();
+      if (NormalizeN) N.normalize();
     }
 
-    if(NormalizeB) B.normalize();
+    if (NormalizeB) B.normalize();
   }
 
   /// (Re)initialize with previous two points
-  void init(const Vec3& p2, const Vec3& p1){
+  void init(const Vec3& p2, const Vec3& p1) {
     mdf = p1 - p2;
     mp1 = p1;
   }
 
-//  /// Get curvature one back back from previous input point
-//  value_type curvature() const {
-//    Vec3 d1 = (mdf + mdb) * 0.5;
-//    value_type d1MagSqr = d1.magSqr();
-//    return sqrt(cross(d1, md2).magSqr() / (d1MagSqr*d1MagSqr*d1MagSqr));
-//  }
+  //  /// Get curvature one back back from previous input point
+  //  value_type curvature() const {
+  //    Vec3 d1 = (mdf + mdb) * 0.5;
+  //    value_type d1MagSqr = d1.magSqr();
+  //    return sqrt(cross(d1, md2).magSqr() / (d1MagSqr*d1MagSqr*d1MagSqr));
+  //  }
 
-protected:
+ protected:
   Vec3 mp1;  // Previously input point
   Vec3 mdb;  // Backward first difference
   Vec3 mdf;  // Forward first difference
 };
 
-
-
 // Implementation
 
 template <class V2>
-inline void frenet(const V2& d1, V2& t, V2& n){
+inline void frenet(const V2& d1, V2& t, V2& n) {
   t = d1;
   t.normalize();
   // normal according to right-hand rule
-  n[0] =-t[1];
+  n[0] = -t[1];
   n[1] = t[0];
 }
 
 template <class V3>
-inline void frenet(const V3& d1, const V3& d2, V3& t, V3& n, V3& b){
+inline void frenet(const V3& d1, const V3& d2, V3& t, V3& n, V3& b) {
   b = cross(d2, d1);
   n = cross(d1, b);
   t = d1;
@@ -182,21 +178,20 @@ inline void frenet(const V3& d1, const V3& d2, V3& t, V3& n, V3& b){
 }
 
 template <class V3>
-inline void frenet(const V3& p2, const V3& p1, const V3& p0, V3& t, V3& n, V3& b){
-  V3 d1 = (p0 - p2);      // 1st (central) difference (scaled by 2)
-  V3 d2 = (p0 - p1*2. + p2);  // 2nd difference
-  frenet(d1,d2, t,n,b);
+inline void frenet(const V3& p2, const V3& p1, const V3& p0, V3& t, V3& n,
+                   V3& b) {
+  V3 d1 = (p0 - p2);            // 1st (central) difference (scaled by 2)
+  V3 d2 = (p0 - p1 * 2. + p2);  // 2nd difference
+  frenet(d1, d2, t, n, b);
 }
-
-
 
 //
 ///// Compute curvature around point b of three successive points a, b, and c.
-//template <class T, template <class> class NVec>
-//T curvature(const NVec<T>& a, const NVec<T>& b, const NVec<T>& c);
+// template <class T, template <class> class NVec>
+// T curvature(const NVec<T>& a, const NVec<T>& b, const NVec<T>& c);
 //
-//template <class T, template <class> class V>
-//T curvature(const V<T>& a, const V<T>& b, const V<T>& c){
+// template <class T, template <class> class V>
+// T curvature(const V<T>& a, const V<T>& b, const V<T>& c){
 //
 //  V<T> d1b = b-a;        // first backward difference
 //  V<T> d1f = c-b;        // first forward difference
@@ -209,6 +204,5 @@ inline void frenet(const V3& p2, const V3& p1, const V3& p0, V3& t, V3& n, V3& b
 //  return (d1.cross(d2)).norm() / (d1n*d1n*d1n);
 //}
 
-
-} // al::
+}  // namespace al
 #endif

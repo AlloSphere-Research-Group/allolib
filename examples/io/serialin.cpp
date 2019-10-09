@@ -23,104 +23,94 @@ Linux	/dev/ttyACM0
 MinGW	\\\\.\\COM3
 */
 
-#include <string>
-#include <iostream>
 #include <cstdio>
+#include <iostream>
+#include <string>
 
 #include "al/app/al_App.hpp"
 #include "al/io/al_Serial.hpp"
 
 using namespace std;
 
-int run(string port , unsigned long baud){
+int run(string port, unsigned long baud) {
+  // Argument 3 is the test string
+  string test_string = "Testing.";
 
-    // Argument 3 is the test string
-    string test_string = "Testing.";
+  // Create and open serial port with address and baudrate as arguments
+  serial::Serial my_serial(port, baud, serial::Timeout::simpleTimeout(1000));
 
+  cout << "Is the serial port open? "
+       << (my_serial.isOpen() ? "Yes.\n" : "No.\n");
 
-    // Create and open serial port with address and baudrate as arguments
-    serial::Serial my_serial(port, baud, serial::Timeout::simpleTimeout(1000));
+  // Wait a bit for serial device to setup
+  al::wait(1);
 
-    cout << "Is the serial port open? " << (my_serial.isOpen() ? "Yes.\n" : "No.\n");
+  // Flush buffers
+  my_serial.flush();
 
-    // Wait a bit for serial device to setup
-    al::wait(1);
+  // Test the timeout, there should be 1 second between prints
+  cout << "Timeout == 1000ms, asking for 1 more byte than written." << endl;
+  for (int count = 0; count < 10; ++count) {
+    size_t bytes_wrote = my_serial.write(test_string);
 
-    // Flush buffers
-    my_serial.flush();
+    string result = my_serial.read(test_string.length() + 1);
 
-    // Test the timeout, there should be 1 second between prints
-    cout << "Timeout == 1000ms, asking for 1 more byte than written." << endl;
-    for(int count=0; count<10; ++count){
-        size_t bytes_wrote = my_serial.write(test_string);
+    cout << "Iteration: " << count << ", Bytes written: " << bytes_wrote
+         << ", Bytes read: " << result.length() << ", String read: " << result
+         << endl;
+  }
 
-        string result = my_serial.read(test_string.length()+1);
+  // Test the timeout at 250ms
+  my_serial.setTimeout(serial::Timeout::max(), 250, 0, 250, 0);
+  cout << "Timeout == 250ms, asking for 1 more byte than written." << endl;
+  for (int count = 0; count < 10; ++count) {
+    size_t bytes_wrote = my_serial.write(test_string);
 
-        cout<< "Iteration: " << count
-            << ", Bytes written: " << bytes_wrote
-            << ", Bytes read: " << result.length()
-            << ", String read: " << result
-            << endl;
-    }
+    string result = my_serial.read(test_string.length() + 1);
 
-    // Test the timeout at 250ms
-    my_serial.setTimeout(serial::Timeout::max(), 250, 0, 250, 0);
-    cout << "Timeout == 250ms, asking for 1 more byte than written." << endl;
-    for(int count=0; count<10; ++count){
-        size_t bytes_wrote = my_serial.write(test_string);
+    cout << "Iteration: " << count << ", Bytes written: " << bytes_wrote
+         << ", Bytes read: " << result.length() << ", String read: " << result
+         << endl;
+  }
 
-        string result = my_serial.read(test_string.length()+1);
+  // Test the timeout at 250ms, but asking exactly for what was written
+  cout << "Timeout == 250ms, asking for exactly what was written." << endl;
+  for (int count = 0; count < 10; ++count) {
+    size_t bytes_wrote = my_serial.write(test_string);
 
-        cout<< "Iteration: " << count
-            << ", Bytes written: " << bytes_wrote
-            << ", Bytes read: " << result.length()
-            << ", String read: " << result
-            << endl;
-    }
+    string result = my_serial.read(test_string.length());
 
-    // Test the timeout at 250ms, but asking exactly for what was written
-    cout << "Timeout == 250ms, asking for exactly what was written." << endl;
-    for(int count=0; count<10; ++count){
-        size_t bytes_wrote = my_serial.write(test_string);
+    cout << "Iteration: " << count << ", Bytes written: " << bytes_wrote
+         << ", Bytes read: " << result.length() << ", String read: " << result
+         << endl;
+  }
 
-        string result = my_serial.read(test_string.length());
+  // Test the timeout at 250ms, but asking for 1 less than what was written
+  cout << "Timeout == 250ms, asking for 1 less than was written." << endl;
+  for (int count = 0; count < 10; ++count) {
+    size_t bytes_wrote = my_serial.write(test_string);
 
-        cout<< "Iteration: " << count
-            << ", Bytes written: " << bytes_wrote
-            << ", Bytes read: " << result.length()
-            << ", String read: " << result
-            << endl;
-    }
+    string result = my_serial.read(test_string.length() - 1);
 
-    // Test the timeout at 250ms, but asking for 1 less than what was written
-    cout << "Timeout == 250ms, asking for 1 less than was written." << endl;
-    for(int count=0; count<10; ++count){
-        size_t bytes_wrote = my_serial.write(test_string);
+    cout << "Iteration: " << count << ", Bytes written: " << bytes_wrote
+         << ", Bytes read: " << result.length() << ", String read: " << result
+         << endl;
+  }
 
-        string result = my_serial.read(test_string.length()-1);
-
-        cout<< "Iteration: " << count
-            << ", Bytes written: " << bytes_wrote
-            << ", Bytes read: " << result.length()
-            << ", String read: " << result
-            << endl;
-    }
-
-    return 0;
+  return 0;
 }
 
-int main(int argc, char **argv){
-
+int main(int argc, char **argv) {
   string port("COM4");
   unsigned long baud = 115200;
-  if(argc == 3) {
+  if (argc == 3) {
     port = argv[1];
     sscanf(argv[2], "%lu", &baud);
   }
 
-    try{
-        return run(port, baud);
-    } catch(exception &e){
-        cerr << "Unhandled Exception: " << e.what() << endl;
-    }
+  try {
+    return run(port, baud);
+  } catch (exception &e) {
+    cerr << "Unhandled Exception: " << e.what() << endl;
+  }
 }

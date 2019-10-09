@@ -5,14 +5,14 @@
 
 namespace al {
 
-void imguiInit ();
-void imguiBeginFrame ();
-void imguiEndFrame ();
-void imguiDraw ();
-void imguiShutdown ();
-bool isImguiUsingInput ();
-bool isImguiUsingKeyboard ();
+void imguiInit();
+void imguiBeginFrame();
+void imguiEndFrame();
+void imguiDraw();
+void imguiShutdown();
+bool isImguiUsingInput();
+bool isImguiUsingKeyboard();
 
-} // namespace al
+}  // namespace al
 
 #endif

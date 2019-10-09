@@ -18,36 +18,34 @@ Lance Putnam, Oct. 2014
 
 using namespace al;
 
-int main(){
+int main() {
+  // The port over which to send packets
+  short port = 16447;
 
-	// The port over which to send packets
-	short port = 16447;
+  // The IP address to send packets to
+  const char* addr = "127.0.0.1";
+  // const char * addr = "172.28.247.249";
 
-	// The IP address to send packets to
-	const char * addr = "127.0.0.1";
-	//const char * addr = "172.28.247.249";
+  // Create an OSC client
+  // osc::Send client(port, addr); // construct with params
 
-	// Create an OSC client
-	// osc::Send client(port, addr); // construct with params
+  // or open later with `open` interface
+  osc::Send client;
+  client.open(port, addr);
 
-	// or open later with `open` interface
-	osc::Send client;
-	client.open(port, addr);
+  // Here, we use a loop to send a packet out every half second.
+  // int i=1; while(i++){
+  for (int i = 0; i < 10; ++i) {
+    std::string str = "Hello!";
 
-	// Here, we use a loop to send a packet out every half second.
-	//int i=1; while(i++){
-	for(int i=0; i<10; ++i){
-		std::string str = "Hello!";
+    // The send function takes an OSC address pattern as the first argument
+    // followed by the packet data.
+    int b = client.send("/test", str, i);
 
-		// The send function takes an OSC address pattern as the first argument
-		// followed by the packet data.
-		int b = client.send("/test", str, i);
+    std::cout << "CLIENT: sent message (" << b << " bytes)" << std::endl;
 
-		std::cout << "CLIENT: sent message (" << b << " bytes)" << std::endl;
-
-		// Wait before sending the next packet, otherwise they will all get
-		// sent at once.
-		al::wait(0.5);
-	}
-
+    // Wait before sending the next packet, otherwise they will all get
+    // sent at once.
+    al::wait(0.5);
+  }
 }

@@ -10,23 +10,17 @@ using namespace std;
 
 // for toml syntax, https://github.com/toml-lang/toml
 
-struct MyApp : App
-{
+struct MyApp : App {
   void onCreate() override {
     cout << TOML::getd("my_float") << endl;
     cout << TOML::geti("my_table", "my_int") << endl;
     cout << TOML::gets("my_table", "my_str") << endl;
   }
 
-  void onDraw(Graphics& g) override {
-    g.clear(0.3f, 0.3f, 0.7f);
-  }
-
+  void onDraw(Graphics& g) override { g.clear(0.3f, 0.3f, 0.7f); }
 };
 
-int main()
-{
+int main() {
   MyApp app;
   app.start();
 }
-

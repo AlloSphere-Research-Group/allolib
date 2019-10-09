@@ -11,25 +11,32 @@ Pose defaultHome() {
 }
 
 Nav::Nav(const Vec3d& pos, double smooth)
-:  Pose(pos), mSmooth(smooth), mVelScale(1), mPullBack0(0), mPullBack1(0), mHome(defaultHome())
-{
+    : Pose(pos),
+      mSmooth(smooth),
+      mVelScale(1),
+      mPullBack0(0),
+      mPullBack1(0),
+      mHome(defaultHome()) {
   updateDirectionVectors();
 }
 
 Nav::Nav(const Nav& nav)
-: Pose(nav.pos(), nav.quat()),
-  mMove0(nav.mMove0), mMove1(nav.mMove1),  // linear velocities (raw, smoothed)
-  mSpin0(nav.mSpin0), mSpin1(nav.mSpin1),  // angular velocities (raw, smoothed)
-  mTurn(nav.mTurn), mNudge(nav.mNudge),      //
-  mSmooth(nav.smooth()), mVelScale(nav.mVelScale),
-  mPullBack0(nav.mPullBack0), mPullBack1(nav.mPullBack1),
-  mHome(defaultHome())
-{
+    : Pose(nav.pos(), nav.quat()),
+      mMove0(nav.mMove0),
+      mMove1(nav.mMove1),  // linear velocities (raw, smoothed)
+      mSpin0(nav.mSpin0),
+      mSpin1(nav.mSpin1),  // angular velocities (raw, smoothed)
+      mTurn(nav.mTurn),
+      mNudge(nav.mNudge),  //
+      mSmooth(nav.smooth()),
+      mVelScale(nav.mVelScale),
+      mPullBack0(nav.mPullBack0),
+      mPullBack1(nav.mPullBack1),
+      mHome(defaultHome()) {
   updateDirectionVectors();
 }
 
-void Nav::faceToward(const Vec3d& point, double amt){
-
+void Nav::faceToward(const Vec3d& point, double amt) {
   /*Vec3d target(p - pos());
   target.normalize();
   Quatd rot = Quatd::getRotationTo(uf(), target);
@@ -43,12 +50,12 @@ void Nav::faceToward(const Vec3d& point, double amt){
   updateDirectionVectors();
 }
 
-void Nav::faceToward(const Vec3d& point, const Vec3d& up, double amt){
+void Nav::faceToward(const Vec3d& point, const Vec3d& up, double amt) {
   Pose::faceToward(point, up, amt);
   updateDirectionVectors();
 }
 
-void Nav::nudgeToward(const Vec3d& p, double amt){
+void Nav::nudgeToward(const Vec3d& p, double amt) {
   Vec3d rotEuler;
   Vec3d target(p - pos());
   target.normalize();  // unit vector of direction to move (in world frame)
@@ -58,7 +65,7 @@ void Nav::nudgeToward(const Vec3d& p, double amt){
   nudge(target * amt);
 }
 
-Nav& Nav::halt(){
+Nav& Nav::halt() {
   mMove0.set(0);
   mMove1.set(0);
   mSpin0.set(0);
@@ -77,7 +84,7 @@ Nav& Nav::home() {
   return *this;
 }
 
-Nav& Nav::setHome(){
+Nav& Nav::setHome() {
   mHome.set(*this);
   return *this;
 }
@@ -92,13 +99,13 @@ Nav& Nav::view(const Quatd& v) {
   return *this;
 }
 
-Nav& Nav::set(const Pose& v){
+Nav& Nav::set(const Pose& v) {
   Pose::set(v);
   updateDirectionVectors();
   return *this;
 }
 
-Nav& Nav::set(const Nav& v){
+Nav& Nav::set(const Nav& v) {
   Pose::set(v);
   mMove0 = v.mMove0;
   mMove1 = v.mMove1;
@@ -113,14 +120,14 @@ Nav& Nav::set(const Nav& v){
   return *this;
 }
 
-void Nav::step(double dt){
+void Nav::step(double dt) {
   mVelScale = dt;
 
-  double amt = 1.-smooth();  // TODO: adjust for dt
+  double amt = 1. - smooth();  // TODO: adjust for dt
 
   // Low-pass filter velocities
-  mMove1.lerp(mMove0*dt + mNudge, amt);
-  mSpin1.lerp(mSpin0*dt + mTurn , amt);
+  mMove1.lerp(mMove0 * dt + mNudge, amt);
+  mSpin1.lerp(mSpin0 * dt + mTurn, amt);
 
   // Turn and nudge are a one-shot increments, so clear each step
   mTurn.set(0);
@@ -133,64 +140,99 @@ void Nav::step(double dt){
   updateDirectionVectors();
 
   // Move according to smoothed position differential (mMove1)
-  for(int i=0; i< pos().size(); ++i){
+  for (int i = 0; i < pos().size(); ++i) {
     pos()[i] += mMove1.dot(Vec3d(ur()[i], uu()[i], uf()[i]));
   }
 
-  mPullBack1 = mPullBack1 + (mPullBack0-mPullBack1)*amt;
+  mPullBack1 = mPullBack1 + (mPullBack0 - mPullBack1) * amt;
 
   mTransformed = *this;
-  if(mPullBack1 > 1e-16){
+  if (mPullBack1 > 1e-16) {
     mTransformed.pos() -= uf() * mPullBack1;
   }
 }
 
-
-
 NavInputControl::NavInputControl(double vscale, double tscale)
-: mNav(), mVScale(vscale), mTScale(tscale), mUseMouse(true)
-{}
+    : mNav(), mVScale(vscale), mTScale(tscale), mUseMouse(true) {}
 
 NavInputControl::NavInputControl(Nav& nav, double vscale, double tscale)
-: mNav(&nav), mVScale(vscale), mTScale(tscale), mUseMouse(true)
-{}
+    : mNav(&nav), mVScale(vscale), mTScale(tscale), mUseMouse(true) {}
 
 NavInputControl::NavInputControl(const NavInputControl& v)
-: mNav(v.mNav), mVScale(v.vscale()), mTScale(v.tscale()), mUseMouse(true)
-{}
+    : mNav(v.mNav), mVScale(v.vscale()), mTScale(v.tscale()), mUseMouse(true) {}
 
-bool NavInputControl::keyDown(const Keyboard& k){
+bool NavInputControl::keyDown(const Keyboard& k) {
   if (!mActive) return true;
-  if(k.ctrl()) return true;
+  if (k.ctrl()) return true;
 
-  double a = mTScale * M_DEG2RAD; // rotational speed: rad/sec
-  double v = mVScale;       // speed: world units/sec
+  double a = mTScale * M_DEG2RAD;  // rotational speed: rad/sec
+  double v = mVScale;              // speed: world units/sec
 
-  if(k.alt()){
-    switch(k.key()){
-    case Keyboard::UP:  nav().pullBack(nav().pullBack()*0.8); return false;
-    case Keyboard::DOWN:nav().pullBack(nav().pullBack()/0.8); return false;
+  if (k.alt()) {
+    switch (k.key()) {
+      case Keyboard::UP:
+        nav().pullBack(nav().pullBack() * 0.8);
+        return false;
+      case Keyboard::DOWN:
+        nav().pullBack(nav().pullBack() / 0.8);
+        return false;
     }
   }
 
-  if(k.alt()) v *= 10;
-  if(k.shift()) v *= 0.1;
+  if (k.alt()) v *= 10;
+  if (k.shift()) v *= 0.1;
 
-  switch(k.key()){
-    case '`':       nav().halt().home(); return false;
-    case 's':       nav().halt(); return false;
-    case Keyboard::UP:    nav().spinR( a); return false;
-    case Keyboard::DOWN:  nav().spinR(-a); return false;
-    case Keyboard::RIGHT: nav().spinU(-a); return false;
-    case Keyboard::LEFT:  nav().spinU( a); return false;
-    case 'q': case 'Q':   nav().spinF( a); return false;
-    case 'z': case 'Z':   nav().spinF(-a); return false;
-    case 'a': case 'A':   nav().moveR(-v); return false;
-    case 'd': case 'D':   nav().moveR( v); return false;
-    case 'e': case 'E':   nav().moveU( v); return false;
-    case 'c': case 'C':   nav().moveU(-v); return false;
-    case 'x': case 'X':   nav().moveF(-v); return false;
-    case 'w': case 'W':   nav().moveF( v); return false;
+  switch (k.key()) {
+    case '`':
+      nav().halt().home();
+      return false;
+    case 's':
+      nav().halt();
+      return false;
+    case Keyboard::UP:
+      nav().spinR(a);
+      return false;
+    case Keyboard::DOWN:
+      nav().spinR(-a);
+      return false;
+    case Keyboard::RIGHT:
+      nav().spinU(-a);
+      return false;
+    case Keyboard::LEFT:
+      nav().spinU(a);
+      return false;
+    case 'q':
+    case 'Q':
+      nav().spinF(a);
+      return false;
+    case 'z':
+    case 'Z':
+      nav().spinF(-a);
+      return false;
+    case 'a':
+    case 'A':
+      nav().moveR(-v);
+      return false;
+    case 'd':
+    case 'D':
+      nav().moveR(v);
+      return false;
+    case 'e':
+    case 'E':
+      nav().moveU(v);
+      return false;
+    case 'c':
+    case 'C':
+      nav().moveU(-v);
+      return false;
+    case 'x':
+    case 'X':
+      nav().moveF(-v);
+      return false;
+    case 'w':
+    case 'W':
+      nav().moveF(v);
+      return false;
     default:;
   }
   return true;
@@ -199,39 +241,58 @@ bool NavInputControl::keyDown(const Keyboard& k){
 bool NavInputControl::keyUp(const Keyboard& k) {
   if (!mActive) return true;
   // keyUp is for stopping, so no need to skip even if mActive is false
-  switch(k.key()){
+  switch (k.key()) {
     case Keyboard::UP:
-    case Keyboard::DOWN:  nav().spinR(0); return false;
+    case Keyboard::DOWN:
+      nav().spinR(0);
+      return false;
     case Keyboard::RIGHT:
-    case Keyboard::LEFT:  nav().spinU(0); return false;
-    case 'q': case 'Q':
-    case 'z': case 'Z':   nav().spinF(0); return false;
-    case 'a': case 'A':
-    case 'd': case 'D':   nav().moveR(0); return false;
-    case 'e': case 'E':
-    case 'c': case 'C':   nav().moveU(0); return false;
-    case 'x': case 'X':
-    case 'w': case 'W':   nav().moveF(0); return false;
+    case Keyboard::LEFT:
+      nav().spinU(0);
+      return false;
+    case 'q':
+    case 'Q':
+    case 'z':
+    case 'Z':
+      nav().spinF(0);
+      return false;
+    case 'a':
+    case 'A':
+    case 'd':
+    case 'D':
+      nav().moveR(0);
+      return false;
+    case 'e':
+    case 'E':
+    case 'c':
+    case 'C':
+      nav().moveU(0);
+      return false;
+    case 'x':
+    case 'X':
+    case 'w':
+    case 'W':
+      nav().moveF(0);
+      return false;
     default:;
   }
   return true;
 }
 
-bool NavInputControl::mouseDrag(const Mouse& m){
+bool NavInputControl::mouseDrag(const Mouse& m) {
   if (!mActive) return true;
-  if(mUseMouse){
-    if(m.left()){
+  if (mUseMouse) {
+    if (m.left()) {
       nav().turnU(-m.dx() * 0.2 * M_DEG2RAD);
       nav().turnR(-m.dy() * 0.2 * M_DEG2RAD);
       return false;
-    }
-    else if(m.right()){
-      nav().turnF( m.dx() * 0.2 * M_DEG2RAD);
-      nav().pullBack(nav().pullBack() + m.dy()*0.02);
+    } else if (m.right()) {
+      nav().turnF(m.dx() * 0.2 * M_DEG2RAD);
+      nav().pullBack(nav().pullBack() + m.dy() * 0.02);
       return false;
     }
   }
   return true;
 }
 
-} // al::
+}  // namespace al

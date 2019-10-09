@@ -3,7 +3,6 @@
 using namespace al;
 
 App::App() {
-
   mOSCDomain = newDomain<OSCDomain>();
 
   mAudioDomain = newDomain<GammaAudioDomain>();
@@ -37,7 +36,6 @@ NavInputControl &App::navControl() {
 }
 
 Lens &App::lens() { return mDefaultWindowDomain->view().lens(); }
-
 
 Keyboard &App::keyboard() { return defaultWindow().mKeyboard; }
 
@@ -108,7 +106,7 @@ void App::cursorHide(bool v) {
   if (mDefaultWindowDomain) {
     defaultWindow().cursorHide(v);
   } else {
-    mOpenGLGraphicsDomain->nextWindowProperties.cursorVisible =!v;
+    mOpenGLGraphicsDomain->nextWindowProperties.cursorVisible = !v;
   }
 }
 
@@ -122,19 +120,20 @@ void App::dimensions(const Window::Dim &v) {
 
 void App::dimensions(int w, int h) {
   if (mDefaultWindowDomain) {
-    defaultWindow().dimensions(w,h);
+    defaultWindow().dimensions(w, h);
   } else {
-    mOpenGLGraphicsDomain->nextWindowProperties.dimensions = Window::Dim(mOpenGLGraphicsDomain->nextWindowProperties.dimensions.t,
-                                                                         mOpenGLGraphicsDomain->nextWindowProperties.dimensions.l,
-                                                                         w, h);
+    mOpenGLGraphicsDomain->nextWindowProperties.dimensions = Window::Dim(
+        mOpenGLGraphicsDomain->nextWindowProperties.dimensions.t,
+        mOpenGLGraphicsDomain->nextWindowProperties.dimensions.l, w, h);
   }
 }
 
 void App::dimensions(int x, int y, int w, int h) {
   if (mDefaultWindowDomain) {
-    defaultWindow().dimensions(x,y,w,h);
+    defaultWindow().dimensions(x, y, w, h);
   } else {
-    mOpenGLGraphicsDomain->nextWindowProperties.dimensions = Window::Dim(x, y, w, h);
+    mOpenGLGraphicsDomain->nextWindowProperties.dimensions =
+        Window::Dim(x, y, w, h);
   }
 }
 
@@ -197,7 +196,6 @@ ParameterServer &App::parameterServer() {
 }
 
 void App::start() {
-
   initializeDomains();
   mDefaultWindowDomain = graphicsDomain()->newWindow();
   mDefaultWindowDomain->initialize(graphicsDomain().get());

@@ -1,16 +1,16 @@
 #ifndef INCLUDE_AL_SPHERE_UTILS_HPP
 #define INCLUDE_AL_SPHERE_UTILS_HPP
 
+#include <cassert>
+#include <cmath>
 #include <string>
 #include <vector>
-#include <cmath>
-#include <cassert>
 
 // gethostname
 #ifdef AL_WINDOWS
-    #include <Winsock2.h>
+#include <Winsock2.h>
 #else
-    #include <unistd.h>
+#include <unistd.h>
 #endif
 
 //#include "al/graphics/al_GLFW.hpp"
@@ -46,8 +46,8 @@ std::string config_file_path(std::string const& path_if_not_renderer);
 
 std::vector<float> generate_equirect_sampletex(int width, int height);
 
-} // namespace sphere
+}  // namespace sphere
 
-} // namespace al
+}  // namespace al
 
 #endif

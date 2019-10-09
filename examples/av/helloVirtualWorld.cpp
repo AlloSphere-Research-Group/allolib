@@ -26,8 +26,7 @@ using namespace al;
 
 // Create an agent,
 struct Agent : PositionedVoice, Nav {
-
-  float oscPhase {0}, oscFreq {220.0}, speed;
+  float oscPhase{0}, oscFreq{220.0}, speed;
 
   void onProcess(AudioIOData& io) override {
     // Play a sine tone
@@ -39,8 +38,7 @@ struct Agent : PositionedVoice, Nav {
     }
   }
 
-  void update(double dt) override
-  {
+  void update(double dt) override {
     // Update internal smoothed nav
     smooth(0.9);
     spin(M_2PI / 360, M_2PI / 397, 0);
@@ -51,7 +49,6 @@ struct Agent : PositionedVoice, Nav {
   }
 
   void onProcess(Graphics& g) override {
-
     // draw
     g.pushMatrix(/*Mat4f{Pose::matrix()}*/);
 
@@ -83,17 +80,13 @@ struct Agent : PositionedVoice, Nav {
     g.draw(m);
     g.popMatrix();
   }
-
 };
 
-
-struct MyApp : App
-{
-
+struct MyApp : App {
   DynamicScene scene;
   void onCreate() override {
     // Set initial pose
-    nav() = {Vec3d(0,0,50), 0.95};
+    nav() = {Vec3d(0, 0, 50), 0.95};
 
     auto us10 = [] { return 10.0 * rnd::uniformS(); };
 
@@ -115,7 +108,7 @@ struct MyApp : App
 
   void onAnimate(double dt) override {
     // Uncomment this line to make listener pose be the viewing pose;
-//    scene.listenerPose(pose());
+    //    scene.listenerPose(pose());
     scene.update(dt);
   }
 
@@ -132,23 +125,19 @@ struct MyApp : App
     scene.render(g);
   }
 
-//  void onKeyDown(const Keyboard& k) override {
-//    // if (k.key() == Keyboard::TAB) {
-//    //  stereo.stereo(!stereo.stereo());
-//    // }
-//  }
+  //  void onKeyDown(const Keyboard& k) override {
+  //    // if (k.key() == Keyboard::TAB) {
+  //    //  stereo.stereo(!stereo.stereo());
+  //    // }
+  //  }
 
-  void onSound(AudioIOData& io) override {
-    scene.render(io);
-  }
-
+  void onSound(AudioIOData& io) override { scene.render(io); }
 };
 
 int main() {
-
   MyApp win;
   win.configureAudio(44100, AUDIO_BLOCK_SIZE, 2, 0);
   win.start();
 
-  return  0;
+  return 0;
 }

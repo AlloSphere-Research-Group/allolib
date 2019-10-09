@@ -16,56 +16,54 @@ Lance Putnam, 1/2012
 using namespace al;
 
 // The function each worker thread will execute
-struct Func : public ThreadFunction{
+struct Func : public ThreadFunction {
+  Func() : sum(0) {}
 
-	Func(): sum(0){}
+  void operator()() {
+    printf("Summing indices %u to %u ...\n", ival[0], ival[1] - 1);
+    for (unsigned i = ival[0]; i < ival[1]; ++i) sum += data[i];
+  }
 
-	void operator()(){
-		printf("Summing indices %u to %u ...\n", ival[0], ival[1]-1);
-		for(unsigned i=ival[0]; i<ival[1]; ++i) sum += data[i];
-	}
-
-	unsigned ival[2];		// processing interval
-	double sum;				// final result
-	const double * data;	// read-only data
+  unsigned ival[2];    // processing interval
+  double sum;          // final result
+  const double* data;  // read-only data
 };
 
+int main() {
+  int Nthreads = 7;           // number of worker threads
+  const unsigned N = 100000;  // size of our array
+  double data[N];
 
-int main(){
-	int Nthreads = 7;			// number of worker threads
-	const unsigned N = 100000;	// size of our array
-	double data[N];
+  // Fill array with polynomial
+  for (unsigned i = 0; i < N; ++i) {
+    double f = double(i) / N;
+    data[i] = 1 - f * f;
+  }
 
-	// Fill array with polynomial
-	for(unsigned i=0; i<N; ++i){
-		double f = double(i)/N;
-		data[i] = 1 - f*f;
-	}
+  Threads<Func> threads(Nthreads);
 
-	Threads<Func> threads(Nthreads);
+  // Setup worker thread summation intervals
+  for (int i = 0; i < Nthreads; ++i) {
+    threads.getInterval(threads.function(i).ival, i, N);
+    threads.function(i).data = data;
+  }
 
-	// Setup worker thread summation intervals
-	for(int i=0; i<Nthreads; ++i){
-		threads.getInterval(threads.function(i).ival, i, N);
-		threads.function(i).data = data;
-	}
+  // Compute in parallel
+  // By default, the threads join the main thread when finished
+  threads.start();
 
-	// Compute in parallel
-	// By default, the threads join the main thread when finished
-	threads.start();
+  // Combine worker results
+  double sumPll = 0;
+  for (int i = 0; i < Nthreads; ++i) {
+    sumPll += threads.function(i).sum;
+  }
 
-	// Combine worker results
-	double sumPll = 0;
-	for(int i=0; i<Nthreads; ++i){
-		sumPll += threads.function(i).sum;
-	}
+  // Compute serially for verification
+  double sumSer = 0;
+  for (unsigned i = 0; i < N; ++i) {
+    sumSer += data[i];
+  }
 
-	// Compute serially for verification
-	double sumSer = 0;
-	for(unsigned i=0; i<N; ++i){
-		sumSer += data[i];
-	}
-
-	printf("Correct : %g\n", sumSer/N);
-	printf("Computed: %g\n", sumPll/N);
+  printf("Correct : %g\n", sumSer / N);
+  printf("Computed: %g\n", sumPll / N);
 }

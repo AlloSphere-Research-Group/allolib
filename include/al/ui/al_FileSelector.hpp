@@ -4,8 +4,8 @@
 /*	Allolib --
     Multimedia / virtual environment application class library
 
-    Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology, UCSB.
-    Copyright (C) 2012-2018. The Regents of the University of California.
+    Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
+   UCSB. Copyright (C) 2012-2018. The Regents of the University of California.
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,8 @@
     Andrés Cabrera mantaraya36@gmail.com
 */
 
-#include <string>
 #include <functional>
-
+#include <string>
 
 #include "al/io/al_File.hpp"
 
@@ -52,9 +51,9 @@ namespace al {
 /// FileSelector
 /// @ingroup UI
 class FileSelector {
-public:
-
-  FileSelector(std::string globalRoot = "", std::function<bool(std::string)> function = nullptr);
+ public:
+  FileSelector(std::string globalRoot = "",
+               std::function<bool(std::string)> function = nullptr);
 
   void start(std::string currentDir);
 
@@ -66,27 +65,24 @@ public:
 
   FileList getSelection();
 
-  bool isActive() { return mActive;}
+  bool isActive() { return mActive; }
 
-  void cancel() { mActive = false;}
+  void cancel() { mActive = false; }
 
-protected:
-
-  bool filteringFunctionWrapper(FilePath const&fp) {
+ protected:
+  bool filteringFunctionWrapper(FilePath const& fp) {
     return mFilterFunc(mGlobalRoot + mCurrentDir + "/" + fp.file());
   }
 
-private:
-
+ private:
   std::string mSelectedItem = "";
   std::string mCurrentDir = "";
   std::string mGlobalRoot = "";
   FileList items;
-  bool mActive {false};
+  bool mActive{false};
   std::function<bool(std::string)> mFilterFunc;
-
 };
 
-} // namespace al
+}  // namespace al
 
 #endif

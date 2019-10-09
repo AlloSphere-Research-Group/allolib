@@ -4,11 +4,12 @@
 
 using namespace al;
 
-FileSelector::FileSelector(std::string globalRoot, std::function<bool (std::string)> function) {
+FileSelector::FileSelector(std::string globalRoot,
+                           std::function<bool(std::string)> function) {
   if (function) {
     mFilterFunc = function;
   } else {
-    mFilterFunc = [](std::string) {return true;};
+    mFilterFunc = [](std::string) { return true; };
   }
   mGlobalRoot = File::conformPathToOS(globalRoot);
 }
@@ -16,7 +17,8 @@ FileSelector::FileSelector(std::string globalRoot, std::function<bool (std::stri
 void FileSelector::start(std::string currentDir) {
   mCurrentDir = currentDir;
   mSelectedItem = "";
-  auto boundFunc = std::bind(&FileSelector::filteringFunctionWrapper, this, std::placeholders::_1);
+  auto boundFunc = std::bind(&FileSelector::filteringFunctionWrapper, this,
+                             std::placeholders::_1);
   items = filterInDir(mGlobalRoot + mCurrentDir, boundFunc);
   mActive = true;
 }
@@ -28,12 +30,13 @@ bool FileSelector::drawFileSelector() {
 
   std::string rootButtonText = mGlobalRoot;
 
-  if (rootButtonText.size() != 0) { // Global root set.
+  if (rootButtonText.size() != 0) {  // Global root set.
     ImGui::Text("Global root:%s", rootButtonText.c_str());
   }
   ImGui::Text("Current Dir: %s", mCurrentDir.c_str());
   if (ImGui::Button("..")) {
-    if (mCurrentDir.find('/') == std::string::npos && mCurrentDir.find('\\') == std::string::npos) {
+    if (mCurrentDir.find('/') == std::string::npos &&
+        mCurrentDir.find('\\') == std::string::npos) {
       mCurrentDir = "";
     } else {
       if (mCurrentDir.find('/') != std::string::npos) {
@@ -48,19 +51,23 @@ bool FileSelector::drawFileSelector() {
       }
 #endif
     }
-    auto boundFunc = std::bind(&FileSelector::filteringFunctionWrapper, this, std::placeholders::_1);
+    auto boundFunc = std::bind(&FileSelector::filteringFunctionWrapper, this,
+                               std::placeholders::_1);
     items = filterInDir(rootButtonText + mCurrentDir, boundFunc);
   }
   //    ImGui::SameLine();
   //    if (ImGui::Button("Set to current")) {
-  //      mCurrentDir = rootButtonText + File::conformPathToOS(mDataRootPath.getCurrent()) + File::conformPathToOS(mAvailableDatasets.getCurrent());
-  //      items = filterInDir(rootButtonText + mCurrentDir, [&](FilePath const&fp) {
-  //          return File::isDirectory(rootButtonText + mCurrentDir + "/" + fp.file());});
+  //      mCurrentDir = rootButtonText +
+  //      File::conformPathToOS(mDataRootPath.getCurrent()) +
+  //      File::conformPathToOS(mAvailableDatasets.getCurrent()); items =
+  //      filterInDir(rootButtonText + mCurrentDir, [&](FilePath const&fp) {
+  //          return File::isDirectory(rootButtonText + mCurrentDir + "/" +
+  //          fp.file());});
   //    }
   bool itemClicked = false;
 #ifdef AL_WINDOWS
   // show drive names for windows.
-  if (items.count() == 0 &&  rootButtonText + mCurrentDir == "") {
+  if (items.count() == 0 && rootButtonText + mCurrentDir == "") {
     items.add(FilePath("C:"));
     items.add(FilePath("D:"));
     items.add(FilePath("E:"));
@@ -68,7 +75,7 @@ bool FileSelector::drawFileSelector() {
     items.add(FilePath("Z:"));
   }
 #endif
-  for(auto item: items) {
+  for (auto item : items) {
     std::string itemText = item.file().c_str();
     if (File::isDirectory(item.filepath())) {
       itemText = "[DIR] " + itemText;
@@ -92,7 +99,8 @@ bool FileSelector::drawFileSelector() {
     }
   }
   if (itemClicked) {
-    auto boundFunc = std::bind(&FileSelector::filteringFunctionWrapper, this, std::placeholders::_1);
+    auto boundFunc = std::bind(&FileSelector::filteringFunctionWrapper, this,
+                               std::placeholders::_1);
     items = filterInDir(rootButtonText + mCurrentDir, boundFunc);
   }
   // FIXME push unique ids for these
@@ -115,4 +123,3 @@ FileList FileSelector::getSelection() {
   }
   return list;
 }
-

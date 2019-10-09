@@ -6,11 +6,6 @@
 
 #include "serial/serial.h"
 
-namespace al {
+namespace al {}
 
-
-
-
-}
-
-#endif // AL_SERIAL_HPP
+#endif  // AL_SERIAL_HPP

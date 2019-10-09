@@ -1,8 +1,8 @@
 #ifndef AL_ARDUINO_HPP
 #define AL_ARDUINO_HPP
 
-#include <thread>
 #include <functional>
+#include <thread>
 
 #include "serial/serial.h"
 
@@ -18,11 +18,8 @@ namespace al {
 @ingroup IO
 */
 class Arduino {
-public:
-
-  Arduino(size_t ringBufferSize = 256)
-    : mRingBuffer(ringBufferSize)
-  {}
+ public:
+  Arduino(size_t ringBufferSize = 256) : mRingBuffer(ringBufferSize) {}
 
   /**
    * @brief initialize serial port and reader thread
@@ -40,7 +37,7 @@ public:
 
   void cleanup();
 
-  bool isOpen() { return mRunning && mReaderThread;}
+  bool isOpen() { return mRunning && mReaderThread; }
 
   /**
    * @brief getLines received from serial port and remove them from input buffer
@@ -50,21 +47,19 @@ public:
 
   std::function<void(uint8_t *, size_t)> onInput = [](uint8_t *, size_t) {};
 
-private:
-
+ private:
   void readFunction();
 
   std::unique_ptr<serial::Serial> serialPort;
   SingleRWRingBuffer mRingBuffer;
 
-  bool mRunning {false};
+  bool mRunning{false};
   std::unique_ptr<std::thread> mReaderThread;
 
   std::string mLineBuffer;
   uint32_t mGranularity;
-
 };
 
-}
+}  // namespace al
 
-#endif // AL_SERIAL_HPP
+#endif  // AL_SERIAL_HPP

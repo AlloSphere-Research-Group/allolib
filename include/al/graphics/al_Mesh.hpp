@@ -47,12 +47,12 @@
 */
 
 #include <vector>
-#include "al/math/al_Vec.hpp"
-#include "al/math/al_Mat.hpp"
-#include "al/types/al_Color.hpp"
 #include "al/graphics/al_OpenGL.hpp"
+#include "al/math/al_Mat.hpp"
+#include "al/math/al_Vec.hpp"
+#include "al/types/al_Color.hpp"
 
-namespace al{
+namespace al {
 
 /// Stores buffers related to rendering graphical objects
 
@@ -60,8 +60,7 @@ namespace al{
 /// that define the geometry and coloring/shading of a graphical object.
 /// @ingroup Graphics
 class Mesh {
-public:
-
+ public:
   enum Primitive : unsigned int {
     POINTS = GL_POINTS,
     LINES = GL_LINES,
@@ -76,11 +75,11 @@ public:
     TRIANGLE_STRIP_ADJACENCY = GL_TRIANGLE_STRIP_ADJACENCY
   };
 
-  typedef Vec3f      Vertex;
-  typedef Vec3f      Normal;
-  typedef float      TexCoord1;
-  typedef Vec2f      TexCoord2;
-  typedef Vec3f      TexCoord3;
+  typedef Vec3f Vertex;
+  typedef Vec3f Normal;
+  typedef float TexCoord1;
+  typedef Vec2f TexCoord2;
+  typedef Vec3f TexCoord3;
   typedef unsigned int Index;
 
   typedef std::vector<Vertex> Vertices;
@@ -92,7 +91,7 @@ public:
   typedef std::vector<Index> Indices;
 
   /// @param[in] primitive  renderer-dependent primitive number
-  Mesh(Primitive p=TRIANGLES);
+  Mesh(Primitive p = TRIANGLES);
 
   Mesh(const Mesh& cpy);
 
@@ -106,7 +105,6 @@ public:
 
   /// Get center of vertices
   Vec3f getCenter() const;
-
 
   // destructive edits to internal vertices:
 
@@ -128,28 +126,33 @@ public:
   /// Convert triangle strip to triangles
   void toTriangles();
 
-
   /// Reset all buffers
   Mesh& reset();
 
   /// Scale all vertices to lie in [-1,1]
-  void unitize(bool proportional=true);
+  void unitize(bool proportional = true);
 
   /// Scale all vertices
   Mesh& scale(float x, float y, float z);
-  Mesh& scale(float s){ return scale(s,s,s); }
+  Mesh& scale(float s) { return scale(s, s, s); }
 
   template <class T>
-  Mesh& scale(const Vec<3,T>& v){ return scale(v[0],v[1],v[2]); }
+  Mesh& scale(const Vec<3, T>& v) {
+    return scale(v[0], v[1], v[2]);
+  }
 
   /// Translate all vertices
   Mesh& translate(float x, float y, float z);
 
   template <class T>
-  Mesh& translate(const Vec<3,T>& v){ return translate(v[0],v[1],v[2]); }
+  Mesh& translate(const Vec<3, T>& v) {
+    return translate(v[0], v[1], v[2]);
+  }
 
   template <class T>
-  Mesh& translate(const T& v){ return translate(v,v,v); }
+  Mesh& translate(const T& v) {
+    return translate(v, v, v);
+  }
 
   /// Transform vertices by projective transform matrix
 
@@ -158,8 +161,7 @@ public:
   /// @param[in] end    ending index of vertices, negative amounts specify
   ///            distance from one past last element
   template <class T>
-  Mesh& transform(const Mat<4,T>& m, int begin=0, int end=-1);
-
+  Mesh& transform(const Mat<4, T>& m, int begin = 0, int end = -1);
 
   /// Generates normals for a set of vertices
 
@@ -173,7 +175,7 @@ public:
   /// @param[in] equalWeightPerFace  whether to use an equal weighting of
   ///                  face normals rather than a weighting
   ///                  based on face areas
-  void generateNormals(bool normalize=true, bool equalWeightPerFace=false);
+  void generateNormals(bool normalize = true, bool equalWeightPerFace = false);
 
   /// Invert direction of normals
   void invertNormals();
@@ -184,16 +186,17 @@ public:
   /// @param[in]  length    length of normals
   /// @param[in]  perFace    whether normals line should be generated per
   ///              face rather than per vertex
-  void createNormalsMesh(Mesh& mesh, float length=0.1, bool perFace=false);
+  void createNormalsMesh(Mesh& mesh, float length = 0.1, bool perFace = false);
 
   /// Ribbonize curve
 
   /// This creates a two-dimensional ribbon from a one-dimensional space curve.
   /// The result is to be rendered with a triangle strip.
   /// @param[in] width      Width of ribbon
-  /// @param[in] faceBinormal    If true, surface faces binormal vector of curve.
+  /// @param[in] faceBinormal    If true, surface faces binormal vector of
+  /// curve.
   ///                If false, surface faces normal vector of curve.
-  void ribbonize(float width=0.04, bool faceBinormal=false){
+  void ribbonize(float width = 0.04, bool faceBinormal = false) {
     ribbonize(&width, 0, faceBinormal);
   }
 
@@ -201,21 +204,24 @@ public:
 
   /// This creates a two-dimensional ribbon from a one-dimensional space curve.
   /// The result is to be rendered with a triangle strip.
-  /// @param[in] widths      Array specifying width of ribbon at each point along curve
+  /// @param[in] widths      Array specifying width of ribbon at each point
+  /// along curve
   /// @param[in] widthsStride    Stride factor of width array
-  /// @param[in] faceBinormal    If true, surface faces binormal vector of curve.
+  /// @param[in] faceBinormal    If true, surface faces binormal vector of
+  /// curve.
   ///                If false, surface faces normal vector of curve.
-  void ribbonize(float * widths, int widthsStride=1, bool faceBinormal=false);
+  void ribbonize(float* widths, int widthsStride = 1,
+                 bool faceBinormal = false);
 
   /// Smooths a triangle mesh
 
   /// This smooths a triangle mesh using Laplacian (low-pass) filtering.
-  /// New vertex positions are a weighted sum of their nearest neighbors. 
+  /// New vertex positions are a weighted sum of their nearest neighbors.
   /// The number of vertices is not changed.
-  /// @param[in] amount    interpolation fraction between original and smoothed result
+  /// @param[in] amount    interpolation fraction between original and smoothed
+  /// result
   /// @param[in] weighting  0 = equal weight, 1 = inverse distance weight
-  void smooth(float amount=1, int weighting=0);
-
+  void smooth(float amount = 1, int weighting = 0);
 
   Primitive primitive() const { return mPrimitive; }
   const std::vector<Vertex>& vertices() const { return mVertices; }
@@ -226,24 +232,27 @@ public:
   const std::vector<TexCoord3>& texCoord3s() const { return mTexCoord3s; }
   const std::vector<Index>& indices() const { return mIndices; }
 
-
   /// Set geometric primitive
   // virtual for graphics lib implementations
-  Mesh& primitive(Primitive p){ mPrimitive=p; return *this; }
+  Mesh& primitive(Primitive p) {
+    mPrimitive = p;
+    return *this;
+  }
 
   /// Repeat last vertex element(s)
   Mesh& repeatLast();
 
   /// Append index to index buffer
-  void index(unsigned int i){ indices().push_back(i); }
+  void index(unsigned int i) { indices().push_back(i); }
 
   /// Append indices to index buffer
   template <class Tindex>
-  void index(const Tindex * buf, int size, Tindex indexOffset=0){
-    for(int i=0; i<size; ++i) index((Index)(buf[i] + indexOffset)); }
+  void index(const Tindex* buf, int size, Tindex indexOffset = 0) {
+    for (int i = 0; i < size; ++i) index((Index)(buf[i] + indexOffset));
+  }
 
-  template <class...Indices>
-  void index(unsigned i, Indices... indices){
+  template <class... Indices>
+  void index(unsigned i, Indices... indices) {
     index(i);
     index(indices...);
   }
@@ -258,85 +267,97 @@ public:
   void color(const RGB& v) { colors().push_back(v); }
 
   /// Append color to color buffer
-  void color(float r, float g, float b, float a=1){ color(Color(r,g,b,a)); }
+  void color(float r, float g, float b, float a = 1) {
+    color(Color(r, g, b, a));
+  }
 
   /// Append color to color buffer
   template <class T>
-  void color(const Vec<4,T>& v) { color(v[0], v[1], v[2], v[3]); }
+  void color(const Vec<4, T>& v) {
+    color(v[0], v[1], v[2], v[3]);
+  }
 
   /// Append colors from flat array
   template <class T>
-  void color(const T * src, int numColors){
-    for(int i=0; i<numColors; ++i) color(src[4*i+0], src[4*i+1], src[4*i+2], src[4*i+3]);
+  void color(const T* src, int numColors) {
+    for (int i = 0; i < numColors; ++i)
+      color(src[4 * i + 0], src[4 * i + 1], src[4 * i + 2], src[4 * i + 3]);
   }
 
-
   /// Append normal to normal buffer
-  void normal(float x, float y, float z=0){ normal(Normal(x,y,z)); }
+  void normal(float x, float y, float z = 0) { normal(Normal(x, y, z)); }
 
   /// Append normal to normal buffer
   void normal(const Normal& v) { normals().push_back(v); }
 
   /// Append normal to normal buffer
   template <class T>
-  void normal(const Vec<2,T>& v, float z=0){ normal(v[0], v[1], z); }
+  void normal(const Vec<2, T>& v, float z = 0) {
+    normal(v[0], v[1], z);
+  }
 
   /// Append normals from flat array
   template <class T>
-  void normal(const T * src, int numNormals){
-    for(int i=0; i<numNormals; ++i) normal(src[3*i+0], src[3*i+1], src[3*i+2]);
+  void normal(const T* src, int numNormals) {
+    for (int i = 0; i < numNormals; ++i)
+      normal(src[3 * i + 0], src[3 * i + 1], src[3 * i + 2]);
   }
 
-
   /// Append texture coordinate to 1D texture coordinate buffer
-  void texCoord(float u){ texCoord1s().push_back(TexCoord1(u)); }
+  void texCoord(float u) { texCoord1s().push_back(TexCoord1(u)); }
 
   /// Append texture coordinate to 2D texture coordinate buffer
-  void texCoord(float u, float v){ texCoord2s().push_back(TexCoord2(u,v)); }
+  void texCoord(float u, float v) { texCoord2s().push_back(TexCoord2(u, v)); }
 
   /// Append texture coordinate to 2D texture coordinate buffer
   template <class T>
-  void texCoord(const Vec<2,T>& v){ texCoord(v[0], v[1]); }
+  void texCoord(const Vec<2, T>& v) {
+    texCoord(v[0], v[1]);
+  }
 
   /// Append texture coordinate to 3D texture coordinate buffer
-  void texCoord(float u, float v, float w){ texCoord3s().push_back(TexCoord3(u,v,w)); }
+  void texCoord(float u, float v, float w) {
+    texCoord3s().push_back(TexCoord3(u, v, w));
+  }
 
   /// Append texture coordinate to 3D texture coordinate buffer
   template <class T>
-  void texCoord(const Vec<3,T>& v){ texCoord(v[0], v[1], v[2]); }
-
-
-  /// Append vertex to vertex buffer
-  void vertex(float x, float y, float z=0){ vertex(Vertex(x,y,z)); }
+  void texCoord(const Vec<3, T>& v) {
+    texCoord(v[0], v[1], v[2]);
+  }
 
   /// Append vertex to vertex buffer
-  void vertex(const Vertex& v){ vertices().push_back(v); }
+  void vertex(float x, float y, float z = 0) { vertex(Vertex(x, y, z)); }
+
+  /// Append vertex to vertex buffer
+  void vertex(const Vertex& v) { vertices().push_back(v); }
 
   /// Append vertex to vertex buffer
   template <class T>
-  void vertex(const Vec<2,T>& v, float z=0){ vertex(v[0], v[1], z); }
+  void vertex(const Vec<2, T>& v, float z = 0) {
+    vertex(v[0], v[1], z);
+  }
 
   /// Append vertices from flat array
   template <class T>
-  void vertex(const T * src, int numVerts){
-    for(int i=0; i<numVerts; ++i) vertex(src[3*i+0], src[3*i+1], src[3*i+2]);
+  void vertex(const T* src, int numVerts) {
+    for (int i = 0; i < numVerts; ++i)
+      vertex(src[3 * i + 0], src[3 * i + 1], src[3 * i + 2]);
   }
 
   /// Append vertices to vertex buffer
   template <class T>
-  void vertex(const Vec<3,T> * src, int numVerts){
-    for(int i=0; i<numVerts; ++i) vertex(src[i][0], src[i][1], src[i][2]);
+  void vertex(const Vec<3, T>* src, int numVerts) {
+    for (int i = 0; i < numVerts; ++i) vertex(src[i][0], src[i][1], src[i][2]);
   }
 
-
-  Vertices& vertices(){ return mVertices; }
-  Normals& normals(){ return mNormals; }
-  Colors& colors(){ return mColors; }
-  TexCoord1s& texCoord1s(){ return mTexCoord1s; }
-  TexCoord2s& texCoord2s(){ return mTexCoord2s; }
-  TexCoord3s& texCoord3s(){ return mTexCoord3s; }
-  Indices& indices(){ return mIndices; }
-
+  Vertices& vertices() { return mVertices; }
+  Normals& normals() { return mNormals; }
+  Colors& colors() { return mColors; }
+  TexCoord1s& texCoord1s() { return mTexCoord1s; }
+  TexCoord2s& texCoord2s() { return mTexCoord2s; }
+  TexCoord3s& texCoord3s() { return mTexCoord3s; }
+  Indices& indices() { return mIndices; }
 
   /// Save mesh to file
 
@@ -346,7 +367,8 @@ public:
   /// @param[in] solidName  solid name defined within the file (optional)
   /// @param[in] binary    write data in binary form as opposed to ASCII
   /// \returns true on successful save, otherwise false
-  bool save(const char* filePath, const char* solidName = "", bool binary=true) const;
+  bool save(const char* filePath, const char* solidName = "",
+            bool binary = true) const;
 
   /// Save mesh to an STL file
 
@@ -368,14 +390,13 @@ public:
   /// @param[in] solidName  solid name defined within the file (optional)
   /// @param[in] binary    write data in binary form as opposed to ASCII
   /// \returns true on successful save, otherwise false
-  bool savePLY(const char* filePath, const char* solidName = "", bool binary=true) const;
-
+  bool savePLY(const char* filePath, const char* solidName = "",
+               bool binary = true) const;
 
   /// Print information about Mesh
-  void print(FILE * dst = stderr) const;
+  void print(FILE* dst = stderr) const;
 
-protected:
-
+ protected:
   // Only populated (size>0) buffers will be used
   Vertices mVertices;
   Normals mNormals;
@@ -389,15 +410,16 @@ protected:
 };
 
 template <class T>
-Mesh& Mesh::transform(const Mat<4,T>& m, int begin, int end){
-  if(end<0) end += vertices().size()+1; // negative index wraps to end of array
-  for(int i=begin; i<end; ++i){
+Mesh& Mesh::transform(const Mat<4, T>& m, int begin, int end) {
+  if (end < 0)
+    end += vertices().size() + 1;  // negative index wraps to end of array
+  for (int i = begin; i < end; ++i) {
     Vertex& v = vertices()[i];
-    v.set(m * Vec<4,T>(v, 1));
+    v.set(m * Vec<4, T>(v, 1));
   }
   return *this;
 }
 
-} // al::
+}  // namespace al
 
 #endif

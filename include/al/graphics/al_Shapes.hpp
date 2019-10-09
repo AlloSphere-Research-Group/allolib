@@ -46,7 +46,7 @@
 
 #include "al/graphics/al_Mesh.hpp"
 
-namespace al{
+namespace al {
 
 /// Add tetrahedron as indexed triangles
 
@@ -55,7 +55,7 @@ namespace al{
 /// \returns number of vertices added (4)
 ///
 /// @ingroup allocore
-int addTetrahedron(Mesh& m, float radius=1);
+int addTetrahedron(Mesh& m, float radius = 1);
 
 /// Add cube as indexed triangles
 
@@ -64,7 +64,8 @@ int addTetrahedron(Mesh& m, float radius=1);
 /// \returns number of vertices added (8)
 ///
 /// @ingroup allocore
-int addCube(Mesh& m, bool withNormalsAndTexcoords = false, float radius=M_SQRT_1_3);
+int addCube(Mesh& m, bool withNormalsAndTexcoords = false,
+            float radius = M_SQRT_1_3);
 
 /// Add octahedron as triangle vertices and indices
 
@@ -73,7 +74,7 @@ int addCube(Mesh& m, bool withNormalsAndTexcoords = false, float radius=M_SQRT_1
 /// \returns number of vertices added (6)
 ///
 /// @ingroup allocore
-int addOctahedron(Mesh& m, float radius=1);
+int addOctahedron(Mesh& m, float radius = 1);
 
 /// Add dodecahedron as indexed triangles
 
@@ -82,7 +83,7 @@ int addOctahedron(Mesh& m, float radius=1);
 /// \returns number of vertices added (20)
 ///
 /// @ingroup allocore
-int addDodecahedron(Mesh& m, float radius=1);
+int addDodecahedron(Mesh& m, float radius = 1);
 
 /// Add icosahedron as indexed triangles
 
@@ -91,8 +92,7 @@ int addDodecahedron(Mesh& m, float radius=1);
 /// \returns number of vertices added (12)
 ///
 /// @ingroup allocore
-int addIcosahedron(Mesh& m, float radius=1);
-
+int addIcosahedron(Mesh& m, float radius = 1);
 
 /// Add sphere produced from subdivided icosahedron as indexed triangles
 
@@ -100,8 +100,7 @@ int addIcosahedron(Mesh& m, float radius=1);
 /// @param[in]    radius  Radius of sphere
 /// @param[in]    divisions Number of recursive subdivisions
 /// \returns number of vertices added
-int addIcosphere(Mesh& m, double radius=1, int divisions=2);
-
+int addIcosphere(Mesh& m, double radius = 1, int divisions = 2);
 
 /// Add sphere as indexed triangles
 
@@ -116,9 +115,8 @@ int addIcosphere(Mesh& m, double radius=1, int divisions=2);
 /// \returns number of vertices added
 ///
 /// @ingroup allocore
-int addSphere(Mesh& m, double radius=1, int slices=16, int stacks=16);
-int addSphereWithTexcoords(Mesh& m, double radius=1, int bands=16 );
-
+int addSphere(Mesh& m, double radius = 1, int slices = 16, int stacks = 16);
+int addSphereWithTexcoords(Mesh& m, double radius = 1, int bands = 16);
 
 /// Add wireframe box as indexed lines
 
@@ -130,8 +128,9 @@ int addSphereWithTexcoords(Mesh& m, double radius=1, int bands=16 );
 ///
 /// @ingroup allocore
 int addWireBox(Mesh& m, float width, float height, float depth);
-inline int addWireBox(Mesh& m, float size=1){ return addWireBox(m,size,size,size); }
-
+inline int addWireBox(Mesh& m, float size = 1) {
+  return addWireBox(m, size, size, size);
+}
 
 /// Add a cone/pyramid as indexed triangles
 
@@ -147,12 +146,8 @@ inline int addWireBox(Mesh& m, float size=1){ return addWireBox(m,size,size,size
 /// \returns number of vertices added
 ///
 /// @ingroup allocore
-int addCone(
-  Mesh& m, float radius=1, const Vec3f& apex=Vec3f(0,0,2),
-  unsigned slices=16,
-  unsigned cycles=1
-);
-
+int addCone(Mesh& m, float radius = 1, const Vec3f& apex = Vec3f(0, 0, 2),
+            unsigned slices = 16, unsigned cycles = 1);
 
 /// Add a disc/regular polygon as indexed triangles
 
@@ -162,8 +157,7 @@ int addCone(
 /// \returns number of vertices added
 ///
 /// @ingroup allocore
-int addDisc(Mesh& m, float radius=1, unsigned slices=16);
-
+int addDisc(Mesh& m, float radius = 1, unsigned slices = 16);
 
 /// Add a prism as an indexed triangle strip
 
@@ -180,12 +174,8 @@ int addDisc(Mesh& m, float radius=1, unsigned slices=16);
 /// \returns number of vertices added
 ///
 /// @ingroup allocore
-int addPrism(
-  Mesh& m, float btmRadius=1, float topRadius=1, float height=2,
-  unsigned slices=16,
-  float twist=0
-);
-
+int addPrism(Mesh& m, float btmRadius = 1, float topRadius = 1,
+             float height = 2, unsigned slices = 16, float twist = 0);
 
 /// Add an annulus ("little ring") as an indexed triangle strip
 
@@ -197,12 +187,8 @@ int addPrism(
 /// \returns number of vertices added
 ///
 /// @ingroup allocore
-int addAnnulus(
-  Mesh& m, float inRadius=0.5, float outRadius=1,
-  unsigned slices=16,
-  float twist=0
-);
-
+int addAnnulus(Mesh& m, float inRadius = 0.5, float outRadius = 1,
+               unsigned slices = 16, float twist = 0);
 
 /// Add an open cylinder as an indexed triangle strip
 
@@ -217,17 +203,13 @@ int addAnnulus(
 /// \returns number of vertices added
 ///
 /// @ingroup allocore
-int addCylinder(
-  Mesh& m, float radius=1, float height=2,
-  unsigned slices=16,
-  float twist=0
-);
-
+int addCylinder(Mesh& m, float radius = 1, float height = 2,
+                unsigned slices = 16, float twist = 0);
 
 /// Add a tessellated rectangular surface as an indexed triangle strip
 
 /// This creates a flat, regularly-tesselated surface lying on the xy plane.
-/// This shape can be used as a starting point for more complex meshes such as 
+/// This shape can be used as a starting point for more complex meshes such as
 /// height maps/terrains and texture-mapped spheres and torii.
 ///
 /// @param[in,out]  m    Mesh to add vertices and indices to
@@ -240,11 +222,8 @@ int addCylinder(
 /// \returns number of vertices added
 ///
 /// @ingroup allocore
-int addSurface(
-  Mesh& m, int Nx, int Ny,
-  double width=2, double height=2, double x=0, double y=0
-);
-
+int addSurface(Mesh& m, int Nx, int Ny, double width = 2, double height = 2,
+               double x = 0, double y = 0);
 
 /// Add a tessellated rectangular surface with connected edges
 
@@ -267,11 +246,8 @@ int addSurface(
 /// \returns number of vertices added
 ///
 /// @ingroup allocore
-int addSurfaceLoop(
-  Mesh& m, int Nx, int Ny, int loopMode,
-  double width=2, double height=2, double x=0, double y=0
-);
-
+int addSurfaceLoop(Mesh& m, int Nx, int Ny, int loopMode, double width = 2,
+                   double height = 2, double x = 0, double y = 0);
 
 /// Add a torus as an indexed triangle strip
 
@@ -286,16 +262,14 @@ int addSurfaceLoop(
 /// \returns number of vertices added
 ///
 /// @ingroup allocore
-int addTorus(
-  Mesh& m, double minRadius=0.3, double majRadius=0.7,
-  int Nmin=16, int Nmaj=16, double minPhase=0
-);
+int addTorus(Mesh& m, double minRadius = 0.3, double majRadius = 0.7,
+             int Nmin = 16, int Nmaj = 16, double minPhase = 0);
 
-int addTexQuad(Mesh& m, float half_width=1, float half_height=1);
-int addQuad(Mesh& m, float half_width=1, float half_height=1);
+int addTexQuad(Mesh& m, float half_width = 1, float half_height = 1);
+int addQuad(Mesh& m, float half_width = 1, float half_height = 1);
 int addRect(Mesh& m, float x, float y, float w, float h);
 int addTexRect(Mesh& m, float x, float y, float w, float h);
 
-} // al::
+}  // namespace al
 
 #endif

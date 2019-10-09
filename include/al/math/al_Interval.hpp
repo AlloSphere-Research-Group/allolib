@@ -42,7 +42,6 @@
   Lance Putnam, 2010, putnam.lance@gmail.com
 */
 
-
 namespace al {
 
 /// A closed interval [min, max]
@@ -53,98 +52,125 @@ namespace al {
 ///
 /// @ingroup Math
 template <class T>
-class Interval{
-public:
-
-  Interval()
-  :  mMin(0), mMax(1){}
+class Interval {
+ public:
+  Interval() : mMin(0), mMax(1) {}
 
   /// @param[in] min  minimum endpoint
   /// @param[in] max  maximum endpoint
-  Interval(const T& min, const T& max)
-  { endpoints(min,max); }
+  Interval(const T& min, const T& max) { endpoints(min, max); }
 
-  T center() const { return (max()+min())/T(2); }  ///< Returns center point
+  T center() const { return (max() + min()) / T(2); }  ///< Returns center point
 
   /// Returns true if value is in interval
-  bool contains(const T& v) const { return v>=min() && v<=max(); }
+  bool contains(const T& v) const { return v >= min() && v <= max(); }
 
-  bool degenerate() const { return min()==max(); }///< Returns true if diameter is zero
-  T diameter() const { return max()-min(); }    ///< Returns absolute difference of endpoints
-  T size() const { return diameter(); }      ///< Returns absolute difference of endpoints
-  const T& max() const { return mMax; }      ///< Get maximum endpoint
-  const T& min() const { return mMin; }      ///< Get minimum endpoint
-  bool proper() const { return min()!=max(); }  ///< Returns true if diameter is non-zero
-  T radius() const { return diameter()/T(2); }  ///< Returns one-half the diameter
+  bool degenerate() const {
+    return min() == max();
+  }  ///< Returns true if diameter is zero
+  T diameter() const {
+    return max() - min();
+  }  ///< Returns absolute difference of endpoints
+  T size() const {
+    return diameter();
+  }  ///< Returns absolute difference of endpoints
+  const T& max() const { return mMax; }  ///< Get maximum endpoint
+  const T& min() const { return mMin; }  ///< Get minimum endpoint
+  bool proper() const {
+    return min() != max();
+  }  ///< Returns true if diameter is non-zero
+  T radius() const {
+    return diameter() / T(2);
+  }  ///< Returns one-half the diameter
 
   /// Linearly map point in interval to point in the unit interval
-  T toUnit(const T& v) const { return (v-min())/diameter(); }
+  T toUnit(const T& v) const { return (v - min()) / diameter(); }
 
   template <class U>
-  bool operator == (const Interval<U>& v){ return min()==v.min() && max()==v.max(); }
+  bool operator==(const Interval<U>& v) {
+    return min() == v.min() && max() == v.max();
+  }
 
   template <class U>
-  bool operator != (const Interval<U>& v){ return !(*this == v); }
+  bool operator!=(const Interval<U>& v) {
+    return !(*this == v);
+  }
 
   template <class U>
-  Interval& operator +=(const Interval<U>& v){ endpoints(min()+v.min(), max()+v.max()); return *this; }
-
-  template <class U>
-  Interval& operator -=(const Interval<U>& v){ endpoints(min()-v.max(), max()-v.min()); return *this; }
-
-  template <class U>
-  Interval& operator *=(const Interval<U>& v){
-    T a=min()*v.min(), b=min()*v.max(), c=max()*v.min(), d=max()*v.max();
-    mMin = min(min(a,b),min(c,d));
-    mMax = max(max(a,b),max(c,d));
+  Interval& operator+=(const Interval<U>& v) {
+    endpoints(min() + v.min(), max() + v.max());
     return *this;
   }
 
   template <class U>
-  Interval& operator /=(const Interval<U>& v){
-    T a=min()/v.min(), b=min()/v.max(), c=max()/v.min(), d=max()/v.max();
-    mMin = min(min(a,b),min(c,d));
-    mMax = max(max(a,b),max(c,d));
+  Interval& operator-=(const Interval<U>& v) {
+    endpoints(min() - v.max(), max() - v.min());
+    return *this;
+  }
+
+  template <class U>
+  Interval& operator*=(const Interval<U>& v) {
+    T a = min() * v.min(), b = min() * v.max(), c = max() * v.min(),
+      d = max() * v.max();
+    mMin = min(min(a, b), min(c, d));
+    mMax = max(max(a, b), max(c, d));
+    return *this;
+  }
+
+  template <class U>
+  Interval& operator/=(const Interval<U>& v) {
+    T a = min() / v.min(), b = min() / v.max(), c = max() / v.min(),
+      d = max() / v.max();
+    mMin = min(min(a, b), min(c, d));
+    mMax = max(max(a, b), max(c, d));
     return *this;
   }
 
   /// Set center point preserving diameter
-  Interval& center(const T& v){ return centerDiameter(v, diameter()); }
+  Interval& center(const T& v) { return centerDiameter(v, diameter()); }
 
   /// Set diameter (width) preserving center
-  Interval& diameter(const T& v){ return centerDiameter(center(), v); }
+  Interval& diameter(const T& v) { return centerDiameter(center(), v); }
 
   /// Set center and diameter
-  Interval& centerDiameter(const T& c, const T& d){
-    mMin = c - d*T(0.5);
+  Interval& centerDiameter(const T& c, const T& d) {
+    mMin = c - d * T(0.5);
     mMax = mMin + d;
     return *this;
   }
 
   /// Set the endpoints
-  Interval& endpoints(const T& min, const T& max){
-    mMax=max; mMin=min;
-    if(mMin > mMax){ T t=mMin; mMin=mMax; mMax=t; }
+  Interval& endpoints(const T& min, const T& max) {
+    mMax = max;
+    mMin = min;
+    if (mMin > mMax) {
+      T t = mMin;
+      mMin = mMax;
+      mMax = t;
+    }
     return *this;
   }
 
   /// Translate interval by fixed amount
-  Interval& translate(const T& v){ mMin+=v; mMax+=v; return *this; }
+  Interval& translate(const T& v) {
+    mMin += v;
+    mMax += v;
+    return *this;
+  }
 
   /// Set maximum endpoint
-  Interval& max(const T& v){ return endpoints(min(), v); }
+  Interval& max(const T& v) { return endpoints(min(), v); }
 
   /// Set minimum endpoint
-  Interval& min(const T& v){ return endpoints(v, max()); }
+  Interval& min(const T& v) { return endpoints(v, max()); }
 
-private:
+ private:
   T mMin, mMax;
 
-  const T& min(const T& a, const T& b){ return a<b?a:b; }
-  const T& max(const T& a, const T& b){ return a>b?a:b; }
+  const T& min(const T& a, const T& b) { return a < b ? a : b; }
+  const T& max(const T& a, const T& b) { return a > b ? a : b; }
 };
 
-} // ::al::
+}  // namespace al
 
 #endif
-

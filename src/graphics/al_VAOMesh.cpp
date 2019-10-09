@@ -3,50 +3,44 @@
 
 using namespace al;
 
-VAOMesh::VAOMesh() {
-    vaoWrapper = std::make_shared<VAOWrapper>();
-}
-VAOMesh::VAOMesh(Primitive p): Mesh(p) {
-    vaoWrapper = std::make_shared<VAOWrapper>();
+VAOMesh::VAOMesh() { vaoWrapper = std::make_shared<VAOWrapper>(); }
+VAOMesh::VAOMesh(Primitive p) : Mesh(p) {
+  vaoWrapper = std::make_shared<VAOWrapper>();
 }
 
 // when copying, make new vao
-VAOMesh::VAOMesh(VAOMesh const& other): Mesh(other) {
-    vaoWrapper = std::make_shared<VAOWrapper>();
-    if (gl::loaded()) update();
-    // std::cout << "copy ctor" << std::endl;
+VAOMesh::VAOMesh(VAOMesh const& other) : Mesh(other) {
+  vaoWrapper = std::make_shared<VAOWrapper>();
+  if (gl::loaded()) update();
+  // std::cout << "copy ctor" << std::endl;
 }
 
 // when moving, move vao
-VAOMesh::VAOMesh(VAOMesh&& other): Mesh(other) {
-    vaoWrapper = other.vaoWrapper;
-    // std::cout << "move ctor" << std::endl;
+VAOMesh::VAOMesh(VAOMesh&& other) : Mesh(other) {
+  vaoWrapper = other.vaoWrapper;
+  // std::cout << "move ctor" << std::endl;
 }
 
 // when copying, make new vao
-VAOMesh& VAOMesh::operator = (VAOMesh const& other) {
-    copy(other);
-    vaoWrapper = std::make_shared<VAOWrapper>();
-    if (gl::loaded()) update();
-    // std::cout << "copy assignment" << std::endl;
-	return *this;
+VAOMesh& VAOMesh::operator=(VAOMesh const& other) {
+  copy(other);
+  vaoWrapper = std::make_shared<VAOWrapper>();
+  if (gl::loaded()) update();
+  // std::cout << "copy assignment" << std::endl;
+  return *this;
 }
 
 // when moving, move vao
-VAOMesh& VAOMesh::operator = (VAOMesh&& other) {
-    copy(other);
-    vaoWrapper = other.vaoWrapper;
-    // std::cout << "move assignment" << std::endl;
-	return *this;
+VAOMesh& VAOMesh::operator=(VAOMesh&& other) {
+  copy(other);
+  vaoWrapper = other.vaoWrapper;
+  // std::cout << "move assignment" << std::endl;
+  return *this;
 }
 
-void VAOMesh::bind() {
-  vao().bind();
-}
+void VAOMesh::bind() { vao().bind(); }
 
-void VAOMesh::unbind() {
-  vao().unbind();
-}
+void VAOMesh::unbind() { vao().unbind(); }
 
 void VAOMesh::update() {
   vaoWrapper->GLPrimMode = mPrimitive;
@@ -67,23 +61,18 @@ void VAOMesh::update() {
       indexBuffer().bufferType(GL_ELEMENT_ARRAY_BUFFER);
     }
     indexBuffer().bind();
-    indexBuffer().data(
-      sizeof(unsigned int) * indices().size(),
-      indices().data()
-    );
+    indexBuffer().data(sizeof(unsigned int) * indices().size(),
+                       indices().data());
     // indexBuffer().unbind();
   }
 }
 
 template <typename T>
-void VAOMesh::updateAttrib(
-  std::vector<T> const& data, MeshAttrib& att
-) {
+void VAOMesh::updateAttrib(std::vector<T> const& data, MeshAttrib& att) {
   // only enable attribs with content
   if (data.size() > 0) {
     vao().enableAttrib(att.index);
-  }
-  else {
+  } else {
     vao().disableAttrib(att.index);
     return;
   }
@@ -98,24 +87,20 @@ void VAOMesh::updateAttrib(
   auto s = sizeof(T);
   att.buffer.bind();
   att.buffer.data(s * data.size(), data.data());
-  // att.buffer.unbind(); 
+  // att.buffer.unbind();
 }
 
-template void VAOMesh::updateAttrib<float>(
-  std::vector<float> const& data, MeshAttrib& att
-);
+template void VAOMesh::updateAttrib<float>(std::vector<float> const& data,
+                                           MeshAttrib& att);
 
-template void VAOMesh::updateAttrib<Vec2f>(
-  std::vector<Vec2f> const& data, MeshAttrib& att
-);
+template void VAOMesh::updateAttrib<Vec2f>(std::vector<Vec2f> const& data,
+                                           MeshAttrib& att);
 
-template void VAOMesh::updateAttrib<Vec3f>(
-  std::vector<Vec3f> const& data, MeshAttrib& att
-);
+template void VAOMesh::updateAttrib<Vec3f>(std::vector<Vec3f> const& data,
+                                           MeshAttrib& att);
 
-template void VAOMesh::updateAttrib<Vec4f>(
-  std::vector<Vec4f> const& data, MeshAttrib& att
-);
+template void VAOMesh::updateAttrib<Vec4f>(std::vector<Vec4f> const& data,
+                                           MeshAttrib& att);
 
 void VAOMesh::draw() {
   vao().bind();
@@ -124,8 +109,7 @@ void VAOMesh::draw() {
     int num_indices = (int)indices().size();
     glDrawElements(vaoWrapper->GLPrimMode, num_indices, GL_UNSIGNED_INT, NULL);
     // indexBuffer().unbind();
-  }
-  else {
+  } else {
     int num_vertices = (int)vertices().size();
     glDrawArrays(vaoWrapper->GLPrimMode, 0, num_vertices);
   }

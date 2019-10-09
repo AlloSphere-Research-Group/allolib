@@ -36,7 +36,7 @@ namespace al {
  * @ingroup App
  */
 struct DistributedApp : public App {
-public:
+ public:
   typedef enum {
     CAP_NONE = 0,
     CAP_SIMULATOR = 1 << 1,
@@ -47,7 +47,7 @@ public:
     CAP_CONSOLE_IO = 1 << 6,
     CAP_USER =
         1
-        << 7 // User defined capabilities can add from here through bitshifting
+        << 7  // User defined capabilities can add from here through bitshifting
   } Capability;
 
   DistributedApp();
@@ -84,7 +84,7 @@ public:
   uint16_t group{0};
   std::shared_ptr<GLFWOpenGLOmniRendererDomain> omniRendering;
 
-private:
+ private:
   AudioControl mAudioControl;
   std::string mGlobalDataRootPath;
 
@@ -94,7 +94,7 @@ private:
 
 template <class TSharedState>
 class DistributedAppWithState : public DistributedApp {
-public:
+ public:
   DistributedAppWithState() : DistributedApp() {
     // State will be same memory for local, but will be synced on the network
     // for separate instances
@@ -121,7 +121,7 @@ public:
               ->addStateReceiver("state");
       receiver->configure(10101);
       mSimulationDomain
-          ->disableProcessingCallback(); // Replicas won't call onAnimate()
+          ->disableProcessingCallback();  // Replicas won't call onAnimate()
     }
   }
 
@@ -133,7 +133,7 @@ public:
 
   void setTitle(std::string title) { defaultWindow().title(title); }
 
-private:
+ private:
 };
 
 // struct DefaultStateDistributedApp {
@@ -566,6 +566,6 @@ private:
 //  //
 //}
 
-} // namespace al
+}  // namespace al
 
 #endif

@@ -84,8 +84,9 @@ struct Pickable {
         [this](float value) { scaleVec.set(Vec3f(value, value, value)); });
     hover.setHint("hide", 1.0);
     selected.setHint("hide", 1.0);
-    scaleVec.setHint("hide",
-                     1.0); // We want to show the single value scale by default.
+    scaleVec.setHint(
+        "hide",
+        1.0);  // We want to show the single value scale by default.
   }
 
   virtual ~Pickable() {}
@@ -118,10 +119,8 @@ struct Pickable {
 
   void clearSelection() {
     this->foreach ([](Pickable &p) {
-      if (p.hover.get())
-        p.hover = false;
-      if (p.selected.get())
-        p.selected = false;
+      if (p.hover.get()) p.hover = false;
+      if (p.selected.get()) p.selected = false;
     });
   }
 
@@ -131,8 +130,7 @@ struct Pickable {
     Rayd ray = transformRayLocal(r);
     for (unsigned int i = 0; i < children.size(); i++) {
       child |= children[i]->intersectsChild(ray);
-      if (child)
-        return child;
+      if (child) return child;
     }
     return child;
   }
@@ -166,21 +164,18 @@ struct Pickable {
   /// pop matrix.
   inline void popMatrix(Graphics &g) { g.popMatrix(); }
 
-  void draw(
-      Graphics &g, std::function<void(Pickable &p)> f = [](Pickable &p) {}) {
+  void draw(Graphics &g,
+            std::function<void(Pickable &p)> f = [](Pickable &p) {}) {
     f(*this);
     pushMatrix(g);
-    for (auto *c : children)
-      c->draw(g, f);
+    for (auto *c : children) c->draw(g, f);
     popMatrix(g);
   }
 
-  void foreach (
-      std::function<void(Pickable &p)> pre,
-      std::function<void(Pickable &p)> post = [](Pickable &p) {}) {
+  void foreach (std::function<void(Pickable &p)> pre,
+                std::function<void(Pickable &p)> post = [](Pickable &p) {}) {
     pre(*this);
-    for (auto *c : children)
-      c->foreach (pre, post);
+    for (auto *c : children) c->foreach (pre, post);
     post(*this);
   }
 
@@ -217,9 +212,9 @@ struct Pickable {
 /// Bounding Box PickableMesh
 /// @ingroup UI
 struct PickableBB : Pickable {
-  Mesh *mesh{nullptr}; // pointer to mesh that is wrapped
-  BoundingBox bb;      // original bounding box
-  BoundingBox aabb; // axis aligned bounding box (after pose/scale transforms)
+  Mesh *mesh{nullptr};  // pointer to mesh that is wrapped
+  BoundingBox bb;       // original bounding box
+  BoundingBox aabb;  // axis aligned bounding box (after pose/scale transforms)
 
   // used for moving pickable naturally
   Vec3f selectPos;
@@ -253,120 +248,116 @@ struct PickableBB : Pickable {
   // bb.contains(p); }
 
   bool onEvent(PickEvent e, Hit h) {
-
     switch (e.type) {
-    case Point:
-      if (hover.get() != h.hit)
-        hover = h.hit; // setting value propagates via OSC, so only set if there
-                       // is a change
-      return h.hit;
-      break;
+      case Point:
+        if (hover.get() != h.hit)
+          hover = h.hit;  // setting value propagates via OSC, so only set if
+                          // there is a change
+        return h.hit;
+        break;
 
-    case Pick:
-      if (h.hit) {
-        prevPose.set(pose.get());
-        selectDist = h.t;
-        selectPos = h();
-        selectOffset = pose.get().pos() - h(); // * scaleVec.get();
-      }
-      if (selected.get() != h.hit)
-        selected = h.hit; // to avoid triggering change callback if no change
-
-      return h.hit;
-      break;
-
-    case PickPose:
-      prevPose.set(pose.get());
-      selectQuat.set(e.pose.quat());
-      selectOffset.set(pose.get().pos() - e.pose.pos());
-
-      if (selected.get() != true)
-        selected = true;
-
-      return true;
-      break;
-
-    case Drag:
-    case TranslateRay:
-      if (selected.get()) {
-        Vec3f newPos = h.ray(selectDist) + selectOffset;
-        if (parent && (parent->containChildren || containedChild)) {
-          auto *p = dynamic_cast<PickableBB *>(parent);
-          if (p) {
-            // std::cout << "pre: " << newPos << std::endl;
-
-            newPos = min(newPos, p->bb.max - scaleVec.get() * bb.dim / 2);
-            // std::cout << "mid: " << newPos << std::endl;
-
-            newPos = max(newPos, p->bb.min + scaleVec.get() * bb.dim / 2);
-
-            // std::cout << "post: " << newPos << std::endl;
-            // std::cout << "min: " << p->bb.min << " max: " << p->bb.max << "
-            // scale: " << scaleVec.get() << " hdim: " << bb.dim / 2  <<
-            // std::endl;
-            // newPos -= bb.dim / 2;
-          }
+      case Pick:
+        if (h.hit) {
+          prevPose.set(pose.get());
+          selectDist = h.t;
+          selectPos = h();
+          selectOffset = pose.get().pos() - h();  // * scaleVec.get();
         }
-        pose = Pose(newPos, pose.get().quat());
-        return true;
-      } else
-        return false;
-      break;
+        if (selected.get() != h.hit)
+          selected = h.hit;  // to avoid triggering change callback if no change
 
-    case RotateRay:
-      if (selected.get()) {
-        Vec3f dir = h.ray(selectDist) - selectPos;
-        Quatf q = Quatf().fromEuler(dir.x * 0.5f, -dir.y * 0.5f, 0);
+        return h.hit;
+        break;
 
-        Vec3f p1 = transformVecWorld(bb.cen);
-        pose.setQuat(q * prevPose.quat());
-        Vec3f p2 = transformVecWorld(bb.cen);
-        pose.setPos(pose.get().pos() + p1 - p2);
-        return true;
-      } else
-        return false;
-      break;
+      case PickPose:
+        prevPose.set(pose.get());
+        selectQuat.set(e.pose.quat());
+        selectOffset.set(pose.get().pos() - e.pose.pos());
 
-    case RotatePose:
-      if (selected.get()) {
-        Quatf diff =
-            e.pose.quat() *
-            selectQuat.inverse(); // diff * q0 = q1 --> diff = q1 * q0.inverse
-
-        Vec3f p1 = transformVecWorld(bb.cen);
-        pose.setQuat(diff * prevPose.quat());
-        Vec3f p2 = transformVecWorld(bb.cen);
-        // pose.setPos(e.pose.pos()+selectOffset + p1-p2);
-        pose.setPos(pose.get().pos() + p1 - p2);
-        return true;
-      } else
-        return false;
-      break;
-
-    case Scale:
-      if (selected.get()) {
-
-        Vec3f p1 = transformVecWorld(bb.cen);
-        scale = scale + e.amount * 0.01 * scale;
-        if (scale < 0.0005)
-          scale = 0.0005;
-        // scaleVec.set(scale)
-        Vec3f p2 = transformVecWorld(bb.cen);
-        pose.setPos(pose.get().pos() + p1 - p2);
+        if (selected.get() != true) selected = true;
 
         return true;
-      } else
+        break;
+
+      case Drag:
+      case TranslateRay:
+        if (selected.get()) {
+          Vec3f newPos = h.ray(selectDist) + selectOffset;
+          if (parent && (parent->containChildren || containedChild)) {
+            auto *p = dynamic_cast<PickableBB *>(parent);
+            if (p) {
+              // std::cout << "pre: " << newPos << std::endl;
+
+              newPos = min(newPos, p->bb.max - scaleVec.get() * bb.dim / 2);
+              // std::cout << "mid: " << newPos << std::endl;
+
+              newPos = max(newPos, p->bb.min + scaleVec.get() * bb.dim / 2);
+
+              // std::cout << "post: " << newPos << std::endl;
+              // std::cout << "min: " << p->bb.min << " max: " << p->bb.max << "
+              // scale: " << scaleVec.get() << " hdim: " << bb.dim / 2  <<
+              // std::endl;
+              // newPos -= bb.dim / 2;
+            }
+          }
+          pose = Pose(newPos, pose.get().quat());
+          return true;
+        } else
+          return false;
+        break;
+
+      case RotateRay:
+        if (selected.get()) {
+          Vec3f dir = h.ray(selectDist) - selectPos;
+          Quatf q = Quatf().fromEuler(dir.x * 0.5f, -dir.y * 0.5f, 0);
+
+          Vec3f p1 = transformVecWorld(bb.cen);
+          pose.setQuat(q * prevPose.quat());
+          Vec3f p2 = transformVecWorld(bb.cen);
+          pose.setPos(pose.get().pos() + p1 - p2);
+          return true;
+        } else
+          return false;
+        break;
+
+      case RotatePose:
+        if (selected.get()) {
+          Quatf diff =
+              e.pose.quat() *
+              selectQuat
+                  .inverse();  // diff * q0 = q1 --> diff = q1 * q0.inverse
+
+          Vec3f p1 = transformVecWorld(bb.cen);
+          pose.setQuat(diff * prevPose.quat());
+          Vec3f p2 = transformVecWorld(bb.cen);
+          // pose.setPos(e.pose.pos()+selectOffset + p1-p2);
+          pose.setPos(pose.get().pos() + p1 - p2);
+          return true;
+        } else
+          return false;
+        break;
+
+      case Scale:
+        if (selected.get()) {
+          Vec3f p1 = transformVecWorld(bb.cen);
+          scale = scale + e.amount * 0.01 * scale;
+          if (scale < 0.0005) scale = 0.0005;
+          // scaleVec.set(scale)
+          Vec3f p2 = transformVecWorld(bb.cen);
+          pose.setPos(pose.get().pos() + p1 - p2);
+
+          return true;
+        } else
+          return false;
+        break;
+
+      case Unpick:
+        if (!hover.get() && selected.get()) selected = false;
         return false;
-      break;
+        break;
 
-    case Unpick:
-      if (!hover.get() && selected.get())
-        selected = false;
-      return false;
-      break;
-
-    default:
-      break;
+      default:
+        break;
     }
   }
 
@@ -382,15 +373,13 @@ struct PickableBB : Pickable {
   // }
 
   void drawMesh(Graphics &g) {
-    if (!mesh)
-      return;
+    if (!mesh) return;
     pushMatrix(g);
     g.draw(*mesh);
     popMatrix(g);
   }
   void drawBB(Graphics &g) {
-    if (!selected.get() && !hover.get())
-      return;
+    if (!selected.get() && !hover.get()) return;
     pushMatrix(g);
     if (selected.get())
       g.color(0, 1, 1);
@@ -442,14 +431,13 @@ struct PickableBB : Pickable {
     Matrix4d model = t.translation(pose.get().pos()) *
                      r.fromQuat(pose.get().quat()) * s.scaling(scaleVec.get());
     Matrix4d absModel(model);
-    for (int i = 0; i < 16; i++)
-      absModel[i] = std::abs(absModel[i]);
+    for (int i = 0; i < 16; i++) absModel[i] = std::abs(absModel[i]);
     Vec4d cen = model.transform(Vec4d(bb.cen, 1));
     Vec4d dim = absModel.transform(Vec4d(bb.dim, 0));
     aabb.setCenterDim(cen.sub<3>(0), dim.sub<3>(0));
   }
 };
 
-} // namespace al
+}  // namespace al
 
 #endif

@@ -19,8 +19,8 @@ void Lbap::compile() {
   // Sort by elevation
   std::sort(mRings.begin(), mRings.end(),
             [](const LdapRing &a, const LdapRing &b) -> bool {
-    return a.elevation > b.elevation;
-  });
+              return a.elevation > b.elevation;
+            });
 }
 
 void Lbap::prepare(AudioIOData &io) {
@@ -32,9 +32,11 @@ void Lbap::prepare(AudioIOData &io) {
   bufferSize = io.framesPerBuffer();
 }
 
-void Lbap::renderSample(AudioIOData &io, const Pose &reldir, const float &sample, const unsigned int &frameIndex) {}
+void Lbap::renderSample(AudioIOData &io, const Pose &reldir,
+                        const float &sample, const unsigned int &frameIndex) {}
 
-void Lbap::renderBuffer(AudioIOData &io, const Pose &listeningPose, const float *samples, const unsigned int &numFrames) {
+void Lbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
+                        const float *samples, const unsigned int &numFrames) {
   Vec3d vec = listeningPose.vec();
 
   // Rotate vector according to listener-rotation
@@ -56,8 +58,8 @@ void Lbap::renderBuffer(AudioIOData &io, const Pose &listeningPose, const float 
   } else {                    // Between inner rings
     auto topRingIt = it - 1;  // top ring is previous ring
     float fraction = (elev - it->elevation) /
-        (topRingIt->elevation -
-         it->elevation);  // elevation angle between layers
+                     (topRingIt->elevation -
+                      it->elevation);  // elevation angle between layers
     float gainTop = sin(M_PI_2 * fraction);
     float gainBottom = cos(M_PI_2 * fraction);
     for (int i = 0; i < bufferSize; i++) {
@@ -66,8 +68,7 @@ void Lbap::renderBuffer(AudioIOData &io, const Pose &listeningPose, const float 
     }
 
     topRingIt->vbap->renderBuffer(io, listeningPose, buffer, bufferSize);
-    it->vbap->renderBuffer(io, listeningPose, buffer + bufferSize,
-                           bufferSize);
+    it->vbap->renderBuffer(io, listeningPose, buffer + bufferSize, bufferSize);
   }
 }
 

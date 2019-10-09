@@ -44,11 +44,11 @@
 
 */
 
-#include "al/graphics/al_OpenGL.hpp"
 #include "al/graphics/al_GPUObject.hpp"
+#include "al/graphics/al_OpenGL.hpp"
 #include "al/graphics/al_Texture.hpp"
 
-namespace al{
+namespace al {
 
 /// Render buffer object
 
@@ -82,14 +82,11 @@ GL_DEPTH24_STENCIL8, GL_DEPTH32F_STENCIL8
 @ingroup Graphics
 */
 class RBO : public GPUObject {
-public:
-
+ public:
   /// @param[in] format  internal format of buffer
   RBO(unsigned int format = GL_DEPTH_COMPONENT16);
 
-  ~RBO() {
-      destroy();
-  }
+  ~RBO() { destroy(); }
 
   /// Get internal pixel format
   unsigned int format() const;
@@ -110,10 +107,8 @@ public:
   /// \returns whether the resize was successful
   bool resize(unsigned width, unsigned height);
 
-  void create(
-    unsigned int width, unsigned int height,
-    unsigned int format=GL_DEPTH_COMPONENT16
-  ) {
+  void create(unsigned int width, unsigned int height,
+              unsigned int format = GL_DEPTH_COMPONENT16) {
     mFormat = format;
     resize(width, height);
   }
@@ -122,12 +117,9 @@ public:
   static unsigned maxSize();
 
   static void bind(unsigned id);
-  static bool resize(
-    unsigned int format,
-    unsigned width, unsigned height
-  );
+  static bool resize(unsigned int format, unsigned width, unsigned height);
 
-protected:
+ protected:
   unsigned int mFormat;
 
   virtual void onCreate();
@@ -151,28 +143,22 @@ protected:
 /// @ingroup Graphics
 
 class FBO : public GPUObject {
-public:
-
+ public:
   /// Attachment type
   enum Attachment {
-    COLOR_ATTACHMENT0        = GL_COLOR_ATTACHMENT0,
-    COLOR_ATTACHMENT1        = GL_COLOR_ATTACHMENT1,
-    COLOR_ATTACHMENT2        = GL_COLOR_ATTACHMENT2,
-    COLOR_ATTACHMENT3        = GL_COLOR_ATTACHMENT3,
-    DEPTH_ATTACHMENT         = GL_DEPTH_ATTACHMENT,
-    STENCIL_ATTACHMENT       = GL_STENCIL_ATTACHMENT,
+    COLOR_ATTACHMENT0 = GL_COLOR_ATTACHMENT0,
+    COLOR_ATTACHMENT1 = GL_COLOR_ATTACHMENT1,
+    COLOR_ATTACHMENT2 = GL_COLOR_ATTACHMENT2,
+    COLOR_ATTACHMENT3 = GL_COLOR_ATTACHMENT3,
+    DEPTH_ATTACHMENT = GL_DEPTH_ATTACHMENT,
+    STENCIL_ATTACHMENT = GL_STENCIL_ATTACHMENT,
     DEPTH_STENCIL_ATTACHMENT = GL_DEPTH_STENCIL_ATTACHMENT
   };
 
-  ~FBO() {
-      destroy();
-  }
+  ~FBO() { destroy(); }
 
   /// Attach RBO at specified attachment point
-  FBO& attachRBO(
-    const RBO& rbo,
-    unsigned int attachment=GL_DEPTH_ATTACHMENT
-  );
+  FBO& attachRBO(const RBO& rbo, unsigned int attachment = GL_DEPTH_ATTACHMENT);
 
   /// Detach RBO at specified attachment point
   FBO& detachRBO(unsigned int attachment);
@@ -182,18 +168,19 @@ public:
   /// @param[in] texID  texture ID
   /// @param[in] attach  Attachment type
   /// @param[in] level  mipmap level of texture
-  FBO& attachTexture2D(
-    Texture const& tex,
-    unsigned int attach=GL_COLOR_ATTACHMENT0,
-    int level=0
-  );
-  
+  FBO& attachTexture2D(Texture const& tex,
+                       unsigned int attach = GL_COLOR_ATTACHMENT0,
+                       int level = 0);
+
   /// Detach texture at a specified attachment point and mipmap level
-  FBO& detachTexture2D(unsigned int attachment, int level=0);
+  FBO& detachTexture2D(unsigned int attachment, int level = 0);
 
-  FBO& attachCubemapFace(Texture const& tex, unsigned int target_face, unsigned int attachment=GL_COLOR_ATTACHMENT0, int level=0);
+  FBO& attachCubemapFace(Texture const& tex, unsigned int target_face,
+                         unsigned int attachment = GL_COLOR_ATTACHMENT0,
+                         int level = 0);
 
-  FBO& detachCubemapFace(unsigned int target_face, unsigned int attachment, int level=0);
+  FBO& detachCubemapFace(unsigned int target_face, unsigned int attachment,
+                         int level = 0);
 
   /// Bind object (start rendering to attached objects)
   void bind();
@@ -206,30 +193,25 @@ public:
 
   /// Get status of frame buffer object
   GLenum status();
-  const char * statusString();
-  const char * statusString(GLenum stat);
+  const char* statusString();
+  const char* statusString(GLenum stat);
 
   static void bind(unsigned fboID);
-  static void renderBuffer(
-    unsigned rboID,
-    unsigned int attachment
-  );
-  static void texture2D(
-    unsigned texID,
-    unsigned int attachment=GL_COLOR_ATTACHMENT0,
-    int level=0
-  );
-  static void textureCubemapFace(unsigned int texID, unsigned int target_face, unsigned int attachment=GL_COLOR_ATTACHMENT0, int level=0);
+  static void renderBuffer(unsigned rboID, unsigned int attachment);
+  static void texture2D(unsigned texID,
+                        unsigned int attachment = GL_COLOR_ATTACHMENT0,
+                        int level = 0);
+  static void textureCubemapFace(unsigned int texID, unsigned int target_face,
+                                 unsigned int attachment = GL_COLOR_ATTACHMENT0,
+                                 int level = 0);
 
-protected:
+ protected:
   virtual void onCreate();
   virtual void onDestroy();
 
-public:
-
-  static unsigned int const DEFAULT {0};
-
+ public:
+  static unsigned int const DEFAULT{0};
 };
 
-} // al::
+}  // namespace al
 #endif

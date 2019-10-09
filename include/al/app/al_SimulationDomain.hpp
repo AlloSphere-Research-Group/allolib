@@ -1,27 +1,26 @@
 #ifndef SIMULATIONDOMAIN_H
 #define SIMULATIONDOMAIN_H
 
+#include <cassert>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <mutex>
 #include <stack>
 #include <vector>
-#include <memory>
-#include <iostream>
-#include <functional>
-#include <cassert>
-#include <mutex>
 
+#include "Gamma/Domain.h"
 #include "al_ComputationDomain.hpp"
 #include "al_StateDistributionDomain.hpp"
-#include "Gamma/Domain.h"
 
 namespace al {
 
-	/**
-	 * @brief SimulationDomain class
-	 * @ingroup App
-	 */
-class SimulationDomain: public SynchronousDomain {
-public:
-
+/**
+ * @brief SimulationDomain class
+ * @ingroup App
+ */
+class SimulationDomain : public SynchronousDomain {
+ public:
   virtual bool tick() override {
     bool ret = tickSubdomains(true);
     if (mUseCallback) {
@@ -32,51 +31,47 @@ public:
   }
 
   void disableProcessingCallback() { mUseCallback = false; }
-  std::function<void(double dt)> simulationFunction = [](double){}; // function to be called in onAnimate()
+  std::function<void(double dt)> simulationFunction = [](double) {
+  };  // function to be called in onAnimate()
 
-private:
-  bool mUseCallback {true};
+ private:
+  bool mUseCallback{true};
 };
 
-
-template<class TSharedState>
+template <class TSharedState>
 class StateSimulationDomain : public SimulationDomain {
-public:
-  StateSimulationDomain() {
-    mState = std::make_shared<TSharedState>();
-  }
+ public:
+  StateSimulationDomain() { mState = std::make_shared<TSharedState>(); }
 
   virtual bool initialize(ComputationDomain *parent = nullptr) {
     SimulationDomain::initialize(parent);
     return true;
   }
 
-  TSharedState &state() { return *mState;}
+  TSharedState &state() { return *mState; }
 
-  std::shared_ptr<TSharedState> statePtr() { return mState;}
+  std::shared_ptr<TSharedState> statePtr() { return mState; }
 
-
-  std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(std::string id = "") {
+  std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(
+      std::string id = "") {
     auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(false);
     newDomain->setId(id);
     newDomain->setStatePointer(statePtr());
     return newDomain;
   }
 
-  std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(std::string id = "") {
+  std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(
+      std::string id = "") {
     auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(true);
     newDomain->setId(id);
     newDomain->setStatePointer(statePtr());
     return newDomain;
   }
 
-
-private:
+ private:
   std::shared_ptr<TSharedState> mState;
 };
 
+}  // namespace al
 
-} // namespace al
-
-
-#endif //SIMULATIONDOMAIN
+#endif  // SIMULATIONDOMAIN

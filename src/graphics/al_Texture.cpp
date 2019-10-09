@@ -11,8 +11,7 @@ Texture::Texture() {}
 Texture::~Texture() { destroy(); }
 
 void Texture::create1D(GLsizei width, GLint internal, GLenum format,
-                       GLenum type)
-{
+                       GLenum type) {
   mTarget = GL_TEXTURE_1D;
   mInternalFormat = internal;
   mWidth = width;
@@ -26,7 +25,7 @@ void Texture::create1D(GLsizei width, GLint internal, GLenum format,
   mWrapUpdated = true;
   mUsingMipmapUpdated = true;
 
-  glTexImage1D(mTarget, 0,  // level
+  glTexImage1D(mTarget, 0,                  // level
                mInternalFormat, mWidth, 0,  // border
                mFormat, mType, nullptr);
 
@@ -236,7 +235,8 @@ void Texture::disableMipmap() {
 //   unbind_temp();
 // }
 
-void Texture::submit(const void *pixels, unsigned int format, unsigned int type) {
+void Texture::submit(const void *pixels, unsigned int format,
+                     unsigned int type) {
   if (!pixels) {
     return;
   }
@@ -252,8 +252,8 @@ void Texture::submit(const void *pixels, unsigned int format, unsigned int type)
                       pixels);
       break;
     case GL_TEXTURE_3D:
-      glTexSubImage3D(target(), 0, 0, 0, 0, width(), height(), depth(),
-                      format, type, pixels);
+      glTexSubImage3D(target(), 0, 0, 0, 0, width(), height(), depth(), format,
+                      type, pixels);
       break;
     default:
       AL_WARN("invalid texture target %d", target());
@@ -268,7 +268,8 @@ void Texture::submit(const void *pixels, unsigned int format, unsigned int type)
   unbind_temp();
 }
 
-bool Texture::resize(unsigned int w, unsigned int h, int internalFormat, unsigned int format, unsigned int type) {
+bool Texture::resize(unsigned int w, unsigned int h, int internalFormat,
+                     unsigned int format, unsigned int type) {
   if (target() != GL_TEXTURE_2D) {
     AL_WARN("invalid geometry for texture 2D target");
     return false;

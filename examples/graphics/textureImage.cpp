@@ -11,27 +11,28 @@ smooth.  This is because interpolation is done on the GPU.
 #include "module/img/loadImage.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <cstdint>
+#include <iostream>
 #include <vector>
 
 using namespace al;
 using namespace std;
 
 class MyApp : public App {
-public:
+ public:
   Texture texture;
 
   void onCreate() {
     // Load a .jpg file
     //
-    const char *filename = "data/hubble.jpg";
+    const char* filename = "data/hubble.jpg";
 
     auto imageData = imgModule::loadImage(filename);
     if (imageData.data.size() == 0) {
       cout << "failed to load image" << endl;
     }
-    cout << "loaded image size: " << imageData.width << ", " << imageData.height << endl;
+    cout << "loaded image size: " << imageData.width << ", " << imageData.height
+         << endl;
 
     texture.create2D(imageData.width, imageData.height);
     texture.submit(imageData.data.data(), GL_RGBA, GL_UNSIGNED_BYTE);

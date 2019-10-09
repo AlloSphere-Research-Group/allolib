@@ -246,13 +246,13 @@ void main() {
 namespace al {
 
 enum class ShaderType : unsigned char {
-  COLOR,   // uniform color
-  MESH,    // per vertex mesh color
-  TEXTURE, // sample texture from texture coordinate per vertex
-  LIGHTING_COLOR,   // ShaderType::COLOR with lighting
-  LIGHTING_MESH,    // ShaderType::MESH with lighting
-  LIGHTING_TEXTURE, // ShaderType::TEXTURE with lighting
-  LIGHTING_MATERIAL // Use material for coloring with lighting
+  COLOR,             // uniform color
+  MESH,              // per vertex mesh color
+  TEXTURE,           // sample texture from texture coordinate per vertex
+  LIGHTING_COLOR,    // ShaderType::COLOR with lighting
+  LIGHTING_MESH,     // ShaderType::MESH with lighting
+  LIGHTING_TEXTURE,  // ShaderType::TEXTURE with lighting
+  LIGHTING_MATERIAL  // Use material for coloring with lighting
 };
 
 // compile shader program as with given config
@@ -269,8 +269,8 @@ std::string multilight_frag_shader(ShaderType type, int num_lights);
 // compile shader program as with given config with lighting
 // TODO - `al::compileDefaultShader`
 //        overlaps functionality with this one
-void compileMultiLightShader(ShaderProgram& s, ShaderType type,
-                             int num_lights, bool is_omni = false);
+void compileMultiLightShader(ShaderProgram& s, ShaderType type, int num_lights,
+                             bool is_omni = false);
 
 }  // namespace al
 

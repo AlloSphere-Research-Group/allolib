@@ -33,10 +33,9 @@ enum COLOR_TYPE { HCLAB, HCLUV, NUM_TYPES };
 COLOR_TYPE TYPE = HCLAB;
 
 struct CieColor : public App {
-  
   int numRows = 4, numCols = 4;
 
-  Mesh verts {Mesh::TRIANGLES};
+  Mesh verts{Mesh::TRIANGLES};
   // rnd::Random<rnd::MulLinCon> rng;
   rnd::Random<rnd::LinCon> rng;
   // rnd::Random<rnd::Tausworthe> rng;
@@ -73,9 +72,7 @@ struct CieColor : public App {
         << endl;
   }
 
-  void onCreate() {
-    printInstructions();
-  }
+  void onCreate() { printInstructions(); }
 
   bool onKeyDown(const Keyboard& k) override {
     // cout << "KEY PRESSED: " << k.key() << endl;
@@ -183,12 +180,13 @@ struct CieColor : public App {
                       ? RGB(HCLab(variedParam2, variedParam1, fixedParam1))
                       : RGB(HCLuv(variedParam2, variedParam1, fixedParam1));
               break;
-            default: break;
+            default:
+              break;
           }
 
           // draw rectangles
 
-            // triangle 1
+          // triangle 1
           verts.vertex(i * width - widthOffset,
                        j * height - heightOffset);  // bottom left
           verts.color(swatch);
@@ -199,7 +197,7 @@ struct CieColor : public App {
                        j * height + height - heightOffset);  // top left
           verts.color(swatch);
 
-            // triangle 2
+          // triangle 2
           verts.vertex(i * width + width - widthOffset,
                        j * height - heightOffset);  // bottom right
           verts.color(swatch);
@@ -221,15 +219,15 @@ struct CieColor : public App {
       // print instructions again for convenience
       printInstructions();
     }
-    
+
     g.clear(0);
 
     // Set up 2D orthographic projection coordinates
-    g.projMatrix(Matrix4f::ortho2D(0, 1, 0, 1)); // left, right, bottom, top
+    g.projMatrix(Matrix4f::ortho2D(0, 1, 0, 1));  // left, right, bottom, top
     g.viewMatrix(Matrix4f::identity());
-    g.loadIdentity(); // model matrix
+    g.loadIdentity();  // model matrix
 
-    g.meshColor(); // use mesh's color array
+    g.meshColor();  // use mesh's color array
     g.draw(verts);
   }
 };

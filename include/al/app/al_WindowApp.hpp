@@ -12,19 +12,22 @@
 // younkeehong@gmail.com
 
 #include "al/app/al_FPS.hpp"
-#include "al/io/al_Window.hpp"
 #include "al/graphics/al_Graphics.hpp"
+#include "al/io/al_Window.hpp"
 
 #include <atomic>
 #include <functional>
 
 namespace al {
 
-	/**
-	 * @brief WindowApp class
-	 * @ingroup App
-	 */
-class [[deprecated("Use domains instead")]] WindowApp : public Window, public WindowEventHandler, public FPS {
+/**
+ * @brief WindowApp class
+ * @ingroup App
+ */
+class[[deprecated("Use domains instead")]] WindowApp
+    : public Window,
+      public WindowEventHandler,
+      public FPS {
  public:
   // basic window app keyboard actions: fullscreen, quit, ...
   struct StandardWindowAppKeyControls : WindowEventHandler {
@@ -36,7 +39,7 @@ class [[deprecated("Use domains instead")]] WindowApp : public Window, public Wi
   std::atomic<bool> mShouldQuitApp{false};
   bool is_verbose = false;
   void verbose(bool b = true) { is_verbose = b; }
-  
+
   WindowApp();
 
   // start app loop
@@ -49,7 +52,7 @@ class [[deprecated("Use domains instead")]] WindowApp : public Window, public Wi
   virtual void onInit() {}
   virtual void onCreate() {}
   virtual void onAnimate(double dt) {}
-  virtual void onDraw(Graphics& g) {}
+  virtual void onDraw(Graphics & g) {}
   virtual void onExit() {}
 
   virtual void onResize(int w, int h) {}

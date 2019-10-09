@@ -4,8 +4,10 @@ static al::TomlLoader& global_toml_loader() {
   static al::TomlLoader root = []() {
     al::TomlLoader l;
     // try loading default config filename
-    try { l.setFile("data/al.toml"); }
-    catch (cpptoml::parse_exception) {}
+    try {
+      l.setFile("data/al.toml");
+    } catch (cpptoml::parse_exception) {
+    }
     return l;
   }();
   return root;
@@ -38,4 +40,3 @@ std::string al::TOML::gets(const std::string& table, const std::string& key) {
 bool al::TOML::getb(const std::string& table, const std::string& key) {
   return global_toml_loader().getb(table, key);
 }
-

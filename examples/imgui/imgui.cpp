@@ -2,16 +2,14 @@
 // (https://github.com/ocornut/imgui.git)
 
 #include "al/app/al_App.hpp"
-#include "al/io/al_Imgui.hpp"
 #include "al/graphics/al_Shapes.hpp"
+#include "al/io/al_Imgui.hpp"
 
 using namespace al;
 
-struct my_app : public App
-{
-  
+struct my_app : public App {
   float x = 0;
-  Color clear_color {0, 0, 0};
+  Color clear_color{0, 0, 0};
   bool show_another_window = false;
   bool show_demo_window = false;
   int counter = 0;
@@ -25,7 +23,6 @@ struct my_app : public App
   }
 
   void onAnimate(double dt) override {
-
     // don't nav if imgui's using inputs
     // ex) prevents camera rotation when mouse dragging scroll bar
     // nav is update after onAnimate and before onDraw.
@@ -37,9 +34,10 @@ struct my_app : public App
     imguiBeginFrame();
 
     {
-      ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+      ImGui::Begin("Hello, world!");  // Create a window called "Hello, world!"
+                                      // and append into it.
       // Display some text (you can use a format string too)
-      ImGui::Text("Hello, world!"); 
+      ImGui::Text("Hello, world!");
       // Edit 1 float using a slider from 0.0f to 1.0f
       ImGui::SliderFloat("x", &x, 0.0f, 1.0f);
       // Edit 3 floats representing a color
@@ -64,12 +62,12 @@ struct my_app : public App
     // 2. Show another simple window. In most cases you will use an explicit
     // Begin/End pair to name your windows.
     if (show_another_window) {
-        ImGui::Begin("Another Window", &show_another_window);
-        ImGui::Text("Hello from another window!");
-        if (ImGui::Button("Close Me")) {
-          show_another_window = false;
-        }
-        ImGui::End();
+      ImGui::Begin("Another Window", &show_another_window);
+      ImGui::Text("Hello from another window!");
+      if (ImGui::Button("Close Me")) {
+        show_another_window = false;
+      }
+      ImGui::End();
     }
 
     // 3. Show the ImGui demo window. Most of the sample code is in
@@ -78,7 +76,7 @@ struct my_app : public App
       // Normally user code doesn't need/want to call this because positions are
       // saved in .ini file anyway. Here we just want to make the demo initial
       // state a bit more friendly!
-      ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver); 
+      ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
       ImGui::ShowDemoWindow(&show_demo_window);
     }
 
@@ -87,22 +85,18 @@ struct my_app : public App
   }
 
   void onDraw(Graphics& g) override {
-
     g.clear(clear_color);
     g.translate(x, 0, 0);
     g.color(1);
     g.draw(m);
 
-    imguiDraw(); // after everything, actual rendering happens here
+    imguiDraw();  // after everything, actual rendering happens here
   }
 
-  void onExit() override {
-    imguiShutdown();
-  }
+  void onExit() override { imguiShutdown(); }
 };
 
-int main()
-{
+int main() {
   my_app app;
   app.start();
 }

@@ -5,9 +5,9 @@ Linux	/dev/ttyACM0
 Windows	COM6
 */
 
-#include <string>
-#include <iostream>
 #include <cstdio>
+#include <iostream>
+#include <string>
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
@@ -34,8 +34,7 @@ void loop() {
 */
 
 class MyApp : public App {
-public:
-
+ public:
   Arduino arduino;
 
   float x = 0;
@@ -46,8 +45,9 @@ public:
     std::vector<serial::PortInfo> ports = serial::list_ports();
 
     // Show port information
-    for (auto port: ports) {
-      std::cout << port.port << ":" << port.description << " -- HWID:" << port.hardware_id <<  std::endl;
+    for (auto port : ports) {
+      std::cout << port.port << ":" << port.description
+                << " -- HWID:" << port.hardware_id << std::endl;
     }
 
     // Use last port, likely the right one on Windows
@@ -59,7 +59,7 @@ public:
   void onAnimate(double dt) {
     // Read lines from Arduino serial port
     auto lines = arduino.getLines();
-    for (auto line: lines) {
+    for (auto line : lines) {
       auto separatorIndex = line.find(":");
       std::string id = line.substr(0, separatorIndex);
       std::string value = line.substr(separatorIndex + 1);
@@ -86,10 +86,9 @@ public:
     // Remember to cleanup or your app will crash on exit
     arduino.cleanup();
   }
-
 };
 
-int main(int argc, char **argv){
+int main(int argc, char **argv) {
   MyApp().start();
 
   return 0;

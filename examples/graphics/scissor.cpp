@@ -1,5 +1,5 @@
-#include <string>
 #include <sstream>
+#include <string>
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
@@ -7,13 +7,10 @@
 using namespace al;
 using namespace std;
 
-Matrix4f getLookAt(const Vec3f& ux, const Vec3f& uy, const Vec3f& uz, const Vec3f& p) {
-  return Matrix4f(
-     ux[0], ux[1], ux[2], -(ux.dot(p)),
-     uy[0], uy[1], uy[2], -(uy.dot(p)),
-     uz[0], uz[1], uz[2], -(uz.dot(p)),
-         0,     0,     0,       1
-  );
+Matrix4f getLookAt(const Vec3f& ux, const Vec3f& uy, const Vec3f& uz,
+                   const Vec3f& p) {
+  return Matrix4f(ux[0], ux[1], ux[2], -(ux.dot(p)), uy[0], uy[1], uy[2],
+                  -(uy.dot(p)), uz[0], uz[1], uz[2], -(uz.dot(p)), 0, 0, 0, 1);
 }
 
 Matrix4f getLookAt(const Vec3f& eyePos, const Vec3f& at, const Vec3f& up) {
@@ -25,11 +22,14 @@ Matrix4f getLookAt(const Vec3f& eyePos, const Vec3f& at, const Vec3f& up) {
 
 string mat_to_string(const Matrix4f& m) {
   stringstream s;
-  s <<
-  to_string(m[0]) << to_string(m[4]) << to_string(m[8]) << to_string(m[12]) << '\n' <<
-  to_string(m[1]) << to_string(m[5]) << to_string(m[9]) << to_string(m[13]) << '\n' <<
-  to_string(m[2]) << to_string(m[6]) << to_string(m[10]) << to_string(m[14]) << '\n' <<
-  to_string(m[3]) << to_string(m[7]) << to_string(m[11]) << to_string(m[15]) << '\n';
+  s << to_string(m[0]) << to_string(m[4]) << to_string(m[8]) << to_string(m[12])
+    << '\n'
+    << to_string(m[1]) << to_string(m[5]) << to_string(m[9]) << to_string(m[13])
+    << '\n'
+    << to_string(m[2]) << to_string(m[6]) << to_string(m[10])
+    << to_string(m[14]) << '\n'
+    << to_string(m[3]) << to_string(m[7]) << to_string(m[11])
+    << to_string(m[15]) << '\n';
   return s.str();
 }
 
@@ -55,22 +55,22 @@ struct MyApp : App {
     // x
     num_verts_added = addCube(axis);
     transform.setIdentity();
-    transform *= Matrix4f::rotation(M_PI / 2, 2, 0); // rotate from z to x
+    transform *= Matrix4f::rotation(M_PI / 2, 2, 0);  // rotate from z to x
     transform *= Matrix4f::translation(0, 0, 0.5);
     transform *= Matrix4f::scaling(0.1, 0.1, 3);
     axis.transform(transform, axis.vertices().size() - num_verts_added);
-    for (int i = 0 ; i < num_verts_added; i += 1) {
+    for (int i = 0; i < num_verts_added; i += 1) {
       axis.color(1, 0, 0);
     }
 
     // y
     num_verts_added = addCube(axis);
     transform.setIdentity();
-    transform *= Matrix4f::rotation(M_PI / 2, 2, 1); // rotate from z to y
+    transform *= Matrix4f::rotation(M_PI / 2, 2, 1);  // rotate from z to y
     transform *= Matrix4f::translation(0, 0, 0.5);
     transform *= Matrix4f::scaling(0.1, 0.1, 3);
     axis.transform(transform, axis.vertices().size() - num_verts_added);
-    for (int i = 0 ; i < num_verts_added; i += 1) {
+    for (int i = 0; i < num_verts_added; i += 1) {
       axis.color(0, 1, 0);
     }
 
@@ -80,7 +80,7 @@ struct MyApp : App {
     transform *= Matrix4f::translation(0, 0, 0.5);
     transform *= Matrix4f::scaling(0.1, 0.1, 3);
     axis.transform(transform, axis.vertices().size() - num_verts_added);
-    for (int i = 0 ; i < num_verts_added; i += 1) {
+    for (int i = 0; i < num_verts_added; i += 1) {
       axis.color(0, 0, 1);
     }
 
@@ -100,8 +100,7 @@ struct MyApp : App {
     g.depthTesting(true);
     g.light(light);
 
-    auto draw_mesh = [this, &g](){
-
+    auto draw_mesh = [this, &g]() {
       g.lighting(false);
       g.meshColor();
       g.polygonMode(Graphics::FILL);
@@ -181,11 +180,9 @@ struct MyApp : App {
     draw_mesh();
     g.popMatrix();
   }
-
 };
 
-int main()
-{
-	MyApp app;
-	app.start();
+int main() {
+  MyApp app;
+  app.start();
 }

@@ -16,13 +16,11 @@ Andres Cabrera Sept 2019
 using namespace al;
 
 struct MyApp : public App {
-
   // This gets called whenever we receive a packet
   void onMessage(osc::Message& m) override {
     m.print();
     // Check that the address and tags match what we expect
-    if(m.addressPattern() == "/test" && m.typeTags() == "si"){
-
+    if (m.addressPattern() == "/test" && m.typeTags() == "si") {
       // Extract the data out of the packet
       std::string str;
       int val;
@@ -32,11 +30,9 @@ struct MyApp : public App {
       std::cout << "SERVER: recv " << str << " " << val << std::endl;
     }
   }
-
 };
 
-
-int main(){
+int main() {
   MyApp().start();
   return 0;
 }

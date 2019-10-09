@@ -3,8 +3,8 @@
 
 #include "al/math/al_Vec.hpp"
 
-#include <vector>
 #include <algorithm>
+#include <vector>
 
 /*  Allocore --
   Multimedia / virtual environment application class library
@@ -73,18 +73,17 @@ namespace al {
 
 /// @ingroup Spatial
 class HashSpace {
-public:
-
+ public:
   /// container for registered spatial elements
   struct Object {
     Object() : hash(invalidHash()), next(NULL), prev(NULL), userdata(0) {}
 
     Vec3d pos;
-    uint32_t hash;  ///< which voxel ID it belongs to (or invalidHash())
-    Object * next, * prev;  ///< neighbors in the same voxel
-    union {      ///< a way to attach user-defined payloads:
+    uint32_t hash;        ///< which voxel ID it belongs to (or invalidHash())
+    Object *next, *prev;  ///< neighbors in the same voxel
+    union {               ///< a way to attach user-defined payloads:
       uint32_t id;
-      void * userdata;
+      void* userdata;
     };
   };
 
@@ -94,13 +93,13 @@ public:
     Voxel(const Voxel& cpy) : mObjects(NULL) {}
 
     /// definitely not thread-safe.
-    inline void add(Object * o);
+    inline void add(Object* o);
 
     /// definitely not thread-safe.
-    inline void remove(Object * o);
+    inline void remove(Object* o);
 
     /// the linked list of objects in this voxel
-    Object * mObjects;
+    Object* mObjects;
   };
 
   /**
@@ -116,12 +115,11 @@ public:
       ...
     }
 
-		@ingroup Spatial
+                @ingroup Spatial
   */
   struct Query {
-
     struct Result {
-      HashSpace::Object * object;
+      HashSpace::Object* object;
       double distanceSquared;
 
       static bool compare(const Result& x, const Result& y) {
@@ -129,7 +127,8 @@ public:
       }
 
       Result() : object(0), distanceSquared(0) {}
-      Result(const Result& cpy) : object(cpy.object), distanceSquared(cpy.distanceSquared) {}
+      Result(const Result& cpy)
+          : object(cpy.object), distanceSquared(cpy.distanceSquared) {}
     };
 
     typedef std::vector<Result> Results;
@@ -139,9 +138,7 @@ public:
       Constructor
       @param maxResults the maximum number of results to find
     */
-    Query(uint32_t maxResults=128)
-    :  mMaxResults(maxResults)
-    {
+    Query(uint32_t maxResults = 128) : mMaxResults(maxResults) {
       mObjects.reserve(maxResults);
     }
 
@@ -158,8 +155,10 @@ public:
       @param minRadius finds objects if they are beyond this distance
       @return the number of results found
     */
-    int operator()(const HashSpace& space, const Vec3d center, double maxRadius, double minRadius=0.);
-    int operator()(const HashSpace& space, const Object * obj, double maxRadius, double minRadius=0.);
+    int operator()(const HashSpace& space, const Vec3d center, double maxRadius,
+                   double minRadius = 0.);
+    int operator()(const HashSpace& space, const Object* obj, double maxRadius,
+                   double minRadius = 0.);
 
     /**
       finds all the neighbors of the given point, up to maxResults()
@@ -170,19 +169,20 @@ public:
       @param obj finds objects near to this object
     */
     int operator()(const HashSpace& space, Vec3d center);
-    int operator()(const HashSpace& space, const Object * obj);
+    int operator()(const HashSpace& space, const Object* obj);
 
     /**
       finds nearest neighbor of an object
     */
-    Object * nearest(const HashSpace& space, const Object * obj);
-
+    Object* nearest(const HashSpace& space, const Object* obj);
 
     /// get number of results:
     unsigned size() const { return mObjects.size(); }
     /// get each result:
-    Object * operator[](unsigned i) const { return mObjects[i].object; }
-    double distanceSquared(unsigned i) const { return mObjects[i].distanceSquared; }
+    Object* operator[](unsigned i) const { return mObjects[i].object; }
+    double distanceSquared(unsigned i) const {
+      return mObjects[i].distanceSquared;
+    }
     double distance(unsigned i) const { return sqrt(distanceSquared(i)); }
 
     /**
@@ -190,10 +190,16 @@ public:
       to support aggregating queries in series
       typically however you would want to clear() and then call the query.
     */
-    Query& clear() { mObjects.clear(); return *this; }
+    Query& clear() {
+      mObjects.clear();
+      return *this;
+    }
 
     /// set the maximum number of desired results
-    Query& maxResults(uint32_t i) { mMaxResults = i; return *this; }
+    Query& maxResults(uint32_t i) {
+      mMaxResults = i;
+      return *this;
+    }
     /// get the maximum number of desired results
     uint32_t maxResults() const { return mMaxResults; }
 
@@ -202,7 +208,7 @@ public:
     Iterator end() { return mObjects.end(); }
     Results& results() { return mObjects; }
 
-  protected:
+   protected:
     uint32_t mMaxResults;
     Results mObjects;
   };
@@ -219,7 +225,7 @@ public:
     @param resolution determines the number of voxels as 2^resolution per axis
     @param numObjects set how many Object slots to initally allocate
   */
-  HashSpace(uint32_t resolution=5, uint32_t numObjects=0);
+  HashSpace(uint32_t resolution = 5, uint32_t numObjects = 0);
 
   ~HashSpace();
 
@@ -236,9 +242,11 @@ public:
   Object& object(uint32_t i) { return mObjects[i]; }
 
   /// set the position of an object:
-  HashSpace& move(uint32_t objectId, double x, double y, double z) { return move(objectId, Vec3d(x,y,z)); }
-  template<typename T>
-  HashSpace& move(uint32_t objectId, Vec<3,T> pos);
+  HashSpace& move(uint32_t objectId, double x, double y, double z) {
+    return move(objectId, Vec3d(x, y, z));
+  }
+  template <typename T>
+  HashSpace& move(uint32_t objectId, Vec<3, T> pos);
 
   /// this removes the object from voxels/queries, but does not destroy it
   /// the objectId can be reused later via move()
@@ -246,59 +254,59 @@ public:
 
   /// wrap an absolute position within the space:
   double wrap(double x) const { return wrap(x, dim()); }
-  template<typename T>
-  Vec<3,T> wrap(Vec<3,T> v) const {
-    return Vec<3,T>(wrap(v.x), wrap(v.y), wrap(v.z));
+  template <typename T>
+  Vec<3, T> wrap(Vec<3, T> v) const {
+    return Vec<3, T>(wrap(v.x), wrap(v.y), wrap(v.z));
   }
 
   /// wrap a relative vector within the space:
   /// use this when computing the vector between objects
   /// to properly take into account toroidal wrapping
   double wrapRelative(double x) const { return wrap(x, maxRadius()); }
-  template<typename T>
-  Vec<3,T> wrapRelative(Vec<3,T> v) const {
+  template <typename T>
+  Vec<3, T> wrapRelative(Vec<3, T> v) const {
     return wrap(v + maxRadius()) - maxRadius();
   }
 
   /// an invalid voxel index used to indicate non-membership
   static uint32_t invalidHash() { return UINT_MAX; }
 
-protected:
-
+ protected:
   // integer distance squared
   uint32_t distanceSquared(double a1, double a2, double a3) const;
 
   // convert x,y,z in range [0..DIM) to unsigned hash:
   // this is also the valid mVoxels index for the corresponding voxel:
   inline uint32_t hash(unsigned x, unsigned y, unsigned z) const {
-    return hashx(x)+hashy(y)+hashz(z);
+    return hashx(x) + hashy(y) + hashz(z);
   }
-  template<typename T>
-  inline uint32_t hash(Vec<3,T> v) const { return hash(v[0], v[1], v[2]); }
+  template <typename T>
+  inline uint32_t hash(Vec<3, T> v) const {
+    return hash(v[0], v[1], v[2]);
+  }
   // generate hash offset by an already generated hash:
-  inline uint32_t hash(uint32_t x, uint32_t y, uint32_t z, uint32_t offset) const {
-    return  hashx(unhashx(offset) + x) +
-        hashy(unhashy(offset) + y) +
-        hashz(unhashz(offset) + z);
+  inline uint32_t hash(uint32_t x, uint32_t y, uint32_t z,
+                       uint32_t offset) const {
+    return hashx(unhashx(offset) + x) + hashy(unhashy(offset) + y) +
+           hashz(unhashz(offset) + z);
   }
-  template<typename T>
-  inline uint32_t hash(Vec<3,T> v, uint32_t offset) const {
+  template <typename T>
+  inline uint32_t hash(Vec<3, T> v, uint32_t offset) const {
     return hash(v[0], v[1], v[2], offset);
   }
 
-
   inline uint32_t hashx(uint32_t v) const { return v & mWrap; }
-  inline uint32_t hashy(uint32_t v) const { return (v & mWrap)<<mShift; }
-  inline uint32_t hashz(uint32_t v) const { return (v & mWrap)<<mShift2; }
+  inline uint32_t hashy(uint32_t v) const { return (v & mWrap) << mShift; }
+  inline uint32_t hashz(uint32_t v) const { return (v & mWrap) << mShift2; }
 
   // convert unsigned hash to x,y,z in range [0..mDim):
-  inline Vec3i unhash(uint32_t h) const { return Vec3i(unhashx(h), unhashy(h), unhashz(h)); }
+  inline Vec3i unhash(uint32_t h) const {
+    return Vec3i(unhashx(h), unhashy(h), unhashz(h));
+  }
 
-  inline uint32_t unhashx(uint32_t h) const { return (h) & mWrap; }
-  inline uint32_t unhashy(uint32_t h) const { return (h>>mShift) & mWrap; }
-  inline uint32_t unhashz(uint32_t h) const { return (h>>mShift2) & mWrap; }
-
-
+  inline uint32_t unhashx(uint32_t h) const { return (h)&mWrap; }
+  inline uint32_t unhashy(uint32_t h) const { return (h >> mShift) & mWrap; }
+  inline uint32_t unhashz(uint32_t h) const { return (h >> mShift2) & mWrap; }
 
   // safe floating-point wrapping
   static double wrap(double x, double mod);
@@ -321,13 +329,11 @@ protected:
   std::vector<uint32_t> mVoxelIndicesToDistance;
 };
 
-
-
 // this is definitely not thread-safe.
-inline void HashSpace::Voxel :: add(Object * o) {
+inline void HashSpace::Voxel ::add(Object* o) {
   if (mObjects) {
     // add to tail:
-    Object * last = mObjects->prev;
+    Object* last = mObjects->prev;
     last->next = o;
     o->prev = last;
     o->next = mObjects;
@@ -339,38 +345,43 @@ inline void HashSpace::Voxel :: add(Object * o) {
 }
 
 // this is definitely not thread-safe.
-inline void HashSpace::Voxel :: remove(Object * o) {
+inline void HashSpace::Voxel ::remove(Object* o) {
   if (o == o->prev) {  // voxel only has 1 item
     mObjects = NULL;
   } else {
-    Object * prev = o->prev;
-    Object * next = o->next;
+    Object* prev = o->prev;
+    Object* next = o->next;
     prev->next = next;
     next->prev = prev;
     // update head pointer?
-    if (mObjects == o) { mObjects = next; }
+    if (mObjects == o) {
+      mObjects = next;
+    }
   }
   // leave the object clean:
   o->prev = o->next = NULL;
 }
 
-inline int HashSpace::Query :: operator()(const HashSpace& space, Vec3d center) {
+inline int HashSpace::Query ::operator()(const HashSpace& space, Vec3d center) {
   return (*this)(space, center, space.maxRadius());
 }
 
-inline int HashSpace::Query :: operator()(const HashSpace& space, const Object * obj) {
+inline int HashSpace::Query ::operator()(const HashSpace& space,
+                                         const Object* obj) {
   return (*this)(space, obj, space.maxRadius());
 }
 
 // the maximum permissible value of radius is mDimHalf
 // if int(inner^2) == int(outer^2), only 1 shell will be queried.
 // TODO: non-toroidal version.
-inline int HashSpace::Query :: operator()(const HashSpace& space, Vec3d center, double maxRadius, double minRadius) {
+inline int HashSpace::Query ::operator()(const HashSpace& space, Vec3d center,
+                                         double maxRadius, double minRadius) {
   unsigned nres = 0;
-  double minr2 = minRadius*minRadius;
-  double maxr2 = maxRadius*maxRadius;
-  uint32_t iminr2 = std::max(uint32_t(0), uint32_t(minRadius*minRadius));
-  uint32_t imaxr2 = std::min(space.mMaxHalfD2, uint32_t(1 + (maxRadius+1)*(maxRadius+1)));
+  double minr2 = minRadius * minRadius;
+  double maxr2 = maxRadius * maxRadius;
+  uint32_t iminr2 = std::max(uint32_t(0), uint32_t(minRadius * minRadius));
+  uint32_t imaxr2 = std::min(space.mMaxHalfD2,
+                             uint32_t(1 + (maxRadius + 1) * (maxRadius + 1)));
   if (iminr2 < imaxr2) {
     uint32_t cellstart = space.mDistanceToVoxelIndices[iminr2];
     uint32_t cellend = space.mDistanceToVoxelIndices[imaxr2];
@@ -378,9 +389,9 @@ inline int HashSpace::Query :: operator()(const HashSpace& space, Vec3d center, 
       uint32_t index = space.hash(center, space.mVoxelIndices[i]);
       const Voxel& voxel = space.mVoxels[index];
       // now add any objects in this voxel to the result...
-      Object * head = voxel.mObjects;
+      Object* head = voxel.mObjects;
       if (head) {
-        Object * o = head;
+        Object* o = head;
         do {
           // final check - float version:
           Vec3d rel = space.wrapRelative(o->pos - center);
@@ -393,25 +404,28 @@ inline int HashSpace::Query :: operator()(const HashSpace& space, Vec3d center, 
           o = o->next;
         } while (o != head && nres < mMaxResults);
       }
-      if(nres == mMaxResults) {
+      if (nres == mMaxResults) {
         break;
       }
     }
   }
-  //std::sort(mObjects.begin(), mObjects.end(), Result::compare);
+  // std::sort(mObjects.begin(), mObjects.end(), Result::compare);
   return nres;
 }
 
 // the maximum permissible value of radius is mDimHalf
 // if int(inner^2) == int(outer^2), only 1 shell will be queried.
 // TODO: non-toroidal version.
-inline int HashSpace::Query :: operator()(const HashSpace& space, const HashSpace::Object * obj, double maxRadius, double minRadius) {
+inline int HashSpace::Query ::operator()(const HashSpace& space,
+                                         const HashSpace::Object* obj,
+                                         double maxRadius, double minRadius) {
   unsigned nres = 0;
   const Vec3d& center = obj->pos;
-  double minr2 = minRadius*minRadius;
-  double maxr2 = maxRadius*maxRadius;
-  uint32_t iminr2 = std::max(uint32_t(0), uint32_t(minRadius*minRadius));
-  uint32_t imaxr2 = std::min(space.mMaxHalfD2, uint32_t(1 + (maxRadius+1)*(maxRadius+1)));
+  double minr2 = minRadius * minRadius;
+  double maxr2 = maxRadius * maxRadius;
+  uint32_t iminr2 = std::max(uint32_t(0), uint32_t(minRadius * minRadius));
+  uint32_t imaxr2 = std::min(space.mMaxHalfD2,
+                             uint32_t(1 + (maxRadius + 1) * (maxRadius + 1)));
   if (iminr2 < imaxr2) {
     uint32_t cellstart = space.mDistanceToVoxelIndices[iminr2];
     uint32_t cellend = space.mDistanceToVoxelIndices[imaxr2];
@@ -419,9 +433,9 @@ inline int HashSpace::Query :: operator()(const HashSpace& space, const HashSpac
       uint32_t index = space.hash(center, space.mVoxelIndices[i]);
       const Voxel& voxel = space.mVoxels[index];
       // now add any objects in this voxel to the result...
-      Object * head = voxel.mObjects;
+      Object* head = voxel.mObjects;
       if (head) {
-        Object * o = head;
+        Object* o = head;
         do {
           if (o != obj) {
             // final check - float version:
@@ -437,23 +451,24 @@ inline int HashSpace::Query :: operator()(const HashSpace& space, const HashSpac
           o = o->next;
         } while (o != head && nres < mMaxResults);
       }
-      if(nres == mMaxResults) break;
+      if (nres == mMaxResults) break;
     }
   }
-  //std::sort(mObjects.begin(), mObjects.end(), Result::compare);
+  // std::sort(mObjects.begin(), mObjects.end(), Result::compare);
   return nres;
 }
 
 // of the matches, return the best:
-inline HashSpace::Object * HashSpace::Query :: nearest(const HashSpace& space, const Object * src) {
+inline HashSpace::Object* HashSpace::Query ::nearest(const HashSpace& space,
+                                                     const Object* src) {
   clear();
   const Vec3d& center = src->pos;
   uint32_t results = (*this)(space, src, space.mMaxHalfD2);
 
-  Object * result = 0;
+  Object* result = 0;
   double rd2 = space.mMaxHalfD2;
-  for (uint32_t i=0; i<results; i++) {
-    Object * o = mObjects[i].object;
+  for (uint32_t i = 0; i < results; i++) {
+    Object* o = mObjects[i].object;
     Vec3d rel = space.wrapRelative(o->pos - center);
     double d2 = rel.magSqr();
     if (d2 < rd2) {
@@ -464,18 +479,17 @@ inline HashSpace::Object * HashSpace::Query :: nearest(const HashSpace& space, c
   return result;
 }
 
-
-inline void HashSpace :: numObjects(int numObjects) {
+inline void HashSpace ::numObjects(int numObjects) {
   mObjects.clear();
   mObjects.resize(numObjects);
   // clear all voxels:
-  for (unsigned i=0; i<mVoxels.size(); i++) {
+  for (unsigned i = 0; i < mVoxels.size(); i++) {
     mVoxels[i].mObjects = 0;
   }
 }
 
-template<typename T>
-inline HashSpace& HashSpace :: move(uint32_t objectId, Vec<3,T> pos) {
+template <typename T>
+inline HashSpace& HashSpace ::move(uint32_t objectId, Vec<3, T> pos) {
   Object& o = mObjects[objectId];
   o.pos.set(wrap(pos));
   uint32_t newhash = hash(o.pos);
@@ -487,7 +501,7 @@ inline HashSpace& HashSpace :: move(uint32_t objectId, Vec<3,T> pos) {
   return *this;
 }
 
-inline HashSpace& HashSpace :: remove(uint32_t objectId) {
+inline HashSpace& HashSpace ::remove(uint32_t objectId) {
   Object& o = mObjects[objectId];
   if (o.hash != invalidHash()) mVoxels[o.hash].remove(&o);
   o.hash = invalidHash();
@@ -495,18 +509,19 @@ inline HashSpace& HashSpace :: remove(uint32_t objectId) {
 }
 
 // integer distance squared
-inline uint32_t HashSpace :: distanceSquared(double x, double y, double z) const {
-  return x*x+y*y+z*z;
+inline uint32_t HashSpace ::distanceSquared(double x, double y,
+                                            double z) const {
+  return x * x + y * y + z * z;
 }
 
 // wrapping floating point numbers is surprisingly complex
 // because of rounding errors, behavior when near zero
 // and other oddities
-inline double HashSpace :: wrap(double x, double mod) {
+inline double HashSpace ::wrap(double x, double mod) {
   if (mod) {
     if (x > mod) {
       // shift down
-      if (x > (mod*2.)) {
+      if (x > (mod * 2.)) {
         // multiple wraps:
         double div = x / mod;
         // get fract:
@@ -539,10 +554,10 @@ inline double HashSpace :: wrap(double x, double mod) {
   }
 }
 
-inline double HashSpace :: wrap(double x, double lo, double hi) {
-  return lo + wrap(x-lo, hi-lo);
+inline double HashSpace ::wrap(double x, double lo, double hi) {
+  return lo + wrap(x - lo, hi - lo);
 }
 
-} // al::
+}  // namespace al
 
 #endif

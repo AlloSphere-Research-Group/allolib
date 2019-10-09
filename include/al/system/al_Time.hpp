@@ -41,21 +41,22 @@
   File author(s):
   Graham Wakefield, 2010, grrrwaaa@gmail.com
   Lance Putnam, 2010, putnam.lance@gmail.com
-  
+
   Keehong Youn, 2016, younkeehong@gmail.com
 */
 
-#include <string>
 #include <climits>
+#include <string>
 
 #include <cmath>
 
-typedef long long int al_nsec; /**< nanoseconds type (accurate to +/- 292.5 years) */
-typedef double al_sec;         /**< seconds type */
+typedef long long int
+    al_nsec;           /**< nanoseconds type (accurate to +/- 292.5 years) */
+typedef double al_sec; /**< seconds type */
 
 /**! conversion factors for nanoseconds/seconds */
-#define al_time_ns2s    1.0e-9
-#define al_time_s2ns    1.0e9
+#define al_time_ns2s 1.0e-9
+#define al_time_s2ns 1.0e9
 
 namespace al {
 
@@ -74,42 +75,41 @@ void al_sleep_nsec(al_nsec dt);
 void al_sleep_until(al_sec target);
 
 // backward compatibility
-inline void wait(al_sec dt){ al_sleep(dt); }
-inline al_sec walltime(){ return al_system_time(); }
-inline al_sec timeNow(){ return al_system_time(); }
+inline void wait(al_sec dt) { al_sleep(dt); }
+inline al_sec walltime() { return al_system_time(); }
+inline al_sec timeNow() { return al_system_time(); }
 
 /// Convert nanoseconds to timecode string
-std::string toTimecode(al_nsec t, const std::string& format="D:H:M:S:m:u");
+std::string toTimecode(al_nsec t, const std::string& format = "D:H:M:S:m:u");
 
 /// Timer with stopwatch-like functionality for benchmarking, etc.
 ///
 /// @ingroup System
 class Timer {
-public:
-  Timer(bool setStartTime=true){
-    if(setStartTime) start();
+ public:
+  Timer(bool setStartTime = true) {
+    if (setStartTime) start();
   }
 
   /// Returns nsec between start() and stop() calls
-  al_nsec elapsed() const { return mStop - mStart; }          
+  al_nsec elapsed() const { return mStop - mStart; }
 
   /// Returns seconds between start() and stop() calls
   al_sec elapsedSec() const { return al_time_ns2s * elapsed(); }
 
   /// Set start time to current time
-  void start(){ mStart = getTime(); }
+  void start() { mStart = getTime(); }
 
   /// Set stop time to current time
-  void stop(){ mStop = getTime(); }
+  void stop() { mStop = getTime(); }
 
   /// Print current elapsed time
   void print() const;
 
-private:
-  al_nsec mStart=0, mStop=0;  // start and stop times
-  static al_nsec getTime(){ return al_steady_time_nsec(); }
+ private:
+  al_nsec mStart = 0, mStop = 0;  // start and stop times
+  static al_nsec getTime() { return al_steady_time_nsec(); }
 };
-
 
 /// Self-correcting timer
 
@@ -121,8 +121,7 @@ private:
 ///
 /// @ingroup System
 class DelayLockedLoop {
-public:
-
+ public:
   DelayLockedLoop(al_sec step_period, double bandwidth = 0.5) {
     tperiod = step_period;
     setBandwidth(bandwidth);
@@ -146,26 +145,27 @@ public:
   al_sec period_smoothed() const { return t2; }
 
   /// Get the current rate estimation (smoothed)
-  al_sec rate_smoothed() const { return 1./t2; }
+  al_sec rate_smoothed() const { return 1. / t2; }
 
   /// Get the ideal period
   al_sec period_ideal() const { return tperiod; }
 
   /// Get the ideal rate
-  al_sec rate_ideal() const { return 1./tperiod; }
+  al_sec rate_ideal() const { return 1. / tperiod; }
 
   /// Returns time estimate between current and next event
 
   /// This returns an estimate of corresponding real-time between current
   /// event & next by linear interpolation of current event timestamp &
   /// projected next event timestamp.
-  al_sec realtime_interp(double alpha) const { return t0 + alpha*(t1-t0); }
+  al_sec realtime_interp(double alpha) const { return t0 + alpha * (t1 - t0); }
 
-protected:
+ protected:
   al_sec tperiod;  // event period in seconds
-  al_sec t0;    // 0th-order component: timestamp of the current event
-  al_sec t1;    // 1st-order component: ideally the timestamp of the next event
-  al_sec t2;    // 2nd-order component (akin to acceleration, or smoothed event period)
+  al_sec t0;       // 0th-order component: timestamp of the current event
+  al_sec t1;  // 1st-order component: ideally the timestamp of the next event
+  al_sec t2;  // 2nd-order component (akin to acceleration, or smoothed event
+              // period)
   double mB, mC;  // 1st & 2nd order weights
   bool mReset;
 };
@@ -174,17 +174,24 @@ protected:
 ///
 /// @ingroup System
 class Clock {
-public:
-
+ public:
   /// Constructor that defaults to realtime mode
   Clock(bool useRT = true)
-  : mNow(0), mReferenceTime(al_system_time()), mDT(0.33), mFPS(1./mDT), mFrame(0), bUseRT(useRT)
-  {}
+      : mNow(0),
+        mReferenceTime(al_system_time()),
+        mDT(0.33),
+        mFPS(1. / mDT),
+        mFrame(0),
+        bUseRT(useRT) {}
 
   /// Constructor that defaults to a fixed 'frame rate'
   Clock(al_sec dt)
-  : mNow(0), mReferenceTime(al_system_time()), mDT(dt), mFPS(1./mDT), mFrame(0), bUseRT(false)
-  {}
+      : mNow(0),
+        mReferenceTime(al_system_time()),
+        mDT(dt),
+        mFPS(1. / mDT),
+        mFrame(0),
+        bUseRT(false) {}
 
   /// get current clock time
   al_sec now() const { return mNow; }
@@ -209,11 +216,11 @@ public:
       mDT = t2 - mNow;
       mNow = t2;
       mFrame++;
-      mFPS = mFPS + 0.1 * ((1./mDT) - mFPS);
+      mFPS = mFPS + 0.1 * ((1. / mDT) - mFPS);
     } else {
       mNow += mDT;
       mFrame++;
-      mFPS = 1./mDT;
+      mFPS = 1. / mDT;
     }
     return now();
   }
@@ -236,14 +243,13 @@ public:
     bUseRT = false;
   }
 
-protected:
+ protected:
   al_sec mNow, mReferenceTime, mDT;
   double mFPS;
   unsigned mFrame;
   bool bUseRT;
 };
 
-} // al::
+}  // namespace al
 
 #endif /* INCLUDE_AL_TIME_CPP_H */
-

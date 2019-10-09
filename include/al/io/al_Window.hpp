@@ -384,9 +384,7 @@ class Window {
     return true;
   };
 
-  WindowEventHandlers & windowEventHandlers() {
-    return mWindowEventHandlers;
-  }
+  WindowEventHandlers& windowEventHandlers() { return mWindowEventHandlers; }
 
   /// Append handler to window event handler list
   /// The order of handlers in the list matches their calling order.

@@ -67,13 +67,13 @@
   context by default.
 */
 
-namespace al{
+namespace al {
 
 /// Base class for allocated resources on the GPU
 ///
 /// @ingroup Graphics
-class GPUObject{
-public:
+class GPUObject {
+ public:
   GPUObject();
 
   // disable copy/move construction
@@ -98,7 +98,7 @@ public:
   /// Returns the assigned object id
   unsigned long id() const { return mID; }
 
-  void id(unsigned long v){ mID = v; }
+  void id(unsigned long v) { mID = v; }
 
   /// Ensure that the GPUObject is ready to use
 
@@ -111,7 +111,7 @@ public:
   /// Triggers re-creation of object safely
   void invalidate();
 
-protected:
+ protected:
   unsigned int mID;
   bool mResubmit;
 
@@ -122,6 +122,6 @@ protected:
   virtual void onDestroy() = 0;
 };
 
-} // ::al
+}  // namespace al
 
 #endif

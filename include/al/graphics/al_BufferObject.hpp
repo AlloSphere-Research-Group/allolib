@@ -49,8 +49,7 @@
 
 #include <vector>
 
-namespace al{
-
+namespace al {
 
 /**
 Vertex Buffer Objects (VBOs) create buffer memory for vertex attributes in
@@ -74,16 +73,16 @@ identifier.
 */
 
 class BufferObject : public GPUObject {
-public:
+ public:
   BufferObject();
   virtual ~BufferObject();
 
   /// Get buffer store size, in bytes
   int size() const;
   /// Set buffer type
-  void bufferType(unsigned int v); // GL_ARRAY_BUFFER, ...
+  void bufferType(unsigned int v);  // GL_ARRAY_BUFFER, ...
   /// Set buffer usage
-  void usage(unsigned int v); // GL_DYNAMIC_DRAW, ...
+  void usage(unsigned int v);  // GL_DYNAMIC_DRAW, ...
 
   /// Bind buffer
   void bind();
@@ -93,7 +92,7 @@ public:
   // size is in bytes, if a std::vector of vec4 with float type is to be sent,
   // the call should be:
   // my_buffer.data(my_vector.size() * 4 * sizeof(float), my_vector.data());
-  void data(size_t size, void const* src=NULL);
+  void data(size_t size, void const* src = NULL);
   void subdata(int offset, int size, void const* src);
 
   // #ifdef AL_GRAPHICS_USE_OPENGL
@@ -121,7 +120,7 @@ public:
   // bool unmap();
   // #endif
 
-protected:
+ protected:
   unsigned int mType;
   unsigned int mUsage;
   // unsigned int mMapMode;
@@ -130,5 +129,5 @@ protected:
   virtual void onDestroy();
 };
 
-} // al::
+}  // namespace al
 #endif

@@ -1,25 +1,25 @@
 #include "al/spatial/al_Pose.hpp"
 
-namespace al{
+namespace al {
 
 Pose::Pose(const Vec3d& v, const Quatd& q)
-:  mVec(v), mQuat(q)//, mParentTransform(nullptr)
+    : mVec(v),
+      mQuat(q)  //, mParentTransform(nullptr)
 {}
 
-Pose::Pose(const Pose& p) {
-  set(p);
-}
+Pose::Pose(const Pose& p) { set(p); }
 
-void Pose::faceToward(const Vec3d& point, double amt){
-
+void Pose::faceToward(const Vec3d& point, double amt) {
   Vec3d target(point - pos());
   target.normalize();
   Quatd rot = Quatd::getRotationTo(uf(), target);
 
   // We must pre-multiply the Pose quaternion with our rotation since
   // it was computed in world space.
-  if(amt == 1.)  quat() = rot * quat();
-  else      quat() = rot.pow(amt) * quat();
+  if (amt == 1.)
+    quat() = rot * quat();
+  else
+    quat() = rot.pow(amt) * quat();
 
   /* Apply rotation using Euler angles (can behave erraticly)
   Vec3d aeb1, aeb2;
@@ -36,14 +36,12 @@ void Pose::faceToward(const Vec3d& point, double amt){
   //*/
 }
 
-void Pose::faceToward(const Vec3d& point, const Vec3d& up, double amt){
+void Pose::faceToward(const Vec3d& point, const Vec3d& up, double amt) {
   // Vec3d target(point - pos());
   // target.normalize();
   // Quatd rot = Quatd::getBillboardRotation(-target, up);
-  quat().slerpTo(
-    Quatd::getBillboardRotation((pos() - point).normalize(), up),
-    amt
-  );
+  quat().slerpTo(Quatd::getBillboardRotation((pos() - point).normalize(), up),
+                 amt);
 }
 
 Mat4d Pose::matrix() const {
@@ -55,9 +53,9 @@ Mat4d Pose::matrix() const {
 
 Mat4d Pose::directionMatrix() const {
   Mat4d m = matrix();
-  m(0,2) = -m(0,2);
-  m(1,2) = -m(1,2);
-  m(2,2) = -m(2,2);
+  m(0, 2) = -m(0, 2);
+  m(1, 2) = -m(1, 2);
+  m(2, 2) = -m(2, 2);
   return m;
 }
 
@@ -69,11 +67,10 @@ Pose Pose::lerp(const Pose& target, double amt) const {
 }
 
 void Pose::toAED(const Vec3d& to, double& az, double& el, double& dist) const {
-
   Vec3d rel = to - vec();
   dist = rel.mag();
 
-  if(dist > quat().eps()*2){
+  if (dist > quat().eps() * 2) {
     rel.normalize();
 
     Vec3d ux, uy, uz;
@@ -97,14 +94,11 @@ void Pose::toAED(const Vec3d& to, double& az, double& el, double& dist) const {
 }
 
 void Pose::print() const {
-  printf("Vec3d(%f, %f, %f);\nQuatd(%f, %f, %f, %f);\n",
-    mVec[0], mVec[1], mVec[2], mQuat[0], mQuat[1], mQuat[2], mQuat[3]);
+  printf("Vec3d(%f, %f, %f);\nQuatd(%f, %f, %f, %f);\n", mVec[0], mVec[1],
+         mVec[2], mQuat[0], mQuat[1], mQuat[2], mQuat[3]);
 }
 
-
-
 SmoothPose::SmoothPose(const Pose& init, double psmooth, double qsmooth)
-:  Pose(init), mTarget(init), mPF(psmooth), mQF(qsmooth)
-{}
+    : Pose(init), mTarget(init), mPF(psmooth), mQF(qsmooth) {}
 
-} // al::
+}  // namespace al

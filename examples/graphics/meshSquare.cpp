@@ -12,58 +12,54 @@ Lance Putnam, March 2015
 using namespace al;
 
 struct MyApp : public App {
+  // This mesh will contain the vertex positions and colors of our square.
+  Mesh mesh;
 
-	// This mesh will contain the vertex positions and colors of our square.
-	Mesh mesh;
+  void onCreate() override {
+    /* The square we want to render will have the following configuration:
 
-	void onCreate () override
-	{
+    (-1,1,0)    (1,1,0)
+    red         blue
+     o-----------o
+     |0         2|
+     |           |
+     |           |
+     |           |
+     |1         3|
+     o-----------o
+    (-1,-1,0)   (1,-1,0)
+    green       white
+    */
 
-		/* The square we want to render will have the following configuration:
-		
-		(-1,1,0)    (1,1,0)
-		red         blue
-		 o-----------o
-		 |0         2|
-		 |           |
-		 |           |
-		 |           |
-		 |1         3|
-		 o-----------o
-		(-1,-1,0)   (1,-1,0)
-		green       white
-		*/
+    // We will use a triangle strip primitive to create a triangle between
+    // each three successive vertices.
+    mesh.primitive(Mesh::TRIANGLE_STRIP);
 
-		// We will use a triangle strip primitive to create a triangle between
-		// each three successive vertices.
-		mesh.primitive(Mesh::TRIANGLE_STRIP);
+    // First, we add the vertex positions in a zig-zag pattern.
+    mesh.vertex(-1, 1, 0);   // 0: top-left corner
+    mesh.vertex(-1, -1, 0);  // 1: bottom-left corner
+    mesh.vertex(1, 1, 0);    // 2: top-right corner
+    mesh.vertex(1, -1, 0);   // 3: bottom-right corner
 
-		// First, we add the vertex positions in a zig-zag pattern.
-		mesh.vertex(-1, 1, 0); // 0: top-left corner
-		mesh.vertex(-1,-1, 0); // 1: bottom-left corner
-		mesh.vertex( 1, 1, 0); // 2: top-right corner
-		mesh.vertex( 1,-1, 0); // 3: bottom-right corner
+    // Next, we add the vertex colors (in RGB color space), using the same
+    // order as the positions above.
+    mesh.color(1, 0, 0);  // 0: red
+    mesh.color(0, 1, 0);  // 1: green
+    mesh.color(0, 0, 1);  // 2: blue
+    mesh.color(1, 1, 1);  // 3: white
 
-		// Next, we add the vertex colors (in RGB color space), using the same
-		// order as the positions above.
-		mesh.color(1, 0, 0); // 0: red
-		mesh.color(0, 1, 0); // 1: green
-		mesh.color(0, 0, 1); // 2: blue
-		mesh.color(1, 1, 1); // 3: white
+    nav().pos(0, 0, 4);
+  }
 
-		nav().pos(0,0,4);
-	}
-
-	void onDraw(Graphics& g) override
-	{
-		g.clear(0);
-		g.meshColor(); // use mesh's color
-		// Here we tell the renderer to draw the mesh
-		g.draw(mesh);
-	}
+  void onDraw(Graphics& g) override {
+    g.clear(0);
+    g.meshColor();  // use mesh's color
+    // Here we tell the renderer to draw the mesh
+    g.draw(mesh);
+  }
 };
 
 int main() {
-	MyApp app;
-	app.start();
+  MyApp app;
+  app.start();
 }

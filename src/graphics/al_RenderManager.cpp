@@ -1,16 +1,18 @@
 #include "al/graphics/al_RenderManager.hpp"
 
-namespace al
-{
-  // from al_Window.hpp
-  float getCurrentWindowPixelDensity ();
-}
+namespace al {
+// from al_Window.hpp
+float getCurrentWindowPixelDensity();
+}  // namespace al
 
 using namespace al;
 
 //______________________________________________________________________________
 
-MatrixStack::MatrixStack() { stack.emplace_back(); stack.reserve(10); }
+MatrixStack::MatrixStack() {
+  stack.emplace_back();
+  stack.reserve(10);
+}
 void MatrixStack::mult(Matrix4f const& m) { stack.back() = stack.back() * m; }
 void MatrixStack::set(const Matrix4f& m) { stack.back() = m; }
 void MatrixStack::setIdentity() { stack.back().setIdentity(); }
@@ -22,13 +24,17 @@ void MatrixStack::push() {
 }
 
 void MatrixStack::pop() { stack.pop_back(); }
-void MatrixStack::pop_all() { stack.clear(); stack.emplace_back(); }
-
-
+void MatrixStack::pop_all() {
+  stack.clear();
+  stack.emplace_back();
+}
 
 //______________________________________________________________________________
 
-ViewportStack::ViewportStack() { stack.emplace_back(); stack.reserve(10); }
+ViewportStack::ViewportStack() {
+  stack.emplace_back();
+  stack.reserve(10);
+}
 void ViewportStack::set(const Viewport& m) { stack.back().set(m); }
 void ViewportStack::set(int left, int bottom, int width, int height) {
   stack.back().set(left, bottom, width, height);
@@ -42,17 +48,19 @@ void ViewportStack::push() {
 
 void ViewportStack::pop() { stack.pop_back(); }
 
-
-
 //______________________________________________________________________________
 
-FBOStack::FBOStack() { stack.emplace_back(); stack.reserve(10); }
-void FBOStack::push() { unsigned int i = stack.back(); stack.push_back(i); }
+FBOStack::FBOStack() {
+  stack.emplace_back();
+  stack.reserve(10);
+}
+void FBOStack::push() {
+  unsigned int i = stack.back();
+  stack.push_back(i);
+}
 void FBOStack::pop() { stack.pop_back(); }
 unsigned int FBOStack::get() const { return stack.back(); }
 void FBOStack::set(unsigned int id) { stack.back() = id; }
-
-
 
 //______________________________________________________________________________
 
@@ -96,9 +104,7 @@ void RenderManager::framebuffer(unsigned int id) {
   // mFBOID = id;
 }
 
-void RenderManager::pushFramebuffer() {
-  mFBOStack.push();
-}
+void RenderManager::pushFramebuffer() { mFBOStack.push(); }
 void RenderManager::popFramebuffer() {
   mFBOStack.pop();
   framebuffer(mFBOStack.get());
@@ -111,12 +117,14 @@ void RenderManager::shader(ShaderProgram& s) {
 
   auto mv_search = modelviewLocs.find(mShaderPtr->id());
   if (mv_search == modelviewLocs.end()) {
-    modelviewLocs[mShaderPtr->id()] = mShaderPtr->getUniformLocation("al_ModelViewMatrix");
+    modelviewLocs[mShaderPtr->id()] =
+        mShaderPtr->getUniformLocation("al_ModelViewMatrix");
   }
 
   auto pr_search = projLocs.find(mShaderPtr->id());
   if (pr_search == projLocs.end()) {
-    projLocs[mShaderPtr->id()] = mShaderPtr->getUniformLocation("al_ProjectionMatrix");
+    projLocs[mShaderPtr->id()] =
+        mShaderPtr->getUniformLocation("al_ProjectionMatrix");
   }
 }
 
@@ -128,22 +136,21 @@ void RenderManager::camera(Viewpoint const& v) {
 
 void RenderManager::camera(Viewpoint::SpecialType v) {
   // let's draw 2D things at z = [0:1] (larger z, closer)
-  switch (v)
-  {
+  switch (v) {
     case Viewpoint::IDENTITY: {
       mViewStack.setIdentity();
       mProjStack.setIdentity();
     } break;
 
     case Viewpoint::ORTHO_FOR_2D: {
-      float rpd = getCurrentWindowPixelDensity(); // reciprocal of pixel density
-      auto v = viewport(); // viewport in framebuffer unit
+      float rpd =
+          getCurrentWindowPixelDensity();  // reciprocal of pixel density
+      auto v = viewport();                 // viewport in framebuffer unit
       mViewStack.setIdentity();
-      mProjStack.set(Matrix4f::ortho(
-        v.l * rpd, v.w * rpd, // left, right
-        v.b * rpd, v.h * rpd, // bottom, top
-        0, 1                  // near, far
-      ));
+      mProjStack.set(Matrix4f::ortho(v.l * rpd, v.w * rpd,  // left, right
+                                     v.b * rpd, v.h * rpd,  // bottom, top
+                                     0, 1                   // near, far
+                                     ));
     } break;
 
     case Viewpoint::UNIT_ORTHO: {
@@ -155,10 +162,9 @@ void RenderManager::camera(Viewpoint::SpecialType v) {
         spany = float(v.h) / v.w;
       }
       mViewStack.setIdentity();
-      mProjStack.set(Matrix4f::ortho(
-        -spanx, spanx, // left, right
-        -spany, spany, // bottom, top
-        0, 1));        // near, far
+      mProjStack.set(Matrix4f::ortho(-spanx, spanx,  // left, right
+                                     -spany, spany,  // bottom, top
+                                     0, 1));         // near, far
     } break;
 
     case Viewpoint::UNIT_ORTHO_INCLUSIVE: {
@@ -170,13 +176,13 @@ void RenderManager::camera(Viewpoint::SpecialType v) {
         spany = float(v.h) / v.w;
       }
       mViewStack.setIdentity();
-      mProjStack.set(Matrix4f::ortho(
-        -spanx, spanx,  // left, right
-        -spany, spany,  // bottom, top
-        0, 1));         // near, far
+      mProjStack.set(Matrix4f::ortho(-spanx, spanx,  // left, right
+                                     -spany, spany,  // bottom, top
+                                     0, 1));         // near, far
     } break;
 
-    default: break;
+    default:
+      break;
   }
   mMatChanged = true;
 }
@@ -214,20 +220,20 @@ void RenderManager::draw(EasyVAO& vao) {
 }
 
 static void updateVAO(EasyVAO& vao, const Mesh& m) {
-    vao.primitive(m.primitive());
-    vao.validate();
-    vao.bind();
-    vao.mNumVertices = static_cast<unsigned int>(m.vertices().size());
-    vao.updateWithoutBinding(m.vertices().data(), sizeof(Vec3f),
-                             m.vertices().size(), vao.mPositionAtt);
-    vao.updateWithoutBinding(m.colors().data(), sizeof(Vec4f),
-                             m.colors().size(), vao.mColorAtt);
-    vao.updateWithoutBinding(m.texCoord2s().data(), sizeof(Vec2f),
-                             m.texCoord2s().size(), vao.mTexcoord2dAtt);
-    vao.updateWithoutBinding(m.normals().data(), sizeof(Vec3f),
-                             m.normals().size(), vao.mNormalAtt);
-    // unbind();
-    vao.updateIndices(m.indices().data(), m.indices().size());
+  vao.primitive(m.primitive());
+  vao.validate();
+  vao.bind();
+  vao.mNumVertices = static_cast<unsigned int>(m.vertices().size());
+  vao.updateWithoutBinding(m.vertices().data(), sizeof(Vec3f),
+                           m.vertices().size(), vao.mPositionAtt);
+  vao.updateWithoutBinding(m.colors().data(), sizeof(Vec4f), m.colors().size(),
+                           vao.mColorAtt);
+  vao.updateWithoutBinding(m.texCoord2s().data(), sizeof(Vec2f),
+                           m.texCoord2s().size(), vao.mTexcoord2dAtt);
+  vao.updateWithoutBinding(m.normals().data(), sizeof(Vec3f),
+                           m.normals().size(), vao.mNormalAtt);
+  // unbind();
+  vao.updateIndices(m.indices().data(), m.indices().size());
 }
 
 void RenderManager::draw(const Mesh& mesh) {

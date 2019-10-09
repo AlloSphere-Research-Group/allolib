@@ -10,9 +10,8 @@ using namespace al;
 // If you need greater control over the GUI layout or properties, use the
 // facilites provided by the ParameterGUI class
 
-class MyApp : public App
-{
-public:
+class MyApp : public App {
+ public:
   // Define parameters
   Parameter x{"X", "", 0, "", -2.0, 2.0};
   Parameter y{"Y", "", 0, "", -2.0, 2.0};
@@ -20,31 +19,30 @@ public:
 
   ParameterBool show{"Show", "", 1.0};
 
-  ParameterColor color {"Color"};
+  ParameterColor color{"Color"};
 
-  ControlGUI mControlGUI; // Control GUI class in charge of generating GUi window
+  ControlGUI
+      mControlGUI;  // Control GUI class in charge of generating GUi window
 
   Mesh mMesh;
 
   void onInit() override {
-
     // Add parameters to GUI
-    // You can pipe any Parameter type (ParameterColor, ParameterVec3f, ParameterBool, etc.) and the
-    // GUI will generate the appropriate controls
+    // You can pipe any Parameter type (ParameterColor, ParameterVec3f,
+    // ParameterBool, etc.) and the GUI will generate the appropriate controls
     mControlGUI << x << y << z << show << color;
 
     addSphere(mMesh, 0.01);
     mMesh.primitive(Mesh::LINES);
   }
 
-  void onCreate() override
-  {
+  void onCreate() override {
     // Always call init() for ControlGUI in onCreate() as it needs a
     // graphics context.
     mControlGUI.init();
     mControlGUI.setTitle("Parameters");
     // You can force the GUI to have a fixed position:
-//    mControlGUI.fixedPosition(true);
+    //    mControlGUI.fixedPosition(true);
   }
 
   void onDraw(Graphics &g) override {
@@ -64,15 +62,11 @@ public:
     // Draw the control GUI
     mControlGUI.draw(g);
   }
-
 };
 
-
-int main()
-{
+int main() {
   MyApp app;
   app.title("Control GUI");
   app.start();
   return 0;
 }
-

@@ -5,11 +5,11 @@
 #include "al/io/al_Window.hpp"
 
 #include <cmath>
+#include <cstdlib>  // exit, EXIT_FAILURE
 #include <iostream>
 #include <map>
-#include <unordered_map>
-#include <cstdlib> // exit, EXIT_FAILURE
 #include <string>
+#include <unordered_map>
 
 using namespace std;
 
@@ -24,7 +24,7 @@ static void cbError(int code, const char* description) {
 
 namespace al {
 
-void initializeWindowManager () {
+void initializeWindowManager() {
   if (!glfwInit()) {
     std::cout << "ERROR: could not initialize GLFW\n";
     exit(EXIT_FAILURE);
@@ -32,17 +32,15 @@ void initializeWindowManager () {
   glfwSetErrorCallback(cbError);
 }
 
-void terminateWindowManager () {
-  glfwTerminate();
-}
+void terminateWindowManager() { glfwTerminate(); }
 
-float getCurrentWindowPixelDensity () {
+float getCurrentWindowPixelDensity() {
   int fbw, fbh;
   int winw, winh;
   GLFWwindow* current_window = glfwGetCurrentContext();
   glfwGetFramebufferSize(current_window, &fbw, &fbh);
   glfwGetWindowSize(current_window, &winw, &winh);
-  float rpd = float(winw) / fbw; // reciprocal of pixel density
+  float rpd = float(winw) / fbw;  // reciprocal of pixel density
   return rpd;
 }
 
@@ -96,7 +94,7 @@ class WindowImpl {
 
     // loop through raw callbacks user registered
     // auto& handler_list = glfw::get_keycallback_handler_list();
-    // if (handler_list.size()) { 
+    // if (handler_list.size()) {
     //   for (auto& h : handler_list) {
     //     h.key_callback(window, key, scancode, action, mods);
     //   }
@@ -163,11 +161,11 @@ class WindowImpl {
     }
   }
 
-  static void cbScroll(GLFWwindow *window, double xoffset, double yoffset) {
-    auto *w = getWindow(window);
+  static void cbScroll(GLFWwindow* window, double xoffset, double yoffset) {
+    auto* w = getWindow(window);
     if (!w) return;
 
-    Mouse &m = w->mMouse;
+    Mouse& m = w->mMouse;
     m.scroll(xoffset, yoffset);
     w->callHandlersMouseScroll();
   }
@@ -218,9 +216,9 @@ class WindowImpl {
     win->callHandlersResize(dimCurr.w, dimCurr.h);
   }
 
-//  static void cbClose(GLFWwindow* window) {
-//    glfwSetWindowShouldClose(window, true);
-//  }
+  //  static void cbClose(GLFWwindow* window) {
+  //    glfwSetWindowShouldClose(window, true);
+  //  }
 
   void registerCBs() {
     glfwSetWindowSizeCallback(mGLFWwindow, cbReshape);
@@ -229,7 +227,7 @@ class WindowImpl {
     glfwSetMouseButtonCallback(mGLFWwindow, cbMouse);
     glfwSetCursorPosCallback(mGLFWwindow, cbMotion);
     glfwSetScrollCallback(mGLFWwindow, cbScroll);
-//    glfwSetWindowCloseCallback(mGLFWwindow, cbClose);
+    //    glfwSetWindowCloseCallback(mGLFWwindow, cbClose);
     // glfwSetWindowRefreshCallback(window, cb_windowrefresh);
     // glfwSetWindowFocusCallback(window, cb_windowfocus);
   }
@@ -266,7 +264,7 @@ bool Window::implCreate(bool is_verbose) {
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-//  glfwWindowHint(GLFW_DECORATED, mDecorated);
+  //  glfwWindowHint(GLFW_DECORATED, mDecorated);
   glfwWindowHint(GLFW_OPENGL_PROFILE,
                  GLFW_OPENGL_CORE_PROFILE);          // Ignored when creating ES
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);  // if OSX, this is a must
@@ -280,7 +278,7 @@ bool Window::implCreate(bool is_verbose) {
   // GLFW_STEREO: GLFW_TRUE GLFW_FALSE
   // GLFW_CLIENT_API: GLFW_OPENGL_API GLFW_OPENGL_API, GLFW_OPENGL_ES_API or
   // GLFW_NO_API
-  glfwWindowHint(GLFW_DECORATED, mDecorated? GLFW_TRUE : GLFW_FALSE);
+  glfwWindowHint(GLFW_DECORATED, mDecorated ? GLFW_TRUE : GLFW_FALSE);
 
   bool should_create_stereo = (mDisplayMode & STEREO_BUF) ? true : false;
   glfwWindowHint(GLFW_STEREO, should_create_stereo);
@@ -363,10 +361,7 @@ bool Window::implCreate(bool is_verbose) {
 
 bool Window::implCreated() const { return mImpl->created(); }
 
-void Window::implMakeCurrent()
-{
-  glfwMakeContextCurrent(mImpl->glfwWindow());
-}
+void Window::implMakeCurrent() { glfwMakeContextCurrent(mImpl->glfwWindow()); }
 
 void Window::implRefresh() {
   // [!] POLLEVENTS IS AFTER SWAPBUFFERS
@@ -379,7 +374,9 @@ void Window::implRefresh() {
 
 void Window::implDestroy() { mImpl->destroy(); }
 
-void Window::implClose() { /*glfwSetWindowShouldClose(mImpl->mGLFWwindow, true);*/ }
+void Window::implClose() { /*glfwSetWindowShouldClose(mImpl->mGLFWwindow,
+                              true);*/
+}
 
 bool Window::implShouldClose() {
   if (glfwWindowShouldClose(mImpl->mGLFWwindow)) {
@@ -421,7 +418,9 @@ void Window::implSetFullScreen() {
   }
 }
 
-void Window::implSetTitle() { glfwSetWindowTitle(mImpl->mGLFWwindow, mTitle.c_str());	}
+void Window::implSetTitle() {
+  glfwSetWindowTitle(mImpl->mGLFWwindow, mTitle.c_str());
+}
 
 // See: https://www.opengl.org/wiki/Swap_Interval
 void Window::implSetVSync() { glfwSwapInterval(mVSync ? 1 : 0); }
@@ -430,8 +429,9 @@ void Window::implHide() {}
 
 void Window::implIconify() {}
 
-void Window::implSetDecorated (bool decorated) {
-  glfwSetWindowAttrib(mImpl->mGLFWwindow, GLFW_DECORATED, decorated? GLFW_TRUE : GLFW_FALSE);
+void Window::implSetDecorated(bool decorated) {
+  glfwSetWindowAttrib(mImpl->mGLFWwindow, GLFW_DECORATED,
+                      decorated ? GLFW_TRUE : GLFW_FALSE);
 }
 
 void Window::destroyAll() {
@@ -446,8 +446,6 @@ void Window::destroyAll() {
     }
   }
 }
-
-
 
 WindowImpl::KeyMap WindowImpl::make_glfw_keymap() {
   KeyMap km;

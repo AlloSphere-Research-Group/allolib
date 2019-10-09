@@ -18,11 +18,9 @@ controls assigned automatically. These are:
     'q'				roll counter-clockwise
     'z'				roll clockwise
     's'				stop moving
-    '`'				reset navigation to (0,0,0) pointing along the z axis
-    left arrow		turn left
-    right arrow		turn right
-    up arrow		turn up
-    down arrow		turn down
+    '`'				reset navigation to (0,0,0) pointing along the z
+axis left arrow		turn left right arrow		turn right up arrow
+turn up down arrow		turn down
 
     escape			toggle fullscreen
     tab				toggle stereographic rendering
@@ -49,9 +47,9 @@ Author:
 Lance Putnam, June 2011
 */
 
+#include <iostream>
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-#include <iostream>
 
 // This example shows how to use the App class and its callbacks
 
@@ -59,16 +57,15 @@ using namespace al;
 
 // We inherit from App to create our own custom application
 struct MyApp : public App {
-
   Mesh mesh;
   double phase = 0;
 
-  void onInit()  override {
+  void onInit() override {
     std::cout << "onInit() - All domains have been initialized " << std::endl;
   }
 
   // This constructor is where we initialize the application
-  void onCreate()  override {
+  void onCreate() override {
     std::cout << "onCreate() - Graphics context now available" << std::endl;
 
     // Add a unit sphere to the mesh
@@ -78,13 +75,13 @@ struct MyApp : public App {
     lens().near(0.1).far(25).fovy(45);
 
     // Set navigation position and orientation
-    nav().pos(0,0,4);
-    nav().quat().fromAxisAngle(0.*M_2PI, 0,1,0);
+    nav().pos(0, 0, 4);
+    nav().quat().fromAxisAngle(0. * M_2PI, 0, 1, 0);
 
     // This disables the default navigation keyboard/mouse controls;
     // leaving this enabled may cause some of the user input callbacks to
     // not trigger, such as onMouseDrag.
-    //window().remove(navControl());
+    // window().remove(navControl());
 
     // Set background color (default is black)
     graphics().setClearColor(HSV(0.5, 1, 0.5));
@@ -93,15 +90,13 @@ struct MyApp : public App {
     // Arguments: sample rate (Hz), block size, output channels, input channels
   }
 
-
   // This is the audio callback
   void onSound(AudioIOData& io) override {
-
     // Things here occur at block rate...
 
     // This is the sample loop
-    while(io()){
-      //float in = io.in(0);
+    while (io()) {
+      // float in = io.in(0);
 
       float out1 = 0;
       float out2 = 0;
@@ -111,7 +106,6 @@ struct MyApp : public App {
     }
   }
 
-
   // This is the application's (graphical) model update.
   // This is called once for each frame of graphics. Typically, you will
   // update your application's geometry, physics, etc. here.
@@ -120,7 +114,7 @@ struct MyApp : public App {
     // animate the sphere.
     double period = 10;
     phase += dt / period;
-    if(phase >= 1.) phase -= 1.;
+    if (phase >= 1.) phase -= 1.;
   }
 
   // This is the application's view update.
@@ -133,55 +127,82 @@ struct MyApp : public App {
     // is handled by the App
     // We can just draw our geometry immediately!
 
-    g.polygonMode(Graphics::LINE); // wireframe mode
+    g.polygonMode(Graphics::LINE);  // wireframe mode
     g.pushMatrix();
-    g.rotate(phase*360, 0,1,0);
+    g.rotate(phase * 360, 0, 1, 0);
     g.color(1);
     g.draw(mesh);
     g.popMatrix();
   }
 
-
   // This is called whenever a key is pressed.
   bool onKeyDown(const Keyboard& k) override {
-
     // Use a switch to do something when a particular key is pressed
-    switch(k.key()){
+    switch (k.key()) {
+      // For printable keys, we just use its character symbol:
+      case '1':
+        std::cout << "Pressed 1." << std::endl;
+        break;
+      case 'y':
+        std::cout << "Pressed y." << std::endl;
+        break;
+      case 'n':
+        std::cout << "Pressed n." << std::endl;
+        break;
+      case '.':
+        std::cout << "Pressed period." << std::endl;
+        break;
+      case ' ':
+        std::cout << "Pressed space bar." << std::endl;
+        break;
 
-    // For printable keys, we just use its character symbol:
-    case '1': std::cout << "Pressed 1." << std::endl; break;
-    case 'y': std::cout << "Pressed y." << std::endl; break;
-    case 'n': std::cout << "Pressed n." << std::endl; break;
-    case '.': std::cout << "Pressed period." << std::endl; break;
-    case ' ': std::cout << "Pressed space bar." << std::endl; break;
-
-      // For non-printable keys, we have to use the enums described in the
-      // Keyboard class:
-    case Keyboard::RETURN: std::cout << "Pressed return." << std::endl; break;
-    case Keyboard::DELETE: std::cout << "Pressed delete." << std::endl; break;
-    case Keyboard::F1: std::cout << "Pressed F1." << std::endl; break;
+        // For non-printable keys, we have to use the enums described in the
+        // Keyboard class:
+      case Keyboard::RETURN:
+        std::cout << "Pressed return." << std::endl;
+        break;
+      case Keyboard::DELETE:
+        std::cout << "Pressed delete." << std::endl;
+        break;
+      case Keyboard::F1:
+        std::cout << "Pressed F1." << std::endl;
+        break;
     }
     return true;
   }
 
   // This is called whenever a mouse button is pressed.
   bool onMouseDown(const Mouse& m) override {
-    switch(m.button()){
-    case Mouse::LEFT: std::cout << "Pressed left mouse button." << std::endl; break;
-    case Mouse::RIGHT: std::cout << "Pressed right mouse button." << std::endl; break;
-    case Mouse::MIDDLE: std::cout << "Pressed middle mouse button." << std::endl; break;
-    default:
-      std::cout << "Pressed button " << m.button() << std::endl; break;
+    switch (m.button()) {
+      case Mouse::LEFT:
+        std::cout << "Pressed left mouse button." << std::endl;
+        break;
+      case Mouse::RIGHT:
+        std::cout << "Pressed right mouse button." << std::endl;
+        break;
+      case Mouse::MIDDLE:
+        std::cout << "Pressed middle mouse button." << std::endl;
+        break;
+      default:
+        std::cout << "Pressed button " << m.button() << std::endl;
+        break;
     }
     return true;
   }
-  bool onMouseUp (const Mouse& m) override {
-    switch(m.button()){
-    case Mouse::LEFT: std::cout << "Released left mouse button." << std::endl; break;
-    case Mouse::RIGHT: std::cout << "Released right mouse button." << std::endl; break;
-    case Mouse::MIDDLE: std::cout << "Released middle mouse button." << std::endl; break;
-    default:
-      std::cout << "Released button " << m.button() << std::endl; break;
+  bool onMouseUp(const Mouse& m) override {
+    switch (m.button()) {
+      case Mouse::LEFT:
+        std::cout << "Released left mouse button." << std::endl;
+        break;
+      case Mouse::RIGHT:
+        std::cout << "Released right mouse button." << std::endl;
+        break;
+      case Mouse::MIDDLE:
+        std::cout << "Released middle mouse button." << std::endl;
+        break;
+      default:
+        std::cout << "Released button " << m.button() << std::endl;
+        break;
     }
     return true;
   }
@@ -199,13 +220,12 @@ struct MyApp : public App {
   // NOTE: check the App class for more callback functions
 };
 
-
-int main(){
+int main() {
   // All we do in main is create the app and start it!
   MyApp app;
   app.dimensions(600, 400);
   app.title("Simple App");
   app.fps(40);
-  app.audioDomain()->configure(44100, 128, 2, 1); // rate, block, output, input
+  app.audioDomain()->configure(44100, 128, 2, 1);  // rate, block, output, input
   app.start();
 }

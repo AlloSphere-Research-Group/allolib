@@ -1,5 +1,5 @@
-#include <iostream>
 #include <chrono>
+#include <iostream>
 #include <memory>
 //#include <functional>
 
@@ -9,17 +9,19 @@
 
 using namespace al;
 
-bool Arduino::initialize(std::string port, unsigned long baud, uint32_t granularity) {
+bool Arduino::initialize(std::string port, unsigned long baud,
+                         uint32_t granularity) {
   mGranularity = granularity;
   try {
-    serialPort = std::make_unique<serial::Serial>(port, baud, serial::Timeout::simpleTimeout(granularity));
-  } catch (const serial::IOException &/*e*/) {
+    serialPort = std::make_unique<serial::Serial>(
+        port, baud, serial::Timeout::simpleTimeout(granularity));
+  } catch (const serial::IOException & /*e*/) {
     std::cerr << "ERROR: Can't open port " << port << std::endl;
     return false;
   }
 
   if (!serialPort->isOpen()) {
-    std::cerr << "ERROR: Port " << port << " could not be opened" <<std::endl;
+    std::cerr << "ERROR: Port " << port << " could not be opened" << std::endl;
     return false;
   }
 
@@ -28,7 +30,8 @@ bool Arduino::initialize(std::string port, unsigned long baud, uint32_t granular
   // Flush buffers
   serialPort->flush();
   mRunning = true;
-  mReaderThread = std::make_unique<std::thread>(std::bind(&Arduino::readFunction, this));
+  mReaderThread =
+      std::make_unique<std::thread>(std::bind(&Arduino::readFunction, this));
 
   return true;
 }
@@ -51,7 +54,7 @@ std::vector<std::string> Arduino::getLines() {
   while (count > 0) {
     size_t start = 0;
     size_t nullPos = 0;
-    while(nullPos <= count) {
+    while (nullPos <= count) {
       if (buffer[nullPos] == '\n' || buffer[nullPos] == '\r') {
         buffer[nullPos] = '\0';
         char *thisLine = buffer + start;
@@ -77,20 +80,25 @@ std::vector<std::string> Arduino::getLines() {
 void Arduino::readFunction() {
   const unsigned int bufferSize = 4096;
   uint8_t buffer[bufferSize];
-  while(mRunning){
+  while (mRunning) {
     //        size_t bytes_wrote = my_serial.write(test_string);
-    auto nextTime = std::chrono::high_resolution_clock::now() + std::chrono::nanoseconds(mGranularity);
+    auto nextTime = std::chrono::high_resolution_clock::now() +
+                    std::chrono::nanoseconds(mGranularity);
     try {
       size_t count = serialPort->read(buffer, bufferSize);
-      mRingBuffer.write((char *) buffer, count);
+      mRingBuffer.write((char *)buffer, count);
       onInput(buffer, count);
       std::this_thread::sleep_until(nextTime);
-    } catch (const serial::PortNotOpenedException &/*e*/) {
+    } catch (const serial::PortNotOpenedException & /*e*/) {
       mRunning = false;
-      std::cerr << "ERROR: Port not opened exception. Closing serial device. Call cleanup() before restarting." << std::endl;
-    } catch (const serial::IOException &/*e*/) {
+      std::cerr << "ERROR: Port not opened exception. Closing serial device. "
+                   "Call cleanup() before restarting."
+                << std::endl;
+    } catch (const serial::IOException & /*e*/) {
       mRunning = false;
-      std::cerr << "ERROR: Port IO exception. Closing serial device. Call cleanup() before restarting." << std::endl;
+      std::cerr << "ERROR: Port IO exception. Closing serial device. Call "
+                   "cleanup() before restarting."
+                << std::endl;
     }
   }
 }

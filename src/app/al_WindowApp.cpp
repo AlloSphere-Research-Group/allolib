@@ -44,7 +44,7 @@ void WindowApp::start() {
     FPS::tickFPS();
   }
   onExit();
-  Window::destroy();          // destroy window
+  Window::destroy();  // destroy window
   terminateWindowManager();
 }
 

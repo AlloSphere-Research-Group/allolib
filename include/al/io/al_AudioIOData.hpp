@@ -2,45 +2,47 @@
 #define INCLUDE_AL_AUDIODATA_IO_HPP
 
 /*	Allocore --
-	Multimedia / virtual environment application class library
+        Multimedia / virtual environment application class library
 
-	Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology, UCSB.
-	Copyright (C) 2012. The Regents of the University of California.
-	All rights reserved.
+        Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
+   UCSB. Copyright (C) 2012. The Regents of the University of California. All
+   rights reserved.
 
-	Redistribution and use in source and binary forms, with or without
-	modification, are permitted provided that the following conditions are met:
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are
+   met:
 
-		Redistributions of source code must retain the above copyright notice,
-		this list of conditions and the following disclaimer.
+                Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-		Redistributions in binary form must reproduce the above copyright
-		notice, this list of conditions and the following disclaimer in the
-		documentation and/or other materials provided with the distribution.
+                Redistributions in binary form must reproduce the above
+   copyright notice, this list of conditions and the following disclaimer in the
+                documentation and/or other materials provided with the
+   distribution.
 
-		Neither the name of the University of California nor the names of its
-		contributors may be used to endorse or promote products derived from
-		this software without specific prior written permission.
+                Neither the name of the University of California nor the names
+   of its contributors may be used to endorse or promote products derived from
+                this software without specific prior written permission.
 
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-	AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-	IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-	ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-	LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-	CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-	SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-	INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-	CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-	ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-	POSSIBILITY OF SUCH DAMAGE.
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+   IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+   OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-	File description:
-	An interface to low-level audio device streams
+        File description:
+        An interface to low-level audio device streams
 
-	File author(s):
-	Lance Putnam, 2010, putnam.lance@gmail.com
-	Andres Cabrera 2017 mantaraya36@gmail.com
+        File author(s):
+        Lance Putnam, 2010, putnam.lance@gmail.com
+        Andres Cabrera 2017 mantaraya36@gmail.com
 */
 
 #include <cassert>
@@ -105,7 +107,7 @@ class AudioDeviceInfo {
 
   //	/// @param[in] nameKeyword	Keyword to search for in device name
   //	/// @param[in] stream		Whether to search for input and/or
-  //output
+  // output
   // devices
   //	AudioDeviceInfo(const std::string& nameKeyword, StreamMode stream =
   // StreamMode(INPUT | OUTPUT)) : mID(-1) {}
@@ -219,19 +221,23 @@ class AudioIOData {
     return *(static_cast<UserDataType*>(mUser));
   }
 
-
   int channels(bool forOutput) const;
-  unsigned int channelsIn() const;          ///< Get effective number of input channels
-  unsigned int channelsOut() const;         ///< Get effective number of output channels
-  unsigned int channelsBus() const;         ///< Get number of allocated bus channels
-  unsigned int framesPerBuffer() const;     ///< Get frames/buffer of audio I/O stream
+  unsigned int channelsIn() const;  ///< Get effective number of input channels
+  unsigned int channelsOut()
+      const;  ///< Get effective number of output channels
+  unsigned int channelsBus() const;  ///< Get number of allocated bus channels
+  unsigned int framesPerBuffer()
+      const;                       ///< Get frames/buffer of audio I/O stream
   double framesPerSecond() const;  ///< Get frames/second of audio I/O streams
   double fps() const { return framesPerSecond(); }
   double secondsPerBuffer() const;  ///< Get seconds/buffer of audio I/O stream
 
-  void user(void* v) { mUser = v; }      ///< Set user data
-  void frame(unsigned int v) { assert(v >= 0); mFrame = v - 1; }  ///< Set frame count for next iteration
-  void zeroBus();                        ///< Zeros all the bus buffers
+  void user(void* v) { mUser = v; }  ///< Set user data
+  void frame(unsigned int v) {
+    assert(v >= 0);
+    mFrame = v - 1;
+  }                ///< Set frame count for next iteration
+  void zeroBus();  ///< Zeros all the bus buffers
   void zeroOut();  ///< Zeros all the internal output buffers
 
   /// Sets number of effective channels on input or output device depending on
@@ -242,12 +248,13 @@ class AudioIOData {
   /// the number of channels opens all available channels.
   virtual void channels(int num, bool forOutput);
 
-  void channelsIn(int n);     ///< Set number of input channels
-  void channelsOut(int n);    ///< Set number of output channels
+  void channelsIn(int n);             ///< Set number of input channels
+  void channelsOut(int n);            ///< Set number of output channels
   virtual void channelsBus(int num);  ///< Set number of bus channels
 
-  virtual void framesPerSecond(double v);        ///< Set number of frames per second
-  virtual void framesPerBuffer(unsigned int n);  ///< Set number of frames per processing buffer
+  virtual void framesPerSecond(double v);  ///< Set number of frames per second
+  virtual void framesPerBuffer(
+      unsigned int n);  ///< Set number of frames per processing buffer
 
   AudioIOData& gain(float v) {
     mGain = v;
@@ -262,15 +269,14 @@ class AudioIOData {
   mutable unsigned int mFrame;
   unsigned int mFramesPerBuffer;
   double mFramesPerSecond;
-  float *mBufI, *mBufO, *mBufB;  // input, output, and aux buffers
-  float* mBufT;                  // temporary one channel buffer
-  unsigned int mNumI, mNumO, mNumB;       // input, output, and aux channels
+  float *mBufI, *mBufO, *mBufB;      // input, output, and aux buffers
+  float* mBufT;                      // temporary one channel buffer
+  unsigned int mNumI, mNumO, mNumB;  // input, output, and aux channels
 
   void resizeBuffer(bool forOutput);
 
-private:
+ private:
   void operator=(const AudioIOData&);  // Disallow copy
-
 };
 
 /// Interface for objects which can be registered with an audio IO stream
@@ -289,19 +295,19 @@ inline float& AudioIOData::bus(unsigned int c, unsigned int f) const {
   return mBufB[c * framesPerBuffer() + f];
 }
 
-inline const float& AudioIOData::in(unsigned int c,unsigned  int f) const {
+inline const float& AudioIOData::in(unsigned int c, unsigned int f) const {
   assert(c < mNumI);
   assert(f < framesPerBuffer());
   return mBufI[c * framesPerBuffer() + f];
 }
 
-inline float& AudioIOData::out(unsigned int c,unsigned  int f) const {
+inline float& AudioIOData::out(unsigned int c, unsigned int f) const {
   assert(c < mNumO);
   assert(f < framesPerBuffer());
   return mBufO[c * framesPerBuffer() + f];
 }
 inline float& AudioIOData::temp(unsigned int f) const { return mBufT[f]; }
 
-}  // al::
+}  // namespace al
 
 #endif

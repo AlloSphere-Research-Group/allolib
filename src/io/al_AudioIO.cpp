@@ -21,8 +21,8 @@
 
 namespace al {
 
-static void warn(const char * msg, const char * src){
-  fprintf(stderr, "%s%swarning: %s\n", src, src[0]?" ":"", msg);
+static void warn(const char *msg, const char *src) {
+  fprintf(stderr, "%s%swarning: %s\n", src, src[0] ? " " : "", msg);
 }
 
 #ifdef AL_AUDIO_DUMMY
@@ -671,13 +671,13 @@ static int rtaudioCallback(void *output, void *input, unsigned int frameCount,
   assert(frameCount == (unsigned)io.framesPerBuffer());
 
   if (input != NULL) {
-	  const float *inBuffers = (const float *)input;
-	  float *hwInBuffer = const_cast<float *>(io.inBuffer(0));
-      for (unsigned int frame = 0; frame < io.framesPerBuffer(); frame++) {
-		  for (int i = 0; i < io.channelsInDevice(); i++) {
-			  hwInBuffer[i * frameCount + frame] = *inBuffers++;
-		  }
-	  }
+    const float *inBuffers = (const float *)input;
+    float *hwInBuffer = const_cast<float *>(io.inBuffer(0));
+    for (unsigned int frame = 0; frame < io.framesPerBuffer(); frame++) {
+      for (int i = 0; i < io.channelsInDevice(); i++) {
+        hwInBuffer[i * frameCount + frame] = *inBuffers++;
+      }
+    }
   }
 
   if (io.autoZeroOut()) io.zeroOut();
@@ -793,7 +793,7 @@ std::string AudioBackend::deviceName(int num) {
     RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
     name = info.name;
   } catch (RtAudioError &e) {
-      std::cerr << "deviceName(" << num << ") " <<  e.getMessage() << std::endl;
+    std::cerr << "deviceName(" << num << ") " << e.getMessage() << std::endl;
   }
   return name;
 }
@@ -805,7 +805,8 @@ int AudioBackend::deviceMaxInputChannels(int num) {
     RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
     numChannels = info.inputChannels;
   } catch (RtAudioError &e) {
-      std::cerr << "deviceMaxInputChannels(" << num << ") " <<  e.getMessage() << std::endl;
+    std::cerr << "deviceMaxInputChannels(" << num << ") " << e.getMessage()
+              << std::endl;
   }
   return numChannels;
 }
@@ -817,7 +818,8 @@ int AudioBackend::deviceMaxOutputChannels(int num) {
     RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
     numChannels = info.outputChannels;
   } catch (RtAudioError &e) {
-      std::cerr << "deviceMaxOutputChannels(" << num << ") " <<  e.getMessage() << std::endl;
+    std::cerr << "deviceMaxOutputChannels(" << num << ") " << e.getMessage()
+              << std::endl;
   }
   return numChannels;
 }
@@ -829,7 +831,8 @@ double AudioBackend::devicePreferredSamplingRate(int num) {
     RtAudio::DeviceInfo info = rt.getDeviceInfo(num);
     sr = info.preferredSampleRate;
   } catch (RtAudioError &e) {
-      std::cerr << "devicePreferredSamplingRate(" << num << ") " <<  e.getMessage() << std::endl;
+    std::cerr << "devicePreferredSamplingRate(" << num << ") " << e.getMessage()
+              << std::endl;
   }
   return sr;
 }
@@ -941,26 +944,21 @@ AudioIO::AudioIO()
       mZeroNANs(true),
       mClipOut(true),
       mAutoZeroOut(true),
-      mBackend{std::make_unique<AudioBackend>()}
-{}
+      mBackend{std::make_unique<AudioBackend>()} {}
 
 AudioIO::~AudioIO() { close(); }
 
 void AudioIO::init(void (*callbackA)(AudioIOData &), void *userData,
-                   int framesPerBuf, double framesPerSec,
-                   int outChansA,  int inChansA)
-{
+                   int framesPerBuf, double framesPerSec, int outChansA,
+                   int inChansA) {
   AudioDevice dev = AudioDevice::defaultOutput();
-  init(callbackA, userData, dev,
-       framesPerBuf, framesPerSec,
-       outChansA, inChansA);
+  init(callbackA, userData, dev, framesPerBuf, framesPerSec, outChansA,
+       inChansA);
 }
 
 void AudioIO::init(void (*callbackA)(AudioIOData &), void *userData,
-                   AudioDevice &dev,
-                   int framesPerBuf, double framesPerSec,
-                   int outChansA,  int inChansA)
-{
+                   AudioDevice &dev, int framesPerBuf, double framesPerSec,
+                   int outChansA, int inChansA) {
   // mBackend = std::make_unique<AudioBackend>();
   callback = callbackA;
   user(userData);
@@ -975,7 +973,7 @@ void AudioIO::init(void (*callbackA)(AudioIOData &), void *userData,
 void AudioIO::initWithDefaults(void (*callback)(AudioIOData &), void *userData,
                                bool use_out, bool use_in,
                                int framesPerBuffer  // default 256
-                               ) {
+) {
   bool use_both = use_out & use_in;
   bool use_either = use_out | use_in;
 
@@ -1061,7 +1059,8 @@ void AudioIO::deviceIn(const AudioDevice &v) {
     mBackend->inDevice(v.id());
     channelsIn(v.channelsInMax());
   } else {
-//    warn("attempt to set input device to a device without inputs", "AudioIO");
+    //    warn("attempt to set input device to a device without inputs",
+    //    "AudioIO");
   }
 }
 
@@ -1071,7 +1070,8 @@ void AudioIO::deviceOut(const AudioDevice &v) {
     mBackend->outDevice(v.id());
     channelsOut(v.channelsOutMax());
   } else {
-//    warn("attempt to set output device to a device without outputs", "AudioIO");
+    //    warn("attempt to set output device to a device without outputs",
+    //    "AudioIO");
   }
 }
 
@@ -1100,7 +1100,7 @@ void AudioIO::channels(int num, bool forOutput) {
   }
   mBackend->channels(num, forOutput);
 
-  if (num == -1) { // Open all device channels?
+  if (num == -1) {  // Open all device channels?
     num = (forOutput ? channelsOutDevice() : channelsInDevice());
   }
 
@@ -1193,22 +1193,14 @@ void AudioIO::processAudio() {
   }
 }
 
-bool AudioIO::isOpen()
-{
-    return mBackend->isOpen();
-}
+bool AudioIO::isOpen() { return mBackend->isOpen(); }
 
-bool AudioIO::isRunning()
-{
-    return mBackend->isRunning();
-}
+bool AudioIO::isRunning() { return mBackend->isRunning(); }
 
 double AudioIO::cpu() const { return mBackend->cpu(); }
 bool AudioIO::zeroNANs() const { return mZeroNANs; }
 
-void AudioIO::clipOut(bool v) {
-    mClipOut = v;
-}
+void AudioIO::clipOut(bool v) { mClipOut = v; }
 
 double AudioIO::time() const {
   assert(mBackend);
@@ -1218,5 +1210,4 @@ double AudioIO::time(int frame) const {
   return (double)frame / framesPerSecond() + time();
 }
 
-
-}  // al::
+}  // namespace al

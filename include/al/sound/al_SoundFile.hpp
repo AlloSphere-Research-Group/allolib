@@ -17,21 +17,21 @@ struct SoundFile {
   int channels = 0;
   long long int frameCount = 0;
 
-// In case of adding some constructor other than default constructor,
-//   remember to implement or explicitly specify related functions
-// Related concept: `Rule of 5`
+  // In case of adding some constructor other than default constructor,
+  //   remember to implement or explicitly specify related functions
+  // Related concept: `Rule of 5`
 
-//  SoundFile() = default;
-//  SoundFile(const SoundFile&) = default;
-//  SoundFile(SoundFile&&) noexcept = default;
-//
-//  SoundFile& operator=(const SoundFile&) = default;
-//  SoundFile& operator=(SoundFile&&) noexcept = default;
-//
-//  ~SoundFile() = default;
+  //  SoundFile() = default;
+  //  SoundFile(const SoundFile&) = default;
+  //  SoundFile(SoundFile&&) noexcept = default;
+  //
+  //  SoundFile& operator=(const SoundFile&) = default;
+  //  SoundFile& operator=(SoundFile&&) noexcept = default;
+  //
+  //  ~SoundFile() = default;
 
   bool open(const char* path);
-  float* getFrame(long long int frame); // unsafe, without frameCount check
+  float* getFrame(long long int frame);  // unsafe, without frameCount check
 };
 
 SoundFile getResampledSoundFile(SoundFile* toConvert,
@@ -50,18 +50,18 @@ struct SoundFilePlayer {
   bool loop = false;
   SoundFile* soundFile = nullptr;  // non-owning
 
-// In case of adding some constructor other than default constructor,
-//   remember to implement or explicitly specify related functions
-// Related concept: `Rule of 5`
+  // In case of adding some constructor other than default constructor,
+  //   remember to implement or explicitly specify related functions
+  // Related concept: `Rule of 5`
 
-//  SoundFilePlayer() = default;
-//  SoundFilePlayer(const SoundFilePlayer&) = default;
-//  SoundFilePlayer(SoundFilePlayer&&) noexcept = default;
-//
-//  SoundFilePlayer& operator=(const SoundFilePlayer&) = default;
-//  SoundFilePlayer& operator=(SoundFilePlayer&&) noexcept = default;
-//
-//  ~SoundFilePlayer() = default;
+  //  SoundFilePlayer() = default;
+  //  SoundFilePlayer(const SoundFilePlayer&) = default;
+  //  SoundFilePlayer(SoundFilePlayer&&) noexcept = default;
+  //
+  //  SoundFilePlayer& operator=(const SoundFilePlayer&) = default;
+  //  SoundFilePlayer& operator=(SoundFilePlayer&&) noexcept = default;
+  //
+  //  ~SoundFilePlayer() = default;
 
   void getFrames(int numFrames, float* buffer, int bufferLength);
 };
@@ -76,18 +76,18 @@ struct SoundFilePlayerTS {
   std::atomic<bool> rewindSignal;
   // TODO - volume and fading
 
-// In case of adding some constructor other than default constructor,
-//   remember to implement or explicitly specify related functions
-// Related concept: `Rule of 5`
+  // In case of adding some constructor other than default constructor,
+  //   remember to implement or explicitly specify related functions
+  // Related concept: `Rule of 5`
 
-//  SoundFilePlayerTS() = default;
-//  SoundFilePlayerTS(const SoundFilePlayerTS&) = default;
-//  SoundFilePlayerTS(SoundFilePlayerTS&&) noexcept = default;
-//
-//  SoundFilePlayerTS& operator=(const SoundFilePlayerTS&) = default;
-//  SoundFilePlayerTS& operator=(SoundFilePlayerTS&&) noexcept = default;
-//
-//  ~SoundFilePlayerTS() = default;
+  //  SoundFilePlayerTS() = default;
+  //  SoundFilePlayerTS(const SoundFilePlayerTS&) = default;
+  //  SoundFilePlayerTS(SoundFilePlayerTS&&) noexcept = default;
+  //
+  //  SoundFilePlayerTS& operator=(const SoundFilePlayerTS&) = default;
+  //  SoundFilePlayerTS& operator=(SoundFilePlayerTS&&) noexcept = default;
+  //
+  //  ~SoundFilePlayerTS() = default;
 
   bool open(const char* path) {
     bool ret = soundFile.open(path);

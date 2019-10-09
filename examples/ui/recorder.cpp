@@ -11,9 +11,7 @@
 using namespace al;
 using namespace std;
 
-
-struct MyApp : App
-{
+struct MyApp : App {
   Parameter X{"x", "", 0.0, "", -2, 2};
   Parameter Y{"y", "", 0.0, "", -2, 2};
 
@@ -22,12 +20,11 @@ struct MyApp : App
   Mesh m;
 
   void onInit() override {
-    presetHandler << X << Y;   // Register parameters with preset handler
-    recorder << presetHandler; // Register preset handler with sequencer
+    presetHandler << X << Y;    // Register parameters with preset handler
+    recorder << presetHandler;  // Register preset handler with sequencer
   }
 
-  void onCreate() override{
-
+  void onCreate() override {
     // Disable mouse nav to avoid naving while changing gui controls.
     navControl().useMouse(false);
 
@@ -43,23 +40,27 @@ struct MyApp : App
 
   bool onKeyDown(const Keyboard& k) override {
     switch (k.key()) {
-    case 'r': recorder.startRecord();
-      break;
-    case ' ': recorder.stopRecord();
-      break;
-    case '1': presetHandler.recallPreset("preset1");
-      break;
-    case '2': presetHandler.recallPreset("preset2");
-      break;
-    case '3': presetHandler.recallPreset("preset3");
-      break;
+      case 'r':
+        recorder.startRecord();
+        break;
+      case ' ':
+        recorder.stopRecord();
+        break;
+      case '1':
+        presetHandler.recallPreset("preset1");
+        break;
+      case '2':
+        presetHandler.recallPreset("preset2");
+        break;
+      case '3':
+        presetHandler.recallPreset("preset3");
+        break;
     }
     return true;
   }
 };
 
-int main()
-{
+int main() {
   MyApp().start();
   return 0;
 }

@@ -36,8 +36,8 @@
 
 */
 
-#include "al/spatial/al_Pose.hpp"
 #include "al/graphics/al_Lens.hpp"
+#include "al/spatial/al_Pose.hpp"
 
 namespace al {
 
@@ -46,51 +46,67 @@ Matrix4f view_mat(Pose const&);
 /// A framed area on a display screen
 /// @ingroup Graphics
 struct Viewport {
-  int l, b, w, h; ///< left, bottom, width, height
+  int l, b, w, h;  ///< left, bottom, width, height
 
   /// @param[in] w  width
   /// @param[in] h  height
-  Viewport(int w=640, int h=480): l(0), b(0), w(w), h(h) {}
+  Viewport(int w = 640, int h = 480) : l(0), b(0), w(w), h(h) {}
 
   /// @param[in] l  left edge coordinate
   /// @param[in] b  bottom edge coordinate
   /// @param[in] w  width
   /// @param[in] h  height
-  Viewport(int l, int b, int w, int h): l(l), b(b), w(w), h(h) {}
+  Viewport(int l, int b, int w, int h) : l(l), b(b), w(w), h(h) {}
 
   ///
-  Viewport(const Viewport& cpy): l(cpy.l), b(cpy.b), w(cpy.w), h(cpy.h) {}
+  Viewport(const Viewport& cpy) : l(cpy.l), b(cpy.b), w(cpy.w), h(cpy.h) {}
 
   /// Get aspect ratio (width divided by height)
-  float aspect() const { return (h!=0 && w!=0) ? float(w)/h : 1; }
+  float aspect() const { return (h != 0 && w != 0) ? float(w) / h : 1; }
 
   /// Set dimensions
-  void set(int l_, int b_, int w_, int h_){ l=l_; b=b_; w=w_; h=h_; }
-  void set(const Viewport& cpy){ l=cpy.l; b=cpy.b; w=cpy.w; h=cpy.h; }
+  void set(int l_, int b_, int w_, int h_) {
+    l = l_;
+    b = b_;
+    w = w_;
+    h = h_;
+  }
+  void set(const Viewport& cpy) {
+    l = cpy.l;
+    b = cpy.b;
+    w = cpy.w;
+    h = cpy.h;
+  }
 
   bool isEqual(Viewport const& v) {
-    return (l == v.l) && (b ==  v.b) && (w == v.w) && (h == v.h);
+    return (l == v.l) && (b == v.b) && (w == v.w) && (h == v.h);
   }
 };
 
 /// Viewpoint within a scene
 
-/// A viewpoint is an aggregation of a lens with a pointer to the pose 
+/// A viewpoint is an aggregation of a lens with a pointer to the pose
 /// (3D pos and orientation) that it is attached to
 ///
 /// @ingroup allocore
 class Viewpoint {
-public:
+ public:
   Viewpoint() {}
-  Viewpoint(Pose& p): mPose(&p) {}
-  
+  Viewpoint(Pose& p) : mPose(&p) {}
+
   const Lens& lens() const { return mLens; }
   Lens& lens() { return mLens; }
-  Viewpoint& lens(Lens const& v){ mLens=v; return *this; }
+  Viewpoint& lens(Lens const& v) {
+    mLens = v;
+    return *this;
+  }
 
   const Pose& pose() const { return *mPose; }
-  Pose& pose(){ return *mPose; }
-  Viewpoint& pose(Pose& p){ mPose = &p; return *this; }
+  Pose& pose() { return *mPose; }
+  Viewpoint& pose(Pose& p) {
+    mPose = &p;
+    return *this;
+  }
 
   Matrix4f viewMatrix() const;
   Matrix4f projMatrix(float aspect_ratio) const;
@@ -98,20 +114,19 @@ public:
     return projMatrix(width / height);
   }
 
-private:
+ private:
   Lens mLens;
   Pose* mPose = nullptr;
 
-public:
+ public:
   enum SpecialType {
     IDENTITY,
     ORTHO_FOR_2D,
-    UNIT_ORTHO, // fits [-1:1] X [-1:1] inside
-    UNIT_ORTHO_INCLUSIVE // fits in [-1:1] X [-1:1]
+    UNIT_ORTHO,           // fits [-1:1] X [-1:1] inside
+    UNIT_ORTHO_INCLUSIVE  // fits in [-1:1] X [-1:1]
   };
 };
 
-
-} // al::
+}  // namespace al
 
 #endif

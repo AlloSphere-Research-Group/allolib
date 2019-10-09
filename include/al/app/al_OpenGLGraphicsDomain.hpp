@@ -20,8 +20,8 @@ class GLFWOpenGLWindowDomain;
 struct WindowSetupProperties {
   Window::Cursor cursor = Window::Cursor::POINTER;
   bool cursorVisible = true;
-  Window::Dim dimensions {50, 50, 640, 480};
-  Window::DisplayMode displayMode {Window::DEFAULT_BUF};
+  Window::Dim dimensions{50, 50, 640, 480};
+  Window::DisplayMode displayMode{Window::DEFAULT_BUF};
   bool fullScreen = false;
   std::string title = "Alloapp";
   bool vsync = true;

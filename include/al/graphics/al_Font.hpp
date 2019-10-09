@@ -4,9 +4,9 @@
 /*  Allocore --
     Multimedia / virtual environment application class library
 
-    Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology, UCSB.
-    Copyright (C) 2012. The Regents of the University of California.
-    All rights reserved.
+    Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
+   UCSB. Copyright (C) 2012. The Regents of the University of California. All
+   rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -44,11 +44,10 @@
     Keehong Youn, 2019, younkeehong@gmail.com
 */
 
-#include "al/graphics/al_Texture.hpp"
 #include "al/graphics/al_Mesh.hpp"
+#include "al/graphics/al_Texture.hpp"
 
-namespace al{
-
+namespace al {
 
 /**
 @brief Interface for loading fonts and rendering text
@@ -56,79 +55,77 @@ namespace al{
 */
 
 struct Font {
+  struct Impl;
+  Impl* impl;
+  Texture tex;
+  float alignFactorX = 0.0f;
 
-    struct Impl;
-    Impl* impl;
-    Texture tex;
-    float alignFactorX = 0.0f;
+  Font();
 
-    Font();
+  // no copy
+  Font(const Font&) = delete;
+  Font& operator=(const Font&) = delete;
 
-    // no copy
-    Font(const Font&) = delete;
-    Font& operator=(const Font&) = delete;
+  // but movable
+  Font(Font&& other) noexcept;
+  Font& operator=(Font&& other) noexcept;
 
-    // but movable
-    Font(Font&& other) noexcept;
-    Font& operator=(Font&& other) noexcept;
+  ~Font();
 
-    ~Font();
+  /// Load font from file
+  /// \param[in] filename        path to font file
+  /// \param[in] fontSize        size of font
+  /// \param[in] bitmapSize      size of font bitmap
+  /// \returns whether font loaded successfully
+  bool load(const char* filename, int fontSize, int bitmapSize);
 
-    /// Load font from file
-    /// \param[in] filename        path to font file
-    /// \param[in] fontSize        size of font
-    /// \param[in] bitmapSize      size of font bitmap
-    /// \returns whether font loaded successfully
-    bool load(const char* filename, int fontSize, int bitmapSize);
+  /*! Render text geometry
+      Render text into geometry for drawing a string of text using the bitmap
+      returned by ascii_chars.  Render expects the vertex and texcoord buffers
+      to be at least as big as the text length * 4 since each character is
+      rendered by a quad.
 
-    /*! Render text geometry
-        Render text into geometry for drawing a string of text using the bitmap
-        returned by ascii_chars.  Render expects the vertex and texcoord buffers
-        to be at least as big as the text length * 4 since each character is
-        rendered by a quad.
+      Example usage:
+      <pre>
+          Mesh mesh;
+          font.write(mesh, "allocore");
 
-        Example usage:
-        <pre>
-            Mesh mesh;
-            font.write(mesh, "allocore");
+          font.texture().bind();
+          g.draw(mesh);
+          font.texture().unbind();
+      </pre>
 
-            font.texture().bind();
-            g.draw(mesh);
-            font.texture().unbind();
-        </pre>
+  */
+  void write(Mesh& mesh, const char* text, float worldHeight);
 
-    */
-    void write(Mesh& mesh, const char* text, float worldHeight);
+  /// Returns the width of a text string, in pixels
+  // float width(const char* text) const;
 
-    /// Returns the width of a text string, in pixels
-    // float width(const char* text) const;
+  /// Returns the width of a character, in pixels
+  // float width(int c) const;
 
-    /// Returns the width of a character, in pixels
-    // float width(int c) const;
+  /// Returns the "above-line" height of the font, in pixels
+  // float ascender() const;
 
-    /// Returns the "above-line" height of the font, in pixels
-    // float ascender() const;
+  /// Returns the "below-line" height of the font, in pixels
+  // float descender() const;
 
-    /// Returns the "below-line" height of the font, in pixels
-    // float descender() const;
+  /// Returns the total height of the font, in pixels
+  // float size() const { return (float)mFontSize; }
 
-    /// Returns the total height of the font, in pixels
-    // float size() const { return (float)mFontSize; }
+  /// Set alignment of rendered text strings
 
+  /// \param[in] xfrac    Fraction along text width to render at x=0;
+  ///                        0 is left-aligned, 0.5 is centered, 1 is
+  ///                        right-aligned
+  /// \param[in] yfrac    Fraction along text height to render at y=0
+  // void align(float xfrac, float yfrac);
 
-    /// Set alignment of rendered text strings
-
-    /// \param[in] xfrac    Fraction along text width to render at x=0;
-    ///                        0 is left-aligned, 0.5 is centered, 1 is right-aligned
-    /// \param[in] yfrac    Fraction along text height to render at y=0
-    // void align(float xfrac, float yfrac);
-    
-    void alignLeft() { alignFactorX = 0.0f; }
-    void alignCenter() { alignFactorX = -0.5f; }
-    void alignRight() { alignFactorX = -1.0f; }
-
+  void alignLeft() { alignFactorX = 0.0f; }
+  void alignCenter() { alignFactorX = -0.5f; }
+  void alignRight() { alignFactorX = -1.0f; }
 };
 
-} // al::
+}  // namespace al
 
 #endif

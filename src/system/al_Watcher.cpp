@@ -5,7 +5,7 @@
 
 using namespace al;
 
-typedef std::set<Watcher *> Watchers;
+typedef std::set<Watcher*> Watchers;
 typedef std::map<std::string, Watchers> WatchersMap;
 
 /// singleton notification center:
@@ -22,17 +22,16 @@ void Watcher::unwatch(std::string name) {
 }
 
 void Watcher::unwatch() {
-  for (WatchersMap::iterator it=gWatchers.begin(); it!=gWatchers.end(); it++) {
+  for (WatchersMap::iterator it = gWatchers.begin(); it != gWatchers.end();
+       it++) {
     unwatch(it->first);
   }
 }
 
 void Watcher::notify(std::string name, std::string event) {
   Watchers& w = gWatchers[name];
-  for (Watchers::iterator it=w.begin(); it!=w.end(); it++) {
-    Watcher * rw = *it;
+  for (Watchers::iterator it = w.begin(); it != w.end(); it++) {
+    Watcher* rw = *it;
     rw->onEvent(name, event);
   }
 }
-
-

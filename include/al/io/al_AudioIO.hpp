@@ -2,44 +2,46 @@
 #define INCLUDE_AL_AUDIO_IO_HPP
 
 /*	Allocore --
-	Multimedia / virtual environment application class library
+        Multimedia / virtual environment application class library
 
-	Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology, UCSB.
-	Copyright (C) 2012. The Regents of the University of California.
-	All rights reserved.
+        Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
+   UCSB. Copyright (C) 2012. The Regents of the University of California. All
+   rights reserved.
 
-	Redistribution and use in source and binary forms, with or without
-	modification, are permitted provided that the following conditions are met:
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are
+   met:
 
-		Redistributions of source code must retain the above copyright notice,
-		this list of conditions and the following disclaimer.
+                Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-		Redistributions in binary form must reproduce the above copyright
-		notice, this list of conditions and the following disclaimer in the
-		documentation and/or other materials provided with the distribution.
+                Redistributions in binary form must reproduce the above
+   copyright notice, this list of conditions and the following disclaimer in the
+                documentation and/or other materials provided with the
+   distribution.
 
-		Neither the name of the University of California nor the names of its
-		contributors may be used to endorse or promote products derived from
-		this software without specific prior written permission.
+                Neither the name of the University of California nor the names
+   of its contributors may be used to endorse or promote products derived from
+                this software without specific prior written permission.
 
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-	AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-	IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-	ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-	LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-	CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-	SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-	INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-	CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-	ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-	POSSIBILITY OF SUCH DAMAGE.
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+   IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+   OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-	File description:
-	An interface to low-level audio device streams
+        File description:
+        An interface to low-level audio device streams
 
-	File author(s):
-	Lance Putnam, 2010, putnam.lance@gmail.com
-	Andres Cabrera, 2017 mantaraya36@gmail.com
+        File author(s):
+        Lance Putnam, 2010, putnam.lance@gmail.com
+        Andres Cabrera, 2017 mantaraya36@gmail.com
 */
 
 #include <functional>
@@ -175,8 +177,7 @@ class AudioIO : public AudioIOData {
             int framesPerBuf = 64, double framesPerSec = 44100.0,
             int outChans = 2, int inChans = 0);
 
-  void init(void (*callback)(AudioIOData &), void *userData,
-            AudioDevice &dev,
+  void init(void (*callback)(AudioIOData &), void *userData, AudioDevice &dev,
             int framesPerBuf = 64, double framesPerSec = 44100.0,
             int outChans = 2, int inChans = 0);
 
@@ -198,16 +199,20 @@ class AudioIO : public AudioIOData {
   bool stop();   ///< Stops the audio IO.
   void processAudio();  ///< Call callback manually
 
-  bool isOpen(); ///< Returns true if device has been opened
-  bool isRunning(); ///< Returns true if audio is running
+  bool isOpen();     ///< Returns true if device has been opened
+  bool isRunning();  ///< Returns true if audio is running
 
   bool autoZeroOut() const { return mAutoZeroOut; }
-  int channelsInDevice() const;  ///< Get number of channels opened on input device
-  int channelsOutDevice() const;  ///< Get number of channels opened on output device
+  int channelsInDevice()
+      const;  ///< Get number of channels opened on input device
+  int channelsOutDevice()
+      const;  ///< Get number of channels opened on output device
   bool clipOut() const { return mClipOut; }  ///< Returns clipOut setting
   double cpu() const;  ///< Returns current CPU usage of audio thread
-  bool supportsFPS(double fps);  ///< Return true if fps supported, otherwise false
-  bool zeroNANs() const;  ///< Returns whether to zero NANs in output buffer going to DAC
+  bool supportsFPS(
+      double fps);  ///< Return true if fps supported, otherwise false
+  bool zeroNANs()
+      const;  ///< Returns whether to zero NANs in output buffer going to DAC
 
   /// Sets number of effective channels on input or output device depending on
   /// 'forOutput' flag.
@@ -218,11 +223,14 @@ class AudioIO : public AudioIOData {
   void channelsBus(int num) override;  ///< Set number of bus channels
 
   void clipOut(bool v);  ///< Set whether to clip output between -1 and 1
-  void device(const AudioDevice &v);  ///< Set input/output device (must be duplex)
+  void device(
+      const AudioDevice &v);  ///< Set input/output device (must be duplex)
   void deviceIn(const AudioDevice &v);   ///< Set input device
   void deviceOut(const AudioDevice &v);  ///< Set output device
-  virtual void framesPerSecond(double v) override;        ///< Set number of frames per second
-  virtual void framesPerBuffer(unsigned int n) override;  ///< Set number of frames per processing buffer
+  virtual void framesPerSecond(
+      double v) override;  ///< Set number of frames per second
+  virtual void framesPerBuffer(
+      unsigned int n) override;  ///< Set number of frames per processing buffer
   void zeroNANs(bool v) {
     mZeroNANs = v;
   }  ///< Set whether to zero NANs in output buffer going to DAC
@@ -231,7 +239,8 @@ class AudioIO : public AudioIOData {
   static const char *errorText(int errNum);  ///< Returns error string.
 
   double time() const;  ///< Get current stream time in seconds
-  double time(int frame) const;  ///< Get current stream time in seconds of frame
+  double time(
+      int frame) const;  ///< Get current stream time in seconds of frame
 
   /// Add an AudioCallback handler (internal callback is always called first)
   AudioIO &append(AudioCallback &v);
@@ -242,11 +251,11 @@ class AudioIO : public AudioIOData {
   /// Remove all input event handlers matching argument
   AudioIO &remove(AudioCallback &v);
 
+  using AudioIOData::channelsBus;
   using AudioIOData::channelsIn;
   using AudioIOData::channelsOut;
-  using AudioIOData::channelsBus;
-  using AudioIOData::framesPerSecond;
   using AudioIOData::framesPerBuffer;
+  using AudioIOData::framesPerSecond;
 
   audioCallback callback;  ///< User specified callback function.
 
@@ -265,6 +274,6 @@ class AudioIO : public AudioIOData {
   std::unique_ptr<AudioBackend> mBackend;
 };
 
-}  // al::
+}  // namespace al
 
 #endif

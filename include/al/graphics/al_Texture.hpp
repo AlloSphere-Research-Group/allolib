@@ -88,7 +88,7 @@ namespace al {
 /// A simple wrapper around an OpenGL Texture
 /// @ingroup Graphics
 class Texture : public GPUObject {
-public:
+ public:
   enum DataType : unsigned int /* GLenum */ {
     BYTE = GL_BYTE,             /**< */
     UBYTE = GL_UNSIGNED_BYTE,   /**< */
@@ -181,15 +181,15 @@ public:
 
   void create2D(unsigned int width, unsigned int height,
                 int internal = GL_RGBA8, unsigned int format = GL_RGBA,
-                unsigned int type = GL_UNSIGNED_BYTE // or GL_FLOAT is used
+                unsigned int type = GL_UNSIGNED_BYTE  // or GL_FLOAT is used
   );
 
   // TODO
   // void create3D();
 
-  void createCubemap(unsigned int size, int internal = GL_RGBA8,
-                     unsigned int format = GL_RGBA,
-                     unsigned int type = GL_UNSIGNED_BYTE // or GL_FLOAT is used
+  void createCubemap(
+      unsigned int size, int internal = GL_RGBA8, unsigned int format = GL_RGBA,
+      unsigned int type = GL_UNSIGNED_BYTE  // or GL_FLOAT is used
   );
 
   /// Bind the texture (to a multitexture unit)
@@ -338,7 +338,7 @@ public:
     return numComponents(Texture::Format(format()));
   }
 
-protected:
+ protected:
   void onCreate() override;
   void onDestroy() override;
 
@@ -348,7 +348,8 @@ protected:
 
   // Pattern for setting a variable that when changed sets a notification flag
   // if v != var, update var and set flag to true
-  template <class T> void update_param(const T &v, T &var, bool &flag) {
+  template <class T>
+  void update_param(const T &v, T &var, bool &flag) {
     if (v != var) {
       var = v;
       flag = true;
@@ -364,13 +365,13 @@ protected:
   int mWrapS = GL_CLAMP_TO_EDGE, mWrapT = GL_CLAMP_TO_EDGE,
       mWrapR = GL_CLAMP_TO_EDGE;
   int mFilterMin = GL_NEAREST, mFilterMag = GL_NEAREST;
-  bool mUseMipmap = false; // by default no mipmap
+  bool mUseMipmap = false;  // by default no mipmap
 
-  bool mFilterUpdated = true; // Flags change in texture params (wrap, filter)
-  bool mWrapUpdated = true;   // Flags change in texture params (wrap, filter)
+  bool mFilterUpdated = true;  // Flags change in texture params (wrap, filter)
+  bool mWrapUpdated = true;    // Flags change in texture params (wrap, filter)
   bool mUsingMipmapUpdated = true;
 };
 
-} // namespace al
+}  // namespace al
 
 #endif

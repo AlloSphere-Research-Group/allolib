@@ -1,8 +1,8 @@
 #ifndef OSCDOMAIN_H
 #define OSCDOMAIN_H
 
-#include <iostream>
 #include <functional>
+#include <iostream>
 
 #include "al_ComputationDomain.hpp"
 
@@ -12,13 +12,12 @@
 
 namespace al {
 
-	/**
-	 * @brief OSCDomain class
-	 * @ingroup App
-	 */
-class OSCDomain: public AsynchronousDomain {
-public:
-
+/**
+ * @brief OSCDomain class
+ * @ingroup App
+ */
+class OSCDomain : public AsynchronousDomain {
+ public:
   // Domain management functions
   bool initialize(ComputationDomain *parent = nullptr) override;
   bool start() override;
@@ -28,32 +27,31 @@ public:
   // Configuration and query
   bool configure(uint16_t port, std::string address = "");
 
-  bool running() { return mParameterServer.serverRunning();}
+  bool running() { return mParameterServer.serverRunning(); }
 
-  osc::PacketHandler & handler() {return mHandler;}
+  osc::PacketHandler &handler() { return mHandler; }
 
-  ParameterServer& parameterServer() { return mParameterServer; }
-  ParameterServer const& parameterServer() const { return mParameterServer; }
+  ParameterServer &parameterServer() { return mParameterServer; }
+  ParameterServer const &parameterServer() const { return mParameterServer; }
 
   // PacketHandler
-  std::function<void(osc::Message&)> onMessage = [](osc::Message &m){std::cout << "Received unhandled message." <<std::endl; m.print();};
+  std::function<void(osc::Message &)> onMessage = [](osc::Message &m) {
+    std::cout << "Received unhandled message." << std::endl;
+    m.print();
+  };
 
   std::string interfaceIP = "0.0.0.0";
   uint16_t port = 9010;
-private:
 
-  class Handler: public osc::PacketHandler {
-  public:
+ private:
+  class Handler : public osc::PacketHandler {
+   public:
     OSCDomain *mOscDomain;
-    void onMessage(osc::Message &m) {
-      mOscDomain->onMessage(m);
-    }
+    void onMessage(osc::Message &m) { mOscDomain->onMessage(m); }
   } mHandler;
-    ParameterServer mParameterServer {"0.0.0.0", 9010, false};
-
-
+  ParameterServer mParameterServer{"0.0.0.0", 9010, false};
 };
 
-} // namespace al
+}  // namespace al
 
-#endif // OSCDOMAIN_H
+#endif  // OSCDOMAIN_H

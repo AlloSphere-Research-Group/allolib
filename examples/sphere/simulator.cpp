@@ -1,7 +1,7 @@
 #ifdef AL_USE_CUTTLEBONE
+#include "Cuttlebone/Cuttlebone.hpp"
 #include "al/app/al_App.hpp"
 #include "al/sphere/al_SphereUtils.hpp"
-#include "Cuttlebone/Cuttlebone.hpp"
 
 #include "common.hpp"
 
@@ -9,16 +9,17 @@ using namespace std;
 using namespace al;
 
 const char* defaultBroadcastIP() {
-  if(sphere::is_in_sphere()) return "192.168.10.255";
-  else return "127.0.0.1";
+  if (sphere::is_in_sphere())
+    return "192.168.10.255";
+  else
+    return "127.0.0.1";
 }
 
-struct MySimulatorApp : App
-{
-  cuttlebone::Maker<State, 9000> maker {defaultBroadcastIP()};
+struct MySimulatorApp : App {
+  cuttlebone::Maker<State, 9000> maker{defaultBroadcastIP()};
   unique_ptr<State> state;
   Mesh mesh;
-    
+
   void onCreate() override {
     state = make_unique<State>();
     maker.start();
@@ -40,14 +41,10 @@ struct MySimulatorApp : App
     g.draw(mesh);
   }
 
-  void onExit() override {
-    maker.stop();
-  }
-
+  void onExit() override { maker.stop(); }
 };
 
-int main()
-{
+int main() {
   MySimulatorApp app;
   app.start();
 }
@@ -56,9 +53,8 @@ int main()
 
 #include <iostream>
 
-int main()
-{
-    std::cerr << " **** ==== **** Cuttlebone not available!!" << std::endl;
+int main() {
+  std::cerr << " **** ==== **** Cuttlebone not available!!" << std::endl;
 }
 
 #endif

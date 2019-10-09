@@ -3,9 +3,11 @@
 using namespace al;
 
 bool OSCDomain::initialize(ComputationDomain *parent) {
-  (void) parent;
+  (void)parent;
   mHandler.mOscDomain = this;
-  mParameterServer.registerOSCListener(&mHandler); // Have the parameter server pass unhandled messages to this app's onMessage virtual function
+  mParameterServer.registerOSCListener(
+      &mHandler);  // Have the parameter server pass unhandled messages to this
+                   // app's onMessage virtual function
   return true;
 }
 
@@ -23,10 +25,12 @@ bool OSCDomain::start() {
     if (parameterServer().serverRunning()) {
       port = portOffset + port;
       parameterServer().startCommandListener(interfaceIP);
-      std::cout << "Application is replica on port: " << parameterServer().serverPort() << std::endl;
+      std::cout << "Application is replica on port: "
+                << parameterServer().serverPort() << std::endl;
     } else {
       port = 0;
-      std::cerr << "Warning: Application could not start network role." << std::endl;
+      std::cerr << "Warning: Application could not start network role."
+                << std::endl;
     }
   }
   return parameterServer().serverRunning();
@@ -38,9 +42,8 @@ bool OSCDomain::stop() {
   return ret;
 }
 
-bool OSCDomain::cleanup(ComputationDomain *parent)
-{
-  (void) parent;
+bool OSCDomain::cleanup(ComputationDomain *parent) {
+  (void)parent;
   mParameterServer.clearOSCListeners();
   return true;
 }

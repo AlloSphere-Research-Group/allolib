@@ -11,16 +11,16 @@ struct ShaderSources {
 };
 
 // should be higher than 3.3
-const char* shaderVersionString (int major, int minor);
+const char* shaderVersionString(int major, int minor);
 
 // signature of the function is:
 // `vec4 stereoDisplace (vec4 vertex, float eyeOffset, float focalLength)`
-const char* stereoVertexDisplaceFunctionString (bool isOmni);
+const char* stereoVertexDisplaceFunctionString(bool isOmni);
 
 // P: position
 // C: color
 // T: texcoord
-//              
+//
 // layout (location = 0) in vec3 vertexPosition;
 // layout (location = 1) in vec4 vertexColor;
 // layout (location = 2) in vec2 vertexTexcoord;
@@ -30,15 +30,12 @@ const char* stereoVertexDisplaceFunctionString (bool isOmni);
 // uniform mat4 alNormalMatrix;
 // uniform float eyeOffset;
 // uniform float focalLength;
-std::string vertexShaderStringP (int major, int minor,
-                                 bool isStereo, bool isOmni,
-                                 bool doLighting);
-std::string vertexShaderStringPC (int major, int minor,
-                                  bool isStereo, bool isOmni,
-                                  bool doLighting);
-std::string vertexShaderStringPT (int major, int minor,
-                                  bool isStereo, bool isOmni,
-                                  bool doLighting);
+std::string vertexShaderStringP(int major, int minor, bool isStereo,
+                                bool isOmni, bool doLighting);
+std::string vertexShaderStringPC(int major, int minor, bool isStereo,
+                                 bool isOmni, bool doLighting);
+std::string vertexShaderStringPT(int major, int minor, bool isStereo,
+                                 bool isOmni, bool doLighting);
 
 // U: uniform color,
 // C: per vertex color,
@@ -47,26 +44,22 @@ std::string vertexShaderStringPT (int major, int minor,
 // uniform vec4 uColor;
 // uniform sampler2D tex0;
 // uniform vec4 lightPositionEyeCoord;
-std::string fragShaderStringU (int major, int minor,
-                               bool doLighting);
-std::string fragShaderStringC (int major, int minor,
-                               bool doLighting);
-std::string fragShaderStringT (int major, int minor,
-                               bool doLighting);
+std::string fragShaderStringU(int major, int minor, bool doLighting);
+std::string fragShaderStringC(int major, int minor, bool doLighting);
+std::string fragShaderStringT(int major, int minor, bool doLighting);
 
 // convenience functions
 // assumes version 3.3
 // example usage:
 // auto src = defaultShaderUniformColor(true, false, 3);
 // myShader.compile(src.vert.str, src.frag.str);
-ShaderSources defaultShaderUniformColor (bool isStereo, bool isOmni,
-                                         bool doLighting);
-ShaderSources defaultShaderVertexColor (bool isStereo, bool isOmni,
+ShaderSources defaultShaderUniformColor(bool isStereo, bool isOmni,
                                         bool doLighting);
-ShaderSources defaultShaderTextureColor (bool isStereo, bool isOmni,
-                                         bool doLighting);
+ShaderSources defaultShaderVertexColor(bool isStereo, bool isOmni,
+                                       bool doLighting);
+ShaderSources defaultShaderTextureColor(bool isStereo, bool isOmni,
+                                        bool doLighting);
 
-} // namespace al
+}  // namespace al
 
 #endif
-

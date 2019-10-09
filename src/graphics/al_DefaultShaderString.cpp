@@ -1,14 +1,14 @@
 #include "al/graphics/al_DefaultShaderString.hpp"
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 // alloc only once with reserve
-static std::string concatShaderStrings (const char** strings, int num) {
+static std::string concatShaderStrings(const char** strings, int num) {
   size_t totalSize = 0;
   for (int i = 0; i < num; i += 1) {
     totalSize += std::strlen(strings[i]);
   }
-  totalSize += 1; // null terminator
+  totalSize += 1;  // null terminator
   std::string result;
   result.reserve(totalSize);
 
@@ -63,14 +63,14 @@ vec4 stereoDisplace(vec4 v, float e, float r) {
 
 )";
 
-static const char* vertexShaderMatricesHeader () {
+static const char* vertexShaderMatricesHeader() {
   return R"(
 uniform mat4 alModelViewMatrix;
 uniform mat4 alProjectionMatrix;
 )";
 }
 
-static const char* vertexShaderStereoHeader (bool isStereo) {
+static const char* vertexShaderStereoHeader(bool isStereo) {
   if (!isStereo) return "\n";
   return R"(
 uniform float eyeOffset;
@@ -78,7 +78,7 @@ uniform float focalLength;
 )";
 }
 
-static const char* vertexShaderLightingHeader (bool doLighting) {
+static const char* vertexShaderLightingHeader(bool doLighting) {
   if (!doLighting) return "\n";
   return R"(
 layout (location = 3) in vec3 vertexNormal;
@@ -88,15 +88,14 @@ out vec3 vertEyeCoord;
 )";
 }
 
-static const char* vertexShaderCommonBody (bool isStereo) {
+static const char* vertexShaderCommonBody(bool isStereo) {
   if (isStereo) {
     return R"(
   vec4 ve = alModelViewMatrix * vec4(vertexPosition, 1.0);
   gl_Position = alProjectionMatrix
               * stereoDisplace(ve, eyeOffset, focalLength);
 )";
-  }
-  else {
+  } else {
     return R"(
   vec4 ve = alModelViewMatrix * vec4(vertexPosition, 1.0);
   gl_Position = alProjectionMatrix * ve;
@@ -104,7 +103,7 @@ static const char* vertexShaderCommonBody (bool isStereo) {
   }
 }
 
-static const char* vertexShaderLightingBody (bool doLighting) {
+static const char* vertexShaderLightingBody(bool doLighting) {
   if (!doLighting) return "\n";
   // `ve` should be defined in previous function body (MV * p)
   return R"(
@@ -113,7 +112,7 @@ static const char* vertexShaderLightingBody (bool doLighting) {
 )";
 }
 
-static const char* fragmentShaderLightingHeader (bool doLighting) {
+static const char* fragmentShaderLightingHeader(bool doLighting) {
   if (!doLighting) return "\n";
   return R"(
 uniform vec4 lightPositionEyeCoord;
@@ -122,7 +121,7 @@ in vec3 vertEyeCoord;
 )";
 }
 
-static const char* fragmentShaderLightingBody (bool doLighting) {
+static const char* fragmentShaderLightingBody(bool doLighting) {
   if (!doLighting) return "\n";
   return R"(
   // w = 0 if directional light
@@ -135,7 +134,7 @@ static const char* fragmentShaderLightingBody (bool doLighting) {
 )";
 }
 
-const char* al::shaderVersionString (int major, int minor) {
+const char* al::shaderVersionString(int major, int minor) {
   if (major == 3 && minor == 3) return "#version 330\n";
   if (major == 4 && minor == 0) return "#version 400\n";
   if (major == 4 && minor == 1) return "#version 410\n";
@@ -148,95 +147,85 @@ const char* al::shaderVersionString (int major, int minor) {
   return "#version 330\n";
 }
 
-const char* al::stereoVertexDisplaceFunctionString (bool isOmni) {
+const char* al::stereoVertexDisplaceFunctionString(bool isOmni) {
   if (isOmni) {
     return stereoOmni;
-  }
-  else {
+  } else {
     return stereoFlat;
   }
 }
 
-std::string al::vertexShaderStringP (int major, int minor, bool isStereo,
-                                     bool isOmni, bool doLighting)
-{
+std::string al::vertexShaderStringP(int major, int minor, bool isStereo,
+                                    bool isOmni, bool doLighting) {
   const char* sources[] = {
-    al::shaderVersionString(major, minor),
-    vertexShaderMatricesHeader(),
-    R"(
+      al::shaderVersionString(major, minor),
+      vertexShaderMatricesHeader(),
+      R"(
 layout (location = 0) in vec3 vertexPosition;
 )",
-    vertexShaderStereoHeader(isStereo),
-    vertexShaderLightingHeader(doLighting),
-    isStereo? al::stereoVertexDisplaceFunctionString(isOmni) : "\n",
-    R"(void main () {)",
+      vertexShaderStereoHeader(isStereo),
+      vertexShaderLightingHeader(doLighting),
+      isStereo ? al::stereoVertexDisplaceFunctionString(isOmni) : "\n",
+      R"(void main () {)",
 
-    vertexShaderCommonBody(isStereo),
-    vertexShaderLightingBody(doLighting),
-    "}"
-  };
+      vertexShaderCommonBody(isStereo),
+      vertexShaderLightingBody(doLighting),
+      "}"};
   return concatShaderStrings(sources, 10);
 }
 
-std::string al::vertexShaderStringPC (int major, int minor, bool isStereo,
-                                           bool isOmni, bool doLighting)
-{
+std::string al::vertexShaderStringPC(int major, int minor, bool isStereo,
+                                     bool isOmni, bool doLighting) {
   const char* sources[] = {
-    al::shaderVersionString(major, minor),
-    vertexShaderMatricesHeader(),
-    R"(
+      al::shaderVersionString(major, minor),
+      vertexShaderMatricesHeader(),
+      R"(
 layout (location = 0) in vec3 vertexPosition;
 layout (location = 1) in vec4 vertexColor;
 out vec4 vColor;
 )",
-    vertexShaderStereoHeader(isStereo),
-    vertexShaderLightingHeader(doLighting),
-    isStereo? al::stereoVertexDisplaceFunctionString(isOmni) : "\n",
-    R"(void main () {)",
+      vertexShaderStereoHeader(isStereo),
+      vertexShaderLightingHeader(doLighting),
+      isStereo ? al::stereoVertexDisplaceFunctionString(isOmni) : "\n",
+      R"(void main () {)",
 
-    vertexShaderCommonBody(isStereo),
-    vertexShaderLightingBody(doLighting),
-    R"(
+      vertexShaderCommonBody(isStereo),
+      vertexShaderLightingBody(doLighting),
+      R"(
   vColor = vertexColor;
-})"
-  };
+})"};
   return concatShaderStrings(sources, 10);
 }
 
-std::string al::vertexShaderStringPT (int major, int minor, bool isStereo,
-                                      bool isOmni, bool doLighting)
-{
+std::string al::vertexShaderStringPT(int major, int minor, bool isStereo,
+                                     bool isOmni, bool doLighting) {
   const char* sources[] = {
-    al::shaderVersionString(major, minor),
-    vertexShaderMatricesHeader(),
-    R"(
+      al::shaderVersionString(major, minor),
+      vertexShaderMatricesHeader(),
+      R"(
 layout (location = 0) in vec3 vertexPosition;
 layout (location = 2) in vec2 vertexTexcoord;
 out vec2 vTexcoord;
 )",
-    vertexShaderStereoHeader(isStereo),
-    vertexShaderLightingHeader(doLighting),
-    isStereo? al::stereoVertexDisplaceFunctionString(isOmni) : "\n",
-    R"(
+      vertexShaderStereoHeader(isStereo),
+      vertexShaderLightingHeader(doLighting),
+      isStereo ? al::stereoVertexDisplaceFunctionString(isOmni) : "\n",
+      R"(
 void main () {
 
 )",
-    vertexShaderCommonBody(isStereo),
-    vertexShaderLightingBody(doLighting),
-    R"(
+      vertexShaderCommonBody(isStereo),
+      vertexShaderLightingBody(doLighting),
+      R"(
   vTexcoord = vertexTexcoord;
-})"
-  };
+})"};
   return concatShaderStrings(sources, 10);
 }
 
-std::string al::fragShaderStringU (int major, int minor,
-                                   bool doLighting)
-{
-  const char* sources[] = {
-    al::shaderVersionString(major, minor),
-    fragmentShaderLightingHeader(doLighting),
-    R"(
+std::string al::fragShaderStringU(int major, int minor, bool doLighting) {
+  const char* sources[] = {al::shaderVersionString(major, minor),
+                           fragmentShaderLightingHeader(doLighting),
+                           R"(
 uniform vec4 uColor;
 
 layout (location = 0) out vec4 fragColor;
@@ -245,21 +234,17 @@ void main () {
 
   vec4 c = uColor;
 )",
-  fragmentShaderLightingBody(doLighting),
-    R"(
+                           fragmentShaderLightingBody(doLighting),
+                           R"(
   fragColor = c;
-})"
-  };
+})"};
   return concatShaderStrings(sources, 5);
 }
 
-std::string al::fragShaderStringC (int major, int minor,
-                                   bool doLighting)
-{
-  const char* sources[] = {
-    al::shaderVersionString(major, minor),
-    fragmentShaderLightingHeader(doLighting),
-    R"(
+std::string al::fragShaderStringC(int major, int minor, bool doLighting) {
+  const char* sources[] = {al::shaderVersionString(major, minor),
+                           fragmentShaderLightingHeader(doLighting),
+                           R"(
 in vec4 vColor;
 
 layout (location = 0) out vec4 fragColor;
@@ -267,21 +252,17 @@ layout (location = 0) out vec4 fragColor;
 void main () {
   vec4 c = vColor;
 )",
-  fragmentShaderLightingBody(doLighting),
-    R"(
+                           fragmentShaderLightingBody(doLighting),
+                           R"(
   fragColor = c;
-})"
-  };
+})"};
   return concatShaderStrings(sources, 5);
 }
 
-std::string al::fragShaderStringT (int major, int minor,
-                                   bool doLighting)
-{
-  const char* sources[] = {
-    al::shaderVersionString(major, minor),
-    fragmentShaderLightingHeader(doLighting),
-    R"(
+std::string al::fragShaderStringT(int major, int minor, bool doLighting) {
+  const char* sources[] = {al::shaderVersionString(major, minor),
+                           fragmentShaderLightingHeader(doLighting),
+                           R"(
 uniform sampler2D tex0;
 in vec2 vTexcoord;
 
@@ -290,34 +271,27 @@ layout (location = 0) out vec4 fragColor;
 void main () {
   vec4 c = texture(tex0, vTexcoord);
 )",
-  fragmentShaderLightingBody(doLighting),
-    R"(
+                           fragmentShaderLightingBody(doLighting),
+                           R"(
   fragColor = c;
-})"
-  };
+})"};
   return concatShaderStrings(sources, 5);
 }
 
-al::ShaderSources al::defaultShaderUniformColor (bool isStereo, bool isOmni,
-                                                 bool doLighting) {
-  return {
-    vertexShaderStringP(3, 3, isStereo, isOmni, doLighting),
-    fragShaderStringU(3, 3, doLighting)
-  };
-}
-
-al::ShaderSources al::defaultShaderVertexColor (bool isStereo, bool isOmni,
+al::ShaderSources al::defaultShaderUniformColor(bool isStereo, bool isOmni,
                                                 bool doLighting) {
-  return {
-    vertexShaderStringPC(3, 3, isStereo, isOmni, doLighting),
-    fragShaderStringC(3, 3, doLighting)
-  };
+  return {vertexShaderStringP(3, 3, isStereo, isOmni, doLighting),
+          fragShaderStringU(3, 3, doLighting)};
 }
 
-al::ShaderSources al::defaultShaderTextureColor (bool isStereo, bool isOmni,
-                                                 bool doLighting) {
-  return {
-    vertexShaderStringPT(3, 3, isStereo, isOmni, doLighting),
-    fragShaderStringT(3, 3, doLighting)
-  };
+al::ShaderSources al::defaultShaderVertexColor(bool isStereo, bool isOmni,
+                                               bool doLighting) {
+  return {vertexShaderStringPC(3, 3, isStereo, isOmni, doLighting),
+          fragShaderStringC(3, 3, doLighting)};
+}
+
+al::ShaderSources al::defaultShaderTextureColor(bool isStereo, bool isOmni,
+                                                bool doLighting) {
+  return {vertexShaderStringPT(3, 3, isStereo, isOmni, doLighting),
+          fragShaderStringT(3, 3, doLighting)};
 }

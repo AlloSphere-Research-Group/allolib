@@ -29,12 +29,12 @@ struct MyApp : public App {
     parameterMidi.connectControl(Gain, 7, 1);
   }
 
-  virtual void onCreate() override { 
-		imguiInit();
+  virtual void onCreate() override {
+    imguiInit();
     nav().pos(Vec3d(0, 0, 8));
     // Disable mouse nav to avoid naving while changing gui controls.
     navControl().useMouse(false);
-	}
+  }
 
   virtual void onDraw(Graphics &g) override {
     g.clear(0);

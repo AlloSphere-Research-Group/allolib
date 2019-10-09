@@ -5,26 +5,23 @@
 
 using namespace al;
 
-
 // You can also create Parameter GUIs without the ControlGUI
 // manager to use ImGUI more directly. This gives you better
 // control over layout and style, but requires a bit more
 // knowledge of how ImGUI works
 
-struct MyApp : public App
-{
+struct MyApp : public App {
   Parameter x{"X", "", 0, "", -2.0, 2.0};
   Parameter y{"Y", "", 0, "", -2.0, 2.0};
   Parameter z{"Z", "", 0, "", -2.0, 2.0};
 
-  ParameterColor color {"Color"};
+  ParameterColor color{"Color"};
 
   ImVec4 textColor = {1.0, 0.3f, 0.1f, 1.0};
 
   Mesh mMesh;
 
-  void onCreate() override
-  {
+  void onCreate() override {
     addSphere(mMesh, 0.1);
     mMesh.primitive(Mesh::LINES);
 
@@ -42,7 +39,6 @@ struct MyApp : public App
     g.color(color);
     g.draw(mMesh);
     g.popMatrix();
-
 
     // You are responsible for wrapping all your ImGUI code
     // between imguiBeginFrame() and imguiEndFrame()
@@ -62,8 +58,10 @@ struct MyApp : public App
     // The following are direct calls to ImGUI
     ImGui::TextColored(textColor, "Colored Text");
     ImGui::Separator();
-    ImGui::ColorPicker3("Choose Color for text", (float *) &textColor,
-                        ImGuiColorEditFlags_Uint8|ImGuiColorEditFlags_DisplayRGB|ImGuiColorEditFlags_InputRGB);
+    ImGui::ColorPicker3("Choose Color for text", (float *)&textColor,
+                        ImGuiColorEditFlags_Uint8 |
+                            ImGuiColorEditFlags_DisplayRGB |
+                            ImGuiColorEditFlags_InputRGB);
     ParameterGUI::endPanel();
 
     // Specifying position and/or width makes the position/width fixed
@@ -78,18 +76,12 @@ struct MyApp : public App
     imguiDraw();
   }
 
-
-  void onExit() override {
-    imguiShutdown();
-  }
+  void onExit() override { imguiShutdown(); }
 };
 
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   MyApp app;
   app.title("Parameter GUI");
   app.start();
   return 0;
 }
-

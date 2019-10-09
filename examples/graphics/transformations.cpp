@@ -13,19 +13,17 @@ Lance Putnam, March 2015
 #include "al/graphics/al_Shapes.hpp"
 using namespace al;
 
-struct MyApp : public App{
-
+struct MyApp : public App {
   Mesh mesh;
 
   void onCreate() {
-
     // Add wire-frame cube to mesh
     addWireBox(mesh);
 
     nav().pullBack(4);
   }
 
-  void onDraw(Graphics& g){
+  void onDraw(Graphics& g) {
     g.clear();
 
     // The modelview matrix transforms each vertex before it is rendered.
@@ -37,7 +35,7 @@ struct MyApp : public App{
     // Typically we scale, rotate, then translate. Note that we must apply
     // the transformations in the reverse order!
     g.translate(0, -0.5, 0);
-    g.rotate(-45, 1,0,0);
+    g.rotate(-45, 1, 0, 0);
     g.scale(0.5, 0.3, 0.1);
 
     // Finally, draw mesh
@@ -47,17 +45,15 @@ struct MyApp : public App{
     // Pop the modified matrix off the stack to restore the original matrix.
     g.popMatrix();
 
-
     // We can draw the mesh as many times as we like with different
     // transformations. Here, we build a pyramid.
-    for(int i=1; i<16; ++i){
-
-      float ds = 1./16;
+    for (int i = 1; i < 16; ++i) {
+      float ds = 1. / 16;
 
       g.pushMatrix();
 
-      g.translate(0, ds*(16-i), 0);
-      g.scale(ds*i, ds*0.5, ds*i);
+      g.translate(0, ds * (16 - i), 0);
+      g.scale(ds * i, ds * 0.5, ds * i);
       g.color(HSV(0.1, 0.7, 1));
       g.draw(mesh);
 
@@ -66,6 +62,4 @@ struct MyApp : public App{
   }
 };
 
-int main(){
-  MyApp().start();
-}
+int main() { MyApp().start(); }
