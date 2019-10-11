@@ -1,4 +1,4 @@
-#ifndef AL_DIALOG_HPP
+﻿#ifndef AL_DIALOG_HPP
 #define AL_DIALOG_HPP
 
 /*	Allocore --
@@ -37,27 +37,26 @@
    ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
         File description:
-    Dialog Window
+    ImGui modal query dialog
 
         File author(s):
         Andrés Cabrera mantaraya36@gmail.com
 */
 
-#include <atomic>
-#include <mutex>
-
-#include "imgui.h"
+#include <functional>
+#include <string>
 
 #include "al/graphics/al_Graphics.hpp"
 #include "al/io/al_Imgui.hpp"
-#include "al/io/al_Window.hpp"
 
 namespace al {
 
 /// Dialog
 /// @ingroup UI
-class Dialog : public Window, public WindowEventHandler {
+class Dialog {
  public:
+  virtual ~Dialog() {}
+
   enum Buttons {
     AL_DIALOG_BUTTON_OK = 0x01,
     AL_DIALOG_BUTTON_CANCEL = 0x02,
@@ -73,120 +72,27 @@ class Dialog : public Window, public WindowEventHandler {
   };
 
   Dialog(std::string title, std::string text,
-         int buttons = Buttons::AL_DIALOG_BUTTON_OK) {
-    mTitle = title;
-    mText = text;
-    mModal =
-        false;  // Always non-modal (not easy to create modal windows on glfw)
-    mButtons = (Buttons)buttons;
+         int buttons = Buttons::AL_DIALOG_BUTTON_OK);
 
-    append(windowEventHandler());
-  };
+  void start();
+  void start(std::function<void(DialogResult)> doneCallback);
 
-  DialogResult exec() {
-    static std::mutex mDialogLock;  // Only allow one dialog window at a time
-    std::unique_lock<std::mutex> lk(mDialogLock);
-    bool is_verbose = true;
-    // Should we call this here? Is it a problem to call again?
-    // glfw::init(is_verbose);
+  bool isOpen();
+  DialogResult getReturnValue();
 
-    mDialogGraphics.init();
-
-    // TODO Support in window render (e.g. for VR or Allosphere).
-    Window::dimensions(200, 100);
-    Window::title(mTitle);
-    Window::create(is_verbose);
-    imguiInit();
-    mDone = false;
-    while (!mDone) {
-      onDraw(mDialogGraphics);
-      Window::refresh();
-      // TODO there should be a way to yield to the parent window to refresh it
-      // while we display, even if this dialog is modal.
-    }
-    std::cout << "done" << std::endl;
-    imguiShutdown();
-    Window::close();
-    imguiInit();
-    return mReturnValue;
-  }
+  virtual void draw(Graphics &g);
 
  protected:
-  void onDraw(Graphics &g) {
-    imguiBeginFrame();
-    //        ImGui::SetNextWindowBgAlpha(alpha);
-
-    ImGuiWindowFlags window_flags = 0;
-    window_flags |= ImGuiWindowFlags_NoTitleBar;  // if (no_titlebar)
-    // window_flags |= ImGuiWindowFlags_NoScrollbar; // if (no_scrollbar)
-    // window_flags |= ImGuiWindowFlags_MenuBar; // if (!no_menu)
-    window_flags |= ImGuiWindowFlags_NoMove;      // if (no_move)
-    window_flags |= ImGuiWindowFlags_NoResize;    // if (no_resize)
-    window_flags |= ImGuiWindowFlags_NoCollapse;  // if (no_collapse)
-    window_flags |= ImGuiWindowFlags_NoNav;       // if (no_nav)
-    //        if (!use_input) window_flags |= ImGuiWindowFlags_NoInputs;
-
-    ImGui::SetNextWindowSize(ImVec2(Window::width(), Window::height()));
-    ImGui::SetNextWindowPos(ImVec2(0, 0));
-
-    ImGui::Begin("", nullptr, window_flags);
-    ImGui::Text("%s", mText.c_str());
-
-    if ((int)mButtons & (int)Buttons::AL_DIALOG_BUTTON_OK) {
-      if (ImGui::Button("OK##__al_Dialog")) {
-        mReturnValue = DialogResult::AL_DIALOG_OK;
-        mDone = true;
-      }
-      ImGui::SameLine();
-    }
-    if ((int)mButtons & (int)Buttons::AL_DIALOG_BUTTON_CANCEL) {
-      if (ImGui::Button("Cancel##__al_Dialog")) {
-        mReturnValue = DialogResult::AL_DIALOG_CANCEL;
-        mDone = true;
-      }
-      ImGui::SameLine();
-    }
-    if ((int)mButtons & (int)Buttons::AL_DIALOG_BUTTON_YES) {
-      if (ImGui::Button("Yes##__al_Dialog")) {
-        mReturnValue = DialogResult::AL_DIALOG_YES;
-        mDone = true;
-      }
-      ImGui::SameLine();
-    }
-    if ((int)mButtons & (int)Buttons::AL_DIALOG_BUTTON_NO) {
-      if (ImGui::Button("No##__al_Dialog")) {
-        mReturnValue = DialogResult::AL_DIALOG_NO;
-        mDone = true;
-      }
-      ImGui::SameLine();
-    }
-
-    imguiEndFrame();
-    ImGui::End();
-  }
-
-  bool keyDown(Keyboard const &k) final {
-    if (k.key() == Keyboard::ENTER) {
-      mDone = true;
-    }
-    return false;
-  }
-  // struct DialogKeyControls : WindowEventHandler {
-  //     bool keyDown(const Keyboard& k) {
-  //         this->onKey
-  //     }
-  // };
-  // DialogKeyControls stdControls;
-
  private:
   bool mModal;
+
+  std::function<void(DialogResult)> mDoneCallback;
 
   std::string mTitle;
   std::string mText;
   Buttons mButtons;
   DialogResult mReturnValue;
-  std::atomic<bool> mDone;
-  Graphics mDialogGraphics;
+  bool mOpen;
 };
 
 }  // namespace al

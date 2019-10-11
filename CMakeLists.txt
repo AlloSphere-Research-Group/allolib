@@ -229,6 +229,7 @@ set(sources
   src/ui/al_ParameterBundle.cpp
   src/ui/al_PresetMIDI.cpp
   src/ui/al_ControlGUI.cpp
+  src/ui/al_Dialog.cpp
   src/ui/al_ParameterGUI.cpp
   src/ui/al_PresetSequencer.cpp
   src/ui/al_FileSelector.cpp
