@@ -64,3 +64,6 @@ On a bash shell on Windows, Linux and OS X do:
 
 The library will be built in build/lib.
 
+# Building aplications with allolib
+
+There are two options provided to build allolib applications. The first is [allolib_playground](https://github.com/AlloSphere-Research-Group/allolib_playground) that is great for prototyping single file applications and for exploring the examples. For more complex projects with multiple source files and dependencies, use [allotemplate](https://github.com/AlloSphere-Research-Group/allotemplate)
