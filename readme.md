@@ -1,5 +1,5 @@
 
-# Allolib C/C++ Libraries
+# Allolib C/C++ Libraries  {#mainpage}
 Developed by:
 
 AlloSphere Research Group
