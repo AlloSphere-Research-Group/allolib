@@ -48,6 +48,7 @@
 #include "al/graphics/al_OpenGL.hpp"
 
 #include <vector>
+#include <cstddef>
 
 namespace al {
 

@@ -7,6 +7,8 @@
 #include "al/graphics/al_BufferObject.hpp"
 #include "al/graphics/al_OpenGL.hpp"
 
+#include <cstddef>
+
 namespace al {
 /**
 @brief VAO class
