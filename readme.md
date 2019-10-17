@@ -50,6 +50,12 @@ For installation through Chocolatey:
 ### Ubuntu/Debian
 
     sudo apt install build-essential git git-lfs cmake libsndfile1-dev libassimp-dev
+    
+allolib requires gcc >= 7. If you need to build on older versions, you can use a ppa to get gcc:
+
+    sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
+    sudo apt update
+    sudo -E apt-get install gcc-8 g++-8
 
 ## Building library and running examples
 On a bash shell on Windows, Linux and OS X do:
