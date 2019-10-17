@@ -4,7 +4,8 @@
 
 #include "al/math/al_Random.hpp"
 #include "al/ui/al_Parameter.hpp"
-#include "al/ui/al_Preset.hpp"
+#include "al/ui/al_PresetHandler.hpp"
+#include "al/ui/al_PresetServer.hpp"
 
 using namespace al;
 using namespace std;

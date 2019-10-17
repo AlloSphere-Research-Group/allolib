@@ -131,7 +131,7 @@ set(headers
   include/al/ui/al_PickableRotateHandle.hpp
   include/al/ui/al_Composition.hpp
   include/al/ui/al_ParameterBundle.hpp
-  include/al/ui/al_Preset.hpp
+  include/al/ui/al_PresetHandler.hpp
   include/al/ui/al_ControlGUI.hpp
   include/al/ui/al_ParameterGUI.hpp
   include/al/ui/al_PresetMapper.hpp
@@ -236,7 +236,8 @@ set(sources
   src/ui/al_ParameterServer.cpp
   src/ui/al_SequenceRecorder.cpp
   src/ui/al_HtmlInterfaceServer.cpp
-  src/ui/al_Preset.cpp
+  src/ui/al_PresetHandler.cpp
+  src/ui/al_PresetServer.cpp
   src/ui/al_Parameter.cpp
   src/ui/al_PresetMapper.cpp
 

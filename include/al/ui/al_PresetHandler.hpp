@@ -1,5 +1,5 @@
-#ifndef AL_PRESET_H
-#define AL_PRESET_H
+#ifndef AL_PRESETHANDLER_H
+#define AL_PRESETHANDLER_H
 
 /*	Allocore --
         Multimedia / virtual environment application class library
@@ -476,97 +476,6 @@ class PresetHandler {
   std::string mCurrentPresetName;
 };
 
-///@ingroup UI
-class PresetServer : public osc::PacketHandler, public OSCNotifier {
- public:
-  /**
-   * @brief PresetServer constructor
-   *
-   * @param oscAddress The network address on which to listen to. If empty use
-   * all available network interfaces. Defaults to "127.0.0.1".
-   * @param oscPort The network port on which to listen. Defaults to 9011.
-   *
-   */
-
-  PresetServer(std::string oscAddress = "127.0.0.1", int oscPort = 9011);
-  /**
-   * @brief using this constructor reuses the existing osc::Recv server from the
-   * ParameterServer object
-   * @param paramServer an existing ParameterServer object
-   *
-   * You will want to reuse an osc::Recv server when you want to expose the
-   * interface thorugh the same network port. Since network ports are exclusive,
-   * once a port is bound, it can't be used. You might need to expose the
-   * parameters on the same network port when using things like
-   * interface.simpleserver.js That must connect all interfaces to the same
-   * network port.
-   */
-  PresetServer(ParameterServer &paramServer);
-  ~PresetServer();
-
-  /**
-   * @brief print prints information about the server to std::out
-   */
-  void print();
-
-  /**
-   * @brief stopServer stops the OSC server thread. Calling this function
-   * is sometimes required when this object is destroyed abruptly and the
-   * destructor is not called
-   */
-  void stopServer();
-
-  bool serverRunning();
-
-  void allowStore(bool allow) { mAllowStore = allow; }
-  bool allowStore() { return mAllowStore; }
-
-  virtual void onMessage(osc::Message &m);
-
-  PresetServer &registerPresetHandler(PresetHandler &presetHandler) {
-    mPresetHandlers.push_back(&presetHandler);
-    presetHandler.registerPresetCallback(PresetServer::changeCallback,
-                                         (void *)this);
-
-    presetHandler.registerMorphTimeCallback([&](float value) {
-      this->notifyListeners(this->mOSCpath + "/morphTime", value);
-    });
-    return *this;
-  }
-
-  PresetServer &operator<<(PresetHandler &presetHandler) {
-    return registerPresetHandler(presetHandler);
-  }
-
-  void setAddress(std::string address);
-  std::string getAddress();
-
-  void notifyPresetChange(bool notify) { mNotifyPresetChange = notify; }
-
-  void attachPacketHandler(osc::PacketHandler *handler);
-
- protected:
-  static void changeCallback(int value, void *sender, void *userData);
-
- private:
-  osc::Recv *mServer;
-  std::vector<PresetHandler *> mPresetHandlers;
-  //	std::mutex mServerLock;
-  std::string mOSCpath;
-  std::mutex mHandlerLock;
-  std::vector<osc::PacketHandler *> mHandlers;
-  bool mAllowStore;
-  bool mStoreMode;
-  bool mNotifyPresetChange;
-
-  std::mutex mPresetChangeLock;
-  std::string mPresetChangeSenderAddr;
-
-  std::vector<std::string> mDisabledListeners;
-
-  ParameterServer *mParameterServer;
-};
-
 }  // namespace al
 
-#endif  // AL_PRESET_H
+#endif  // AL_PRESETHANDLER_H

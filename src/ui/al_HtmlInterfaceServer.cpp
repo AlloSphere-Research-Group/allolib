@@ -43,9 +43,11 @@
 */
 
 #include "al/ui/al_HtmlInterfaceServer.hpp"
+#include "al/ui/al_PresetServer.hpp"
+#include "al/io/al_File.hpp"
+
 #include <algorithm>
 #include <string>
-#include "al/io/al_File.hpp"
 
 std::string htmlTemplateStart = R"(
 <html>
