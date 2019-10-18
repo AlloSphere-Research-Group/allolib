@@ -555,16 +555,10 @@ the other
 */
 class PolySynth {
  public:
-  typedef enum {
-    TIME_MASTER_AUDIO,
-    TIME_MASTER_GRAPHICS,
-    TIME_MASTER_ASYNC,
-    TIME_MASTER_CPU
-  } TimeMasterMode;
 
   friend class SynthSequencer;
 
-  PolySynth(TimeMasterMode masterMode = TIME_MASTER_AUDIO);
+  PolySynth(TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_AUDIO);
 
   virtual ~PolySynth();
 

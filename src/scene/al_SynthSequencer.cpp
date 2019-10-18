@@ -12,7 +12,7 @@
 using namespace al;
 
 void SynthSequencer::render(AudioIOData &io) {
-  if (mMasterMode == PolySynth::TIME_MASTER_AUDIO) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
     double timeIncrement =
         mNormalizedTempo * io.framesPerBuffer() / (double)io.framesPerSecond();
     double blockStartTime = mMasterTime;
@@ -23,7 +23,7 @@ void SynthSequencer::render(AudioIOData &io) {
 }
 
 void SynthSequencer::render(Graphics &g) {
-  if (mMasterMode == PolySynth::TIME_MASTER_GRAPHICS) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
     double timeIncrement = 1.0 / mFps;
     double blockStartTime = mMasterTime;
     mMasterTime += timeIncrement;
@@ -56,7 +56,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   for (auto cb : mSequenceBeginCallbacks) {
     cb(mLastSequencePlayed);
   }
-  if (mMasterMode == PolySynth::TIME_MASTER_CPU) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
     mCpuThread = std::make_shared<std::thread>([&](int granularityns = 1000) {
       bool running = true;
       auto startTime = std::chrono::high_resolution_clock::now();

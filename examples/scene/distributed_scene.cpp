@@ -146,7 +146,7 @@ struct MyApp : public DistributedApp {
     return true;
   }
 
-  DistributedScene scene{PolySynth::TIME_MASTER_CPU};
+  DistributedScene scene{TimeMasterMode::TIME_MASTER_CPU};
 };
 
 int main() {

@@ -121,7 +121,7 @@ void DynamicScene::render(Graphics &g) {
     g.draw(mWorldMarker);
   }
 
-  if (mMasterMode == TIME_MASTER_GRAPHICS) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -145,7 +145,7 @@ void DynamicScene::render(Graphics &g) {
     }
     voice = voice->next;
   }
-  if (mMasterMode == TIME_MASTER_GRAPHICS) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
     processInactiveVoices();
   }
 }
@@ -157,7 +157,7 @@ void DynamicScene::render(AudioIOData &io) {
   assert(mSpatializer && "ERROR: call setSpatializer before starting audio");
   io.frame(0);
   mSpatializer->prepare(io);
-  if (mMasterMode == TIME_MASTER_AUDIO) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -267,13 +267,13 @@ void DynamicScene::render(AudioIOData &io) {
     io.frame(0);
     cb->onAudioCB(io);
   }
-  if (mMasterMode == TIME_MASTER_AUDIO) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
     processInactiveVoices();
   }
 }
 
 void DynamicScene::update(double dt) {
-  if (mMasterMode == TIME_MASTER_ASYNC) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_ASYNC) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -300,7 +300,7 @@ void DynamicScene::update(double dt) {
     mWorkerThreads->waitForProcessingDone();
   }
   // Update
-  if (mMasterMode == TIME_MASTER_ASYNC) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_ASYNC) {
     processInactiveVoices();
   }
 }
