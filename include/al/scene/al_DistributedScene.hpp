@@ -13,7 +13,7 @@ namespace al {
 class DistributedScene : public DynamicScene, public osc::MessageConsumer {
  public:
   DistributedScene(std::string name = "scene", int threadPoolSize = 0,
-                   TimeMasterMode masterMode = TIME_MASTER_CPU);
+                   TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_CPU);
 
   DistributedScene(TimeMasterMode masterMode)
       : DistributedScene("scene", 0, masterMode) {}

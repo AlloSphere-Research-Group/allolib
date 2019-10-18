@@ -211,9 +211,9 @@ int al::asciiToMIDI(int asciiKey, int offset) {
 
 // ----------------------------
 
-PolySynth::PolySynth(PolySynth::TimeMasterMode masterMode)
+PolySynth::PolySynth(TimeMasterMode masterMode)
     : mMasterMode(masterMode) {
-  if (mMasterMode == TIME_MASTER_CPU) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
     startCpuClockThread();
   }
 }
@@ -330,7 +330,7 @@ void PolySynth::render(AudioIOData &io) {
   if (!m_internalAudioConfigured) {
     prepare(io);
   }
-  if (mMasterMode == TIME_MASTER_AUDIO) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -384,13 +384,13 @@ void PolySynth::render(AudioIOData &io) {
     io.frame(0);
     cb->onAudioCB(io);
   }
-  if (mMasterMode == TIME_MASTER_AUDIO) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
     processInactiveVoices();
   }
 }
 
 void PolySynth::render(Graphics &g) {
-  if (mMasterMode == TIME_MASTER_GRAPHICS) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -404,13 +404,13 @@ void PolySynth::render(Graphics &g) {
     }
     voice = voice->next;
   }
-  if (mMasterMode == TIME_MASTER_GRAPHICS) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
     processInactiveVoices();
   }
 }
 
 void PolySynth::update(double dt) {
-  if (mMasterMode == TIME_MASTER_ASYNC) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_ASYNC) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -423,7 +423,7 @@ void PolySynth::update(double dt) {
     }
     voice = voice->next;
   }
-  if (mMasterMode == TIME_MASTER_ASYNC) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_ASYNC) {
     processInactiveVoices();
   }
 }
@@ -479,9 +479,9 @@ bool PolySynth::popFreeVoice(SynthVoice *voice) {
   return false;
 }
 
-void PolySynth::setTimeMaster(PolySynth::TimeMasterMode masterMode) {
+void PolySynth::setTimeMaster(TimeMasterMode masterMode) {
   mMasterMode = masterMode;
-  if (mMasterMode == TIME_MASTER_CPU) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
     mRunCPUClock = true;
     startCpuClockThread();
   } else {

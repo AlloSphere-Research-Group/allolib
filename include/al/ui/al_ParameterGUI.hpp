@@ -452,7 +452,7 @@ class SynthGUIManager {
   SequenceRecorder mPresetSequenceRecorder;
 
   //    PolySynth *mSynth;
-  SynthSequencer mSequencer{PolySynth::TIME_MASTER_AUDIO};
+  SynthSequencer mSequencer{PolySynth::TimeMasterMode::TIME_MASTER_AUDIO};
   SynthRecorder mRecorder;
 
   std::vector<std::shared_ptr<ParameterBundle>> mBundles;
