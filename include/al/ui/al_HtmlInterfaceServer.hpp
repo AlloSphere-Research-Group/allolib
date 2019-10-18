@@ -62,6 +62,7 @@
 
 #include "al/ui/al_Parameter.hpp"
 #include "al/ui/al_PresetHandler.hpp"
+#include "al/ui/al_PresetServer.hpp"
 
 namespace al {
 /**
