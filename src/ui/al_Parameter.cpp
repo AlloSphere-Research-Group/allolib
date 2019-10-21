@@ -112,7 +112,7 @@ ParameterBool::ParameterBool(std::string parameterName, std::string Group,
 //		for(size_t i = 0; i < mCallbacks.size(); ++i) {
 //			if (mCallbacks[i]) {
 //				mCallbacks[i](value, this, mCallbackUdata[i],
-//blockReceiver);
+// blockReceiver);
 //			}
 //		}
 //	}
@@ -153,8 +153,14 @@ ParameterMeta::ParameterMeta(std::string parameterName, std::string group,
   auto none = sregex_iterator();
   if (_prefix != none) mFullAddress += "/" + _prefix->str();
   if (_group != none) mFullAddress += "/" + _group->str();
-  assert(_parameterName != none);
-  mFullAddress += "/" + _parameterName->str();
+  if (_parameterName != none) {
+    mFullAddress += "/" + _parameterName->str();
+  } else {
+    std::cout << "ParameterMeta ERROR: A valid name must be provided for the "
+                 "parameter"
+              << std::endl;
+    mFullAddress += "/_";
+  }
 
   mDisplayName = mParameterName;
 }
