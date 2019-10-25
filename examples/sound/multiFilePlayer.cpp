@@ -31,58 +31,56 @@ typedef struct {
 
 struct MyApp : public App {
   SoundFile sfs[4];
-  float read_buffer[AUDIO_BLOCK_SIZE];
-  vector<int> outputMap;
+  uint64_t frameCounter = 0;
+  vector<uint16_t> outputMap;
 
   void onSound(AudioIOData &io) override {
-    int numFrames = io.framesPerBuffer();
-
-    int framesRead;
-    for (int i = 0; i < 4; i++) {
-      framesRead = sfs[i].read(ud->read_buffer, numFrames);
-      for (int j = 0; j < framesRead; j++) {
-        io.out(outputMap[i], j) += (read_buffer[j] * ud->gain);
-      }
+    uint64_t numFrames = io.framesPerBuffer();
+    if (frameCounter + numFrames > sfs[0].frameCount) {
+      numFrames = sfs[0].frameCount - frameCounter;
+    }
+    std::cout << frameCounter << std::endl;
+    for (uint16_t i = 0; i < 4; i++) {
+      float *frames = sfs[i].getFrame(frameCounter);
+      memcpy(io.outBuffer(i), frames, numFrames * sizeof(float));
+    }
+    frameCounter += io.framesPerBuffer();
+    if (frameCounter >= sfs[0].frameCount) {
+      frameCounter = 0;
     }
   }
 };
 
-void audioCB() {}
-
-//#define STEREO
-
-int main(int argc, char *argv[]) {
-  float sr = 44100;
-
+int main() {
   std::vector<std::string> filenames;
   filenames.push_back("data/count.wav");
   filenames.push_back("data/count.wav");
   filenames.push_back("data/count.wav");
   filenames.push_back("data/count.wav");
 
-  for (int i = 0; i < filenames.size(); i++) {
-    app.sfs[i].load(filenames[i]);
-    if (!ud.sfs[i].openRead()) {
+  MyApp app;
+
+  app.outputMap = {0, 1, 2, 3};
+  //  app.outputMap[0] = 2 - 1;
+  //  app.outputMap[1] = 53 - 1;
+  //  app.outputMap[2] = 59 - 1;
+  //  app.outputMap[3] = 8 - 1;
+
+  for (size_t i = 0; i < filenames.size(); i++) {
+    if (!app.sfs[i].open(filenames[i].c_str())) {
       std::cout << " Can't open file: " << filenames[i] << std::endl;
       return -1;
     } else {
-      std::cout << "Playing file: " << filenames[i] << std::endl;
+      std::cout << "Playing file " << i << " : " << filenames[i] << std::endl;
+      std::cout << " -- sr: " << app.sfs[i].sampleRate
+                << " total frames: " << app.sfs[i].frameCount
+                << " channels: " << app.sfs[i].channels << std::endl;
     }
-    // TODO check sampling rate;
   }
 
-  MyApp app;
+  float sr = app.sfs[0].sampleRate;
   app.audioDomain()->audioIO().gain(0.5);  // Global output gain.
-  app.audioDomain()->configureAudio(44100, AUDIO_BLOCK_SIZE);
-
-  // Map files to speakers
-  app.outputMap.resize(filenames.size());
-
-  app.outputMap[0] = 2 - 1;
-  app.outputMap[1] = 53 - 1;
-  app.outputMap[2] = 59 - 1;
-  app.outputMap[3] = 8 - 1;
-
-  ap.start();
+  app.audioDomain()->configure(sr, AUDIO_BLOCK_SIZE, 4);
+  app.start();
   return 0;
 }

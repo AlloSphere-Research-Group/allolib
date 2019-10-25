@@ -29,7 +29,7 @@ bool SoundFile::open(const char* path) {
       channels = (int)c;
       sampleRate = (int)s;
       frameCount = (long long int)f;
-      size_t n = size_t(channels * frameCount);
+      size_t n = size_t(c * f);
       data.resize(n);
       std::memcpy(data.data(), file_data, sizeof(float) * n);
       drwav_free(file_data);
@@ -58,7 +58,7 @@ bool SoundFile::open(const char* path) {
       channels = (int)c;
       sampleRate = (int)s;
       frameCount = (long long int)f;
-      size_t n = (size_t)(channels * frameCount);
+      size_t n = (size_t)(c * f);
       data.resize(n);
       std::memcpy(data.data(), file_data, sizeof(float) * n);
       drflac_free(file_data);

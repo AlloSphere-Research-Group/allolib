@@ -46,6 +46,7 @@
 */
 
 #include <cassert>
+#include <cinttypes>
 #include <cstdio>
 
 namespace al {
@@ -226,9 +227,8 @@ class AudioIOData {
   unsigned int channelsOut()
       const;  ///< Get effective number of output channels
   unsigned int channelsBus() const;  ///< Get number of allocated bus channels
-  unsigned int framesPerBuffer()
-      const;                       ///< Get frames/buffer of audio I/O stream
-  double framesPerSecond() const;  ///< Get frames/second of audio I/O streams
+  uint64_t framesPerBuffer() const;  ///< Get frames/buffer of audio I/O stream
+  double framesPerSecond() const;    ///< Get frames/second of audio I/O streams
   double fps() const { return framesPerSecond(); }
   double secondsPerBuffer() const;  ///< Get seconds/buffer of audio I/O stream
 
