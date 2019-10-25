@@ -39,11 +39,6 @@ struct SoundFile {
 SoundFile getResampledSoundFile(SoundFile* toConvert,
                                 unsigned int newSampleRate);
 
-// only supports wav
-// TODO - implement
-// void writeSoundFile (const char* filename, float* data, int frameCount,
-//                      int sampleRate, int channels);
-
 /// @brief Soundfile player class
 /// @ingroup Sound
 struct SoundFilePlayer {

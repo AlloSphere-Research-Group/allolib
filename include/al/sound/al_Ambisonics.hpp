@@ -50,6 +50,7 @@
 */
 
 #include <stdio.h>
+
 #include <iostream>
 
 #include "al/math/al_Vec.hpp"
@@ -219,17 +220,17 @@ class AmbiDecode : public AmbiBase {
 
   void setSpeaker(int index, int deviceChannel, float azimuth,
                   float elevation = 0, float amp = 1.f);
-  // void zero();					///< Zeroes out internal ambisonic
-  // frame.
+  // void zero();					///< Zeroes out internal
+  // ambisonic frame.
 
   void setSpeakers(Speakers* spkrs);
   void setSpeakers(Speakers& spkrs);
 
-  //	float * azimuths();				///< Returns pointer to speaker
-  //azimuths.
+  //	float * azimuths();				///< Returns pointer to
+  //speaker azimuths.
   //	float * elevations();			///< Returns pointer to speaker
-  //elevations. 	float * frame() const;			///< Returns pointer to
-  //ambisonic channel frame used by decode(int)
+  // elevations. 	float * frame() const;			///< Returns pointer
+  // to ambisonic channel frame used by decode(int)
 
   /// Get speaker
   Speaker& speaker(int num) { return mSpeakers[num]; }
@@ -317,6 +318,7 @@ class AmbiEncode : public AmbiBase {
 /// @ingroup Sound
 class AmbisonicsSpatializer : public Spatializer {
  public:
+  AmbisonicsSpatializer();
   AmbisonicsSpatializer(SpeakerLayout& sl, int dim = 2, int order = 1,
                         int flavor = 1);
 
@@ -431,12 +433,12 @@ inline float AmbiDecode::decode(float* encFrame, int encNumChannels,
 // AmbiEncode
 // inline void AmbiEncode::encode(const AmbiDecode &dec, float input){
 //	for(int c=0; c<dec.channels(); ++c) dec.frame()[c] = weights()[c] *
-//input;
+// input;
 //}
 //
 // inline void AmbiEncode::encodeAdd(const AmbiDecode &dec, float input){
 //	for(int c=0; c<dec.channels(); ++c) dec.frame()[c] += weights()[c] *
-//input;
+// input;
 //}
 
 inline void AmbiEncode::direction(float az, float el) {
@@ -463,8 +465,9 @@ inline void AmbiEncode::encode(float* ambiChans, int numFrames, int timeIndex,
   int ch = channels() - 1;
   switch (ch) {
     CS(15)
-    CS(14) CS(13) CS(12) CS(11) CS(10) CS(9) CS(8) CS(7) CS(6) CS(5) CS(4) CS(3)
-        CS(2) CS(1) CS(0) default:;
+    CS(14)
+    CS(13) CS(12) CS(11) CS(10) CS(9) CS(8) CS(7) CS(6) CS(5) CS(4) CS(3) CS(2)
+        CS(1) CS(0) default:;
   }
 #undef CS
 }
