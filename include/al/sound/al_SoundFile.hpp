@@ -6,11 +6,13 @@
 
 namespace al {
 
-/// @brief Read sound file and store the data in float array (interleaved)
-/// @ingroup Sound
-/// Reading supports wav, flac
-/// Implementation uses "dr libs" (https://github.com/mackron/dr_libs)
-
+/**
+ * @brief Read sound file and store the data in float array (interleaved)
+ * @ingroup Sound
+ *
+ * Reading supports wav, flac
+ * Implementation uses "dr libs" (https://github.com/mackron/dr_libs)
+ */
 struct SoundFile {
   std::vector<float> data;
   int sampleRate = 0;
@@ -63,10 +65,42 @@ struct SoundFilePlayer {
   //
   //  ~SoundFilePlayer() = default;
 
-  void getFrames(int numFrames, float* buffer, int bufferLength);
+  void getFrames(uint64_t numFrames, float* buffer, int bufferLength);
 };
 
-/// @brief Soundfile player class
+/**
+ * @brief The SoundFileStreaming class provides reading soundifle directly from
+ * disk one buffer at a time.
+ *
+ * This is a simple reading class with few options, if you need more
+ * comprehensive support, use the soundfile module in al_ext
+ */
+class SoundFileStreaming {
+ public:
+  SoundFileStreaming(const char* path = nullptr);
+  ~SoundFileStreaming();
+
+  bool isOpen() { return mImpl != nullptr; }
+
+  /// Sampling rate of file. Call after open has returned true.
+  uint32_t sampleRate();
+  /// Total number of frames in file. Call after open has returned true.
+  uint64_t totalFrames();
+  /// Number of channels in file. Call after open has returned true.
+  uint16_t numChannels();
+
+  /// Open file for reading.
+  bool open(const char* path);
+  /// Close file and cleanup
+  void close();
+  /// Read interleaved frames into preallocated buffer;
+  uint64_t getFrames(uint64_t numFrames, float* buffer);
+
+ private:
+  void* mImpl{nullptr};
+};
+
+/// @brief Soundfile player class with thread-safe access to playback controls
 /// @ingroup Sound
 struct SoundFilePlayerTS {
   SoundFile soundFile;

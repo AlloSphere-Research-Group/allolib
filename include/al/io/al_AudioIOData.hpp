@@ -63,13 +63,13 @@ static int resize(T*& buf, int n) {
   return n;
 }
 
-// Utility function to efficiently clear buffer (set all to 0)
+/// Utility function to efficiently clear buffer (set all to 0)
 template <class T>
 static void zero(T* buf, int n) {
   memset(buf, 0, n * sizeof(T));
 }
 
-// Utility function to deinterleave samples
+/// Utility function to deinterleave samples
 template <class T>
 static void deinterleave(T* dst, const T* src, int numFrames, int numChannels) {
   int numSamples = numFrames * numChannels;
