@@ -52,10 +52,13 @@ namespace al {
 /// @ingroup UI
 class FileSelector {
  public:
-  FileSelector(std::string globalRoot = "",
-               std::function<bool(std::string)> function = nullptr);
+  FileSelector(
+      std::string globalRoot = "",
+      std::function<bool(std::string)> filterfunction = [](std::string) {
+        return true;
+      });
 
-  void start(std::string currentDir);
+  void start(std::string currentDir = "");
 
   /**
    * @brief drawFileSelector
