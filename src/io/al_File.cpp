@@ -1,7 +1,8 @@
 #include "al/io/al_File.hpp"
-#include "minFileSys.hpp"
 
 #include <stdlib.h>  // realpath (POSIX), _fullpath (Windows)
+
+#include "minFileSys.hpp"
 
 #ifdef AL_WINDOWS
 #define WIN32_LEAN_AND_MEAN
@@ -233,6 +234,14 @@ std::string File::absolutePath(const std::string& path) {
   char* result = realpath(path.c_str(), temp);
   return result ? result : "";
 #endif
+}
+
+std::string File::currentPath() {
+  // Can be removed once moved to C++17 std::file_system::current_path()
+  char buf[FILENAME_MAX];
+  platform_getcwd(buf, FILENAME_MAX);
+  std::string currentDir(buf);
+  return File::conformPathToOS(currentDir);
 }
 
 std::string File::baseName(const std::string& path, const std::string& suffix) {
