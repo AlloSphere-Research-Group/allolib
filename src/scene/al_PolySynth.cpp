@@ -1,11 +1,12 @@
-#include <memory>
-
 #include "al/scene/al_PolySynth.hpp"
+
+#include <memory>
 
 using namespace al;
 
 #ifdef __GNUG__
 #include <cxxabi.h>
+
 #include <cstdlib>
 #include <memory>
 
@@ -209,10 +210,206 @@ int al::asciiToMIDI(int asciiKey, int offset) {
   return 0;
 }
 
+// --------- SynthVoice
+
+bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
+                                  bool noCalls) {
+  if (pFields.size() < mTriggerParams.size()) {
+    // std::cout << "pField count mismatch. Ignoring." << std::endl;
+    return false;
+  }
+  auto it = pFields.begin();
+  // Trigger parameters should not trigger callbacks when set through
+  // this function as these values are initial "construction" values
+  // If you need the callbacks to propagate, set the parameter values
+  // directly instead of through these functions.
+  if (noCalls) {
+    for (auto &param : mTriggerParams) {
+      if (it->type() == ParameterField::FLOAT) {
+        if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
+          static_cast<Parameter *>(param)->setNoCalls(it->get<float>());
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name()) ==
+                   0) {
+          static_cast<ParameterInt *>(param)->setNoCalls(it->get<float>());
+        } else if (strcmp(typeid(*param).name(),
+                          typeid(ParameterMenu).name()) == 0) {
+          static_cast<ParameterMenu *>(param)->setNoCalls(it->get<float>());
+        } else if (strcmp(typeid(*param).name(),
+                          typeid(ParameterString).name()) == 0) {
+          static_cast<ParameterString *>(param)->setNoCalls(
+              std::to_string(it->get<float>()));
+        } else {
+          std::cerr << "ERROR: p-field string not setting parameter. Invalid "
+                       "parameter type for parameter "
+                    << param->getFullAddress() << std::endl;
+        }
+      } else if (it->type() == ParameterField::STRING) {
+        if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
+            0) {
+          static_cast<ParameterString *>(param)->setNoCalls(
+              it->get<std::string>());
+        } else if (strcmp(typeid(*param).name(),
+                          typeid(ParameterMenu).name()) == 0) {
+          static_cast<ParameterMenu *>(param)->setCurrent(
+              it->get<std::string>(), noCalls);
+        } else {
+          std::cerr << "ERROR: p-field string not setting parameter. Invalid "
+                       "parameter type for parameter "
+                    << param->getFullAddress() << std::endl;
+        }
+      }
+      it++;
+    }
+  } else {
+    for (auto &param : mTriggerParams) {
+      if (it->type() == ParameterField::FLOAT) {
+        if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
+          static_cast<Parameter *>(param)->set(it->get<float>());
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name()) ==
+                   0) {
+          static_cast<ParameterInt *>(param)->set(it->get<float>());
+        } else if (strcmp(typeid(*param).name(),
+                          typeid(ParameterMenu).name()) == 0) {
+          static_cast<ParameterMenu *>(param)->set(it->get<float>());
+        } else if (strcmp(typeid(*param).name(),
+                          typeid(ParameterString).name()) == 0) {
+          static_cast<ParameterString *>(param)->set(
+              std::to_string(it->get<float>()));
+        } else {
+          std::cerr << "ERROR: p-field string not setting parameter. Invalid "
+                       "parameter type for parameter "
+                    << param->getFullAddress() << std::endl;
+        }
+      } else if (it->type() == ParameterField::STRING) {
+        if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
+            0) {
+          static_cast<ParameterString *>(param)->set(it->get<std::string>());
+        } else if (strcmp(typeid(*param).name(),
+                          typeid(ParameterMenu).name()) == 0) {
+          static_cast<ParameterMenu *>(param)->setCurrent(
+              it->get<std::string>(), noCalls);
+        } else {
+          std::cerr << "ERROR: p-field string not setting parameter. Invalid "
+                       "parameter type for parameter "
+                    << param->getFullAddress() << std::endl;
+        }
+      }
+      it++;
+    }
+  }
+  return true;
+}
+
+int SynthVoice::getTriggerParams(float *pFields, int maxParams) {
+  std::vector<ParameterField> pFieldsVector = getTriggerParams();
+  if (maxParams == -1) {
+    assert(pFieldsVector.size() < INT_MAX);
+    maxParams = int(pFieldsVector.size());
+  }
+  int count = 0;
+  for (auto param : pFieldsVector) {
+    if (count == maxParams) {
+      break;
+    }
+    if (param.type() == ParameterField::FLOAT) {
+      *pFields++ = param.get<float>();
+    } else {
+      *pFields++ = 0.0f;  // Ignore strings...
+    }
+    count++;
+  }
+  return count;
+}
+
+std::vector<ParameterField> SynthVoice::getTriggerParams() {
+  std::vector<ParameterField> pFields;
+  pFields.reserve(mTriggerParams.size());
+  for (auto param : mTriggerParams) {
+    if (param) {
+      if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) == 0) {
+        pFields.push_back(static_cast<ParameterString *>(param)->get());
+      } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) ==
+                 0) {
+        pFields.push_back(static_cast<ParameterMenu *>(param)->getCurrent());
+      } else {
+        pFields.push_back(param->toFloat());
+      }
+    }
+  }
+  return pFields;
+}
+
+void SynthVoice::triggerOn(int offsetFrames) {
+  mOnOffsetFrames = offsetFrames;
+  mActive = true;
+  onTriggerOn();
+}
+
+void SynthVoice::triggerOff(int offsetFrames) {
+  mOffOffsetFrames =
+      offsetFrames;  // TODO implement offset frames for trigger off.
+  // Currently ignoring and turning off at start of buffer
+  onTriggerOff();
+}
+
+int SynthVoice::getStartOffsetFrames(unsigned int framesPerBuffer) {
+  int frames = mOnOffsetFrames;
+  mOnOffsetFrames -= framesPerBuffer;
+  if (mOnOffsetFrames < 0) {
+    mOnOffsetFrames = 0;
+  }
+  return frames;
+}
+
+int SynthVoice::getEndOffsetFrames(unsigned int framesPerBuffer) {
+  int frames = mOffOffsetFrames;
+  mOffOffsetFrames -= framesPerBuffer;
+  if (mOffOffsetFrames < 0) {
+    mOffOffsetFrames = 0;
+  }
+  return frames;
+}
+
+std::shared_ptr<Parameter> SynthVoice::createInternalTriggerParameter(
+    std::string name, float defaultValue, float minValue, float maxValue) {
+  mInternalParameters.push_back(
+      std::make_shared<Parameter>(name, defaultValue, minValue, maxValue));
+  registerTriggerParameter(*mInternalParameters.back().get());
+  return mInternalParameters.back();
+}
+
+Parameter &SynthVoice::getInternalParameter(std::string name) {
+  for (auto param : mInternalParameters) {
+    if (param->getName() == name &&
+        strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
+      return *param;
+    }
+  }
+  std::cerr << "Parameter not found! Aborting: " << name << std::endl;
+  throw "Invalid parameter name";
+}
+
+float SynthVoice::getInternalParameterValue(std::string name) {
+  for (auto param : mInternalParameters) {
+    if (param->getName() == name) {
+      return param->get();
+    }
+  }
+  return 0.0;
+}
+
+void SynthVoice::setInternalParameterValue(std::string name, float value) {
+  for (auto param : mInternalParameters) {
+    if (param->getName() == name) {
+      param->set(value);
+      //        return;
+    }
+  }
+}
+
 // ----------------------------
 
-PolySynth::PolySynth(TimeMasterMode masterMode)
-    : mMasterMode(masterMode) {
+PolySynth::PolySynth(TimeMasterMode masterMode) : mMasterMode(masterMode) {
   if (mMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
     startCpuClockThread();
   }
@@ -571,6 +768,24 @@ void PolySynth::print(std::ostream &stream) {
   }
 }
 
+void PolySynth::registerTriggerOnCallback(
+    std::function<bool(SynthVoice *, int, int, void *)> cb, void *userData) {
+  TriggerOnCallback cbNode(cb, userData);
+  mTriggerOnCallbacks.push_back(cbNode);
+}
+
+void PolySynth::registerTriggerOffCallback(std::function<bool(int, void *)> cb,
+                                           void *userData) {
+  TriggerOffCallback cbNode(cb, userData);
+  mTriggerOffCallbacks.push_back(cbNode);
+}
+
+void PolySynth::registerFreeCallback(std::function<bool(int, void *)> cb,
+                                     void *userData) {
+  FreeCallback cbNode(cb, userData);
+  mFreeCallbacks.push_back(cbNode);
+}
+
 SynthVoice *PolySynth::allocateVoice(std::string name) {
   if (mCreators.find(name) != mCreators.end()) {
     if (mVerbose) {
@@ -613,20 +828,28 @@ void PolySynth::startCpuClockThread() {
   }
 }
 
-int SynthVoice::getStartOffsetFrames(unsigned int framesPerBuffer) {
-  int frames = mOnOffsetFrames;
-  mOnOffsetFrames -= framesPerBuffer;
-  if (mOnOffsetFrames < 0) {
-    mOnOffsetFrames = 0;
+void PolySynth::prepare(AudioIOData &io) {
+  internalAudioIO.framesPerBuffer(io.framesPerBuffer());
+  internalAudioIO.channelsIn(mVoiceMaxInputChannels);
+  internalAudioIO.channelsOut(mVoiceMaxOutputChannels);
+  internalAudioIO.channelsBus(mVoiceBusChannels);
+  if ((int)io.channelsBus() < mVoiceBusChannels) {
+    std::cout << "WARNING: You don't have enough buses in AudioIO object. "
+                 "This is likely to crash."
+              << std::endl;
   }
-  return frames;
+  //      mThreadedAudioData.resize(mAudioThreads.size());
+  //      for (auto &threadio: mThreadedAudioData) {
+  //          threadio.framesPerBuffer(io.framesPerBuffer());
+  //          threadio.channelsIn(mVoiceMaxInputChannels);
+  //          threadio.channelsOut(mVoiceMaxOutputChannels);
+  //          threadio.channelsBus(mVoiceBusChannels);
+  //      }
+  m_internalAudioConfigured = true;
 }
 
-int SynthVoice::getEndOffsetFrames(unsigned int framesPerBuffer) {
-  int frames = mOffOffsetFrames;
-  mOffOffsetFrames -= framesPerBuffer;
-  if (mOffOffsetFrames < 0) {
-    mOffOffsetFrames = 0;
-  }
-  return frames;
+void PolySynth::registerAllocateCallback(
+    std::function<void(SynthVoice *, void *)> cb, void *userData) {
+  AllocationCallback cbNode(cb, userData);
+  mAllocationCallbacks.push_back(cbNode);
 }

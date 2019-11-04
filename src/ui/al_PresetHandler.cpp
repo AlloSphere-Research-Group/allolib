@@ -1,4 +1,6 @@
 
+#include "al/ui/al_PresetHandler.hpp"
+
 #include <cassert>
 #include <cstring>
 #include <fstream>
@@ -7,35 +9,44 @@
 #include <string>
 
 #include "al/io/al_File.hpp"
-#include "al/ui/al_PresetHandler.hpp"
 
 using namespace al;
 
 // PresetHandler --------------------------------------------------------------
 
 PresetHandler::PresetHandler(std::string rootDirectory, bool verbose)
-    : mVerbose(verbose),
-      mUseCallbacks(true),
-      mRootDir(rootDirectory),
-      mRunning(true),
-      mMorphRemainingSteps(-1),
-      mMorphInterval(0.05f),
-      mMorphTime("morphTime", "", 0.0, "", 0.0, 20.0),
-      mMorphingThread(PresetHandler::morphingFunction, this) {
-  if (!File::exists(rootDirectory)) {
-    if (!Dir::make(rootDirectory)) {
-      std::cout << "Error creating directory: " << rootDirectory << std::endl;
-    }
-  }
+    : mVerbose(verbose), mRootDir(rootDirectory) {
   setCurrentPresetMap("default");
+  setRootPath(rootDirectory);
+
+  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
+    mRunning = true;
+    mMorphingThread =
+        std::make_unique<std::thread>(PresetHandler::morphingFunction, this);
+  }
+}
+PresetHandler::PresetHandler(TimeMasterMode timeMasterMode,
+                             std::string rootDirectory, bool verbose)
+    : mVerbose(verbose),
+      mRootDir(rootDirectory),
+      mTimeMasterMode(timeMasterMode) {
+  setCurrentPresetMap("default");
+  setRootPath(rootDirectory);
+  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
+    mRunning = true;
+    mMorphingThread =
+        std::make_unique<std::thread>(PresetHandler::morphingFunction, this);
+  }
 }
 
 PresetHandler::~PresetHandler() {
   stopMorph();
   mRunning = false;
-  mMorphConditionVar.notify_all();
+  //  mMorphConditionVar.notify_all();
   // mMorphLock.lock();
-  mMorphingThread.join();
+  if (mMorphingThread) {
+    mMorphingThread->join();
+  }
   // mMorphLock.unlock();
 }
 
@@ -205,14 +216,16 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
 
 void PresetHandler::recallPreset(std::string name) {
   {
-    if (mMorphRemainingSteps.load() >= 0) {
-      mMorphRemainingSteps.store(-1);
-      std::lock_guard<std::mutex> lk(mTargetLock);
-    }
+    //    if (mMorphRemainingSteps.load() >= 0) {
+    //      mMorphRemainingSteps.store(0);
+    //    }
+    std::lock_guard<std::mutex> lk(mTargetLock);
     mTargetValues = loadPresetValues(name);
-    mMorphRemainingSteps.store(1.0f + ceilf(mMorphTime.get() / mMorphInterval));
+    uint64_t totalSteps = ceilf(0.5 + mMorphTime.get() / mMorphInterval);
+    mMorphRemainingSteps.store(totalSteps);
+    mTotalSteps.store(totalSteps);
   }
-  mMorphConditionVar.notify_one();
+
   int index = -1;
   for (auto preset : mPresetsMap) {
     if (preset.second == name) {
@@ -259,11 +272,10 @@ void PresetHandler::setInterpolatedPreset(std::string presetName1,
       }
     }
   } else {
-    if (mMorphRemainingSteps.load() >= 0) {
-      mMorphRemainingSteps.store(-1);
-      std::lock_guard<std::mutex> lk(
-          mTargetLock);  // Wait for morph function loop to process
-    }
+    std::lock_guard<std::mutex> lk(
+        mTargetLock);  // Wait for morph function loop to process
+                       //    mMorphRemainingSteps.store(1);
+                       //    mTotalSteps.store(1);
     mTargetValues.clear();
     for (auto value : values1) {
       if (values2.count(value.first) >
@@ -279,7 +291,6 @@ void PresetHandler::setInterpolatedPreset(std::string presetName1,
       }
     }
   }
-  mMorphConditionVar.notify_one();
 }
 
 void PresetHandler::setInterpolatedPreset(int index1, int index2, double factor,
@@ -298,30 +309,14 @@ void PresetHandler::setInterpolatedPreset(int index1, int index2, double factor,
 
 void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
   {
-    if (mMorphRemainingSteps.load() >= 0) {
-      mMorphRemainingSteps.store(-1);
-      std::lock_guard<std::mutex> lk(mTargetLock);
-    }
+    std::lock_guard<std::mutex> lk(mTargetLock);
     mMorphTime.set(morphTime);
     mTargetValues = parameterStates;
-    mMorphRemainingSteps.store(1 + ceil(mMorphTime.get() / mMorphInterval));
+    mMorphRemainingSteps.store(ceilf(mMorphTime.get() / mMorphInterval));
+    mTotalSteps.store(ceilf(mMorphTime.get() / mMorphInterval));
   }
-  mMorphConditionVar.notify_one();
-  //	int index = -1;
-  //	for (auto preset: mPresetsMap) {
-  //		if (preset.second == name) {
-  //			index = preset.first;
-  //			break;
-  //		}
-  //	}
+
   mCurrentPresetName = "";
-  //	if (mUseCallbacks) {
-  //		for(int i = 0; i < mCallbacks.size(); ++i) {
-  //			if (mCallbacks[i]) {
-  //				mCallbacks[i](index, this, mCallbackUdata[i]);
-  //			}
-  //		}
-  //	}
 }
 
 std::string PresetHandler::recallPreset(int index) {
@@ -338,9 +333,10 @@ std::string PresetHandler::recallPreset(int index) {
 void PresetHandler::recallPresetSynchronous(std::string name) {
   {
     if (mMorphRemainingSteps.load() >= 0) {
-      mMorphRemainingSteps.store(-1);
-      std::lock_guard<std::mutex> lk(mTargetLock);
+      mMorphRemainingSteps.store(1);
+      mTotalSteps.store(1);
     }
+    std::lock_guard<std::mutex> lk(mTargetLock);
     mTargetValues = loadPresetValues(name);
   }
   for (ParameterMeta *param : mParameters) {
@@ -418,14 +414,9 @@ float PresetHandler::getMorphTime() { return mMorphTime.get(); }
 void PresetHandler::setMorphTime(float time) { mMorphTime.set(time); }
 
 void PresetHandler::stopMorph() {
-  {
-    if (mMorphRemainingSteps.load() >= 0) {
-      mMorphRemainingSteps.store(-1);
-    }
-  }
-  {
-    std::lock_guard<std::mutex> lk(mTargetLock);
-    mMorphConditionVar.notify_all();
+  if (mMorphRemainingSteps.load() >= 0) {
+    mMorphRemainingSteps.store(0);
+    mTotalSteps.store(0);
   }
 }
 
@@ -505,7 +496,7 @@ std::map<int, std::string> PresetHandler::readPresetMap(std::string mapName) {
   if (f.bad()) {
     if (mVerbose) {
       std::cout << "Error while opening preset map file for reading: "
-                << mFileName << std::endl;
+                << mapFullPath << std::endl;
     }
   }
   return presetsMap;
@@ -574,6 +565,139 @@ void PresetHandler::changeParameterValue(std::string presetName,
   savePresetValues(parameters, presetName, true);
 }
 
+int PresetHandler::asciiToPresetIndex(int ascii, int offset) {
+  int index = -1;
+
+  switch (ascii) {
+    case '1':
+      index = 0;
+      break;
+    case '2':
+      index = 1;
+      break;
+    case '3':
+      index = 2;
+      break;
+    case '4':
+      index = 3;
+      break;
+    case '5':
+      index = 4;
+      break;
+    case '6':
+      index = 5;
+      break;
+    case '7':
+      index = 6;
+      break;
+    case '8':
+      index = 7;
+      break;
+    case '9':
+      index = 8;
+      break;
+    case '0':
+      index = 9;
+      break;
+    case 'q':
+      index = 10;
+      break;
+    case 'w':
+      index = 11;
+      break;
+    case 'e':
+      index = 12;
+      break;
+    case 'r':
+      index = 13;
+      break;
+    case 't':
+      index = 14;
+      break;
+    case 'y':
+      index = 15;
+      break;
+    case 'u':
+      index = 16;
+      break;
+    case 'i':
+      index = 17;
+      break;
+    case 'o':
+      index = 18;
+      break;
+    case 'p':
+      index = 19;
+      break;
+    case 'a':
+      index = 20;
+      break;
+    case 's':
+      index = 21;
+      break;
+    case 'd':
+      index = 22;
+      break;
+    case 'f':
+      index = 23;
+      break;
+    case 'g':
+      index = 24;
+      break;
+    case 'h':
+      index = 25;
+      break;
+    case 'j':
+      index = 26;
+      break;
+    case 'k':
+      index = 27;
+      break;
+    case 'l':
+      index = 28;
+      break;
+    case ';':
+      index = 29;
+      break;
+      ;
+    case 'z':
+      index = 30;
+      break;
+    case 'x':
+      index = 31;
+      break;
+    case 'c':
+      index = 32;
+      break;
+    case 'v':
+      index = 33;
+      break;
+    case 'b':
+      index = 34;
+      break;
+    case 'n':
+      index = 35;
+      break;
+    case 'm':
+      index = 36;
+      break;
+    case ',':
+      index = 37;
+      break;
+    case '.':
+      index = 38;
+      break;
+    case '/':
+      index = 39;
+      break;
+  }
+  if (index >= 0) {
+    index += offset;
+  }
+
+  return index;
+}
+
 void PresetHandler::storeCurrentPresetMap(std::string mapName,
                                           bool useSubDirectory) {
   if (mapName.size() > 0) {
@@ -595,7 +719,7 @@ void PresetHandler::storeCurrentPresetMap(std::string mapName,
   f << "::" << std::endl;
   if (f.bad()) {
     if (mVerbose) {
-      std::cout << "Error while writing preset map file: " << mFileName
+      std::cout << "Error while writing preset map file: " << mapFullPath
                 << std::endl;
     }
   }
@@ -623,9 +747,7 @@ void PresetHandler::setParameterValues(ParameterMeta *p,
       float paramValue = param->get();
       float difference = values[0].get<float>() - paramValue;
       // int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
-      if (factor > 0) {
-        difference = difference * factor;
-      }
+      difference = difference * factor;
       if (difference != 0.0) {
         float newVal = paramValue + difference;
         param->set(newVal);
@@ -754,7 +876,7 @@ void PresetHandler::setParameterValues(ParameterMeta *p,
 void PresetHandler::setParametersInBundle(ParameterBundle *bundle,
                                           std::string bundlePrefix,
                                           PresetHandler *handler,
-                                          float factor) {
+                                          double factor) {
   for (ParameterMeta *p : bundle->parameters()) {
     //                       std::cout << bundlePrefix + p->getFullAddress() <<
     //                       std::endl;
@@ -778,46 +900,43 @@ void PresetHandler::setParametersInBundle(ParameterBundle *bundle,
   }
 }
 
-void PresetHandler::morphingFunction(al::PresetHandler *handler) {
-  // handler->mMorphLock.lock();
-  while (handler->mRunning) {
-    std::unique_lock<std::mutex> lk(handler->mTargetLock);
-    handler->mMorphConditionVar.wait(lk);
-    int remainingSteps;
-    while ((remainingSteps = std::atomic_fetch_sub(
-                &(handler->mMorphRemainingSteps), 1)) > 0) {
-      for (ParameterMeta *p : handler->mParameters) {
-        if (handler->mTargetValues.find(p->getFullAddress()) !=
-            handler->mTargetValues.end()) {
-          handler->setParameterValues(
-              p, handler->mTargetValues[p->getFullAddress()],
-              1.0 / remainingSteps);
+void PresetHandler::stepMorphing() {
+  if (mMorphRemainingSteps.load() > 0) {
+    // TODO Think carefully about possible race conditions here:
+    std::atomic_fetch_sub(&(mMorphRemainingSteps), 1);
+    auto remainingSteps = mMorphRemainingSteps.load();
+    auto totalSteps = mTotalSteps.load();
+
+    if (totalSteps > 0) {
+      double factor = 1.0 - (remainingSteps / (double)totalSteps);
+      std::cout << factor << std::endl;
+      for (ParameterMeta *p : mParameters) {
+        if (mTargetValues.find(p->getFullAddress()) != mTargetValues.end()) {
+          setParameterValues(p, mTargetValues[p->getFullAddress()], factor);
         } else {
-          if (handler->mVerbose) {
+          if (mVerbose) {
             std::cout << "Parameter not found " << p->getFullAddress()
                       << std::endl;
           }
         }
       }
-      for (auto bundleGroup : handler->mBundles) {
+      for (auto bundleGroup : mBundles) {
         const std::string &bundleName = bundleGroup.first;
         for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
           std::string bundlePrefix = "/" + bundleName + "/" + std::to_string(i);
           ParameterBundle *bundle = bundleGroup.second[i];
-          handler->setParametersInBundle(bundle, bundlePrefix, handler,
-                                         1.0 / remainingSteps);
+          setParametersInBundle(bundle, bundlePrefix, this, factor);
         }
       }
-      al::wait(handler->mMorphInterval);
     }
-    //		// Set final values
-    //		for (Parameter param: mParameters) {
-    //			if (preset.find(param.getName()) != preset.end()) {
-    //				param.set(preset[param.getName()]);
-    //			}
-    //		}
   }
-  // handler->mMorphLock.unlock();
+}
+
+void PresetHandler::morphingFunction(al::PresetHandler *handler) {
+  while (handler->mRunning) {
+    handler->stepMorphing();
+    al::wait(handler->mMorphInterval);
+  }
 }
 
 PresetHandler::ParameterStates PresetHandler::getBundleStates(
@@ -850,8 +969,8 @@ PresetHandler::ParameterStates PresetHandler::loadPresetValues(
   std::ifstream f(path + name + ".preset");
   if (!f.is_open()) {
     if (mVerbose) {
-      std::cout << "Error while opening preset file: " << mFileName
-                << std::endl;
+      std::cout << "Error while opening preset file: "
+                << path + name + ".preset" << std::endl;
     }
   }
   while (getline(f, line)) {
@@ -905,8 +1024,8 @@ PresetHandler::ParameterStates PresetHandler::loadPresetValues(
   }
   if (f.bad()) {
     if (mVerbose) {
-      std::cout << "Error while writing preset file: " << mFileName
-                << std::endl;
+      std::cout << "Error while writing preset file: "
+                << path + name + ".preset" << std::endl;
     }
   }
   f.close();
@@ -930,7 +1049,7 @@ bool PresetHandler::savePresetValues(const ParameterStates &values,
   std::ofstream f(fileName);
   if (!f.is_open()) {
     if (mVerbose) {
-      std::cout << "Error while opening preset file: " << mFileName
+      std::cout << "Error while opening preset file fro write: " << fileName
                 << std::endl;
     }
     return false;
@@ -957,8 +1076,7 @@ bool PresetHandler::savePresetValues(const ParameterStates &values,
   f << "::" << std::endl;
   if (f.bad()) {
     if (mVerbose) {
-      std::cout << "Error while writing preset file: " << mFileName
-                << std::endl;
+      std::cout << "Error while writing preset file: " << fileName << std::endl;
     }
     ok = false;
   }
