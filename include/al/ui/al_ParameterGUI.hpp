@@ -2,31 +2,29 @@
 #define AL_PARAMETERGUI_H
 
 /*	Allolib --
-        Multimedia / virtual environment application class library
+   Multimedia / virtual environment application class library
 
-        Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
+   Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
    UCSB. Copyright (C) 2012-2018. The Regents of the University of California.
-        All rights reserved.
+   All rights reserved.
 
-        Redistribution and use in source and binary forms, with or without
-        modification, are permitted provided that the following conditions are
-   met:
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
 
-                Redistributions of source code must retain the above copyright
+   Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
 
-                Redistributions in binary form must reproduce the above
+   Redistributions in binary form must reproduce the above
    copyright notice, this list of conditions and the following disclaimer in the
-                documentation and/or other materials provided with the
-   distribution.
+   documentation and/or other materials provided with the distribution.
 
-                Neither the name of the University of California nor the names
-   of its contributors may be used to endorse or promote products derived from
-                this software without specific prior written permission.
+   Neither the name of the University of California nor the names of its
+   contributors may be used to endorse or promote products derived from this
+   software without specific prior written permission.
 
-        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
    IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
@@ -36,10 +34,10 @@
    OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
    ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-        File description:
-    Expose parameters on the network
-        File author(s):
-        Andrés Cabrera mantaraya36@gmail.com
+   File description:
+   Expose parameters on the network
+   File author(s):
+   Andrés Cabrera mantaraya36@gmail.com
 */
 
 #include <climits>
@@ -452,7 +450,7 @@ class SynthGUIManager {
   SequenceRecorder mPresetSequenceRecorder;
 
   //    PolySynth *mSynth;
-  SynthSequencer mSequencer{PolySynth::TimeMasterMode::TIME_MASTER_AUDIO};
+  SynthSequencer mSequencer{TimeMasterMode::TIME_MASTER_AUDIO};
   SynthRecorder mRecorder;
 
   std::vector<std::shared_ptr<ParameterBundle>> mBundles;

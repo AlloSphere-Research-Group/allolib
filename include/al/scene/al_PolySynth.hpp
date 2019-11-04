@@ -133,92 +133,7 @@ the other
    * @return true if able to set the fields
    */
   virtual bool setTriggerParams(std::vector<ParameterField> pFields,
-                                bool noCalls = false) {
-    if (pFields.size() < mTriggerParams.size()) {
-      // std::cout << "pField count mismatch. Ignoring." << std::endl;
-      return false;
-    }
-    auto it = pFields.begin();
-    // Trigger parameters should not trigger callbacks when set through
-    // this function as these values are initial "construction" values
-    // If you need the callbacks to propagate, set the parameter values
-    // directly instead of through these functions.
-    if (noCalls) {
-      for (auto &param : mTriggerParams) {
-        if (it->type() == ParameterField::FLOAT) {
-          if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
-            static_cast<Parameter *>(param)->setNoCalls(it->get<float>());
-          } else if (strcmp(typeid(*param).name(),
-                            typeid(ParameterInt).name()) == 0) {
-            static_cast<ParameterInt *>(param)->setNoCalls(it->get<float>());
-          } else if (strcmp(typeid(*param).name(),
-                            typeid(ParameterMenu).name()) == 0) {
-            static_cast<ParameterMenu *>(param)->setNoCalls(it->get<float>());
-          } else if (strcmp(typeid(*param).name(),
-                            typeid(ParameterString).name()) == 0) {
-            static_cast<ParameterString *>(param)->setNoCalls(
-                std::to_string(it->get<float>()));
-          } else {
-            std::cerr << "ERROR: p-field string not setting parameter. Invalid "
-                         "parameter type for parameter "
-                      << param->getFullAddress() << std::endl;
-          }
-        } else if (it->type() == ParameterField::STRING) {
-          if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
-              0) {
-            static_cast<ParameterString *>(param)->setNoCalls(
-                it->get<std::string>());
-          } else if (strcmp(typeid(*param).name(),
-                            typeid(ParameterMenu).name()) == 0) {
-            static_cast<ParameterMenu *>(param)->setCurrent(
-                it->get<std::string>(), noCalls);
-          } else {
-            std::cerr << "ERROR: p-field string not setting parameter. Invalid "
-                         "parameter type for parameter "
-                      << param->getFullAddress() << std::endl;
-          }
-        }
-        it++;
-      }
-    } else {
-      for (auto &param : mTriggerParams) {
-        if (it->type() == ParameterField::FLOAT) {
-          if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
-            static_cast<Parameter *>(param)->set(it->get<float>());
-          } else if (strcmp(typeid(*param).name(),
-                            typeid(ParameterInt).name()) == 0) {
-            static_cast<ParameterInt *>(param)->set(it->get<float>());
-          } else if (strcmp(typeid(*param).name(),
-                            typeid(ParameterMenu).name()) == 0) {
-            static_cast<ParameterMenu *>(param)->set(it->get<float>());
-          } else if (strcmp(typeid(*param).name(),
-                            typeid(ParameterString).name()) == 0) {
-            static_cast<ParameterString *>(param)->set(
-                std::to_string(it->get<float>()));
-          } else {
-            std::cerr << "ERROR: p-field string not setting parameter. Invalid "
-                         "parameter type for parameter "
-                      << param->getFullAddress() << std::endl;
-          }
-        } else if (it->type() == ParameterField::STRING) {
-          if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
-              0) {
-            static_cast<ParameterString *>(param)->set(it->get<std::string>());
-          } else if (strcmp(typeid(*param).name(),
-                            typeid(ParameterMenu).name()) == 0) {
-            static_cast<ParameterMenu *>(param)->setCurrent(
-                it->get<std::string>(), noCalls);
-          } else {
-            std::cerr << "ERROR: p-field string not setting parameter. Invalid "
-                         "parameter type for parameter "
-                      << param->getFullAddress() << std::endl;
-          }
-        }
-        it++;
-      }
-    }
-    return true;
-  }
+                                bool noCalls = false);
 
   /**
    * @brief Get this instance's parameter fields
@@ -232,26 +147,7 @@ the other
    * Copy the values from the internal parameters that have been
    * registered using registerParameterAsField or the << operator.
    */
-  int getTriggerParams(float *pFields, int maxParams = -1) {
-    std::vector<ParameterField> pFieldsVector = getTriggerParams();
-    if (maxParams == -1) {
-      assert(pFieldsVector.size() < INT_MAX);
-      maxParams = int(pFieldsVector.size());
-    }
-    int count = 0;
-    for (auto param : pFieldsVector) {
-      if (count == maxParams) {
-        break;
-      }
-      if (param.type() == ParameterField::FLOAT) {
-        *pFields++ = param.get<float>();
-      } else {
-        *pFields++ = 0.0f;  // Ignore strings...
-      }
-      count++;
-    }
-    return count;
-  }
+  int getTriggerParams(float *pFields, int maxParams = -1);
 
   /**
    * @brief Get this instance's parameter fields
@@ -263,24 +159,7 @@ the other
    * operator. Override this function in your voice if you need a different
    * behavior.
    */
-  virtual std::vector<ParameterField> getTriggerParams() {
-    std::vector<ParameterField> pFields;
-    pFields.reserve(mTriggerParams.size());
-    for (auto param : mTriggerParams) {
-      if (param) {
-        if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
-            0) {
-          pFields.push_back(static_cast<ParameterString *>(param)->get());
-        } else if (strcmp(typeid(*param).name(),
-                          typeid(ParameterMenu).name()) == 0) {
-          pFields.push_back(static_cast<ParameterMenu *>(param)->getCurrent());
-        } else {
-          pFields.push_back(param->toFloat());
-        }
-      }
-    }
-    return pFields;
-  }
+  virtual std::vector<ParameterField> getTriggerParams();
 
   /**
    * @brief Override this function to define audio processing.
@@ -345,11 +224,7 @@ the other
    * This function can be called to programatically trigger a voice.
    * It is used for example in PolySynth to trigger a voice.
    */
-  void triggerOn(int offsetFrames = 0) {
-    mOnOffsetFrames = offsetFrames;
-    mActive = true;
-    onTriggerOn();
-  }
+  void triggerOn(int offsetFrames = 0);
 
   /**
    * @brief Call the voice's onTriggerOff() function to begin note's
@@ -359,12 +234,7 @@ the other
    * This function can be called to programatically trigger the release of a
    * voice
    */
-  void triggerOff(int offsetFrames = 0) {
-    mOffOffsetFrames =
-        offsetFrames;  // TODO implement offset frames for trigger off.
-                       // Currently ignoring and turning off at start of buffer
-    onTriggerOff();
-  }
+  void triggerOff(int offsetFrames = 0);
 
   /**
    * @brief Set the id for this voice
@@ -402,43 +272,44 @@ the other
    */
   unsigned int numOutChannels() { return mNumOutChannels; }
 
+  /**
+   * @brief A convenience function for quick creation of a managed parameter
+   * @return a shared pointer to the created Parameter
+   *
+   * This creates a float type Parameter. The parameters instantiated
+   * through this function can be queried and set quickly through
+   * getInternalParameter(), getInternalParameterValue() and
+   * setInternalParameterValue(). These functions provide a quick way to add
+   * trigger parameters to the synth. These parameters are registered
+   * automatically, so they will be used in automatic GUIs and with the
+   * SynthSequencer.
+   *
+   */
   std::shared_ptr<Parameter> createInternalTriggerParameter(
       std::string name, float defaultValue = 0.0, float minValue = -9999.0,
-      float maxValue = 9999.0) {
-    mInternalParameters.push_back(
-        std::make_shared<Parameter>(name, defaultValue, minValue, maxValue));
-    registerTriggerParameter(*mInternalParameters.back().get());
-    return mInternalParameters.back();
-  }
+      float maxValue = 9999.0);
 
-  Parameter &getInternalParameter(std::string name) {
-    for (auto param : mInternalParameters) {
-      if (param->getName() == name &&
-          strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
-        return *param;
-      }
-    }
-    std::cerr << "Parameter not found! Aborting: " << name << std::endl;
-    throw "Invalid parameter name";
-  }
+  /**
+   * @brief Get reference to internal Parameter
+   * @param name parameter name
+   * @return reference to the parameter
+   *
+   * Internal parameters are those registered through
+   * createInternalTriggerParameter()
+   */
+  Parameter &getInternalParameter(std::string name);
 
-  float getInternalParameterValue(std::string name) {
-    for (auto param : mInternalParameters) {
-      if (param->getName() == name) {
-        return param->get();
-      }
-    }
-    return 0.0;
-  }
+  /**
+   * @brief Get value for internal trigger parameter
+   * @param name name of the parameter
+   * @return current float value of the parameter
+   */
+  float getInternalParameterValue(std::string name);
 
-  void setInternalParameterValue(std::string name, float value) {
-    for (auto param : mInternalParameters) {
-      if (param->getName() == name) {
-        param->set(value);
-        //        return;
-      }
-    }
-  }
+  /**
+   * @brief Set value for internal trigger parameter
+   */
+  void setInternalParameterValue(std::string name, float value);
 
   /**
    * @brief Register a parameter as a "trigger" parameter
@@ -504,6 +375,10 @@ the other
     return *this;
   }
 
+  /**
+   * @brief Get the Voice's continuous (i.e. not "trigger") parameters
+   * @return vector with pointers to parameters
+   */
   std::vector<ParameterMeta *> parameters() { return mContinuousParameters; }
 
   /**
@@ -555,7 +430,6 @@ the other
 */
 class PolySynth {
  public:
-
   friend class SynthSequencer;
 
   PolySynth(TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_AUDIO);
@@ -785,39 +659,26 @@ class PolySynth {
       std::function<bool(SynthVoice *voice, int offsetFrames, int id,
                          void *userData)>
           cb,
-      void *userData = nullptr) {
-    TriggerOnCallback cbNode(cb, userData);
-    mTriggerOnCallbacks.push_back(cbNode);
-  }
+      void *userData = nullptr);
 
   /**
    * @brief register a callback to be notified of a trigger off event
    */
   void registerTriggerOffCallback(
-      std::function<bool(int id, void *userData)> cb,
-      void *userData = nullptr) {
-    TriggerOffCallback cbNode(cb, userData);
-    mTriggerOffCallbacks.push_back(cbNode);
-  }
+      std::function<bool(int id, void *userData)> cb, void *userData = nullptr);
   /**
    * @brief register a callback to be notified of a note is moved to the free
    * pool from the active list
    */
   void registerFreeCallback(std::function<bool(int id, void *userData)> cb,
-                            void *userData = nullptr) {
-    FreeCallback cbNode(cb, userData);
-    mFreeCallbacks.push_back(cbNode);
-  }
+                            void *userData = nullptr);
 
   /**
    * @brief register a callback to be notified of allocation of a voice.
    */
   void registerAllocateCallback(
       std::function<void(SynthVoice *voice, void *)> cb,
-      void *userData = nullptr) {
-    AllocationCallback cbNode(cb, userData);
-    mAllocationCallbacks.push_back(cbNode);
-  }
+      void *userData = nullptr);
 
   /**
    * Register a SynthVoice class to allow instantiating it by name
@@ -888,7 +749,7 @@ class PolySynth {
    * Always call prepare() after calling this function. The changes are only
    * applied by prepare().
    */
-  void setVoiceMaxOutputChannels(unsigned int channels) {
+  void setVoiceMaxOutputChannels(uint16_t channels) {
     mVoiceMaxOutputChannels = channels;
   }
 
@@ -899,9 +760,7 @@ class PolySynth {
    * Always call prepare() after calling this function. The changes are only
    * applied by prepare().
    */
-  void setVoiceBusChannels(unsigned int channels) {
-    mVoiceBusChannels = channels;
-  }
+  void setVoiceBusChannels(uint16_t channels) { mVoiceBusChannels = channels; }
 
   typedef const std::function<void(AudioIOData &internalVoiceIO,
                                    Pose &channelPose)>
@@ -919,6 +778,12 @@ class PolySynth {
     mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
   }
 
+  /**
+   * @brief Set the time in seconds to wait between sequencer updates when time
+   * master is CPU.
+   *
+   * This has no effect if time master mode is not TIME_MASTER_CPU
+   */
   void setCpuClockGranularity(double timeSecs) {
     mCpuGranularitySec = timeSecs;
   }
@@ -1061,43 +926,26 @@ class PolySynth {
     }
   }
 
-  virtual void prepare(AudioIOData &io) {
-    internalAudioIO.framesPerBuffer(io.framesPerBuffer());
-    internalAudioIO.channelsIn(mVoiceMaxInputChannels);
-    internalAudioIO.channelsOut(mVoiceMaxOutputChannels);
-    internalAudioIO.channelsBus(mVoiceBusChannels);
-    if ((int)io.channelsBus() < mVoiceBusChannels) {
-      std::cout << "WARNING: You don't have enough buses in AudioIO object. "
-                   "This is likely to crash."
-                << std::endl;
-    }
-    //      mThreadedAudioData.resize(mAudioThreads.size());
-    //      for (auto &threadio: mThreadedAudioData) {
-    //          threadio.framesPerBuffer(io.framesPerBuffer());
-    //          threadio.channelsIn(mVoiceMaxInputChannels);
-    //          threadio.channelsOut(mVoiceMaxOutputChannels);
-    //          threadio.channelsBus(mVoiceBusChannels);
-    //      }
-    m_internalAudioConfigured = true;
-  }
+  virtual void prepare(AudioIOData &io);
 
-  // Internal voices are allocated in PolySynth and shared with the outside.
-  SynthVoice *mVoicesToInsert{
-      nullptr};  // Voices to be inserted in the realtime context
-  SynthVoice *mFreeVoices{nullptr};  // Allocated voices available for reuse
-  SynthVoice *mActiveVoices{
-      nullptr};  // Dynamic voices that are currently active. Only modified
-                 // within the master domain (set by mMasterMode)
+  /// Voices to be inserted in the realtime context. Internal voices are
+  /// allocated in PolySynth and shared with the outside.
+  SynthVoice *mVoicesToInsert{nullptr};
+  /// Allocated voices available for reuse
+  SynthVoice *mFreeVoices{nullptr};
+  /// Dynamic voices that are currently active. Only modified
+  /// within the master domain (set by mMasterMode)
+  SynthVoice *mActiveVoices{nullptr};
   std::mutex mVoiceToInsertLock;
   std::mutex mFreeVoiceLock;
   std::mutex mGraphicsLock;
 
   bool m_useInternalAudioIO = true;
   bool m_internalAudioConfigured = false;
-  // Internal AudioIOData characteristics. Set these
-  int mVoiceMaxOutputChannels = 2;
-  int mVoiceMaxInputChannels = 0;
-  int mVoiceBusChannels = 0;
+
+  uint16_t mVoiceMaxOutputChannels = 2;
+  uint16_t mVoiceMaxInputChannels = 0;
+  uint16_t mVoiceBusChannels = 0;
   std::shared_ptr<BusRoutingCallback> mBusRoutingCallback;
   AudioIOData internalAudioIO;
 
@@ -1129,8 +977,8 @@ class PolySynth {
 
   int mIdCounter{1000};
 
-  bool mAllNotesOff{
-      false};  // Flag used to notify processing to turn off all voices
+  // Flag used to notify processing to turn off all voices
+  bool mAllNotesOff{false};
 
   typedef std::function<SynthVoice *()> VoiceCreatorFunc;
   typedef std::map<std::string, VoiceCreatorFunc> Creators;
@@ -1138,9 +986,8 @@ class PolySynth {
   void *mDefaultUserData{nullptr};
 
   Creators mCreators;
-  std::vector<std::string>
-      mNoAllocationList;  // Disallow auto allocation for class name. Set in
-                          // allocateVoice()
+  // Disallow auto allocation for class name. Set in allocateVoice()
+  std::vector<std::string> mNoAllocationList;
 
   bool mRunCPUClock{true};
   double mCpuGranularitySec = 0.001;  // 1ms
