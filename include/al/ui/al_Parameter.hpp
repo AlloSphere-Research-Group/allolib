@@ -42,12 +42,8 @@
         Andrés Cabrera mantaraya36@gmail.com
 */
 
-#include "al/math/al_Vec.hpp"
-#include "al/protocol/al_OSC.hpp"
-#include "al/spatial/al_Pose.hpp"
-#include "al/types/al_Color.hpp"
-
 #include <float.h>
+
 #include <algorithm>
 #include <atomic>
 #include <cassert>
@@ -59,6 +55,11 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "al/math/al_Vec.hpp"
+#include "al/protocol/al_OSC.hpp"
+#include "al/spatial/al_Pose.hpp"
+#include "al/types/al_Color.hpp"
 
 namespace al {
 
@@ -147,7 +148,6 @@ class ParameterField {
 
   template <typename type>
   type get() {
-    //        assert(mType == STRING);
     return *static_cast<type *>(mData);
   }
 
@@ -615,7 +615,9 @@ class Parameter : public ParameterWrapper<float> {
   }
 
   virtual void set(std::vector<ParameterField> &fields) override {
+    assert(fields.size() == 1);
     if (fields.size() == 1) {
+      assert(fields[0].type() == ParameterField::FLOAT);
       set(fields[0].get<float>());
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
