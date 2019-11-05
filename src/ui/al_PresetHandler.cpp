@@ -221,7 +221,24 @@ void PresetHandler::recallPreset(std::string name) {
     //    }
     std::lock_guard<std::mutex> lk(mTargetLock);
     mTargetValues = loadPresetValues(name);
-    uint64_t totalSteps = ceilf(0.5 + mMorphTime.get() / mMorphInterval);
+    mStartValues.clear();
+    // FIXME morph recursively inside bundles
+    for (auto targetValue : mTargetValues) {
+      bool valueSet = false;
+      for (auto *param : mParameters) {
+        if (param->getFullAddress() == targetValue.first) {
+          mStartValues[param->getFullAddress()] = std::vector<ParameterField>();
+          param->get(mStartValues[param->getFullAddress()]);
+          valueSet = true;
+          break;
+        }
+      }
+      if (!valueSet) {
+        mStartValues[targetValue.first] = targetValue.second;
+      }
+    }
+    uint64_t totalSteps =
+        (uint64_t)ceilf(0.5 + mMorphTime.get() / mMorphInterval);
     mMorphRemainingSteps.store(totalSteps);
     mTotalSteps.store(totalSteps);
   }
@@ -245,62 +262,20 @@ void PresetHandler::recallPreset(std::string name) {
 
 void PresetHandler::setInterpolatedPreset(std::string presetName1,
                                           std::string presetName2,
-                                          double factor, bool synchronous) {
+                                          double factor) {
   ParameterStates values1 = loadPresetValues(presetName1);
   ParameterStates values2 = loadPresetValues(presetName2);
-  if (synchronous) {
-    for (auto value : values1) {
-      if (values2.count(value.first) >
-          0) {  // if para std::cout << meter name match exists
-        mTargetValues[value.first] = value.second;
-        for (ParameterMeta *param : mParameters) {
-          if (param->getFullAddress() == value.first) {
-            std::vector<ParameterField> newValues;
-            for (unsigned int index = 0; index < value.second.size(); index++) {
-              if (value.second[index].type() == ParameterField::FLOAT) {
-                newValues.push_back(value.second[index].get<float>() +
-                                    (values2[value.first][index].get<float>() -
-                                     value.second[index].get<float>()) *
-                                        factor);
-              } else {
-                newValues.push_back(value.second[index]);
-              }
-            }
-            setParameterValues(param, newValues, factor);
-          }
-        }
-      }
-    }
-  } else {
-    std::lock_guard<std::mutex> lk(
-        mTargetLock);  // Wait for morph function loop to process
-                       //    mMorphRemainingSteps.store(1);
-                       //    mTotalSteps.store(1);
-    mTargetValues.clear();
-    for (auto value : values1) {
-      if (values2.count(value.first) >
-          0) {  // if para std::cout << meter name match exists
-        mTargetValues[value.first] = value.second;
-        for (unsigned int index = 0; index < value.second.size(); index++) {
-          mTargetValues[value.first][index] =
-              value.second[index].get<float>() +
-              (values2[value.first][index].get<float>() -
-               value.second[index].get<float>()) *
-                  factor;
-        }
-      }
-    }
-  }
+  //  if (synchronous) {
+  setInterpolatedValues(values1, values2, factor);
 }
 
-void PresetHandler::setInterpolatedPreset(int index1, int index2, double factor,
-                                          bool synchronous) {
+void PresetHandler::setInterpolatedPreset(int index1, int index2,
+                                          double factor) {
   auto presetNameIt1 = mPresetsMap.find(index1);
   auto presetNameIt2 = mPresetsMap.find(index2);
   if (presetNameIt1 != mPresetsMap.end() &&
       presetNameIt2 != mPresetsMap.end()) {
-    setInterpolatedPreset(presetNameIt1->second, presetNameIt2->second, factor,
-                          synchronous);
+    setInterpolatedPreset(presetNameIt1->second, presetNameIt2->second, factor);
   } else {
     std::cout << "Invalid indeces for preset interpolation: " << index1 << ","
               << index2 << std::endl;
@@ -332,16 +307,17 @@ std::string PresetHandler::recallPreset(int index) {
 
 void PresetHandler::recallPresetSynchronous(std::string name) {
   {
-    if (mMorphRemainingSteps.load() >= 0) {
-      mMorphRemainingSteps.store(1);
-      mTotalSteps.store(1);
+    if (mMorphRemainingSteps.load() > 0) {
+      mMorphRemainingSteps.store(0);
+      mTotalSteps.store(0);
     }
     std::lock_guard<std::mutex> lk(mTargetLock);
     mTargetValues = loadPresetValues(name);
   }
+  // FIXME recall bundles
   for (ParameterMeta *param : mParameters) {
     if (mTargetValues.find(param->getFullAddress()) != mTargetValues.end()) {
-      setParameterValues(param, mTargetValues[param->getFullAddress()]);
+      param->set(mTargetValues[param->getFullAddress()]);
     }
   }
   int index = -1;
@@ -726,179 +702,221 @@ void PresetHandler::storeCurrentPresetMap(std::string mapName,
   f.close();
 }
 
-void PresetHandler::setParameterValues(ParameterMeta *p,
-                                       std::vector<ParameterField> &values,
-                                       double factor) {
-  // We do a runtime check to determine the type of the parameter to determine
-  // how to draw it.
-  if (factor == 1.0f) {
-    p->set(values);
-  } else {
-    // TODO this is a fallback for now. What would be a good way of doing it?
-    if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) ==
-        0) {  // ParameterBool
-      ParameterBool *param = dynamic_cast<ParameterBool *>(p);
-      // No interpolation for parameter bool. Should we change exactly in the
-      // middle?
-      param->set(values[0].get<int32_t>());
-    } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) ==
-               0) {  // Parameter
-      Parameter *param = dynamic_cast<Parameter *>(p);
-      float paramValue = param->get();
-      float difference = values[0].get<float>() - paramValue;
-      // int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
-      difference = difference * factor;
-      if (difference != 0.0) {
-        float newVal = paramValue + difference;
-        param->set(newVal);
-      }
-    } else if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) ==
-               0) {  // ParameterInt
-      ParameterInt *param = dynamic_cast<ParameterInt *>(p);
-      //        int32_t paramValue = param->get();
-      //        double difference = values[0] - paramValue;
-      //        //int steps = handler->mMorphRemainingSteps.load(); // factor
-      //        = 1.0/steps if (factor > 0) {
-      //            difference = difference * factor;
-      //        }
-      //        if (difference != 0.0) {
-      //            int32_t newVal = std::round(paramValue + difference);
-      //            param->set(newVal);
-      //        }
-      // The interpolation above is broken, no easy way to fix for things as
-      // they are now...
-      param->set(values[0].get<int32_t>());
-    } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) ==
-               0) {  // Parameter pose
-      ParameterPose *param = dynamic_cast<ParameterPose *>(p);
-      if (values.size() == 7) {
-        Pose paramValue = param->get();
-        Pose difference;
-        // TODO better interpolation of quaternion
-        Vec3d differenceVec =
-            Vec3d(values[0].get<float>(), values[1].get<float>(),
-                  values[2].get<float>()) -
-            paramValue.vec();
-        Quatd differenceQuat =
-            Quatd(values[3].get<float>(), values[4].get<float>(),
-                  values[5].get<float>(), values[6].get<float>()) -
-            paramValue.quat();
-        // int steps = handler->mMorphRemainingSteps.load(); // factor
-        // = 1.0/steps
-        if (factor > 0) {
-          differenceVec = differenceVec * factor;
-          differenceQuat = differenceQuat * factor;
-        }
-        if (differenceVec != Vec4f() && differenceQuat != Quatd()) {
-          param->set(Pose(paramValue.vec() + differenceVec,
-                          paramValue.quat() + differenceQuat));
-        }
-      } else {
-        std::cout << "Unexpected number of values for "
-                  << param->getFullAddress() << std::endl;
-      }
-    } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) ==
-               0) {  // Parameter
-      ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
-      if (factor == 0) {
-        param->setCurrent(values[0].get<std::string>());
-      }
-    } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) ==
-               0) {  // Parameter
-      ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
-      if (factor == 0) {
-        param->set((uint16_t)values[0].get<int32_t>());
-      }
-    } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) ==
-               0) {  // Parameter
-      ParameterVec3 *param = dynamic_cast<ParameterVec3 *>(p);
-      if (values.size() == 3) {
-        Vec3f paramValue = param->get();
-        Vec3f difference = Vec3f((float *)values.data()) - paramValue;
-        // int steps = handler->mMorphRemainingSteps.load(); // factor
-        // = 1.0/steps
-        if (factor > 0) {
-          difference = difference * factor;
-        }
-        param->set(paramValue + difference);
-      } else {
-        std::cout << "Unexpected number of values for "
-                  << param->getFullAddress() << std::endl;
-      }
-    } else if (strcmp(typeid(*p).name(), typeid(ParameterVec4).name()) ==
-               0) {  // Parameter
-      ParameterVec4 *param = dynamic_cast<ParameterVec4 *>(p);
-      if (values.size() == 4) {
-        Vec4f paramValue = param->get();
-        Vec4f difference = Vec4f(values[0].get<float>(), values[1].get<float>(),
-                                 values[2].get<float>()) -
-                           paramValue;
-        // int steps = handler->mMorphRemainingSteps.load(); // factor
-        // = 1.0/steps
-        if (factor > 0) {
-          difference = difference * factor;
-        }
-        param->set(paramValue + difference);
-      } else {
-        std::cout << "Unexpected number of values for "
-                  << param->getFullAddress() << std::endl;
-      }
-    } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) ==
-               0) {  // Parameter
-      ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
-      if (factor == 0) {
-        param->set(values[0].get<int32_t>());
-      }
-    } else if (strcmp(typeid(*p).name(), typeid(ParameterColor).name()) ==
-               0) {  // Parameter
-      ParameterColor *param = dynamic_cast<ParameterColor *>(p);
-      if (values.size() == 4) {
-        Color paramValue = param->get();
-        Color difference =
-            Color(values[0].get<float>(), values[1].get<float>(),
-                  values[2].get<float>(), values[3].get<float>()) -
-            paramValue;
-        // int steps = handler->mMorphRemainingSteps.load(); // factor
-        // = 1.0/steps
-        if (factor > 0) {
-          difference = difference * factor;
-        }
-        param->set(paramValue + difference);
-      } else {
-        std::cout << "Unexpected number of values for "
-                  << param->getFullAddress() << std::endl;
-      }
-    } else {
-      std::cout << "Unsupported Parameter " << p->getFullAddress() << std::endl;
-    }
-  }
-}
-void PresetHandler::setParametersInBundle(ParameterBundle *bundle,
-                                          std::string bundlePrefix,
-                                          PresetHandler *handler,
+// void PresetHandler::setParameterValues(ParameterMeta *p,
+//                                       std::vector<ParameterField> &values) {
+//  if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) ==
+//      0) {  // ParameterBool
+//    ParameterBool *param = dynamic_cast<ParameterBool *>(p);
+//    // No interpolation for parameter bool. Should we change exactly in the
+//    // middle?
+//    param->set(values[0].get<int32_t>());
+//  } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) ==
+//             0) {  // Parameter
+//    Parameter *param = dynamic_cast<Parameter *>(p);
+//    float paramValue = param->get();
+//    float difference = values[0].get<float>() - paramValue;
+//    // int steps = handler->mMorphRemainingSteps.load(); // factor = 1.0/steps
+//    difference = difference * factor;
+//    if (difference != 0.0) {
+//      float newVal = paramValue + difference;
+//      param->set(newVal);
+//    }
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) ==
+//             0) {  // ParameterInt
+//    ParameterInt *param = dynamic_cast<ParameterInt *>(p);
+//    //        int32_t paramValue = param->get();
+//    //        double difference = values[0] - paramValue;
+//    //        //int steps = handler->mMorphRemainingSteps.load(); // factor
+//    //        = 1.0/steps if (factor > 0) {
+//    //            difference = difference * factor;
+//    //        }
+//    //        if (difference != 0.0) {
+//    //            int32_t newVal = std::round(paramValue + difference);
+//    //            param->set(newVal);
+//    //        }
+//    // The interpolation above is broken, no easy way to fix for things as
+//    // they are now...
+//    param->set(values[0].get<int32_t>());
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) ==
+//             0) {  // Parameter pose
+//    ParameterPose *param = dynamic_cast<ParameterPose *>(p);
+//    if (values.size() == 7) {
+//      Pose paramValue = param->get();
+//      Pose difference;
+//      // TODO better interpolation of quaternion
+//      Vec3d differenceVec =
+//          Vec3d(values[0].get<float>(), values[1].get<float>(),
+//                values[2].get<float>()) -
+//          paramValue.vec();
+//      Quatd differenceQuat =
+//          Quatd(values[3].get<float>(), values[4].get<float>(),
+//                values[5].get<float>(), values[6].get<float>()) -
+//          paramValue.quat();
+//      // int steps = handler->mMorphRemainingSteps.load(); // factor
+//      // = 1.0/steps
+//      if (factor > 0) {
+//        differenceVec = differenceVec * factor;
+//        differenceQuat = differenceQuat * factor;
+//      }
+//      if (differenceVec != Vec4f() && differenceQuat != Quatd()) {
+//        param->set(Pose(paramValue.vec() + differenceVec,
+//                        paramValue.quat() + differenceQuat));
+//      }
+//    } else {
+//      std::cout << "Unexpected number of values for " <<
+//      param->getFullAddress()
+//                << std::endl;
+//    }
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) ==
+//             0) {  // Parameter
+//    ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
+//    if (factor == 0) {
+//      param->setCurrent(values[0].get<std::string>());
+//    }
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) ==
+//             0) {  // Parameter
+//    ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
+//    if (factor == 0) {
+//      param->set((uint16_t)values[0].get<int32_t>());
+//    }
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) ==
+//             0) {  // Parameter
+//    ParameterVec3 *param = dynamic_cast<ParameterVec3 *>(p);
+//    if (values.size() == 3) {
+//      Vec3f paramValue = param->get();
+//      Vec3f difference = Vec3f((float *)values.data()) - paramValue;
+//      // int steps = handler->mMorphRemainingSteps.load(); // factor
+//      // = 1.0/steps
+//      if (factor > 0) {
+//        difference = difference * factor;
+//      }
+//      param->set(paramValue + difference);
+//    } else {
+//      std::cout << "Unexpected number of values for " <<
+//      param->getFullAddress()
+//                << std::endl;
+//    }
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterVec4).name()) ==
+//             0) {  // Parameter
+//    ParameterVec4 *param = dynamic_cast<ParameterVec4 *>(p);
+//    if (values.size() == 4) {
+//      Vec4f paramValue = param->get();
+//      Vec4f difference = Vec4f(values[0].get<float>(), values[1].get<float>(),
+//                               values[2].get<float>()) -
+//                         paramValue;
+//      // int steps = handler->mMorphRemainingSteps.load(); // factor
+//      // = 1.0/steps
+//      if (factor > 0) {
+//        difference = difference * factor;
+//      }
+//      param->set(paramValue + difference);
+//    } else {
+//      std::cout << "Unexpected number of values for " <<
+//      param->getFullAddress()
+//                << std::endl;
+//    }
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) ==
+//             0) {  // Parameter
+//    ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
+//    if (factor == 0) {
+//      param->set(values[0].get<int32_t>());
+//    }
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterColor).name()) ==
+//             0) {  // Parameter
+//    ParameterColor *param = dynamic_cast<ParameterColor *>(p);
+//    if (values.size() == 4) {
+//      Color paramValue = param->get();
+//      Color difference = Color(values[0].get<float>(), values[1].get<float>(),
+//                               values[2].get<float>(), values[3].get<float>())
+//                               -
+//                         paramValue;
+//      // int steps = handler->mMorphRemainingSteps.load(); // factor
+//      // = 1.0/steps
+//      if (factor > 0) {
+//        difference = difference * factor;
+//      }
+//      param->set(paramValue + difference);
+//    } else {
+//      std::cout << "Unexpected number of values for " <<
+//      param->getFullAddress()
+//                << std::endl;
+//    }
+//  } else {
+//    std::cout << "Unsupported Parameter " << p->getFullAddress() << std::endl;
+//  }
+//}
+
+void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
+                                          ParameterStates &endValues,
                                           double factor) {
-  for (ParameterMeta *p : bundle->parameters()) {
-    //                       std::cout << bundlePrefix + p->getFullAddress() <<
-    //                       std::endl;
-    if (handler->mTargetValues.find(bundlePrefix + p->getFullAddress()) !=
-        handler->mTargetValues.end()) {
-      handler->setParameterValues(
-          p, handler->mTargetValues[bundlePrefix + p->getFullAddress()],
-          factor);
-    } else {
-      if (handler->mVerbose) {
-        std::cout << "Parameter not found "
-                  << bundlePrefix + p->getFullAddress() << std::endl;
+  for (auto startValue : startValues) {
+    std::vector<ParameterField> interpValues;
+    for (auto endValue : endValues) {
+      if (startValue.first == endValue.first) {
+        assert(startValue.second.size() == endValue.second.size());
+        if (factor != 1.0) {
+          for (size_t i = 0; i < endValue.second.size(); i++) {
+            assert(startValue.second[i].type() == endValue.second[i].type());
+            if (startValue.second[i].type() == ParameterField::FLOAT) {
+              interpValues.push_back(ParameterField(
+                  startValue.second[i].get<float>() +
+                  (factor * (endValue.second[i].get<float>() -
+                             startValue.second[i].get<float>()))));
+            } else if (startValue.second[i].type() == ParameterField::INT32) {
+              float value =
+                  startValue.second[i].get<int32_t>() +
+                  (factor * (endValue.second[i].get<int32_t>() -
+                             (float)startValue.second[i].get<int32_t>()));
+              interpValues.push_back(ParameterField((int32_t)value));
+            } else if (startValue.second[i].type() == ParameterField::STRING) {
+              interpValues.push_back(endValue.second[i]);
+            }
+          }
+        } else {
+          interpValues = endValue.second;
+        }
+
+        // TODO interpolate bundles
+        for (auto *param : mParameters) {
+          if (param->getFullAddress() == startValue.first &&
+              interpValues.size() > 0) {
+            param->set(interpValues);
+            break;
+          }
+        }
+        continue;
       }
     }
   }
-  for (auto subBundle : bundle->bundles()) {
-    std::string subBundlePrefix =
-        bundlePrefix + "/" + subBundle.second->name() + "/" + subBundle.first;
-    handler->setParametersInBundle(subBundle.second, subBundlePrefix, handler,
-                                   factor);
-  }
 }
+
+// void PresetHandler::setParametersInBundle(ParameterBundle *bundle,
+//                                          std::string bundlePrefix,
+//                                          PresetHandler *handler,
+//                                          double factor) {
+//  for (ParameterMeta *p : bundle->parameters()) {
+//    //                       std::cout << bundlePrefix + p->getFullAddress()
+//    <<
+//    //                       std::endl;
+//    if (handler->mTargetValues.find(bundlePrefix + p->getFullAddress()) !=
+//        handler->mTargetValues.end()) {
+//      handler->setParameterValues(
+//          p, handler->mTargetValues[bundlePrefix + p->getFullAddress()],
+//          factor);
+//    } else {
+//      if (handler->mVerbose) {
+//        std::cout << "Parameter not found "
+//                  << bundlePrefix + p->getFullAddress() << std::endl;
+//      }
+//    }
+//  }
+//  for (auto subBundle : bundle->bundles()) {
+//    std::string subBundlePrefix =
+//        bundlePrefix + "/" + subBundle.second->name() + "/" + subBundle.first;
+//    handler->setParametersInBundle(subBundle.second, subBundlePrefix, handler,
+//                                   factor);
+//  }
+//}
 
 void PresetHandler::stepMorphing() {
   if (mMorphRemainingSteps.load() > 0) {
@@ -909,23 +927,16 @@ void PresetHandler::stepMorphing() {
 
     if (totalSteps > 0) {
       double factor = 1.0 - (remainingSteps / (double)totalSteps);
-      std::cout << factor << std::endl;
-      for (ParameterMeta *p : mParameters) {
-        if (mTargetValues.find(p->getFullAddress()) != mTargetValues.end()) {
-          setParameterValues(p, mTargetValues[p->getFullAddress()], factor);
-        } else {
-          if (mVerbose) {
-            std::cout << "Parameter not found " << p->getFullAddress()
-                      << std::endl;
-          }
-        }
-      }
+      //      std::cout << factor << std::endl;
+      setInterpolatedValues(mStartValues, mTargetValues, factor);
+
+      // FIXME implement bundle morphing
       for (auto bundleGroup : mBundles) {
         const std::string &bundleName = bundleGroup.first;
         for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
           std::string bundlePrefix = "/" + bundleName + "/" + std::to_string(i);
           ParameterBundle *bundle = bundleGroup.second[i];
-          setParametersInBundle(bundle, bundlePrefix, this, factor);
+          //          setParametersInBundle(bundle, bundlePrefix, this, factor);
         }
       }
     }
@@ -1084,59 +1095,59 @@ bool PresetHandler::savePresetValues(const ParameterStates &values,
   return ok;
 }
 
-std::vector<float> PresetHandler::getParameterValue(ParameterMeta *p) {
-  // We do a runtime check to determine the type of the parameter to determine
-  // how to draw it.
-  if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) ==
-      0) {  // ParameterBool
-    ParameterBool *param = dynamic_cast<ParameterBool *>(p);
-    return std::vector<float>{param->get()};
-  } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) ==
-             0) {  // Parameter
-    Parameter *param = dynamic_cast<Parameter *>(p);
-    return std::vector<float>{param->get()};
-  } else if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) ==
-             0) {  // ParameterInt
-    ParameterInt *param = dynamic_cast<ParameterInt *>(p);
-    return std::vector<float>{float(param->get())};
-  } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) ==
-             0) {  // Parameter pose
-    ParameterPose *param = dynamic_cast<ParameterPose *>(p);
-    Pose value = param->get();
-    return std::vector<float>{(float)value.pos()[0], (float)value.pos()[1],
-                              (float)value.pos()[2], (float)value.quat().w,
-                              (float)value.quat().x, (float)value.quat().y,
-                              (float)value.quat().z};
-  } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) ==
-             0) {  // Parameter menu
-    ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
-    // TODO we should store the original int value, but float will do for now
-    return std::vector<float>{(float)param->get()};
-  } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) ==
-             0) {  // Parameter choice
-    ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
-    // TODO we should store the original int value, but float will do for now
-    return std::vector<float>{(float)param->get()};
-  } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) ==
-             0) {  // Parameter vec3
-    ParameterVec3 *param = dynamic_cast<ParameterVec3 *>(p);
-    Vec3f value = param->get();
-    return std::vector<float>{value.x, value.y, value.z};
-  } else if (strcmp(typeid(*p).name(), typeid(ParameterVec4).name()) ==
-             0) {  // Parameter vec4
-    ParameterVec4 *param = dynamic_cast<ParameterVec4 *>(p);
-    Vec4f value = param->get();
-    return std::vector<float>{value.x, value.y, value.z, value.w};
-  } else if (strcmp(typeid(*p).name(), typeid(ParameterColor).name()) ==
-             0) {  // Parameter choice
-    ParameterColor *param = dynamic_cast<ParameterColor *>(p);
-    // TODO we should store the original int value, but float will do for now
-    return std::vector<float>{param->get().r, param->get().g, param->get().b,
-                              param->get().a};
-  } else {
-    // TODO this check should be performed on registration
-    std::cout << "Unsupported Parameter type for storage for "
-              << p->getFullAddress() << std::endl;
-  }
-  return std::vector<float>();
-}
+// std::vector<float> PresetHandler::getParameterValue(ParameterMeta *p) {
+//  // We do a runtime check to determine the type of the parameter to determine
+//  // how to draw it.
+//  if (strcmp(typeid(*p).name(), typeid(ParameterBool).name()) ==
+//      0) {  // ParameterBool
+//    ParameterBool *param = dynamic_cast<ParameterBool *>(p);
+//    return std::vector<float>{param->get()};
+//  } else if (strcmp(typeid(*p).name(), typeid(Parameter).name()) ==
+//             0) {  // Parameter
+//    Parameter *param = dynamic_cast<Parameter *>(p);
+//    return std::vector<float>{param->get()};
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) ==
+//             0) {  // ParameterInt
+//    ParameterInt *param = dynamic_cast<ParameterInt *>(p);
+//    return std::vector<float>{float(param->get())};
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterPose).name()) ==
+//             0) {  // Parameter pose
+//    ParameterPose *param = dynamic_cast<ParameterPose *>(p);
+//    Pose value = param->get();
+//    return std::vector<float>{(float)value.pos()[0], (float)value.pos()[1],
+//                              (float)value.pos()[2], (float)value.quat().w,
+//                              (float)value.quat().x, (float)value.quat().y,
+//                              (float)value.quat().z};
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) ==
+//             0) {  // Parameter menu
+//    ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
+//    // TODO we should store the original int value, but float will do for now
+//    return std::vector<float>{(float)param->get()};
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) ==
+//             0) {  // Parameter choice
+//    ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
+//    // TODO we should store the original int value, but float will do for now
+//    return std::vector<float>{(float)param->get()};
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) ==
+//             0) {  // Parameter vec3
+//    ParameterVec3 *param = dynamic_cast<ParameterVec3 *>(p);
+//    Vec3f value = param->get();
+//    return std::vector<float>{value.x, value.y, value.z};
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterVec4).name()) ==
+//             0) {  // Parameter vec4
+//    ParameterVec4 *param = dynamic_cast<ParameterVec4 *>(p);
+//    Vec4f value = param->get();
+//    return std::vector<float>{value.x, value.y, value.z, value.w};
+//  } else if (strcmp(typeid(*p).name(), typeid(ParameterColor).name()) ==
+//             0) {  // Parameter choice
+//    ParameterColor *param = dynamic_cast<ParameterColor *>(p);
+//    // TODO we should store the original int value, but float will do for now
+//    return std::vector<float>{param->get().r, param->get().g, param->get().b,
+//                              param->get().a};
+//  } else {
+//    // TODO this check should be performed on registration
+//    std::cout << "Unsupported Parameter type for storage for "
+//              << p->getFullAddress() << std::endl;
+//  }
+//  return std::vector<float>();
+//}

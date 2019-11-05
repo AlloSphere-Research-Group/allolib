@@ -148,7 +148,6 @@ class ParameterField {
 
   template <typename type>
   type get() {
-    //        assert(mType == STRING);
     return *static_cast<type *>(mData);
   }
 
@@ -669,7 +668,9 @@ class Parameter : public ParameterWrapper<float> {
   }
 
   virtual void set(std::vector<ParameterField> &fields) override {
+    assert(fields.size() == 1);
     if (fields.size() == 1) {
+      assert(fields[0].type() == ParameterField::FLOAT);
       set(fields[0].get<float>());
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()

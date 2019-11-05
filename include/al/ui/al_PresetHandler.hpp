@@ -159,19 +159,19 @@ class PresetHandler {
    * A factor of 0 uses preset 1 and a factor of 1 uses preset 2. Values
    * in between result in linear interpolation of the values.
    */
-  void setInterpolatedPreset(int index1, int index2, double factor,
-                             bool synchronous = true);
+  void setInterpolatedPreset(int index1, int index2, double factor);
 
   void setInterpolatedPreset(std::string presetName1, std::string presetName2,
-                             double factor, bool synchronous = true);
+                             double factor);
 
+  //  static void setParameterValues(ParameterMeta *param,
+  //                                 std::vector<ParameterField> &values);
   /**
-   * @brief Interpolate between current values and new values according to
+   * @brief Interpolate between start and end values according to
    * factor
    */
-  static void setParameterValues(ParameterMeta *param,
-                                 std::vector<ParameterField> &values,
-                                 double factor = 1.0);
+  void setInterpolatedValues(ParameterStates &startValues,
+                             ParameterStates &endValues, double factor = 1.0);
 
   std::map<int, std::string> availablePresets();
   std::string getPresetName(int index);
@@ -326,9 +326,10 @@ class PresetHandler {
                         bool overwrite = true);
 
  private:
-  std::vector<float> getParameterValue(ParameterMeta *p);
-  void setParametersInBundle(ParameterBundle *bundle, std::string bundlePrefix,
-                             PresetHandler *handler, double factor = 1.0);
+  //  std::vector<float> getParameterValue(ParameterMeta *p);
+  //  void setParametersInBundle(ParameterBundle *bundle, std::string
+  //  bundlePrefix,
+  //                             PresetHandler *handler, double factor = 1.0);
   static void morphingFunction(PresetHandler *handler);
 
   ParameterStates getBundleStates(ParameterBundle *bundle, std::string id);
@@ -353,6 +354,7 @@ class PresetHandler {
 
   std::mutex mTargetLock;
   ParameterStates mTargetValues;
+  ParameterStates mStartValues;
 
   TimeMasterMode mTimeMasterMode{TimeMasterMode::TIME_MASTER_CPU};
 
