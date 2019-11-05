@@ -903,7 +903,7 @@ void PresetHandler::setParametersInBundle(ParameterBundle *bundle,
 void PresetHandler::stepMorphing() {
   if (mMorphRemainingSteps.load() > 0) {
     // TODO Think carefully about possible race conditions here:
-    std::atomic_fetch_sub(&(mMorphRemainingSteps), 1);
+    std::atomic_fetch_sub(&(mMorphRemainingSteps), (uint64_t)1);
     auto remainingSteps = mMorphRemainingSteps.load();
     auto totalSteps = mTotalSteps.load();
 
