@@ -46,6 +46,7 @@
 */
 
 #include <stdio.h>
+
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -348,7 +349,7 @@ class Window {
 
   /// This will make the window go fullscreen without borders and,
   /// if posssible, without changing the display resolution.
-  void fullScreen(bool on);
+  void fullScreen(bool on, int monitorIndex = 0);
   void fullScreenToggle();  ///< Toggle fullscreen
   void hide();              ///< Hide window (if showing)
   void iconify();           ///< Iconify window
@@ -434,7 +435,7 @@ class Window {
   void implSetCursor();
   void implSetCursorHide();
   void implSetDimensions();
-  void implSetFullScreen();
+  void implSetFullScreen(int monitorIndex = 0);
   void implSetTitle();
   void implSetVSync();
   void implHide();
@@ -484,11 +485,8 @@ class Window {
 #undef CALL
 
  public:
-  [[deprecated]] Window& add(WindowEventHandler* v) {
-    return append(*v);
-  }[[deprecated]] Window& prepend(WindowEventHandler* v) {
-    return prepend(*v);
-  }
+  [[deprecated]] Window& add(WindowEventHandler* v) { return append(*v); }
+  [[deprecated]] Window& prepend(WindowEventHandler* v) { return prepend(*v); }
   [[deprecated]] Window& remove(WindowEventHandler* v) { return remove(*v); }
 };
 

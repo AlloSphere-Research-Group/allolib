@@ -1,4 +1,5 @@
 #include "al/io/al_Window.hpp"
+
 #include <stdio.h>
 
 namespace al {
@@ -181,10 +182,10 @@ void Window::displayMode(DisplayMode v) {
   }
 }
 
-void Window::fullScreen(bool v) {
+void Window::fullScreen(bool v, int monitorIndex) {
   if (v != mFullScreen) {
     mFullScreen = v;
-    if (created()) implSetFullScreen();
+    if (created()) implSetFullScreen(monitorIndex);
   }
 }
 

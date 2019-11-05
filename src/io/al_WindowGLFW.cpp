@@ -1,8 +1,5 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include "al/graphics/al_OpenGL.hpp"
-
-#include "al/io/al_Window.hpp"
 
 #include <cmath>
 #include <cstdlib>  // exit, EXIT_FAILURE
@@ -10,6 +7,9 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+
+#include "al/graphics/al_OpenGL.hpp"
+#include "al/io/al_Window.hpp"
 
 using namespace std;
 
@@ -402,13 +402,19 @@ void Window::implSetDimensions() {
   }
 }
 
-void Window::implSetFullScreen() {
+void Window::implSetFullScreen(int monitorIndex) {
   if (mFullScreen) {
     // TODO: selection for multi-monitor
-
-    GLFWmonitor* primary = glfwGetPrimaryMonitor();
-    const GLFWvidmode* mode = glfwGetVideoMode(primary);
-    glfwSetWindowMonitor(mImpl->mGLFWwindow, primary, 0, 0, mode->width,
+    int monitorCount;
+    GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
+    GLFWmonitor* monitor;
+    if (monitorCount > monitorIndex && monitorIndex >= 0) {
+      monitor = monitors[monitorIndex];
+    } else {
+      monitor = glfwGetPrimaryMonitor();
+    }
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    glfwSetWindowMonitor(mImpl->mGLFWwindow, monitor, 0, 0, mode->width,
                          mode->height, mode->refreshRate);
     vsync(mVSync);
   } else {
