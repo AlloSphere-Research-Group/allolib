@@ -351,7 +351,7 @@ class Window {
 
   /// This will make the window go fullscreen without borders and,
   /// if posssible, without changing the display resolution.
-  void fullScreen(bool on);
+  void fullScreen(bool on, int monitorIndex = 0);
   void fullScreenToggle();  ///< Toggle fullscreen
   void hide();              ///< Hide window (if showing)
   void iconify();           ///< Iconify window
@@ -438,7 +438,7 @@ class Window {
   void implSetCursor();
   void implSetCursorHide();
   void implSetDimensions();
-  void implSetFullScreen();
+  void implSetFullScreen(int monitorIndex = 0);
   void implSetTitle();
   void implSetVSync();
   void implHide();

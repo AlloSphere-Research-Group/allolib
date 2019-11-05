@@ -403,13 +403,19 @@ void Window::implSetDimensions() {
   }
 }
 
-void Window::implSetFullScreen() {
+void Window::implSetFullScreen(int monitorIndex) {
   if (mFullScreen) {
     // TODO: selection for multi-monitor
-
-    GLFWmonitor* primary = glfwGetPrimaryMonitor();
-    const GLFWvidmode* mode = glfwGetVideoMode(primary);
-    glfwSetWindowMonitor(mImpl->mGLFWwindow, primary, 0, 0, mode->width,
+    int monitorCount;
+    GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
+    GLFWmonitor* monitor;
+    if (monitorCount > monitorIndex && monitorIndex >= 0) {
+      monitor = monitors[monitorIndex];
+    } else {
+      monitor = glfwGetPrimaryMonitor();
+    }
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    glfwSetWindowMonitor(mImpl->mGLFWwindow, monitor, 0, 0, mode->width,
                          mode->height, mode->refreshRate);
     vsync(mVSync);
   } else {
