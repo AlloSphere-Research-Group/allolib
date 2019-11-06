@@ -100,7 +100,8 @@ class PresetSequencer : public osc::MessageConsumer {
   friend class Composition;
 
  public:
-  PresetSequencer();
+  PresetSequencer(
+      TimeMasterMode timeMasterMode = TimeMasterMode::TIME_MASTER_CPU);
   ~PresetSequencer() override;
 
   typedef enum { PRESET, EVENT, PARAMETER } StepType;
@@ -201,6 +202,8 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   PresetSequencer &registerPresetHandler(PresetHandler &presetHandler) {
     mPresetHandler = &presetHandler;
+    // We need to take over the preset handler timing.
+    mPresetHandler->setTimeMaster(TimeMasterMode::TIME_MASTER_CPU);
     mDirectory = mPresetHandler->getCurrentPath();
     //		std::cout << "Path set to:" << mDirectory << std::endl;
     return *this;
@@ -303,6 +306,10 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   void appendStep(Step &newStep);
 
+  void setTimeMaster(TimeMasterMode masterMode);
+
+  void stepSequencer();
+
  protected:
   virtual bool consumeMessage(osc::Message &m,
                               std::string rootOSCPath) override;
@@ -311,6 +318,9 @@ class PresetSequencer : public osc::MessageConsumer {
   static void sequencerFunction(PresetSequencer *sequencer);
 
   std::string buildFullPath(std::string sequenceName);
+
+  void startCpuThread();
+  void stopCpuThread();
 
   std::queue<Step> mSteps;
   std::queue<Step>
@@ -327,6 +337,8 @@ class PresetSequencer : public osc::MessageConsumer {
 
   std::atomic<float> mTimeRequest{-1.0f};  // Request setting the current time.
                                            // Passes info to playback thread
+
+  TimeMasterMode mTimeMasterMode;
 
   bool mSequencerActive;
   bool mRunning;
