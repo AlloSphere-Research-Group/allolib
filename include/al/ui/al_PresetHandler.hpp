@@ -325,6 +325,8 @@ class PresetHandler {
   bool savePresetValues(const ParameterStates &values, std::string presetName,
                         bool overwrite = true);
 
+  void setTimeMaster(TimeMasterMode masterMode);
+
  private:
   //  std::vector<float> getParameterValue(ParameterMeta *p);
   //  void setParametersInBundle(ParameterBundle *bundle, std::string

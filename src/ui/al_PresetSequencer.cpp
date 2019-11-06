@@ -1,4 +1,6 @@
 
+#include "al/ui/al_PresetSequencer.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -6,35 +8,23 @@
 
 #include "al/io/al_File.hpp"
 #include "al/ui/al_Composition.hpp"
-#include "al/ui/al_PresetSequencer.hpp"
 #include "al/ui/al_SequenceRecorder.hpp"
 
 using namespace al;
 
-PresetSequencer::PresetSequencer()
-    : mSequencerActive(true),
-      mRunning(false),
+PresetSequencer::PresetSequencer(TimeMasterMode timeMasterMode)
+    : mRunning(false),
       mStartingRun(false),
       mSequencerThread(nullptr),
       mBeginCallbackEnabled(false),
       mEndCallbackEnabled(false) {
-  mSequencerThread =
-      std::make_unique<std::thread>(PresetSequencer::sequencerFunction, this);
+  mTimeMasterMode = timeMasterMode;
+  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
+    startCpuThread();
+  }
 }
 
-PresetSequencer::~PresetSequencer() {
-  mSequencerActive = false;
-  stopSequence(false);
-  if (mPresetHandler) {
-    mPresetHandler->stopMorph();
-  }
-  this->enableBeginCallback(
-      false);  // To vaoid triggering callback on thread wake up
-  mStartingRun =
-      true;  // The conditional variable will only stop waiting if this is true
-  this->mPlayWaitVariable.notify_all();
-  mSequencerThread->join();
-}
+PresetSequencer::~PresetSequencer() { stopCpuThread(); }
 
 void PresetSequencer::playSequence(std::string sequenceName, double timeScale) {
   stopSequence();
@@ -330,7 +320,7 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer) {
         // std::cout <<
         // std::chrono::high_resolution_clock::to_time_t(targetTime)
         //	    << "---" <<
-        //std::chrono::high_resolution_clock::to_time_t(std::chrono::high_resolution_clock::now())
+        // std::chrono::high_resolution_clock::to_time_t(std::chrono::high_resolution_clock::now())
         //<< std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(granularity));
         timeAccumulator += granularity;
@@ -505,7 +495,7 @@ std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(
       step.params.push_back(std::stof(next));
       steps.push(step);
       //			 std::cout << name  << ":" << delta << ":" <<
-      //duration << std::endl;
+      // duration << std::endl;
     } else if (name.size() > 0 && name[0] == '+') {
       Step step;
       step.type = PARAMETER;
@@ -607,6 +597,12 @@ void PresetSequencer::appendStep(PresetSequencer::Step &newStep) {
   mSequenceLock.unlock();
 }
 
+void PresetSequencer::setTimeMaster(TimeMasterMode masterMode) {
+  mTimeMasterMode = masterMode;
+}
+
+void PresetSequencer::stepSequencer() {}
+
 bool PresetSequencer::consumeMessage(osc::Message &m, std::string rootOSCPath) {
   std::string basePath = rootOSCPath;
   if (mOSCsubPath.size() > 0) {
@@ -637,6 +633,29 @@ std::string PresetSequencer::buildFullPath(std::string sequenceName) {
   }
   fullName += sequenceName;
   return fullName;
+}
+
+void PresetSequencer::startCpuThread() {
+  stopCpuThread();
+  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
+    mSequencerActive = true;
+    mSequencerThread =
+        std::make_unique<std::thread>(PresetSequencer::sequencerFunction, this);
+  }
+}
+
+void PresetSequencer::stopCpuThread() {
+  mSequencerActive = false;
+  stopSequence(false);
+  if (mPresetHandler) {
+    mPresetHandler->stopMorph();
+  }
+  this->enableBeginCallback(
+      false);  // To vaoid triggering callback on thread wake up
+  mStartingRun =
+      true;  // The conditional variable will only stop waiting if this is true
+  this->mPlayWaitVariable.notify_all();
+  mSequencerThread->join();
 }
 
 // SequenceServer

@@ -1095,6 +1095,19 @@ bool PresetHandler::savePresetValues(const ParameterStates &values,
   return ok;
 }
 
+void PresetHandler::setTimeMaster(TimeMasterMode masterMode) {
+  mTimeMasterMode = masterMode;
+  mRunning = false;
+  if (mMorphingThread) {
+    mMorphingThread->join();
+  }
+  if (masterMode == TimeMasterMode::TIME_MASTER_CPU) {
+    mRunning = true;
+    mMorphingThread =
+        std::make_unique<std::thread>(PresetHandler::morphingFunction, this);
+  }
+}
+
 // std::vector<float> PresetHandler::getParameterValue(ParameterMeta *p) {
 //  // We do a runtime check to determine the type of the parameter to determine
 //  // how to draw it.

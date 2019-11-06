@@ -10,7 +10,7 @@ using namespace al;
 
 struct MyApp : public App {
   Parameter Size{"Size", "", 0.3, "", 0.1, 2.0};
-  ParameterBool RunMorph{"Run morph", "", 1.0};
+  ParameterBool RunPresets{"Run Presets", "", 1.0};
 
   // Set time master mode to Async
   PresetHandler presets{TimeMasterMode::TIME_MASTER_ASYNC, "presetsGUI"};
@@ -23,7 +23,7 @@ struct MyApp : public App {
     presets << Size;
 
     // Add to GUI
-    gui << Size << RunMorph;
+    gui << Size << RunPresets;
 
     // Adding a PresetHandler to a ControlGUI creates a multi-button interface
     // to control the presets.
@@ -44,8 +44,11 @@ struct MyApp : public App {
   }
 
   virtual void onAnimate(double dt) {
-    // Set parameter values to next step in morph (if morphing)
-    presets.stepMorphing();
+    // If you uncheck Run Presets, selecting presets will have no effect
+    if (RunPresets.get() == 1.0) {
+      // Set parameter values to next step in morph (if morphing)
+      presets.stepMorphing();
+    }
   }
 
   virtual void onDraw(Graphics &g) override {
