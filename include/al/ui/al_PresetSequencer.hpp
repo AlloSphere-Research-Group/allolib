@@ -200,14 +200,7 @@ class PresetSequencer : public osc::MessageConsumer {
    * preset handler. The sequencer's directory is set to
    * the preset handler's directory
    */
-  PresetSequencer &registerPresetHandler(PresetHandler &presetHandler) {
-    mPresetHandler = &presetHandler;
-    // We need to take over the preset handler timing.
-    mPresetHandler->setTimeMaster(TimeMasterMode::TIME_MASTER_CPU);
-    mDirectory = mPresetHandler->getCurrentPath();
-    //		std::cout << "Path set to:" << mDirectory << std::endl;
-    return *this;
-  }
+  PresetSequencer &registerPresetHandler(PresetHandler &presetHandler);
 
   /**
    * @brief Register PresetHandler through the << operator
@@ -319,6 +312,8 @@ class PresetSequencer : public osc::MessageConsumer {
 
   std::string buildFullPath(std::string sequenceName);
 
+  void prepareNextStep();
+
   void startCpuThread();
   void stopCpuThread();
 
@@ -331,10 +326,6 @@ class PresetSequencer : public osc::MessageConsumer {
   std::string mOSCsubPath;
   std::string mCurrentSequence;
 
-  std::mutex mSequenceLock;
-  std::mutex mPlayWaitLock;
-  std::condition_variable mPlayWaitVariable;
-
   std::atomic<float> mTimeRequest{-1.0f};  // Request setting the current time.
                                            // Passes info to playback thread
 
@@ -343,7 +334,14 @@ class PresetSequencer : public osc::MessageConsumer {
   bool mSequencerActive;
   bool mRunning;
   bool mStartingRun;
-  std::unique_ptr<std::thread> mSequencerThread;
+
+  std::chrono::high_resolution_clock::time_point mSequenceStart =
+      std::chrono::high_resolution_clock::now();
+  std::chrono::high_resolution_clock::time_point mParamTargetTime;
+  std::chrono::high_resolution_clock::time_point mTargetTime;
+  std::queue<Step> mParameterList;
+  float mTimeAccumulator = 0.0f;
+
   const int mGranularity = 10;  // milliseconds
   bool mBeginCallbackEnabled;
   std::function<void(PresetSequencer *, void *userData)> mBeginCallback;
@@ -351,10 +349,15 @@ class PresetSequencer : public osc::MessageConsumer {
   bool mEndCallbackEnabled;
   std::function<void(bool, PresetSequencer *, void *userData)> mEndCallback;
   void *mEndCallbackData;
-
   std::vector<EventCallback> mEventCallbacks;
   std::function<void(float)> mTimeChangeCallback;
   float mTimeChangeMinTimeDelta = 0;
+
+  // CPU thread
+  std::unique_ptr<std::thread> mSequencerThread;
+  std::mutex mSequenceLock;
+  std::mutex mPlayWaitLock;
+  std::condition_variable mPlayWaitVariable;
 };
 
 /// SequenceServer
