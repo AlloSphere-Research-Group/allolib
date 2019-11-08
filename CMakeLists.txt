@@ -253,6 +253,7 @@ set_target_properties(al PROPERTIES
 
 if (AL_WINDOWS)
   target_compile_options(al PRIVATE "")
+  target_compile_definitions(al PUBLIC NOMINMAX UNICODE STRICT)
 else ()
   target_compile_options(al PRIVATE "-Wall")
 endif (AL_WINDOWS)
