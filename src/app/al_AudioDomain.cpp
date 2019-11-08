@@ -2,9 +2,16 @@
 
 using namespace al;
 
-bool AudioDomain::initialize(ComputationDomain *parent) {
-  bool ret = true;
+AudioDomain::AudioDomain() {
+  mParameters = {&mGainParameter};
 
+  mGainParameter.registerChangeCallback(
+      [&](float value) { mAudioIO.gain(value); });
+}
+
+bool AudioDomain::initialize(ComputationDomain *parent) {
+  (void)parent;
+  bool ret = true;
   callInitializeCallbacks();
   return ret;
 }
