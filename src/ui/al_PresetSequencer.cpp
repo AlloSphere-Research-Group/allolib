@@ -26,25 +26,88 @@ PresetSequencer::PresetSequencer(TimeMasterMode timeMasterMode)
 
 PresetSequencer::~PresetSequencer() { stopCpuThread(); }
 
+void PresetSequencer::prepareNextStep() {
+  float playStandaloneTime = 0.0f;
+  bool playStandaloneParameters = false;
+  // Read parameter changes prior to first preset change
+  while (mSteps.size() > 0 && mSteps.front().type == PARAMETER) {
+    mParameterList.push(mSteps.front());
+    //        std::cout << "queued " << step.presetName << ":" <<
+    //        step.params[0] <<std::endl;
+    playStandaloneTime += mSteps.front().waitTime;
+    mSteps.pop();
+    playStandaloneParameters = true;
+  }
+
+  Step step = mSteps.front();
+  if (step.type == PRESET && !playStandaloneParameters) {
+    if (mPresetHandler) {
+      mPresetHandler->setMorphTime(step.morphTime);
+      mPresetHandler->recallPreset(step.presetName);
+      //                std::cout << "recalling " << step.presetName <<
+      //                std::endl;
+    } else {
+      std::cerr << "No preset handler registered with PresetSequencer. "
+                   "Ignoring preset change."
+                << std::endl;
+    }
+    mSteps.pop();
+    // Read parameter changes between this and the next preset change.
+    while (!mParameterList.empty()) {
+      mParameterList.pop();
+    }
+    while (mSteps.size() > 0 && mSteps.front().type == PARAMETER) {
+      mParameterList.push(mSteps.front());
+      mSteps.pop();
+    }
+    float totalWaitTime = step.morphTime + step.waitTime;
+    mTargetTime += std::chrono::microseconds(
+        (int)(totalWaitTime * 1.0e6 - (mGranularity * 1.5 * 1.0e3)));
+  }
+  if (mParameterList.size() > 0) {
+    mParamTargetTime =
+        mSequenceStart + std::chrono::microseconds(
+                             (int)(mParameterList.front().waitTime * 1.0e6));
+    //            std::cout << "setting param wait " <<
+    //            mParameterList.front().waitTime << std::endl;
+  }
+  if (playStandaloneParameters) {
+    mTargetTime = mSequenceStart +
+                  std::chrono::microseconds((int)(playStandaloneTime * 1e06));
+  }
+}
+
 void PresetSequencer::playSequence(std::string sequenceName, double timeScale) {
   stopSequence();
   mSequenceLock.lock();
-  //		while (!mSteps.empty()) {
-  //			mSteps.pop();
-  //		}
+
   if (sequenceName.size() > 0) {
     std::queue<Step> steps = loadSequence(sequenceName, timeScale);
     mSteps = steps;
   }
-  {
-    std::unique_lock<std::mutex> lk(mPlayWaitLock);
-    mStartingRun = true;
-    mPlayWaitVariable.notify_one();
-  }
-  mSequenceLock.unlock();
-  {
-    std::unique_lock<std::mutex> lk(mPlayWaitLock);
-    mPlayWaitVariable.wait(lk, [&] { return mRunning; });
+
+  // Initialize counters
+  mSequenceStart = std::chrono::high_resolution_clock::now();
+  mTargetTime = mSequenceStart;
+  mParamTargetTime = mSequenceStart;
+  mTimeAccumulator = 0.0f;
+
+  prepareNextStep();
+
+  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
+    {
+      std::unique_lock<std::mutex> lk(mPlayWaitLock);
+      mStartingRun = true;
+      mPlayWaitVariable.notify_one();
+    }
+    mSequenceLock.unlock();
+    {
+      std::unique_lock<std::mutex> lk(mPlayWaitLock);
+      mPlayWaitVariable.wait(lk, [&] { return mRunning; });
+    }
+
+  } else {
+    mSequenceLock.unlock();
   }
 
   //	std::thread::id seq_thread_id = mSequencerThread->get_id();
@@ -254,187 +317,8 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer) {
                         // and callbacks have been called.
     sequencer->mSequenceLock.lock();
 
-    int granularity = sequencer->mGranularity;
-    auto sequenceStart = std::chrono::high_resolution_clock::now();
-    auto targetTime = sequenceStart;
-    auto paramTargetTime = sequenceStart;
-    float timeAccumulator = 0.0f;
-    std::queue<Step> parameterList;
-    bool playStandaloneParameters = false;
-    float playStandaloneTime = 0.0f;
-    while (sequencer->mSteps.size() > 0 &&
-           sequencer->mSteps.front().type == PARAMETER) {
-      parameterList.push(sequencer->mSteps.front());
-      //        std::cout << "queued " << step.presetName << ":" <<
-      //        step.params[0] <<std::endl;
-      playStandaloneTime += sequencer->mSteps.front().waitTime;
-      sequencer->mSteps.pop();
-      playStandaloneParameters = true;
-    }
     while (sequencer->running() && sequencer->mSteps.size() > 0) {
-      Step step = sequencer->mSteps.front();
-      auto now = std::chrono::high_resolution_clock::now();
-      if (step.type == PRESET && !playStandaloneParameters) {
-        if (sequencer->mPresetHandler) {
-          sequencer->mPresetHandler->setMorphTime(step.morphTime);
-          sequencer->mPresetHandler->recallPreset(step.presetName);
-          //                std::cout << "recalling " << step.presetName <<
-          //                std::endl;
-        } else {
-          std::cerr << "No preset handler registered with PresetSequencer. "
-                       "Ignoring preset change."
-                    << std::endl;
-        }
-        sequencer->mSteps.pop();
-        while (!parameterList.empty()) {
-          parameterList.pop();
-        }
-        while (sequencer->mSteps.size() > 0 &&
-               sequencer->mSteps.front().type == PARAMETER) {
-          parameterList.push(sequencer->mSteps.front());
-          //                std::cout << "queued " <<
-          //                sequencer->mSteps.front().presetName << ":" <<
-          //                sequencer->mSteps.front().params[0] <<std::endl;
-          sequencer->mSteps.pop();
-        }
-        float totalWaitTime = step.morphTime + step.waitTime;
-        targetTime += std::chrono::microseconds(
-            (int)(totalWaitTime * 1.0e6 - (granularity * 1.5 * 1.0e3)));
-      }
-      if (parameterList.size() > 0) {
-        paramTargetTime =
-            now + std::chrono::microseconds(
-                      (int)(parameterList.front().waitTime * 1.0e6));
-        //            std::cout << "setting param wait " <<
-        //            parameterList.front().waitTime << std::endl;
-      }
-      if (playStandaloneParameters) {
-        targetTime =
-            now + std::chrono::microseconds((int)(playStandaloneTime * 1e06));
-      }
-
-      while (now < targetTime ||
-             parameterList.size() >
-                 0) {  // Granularity to allow more responsive stopping of
-                       // composition playback
-        // std::cout <<
-        // std::chrono::high_resolution_clock::to_time_t(targetTime)
-        //	    << "---" <<
-        // std::chrono::high_resolution_clock::to_time_t(std::chrono::high_resolution_clock::now())
-        //<< std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(granularity));
-        timeAccumulator += granularity;
-        if (now > paramTargetTime && parameterList.size() > 0) {
-          if (sequencer->mRunning) {
-            std::string name = parameterList.front().presetName;
-            for (auto *param : sequencer->mParameters) {
-              if (param->getFullAddress() == name) {
-                param->fromFloat(parameterList.front().params[0]);
-              }
-            }
-          }
-          parameterList.pop();
-          if (parameterList.size() > 0) {
-            paramTargetTime += std::chrono::microseconds(
-                (int)(parameterList.front().waitTime * 1.0e6));
-          }
-        }
-        if (timeAccumulator >= sequencer->mTimeChangeMinTimeDelta * 1000) {
-          timeAccumulator -= sequencer->mTimeChangeMinTimeDelta * 1000;
-          if (sequencer->mTimeChangeCallback) {
-            //                    std::cout <<  1.0e-9 *
-            //                    std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now()
-            //                    - sequenceStart).count() <<std::endl;
-            sequencer->mTimeChangeCallback(
-                1.0e-9 *
-                std::chrono::duration_cast<std::chrono::nanoseconds>(
-                    std::chrono::high_resolution_clock::now() - sequenceStart)
-                    .count());
-          }
-        }
-        double timeRequest = sequencer->mTimeRequest.exchange(-1.0f);
-        if (timeRequest > 0.0) {
-          double currentTime =
-              1.0e-9 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-                           now - sequenceStart)
-                           .count();
-          // Bring back previous steps
-          sequencer->mSteps = sequencer->mMostRecentSequence;
-          currentTime = 0;
-          sequenceStart = now;
-          //                paramTargetTime = now;
-          targetTime = now;
-          if (currentTime < timeRequest) {
-            std::string previousPreset = sequencer->mSteps.front().presetName;
-            while (currentTime < timeRequest && sequencer->mSteps.size() > 0) {
-              step = sequencer->mSteps.front();
-              if (step.type == PRESET) {
-                currentTime += step.morphTime + step.waitTime;
-                std::cout << "Skipping: " << step.presetName << " "
-                          << step.morphTime << ":" << step.waitTime
-                          << std::endl;
-                if (currentTime < timeRequest) {
-                  previousPreset = sequencer->mSteps.front().presetName;
-                }
-              }
-              sequencer->mSteps.pop();
-            }
-            if (timeRequest >
-                (currentTime -
-                 step.waitTime)) {  // We only need to wait, morphing is done
-              //                        sequencer->mPresetHandler->setMorphTime(0);
-              sequencer->mPresetHandler->recallPresetSynchronous(
-                  step.presetName);
-              sequencer->mPresetHandler->setMorphTime(
-                  step.morphTime);  // Just set it so it has the expected last
-                                    // value
-              targetTime = now + std::chrono::microseconds(
-                                     int(1.0e6 * (currentTime - timeRequest)));
-              sequenceStart =
-                  now - std::chrono::microseconds(int(1.0e6 * (timeRequest)));
-            } else {  // We need to finish the morphing
-              float remainingMorphTime =
-                  currentTime - timeRequest - step.waitTime;
-              if (previousPreset.size() > 0) {
-                //                            sequencer->mPresetHandler->recallPresetSynchronous(previousPreset);
-
-                sequencer->mPresetHandler->setInterpolatedPreset(
-                    previousPreset, step.presetName,
-                    1.0 - (remainingMorphTime / step.morphTime));
-                std::cout << "Interpolating: " << previousPreset << " "
-                          << step.presetName << " "
-                          << 1.0 - (remainingMorphTime / step.morphTime)
-                          << std::endl;
-              }
-              sequencer->mPresetHandler->setMorphTime(remainingMorphTime);
-              sequencer->mPresetHandler->recallPreset(step.presetName);
-              targetTime = now + std::chrono::microseconds(
-                                     int(1.0e6 * (currentTime - timeRequest)));
-              sequenceStart =
-                  now - std::chrono::microseconds(int(1.0e6 * (timeRequest)));
-            }
-          }
-        }
-        if (sequencer->mRunning == false) {
-          targetTime = now;
-          break;
-        }
-        now = std::chrono::high_resolution_clock::now();
-      }
-      playStandaloneParameters = false;
-      if (step.type == EVENT) {  // After event is triggered, call callback
-        if (sequencer->mRunning) {
-          for (auto eventCallback : sequencer->mEventCallbacks) {
-            if (eventCallback.eventName == step.presetName) {
-              eventCallback.callback(eventCallback.callbackData, step.params);
-              break;
-            }
-          }
-        }
-      }
-
-      //		std::this_thread::sleep_until(targetTime);
-      // std::this_thread::sleep_for(std::chrono::duration<float>(totalWaitTime));
+      sequencer->stepSequencer();
     }
     if (sequencer->mPresetHandler) {
       std::this_thread::sleep_for(std::chrono::milliseconds(
@@ -459,6 +343,16 @@ void PresetSequencer::setHandlerSubDirectory(std::string subDir) {
                  "PresetHandler not registered."
               << std::endl;
   }
+}
+
+PresetSequencer &PresetSequencer::registerPresetHandler(
+    PresetHandler &presetHandler) {
+  mPresetHandler = &presetHandler;
+  // We need to take over the preset handler timing.
+  mPresetHandler->setTimeMaster(TimeMasterMode::TIME_MASTER_CPU);
+  mDirectory = mPresetHandler->getCurrentPath();
+  //		std::cout << "Path set to:" << mDirectory << std::endl;
+  return *this;
 }
 
 std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(
@@ -601,7 +495,132 @@ void PresetSequencer::setTimeMaster(TimeMasterMode masterMode) {
   mTimeMasterMode = masterMode;
 }
 
-void PresetSequencer::stepSequencer() {}
+void PresetSequencer::stepSequencer() {
+  auto now = std::chrono::high_resolution_clock::now();
+  int granularity = mGranularity;
+  std::this_thread::sleep_for(std::chrono::milliseconds(granularity));
+  if (mTargetTime < now || mParameterList.size() > 0) {
+    // There are events still remaining in sequence.
+    if (mRunning) {
+      if (now < mTargetTime || mParameterList.size() > 0) {
+        mTimeAccumulator += granularity;
+        if (now > mParamTargetTime && mParameterList.size() > 0) {
+          if (mRunning) {
+            std::string name = mParameterList.front().presetName;
+            for (auto *param : mParameters) {
+              if (param->getFullAddress() == name) {
+                param->fromFloat(mParameterList.front().params[0]);
+              }
+            }
+          }
+          mParameterList.pop();
+          if (mParameterList.size() > 0) {
+            mParamTargetTime += std::chrono::microseconds(
+                (int)(mParameterList.front().waitTime * 1.0e6));
+          }
+        }
+        if (mTimeAccumulator >= mTimeChangeMinTimeDelta * 1000) {
+          mTimeAccumulator -= mTimeChangeMinTimeDelta * 1000;
+          if (mTimeChangeCallback) {
+            //                    std::cout <<  1.0e-9 *
+            //                    std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now()
+            //                    - sequenceStart).count() <<std::endl;
+            mTimeChangeCallback(
+                1.0e-9 *
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    std::chrono::high_resolution_clock::now() - mSequenceStart)
+                    .count());
+          }
+        }
+        double timeRequest = mTimeRequest.exchange(-1.0f);
+        if (timeRequest > 0.0) {
+          double currentTime =
+              1.0e-9 * std::chrono::duration_cast<std::chrono::nanoseconds>(
+                           now - mSequenceStart)
+                           .count();
+          // Bring back previous steps
+          mSteps = mMostRecentSequence;
+          currentTime = 0;
+          mSequenceStart = now;
+          //                paramTargetTime = now;
+          mTargetTime = now;
+          if (currentTime < timeRequest) {
+            std::string previousPreset = mSteps.front().presetName;
+            while (currentTime < timeRequest && mSteps.size() > 0) {
+              Step step = mSteps.front();
+              if (step.type == PRESET) {
+                currentTime += step.morphTime + step.waitTime;
+                std::cout << "Skipping: " << step.presetName << " "
+                          << step.morphTime << ":" << step.waitTime
+                          << std::endl;
+                if (currentTime < timeRequest) {
+                  previousPreset = mSteps.front().presetName;
+                }
+              }
+              mSteps.pop();
+            }
+            Step step = mSteps.front();
+            if (timeRequest >
+                (currentTime -
+                 step.waitTime)) {  // We only need to wait, morphing is done
+              //                        sequencer->mPresetHandler->setMorphTime(0);
+              mPresetHandler->recallPresetSynchronous(step.presetName);
+              mPresetHandler->setMorphTime(
+                  step.morphTime);  // Just set it so it has the expected last
+                                    // value
+              mTargetTime = now + std::chrono::microseconds(
+                                      int(1.0e6 * (currentTime - timeRequest)));
+              mSequenceStart =
+                  now - std::chrono::microseconds(int(1.0e6 * (timeRequest)));
+            } else {  // We need to finish the morphing
+              float remainingMorphTime =
+                  currentTime - timeRequest - step.waitTime;
+              if (previousPreset.size() > 0) {
+                //                            sequencer->mPresetHandler->recallPresetSynchronous(previousPreset);
+
+                mPresetHandler->setInterpolatedPreset(
+                    previousPreset, step.presetName,
+                    1.0 - (remainingMorphTime / step.morphTime));
+                std::cout << "Interpolating: " << previousPreset << " "
+                          << step.presetName << " "
+                          << 1.0 - (remainingMorphTime / step.morphTime)
+                          << std::endl;
+              }
+              mPresetHandler->setMorphTime(remainingMorphTime);
+              mPresetHandler->recallPreset(step.presetName);
+              mTargetTime = now + std::chrono::microseconds(
+                                      int(1.0e6 * (currentTime - timeRequest)));
+              mSequenceStart =
+                  now - std::chrono::microseconds(int(1.0e6 * (timeRequest)));
+            }
+          }
+        }
+      } else {
+        // Need to process next events
+
+        Step step = mSteps.front();
+        if (step.type == EVENT) {  // After event is triggered, call callback
+          if (mRunning) {
+            for (auto eventCallback : mEventCallbacks) {
+              if (eventCallback.eventName == step.presetName) {
+                eventCallback.callback(eventCallback.callbackData, step.params);
+                break;
+              }
+            }
+          }
+        }
+      }
+
+    } else {
+      // Not running but events still in sequence. Means stop has been
+      // requested.
+      mTargetTime = now;
+      while (!mParameterList.empty()) {
+        mParameterList.pop();
+      }
+    }
+  }
+}
 
 bool PresetSequencer::consumeMessage(osc::Message &m, std::string rootOSCPath) {
   std::string basePath = rootOSCPath;
@@ -651,11 +670,14 @@ void PresetSequencer::stopCpuThread() {
     mPresetHandler->stopMorph();
   }
   this->enableBeginCallback(
-      false);  // To vaoid triggering callback on thread wake up
-  mStartingRun =
-      true;  // The conditional variable will only stop waiting if this is true
+      false);           // To vaoid triggering callback on thread wake up
+  mStartingRun = true;  // The conditional variable will only stop waiting if
+                        // this is true
   this->mPlayWaitVariable.notify_all();
-  mSequencerThread->join();
+  if (mSequencerThread) {
+    mSequencerThread->join();
+    mSequencerThread = nullptr;
+  }
 }
 
 // SequenceServer
