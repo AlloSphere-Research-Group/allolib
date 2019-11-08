@@ -42,12 +42,8 @@
         Andrés Cabrera mantaraya36@gmail.com
 */
 
-#include "al/math/al_Vec.hpp"
-#include "al/protocol/al_OSC.hpp"
-#include "al/spatial/al_Pose.hpp"
-#include "al/types/al_Color.hpp"
-
 #include <float.h>
+
 #include <algorithm>
 #include <atomic>
 #include <cassert>
@@ -59,6 +55,11 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "al/math/al_Vec.hpp"
+#include "al/protocol/al_OSC.hpp"
+#include "al/spatial/al_Pose.hpp"
+#include "al/types/al_Color.hpp"
 
 namespace al {
 
