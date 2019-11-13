@@ -59,7 +59,7 @@ class App {
   virtual bool onMouseDrag(Mouse const &m) { return true; }
   virtual bool onMouseMove(Mouse const &m) { return true; }
   virtual bool onMouseScroll(Mouse const &m) { return true; }
-  //  virtual void onResize(int w, int h) {}
+  virtual void onResize(int w, int h) {}
   //  virtual void onVisibility(bool v) {}
 
   void quit();  ///< Requests domain to quit.
