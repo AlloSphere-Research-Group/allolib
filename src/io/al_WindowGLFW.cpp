@@ -1,8 +1,5 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include "al/graphics/al_OpenGL.hpp"
-
-#include "al/io/al_Window.hpp"
 
 #include <cmath>
 #include <cstdlib>  // exit, EXIT_FAILURE
@@ -10,6 +7,9 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+
+#include "al/graphics/al_OpenGL.hpp"
+#include "al/io/al_Window.hpp"
 
 using namespace std;
 
@@ -226,6 +226,7 @@ class WindowImpl {
     glfwSetKeyCallback(mGLFWwindow, cbKeyboard);
     glfwSetMouseButtonCallback(mGLFWwindow, cbMouse);
     glfwSetCursorPosCallback(mGLFWwindow, cbMotion);
+    glfwSetWindowSizeCallback(mGLFWwindow, cbReshape);
     glfwSetScrollCallback(mGLFWwindow, cbScroll);
     //    glfwSetWindowCloseCallback(mGLFWwindow, cbClose);
     // glfwSetWindowRefreshCallback(window, cb_windowrefresh);

@@ -46,6 +46,7 @@
 */
 
 #include <stdio.h>
+
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -383,6 +384,7 @@ class Window {
   std::function<bool(Mouse const&)> onMouseScroll = [](Mouse const&) {
     return true;
   };
+  std::function<void(int, int)> onResize = [](int, int) {};
 
   WindowEventHandlers& windowEventHandlers() { return mWindowEventHandlers; }
 
@@ -479,16 +481,16 @@ class Window {
     CALL(keyUp(mKeyboard));
     onKeyUp(mKeyboard);
   }
-  void callHandlersResize(int w, int h) { CALL(resize(w, h)); }
+  void callHandlersResize(int w, int h) {
+    CALL(resize(w, h));
+    onResize(w, h);
+  }
   void callHandlersVisibility(bool v) { CALL(visibility(v)); }
 #undef CALL
 
  public:
-  [[deprecated]] Window& add(WindowEventHandler* v) {
-    return append(*v);
-  }[[deprecated]] Window& prepend(WindowEventHandler* v) {
-    return prepend(*v);
-  }
+  [[deprecated]] Window& add(WindowEventHandler* v) { return append(*v); }
+  [[deprecated]] Window& prepend(WindowEventHandler* v) { return prepend(*v); }
   [[deprecated]] Window& remove(WindowEventHandler* v) { return remove(*v); }
 };
 
