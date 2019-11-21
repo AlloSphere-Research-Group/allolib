@@ -12,7 +12,7 @@
     \brief An abstract base class for realtime MIDI input/output.
 
     This class implements some common functionality for the realtime
-    MIDI input/output subclasses RtMidiIn and RtMidiOut.
+    MIDI input/output subclasses RtRtMidiIn and RtMidiOut.
 
     RtMidi WWW site: http://music.mcgill.ca/~gary/rtmidi/
 */
@@ -25,12 +25,13 @@
 namespace al {
 
 // Internal classes to maintain backward compatibility
-class[[depreacated("User RtMidiIn directly")]] MIDIIn : public RtMidiIn{};
+// class[[depreacated("User RtRtMidiIn directly")]] RtMidiIn : public
+// RtMidiIn{};
 
-class[[depreacated("User RtMidiOut directly")]] MIDIOut : public RtMidiOut{};
+// class[[depreacated("User RtMidiOut directly")]] MIDIOut : public RtMidiOut{};
 
-class[[depreacated("User RtMidiError directly")]] MIDIError
-    : public RtMidiError{};
+// class[[depreacated("User RtMidiError directly")]] MIDIError
+//    : public RtMidiError{};
 
 /// Convert note number to Hz value
 ///
@@ -201,7 +202,7 @@ class MIDIMessageHandler {
   virtual void onMIDIMessage(const MIDIMessage& m) = 0;
 
   /// Bind handler to a MIDI input
-  void bindTo(RtMidiIn& midiIn, unsigned port = 0);
+  void bindTo(RtMidiIn& RtMidiIn, unsigned port = 0);
 
   void clearBindings() {
     for (auto& binding : mBindings) {

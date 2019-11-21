@@ -105,7 +105,7 @@ void MIDIMessage::print(std::ostream& stream) const {
   stream << ", time " << timeStamp() << std::endl;
 }
 
-void MIDIMessageHandler::bindTo(RtMidiIn& midiIn, unsigned port) {
+void MIDIMessageHandler::bindTo(RtMidiIn& RtMidiIn, unsigned port) {
   struct F {
     static void callback(double t, std::vector<unsigned char>* msgPtr,
                          void* user) {
@@ -130,8 +130,8 @@ void MIDIMessageHandler::bindTo(RtMidiIn& midiIn, unsigned port) {
     }
   };
 
-  Binding b = {&midiIn, this, port};
+  Binding b = {&RtMidiIn, this, port};
   mBindings.push_back(b);
 
-  midiIn.setCallback(F::callback, &mBindings.back());
+  RtMidiIn.setCallback(F::callback, &mBindings.back());
 }

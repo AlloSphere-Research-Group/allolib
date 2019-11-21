@@ -25,7 +25,7 @@ struct MyApp : public App {
   Spatializer *spatializer{nullptr};
 
   Mesh mMarker;
-  float speedMult = 0.04f;
+  double speedMult = 0.04f;
   double mElapsedTime = 0.0;
 
   ParameterVec3 srcpos{"srcPos", "", {0.0, 0.0, 0.0}};
@@ -37,17 +37,6 @@ struct MyApp : public App {
   int spatializerType = 0;
   unsigned long counter = 0;  // overall sample counter
 
-  MyApp() {
-    audioIO().channelsBus(1);
-    initSpeakers(0);
-    initSpatializer(1);
-  }
-
-  ~MyApp() override {
-    if (mPeaks) {
-      free(mPeaks);
-    }
-  }
   void initSpeakers(int type = -1) {
     if (type < 0) {
       type = (speakerType + 1) % 3;
@@ -89,6 +78,7 @@ struct MyApp : public App {
   }
 
   void onInit() override {
+    audioIO().channelsBus(1);
     addDodecahedron(mMarker);
     initSpeakers(0);
     initSpatializer(1);
@@ -201,6 +191,12 @@ struct MyApp : public App {
     }
     audioIO().start();
     return true;
+  }
+
+  void onExit() override {
+    if (mPeaks) {
+      free(mPeaks);
+    }
   }
 };
 
