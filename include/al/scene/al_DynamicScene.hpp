@@ -96,7 +96,7 @@ class PositionedVoice : public SynthVoice {
    * @brief Override this function to apply transformations after the internal
    * transformations of the voice has been applied
    */
-  virtual void preProcess(Graphics &g) {}
+  virtual void preProcess(Graphics & /*g*/) {}
 
   /**
    * @brief For PositionedVoice, the pose (7 floats) and the size are appended
@@ -178,7 +178,7 @@ class ThreadPool {
   void waitForProcessingDone();
   ~ThreadPool();
 
-  unsigned int size() { return workers.size(); }
+  size_t size() { return workers.size(); }
 
   void stopThreads();
 

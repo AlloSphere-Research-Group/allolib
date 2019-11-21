@@ -491,9 +491,11 @@ class Window {
 #undef CALL
 
  public:
-  [[deprecated]] Window &add(WindowEventHandler *v) { return append(*v); }
-  [[deprecated]] Window &prepend(WindowEventHandler *v) { return prepend(*v); }
-  [[deprecated]] Window &remove(WindowEventHandler *v) { return remove(*v); }
+  //  [[deprecated]] Window& add(WindowEventHandler* v) { return append(*v); }
+  //  [[deprecated]] Window& prepend(WindowEventHandler* v) { return
+  //  prepend(*v); }
+  //  [[deprecated]] Window& remove(WindowEventHandler* v) { return remove(*v);
+  //  }
 };
 
 inline Window::DisplayMode operator|(const Window::DisplayMode &a,
