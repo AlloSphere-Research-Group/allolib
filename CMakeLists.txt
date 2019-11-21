@@ -109,7 +109,7 @@ set(headers
   include/al/scene/al_SequencerMIDI.hpp
   include/al/scene/al_SynthSequencer.hpp
   include/al/sound/al_Ambisonics.hpp
-  include/al/sound/al_AudioScene.hpp
+#  include/al/sound/al_AudioScene.hpp
   include/al/sound/al_Biquad.hpp
   include/al/sound/al_Crossover.hpp
   include/al/sound/al_Dbap.hpp
@@ -211,7 +211,7 @@ set(sources
   src/scene/al_PolySynth.cpp
   src/scene/al_SynthSequencer.cpp
   src/sound/al_Ambisonics.cpp
-  src/sound/al_AudioScene.cpp
+#  src/sound/al_AudioScene.cpp
   src/sound/al_Biquad.cpp
   src/sound/al_Dbap.cpp
   src/sound/al_Lbap.cpp
