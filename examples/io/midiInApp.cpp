@@ -16,18 +16,18 @@ using namespace al;
 
 class MyApp : public App, public MIDIMessageHandler {
  public:
-  MIDIIn midiIn;
+  RtMidiIn RtMidiIn;
 
   void onCreate() {
     // Check for connected MIDI devices
-    if (midiIn.getPortCount() > 0) {
-      // Bind ourself to the MIDIIn
-      MIDIMessageHandler::bindTo(midiIn);
+    if (RtMidiIn.getPortCount() > 0) {
+      // Bind ourself to the RtMidiIn
+      MIDIMessageHandler::bindTo(RtMidiIn);
 
       // Open the last device found
-      int port = midiIn.getPortCount() - 1;
-      midiIn.openPort(port);
-      printf("Opened port to %s\n", midiIn.getPortName(port).c_str());
+      int port = RtMidiIn.getPortCount() - 1;
+      RtMidiIn.openPort(port);
+      printf("Opened port to %s\n", RtMidiIn.getPortName(port).c_str());
     } else {
       printf("Error: No MIDI devices found.\n");
     }

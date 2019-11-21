@@ -52,13 +52,13 @@ class App {
   virtual void onMessage(osc::Message &m) { (void)m; }
   virtual void onExit() {}
 
-  virtual bool onKeyDown(Keyboard const &k) { return true; }
-  virtual bool onKeyUp(Keyboard const &k) { return true; }
-  virtual bool onMouseDown(Mouse const &m) { return true; }
-  virtual bool onMouseUp(Mouse const &m) { return true; }
-  virtual bool onMouseDrag(Mouse const &m) { return true; }
-  virtual bool onMouseMove(Mouse const &m) { return true; }
-  virtual bool onMouseScroll(Mouse const &m) { return true; }
+  virtual bool onKeyDown(Keyboard const & /*k*/) { return true; }
+  virtual bool onKeyUp(Keyboard const & /*k*/) { return true; }
+  virtual bool onMouseDown(Mouse const & /*m*/) { return true; }
+  virtual bool onMouseUp(Mouse const & /*m*/) { return true; }
+  virtual bool onMouseDrag(Mouse const & /*m*/) { return true; }
+  virtual bool onMouseMove(Mouse const & /*m*/) { return true; }
+  virtual bool onMouseScroll(Mouse const & /*m*/) { return true; }
   //  virtual void onResize(int w, int h) {}
   //  virtual void onVisibility(bool v) {}
 
@@ -139,7 +139,7 @@ class App {
       WindowEventHandler &handler);
 
   // Access to audio domain
-  [[deprecated("Use call from domain directly")]] AudioIO &audioIO();
+  AudioIO &audioIO();
 
   void configureAudio(double audioRate = 44100, int audioBlockSize = 512,
                       int audioOutputs = -1, int audioInputs = -1);

@@ -61,12 +61,12 @@ class PresetMIDI : public MIDIMessageHandler {
   PresetMIDI() {}
 
   PresetMIDI(int deviceIndex) : mPresetHandler(nullptr) {
-    MIDIMessageHandler::bindTo(mMidiIn);
+    MIDIMessageHandler::bindTo(mRtMidiIn);
     try {
-      mMidiIn.openPort(deviceIndex);
+      mRtMidiIn.openPort(deviceIndex);
       printf("PresetMIDI: Opened port to %s\n",
-             mMidiIn.getPortName(deviceIndex).c_str());
-    } catch (al::MIDIError error) {
+             mRtMidiIn.getPortName(deviceIndex).c_str());
+    } catch (RtMidiError error) {
       std::cout << "PresetMIDI Warning: Could not open MIDI port "
                 << deviceIndex << std::endl;
     }
@@ -92,32 +92,32 @@ class PresetMIDI : public MIDIMessageHandler {
   }
 
   void open(int deviceIndex) {
-    MIDIMessageHandler::bindTo(mMidiIn);
+    MIDIMessageHandler::bindTo(mRtMidiIn);
 
-    if (mMidiIn.isPortOpen()) {
-      mMidiIn.closePort();
+    if (mRtMidiIn.isPortOpen()) {
+      mRtMidiIn.closePort();
     }
     try {
-      if (deviceIndex >= 0 && deviceIndex < (int)mMidiIn.getPortCount()) {
-        mMidiIn.openPort(deviceIndex);
+      if (deviceIndex >= 0 && deviceIndex < (int)mRtMidiIn.getPortCount()) {
+        mRtMidiIn.openPort(deviceIndex);
         printf("PresetMIDI: Opened port to %s\n",
-               mMidiIn.getPortName(deviceIndex).c_str());
+               mRtMidiIn.getPortName(deviceIndex).c_str());
       } else {
         std::cerr << "PresetMIDI Warning: Could not open MIDI port "
                   << deviceIndex << std::endl;
       }
-    } catch (al::MIDIError error) {
+    } catch (RtMidiError error) {
       std::cerr << "PresetMIDI Warning: Could not open MIDI port "
                 << deviceIndex << std::endl;
     }
   }
 
   void close() {
-    mMidiIn.closePort();
+    mRtMidiIn.closePort();
     MIDIMessageHandler::clearBindings();
   }
 
-  bool isOpen() { return mMidiIn.isPortOpen(); }
+  bool isOpen() { return mRtMidiIn.isPortOpen(); }
 
   void setPresetHandler(PresetHandler &presetHandler) {
     mPresetHandler = &presetHandler;
@@ -163,7 +163,7 @@ class PresetMIDI : public MIDIMessageHandler {
 
   PresetHandler *mPresetHandler;
 
-  MIDIIn mMidiIn;
+  RtMidiIn mRtMidiIn;
   std::vector<NoteBinding> mNoteBindings;
   std::vector<ProgramBinding> mProgramBindings;
 };

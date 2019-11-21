@@ -169,12 +169,12 @@ the other
    *  free() function when envelopes or processing is done. You should
    * call free() from one of the render() functions.
    */
-  virtual void onProcess(AudioIOData &io) {}
+  virtual void onProcess(AudioIOData & /*io*/) {}
 
   /**
    * @brief Override this function to define graphics for this synth
    */
-  virtual void onProcess(Graphics &g) {}
+  virtual void onProcess(Graphics & /*g*/) {}
 
   /**
    * @brief Override this function to update internal state, e.g. from an
@@ -182,7 +182,7 @@ the other
    *
    * dt is the delta time elapsed since last update
    */
-  virtual void update(double dt = 0) {}
+  virtual void update(double dt = 0) { (void)dt; }
 
   /**
    * @brief Override this function to initialize internal data.
@@ -918,7 +918,7 @@ class PolySynth {
     if (mAudioGain != 1.0f) {
       for (unsigned int i = 0; i < io.channelsOut(); i++) {
         float *buffer = io.outBuffer(i);
-        unsigned int samps = io.framesPerBuffer();
+        uint64_t samps = io.framesPerBuffer();
         while (samps--) {
           *buffer++ *= mAudioGain;
         }

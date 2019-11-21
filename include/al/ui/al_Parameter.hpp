@@ -85,7 +85,7 @@ class ParameterField {
   ParameterField(const double value) {
     mType = FLOAT;
     mData = new float;
-    *static_cast<float *>(mData) = value;
+    *static_cast<float *>(mData) = float(value);
   }
 
   ParameterField(const int32_t value) {
@@ -295,19 +295,20 @@ class ParameterMeta {
     return value;
   }
 
-  virtual void get(std::vector<ParameterField> &fields) {
+  virtual void get(std::vector<ParameterField> & /*fields*/) {
     std::cout
         << "get(std::vector<ParameteterField> &fields) not implemented for "
         << typeid(*this).name() << std::endl;
   }
 
-  virtual void set(std::vector<ParameterField> &fields) {
+  virtual void set(std::vector<ParameterField> & /*fields*/) {
     std::cout
         << "set(std::vector<ParameteterField> &fields) not implemented for "
         << typeid(*this).name() << std::endl;
   }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") {
+    (void)prefix;  // Remove compiler warning
     std::cout << "sendValue function not implemented for "
               << typeid(*this).name() << std::endl;
   }
