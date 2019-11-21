@@ -217,6 +217,7 @@ set(sources
   src/sound/al_Lbap.cpp
   src/sound/al_Vbap.cpp
   src/sound/al_Spatializer.cpp
+  src/sound/al_Speaker.cpp
   src/sound/al_StereoPanner.cpp
   src/sound/al_SoundFile.cpp
   src/spatial/al_HashSpace.cpp

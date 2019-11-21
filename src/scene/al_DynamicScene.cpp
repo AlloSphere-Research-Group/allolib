@@ -1,4 +1,5 @@
 #include "al/scene/al_DynamicScene.hpp"
+
 #include "al/graphics/al_Shapes.hpp"
 
 using namespace std;
@@ -58,7 +59,7 @@ void ThreadPool::stopThreads() {
 
 DynamicScene::DynamicScene(int threadPoolSize, TimeMasterMode masterMode)
     : PolySynth(masterMode) {
-  SpeakerLayout sl = StereoSpeakerLayout();  // Stereo by default
+  Speakers sl = StereoSpeakerLayout();  // Stereo by default
   setSpatializer<StereoPanner>(sl);
   if (threadPoolSize > 0) {
     mWorkerThreads = std::make_unique<ThreadPool>(threadPoolSize);

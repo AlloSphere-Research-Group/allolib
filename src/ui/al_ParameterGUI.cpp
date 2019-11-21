@@ -1,6 +1,6 @@
-#include <string>
-
 #include "al/ui/al_ParameterGUI.hpp"
+
+#include <string>
 
 using namespace al;
 using namespace std;
@@ -761,7 +761,7 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
       float time = state.currentTime;
       //        std::cout << time << std::endl;
       if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
-        //            std::cout << "Requested time:" << time << std::endl;
+        std::cout << "Requested time:" << time << std::endl;
         presetSequencer->setTime(time);
       }
     } else {

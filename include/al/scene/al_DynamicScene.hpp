@@ -52,11 +52,9 @@
 #include "al/math/al_Vec.hpp"
 #include "al/scene/al_SynthSequencer.hpp"
 #include "al/sound/al_Speaker.hpp"
-#include "al/spatial/al_DistAtten.hpp"
-#include "al/spatial/al_Pose.hpp"
-
 #include "al/sound/al_StereoPanner.hpp"
 #include "al/spatial/al_DistAtten.hpp"
+#include "al/spatial/al_Pose.hpp"
 
 namespace al {
 /**
@@ -225,7 +223,7 @@ class DynamicScene : public PolySynth {
    *  If not called, the default is stereo panning over two speakers.
    */
   template <class TSpatializer>
-  std::shared_ptr<TSpatializer> setSpatializer(SpeakerLayout &sl) {
+  std::shared_ptr<TSpatializer> setSpatializer(Speakers &sl) {
     mSpatializer = std::make_shared<TSpatializer>(sl);
     mSpatializer->compile();
     return std::static_pointer_cast<TSpatializer>(mSpatializer);
