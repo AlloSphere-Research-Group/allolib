@@ -21,22 +21,17 @@ namespace al {
  */
 class SimulationDomain : public SynchronousDomain {
  public:
-  virtual bool tick() override {
-    bool ret = tickSubdomains(true);
-    if (mUseCallback) {
-      simulationFunction(timeDelta());
-    }
-    ret &= tickSubdomains(false);
-    return true;
-  }
+  virtual bool tick() override;
 
-  void disableProcessingCallback() { mUseCallback = false; }
+  void disableProcessingCallback();
   std::function<void(double dt)> simulationFunction = [](double) {
   };  // function to be called in onAnimate()
 
  private:
   bool mUseCallback{true};
 };
+
+// -------------
 
 template <class TSharedState>
 class StateSimulationDomain : public SimulationDomain {
