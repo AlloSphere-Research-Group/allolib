@@ -34,7 +34,7 @@ struct MyApp : App {
   }
 
   void onDraw(Graphics &g) override {
-    sequencer.stepSequencer();
+    sequencer.stepSequencer(1.0f / graphicsDomain()->fps());
     g.clear(0);
     if (sequencer.running()) {
       g.translate(X.get(), Y.get(), 0);

@@ -1,17 +1,17 @@
 
-#include <algorithm>
-
 #include "al/sound/al_Lbap.hpp"
+
+#include <algorithm>
 
 using namespace al;
 
 void Lbap::compile() {
-  std::map<int, SpeakerLayout> speakerRingMap;
+  std::map<int, Speakers> speakerRingMap;
   for (auto &speaker : mSpeakers) {
     if (speakerRingMap.find(speaker.group) == speakerRingMap.end()) {
-      speakerRingMap[speaker.group] = SpeakerLayout();
+      speakerRingMap[speaker.group] = Speakers();
     }
-    speakerRingMap[speaker.group].addSpeaker(speaker);
+    speakerRingMap[speaker.group].push_back(speaker);
   }
   for (auto speakerRing : speakerRingMap) {
     mRings.push_back(LdapRing(speakerRing.second));

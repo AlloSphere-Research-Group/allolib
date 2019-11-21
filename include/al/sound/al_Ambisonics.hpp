@@ -227,10 +227,10 @@ class AmbiDecode : public AmbiBase {
   void setSpeakers(Speakers& spkrs);
 
   //	float * azimuths();				///< Returns pointer to
-  //speaker azimuths.
+  // speaker azimuths.
   //	float * elevations();			///< Returns pointer to speaker
-  // elevations. 	float * frame() const;			///< Returns pointer
-  // to ambisonic channel frame used by decode(int)
+  // elevations. 	float * frame() const;			///< Returns
+  // pointer to ambisonic channel frame used by decode(int)
 
   /// Get speaker
   Speaker& speaker(int num) { return mSpeakers[num]; }
@@ -319,7 +319,7 @@ class AmbiEncode : public AmbiBase {
 class AmbisonicsSpatializer : public Spatializer {
  public:
   AmbisonicsSpatializer();
-  AmbisonicsSpatializer(SpeakerLayout& sl, int dim = 2, int order = 1,
+  AmbisonicsSpatializer(Speakers& sl, int dim = 2, int order = 1,
                         int flavor = 1);
 
   void zeroAmbi();
@@ -466,8 +466,9 @@ inline void AmbiEncode::encode(float* ambiChans, int numFrames, int timeIndex,
   switch (ch) {
     CS(15)
     CS(14)
-    CS(13) CS(12) CS(11) CS(10) CS(9) CS(8) CS(7) CS(6) CS(5) CS(4) CS(3) CS(2)
-        CS(1) CS(0) default:;
+    CS(13)
+    CS(12) CS(11) CS(10) CS(9) CS(8) CS(7) CS(6) CS(5) CS(4) CS(3) CS(2) CS(1)
+        CS(0) default:;
   }
 #undef CS
 }

@@ -59,13 +59,13 @@ namespace al {
 
 class LdapRing {
  public:
-  LdapRing(SpeakerLayout &sl) {
+  LdapRing(Speakers &sl) {
     vbap = std::make_shared<Vbap>(sl);
     elevation = 0;
-    for (auto speaker : sl.speakers()) {
+    for (auto speaker : sl) {
       elevation += speaker.elevation;
     }
-    elevation /= sl.numSpeakers();  // store average elevation
+    elevation /= sl.size();  // store average elevation
     vbap->compile();
   }
 
@@ -84,7 +84,7 @@ class Lbap : public Spatializer {
   } VbapOptions;
 
   /// @param[in] sl	A speaker layout
-  Lbap(const SpeakerLayout &sl) : Spatializer(sl) {}
+  Lbap(const Speakers &sl) : Spatializer(sl) {}
 
   virtual ~Lbap() override {
     if (buffer) {

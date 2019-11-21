@@ -19,7 +19,7 @@ namespace al {
 /// @ingroup Sound
 class StereoPanner : public Spatializer {
  public:
-  StereoPanner(SpeakerLayout& sl) : Spatializer(sl), numSpeakers(0) {
+  StereoPanner(Speakers& sl) : Spatializer(sl), numSpeakers(0) {
     numSpeakers = mSpeakers.size();
     if (numSpeakers != 2) {
       printf(

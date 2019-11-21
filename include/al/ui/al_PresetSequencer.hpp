@@ -301,18 +301,27 @@ class PresetSequencer : public osc::MessageConsumer {
 
   void setTimeMaster(TimeMasterMode masterMode);
 
-  void stepSequencer();
+  /**
+   * @brief step sequencer forward dt amount of time
+   * @param dt amount of time (seconds) to step
+   *
+   * Any parameter and preset events that fall within this delta time will
+   * be applied.
+   */
+  void stepSequencer(double dt);
 
  protected:
   virtual bool consumeMessage(osc::Message &m,
                               std::string rootOSCPath) override;
+
+  void processTimeChangeRequest();
 
  private:
   static void sequencerFunction(PresetSequencer *sequencer);
 
   std::string buildFullPath(std::string sequenceName);
 
-  void prepareNextStep();
+  void prepareFirstStep();
 
   void startCpuThread();
   void stopCpuThread();
@@ -334,13 +343,11 @@ class PresetSequencer : public osc::MessageConsumer {
   bool mSequencerActive;
   bool mRunning;
   bool mStartingRun;
-
-  std::chrono::high_resolution_clock::time_point mSequenceStart =
-      std::chrono::high_resolution_clock::now();
-  std::chrono::high_resolution_clock::time_point mParamTargetTime;
-  std::chrono::high_resolution_clock::time_point mTargetTime;
   std::queue<Step> mParameterList;
-  float mTimeAccumulator = 0.0f;
+  double mCurrentTime = 0.0;  // Current time (in seconds)
+  double mParamTargetTime;
+  double mTargetTime;
+  double mLastTimeUpdate = 0.0;
 
   const int mGranularity = 10;  // milliseconds
   bool mBeginCallbackEnabled;
@@ -354,6 +361,9 @@ class PresetSequencer : public osc::MessageConsumer {
   float mTimeChangeMinTimeDelta = 0;
 
   // CPU thread
+
+  //  std::chrono::high_resolution_clock::time_point mSequenceStart =
+  //      std::chrono::high_resolution_clock::now();
   std::unique_ptr<std::thread> mSequencerThread;
   std::mutex mSequenceLock;
   std::mutex mPlayWaitLock;

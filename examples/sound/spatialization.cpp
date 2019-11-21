@@ -1,3 +1,6 @@
+#include <atomic>
+#include <vector>
+
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include "al/math/al_Random.hpp"
@@ -9,9 +12,6 @@
 #include "al/sound/al_Vbap.hpp"
 #include "al/sphere/al_AlloSphereSpeakerLayout.hpp"
 #include "al/ui/al_Parameter.hpp"
-
-#include <atomic>
-#include <vector>
 
 using namespace al;
 using namespace std;
@@ -31,7 +31,7 @@ struct MyApp : public App {
   ParameterVec3 srcpos{"srcPos", "", {0.0, 0.0, 0.0}};
   atomic<float> *mPeaks{nullptr};
 
-  SpeakerLayout speakerLayout;
+  Speakers speakerLayout;
 
   int speakerType = 0;
   int spatializerType = 0;
@@ -63,9 +63,8 @@ struct MyApp : public App {
     if (mPeaks) {
       free(mPeaks);
     }
-    mPeaks =
-        new atomic<float>[speakerLayout.speakers().size()];  // Not being freed
-                                                             // in this example
+    mPeaks = new atomic<float>[speakerLayout.size()];  // Not being freed
+                                                       // in this example
   }
 
   void initSpatializer(int type) {
@@ -116,11 +115,10 @@ struct MyApp : public App {
     g.blending(true);
     g.blendModeTrans();
     // Draw the speakers
-    Speakers sp = speakerLayout.speakers();
-    for (size_t i = 0; i < sp.size(); ++i) {
+    for (size_t i = 0; i < speakerLayout.size(); ++i) {
       g.pushMatrix();
       float xyz[3];
-      sp[i].posCart(xyz);
+      speakerLayout[i].posCart(xyz);
       g.translate(-xyz[1], xyz[2], -xyz[0]);
       float peak = mPeaks[i].load();
       g.scale(0.02f + fabs(peak) * 5);
@@ -169,11 +167,10 @@ struct MyApp : public App {
     spatializer->finalize(io);
 
     // Now compute RMS to display the signal level for each speaker
-    Speakers &speakers = speakerLayout.speakers();
-    for (size_t speaker = 0; speaker < speakers.size(); speaker++) {
+    for (size_t speaker = 0; speaker < speakerLayout.size(); speaker++) {
       float rms = 0;
       for (unsigned int i = 0; i < io.framesPerBuffer(); i++) {
-        unsigned int deviceChannel = speakers[speaker].deviceChannel;
+        unsigned int deviceChannel = speakerLayout[speaker].deviceChannel;
         float sample = io.out(deviceChannel, i);
         rms += sample * sample;
       }

@@ -1,3 +1,6 @@
+#include <atomic>
+#include <vector>
+
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include "al/math/al_Random.hpp"
@@ -9,9 +12,6 @@
 #include "al/sound/al_Vbap.hpp"
 #include "al/sphere/al_AlloSphereSpeakerLayout.hpp"
 #include "al/ui/al_Parameter.hpp"
-
-#include <atomic>
-#include <vector>
 
 using namespace al;
 using namespace std;
@@ -61,7 +61,7 @@ struct MyApp : public App {
 
   Source *mSource;
 
-  SpeakerLayout speakerLayout;
+  Speakers speakerLayout;
 
   int speakerType = 0;
   int spatializerType = 0;
@@ -88,9 +88,8 @@ struct MyApp : public App {
     if (mPeaks) {
       free(mPeaks);
     }
-    mPeaks =
-        new atomic<float>[speakerLayout.speakers().size()];  // Not being freed
-                                                             // in this example
+    mPeaks = new atomic<float>[speakerLayout.size()];  // Not being freed
+                                                       // in this example
   }
 
   void initSpatializer(int type = -1) {
@@ -150,11 +149,10 @@ struct MyApp : public App {
     g.blendOn();
     g.blendModeTrans();
     // Draw the speakers
-    Speakers sp = speakerLayout.speakers();
-    for (int i = 0; i < (int)sp.size(); ++i) {
+    for (int i = 0; i < (int)speakerLayout.size(); ++i) {
       g.pushMatrix();
       float xyz[3];
-      sp[i].posCart(xyz);
+      speakerLayout[i].posCart(xyz);
       g.translate(-xyz[1], xyz[2], -xyz[0]);
       float peak = mPeaks[i].load();
       g.scale(0.02 + fabs(peak) * 5);
@@ -187,11 +185,10 @@ struct MyApp : public App {
     mScene.render(io);
 
     // Now compute RMS to display the signal level for each speaker
-    Speakers &speakers = speakerLayout.speakers();
-    for (int speaker = 0; speaker < (int)speakers.size(); speaker++) {
+    for (size_t speaker = 0; speaker < speakerLayout.size(); speaker++) {
       float rms = 0;
-      for (int i = 0; i < (int)io.framesPerBuffer(); i++) {
-        int deviceChannel = speakers[speaker].deviceChannel;
+      for (uint64_t i = 0; i < io.framesPerBuffer(); i++) {
+        auto deviceChannel = speakerLayout[speaker].deviceChannel;
         float sample = io.out(deviceChannel, i);
         rms += sample * sample;
       }
