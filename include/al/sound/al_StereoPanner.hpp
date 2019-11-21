@@ -22,10 +22,8 @@ class StereoPanner : public Spatializer {
   StereoPanner(Speakers& sl) : Spatializer(sl), numSpeakers(0) {
     numSpeakers = mSpeakers.size();
     if (numSpeakers != 2) {
-      printf(
-          "Stereo Panner Requires exactly 2 speakers (%i used), no panning "
-          "will occur!\n",
-          numSpeakers);
+      std::cout << "Stereo Panner Requires exactly 2 speakers (" << numSpeakers
+                << " used). First two will be used!" << std::endl;
     }
   }
 
@@ -40,7 +38,7 @@ class StereoPanner : public Spatializer {
                             const unsigned int& numFrames) override;
 
  private:
-  int numSpeakers;
+  size_t numSpeakers;
 
   void equalPowerPan(const Vec3d& relPos, float& gainL, float& gainR);
 };

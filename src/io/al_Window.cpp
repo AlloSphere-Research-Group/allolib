@@ -69,11 +69,11 @@ void Mouse::scroll(double x, double y) {
   mScrollY = y;
 }
 
-WindowEventHandler::WindowEventHandler() : mWindow(NULL) {}
+WindowEventHandler::WindowEventHandler() : mWindow(nullptr) {}
 WindowEventHandler::~WindowEventHandler() { removeFromWindow(); }
 void WindowEventHandler::removeFromWindow() {
   if (attached()) {
-    window().remove(this);
+    window().remove(*this);
     mWindow = nullptr;
   }
 }

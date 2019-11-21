@@ -354,7 +354,7 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
       //                active voices are put in mThreadMap
       if (find(idsToProcess.begin(), idsToProcess.end(), voice->id()) !=
           idsToProcess.end()) {  // voice has been assigned to this thread
-        int offset = voice->getStartOffsetFrames(fpb);
+        unsigned int offset = voice->getStartOffsetFrames(fpb);
         if (offset < fpb) {
           io.frame(offset);
           int endOffsetFrames = voice->getEndOffsetFrames(fpb);

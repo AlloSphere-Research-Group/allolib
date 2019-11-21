@@ -46,12 +46,12 @@
         Keehong Youn, 2017, younkeehong@gmail.com
 */
 
-#include "al/system/al_Thread.hpp"
-#include "al/system/al_Time.hpp"
-
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "al/system/al_Thread.hpp"
+#include "al/system/al_Time.hpp"
 
 namespace al {
 
@@ -89,7 +89,7 @@ class Packet {
 
   /// @param[in] contents		buffer to copy packet data from
   /// @param[in] size			size, in bytes, of the packet buffer
-  Packet(const char* contents, int size);
+  Packet(const char* contents, size_t size);
 
   ~Packet();
 
@@ -101,7 +101,7 @@ class Packet {
   void printRaw() const;
 
   /// Get number of bytes of current packet data
-  int size() const;
+  size_t size() const;
 
   /// Begin a new bundle
   Packet& beginBundle(TimeTag timeTag = 1);
@@ -303,8 +303,8 @@ class Send : public Packet {
 
   /// @param[in] port		Port number (valid range is 0-65535)
   /// @param[in] address	IP address
-  /// @param[in] timeout	< 0: block forever; = 0: no blocking; > 0 block with
-  /// timeout
+  /// @param[in] timeout	< 0: block forever; = 0: no blocking; > 0 block
+  /// with timeout
   /// @param[in] size 	Packet buffer size
   Send(uint16_t port, const char* address = "localhost", al_sec timeout = 0,
        int size = 1024);
@@ -317,66 +317,66 @@ class Send : public Packet {
   uint16_t port() const { return mPort; }
 
   /// Send and clear current packet contents
-  int send();
+  size_t send();
 
   /// Send a packet
-  int send(const Packet& p);
+  size_t send(const Packet& p);
 
   /// Send zero argument message immediately
-  int send(const std::string& addr) {
+  size_t send(const std::string& addr) {
     addMessage(addr);
     return send();
   }
 
   /// Send one argument message immediately
   template <class A>
-  int send(const std::string& addr, const A& a) {
+  size_t send(const std::string& addr, const A& a) {
     addMessage(addr, a);
     return send();
   }
 
   /// Send two argument message immediately
   template <class A, class B>
-  int send(const std::string& addr, const A& a, const B& b) {
+  size_t send(const std::string& addr, const A& a, const B& b) {
     addMessage(addr, a, b);
     return send();
   }
 
   /// Send three argument message immediately
   template <class A, class B, class C>
-  int send(const std::string& addr, const A& a, const B& b, const C& c) {
+  size_t send(const std::string& addr, const A& a, const B& b, const C& c) {
     addMessage(addr, a, b, c);
     return send();
   }
 
   /// Send four argument message immediately
   template <class A, class B, class C, class D>
-  int send(const std::string& addr, const A& a, const B& b, const C& c,
-           const D& d) {
+  size_t send(const std::string& addr, const A& a, const B& b, const C& c,
+              const D& d) {
     addMessage(addr, a, b, c, d);
     return send();
   }
 
   /// Send five argument message immediately
   template <class A, class B, class C, class D, class E>
-  int send(const std::string& addr, const A& a, const B& b, const C& c,
-           const D& d, const E& e) {
+  size_t send(const std::string& addr, const A& a, const B& b, const C& c,
+              const D& d, const E& e) {
     addMessage(addr, a, b, c, d, e);
     return send();
   }
 
   /// Send six argument message immediately
   template <class A, class B, class C, class D, class E, class F>
-  int send(const std::string& addr, const A& a, const B& b, const C& c,
-           const D& d, const E& e, const F& f) {
+  size_t send(const std::string& addr, const A& a, const B& b, const C& c,
+              const D& d, const E& e, const F& f) {
     addMessage(addr, a, b, c, d, e, f);
     return send();
   }
 
   /// Send seven argument message immediately
   template <class A, class B, class C, class D, class E, class F, class G>
-  int send(const std::string& addr, const A& a, const B& b, const C& c,
-           const D& d, const E& e, const F& f, const G& g) {
+  size_t send(const std::string& addr, const A& a, const B& b, const C& c,
+              const D& d, const E& e, const F& f, const G& g) {
     addMessage(addr, a, b, c, d, e, f, g);
     return send();
   }
@@ -395,10 +395,10 @@ class Recv {
   Recv();
 
   /// @param[in] port		Port number (valid range is 0-65535)
-  /// @param[in] address	IP address. If empty, will bind all network interfaces
-  /// to socket.
-  /// @param[in] timeout	< 0: block forever; = 0: no blocking; > 0 block with
-  /// timeout
+  /// @param[in] address	IP address. If empty, will bind all network
+  /// interfaces to socket.
+  /// @param[in] timeout	< 0: block forever; = 0: no blocking; > 0 block
+  /// with timeout
   Recv(uint16_t port, const char* address = "", al_sec timeout = 0);
 
   virtual ~Recv();
