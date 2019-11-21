@@ -1,3 +1,5 @@
+#include "al/io/al_AudioIO.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -8,8 +10,6 @@
 #include <cstring>
 #include <iostream>
 #include <string>
-
-#include "al/io/al_AudioIO.hpp"
 
 #ifdef AL_AUDIO_RTAUDIO
 #include "RtAudio.h"
@@ -577,7 +577,7 @@ static int rtaudioCallback(void *output, void *input, unsigned int frameCount,
                            double streamTime, RtAudioStreamStatus status,
                            void *userData);
 
-bool AudioBackend::open(int framesPerSecond, int framesPerBuffer,
+bool AudioBackend::open(int framesPerSecond, unsigned int framesPerBuffer,
                         void *userdata) {
   assert(framesPerBuffer != 0 && framesPerSecond != 0 && userdata != NULL);
   // Set the same number of channels for both input and output.
@@ -595,7 +595,7 @@ bool AudioBackend::open(int framesPerSecond, int framesPerBuffer,
     return false;
   }
 
-  if (deviceBufferSize != static_cast<unsigned int>(framesPerBuffer)) {
+  if (deviceBufferSize != framesPerBuffer) {
     printf("WARNING: Device opened with buffer size: %d", deviceBufferSize);
   }
   return true;
@@ -635,9 +635,8 @@ bool AudioBackend::stop() {
   try {
     data->audio.stopStream();
   } catch (RtAudioError &e) {
+    e.printMessage();
     return false;
-    //        e.printMessage();
-    //        goto cleanup;
   }
   return true;
 }

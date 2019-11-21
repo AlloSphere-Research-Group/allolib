@@ -67,7 +67,7 @@ static int resize(T*& buf, int n) {
 
 /// Utility function to efficiently clear buffer (set all to 0)
 template <class T>
-static void zero(T* buf, int n) {
+static void zero(T* buf, unsigned int n) {
   memset(buf, 0, n * sizeof(T));
 }
 
