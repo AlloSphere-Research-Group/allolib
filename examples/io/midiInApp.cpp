@@ -10,24 +10,26 @@ Lance Putnam, 9/2013
 */
 
 #include <stdio.h>
+
 #include "al/app/al_App.hpp"
 #include "al/io/al_MIDI.hpp"
 using namespace al;
 
 class MyApp : public App, public MIDIMessageHandler {
  public:
-  RtMidiIn RtMidiIn;
+  RtMidiIn midiIn;
 
-  void onCreate() {
+  void onInit() {
     // Check for connected MIDI devices
-    if (RtMidiIn.getPortCount() > 0) {
-      // Bind ourself to the RtMidiIn
-      MIDIMessageHandler::bindTo(RtMidiIn);
+    if (midiIn.getPortCount() > 0) {
+      // Bind ourself to the RtMidiIn object, to have the onMidiMessage()
+      // callback called whenever a MIDI message is received
+      MIDIMessageHandler::bindTo(midiIn);
 
       // Open the last device found
-      int port = RtMidiIn.getPortCount() - 1;
-      RtMidiIn.openPort(port);
-      printf("Opened port to %s\n", RtMidiIn.getPortName(port).c_str());
+      unsigned int port = midiIn.getPortCount() - 1;
+      midiIn.openPort(port);
+      printf("Opened port to %s\n", midiIn.getPortName(port).c_str());
     } else {
       printf("Error: No MIDI devices found.\n");
     }
@@ -83,4 +85,7 @@ class MyApp : public App, public MIDIMessageHandler {
   }
 };
 
-int main() { MyApp().start(); }
+int main() {
+  MyApp().start();
+  return 0;
+}
