@@ -222,6 +222,7 @@ set(sources
   src/sound/al_SoundFile.cpp
   src/spatial/al_HashSpace.cpp
   src/spatial/al_Pose.cpp
+  src/sphere/al_AlloSphereSpeakerLayout.cpp
   src/sphere/al_SphereUtils.cpp
   src/sphere/al_PerProjection.cpp
   src/system/al_PeriodicThread.cpp
