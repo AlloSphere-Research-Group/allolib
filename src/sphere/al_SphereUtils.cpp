@@ -1,4 +1,6 @@
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 #include "al/sphere/al_SphereUtils.hpp"
 
@@ -54,20 +56,17 @@ void sphere::get_fullscreen_dimension(int *width, int *height) {
   *width = 0;
   *height = 0;
 
-  assert(0 == 1);
+  GLFWmonitor** monitors = glfwGetMonitors(&count);
 
-  // FIXME implement
-  //    GLFWmonitor** monitors = glfwGetMonitors(&count);
-
-  //    for (int i = 0; i < count; i += 1) {
-  //        int x, y;
-  //        glfwGetMonitorPos(monitors[i], &x, &y);
-  //        const GLFWvidmode* vm = glfwGetVideoMode(monitors[i]);
-  //        int xmax = x + vm->width;
-  //        int ymax = y + vm->height;
-  //        if (*width < xmax) *width = xmax;
-  //        if (*height < ymax) *height = ymax;
-  //    }
+  for (int i = 0; i < count; i += 1) {
+    int x, y;
+    glfwGetMonitorPos(monitors[i], &x, &y);
+    const GLFWvidmode* vm = glfwGetVideoMode(monitors[i]);
+    int xmax = x + vm->width;
+    int ymax = y + vm->height;
+    if (*width < xmax) *width = xmax;
+    if (*height < ymax) *height = ymax;
+  }
 }
 
 std::string sphere::config_directory(const std::string &dir_if_not_renderer) {

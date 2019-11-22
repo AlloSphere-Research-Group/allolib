@@ -938,16 +938,16 @@ bool PresetHandler::savePresetValues(const ParameterStates &values,
   f << "::" + presetName << std::endl;
   for (auto value : values) {
     std::string types, valueString;
-    for (auto &value : value.second) {
-      if (value.type() == ParameterField::FLOAT) {
+    for (auto &value2 : value.second) {
+      if (value2.type() == ParameterField::FLOAT) {
         types += "f";
-        valueString += std::to_string(value.get<float>()) + " ";
-      } else if (value.type() == ParameterField::STRING) {
+        valueString += std::to_string(value2.get<float>()) + " ";
+      } else if (value2.type() == ParameterField::STRING) {
         types += "s";
-        valueString += value.get<std::string>() + " ";
-      } else if (value.type() == ParameterField::INT32) {
+        valueString += value2.get<std::string>() + " ";
+      } else if (value2.type() == ParameterField::INT32) {
         types += "i";
-        valueString += std::to_string(value.get<int32_t>()) + " ";
+        valueString += std::to_string(value2.get<int32_t>()) + " ";
       }
     }
     // TODO chop last blank space
