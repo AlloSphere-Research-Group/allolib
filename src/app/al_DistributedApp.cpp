@@ -18,13 +18,14 @@ void DistributedApp::initialize() {
 #endif
   TomlLoader appConfig("distributed_app.toml");
   auto nodesTable = appConfig.root->get_table_array("node");
+  std::vector<std::string> mListeners;
   // First get role from config file
   if (nodesTable) {
     for (const auto &table : *nodesTable) {
       std::string host = *table->get_as<std::string>("host");
       std::string role = *table->get_as<std::string>("role");
 
-      if (strncmp(name().c_str(), host.c_str(), name().size()) == 0) {
+       if (name() == host) {
         // Now set capabilities from role
         if (role == "desktop") {
           mCapabilites = (Capability)(CAP_SIMULATOR | CAP_RENDERING |
@@ -49,24 +50,28 @@ void DistributedApp::initialize() {
         }
       }
       mRoleMap[host] = role;
-      if (table->contains("dataRoot") &&
-          strncmp(name().c_str(), host.c_str(), name().size()) ==
-              0) {  // Set configuration for this node when found
+      if (table->contains("dataRoot")) {
+         if (name() == host) {  // Set configuration for this node when found
         std::string dataRootValue = *table->get_as<std::string>("dataRoot");
         mGlobalDataRootPath = File::conformPathToOS(dataRootValue);
+        }
       } else {
         std::cout << "WARNING: node " << host.c_str() << " not given dataRoot"
                   << std::endl;
       }
 
       if (table->contains("rank")) {
-        rank = *table->get_as<int>("rank");
+         if (name() == host) {  // Set configuration for this node when found
+          rank = *table->get_as<int>("rank");
+        }
       } else {
         std::cout << "WARNING: node " << host.c_str() << " not given rank"
                   << std::endl;
       }
       if (table->contains("group")) {
-        group = *table->get_as<int>("group");
+        if (name() == host) {  // Set configuration for this node when found
+          group = *table->get_as<int>("group");
+        }
       } else {
         std::cout << "WARNING: node " << host.c_str() << " not given group"
                   << std::endl;
@@ -101,12 +106,16 @@ void DistributedApp::initialize() {
   // probe to check if first port available, this will determine if this
   // application is the primary or the replica
   if (!testServer.open(mOSCDomain->port, mOSCDomain->interfaceIP.c_str())) {
+    // If port taken, run this instance as a renderer
     mCapabilites = (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC);
-    rank = 1;
+    rank = 99;
     std::cout << "Replica: " << name() << ":Running distributed" << std::endl;
-  } else {
+  } else if (rank == 0) {
     testServer.stop();
     std::cout << "Primary: " << name() << ":Running distributed" << std::endl;
+  } else {
+    testServer.stop();
+    std::cout << "Secondary: rank " << rank << std::endl;
   }
 
   if (hasCapability(CAP_AUDIO_IO)) {
@@ -184,7 +193,16 @@ void DistributedApp::start() {
   if (!isPrimary()) {
     mSimulationDomain
         ->disableProcessingCallback();  // Replicas won't call onAnimate()
+
+  } else {
+    for(auto hostRole: mRoleMap) {
+      if (hostRole.first != name() ) {
+        parameterServer().addListener(hostRole.first, oscDomain()->port);
+      }
+
+    }
   }
+
 
   onInit();
 
