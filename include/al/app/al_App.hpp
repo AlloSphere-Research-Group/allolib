@@ -14,9 +14,7 @@
 #include "al/app/al_OSCDomain.hpp"
 #include "al/app/al_OpenGLGraphicsDomain.hpp"
 #include "al/app/al_SimulationDomain.hpp"
-//#include "al_OpenVRDomain.hpp"
-
-#include "al/app/al_WindowApp.hpp"
+#include "al/graphics/al_Graphics.hpp"
 
 /** @defgroup App Application building tools
  *
