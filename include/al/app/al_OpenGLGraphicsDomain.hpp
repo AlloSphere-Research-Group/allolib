@@ -8,10 +8,11 @@
 #include <stack>
 #include <vector>
 
-#include "al_ComputationDomain.hpp"
-
-#include "al/app/al_WindowApp.hpp"
+#include "al/app/al_ComputationDomain.hpp"
+#include "al/app/al_FPS.hpp"
+#include "al/graphics/al_Graphics.hpp"
 #include "al/io/al_ControlNav.hpp"
+#include "al/io/al_Window.hpp"
 
 namespace al {
 
@@ -44,6 +45,8 @@ class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
 
   void quit() { mShouldQuitApp = true; }
   bool shouldQuit() { return mShouldQuitApp || mSubDomainList.size() == 0; }
+
+  bool running() { return mRunning; }
 
   std::shared_ptr<GLFWOpenGLWindowDomain> newWindow();
 

@@ -50,7 +50,7 @@ set(headers
   include/al/app/al_AudioApp.hpp
   include/al/app/al_DistributedApp.hpp
   include/al/app/al_FPS.hpp/
-  include/al/app/al_WindowApp.hpp
+#  include/al/app/al_WindowApp.hpp
 
   include/al/app/al_AudioDomain.hpp
   include/al/app/al_ComputationDomain.hpp
@@ -152,7 +152,7 @@ set(sources
   src/app/al_App.cpp
   src/app/al_AudioApp.cpp
   src/app/al_FPS.cpp
-  src/app/al_WindowApp.cpp
+#  src/app/al_WindowApp.cpp
   src/app/al_DistributedApp.cpp
 
   src/app/al_AudioDomain.cpp
