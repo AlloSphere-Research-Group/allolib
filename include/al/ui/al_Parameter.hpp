@@ -470,6 +470,51 @@ class ParameterWrapper : public ParameterMeta {
    */
   void registerChangeCallback(ParameterChangeCallback cb);
 
+  /**
+   * @brief Determines whether value change callbacks are called synchronously
+   * @param synchronous
+   *
+   * If set to true, parameter change callbacks are called directly from the
+   * setter function, i.e. as soon as the parameter value changes. This behavior
+   * might be problematic in some cases, for example when an OSC message
+   * triggers a change in the opengl state. This will cause a crash as the
+   * opengl functions need to be called from the opengl context instead of from
+   * a thread in the network context. By setting this to false and then calling
+   * runChangeCallbacks within the opengl thread will call the callbacks
+   * whenever the value has changed, but at the right time, in the right
+   * context.
+   */
+  void setSynchronousCallbacks(bool synchronous = true) {
+    mSynchronous = synchronous;
+    if (mCallbacks.size() > 0 && mCallbacks[0] == mAsyncCallback) {
+      if (synchronous) {
+        mCallbacks.erase(mCallbacks.begin());
+      } else {
+        std::cout << "WARNING: setSynchronousCallbacks() already set to false"
+                  << std::endl;
+      }
+    } else {
+      if (!synchronous) {
+        mCallbacks.insert(mCallbacks.begin(), mAsyncCallback);
+      }
+    }
+  }
+
+  /**
+   * @brief call change callbacks if value has changed since last call
+   */
+  void processChange() {
+    if (mChanged && mCallbacks.size() > 0 && mCallbacks[0] == mAsyncCallback) {
+      auto callbackIt = mCallbacks.begin() + 1;
+      ParameterType value = get();
+      mChanged = false;
+      while (callbackIt != mCallbacks.end()) {
+        (*(*callbackIt))(value);
+        callbackIt++;
+      }
+    }
+  }
+
   std::vector<ParameterWrapper<ParameterType> *> operator<<(
       ParameterWrapper<ParameterType> &newParam) {
     std::vector<ParameterWrapper<ParameterType> *> paramList;
@@ -496,16 +541,24 @@ class ParameterWrapper : public ParameterMeta {
   ParameterType mMin;
   ParameterType mMax;
 
+  void runChangeCallbacksSynchronous(ParameterType &value);
+
   std::shared_ptr<ParameterProcessCallback> mProcessCallback;
   // void * mProcessUdata;
-  std::vector<std::shared_ptr<ParameterChangeCallback>> mCallbacks;
   // std::vector<void *> mCallbackUdata;
 
  private:
-  std::mutex
-      *mMutex;  // pointer to avoid having to explicitly declare copy/move
+  // pointer to avoid having to explicitly declare copy/move
+  std::mutex *mMutex;
   ParameterType mValue;
   ParameterType mValueCache;
+
+  bool mSynchronous{true};
+  std::shared_ptr<ParameterChangeCallback> mAsyncCallback;
+  bool mChanged{false};
+
+ private:
+  std::vector<std::shared_ptr<ParameterChangeCallback>> mCallbacks;
 };
 
 /**
@@ -1212,6 +1265,9 @@ ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName,
   mValue = defaultValue;
   mValueCache = defaultValue;
   mMutex = new std::mutex;
+  std::shared_ptr<ParameterChangeCallback> mAsyncCallback =
+      std::make_shared<ParameterChangeCallback>(
+          [&](ParameterType value) { mChanged = true; });
 }
 
 template <class ParameterType>
@@ -1259,6 +1315,21 @@ void ParameterWrapper<ParameterType>::registerChangeCallback(
     typename ParameterWrapper::ParameterChangeCallback cb) {
   mCallbacks.push_back(std::make_shared<ParameterChangeCallback>(cb));
   // mCallbackUdata.push_back(userData);
+}
+
+template <class ParameterType>
+void ParameterWrapper<ParameterType>::runChangeCallbacksSynchronous(
+    ParameterType &value) {
+  for (auto cb : mCallbacks) {
+    if (cb == mAsyncCallback) {
+      // Async callback is just a marker and should be the first callback
+      // in the vector
+      mChanged = true;
+      return;
+    } else {
+      (*cb)(value);
+    }
+  }
 }
 
 }  // namespace al

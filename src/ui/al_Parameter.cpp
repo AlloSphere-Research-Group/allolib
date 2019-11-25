@@ -1,11 +1,12 @@
 
+#include "al/ui/al_Parameter.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <regex>
 #include <sstream>
 
 #include "al/io/al_File.hpp"
-#include "al/ui/al_Parameter.hpp"
 
 using namespace al;
 
@@ -33,9 +34,7 @@ void Parameter::setNoCalls(float value, void *blockReceiver) {
     value = (*mProcessCallback)(value);  //, mProcessUdata);
   }
   if (blockReceiver) {
-    for (auto cb : mCallbacks) {
-      (*cb)(value);
-    }
+    runChangeCallbacksSynchronous(value);
   }
 
   mFloatValue = value;
@@ -47,9 +46,8 @@ void Parameter::set(float value) {
   if (mProcessCallback) {
     value = (*mProcessCallback)(value);  //, mProcessUdata);
   }
-  for (auto cb : mCallbacks) {
-    (*cb)(value);
-  }
+
+  runChangeCallbacksSynchronous(value);
   mFloatValue = value;
 }
 
@@ -72,9 +70,7 @@ void ParameterInt::setNoCalls(int32_t value, void *blockReceiver) {
     value = (*mProcessCallback)(value);  //, mProcessUdata);
   }
   if (blockReceiver) {
-    for (auto cb : mCallbacks) {
-      (*cb)(value);
-    }
+    runChangeCallbacksSynchronous(value);
   }
 
   mIntValue = value;
@@ -86,9 +82,8 @@ void ParameterInt::set(int32_t value) {
   if (mProcessCallback) {
     value = (*mProcessCallback)(value);  //, mProcessUdata);
   }
-  for (auto cb : mCallbacks) {
-    (*cb)(value);
-  }
+
+  runChangeCallbacksSynchronous(value);
   mIntValue = value;
 }
 
