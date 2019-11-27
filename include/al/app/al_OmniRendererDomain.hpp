@@ -5,7 +5,7 @@
 
 #include "al/app/al_OpenGLGraphicsDomain.hpp"
 #include "al/graphics/al_Graphics.hpp"
-#include "al/sphere/al_Perprojection.hpp"
+#include "al/sphere/al_PerProjection.hpp"
 #include "al/sphere/al_SphereUtils.hpp"
 
 namespace al {
