@@ -49,6 +49,7 @@ set(headers
   include/al/app/al_App.hpp
   include/al/app/al_AudioApp.hpp
   include/al/app/al_DistributedApp.hpp
+  include/al/app/al_NodeConfiguration.hpp
   include/al/app/al_FPS.hpp/
 #  include/al/app/al_WindowApp.hpp
 
@@ -121,6 +122,8 @@ set(headers
   include/al/sound/al_SoundFile.hpp
   include/al/spatial/al_HashSpace.hpp
   include/al/spatial/al_Pose.hpp
+  include/al/sphere/al_SphereUtils.hpp
+  include/al/sphere/al_PerProjection.hpp
   include/al/system/al_PeriodicThread.hpp
   include/al/system/al_Printing.hpp
   include/al/system/al_Thread.hpp

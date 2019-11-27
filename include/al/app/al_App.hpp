@@ -67,10 +67,10 @@ class App {
   virtual Window &defaultWindow();
   virtual Graphics &graphics();
 
-  Viewpoint &view();
-  Pose &pose();
-  Lens &lens();
-  Nav &nav();
+  virtual Viewpoint &view();
+  virtual Pose &pose();
+  virtual Lens &lens();
+  virtual Nav &nav();
   NavInputControl &navControl();
   void fps(double f);
 

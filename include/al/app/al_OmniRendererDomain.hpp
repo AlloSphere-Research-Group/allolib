@@ -1,14 +1,12 @@
 #ifndef INCLUDE_OMNIRENDER_HPP
 #define INCLUDE_OMNIRENDER_HPP
 
-#include "al/sphere/al_Perprojection.hpp"
-#include "al/sphere/al_SphereUtils.hpp"
+#include <iostream>
 
 #include "al/app/al_OpenGLGraphicsDomain.hpp"
-//#include "al/graphics/al_GLFW.hpp"
 #include "al/graphics/al_Graphics.hpp"
-
-#include <iostream>
+#include "al/sphere/al_Perprojection.hpp"
+#include "al/sphere/al_SphereUtils.hpp"
 
 namespace al {
 
