@@ -44,8 +44,8 @@ struct MyApp : App {
   }
 
   void exitExtra() {
-    std::cout << "doing extra stuff" << std::endl;
     client.send("/test", "handshakeoff", 1);
+    std::cout << "doing extra stuff" << std::endl;
   }
 
   void onAnimate(double dt) override {
@@ -70,6 +70,7 @@ struct MyApp : App {
       while (1)
         ;
     }
+    return true;
   }
 
   void onMessage(osc::Message& m) override { m.print(); }
