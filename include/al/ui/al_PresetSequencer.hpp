@@ -46,6 +46,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <functional>
+#include <future>
 #include <mutex>
 #include <queue>
 #include <string>
@@ -146,21 +147,7 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   void rewind();
 
-  bool playbackFinished() { return mSteps.size() == 0; }
-
-  /**
-   * @brief Stores a copy of a sequence with its associated presets
-   * @param sequenceName Name of sequence without extension. Searched for in
-   * mDirectory
-   * @param overwrite if directory exists, delete it before writing if overwrite
-   * is true.
-   * @return returns false if there was any error archiving sequence
-   *
-   * Stores a copy of the sequence and all its associated presets in a new
-   * folder. A PresetHandler must be registered for this to work as this sets
-   * the current Sequence and preset directory.
-   */
-  bool archiveSequence(std::string sequenceName, bool overwrite = true);
+  bool playbackFinished() { return mSteps.size() == mCurrentStep; }
 
   /**
    * @brief getSequenceList returns a list of sequences in the current sequence
@@ -229,8 +216,8 @@ class PresetSequencer : public osc::MessageConsumer {
    * The sequence is searched in the PresetHandler current path or the
    *  PresetSequencer's directory if PresetHandler not registered.
    */
-  std::queue<Step> loadSequence(std::string sequenceName,
-                                double timeScale = 1.0f);
+  std::vector<Step> loadSequence(std::string sequenceName,
+                                 double timeScale = 1.0);
 
   std::string currentSequence() { return mCurrentSequence; }
 
@@ -321,14 +308,10 @@ class PresetSequencer : public osc::MessageConsumer {
 
   std::string buildFullPath(std::string sequenceName);
 
-  void prepareFirstStep();
-
   void startCpuThread();
   void stopCpuThread();
 
-  std::queue<Step> mSteps;
-  std::queue<Step>
-      mMostRecentSequence;  // Steps from last sequence loaded from disk
+  std::vector<Step> mSteps;
   std::string mDirectory;
   PresetHandler *mPresetHandler{nullptr};
   std::vector<ParameterMeta *> mParameters;
@@ -340,9 +323,9 @@ class PresetSequencer : public osc::MessageConsumer {
 
   TimeMasterMode mTimeMasterMode;
 
-  bool mSequencerActive;
+  bool mSequencerActive{false};
   bool mRunning;
-  bool mStartingRun;
+  bool mStartRunning;
   std::queue<Step> mParameterList;
   double mCurrentTime = 0.0;  // Current time (in seconds)
   double mParamTargetTime;
@@ -366,89 +349,13 @@ class PresetSequencer : public osc::MessageConsumer {
   //      std::chrono::high_resolution_clock::now();
   std::unique_ptr<std::thread> mSequencerThread;
   std::mutex mSequenceLock;
+  uint64_t mCurrentStep;
+  PresetHandler::ParameterStates mStartValues;
   std::mutex mPlayWaitLock;
   std::condition_variable mPlayWaitVariable;
-};
-
-/// SequenceServer
-/// @ingroup UI
-class SequenceServer : public osc::PacketHandler, public OSCNotifier {
- public:
-  /**
-   * @brief SequenceServer constructor
-   *
-   * @param oscAddress The network address on which to listen to. If empty use
-   * all available network interfaces. Defaults to "127.0.0.1".
-   * @param oscPort The network port on which to listen. Defaults to 9012.
-   *
-   * The sequencer server triggers sequences when it receives a valid sequence
-   * name on OSC path /sequence.
-   */
-
-  SequenceServer(std::string oscAddress = "127.0.0.1", int oscPort = 9012);
-  /**
-   * @brief using this constructor reuses the existing osc::Recv server from the
-   * ParameterServer object
-   * @param paramServer an existing ParameterServer object
-   *
-   * You will want to reuse an osc::Recv server when you want to expose the
-   * interface thorugh the same network port. Since network ports are exclusive,
-   * once a port is bound, it can't be used. You might need to expose the
-   * parameters on the same network port when using things like
-   * interface.simpleserver.js That must connect all interfaces to the same
-   * network port.
-   */
-  SequenceServer(ParameterServer &paramServer);
-  ~SequenceServer();
-
-  virtual void onMessage(osc::Message &m);
-
-  // Special cases of objects that are handled in specific ways
-  SequenceServer &registerSequencer(PresetSequencer &sequencer);
-  SequenceServer &registerRecorder(SequenceRecorder &recorder);
-  SequenceServer &registerMessageConsumer(osc::MessageConsumer &consumer);
-
-  /**
-   * @brief print prints information about the server to std::out
-   */
-  void print();
-
-  /**
-   * @brief stopServer stops the OSC server thread. Calling this function
-   * is sometimes required when this object is destroyed abruptly and the
-   * destructor is not called.
-   */
-  void stopServer();
-
-  SequenceServer &operator<<(PresetSequencer &sequencer) {
-    return registerSequencer(sequencer);
-  }
-  SequenceServer &operator<<(SequenceRecorder &recorder) {
-    return registerRecorder(recorder);
-  }
-  SequenceServer &operator<<(osc::MessageConsumer &consumer) {
-    return registerMessageConsumer(consumer);
-  }
-
-  void setAddress(std::string address);
-  std::string getAddress();
-
- protected:
-  //	void attachPacketHandler(osc::PacketHandler *handler);
-  static void changeCallback(int value, void *sender, void *userData);
-
- private:
-  osc::Recv *mServer;
-  PresetSequencer *mSequencer;
-  SequenceRecorder *mRecorder;
-  // ParameterServer *mParamServer;
-  std::vector<Composition *> mCompositions;
-  //	std::mutex mServerLock;
-  std::string mOSCpath;
-  std::string mOSCQueryPath;
-  //	std::mutex mHandlerLock;
-  //	std::vector<osc::PacketHandler *> mHandlers;
-  std::vector<osc::MessageConsumer *> mConsumers;
+  //  std::mutex mPlayStartedLock;
+  //  std::condition_variable mPlayStartedVariable;
+  std::shared_ptr<std::promise<void>> mPlayPromiseObj;
 };
 
 }  // namespace al

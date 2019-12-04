@@ -1,6 +1,5 @@
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-
 #include "al/ui/al_ControlGUI.hpp"
 #include "al/ui/al_Parameter.hpp"
 #include "al/ui/al_PresetSequencer.hpp"
@@ -8,6 +7,10 @@
 
 using namespace al;
 using namespace std;
+
+// This file shows how you can use the PresetSequencer class to store and
+// recall individual parameter changes (without having them be part of a
+// preset)
 
 struct MyApp : App {
   Mesh m;
@@ -27,11 +30,15 @@ struct MyApp : App {
     navControl().disable();
 
     sequencer.setDirectory("presets");
+    // Register preset handler and parameters with sequencer
+    sequencer << presetHandler << Z;
+    // Register preset handler and parameters with recorder
+    recorder << presetHandler << Z;
 
-    sequencer << presetHandler
-              << Z;  // Register preset handler and parameters with sequencer
-    recorder << presetHandler
-             << Z;  // Register preset handler and parameters with recorder
+    // We have registered parameter Z with the sequencer, so we will register
+    // the other two parameters with the preset handler. This setup will
+    // store X and Y in preset files and changes to Z in the preset sequence
+    // text file
     presetHandler << X << Y;
 
     gui.init();
@@ -59,10 +66,8 @@ struct MyApp : App {
         recorder.stopRecord();
         std::cout << "End recording" << std::endl;
         auto steps = sequencer.loadSequence("seq");
-        while (!steps.empty()) {
-          std::cout << steps.front().waitTime << " " << steps.front().presetName
-                    << std::endl;
-          steps.pop();
+        for (auto &step : steps) {
+          std::cout << step.waitTime << " " << step.presetName << std::endl;
         }
       } else {
         recorder.startRecord("seq", true);

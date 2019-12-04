@@ -736,17 +736,19 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
         //                presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
       }
       if (ImGui::Button("Play")) {
-        presetSequencer->stopSequence();
-        if (presetSequencer->playbackFinished()) {
-          presetSequencer->setTime(0.0);
-        }
-        if (currentPresetSequencerItem >= 0) {
-          double sliderTime = state.currentTime;
-          presetSequencer->playSequence(
-              stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
-          presetSequencer->setTime(sliderTime);
-        } else {
-          std::cout << "No sequence selected for playback." << std::endl;
+        if (!presetSequencer->running()) {
+          presetSequencer->stopSequence();
+          if (presetSequencer->playbackFinished()) {
+            presetSequencer->setTime(0.0);
+          }
+          if (currentPresetSequencerItem >= 0) {
+            double sliderTime = state.currentTime;
+            presetSequencer->playSequence(
+                stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
+            presetSequencer->setTime(sliderTime);
+          } else {
+            std::cout << "No sequence selected for playback." << std::endl;
+          }
         }
       }
       ImGui::SameLine();

@@ -1,10 +1,11 @@
+#include "al/ui/al_Composition.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
 #include "al/io/al_File.hpp"
 #include "al/system/al_Time.hpp"
-#include "al/ui/al_Composition.hpp"
 
 using namespace al;
 
@@ -78,83 +79,84 @@ bool Composition::playArchive(std::string archiveName) {
 
 std::string Composition::getName() { return mCompositionName; }
 
-bool Composition::archiveComposition() {
-  std::string path = getCurrentPath();
-  std::string compositionName = mCompositionName;
-  bool ok = true;
+// bool Composition::archiveComposition() {
+//  std::string path = getCurrentPath();
+//  std::string compositionName = mCompositionName;
+//  bool ok = true;
 
-  std::string fullPath = path;
-  fullPath += compositionName + ".composition";
+//  std::string fullPath = path;
+//  fullPath += compositionName + ".composition";
 
-  std::string archivePath = fullPath;
-  if (archivePath.size() > 8 &&
-      archivePath.substr(archivePath.size() - 8) != "_archive") {
-    archivePath += "_archive";
-  }
+//  std::string archivePath = fullPath;
+//  if (archivePath.size() > 8 &&
+//      archivePath.substr(archivePath.size() - 8) != "_archive") {
+//    archivePath += "_archive";
+//  }
 
-  if (File::isDirectory(archivePath)) {
-    if (!Dir::removeRecursively(archivePath)) {
-      std::cerr << "Error removing directory: " << fullPath
-                << " aborting composition archiving." << std::endl;
-      return false;
-    }
-    if (!Dir::make(archivePath)) {
-      std::cerr << "Error creating composition archive directory " << fullPath
-                << std::endl;
-      return false;
-    }
+//  if (File::isDirectory(archivePath)) {
+//    if (!Dir::removeRecursively(archivePath)) {
+//      std::cerr << "Error removing directory: " << fullPath
+//                << " aborting composition archiving." << std::endl;
+//      return false;
+//    }
+//    if (!Dir::make(archivePath)) {
+//      std::cerr << "Error creating composition archive directory " << fullPath
+//                << std::endl;
+//      return false;
+//    }
 
-  } else if (!File::exists(archivePath)) {
-    if (!Dir::make(archivePath)) {
-      std::cerr << "Error creating compostion archive directory " << archivePath
-                << std::endl;
-      return false;
-    }
+//  } else if (!File::exists(archivePath)) {
+//    if (!Dir::make(archivePath)) {
+//      std::cerr << "Error creating compostion archive directory " <<
+//      archivePath
+//                << std::endl;
+//      return false;
+//    }
 
-  } else {
-    // TODO generate new name instead of error
-    std::cerr << "compostion directory name taken by file: " << archivePath
-              << std::endl;
-    return false;
-  }
+//  } else {
+//    // TODO generate new name instead of error
+//    std::cerr << "compostion directory name taken by file: " << archivePath
+//              << std::endl;
+//    return false;
+//  }
 
-  auto steps = loadCompositionSteps(compositionName);
+//  auto steps = loadCompositionSteps(compositionName);
 
-  for (auto step : steps) {
-    std::cout << step.sequenceName << ":" << step.deltaTime << std::endl;
-    PresetSequencer sequencer;
-    sequencer.setDirectory(path);
-    std::queue<PresetSequencer::Step> sequenceSteps =
-        sequencer.loadSequence(step.sequenceName);
-    if (!File::copy(path + step.sequenceName + ".sequence",
-                    archivePath + "/" + step.sequenceName + ".sequence")) {
-      std::cerr << "Error copying sequence: " << step.sequenceName
-                << " when archiving composition." << std::endl;
-      ok = false;
-    }
-    while (sequenceSteps.size() > 0) {
-      PresetSequencer::Step &sequenceStep = sequenceSteps.front();
-      if (!File::exists(archivePath + "/" + sequenceStep.presetName +
-                        ".preset") &&
-          !File::copy(
-              path + sequenceStep.presetName + ".preset",
-              archivePath + "/" + sequenceStep.presetName + ".preset")) {
-        std::cerr << "Error copying preset: " << sequenceStep.presetName
-                  << " when archiving composition." << std::endl;
-        ok = false;
-      }
-      sequenceSteps.pop();
-    }
-  }
-  if (!File::copy(fullPath,
-                  archivePath + "/" + compositionName + ".composition")) {
-    std::cerr << "Error copying composition: " << compositionName
-              << " when archiving composition." << std::endl;
-    ok = false;
-  }
+//  for (auto step : steps) {
+//    std::cout << step.sequenceName << ":" << step.deltaTime << std::endl;
+//    PresetSequencer sequencer;
+//    sequencer.setDirectory(path);
+//    std::queue<PresetSequencer::Step> sequenceSteps =
+//        sequencer.loadSequence(step.sequenceName);
+//    if (!File::copy(path + step.sequenceName + ".sequence",
+//                    archivePath + "/" + step.sequenceName + ".sequence")) {
+//      std::cerr << "Error copying sequence: " << step.sequenceName
+//                << " when archiving composition." << std::endl;
+//      ok = false;
+//    }
+//    while (sequenceSteps.size() > 0) {
+//      PresetSequencer::Step &sequenceStep = sequenceSteps.front();
+//      if (!File::exists(archivePath + "/" + sequenceStep.presetName +
+//                        ".preset") &&
+//          !File::copy(
+//              path + sequenceStep.presetName + ".preset",
+//              archivePath + "/" + sequenceStep.presetName + ".preset")) {
+//        std::cerr << "Error copying preset: " << sequenceStep.presetName
+//                  << " when archiving composition." << std::endl;
+//        ok = false;
+//      }
+//      sequenceSteps.pop();
+//    }
+//  }
+//  if (!File::copy(fullPath,
+//                  archivePath + "/" + compositionName + ".composition")) {
+//    std::cerr << "Error copying composition: " << compositionName
+//              << " when archiving composition." << std::endl;
+//    ok = false;
+//  }
 
-  return ok;
-}
+//  return ok;
+//}
 
 bool Composition::archive(std::string compositionName, std::string path,
                           bool overwrite) {
