@@ -74,8 +74,8 @@ class Composition : public osc::MessageConsumer {
 
   std::string getName();
 
-  /// Archive current compostion
-  bool archiveComposition();
+  //  /// Archive current compostion
+  //  bool archiveComposition();
 
   void setSubDirectory(std::string subDir) { mSubDirectory = subDir; }
 

@@ -14,10 +14,9 @@ using namespace al;
 
 PresetSequencer::PresetSequencer(TimeMasterMode timeMasterMode)
     : mRunning(false),
-      mStartingRun(false),
-      mSequencerThread(nullptr),
       mBeginCallbackEnabled(false),
-      mEndCallbackEnabled(false) {
+      mEndCallbackEnabled(false),
+      mSequencerThread(nullptr) {
   mTimeMasterMode = timeMasterMode;
   if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
     startCpuThread();
@@ -26,89 +25,41 @@ PresetSequencer::PresetSequencer(TimeMasterMode timeMasterMode)
 
 PresetSequencer::~PresetSequencer() { stopCpuThread(); }
 
-void PresetSequencer::prepareFirstStep() {
-  float playStandaloneTime = 0.0f;
-  bool playStandaloneParameters = false;
-  // Read parameter changes prior to first preset change
-  while (mSteps.size() > 0 && mSteps.front().type == PARAMETER) {
-    mParameterList.push(mSteps.front());
-    std::cout << "queued " << mSteps.front().presetName << ":"
-              << mSteps.front().params[0] << std::endl;
-    playStandaloneTime += mSteps.front().waitTime;
-    mSteps.pop();
-    playStandaloneParameters = true;
-  }
-
-  Step step = mSteps.front();
-  if (step.type == PRESET && !playStandaloneParameters) {
-    if (mPresetHandler) {
-      mPresetHandler->setMorphTime(step.morphTime);
-      mPresetHandler->recallPreset(step.presetName);
-      //                std::cout << "recalling " << step.presetName <<
-      //                std::endl;
-    } else {
-      std::cerr << "No preset handler registered with PresetSequencer. "
-                   "Ignoring preset change."
-                << std::endl;
-    }
-    mSteps.pop();
-    // Read parameter changes between this and the next preset change.
-    assert(mParameterList.empty());
-    //    while (!mParameterList.empty()) {
-    //      mParameterList.pop();
-    //    }
-    while (mSteps.size() > 0 && mSteps.front().type == PARAMETER) {
-      mParameterList.push(mSteps.front());
-      mSteps.pop();
-    }
-    //    float totalWaitTime = step.morphTime + step.waitTime;
-    //    mTargetTime += std::chrono::microseconds(
-    //        (int)(totalWaitTime * 1.0e6 - (mGranularity * 1.5 * 1.0e3)));
-  }
-  if (mParameterList.size() > 0) {
-    mParamTargetTime = mParameterList.front().waitTime;
-    //            std::cout << "setting param wait " <<
-    //            mParameterList.front().waitTime << std::endl;
-  }
-  mTargetTime = playStandaloneTime;
-}
-
 void PresetSequencer::playSequence(std::string sequenceName, double timeScale) {
   stopSequence();
   mSequenceLock.lock();
 
   if (sequenceName.size() > 0) {
-    std::queue<Step> steps = loadSequence(sequenceName, timeScale);
+    auto steps = loadSequence(sequenceName, timeScale);
+    mCurrentSequence = sequenceName;
     mSteps = steps;
   }
 
   // Initialize counters
   //  mSequenceStart = std::chrono::high_resolution_clock::now();
-  mCurrentTime = 0.0f;
-  mLastTimeUpdate = 0.0f;
-
-  prepareFirstStep();
+  mCurrentTime = 0.0;
+  mCurrentStep = 0;
+  mLastTimeUpdate = 0.0;
+  mTargetTime = 0.0;
+  mRunning = false;
+  mSequenceLock.unlock();
 
   if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
     {
-      std::unique_lock<std::mutex> lk(mPlayWaitLock);
-      mStartingRun = true;
-      mPlayWaitVariable.notify_one();
-    }
-    mSequenceLock.unlock();
-    {
-      std::unique_lock<std::mutex> lk(mPlayWaitLock);
-      mPlayWaitVariable.wait(lk, [&] { return mRunning; });
+      //      std::unique_lock<std::mutex> lk2(mPlayStartedLock);
+      mPlayPromiseObj = std::make_shared<std::promise<void>>();
+      auto playFuture = mPlayPromiseObj->get_future();
+      {
+        std::unique_lock<std::mutex> lk(mPlayWaitLock);
+        mPlayWaitVariable.notify_all();
+      }
+      playFuture.get();
+      //      mPlayStartedVariable.wait(lk2);
     }
 
   } else {
-    mSequenceLock.unlock();
     mRunning = true;
   }
-
-  //	std::thread::id seq_thread_id = mSequencerThread->get_id();
-  //	std::cout << "Preset Sequencer thread id: " << std::hex << seq_thread_id
-  //<< std::endl;
 }
 
 void PresetSequencer::stopSequence(bool triggerCallbacks) {
@@ -122,33 +73,40 @@ void PresetSequencer::stopSequence(bool triggerCallbacks) {
       enableEndCallback(mCallbackStatus);
     }
     mRunning = false;
-    // Is waiting on this lock reliable? Will it hang?
-    mPlayWaitLock.lock();  // This waits for the sequencer thread function to
-                           // wait on the condition variable.
-    mPlayWaitLock.unlock();
   }
+  //  if (mSequencerThread) {
+  //    //    std::unique_lock<std::mutex> lk2(mPlayStartedLock);
+  //    mPlayPromiseObj = std::make_shared<std::promise<bool>>();
+  //    auto playFuture = mPlayPromiseObj->get_future();
+  //    std::unique_lock<std::mutex> lk(mPlayWaitLock);
+  //    mPlayWaitVariable.notify_all();
+  //    //    playFuture.wait();
+  //    //    mPlayStartedVariable.wait(lk2);
+  //  }
 }
 
 void PresetSequencer::setTime(double time) {
   if (running()) {
     mTimeRequest = time;
   } else {
-    mSteps = mMostRecentSequence;
+    //    mSteps = mMostRecentSequence;
     double currentTime = 0.0;
     auto sequencer = this;
     auto timeRequest = time;
+    mCurrentStep = 0;
     if (mSteps.size() > 0) {
-      Step step = sequencer->mSteps.front();
+      Step step = sequencer->mSteps[mCurrentStep];
       std::string previousPreset = mSteps.front().presetName;
-      while (currentTime < timeRequest && sequencer->mSteps.size() > 0) {
-        step = sequencer->mSteps.front();
+      while (currentTime < timeRequest &&
+             mCurrentStep < sequencer->mSteps.size()) {
+        step = sequencer->mSteps[mCurrentStep];
         currentTime += step.morphTime + step.waitTime;
         //                std::cout << "Skipping: " << step.presetName << " " <<
         //                step.morphTime << ":" << step.waitTime << std::endl;
         if (currentTime < timeRequest) {
           previousPreset = sequencer->mSteps.front().presetName;
         }
-        sequencer->mSteps.pop();
+        mCurrentStep++;
       }
       if (timeRequest >
           (currentTime -
@@ -191,78 +149,12 @@ void PresetSequencer::setTime(double time) {
 
 void PresetSequencer::rewind() {
   if (mSequenceLock.try_lock()) {
-    mSteps = mMostRecentSequence;
+    mCurrentStep = 0;
     setTime(0.0);
     mSequenceLock.unlock();
   } else {  // If lock can't be acquired, request time change
     setTime(0.0);
   }
-}
-
-bool PresetSequencer::archiveSequence(std::string sequenceName,
-                                      bool overwrite) {
-  bool ok = true;
-  std::string fullPath = buildFullPath(sequenceName) + "_archive";
-  if (mPresetHandler == nullptr) {
-    std::cerr
-        << "A Preset Handler must be registered to store sequences. Aborting."
-        << std::endl;
-    return false;
-  }
-  if (overwrite) {
-    if (File::isDirectory(fullPath)) {
-      if (!Dir::removeRecursively(fullPath)) {
-        std::cout << "Error removing directory: " << fullPath
-                  << " aborting sequence archiving." << std::endl;
-        return false;
-      }
-    } else {
-      if (File::remove(fullPath) != 0) {
-        std::cout << "Error removing file: " << fullPath
-                  << " aborting sequence archiving." << std::endl;
-        return false;
-      }
-    }
-    if (!Dir::make(fullPath)) {
-      std::cout << "Error creating sequence archive directory " << fullPath
-                << std::endl;
-      return false;
-    }
-  } else {
-    int counter = 0;
-    while (File::isDirectory(fullPath)) {
-      std::string newName = sequenceName + "_" + std::to_string(counter++);
-      fullPath = buildFullPath(newName) + "_archive";
-      if (counter == 0) {  // We've wrapped and run out of names...
-        std::cout << "Out of names for sequence archive." << std::endl;
-        return false;
-      }
-    }
-    if (!Dir::make(fullPath)) {
-      std::cout << "Error creating sequence archive directory " << fullPath
-                << std::endl;
-      return false;
-    }
-  }
-  std::queue<Step> steps = loadSequence(sequenceName);
-  while (steps.size() > 0) {
-    Step &step = steps.front();
-    std::string presetFilename =
-        mPresetHandler->getCurrentPath() + step.presetName + ".preset";
-    if (!File::copy(presetFilename, fullPath)) {
-      std::cout << "Error copying preset " << presetFilename
-                << " when archiving." << std::endl;
-      ok = false;
-    }
-    steps.pop();
-  }
-  if (!File::copy(buildFullPath(sequenceName), fullPath)) {
-    std::cout << "Error copying sequence " << sequenceName << " when archiving."
-              << std::endl;
-    ok = false;
-  }
-
-  return ok;
 }
 
 std::vector<std::string> al::PresetSequencer::getSequenceList() {
@@ -299,38 +191,38 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer) {
   while (sequencer->mSequencerActive) {
     {
       std::unique_lock<std::mutex> lk(sequencer->mPlayWaitLock);
+      sequencer->mPlayWaitVariable.wait(lk);
       if (sequencer->mBeginCallbackEnabled &&
           sequencer->mBeginCallback != nullptr) {
         sequencer->mBeginCallback(sequencer, sequencer->mBeginCallbackData);
       }
-      sequencer->mPlayWaitVariable.wait(
-          lk, [&] { return sequencer->mStartingRun; });
-      //      sequencer->mRunning = true;
-      //      sequencer->mStartingRun = false;
+      std::cout << "After begin callback" << std::endl;
+      sequencer->mRunning = true;
+      sequencer->mStartRunning = false;
+      sequencer->mPlayPromiseObj->set_value();
     }
-    sequencer->mRunning = true;
-    sequencer->mPlayWaitVariable.notify_one();
+    //    {
+    //      std::unique_lock<std::mutex> lk(sequencer->mPlayStartedLock);
+    //      sequencer->mPlayStartedVariable.notify_all();
+    //    }
     // to have the calling function know play has started
     // and callbacks have been called.
     //    sequencer->mSequenceLock.lock();
 
+    std::cout << "running" << std::endl;
+
     while (sequencer->running()) {
-      //      auto now = std::chrono::high_resolution_clock::now();
-      //      double currentTime =
-      //          1.0e-9 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-      //                       now - sequencer->mSequenceStart)
-      //                       .count();
       sequencer->stepSequencer(sequencer->mGranularity / 1000.0);
       std::this_thread::sleep_for(
           std::chrono::milliseconds(sequencer->mGranularity));
     }
+    sequencer->mRunning = false;
+    std::cout << "Sequence finished." << std::endl;
     if (sequencer->mPresetHandler) {
       std::this_thread::sleep_for(std::chrono::milliseconds(
           100));  // Give a little time to process any pending preset changes.
       sequencer->mPresetHandler->stopMorph();
     }
-    //	std::cout << "Sequence finished." << std::endl;
-    sequencer->mRunning = false;
     //    sequencer->mSequenceLock.unlock();
     if (sequencer->mEndCallbackEnabled && sequencer->mEndCallback != nullptr) {
       bool finished = sequencer->mSteps.size() == 0;
@@ -359,9 +251,9 @@ PresetSequencer &PresetSequencer::registerPresetHandler(
   return *this;
 }
 
-std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(
+std::vector<PresetSequencer::Step> PresetSequencer::loadSequence(
     std::string sequenceName, double timeScale) {
-  std::queue<Step> steps;
+  std::vector<Step> steps;
   std::string fullName = buildFullPath(sequenceName);
   std::ifstream f(fullName);
   if (!f.is_open()) {
@@ -391,7 +283,7 @@ std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(
       std::string next;
       std::getline(ss, next, ':');
       step.params.push_back(std::stof(next));
-      steps.push(step);
+      steps.push_back(step);
       //			 std::cout << name  << ":" << delta << ":" <<
       // duration << std::endl;
     } else if (name.size() > 0 && name[0] == '+') {
@@ -400,7 +292,7 @@ std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(
       step.presetName = delta;
       step.waitTime = std::stof(name.substr(1)) * timeScale;
       step.params = {float(std::stod(duration) * timeScale)};
-      steps.push(step);
+      steps.push_back(step);
       // std::cout << name  << ":" << delta << ":" << duration << std::endl;
     } else if (name.size() > 0 && name[0] != '#' && name[0] != '\r') {
       Step step;
@@ -408,17 +300,12 @@ std::queue<PresetSequencer::Step> PresetSequencer::loadSequence(
       step.presetName = name;
       step.morphTime = std::stof(delta) * timeScale;
       step.waitTime = std::stof(duration) * timeScale;
-      steps.push(step);
+      steps.push_back(step);
       // std::cout << name  << ":" << delta << ":" << duration << std::endl;
     }
   }
   if (f.bad()) {
     std::cout << "Error reading:" << sequenceName << std::endl;
-  }
-
-  if (!steps.empty()) {
-    mCurrentSequence = sequenceName;
-    mMostRecentSequence = steps;
   }
   return steps;
 }
@@ -465,17 +352,17 @@ void PresetSequencer::registerTimeChangeCallback(
 }
 
 float PresetSequencer::getSequenceTotalDuration(std::string sequenceName) {
-  float duration = 0.0f;
-  std::queue<Step> steps;
+  std::vector<Step> steps;
   if (sequenceName == mCurrentSequence) {
-    steps = mMostRecentSequence;
+    mSequenceLock.lock();
+    steps = mSteps;
+    mSequenceLock.unlock();
   } else {
     steps = loadSequence(sequenceName);
   }
-  while (steps.size() > 0) {
-    const Step &step = steps.front();
+  float duration = 0.0f;
+  for (auto &step : steps) {
     duration += step.morphTime + step.waitTime;
-    steps.pop();
   }
   return duration;
 }
@@ -483,19 +370,26 @@ float PresetSequencer::getSequenceTotalDuration(std::string sequenceName) {
 void PresetSequencer::clearSteps() {
   stopSequence();
   mSequenceLock.lock();
-  while (!mSteps.empty()) {
-    mSteps.pop();
-  }
+  mSteps.clear();
+  mCurrentSequence = "";
   mSequenceLock.unlock();
 }
 
 void PresetSequencer::appendStep(PresetSequencer::Step &newStep) {
   mSequenceLock.lock();
-  mSteps.push(newStep);
+  mSteps.push_back(newStep);
+  mCurrentSequence = "";
   mSequenceLock.unlock();
 }
 
 void PresetSequencer::setTimeMaster(TimeMasterMode masterMode) {
+  if (masterMode == TimeMasterMode::TIME_MASTER_CPU) {
+    startCpuThread();
+  } else {
+    if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
+      stopCpuThread();
+    }
+  }
   mTimeMasterMode = masterMode;
 }
 
@@ -504,16 +398,12 @@ void PresetSequencer::processTimeChangeRequest() {
   double timeRequest = double(mTimeRequest.exchange(-1.0f));
   if (timeRequest > 0.0) {
     std::cout << "Requested " << timeRequest << std::endl;
-    // Bring back previous steps
-    mSteps = mMostRecentSequence;
     mCurrentTime = 0.0;
-    //      mSequenceStart = std::chrono::high_resolution_clock::now();
-    //                paramTargetTime = now;
-    //      mTargetTime = mCurrentTime;
+    mCurrentStep = 0;
     if (mCurrentTime < timeRequest) {
       std::string previousPreset = mSteps.front().presetName;
-      while (mCurrentTime < timeRequest && mSteps.size() > 0) {
-        Step step = mSteps.front();
+      while (mCurrentTime < timeRequest && mSteps.size() > mCurrentStep) {
+        Step step = mSteps[mCurrentStep];
         if (step.type == PRESET) {
           mCurrentTime += step.morphTime + step.waitTime;
           //            std::cout << "Skipping: " << step.presetName << " "
@@ -523,7 +413,8 @@ void PresetSequencer::processTimeChangeRequest() {
             previousPreset = mSteps.front().presetName;
           }
         }
-        mSteps.pop();
+        mCurrentStep++;
+        //        mSteps.pop();
       }
       Step step = mSteps.front();
       if (timeRequest > (mCurrentTime - step.waitTime)) {
@@ -568,22 +459,6 @@ void PresetSequencer::stepSequencer(double dt) {
   if (mRunning) {
     mSequenceLock.lock();
     // Process parameter change
-    // Parameter changes until next preset change have been stored in
-    // mParameterList
-    if (mParameterList.size() > 0) {
-      while (mParamTargetTime <= mCurrentTime) {
-        std::string name = mParameterList.front().presetName;
-        for (auto *param : mParameters) {
-          if (param->getFullAddress() == name) {
-            param->fromFloat(mParameterList.front().params[0]);
-          }
-        }
-        mParameterList.pop();
-        if (mParameterList.size() > 0) {
-          mParamTargetTime += mParameterList.front().waitTime;
-        }
-      }
-    }
 
     //    {
     //      // Need to process next events
@@ -610,10 +485,10 @@ void PresetSequencer::stepSequencer(double dt) {
       }
     }
 
-    while (mTargetTime < mCurrentTime) {
+    while (mTargetTime < mCurrentTime && (mSteps.size() > mCurrentStep)) {
       // Reached target time. Process step
-      if (mSteps.size() > 0) {
-        Step step = mSteps.front();
+      if (mSteps.size() > mCurrentStep) {
+        Step step = mSteps[mCurrentStep];
         assert(step.type == PRESET);
         assert(mParameterList.empty());
         //        while (!mParameterList.empty()) {
@@ -629,14 +504,12 @@ void PresetSequencer::stepSequencer(double dt) {
                          "Ignoring preset change."
                       << std::endl;
           }
-          mSteps.pop();
-          while (mSteps.size() > 0 && mSteps.front().type == PARAMETER) {
-            mParameterList.push(mSteps.front());
-            std::cout << "queued " << mSteps.front().presetName << ":"
-                      << mSteps.front().params[0] << std::endl;
-            mSteps.pop();
-          }
+          mCurrentStep++;
           mTargetTime += step.morphTime + step.waitTime;
+        } else if (step.type == PARAMETER) {
+          mCurrentStep++;
+          mTargetTime += step.morphTime + step.waitTime;
+        } else if (step.type == EVENT) {
         }
 
         //        if (!mRunning) {
@@ -653,22 +526,12 @@ void PresetSequencer::stepSequencer(double dt) {
         //        }
       }
     }
-    if (mTargetTime < mCurrentTime) {
+    if (mTargetTime <= mCurrentTime) {
       mRunning = false;
     }
     mSequenceLock.unlock();
   }
 }
-// else {
-//  if (mRunning) {
-//    // If still running, we have reached end of sequence.
-//    if (mEndCallback) {
-//      mEndCallback(true, this, mEndCallbackData);
-//    }
-//    mRunning = false;
-//  }
-//}
-//}
 
 bool PresetSequencer::consumeMessage(osc::Message &m, std::string rootOSCPath) {
   std::string basePath = rootOSCPath;
@@ -712,120 +575,22 @@ void PresetSequencer::startCpuThread() {
 }
 
 void PresetSequencer::stopCpuThread() {
-  mSequencerActive = false;
   stopSequence(false);
   if (mPresetHandler) {
     mPresetHandler->stopMorph();
   }
-  this->enableBeginCallback(
-      false);           // To vaoid triggering callback on thread wake up
-  mStartingRun = true;  // The conditional variable will only stop waiting if
-                        // this is true
-  this->mPlayWaitVariable.notify_all();
+
   if (mSequencerThread) {
+    mSequencerActive = false;
+    mPlayPromiseObj = std::make_shared<std::promise<void>>();
+    auto playFuture = mPlayPromiseObj->get_future();
+    {
+      std::unique_lock<std::mutex> lk(mPlayWaitLock);
+      mPlayWaitVariable.notify_all();
+    }
+    playFuture.get();
+    mRunning = false;
     mSequencerThread->join();
     mSequencerThread = nullptr;
   }
-}
-
-// SequenceServer
-// ----------------------------------------------------------------
-
-SequenceServer::SequenceServer(std::string oscAddress, int oscPort)
-    : mServer(nullptr),
-      mRecorder(nullptr),
-      // mParamServer(nullptr),
-      mOSCpath("/sequence") {
-  mServer = new osc::Recv(oscPort, oscAddress.c_str(),
-                          0.001);  // Is this 1ms wait OK?
-  if (mServer) {
-    mServer->handler(*this);
-    mServer->start();
-  } else {
-    std::cout << "Error starting OSC server." << std::endl;
-  }
-}
-
-SequenceServer::SequenceServer(ParameterServer &paramServer)
-    : mServer(nullptr),
-      // mParamServer(&paramServer),
-      mOSCpath("/sequence") {
-  paramServer.registerOSCListener(this);
-}
-
-SequenceServer::~SequenceServer() {
-  //	std::cout << "~SequenceServer()" << std::endl;;
-  if (mServer) {
-    mServer->stop();
-    delete mServer;
-    mServer = nullptr;
-  }
-}
-
-void SequenceServer::onMessage(osc::Message &m) {
-  if (m.addressPattern() == mOSCpath + "/last") {
-    if (mSequencer && mRecorder) {
-      std::cout << "start last recorder sequence "
-                << mRecorder->lastSequenceName() << std::endl;
-      mSequencer->setHandlerSubDirectory(mRecorder->lastSequenceSubDir());
-      mSequencer->playSequence(mRecorder->lastSequenceName());
-    } else {
-      std::cerr << "SequenceRecorder and PresetSequencer must be registered to "
-                   "enable /*/last."
-                << std::endl;
-    }
-  } else {
-    for (osc::MessageConsumer *consumer : mConsumers) {
-      if (consumer->consumeMessage(m, mOSCpath)) {
-        break;
-      }
-    }
-  }
-}
-
-SequenceServer &SequenceServer::registerMessageConsumer(
-    osc::MessageConsumer &consumer) {
-  mConsumers.push_back(&consumer);
-  return *this;
-}
-
-SequenceServer &SequenceServer::registerRecorder(SequenceRecorder &recorder) {
-  mRecorder = &recorder;
-  mConsumers.push_back(static_cast<osc::MessageConsumer *>(&recorder));
-  return *this;
-}
-
-SequenceServer &SequenceServer::registerSequencer(PresetSequencer &sequencer) {
-  mSequencer = &sequencer;
-  mConsumers.push_back(&sequencer);
-  return *this;
-}
-
-void SequenceServer::print() {
-  if (mServer) {
-    std::cout << "Sequence server listening on: " << mServer->address() << ":"
-              << mServer->port() << std::endl;
-    std::cout << "Communicating on path: " << mOSCpath << std::endl;
-  }
-  for (auto sender : mOSCSenders) {
-    std::cout << sender->address() << ":" << sender->port() << std::endl;
-  }
-}
-
-void SequenceServer::stopServer() {
-  if (mServer) {
-    mServer->stop();
-    delete mServer;
-    mServer = nullptr;
-  }
-}
-
-void SequenceServer::setAddress(std::string address) { mOSCpath = address; }
-
-std::string SequenceServer::getAddress() { return mOSCpath; }
-
-void SequenceServer::changeCallback(int value, void *sender, void *userData) {
-  SequenceServer *server = static_cast<SequenceServer *>(userData);
-  // Parameter *parameter = static_cast<Parameter *>(sender);
-  server->notifyListeners(server->mOSCpath, value);
 }

@@ -144,6 +144,7 @@ set(headers
   include/al/ui/al_Gnomon.hpp
   include/al/ui/al_Pickable.hpp
   include/al/ui/al_SequenceRecorder.hpp
+  include/al/ui/al_SequenceServer.hpp
   include/al/ui/al_HtmlInterfaceServer.hpp
   include/al/ui/al_PickableManager.hpp
 )
@@ -237,6 +238,7 @@ set(sources
   src/ui/al_FileSelector.cpp
   src/ui/al_ParameterServer.cpp
   src/ui/al_SequenceRecorder.cpp
+  src/ui/al_SequenceServer.cpp
   src/ui/al_HtmlInterfaceServer.cpp
   src/ui/al_PresetHandler.cpp
   src/ui/al_PresetServer.cpp

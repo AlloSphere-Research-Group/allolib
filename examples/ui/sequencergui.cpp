@@ -1,13 +1,11 @@
+#include <fstream>
+
 #include "al/app/al_App.hpp"
-
 #include "al/graphics/al_Shapes.hpp"
-
 #include "al/ui/al_ControlGUI.hpp"
 #include "al/ui/al_Parameter.hpp"
 #include "al/ui/al_PresetHandler.hpp"
 #include "al/ui/al_PresetSequencer.hpp"
-
-#include <fstream>
 
 using namespace al;
 using namespace std;
@@ -52,7 +50,7 @@ void writeExamplePresets() {
   string sequence = R"(preset1:0.0:0.5
 preset2:3.0:1.0
 preset3:1.0:0.0
-preset2:1.5:2.0
+preset1:1.5:2.0
 ::
 )";
   ofstream fseq("sequencerDir/seq.sequence");
@@ -60,7 +58,7 @@ preset2:1.5:2.0
   fseq.close();
 
   string preset1 = R"(::preset1
-/x f 0.4
+/x f -0.4
 /y f 0.2
 ::
 )";

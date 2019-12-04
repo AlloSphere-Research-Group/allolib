@@ -1,4 +1,6 @@
 
+#include "al/scene/al_SynthSequencer.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <climits>
@@ -6,8 +8,6 @@
 #include <iostream>
 #include <sstream>
 #include <typeinfo>  // For class name instrospection
-
-#include "al/scene/al_SynthSequencer.hpp"
 
 using namespace al;
 
@@ -43,7 +43,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   // before the sequence
   mMasterTime = startTime;
   double currentMasterTime = mMasterTime;
-  const double startPad = 0.1;
+  const double startPad = 0.0;
   std::list<SynthSequencerEvent> events =
       loadSequence(sequenceName, currentMasterTime - startTime + startPad);
   std::unique_lock<std::mutex> lk(mEventLock);
