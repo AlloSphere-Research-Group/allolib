@@ -243,9 +243,7 @@ class PresetSequencer : public osc::MessageConsumer {
    * as it is ready to start playing before calling the first step.
    */
   void registerBeginCallback(
-      std::function<void(PresetSequencer *sender, void *userData)>
-          beginCallback,
-      void *userData = nullptr);
+      std::function<void(PresetSequencer *sender)> beginCallback);
 
   void enableBeginCallback(bool enable) { mBeginCallbackEnabled = enable; }
 
@@ -261,16 +259,13 @@ class PresetSequencer : public osc::MessageConsumer {
    * user prematurely, it will send false.
    */
   void registerEndCallback(
-      std::function<void(bool finished, PresetSequencer *sender,
-                         void *userData)>
-          endCallback,
-      void *userData = nullptr);
+      std::function<void(bool finished, PresetSequencer *sender)> endCallback);
 
   void enableEndCallback(bool enable) { mEndCallbackEnabled = enable; }
   void toggleEnableEndCallback() { mEndCallbackEnabled = !mEndCallbackEnabled; }
 
   void registerTimeChangeCallback(std::function<void(float)> func,
-                                  float minTimeDeltaSec = 0.05f);
+                                  float minTimeDeltaSec = -1.0);
 
   float getSequenceTotalDuration(std::string sequenceName);
 
@@ -302,6 +297,7 @@ class PresetSequencer : public osc::MessageConsumer {
                               std::string rootOSCPath) override;
 
   void processTimeChangeRequest();
+  void updateTime(double time);
 
  private:
   static void sequencerFunction(PresetSequencer *sequencer);
@@ -334,14 +330,12 @@ class PresetSequencer : public osc::MessageConsumer {
 
   const int mGranularity = 10;  // milliseconds
   bool mBeginCallbackEnabled;
-  std::function<void(PresetSequencer *, void *userData)> mBeginCallback;
-  void *mBeginCallbackData;
+  std::function<void(PresetSequencer *)> mBeginCallback;
   bool mEndCallbackEnabled;
-  std::function<void(bool, PresetSequencer *, void *userData)> mEndCallback;
-  void *mEndCallbackData;
+  std::function<void(bool, PresetSequencer *)> mEndCallback;
   std::vector<EventCallback> mEventCallbacks;
-  std::function<void(float)> mTimeChangeCallback;
-  float mTimeChangeMinTimeDelta = 0;
+  std::vector<std::function<void(float)>> mTimeChangeCallbacks;
+  float mTimeChangeMinTimeDelta = 0.05;
 
   // CPU thread
 

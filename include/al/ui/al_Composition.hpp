@@ -138,17 +138,12 @@ class Composition : public osc::MessageConsumer {
   std::function<void(bool, Composition *, void *userData)> mEndCallback;
   void *mEndCallbackData;
 
-  std::function<void(bool, PresetSequencer *, void *userData)>
-      mSequencerEndCallbackCache;
-  void *mSequencerEndCallbackDataCache;
+  std::function<void(bool, PresetSequencer *)> mSequencerEndCallbackCache;
 
   std::vector<CompositionStep> loadCompositionSteps(
       std::string compositionSteps);
   std::string getRootPath();
   std::string getCurrentPath();
-
-  static void waitForSequencerCallback(bool finished, PresetSequencer *seq,
-                                       void *userData);
 
   static void playbackThread(Composition *composition);
 };

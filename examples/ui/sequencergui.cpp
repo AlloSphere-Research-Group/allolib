@@ -16,7 +16,7 @@ struct MyApp : App {
   Parameter X{"x", "", 0.0, "", -2, 2};
   Parameter Y{"y", "", 0.0, "", -2, 2};
 
-  PresetHandler presetHandler{"sequencerDir", true};
+  PresetHandler presetHandler{"sequencerDir", false};
   PresetSequencer sequencer;
 
   ControlGUI gui;
@@ -31,11 +31,22 @@ struct MyApp : App {
     sequencer << presetHandler;  // Register preset handler with sequencer
     gui << sequencer;
     gui.init();
+
+    sequencer.registerBeginCallback([&](PresetSequencer *) {
+      std::cout << "**** Started Sequence" << std::endl;
+    });
+    sequencer.registerEndCallback([&](bool finished, PresetSequencer *) {
+      if (finished) {
+        std::cout << "**** Sequence FINSIHED ***" << std::endl;
+      } else {
+        std::cout << "**** Sequence Stopped" << std::endl;
+      }
+    });
   }
 
   void onDraw(Graphics &g) override {
     g.clear(0);
-    if (sequencer.running()) {
+    if (sequencer.running() || !sequencer.playbackFinished()) {
       g.translate(X.get(), Y.get(), 0);
       g.color(0.0, 1.0, 0.0);
     } else {
