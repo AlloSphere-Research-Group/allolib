@@ -322,17 +322,6 @@ std::string Composition::getCurrentPath() {
   return path;
 }
 
-void Composition::waitForSequencerCallback(bool finished, PresetSequencer *,
-                                           void *userData) {
-  Composition *comp = static_cast<Composition *>(userData);
-  comp->mSequencer->mEndCallback = comp->mSequencerEndCallbackCache;
-  comp->mSequencer->mEndCallbackData = comp->mSequencerEndCallbackDataCache;
-
-  if (comp->mEndCallbackEnabled && comp->mEndCallback != nullptr) {
-    comp->mEndCallback(finished, comp, comp->mEndCallbackData);
-  }
-}
-
 void Composition::playbackThread(Composition *composition) {
   size_t index = 0;
   if (composition->mCompositionSteps.size() == 0) {
@@ -359,8 +348,6 @@ void Composition::playbackThread(Composition *composition) {
   composition->mPlayerLock.lock();
   composition->mSequencerEndCallbackCache =
       composition->mSequencer->mEndCallback;
-  composition->mSequencerEndCallbackDataCache =
-      composition->mSequencer->mEndCallbackData;
   auto sequenceStart = std::chrono::high_resolution_clock::now();
   auto targetTime = sequenceStart;
   while (composition->mPlaying) {
@@ -401,7 +388,16 @@ void Composition::playbackThread(Composition *composition) {
                           // here if playback stops between the check and the
                           // branches
     composition->mSequencer->registerEndCallback(
-        Composition::waitForSequencerCallback, composition);
+        [&](bool finished, PresetSequencer *) {
+          composition->mSequencer->mEndCallback =
+              composition->mSequencerEndCallbackCache;
+
+          if (composition->mEndCallbackEnabled &&
+              composition->mEndCallback != nullptr) {
+            composition->mEndCallback(finished, composition,
+                                      composition->mEndCallbackData);
+          }
+        });
   } else {
     if (composition->mEndCallbackEnabled &&
         composition->mEndCallback != nullptr) {

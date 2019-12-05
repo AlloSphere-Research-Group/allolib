@@ -687,11 +687,10 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
     float *currentTime = &(stateMap[presetSequencer].currentTime);
     presetSequencer->registerTimeChangeCallback(
         [currentTime](float currTime) { *currentTime = currTime; }, 0.1f);
-    presetSequencer->registerBeginCallback(
-        [&](PresetSequencer *sender, void * /*userData*/) {
-          stateMap[presetSequencer].totalDuration =
-              sender->getSequenceTotalDuration(sender->currentSequence());
-        });
+    presetSequencer->registerBeginCallback([&](PresetSequencer *sender) {
+      stateMap[presetSequencer].totalDuration =
+          sender->getSequenceTotalDuration(sender->currentSequence());
+    });
     stateMap[presetSequencer].seqList = presetSequencer->getSequenceList();
     if (stateMap[presetSequencer].seqList.size() > 64) {
       stateMap[presetSequencer].seqList.resize(64);
@@ -753,12 +752,12 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
       }
       ImGui::SameLine();
       if (ImGui::Button("Pause")) {
-        presetSequencer->stopSequence();
+        presetSequencer->stopSequence(false);
       }
       ImGui::SameLine();
       if (ImGui::Button("Stop")) {
         presetSequencer->stopSequence();
-        presetSequencer->rewind();
+        presetSequencer->setTime(stateMap[presetSequencer].totalDuration);
       }
       float time = state.currentTime;
       //        std::cout << time << std::endl;
