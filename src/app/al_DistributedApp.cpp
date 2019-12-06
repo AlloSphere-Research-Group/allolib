@@ -38,7 +38,7 @@ void DistributedApp::initialize() {
       if (table->contains("dataRoot")) {
         if (name() == host) {  // Set configuration for this node when found
           std::string dataRootValue = *table->get_as<std::string>("dataRoot");
-          mGlobalDataRootPath = File::conformPathToOS(dataRootValue);
+          dataRoot = File::conformPathToOS(dataRootValue);
         }
       } else {
         std::cout << "WARNING: node " << host.c_str() << " not given dataRoot"

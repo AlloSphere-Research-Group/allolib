@@ -56,7 +56,7 @@ class DistributedApp : public App, public NodeConfiguration {
 
  private:
   AudioControl mAudioControl;
-  std::string mGlobalDataRootPath;
+  //  std::string mGlobalDataRootPath;
 
   std::map<std::string, std::string> mRoleMap;
 };
