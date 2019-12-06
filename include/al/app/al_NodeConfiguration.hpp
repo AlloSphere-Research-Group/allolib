@@ -15,13 +15,17 @@ typedef enum {
   CAP_AUDIO_IO = 1 << 4,
   CAP_OSC = 1 << 5,
   CAP_CONSOLE_IO = 1 << 6,
-  CAP_USER = 1 << 7
+  CAP_2DGUI = 1 << 7,
+  CAP_USER = 1 << 10
   // User defined capabilities can add from here through bitshifting
 } Capability;
 
 struct NodeConfiguration {
   uint16_t rank{0};
   uint16_t group{0};
+
+  std::string dataRoot;
+
   Capability mCapabilites{CAP_NONE};
 
   bool hasCapability(Capability cap) { return cap & mCapabilites; }
@@ -29,8 +33,8 @@ struct NodeConfiguration {
 
   void setRole(std::string role) {
     if (role == "desktop") {
-      mCapabilites =
-          (Capability)(CAP_SIMULATOR | CAP_RENDERING | CAP_AUDIO_IO | CAP_OSC);
+      mCapabilites = (Capability)(CAP_SIMULATOR | CAP_RENDERING | CAP_AUDIO_IO |
+                                  CAP_OSC | CAP_2DGUI);
     } else if (role == "renderer") {
       mCapabilites = (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC);
     } else if (role == "audio") {
@@ -42,7 +46,7 @@ struct NodeConfiguration {
       mCapabilites = (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING |
                                   CAP_AUDIO_IO | CAP_OSC);
     } else if (role == "control") {
-      mCapabilites = (Capability)(CAP_RENDERING | CAP_OSC);
+      mCapabilites = (Capability)(CAP_RENDERING | CAP_OSC | CAP_2DGUI);
     } else {
       std::cerr << "WARNING: Setting no capabilities for this app from "
                    "config file"
