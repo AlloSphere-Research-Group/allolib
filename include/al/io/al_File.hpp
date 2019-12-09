@@ -339,9 +339,9 @@ class File {
                          int maxDepth = 6);
 
   /// Search for file or directory back from current directory
-  /// @param[in,out] path		Input is a file or directory to search for.
-  /// If the file is found, the output contains a series of "../" prefixed to
-  /// the input. Otherwise, the input path is not modified.
+  /// @param[in,out] path		Input is a file or directory to search
+  /// for. If the file is found, the output contains a series of "../" prefixed
+  /// to the input. Otherwise, the input path is not modified.
   /// @param[in]  maxDepth	Maximum number of directories to search back
   /// \returns whether the file or directory was found
   static bool searchBack(std::string& path, int maxDepth = 6);
