@@ -292,6 +292,13 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   void stepSequencer(double dt);
 
+  /**
+   * @brief move sequencer forward by time set using setSequencerStepTime()
+   */
+  void stepSequencer();
+
+  void setSequencerStepTime(double stepTime) { mGranularity = stepTime * 1e9; }
+
  protected:
   virtual bool consumeMessage(osc::Message &m,
                               std::string rootOSCPath) override;
@@ -327,15 +334,16 @@ class PresetSequencer : public osc::MessageConsumer {
   double mParamTargetTime;
   double mTargetTime;
   double mLastTimeUpdate = 0.0;
+  double mStepTime;
 
-  const int mGranularity = 10;  // milliseconds
+  uint64_t mGranularity = 10e6;  // nanoseconds
   bool mBeginCallbackEnabled;
   std::function<void(PresetSequencer *)> mBeginCallback;
   bool mEndCallbackEnabled;
   std::function<void(bool, PresetSequencer *)> mEndCallback;
   std::vector<EventCallback> mEventCallbacks;
   std::vector<std::function<void(float)>> mTimeChangeCallbacks;
-  float mTimeChangeMinTimeDelta = 0.05;
+  float mTimeChangeMinTimeDelta = 0.05f;
 
   // CPU thread
 

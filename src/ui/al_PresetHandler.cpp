@@ -20,11 +20,12 @@ PresetHandler::PresetHandler(std::string rootDirectory, bool verbose)
   setRootPath(rootDirectory);
 
   if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
-    mRunning = true;
+    mCpuThreadRunning = true;
     mMorphingThread =
         std::make_unique<std::thread>(PresetHandler::morphingFunction, this);
   }
 }
+
 PresetHandler::PresetHandler(TimeMasterMode timeMasterMode,
                              std::string rootDirectory, bool verbose)
     : mVerbose(verbose),
@@ -33,22 +34,11 @@ PresetHandler::PresetHandler(TimeMasterMode timeMasterMode,
   setCurrentPresetMap("default");
   setRootPath(rootDirectory);
   if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
-    mRunning = true;
-    mMorphingThread =
-        std::make_unique<std::thread>(PresetHandler::morphingFunction, this);
+    startCpuThread();
   }
 }
 
-PresetHandler::~PresetHandler() {
-  stopMorph();
-  mRunning = false;
-  //  mMorphConditionVar.notify_all();
-  // mMorphLock.lock();
-  if (mMorphingThread) {
-    mMorphingThread->join();
-  }
-  // mMorphLock.unlock();
-}
+PresetHandler::~PresetHandler() { stopCpuThread(); }
 
 void PresetHandler::setSubDirectory(std::string directory) {
   std::string path = getRootPath();
@@ -237,10 +227,6 @@ void PresetHandler::recallPreset(std::string name) {
         mStartValues[targetValue.first] = targetValue.second;
       }
     }
-    uint64_t totalSteps =
-        (uint64_t)ceilf(0.5 + mMorphTime.get() / mMorphInterval);
-    mMorphRemainingSteps.store(totalSteps);
-    mTotalSteps.store(totalSteps);
   }
 
   int index = -1;
@@ -287,11 +273,27 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
     std::lock_guard<std::mutex> lk(mTargetLock);
     mMorphTime.set(morphTime);
     mTargetValues = parameterStates;
-    mMorphRemainingSteps.store(ceilf(mMorphTime.get() / mMorphInterval));
-    mTotalSteps.store(ceilf(mMorphTime.get() / mMorphInterval));
+    for (ParameterMeta *param : mParameters) {
+      if (mTargetValues.find(param->getFullAddress()) != mTargetValues.end()) {
+        std::vector<ParameterField> params;
+        param->get(params);
+        mStartValues[param->getFullAddress()] = params;
+      }
+    }
+    mMorphStepCount = 0;
+    if (mMorphInterval <= 0.0) {
+      mTotalSteps.store(1);
+    } else {
+      mTotalSteps.store(ceilf(mMorphTime.get() / mMorphInterval));
+    }
   }
 
   mCurrentPresetName = "";
+}
+
+void PresetHandler::morphTo(std::string presetName, float morphTime) {
+  auto parameterStates = loadPresetValues(presetName);
+  morphTo(parameterStates, morphTime);
 }
 
 std::string PresetHandler::recallPreset(int index) {
@@ -307,10 +309,12 @@ std::string PresetHandler::recallPreset(int index) {
 
 void PresetHandler::recallPresetSynchronous(std::string name) {
   {
-    if (mMorphRemainingSteps.load() > 0) {
-      mMorphRemainingSteps.store(0);
-      mTotalSteps.store(0);
-    }
+    //    if (mMorphRemainingSteps.load() > 0) {
+    //      mMorphRemainingSteps.store(0);
+    //      mTotalSteps.store(0);
+    //    }
+    mTotalSteps = 0;
+    mMorphStepCount = 0;
     std::lock_guard<std::mutex> lk(mTargetLock);
     mTargetValues = loadPresetValues(name);
   }
@@ -389,11 +393,21 @@ float PresetHandler::getMorphTime() { return mMorphTime.get(); }
 
 void PresetHandler::setMorphTime(float time) { mMorphTime.set(time); }
 
-void PresetHandler::stopMorph() {
-  if (mMorphRemainingSteps.load() >= 0) {
-    mMorphRemainingSteps.store(0);
-    mTotalSteps.store(0);
+// void PresetHandler::stopMorph() {
+
+//    mCurrentMorphIndex = 0.0;
+//  if (mMorphRemainingSteps.load() >= 0) {
+//    mMorphRemainingSteps.store(0);
+//    mTotalSteps.store(0);
+//  }
+//}
+
+void PresetHandler::stepMorphing(double stepTime) {
+  double drift = mMorphInterval - stepTime;
+  if (drift > 0.01) {
+    std::cout << "Time drift = " << drift << std::endl;
   }
+  stepMorphing();
 }
 
 std::string PresetHandler::getCurrentPath() {
@@ -919,32 +933,26 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
 //}
 
 void PresetHandler::stepMorphing() {
-  if (mMorphRemainingSteps.load() > 0) {
-    // TODO Think carefully about possible race conditions here:
-    std::atomic_fetch_sub(&(mMorphRemainingSteps), (uint64_t)1);
-    auto remainingSteps = mMorphRemainingSteps.load();
-    auto totalSteps = mTotalSteps.load();
+  uint64_t totalSteps = mTotalSteps.load();
+  uint64_t stepCount = mMorphStepCount.fetch_add(1);
+  if (stepCount <= totalSteps && totalSteps > 0) {
+    double morphPhase = double(stepCount) / totalSteps;
+    setInterpolatedValues(mStartValues, mTargetValues, morphPhase);
 
-    if (totalSteps > 0) {
-      double factor = 1.0 - (remainingSteps / (double)totalSteps);
-      //      std::cout << factor << std::endl;
-      setInterpolatedValues(mStartValues, mTargetValues, factor);
-
-      // FIXME implement bundle morphing
-      for (auto bundleGroup : mBundles) {
-        const std::string &bundleName = bundleGroup.first;
-        for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
-          std::string bundlePrefix = "/" + bundleName + "/" + std::to_string(i);
-          ParameterBundle *bundle = bundleGroup.second[i];
-          //          setParametersInBundle(bundle, bundlePrefix, this, factor);
-        }
+    // FIXME implement bundle morphing
+    for (auto bundleGroup : mBundles) {
+      const std::string &bundleName = bundleGroup.first;
+      for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
+        std::string bundlePrefix = "/" + bundleName + "/" + std::to_string(i);
+        ParameterBundle *bundle = bundleGroup.second[i];
+        //          setParametersInBundle(bundle, bundlePrefix, this, factor);
       }
     }
   }
 }
 
 void PresetHandler::morphingFunction(al::PresetHandler *handler) {
-  while (handler->mRunning) {
+  while (handler->mCpuThreadRunning) {
     handler->stepMorphing();
     al::wait(handler->mMorphInterval);
   }
@@ -1096,15 +1104,28 @@ bool PresetHandler::savePresetValues(const ParameterStates &values,
 }
 
 void PresetHandler::setTimeMaster(TimeMasterMode masterMode) {
+  stopCpuThread();
   mTimeMasterMode = masterMode;
-  mRunning = false;
-  if (mMorphingThread) {
-    mMorphingThread->join();
-  }
   if (masterMode == TimeMasterMode::TIME_MASTER_CPU) {
-    mRunning = true;
+    mCpuThreadRunning = true;
     mMorphingThread =
         std::make_unique<std::thread>(PresetHandler::morphingFunction, this);
+  }
+}
+
+void PresetHandler::startCpuThread() {
+  mCpuThreadRunning = true;
+  mMorphingThread =
+      std::make_unique<std::thread>(PresetHandler::morphingFunction, this);
+}
+
+void PresetHandler::stopCpuThread() {
+  mCpuThreadRunning = false;
+  //  mMorphConditionVar.notify_all();
+  // mMorphLock.lock();
+  if (mMorphingThread) {
+    mMorphingThread->join();
+    mMorphingThread = nullptr;
   }
 }
 

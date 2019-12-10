@@ -16,7 +16,8 @@ struct MyApp : App {
   Parameter X{"x", "", 0.0, "", -2, 2};
   Parameter Y{"y", "", 0.0, "", -2, 2};
 
-  PresetHandler presetHandler{"sequencerDir", true};
+  PresetHandler presetHandler{TimeMasterMode::TIME_MASTER_ASYNC, "sequencerDir",
+                              true};
   PresetSequencer sequencer{TimeMasterMode::TIME_MASTER_ASYNC};
 
   ControlGUI gui;
@@ -42,10 +43,15 @@ struct MyApp : App {
         std::cout << "**** Sequence Stopped" << std::endl;
       }
     });
+    presetHandler.setMorphStepTime(1.0f / graphicsDomain()->fps());
+  }
+
+  void onAnimate(double dt) override {
+    sequencer.stepSequencer(dt);
+    presetHandler.stepMorphing(dt);
   }
 
   void onDraw(Graphics &g) override {
-    sequencer.stepSequencer(1.0f / graphicsDomain()->fps());
     g.clear(0);
     if (sequencer.running() || !sequencer.playbackFinished()) {
       g.translate(X.get(), Y.get(), 0);

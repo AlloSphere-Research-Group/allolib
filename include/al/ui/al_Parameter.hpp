@@ -74,7 +74,12 @@ enum class TimeMasterMode {
 // @ingroup UI
 class ParameterField {
  public:
-  typedef enum { FLOAT, INT32, STRING } ParameterDataType;
+  typedef enum { FLOAT, INT32, STRING, NULLDATA } ParameterDataType;
+
+  ParameterField() {
+    mData = nullptr;
+    mType = NULLDATA;
+  }
 
   ParameterField(const float value) {
     mType = FLOAT;
@@ -106,6 +111,23 @@ class ParameterField {
     *static_cast<std::string *>(mData) = value;
   }
 
+  virtual ~ParameterField() {
+    switch (mType) {
+      case FLOAT:
+        delete static_cast<float *>(mData);
+        break;
+      case STRING:
+        delete static_cast<std::string *>(mData);
+        break;
+      case INT32:
+        delete static_cast<int32_t *>(mData);
+        break;
+      case NULLDATA:
+        break;
+    }
+  }
+
+  // Copy constructor
   ParameterField(const ParameterField &paramField) : mType(paramField.mType) {
     switch (mType) {
       case FLOAT:
@@ -122,29 +144,36 @@ class ParameterField {
         *static_cast<int32_t *>(mData) =
             *static_cast<int32_t *>(paramField.mData);
         break;
+      case NULLDATA:
+        break;
     }
   }
 
-  virtual ~ParameterField() {
-    switch (mType) {
-      case FLOAT:
-        delete static_cast<float *>(mData);
-        break;
-      case STRING:
-        delete static_cast<std::string *>(mData);
-        break;
-      case INT32:
-        delete static_cast<int32_t *>(mData);
-        break;
-    }
+  // Move constructor
+  ParameterField(ParameterField &&that) noexcept
+      : mType(NULLDATA), mData(nullptr) {
+    swap(*this, that);
+  }
+
+  // Copy assignment operator
+  ParameterField &operator=(const ParameterField &other) {
+    ParameterField copy(other);
+    swap(*this, copy);
+    return *this;
+  }
+
+  // Move assignment operator
+  ParameterField &operator=(ParameterField &&that) {
+    swap(*this, that);
+    return *this;
+  }
+
+  friend void swap(ParameterField &lhs, ParameterField &rhs) noexcept {
+    std::swap(lhs.mData, rhs.mData);
+    std::swap(lhs.mType, rhs.mType);
   }
 
   ParameterDataType type() { return mType; }
-
-  //    float get() {
-  //        assert(mType == FLOAT);
-  //        return *static_cast<float *>(mData);
-  //    }
 
   template <typename type>
   type get() {

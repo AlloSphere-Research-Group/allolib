@@ -192,10 +192,13 @@ class PresetHandler {
 
   float getMorphTime();
   void setMorphTime(float time);
+  void stopMorphing() { mTotalSteps.store(0); }
   void morphTo(ParameterStates &parameterStates, float morphTime);
-  void stopMorph();
+  void morphTo(std::string presetName, float morphTime);
 
   void setMorphStepTime(float stepTime) { mMorphInterval = stepTime; }
+
+  void stepMorphing(double stepTime);
 
   /// Step morphing to adjust parameter values to next step. You need to call
   /// this function only if TimeMasterMode is TIME_MASTER_ASYNC
@@ -327,6 +330,9 @@ class PresetHandler {
 
   void setTimeMaster(TimeMasterMode masterMode);
 
+  void startCpuThread();
+  void stopCpuThread();
+
  private:
   //  std::vector<float> getParameterValue(ParameterMeta *p);
   //  void setParametersInBundle(ParameterBundle *bundle, std::string
@@ -362,12 +368,14 @@ class PresetHandler {
 
   Parameter mMorphTime{"morphTime", "", 0.0, "", 0.0, 20.0};
 
-  std::atomic<uint64_t> mMorphRemainingSteps{0};
+  std::atomic<uint64_t> mMorphStepCount{0};
   std::atomic<uint64_t> mTotalSteps{0};
-  bool mRunning{false};  // To keep the morphing thread alive
+  //  std::atomic<float> mCurrentMorphIndex;
+  bool mCpuThreadRunning{false};  // To keep the morphing thread alive
   std::unique_ptr<std::thread> mMorphingThread;
   //  std::condition_variable mMorphConditionVar;
-  float mMorphInterval{0.05f};
+  double mMorphInterval{0.05};
+  //  std::atomic<bool> mMorphing;
 
   std::vector<std::function<void(int index, void *sender, void *userData)>>
       mCallbacks;

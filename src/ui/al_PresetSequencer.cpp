@@ -44,7 +44,8 @@ void PresetSequencer::playSequence(std::string sequenceName, double timeScale) {
   mRunning = false;
   mSequenceLock.unlock();
 
-  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
+  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU && mSequencerThread) {
+    mStartRunning = true;
     {
       //      std::unique_lock<std::mutex> lk2(mPlayStartedLock);
       mPlayPromiseObj = std::make_shared<std::promise<void>>();
@@ -58,6 +59,7 @@ void PresetSequencer::playSequence(std::string sequenceName, double timeScale) {
     }
 
   } else {
+    mStartRunning = false;
     mRunning = true;
   }
 }
@@ -140,6 +142,10 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer) {
     {
       std::unique_lock<std::mutex> lk(sequencer->mPlayWaitLock);
       sequencer->mPlayWaitVariable.wait(lk);
+      if (!sequencer->mStartRunning) {
+        sequencer->mPlayPromiseObj->set_value();
+        return;
+      }
       if (sequencer->mBeginCallbackEnabled &&
           sequencer->mBeginCallback != nullptr) {
         sequencer->mBeginCallback(sequencer);
@@ -151,15 +157,15 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer) {
     }
 
     while (sequencer->running()) {
-      sequencer->stepSequencer(sequencer->mGranularity / 1000.0);
+      sequencer->stepSequencer(sequencer->mGranularity * 1.0e-9);
       std::this_thread::sleep_for(
-          std::chrono::milliseconds(sequencer->mGranularity));
+          std::chrono::nanoseconds(sequencer->mGranularity));
     }
     //    std::cout << "Sequence finished." << std::endl;
     if (sequencer->mPresetHandler) {
       std::this_thread::sleep_for(std::chrono::milliseconds(
           100));  // Give a little time to process any pending preset changes.
-      sequencer->mPresetHandler->stopMorph();
+      sequencer->mPresetHandler->stopMorphing();
     }
     if (sequencer->mEndCallbackEnabled && sequencer->mEndCallback != nullptr) {
       bool finished = sequencer->mSteps.size() == sequencer->mCurrentStep;
@@ -182,7 +188,7 @@ PresetSequencer &PresetSequencer::registerPresetHandler(
     PresetHandler &presetHandler) {
   mPresetHandler = &presetHandler;
   // We need to take over the preset handler timing.
-  mPresetHandler->setTimeMaster(TimeMasterMode::TIME_MASTER_CPU);
+  //  mPresetHandler->setTimeMaster(TimeMasterMode::TIME_MASTER_CPU);
   mDirectory = mPresetHandler->getCurrentPath();
   //		std::cout << "Path set to:" << mDirectory << std::endl;
   return *this;
@@ -421,8 +427,7 @@ void PresetSequencer::stepSequencer(double dt) {
         //        }
         if (step.type == PRESET) {
           if (mPresetHandler) {
-            mPresetHandler->setMorphTime(step.morphTime);
-            mPresetHandler->recallPreset(step.presetName);
+            mPresetHandler->morphTo(step.presetName, step.morphTime);
             std::cout << "recalling " << step.presetName << std::endl;
           } else {
             std::cerr << "No preset handler registered with PresetSequencer. "
@@ -444,6 +449,8 @@ void PresetSequencer::stepSequencer(double dt) {
     mSequenceLock.unlock();
   }
 }
+
+void PresetSequencer::stepSequencer() { stepSequencer(mGranularity * 1.0e-9); }
 
 bool PresetSequencer::consumeMessage(osc::Message &m, std::string rootOSCPath) {
   std::string basePath = rootOSCPath;
@@ -489,11 +496,12 @@ void PresetSequencer::startCpuThread() {
 void PresetSequencer::stopCpuThread() {
   stopSequence(false);
   if (mPresetHandler) {
-    mPresetHandler->stopMorph();
+    mPresetHandler->stopCpuThread();
   }
 
   if (mSequencerThread) {
     mSequencerActive = false;
+    mRunning = false;
     mPlayPromiseObj = std::make_shared<std::promise<void>>();
     auto playFuture = mPlayPromiseObj->get_future();
     {
@@ -501,7 +509,6 @@ void PresetSequencer::stopCpuThread() {
       mPlayWaitVariable.notify_all();
     }
     playFuture.get();
-    mRunning = false;
     mSequencerThread->join();
     mSequencerThread = nullptr;
   }
