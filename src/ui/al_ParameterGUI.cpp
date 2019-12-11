@@ -686,7 +686,7 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
     stateMap[presetSequencer] = SequencerState{0.0, 0.0, {}};
     float *currentTime = &(stateMap[presetSequencer].currentTime);
     presetSequencer->registerTimeChangeCallback(
-        [currentTime](float currTime) { *currentTime = currTime; }, 0.1f);
+        [currentTime](float currTime) { *currentTime = currTime; }, 0.05f);
     presetSequencer->registerBeginCallback([&](PresetSequencer *sender) {
       stateMap[presetSequencer].totalDuration =
           sender->getSequenceTotalDuration(sender->currentSequence());

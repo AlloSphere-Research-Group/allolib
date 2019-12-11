@@ -93,6 +93,24 @@ class Composition;
  *
  * The file should end with two colons (::).
  *
+ * Individual parameters can also be sequenced through the preset sequencer.
+ * They must be registered through registerParameter() or the streaming (<<)
+ * operator.
+ *
+ * The line should start with the '+' character followed by the delta time to
+ * the previous line. Note that parameters have delta times relative to both
+ * preset and parameter steps, but preset events are relative to other preset
+ * steps and ignore parameter and event steps.
+ *
+ * @code
+ * preset1:0.0:3.0
+ * +0.1:/X:0.3
+ * +0.1:/X:0.4
+ * +0.1:/X:0.5
+ * preset2:4.0:2.0
+ * ::
+ * @endcode
+ *
  * The directory where sequences are loaded is taken from the PresetHandler
  * object registered with the sequencer.
  *
@@ -112,12 +130,13 @@ class PresetSequencer : public osc::MessageConsumer {
     std::string presetName;
     float morphTime;  // The time to get to the preset
     float waitTime;   // The time to stay in the preset before the next step
-    std::vector<float> params;
+    std::vector<ParameterField> params;
   };
 
   typedef struct {
     std::string eventName;
-    std::function<void(void *data, std::vector<float> &params)> callback;
+    std::function<void(void *data, std::vector<ParameterField> &params)>
+        callback;
     void *callbackData;
   } EventCallback;
 
@@ -231,7 +250,8 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   void registerEventCommand(
       std::string eventName,
-      std::function<void(void *data, std::vector<float> &params)> callback,
+      std::function<void(void *data, std::vector<ParameterField> &params)>
+          callback,
       void *data);
 
   void setOSCSubPath(std::string subPath) { mOSCsubPath = subPath; }
@@ -306,6 +326,8 @@ class PresetSequencer : public osc::MessageConsumer {
   void processTimeChangeRequest();
   void updateTime(double time);
 
+  void updateSequencer();
+
  private:
   static void sequencerFunction(PresetSequencer *sequencer);
 
@@ -331,8 +353,9 @@ class PresetSequencer : public osc::MessageConsumer {
   bool mStartRunning;
   std::queue<Step> mParameterList;
   double mCurrentTime = 0.0;  // Current time (in seconds)
-  double mParamTargetTime;
   double mTargetTime;
+  double mLastPresetTime;  // To anchor parameter deltas
+  double mParameterTargetTime;
   double mLastTimeUpdate = 0.0;
   double mStepTime;
 

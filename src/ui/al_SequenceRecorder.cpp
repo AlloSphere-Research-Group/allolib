@@ -1,4 +1,6 @@
 
+#include "al/ui/al_SequenceRecorder.hpp"
+
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -6,7 +8,6 @@
 #include <string>
 
 #include "al/io/al_File.hpp"
-#include "al/ui/al_SequenceRecorder.hpp"
 
 using namespace al;
 
@@ -45,7 +46,7 @@ SequenceRecorder::SequenceRecorder()
 //			step.duration = std::stof(duration);
 //			mSteps.push(step);
 //			std::cout << name  << ":" << delta << ":" << duration <<
-//std::endl;
+// std::endl;
 //		}
 //	}
 //	if (f.bad()) {
@@ -60,8 +61,8 @@ SequenceRecorder::SequenceRecorder()
 // void SequenceRecorder::stopSequence()
 //{
 //	mRunning = false;
-//	//		mSequenceLock.lock(); // Waits until the sequencer thread
-//is done and back at the condition variable
+//	//		mSequenceLock.lock(); // Waits until the sequencer
+// thread is done and back at the condition variable
 //}
 
 // std::vector<std::string> SequenceRecorder::getSequenceList()
@@ -73,8 +74,10 @@ SequenceRecorder::SequenceRecorder()
 //		if (info.type() == FileInfo::REG) {
 //			std::string fileName = info.name();
 //			if (fileName.find(".sequence") == fileName.size() - 9) {
-//				// Should do better checks, what if '.sequence' is not
-//at the end... 				sequenceList.push_back(fileName.substr(0, fileName.size() - 9));
+//				// Should do better checks, what if '.sequence'
+// is not
+// at the end...
+// sequenceList.push_back(fileName.substr(0, fileName.size() - 9));
 //			}
 //		}
 //	}
@@ -169,7 +172,7 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder,
     steps.push_back(recorder->mStepToInsert);
 
     //		std::cout << recorder->mStepToInsert.presetName << ":" <<
-    //recorder->mStepToInsert.waitTime << std::endl;
+    // recorder->mStepToInsert.waitTime << std::endl;
   }
   if (steps.size() < 2) {
     return;
@@ -182,13 +185,20 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder,
     if (step.type == PresetSequencer::PRESET) {
       fileText += step.presetName + ":" + std::to_string(step.morphTime) + ":" +
                   std::to_string(step.waitTime) + "\n";
-    } else {
-      fileText += "+" + std::to_string(step.waitTime) + ":" + step.presetName +
-                  ":" + std::to_string(step.params[0]) + "\n";
+    } else if (step.type == PresetSequencer::PARAMETER) {
+      if (step.params[0].type() == ParameterField::FLOAT) {
+        fileText += "+" + std::to_string(step.waitTime) + ":" +
+                    step.presetName + ":" +
+                    std::to_string(step.params[0].get<float>()) + "\n";
+      } else if (step.params[0].type() == ParameterField::STRING) {
+        fileText += "+" + std::to_string(step.waitTime) + ":" +
+                    step.presetName + ":" + step.params[0].get<std::string>() +
+                    "\n";
+      }
     }
   }
 
-  std::string path;
+  std::string path = recorder->mDirectory;
   if (recorder->mPresetHandler) {
     path = File::conformDirectory(recorder->mPresetHandler->getCurrentPath());
   }
@@ -226,6 +236,10 @@ std::string SequenceRecorder::lastSequenceName() { return mLastSequenceName; }
 
 std::string SequenceRecorder::lastSequenceSubDir() {
   return mLastSequenceSubDir;
+}
+
+void SequenceRecorder::setDirectory(std::string directory) {
+  mDirectory = File::conformDirectory(directory);
 }
 
 void SequenceRecorder::registerParameter(ParameterMeta &p) {

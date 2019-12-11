@@ -54,11 +54,11 @@ struct MyApp : App {
   void onDraw(Graphics &g) override {
     g.clear(0);
     if (sequencer.running() || !sequencer.playbackFinished()) {
-      g.translate(X.get(), Y.get(), 0);
       g.color(0.0, 1.0, 0.0);
     } else {
       g.color(0.0, 0.0, 1.0);
     }
+    g.translate(X.get(), Y.get(), 0);
     g.draw(m);
     gui.draw(g);
   }
