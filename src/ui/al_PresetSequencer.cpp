@@ -77,6 +77,10 @@ void PresetSequencer::stopSequence(bool triggerCallbacks) {
     if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
       std::unique_lock<std::mutex> lk(mPlayWaitLock);
     }
+
+    if (mPresetHandler) {
+      mPresetHandler->stopMorphing();
+    }
     // Wait until CPU thread is waiting to start again.
     if (!triggerCallbacks) {
       enableEndCallback(previousCallbackStatus);
@@ -352,7 +356,7 @@ void PresetSequencer::updateTime(double time) {
   //    mSteps = mMostRecentSequence;
   if (mSteps.size() > 0) {
     mCurrentStep = 0;
-    mCurrentTime = 0.0;
+    mCurrentTime = time;
     mTargetTime = 0;
     mLastPresetTime = 0.0;
     mLastTimeUpdate = 0.0;
@@ -373,22 +377,18 @@ void PresetSequencer::updateTime(double time) {
     }
 
     updateSequencer();
-    if (mSteps.size() > mCurrentStep) {
-      if (mCurrentStep > 0) {
-        mCurrentStep--;
-      }
-      std::string previousPreset;
-      Step step = mSteps[mCurrentStep];
+    if (mSteps.size() > mCurrentStep && mCurrentStep > 1) {
+      Step step = mSteps[mCurrentStep - 1];
+      std::string previousPreset = mSteps[mCurrentStep - 2].presetName;
       if (time > (mTargetTime - step.waitTime)) {
         // We only need to wait, morphing is done
-        //                        mPresetHandler->setMorphTime(0);
         if (mPresetHandler) {
           mPresetHandler->recallPresetSynchronous(step.presetName);
+          // Just set morph time so it has the expected last value
           mPresetHandler->setMorphTime(step.morphTime);
-          // Just set it so it has the expected last value
         }
       } else {
-        // We need to finish the morphing
+        // In the middle of morphing
         if (mPresetHandler) {
           double remainingMorphTime =
               mTargetTime - time - double(step.waitTime);
@@ -396,6 +396,9 @@ void PresetSequencer::updateTime(double time) {
             mPresetHandler->setInterpolatedPreset(
                 previousPreset, step.presetName,
                 1.0 - (remainingMorphTime / step.morphTime));
+          }
+          if (mRunning) {
+            mPresetHandler->morphTo(step.presetName, remainingMorphTime);
           }
         }
       }
@@ -416,7 +419,7 @@ void PresetSequencer::updateSequencer() {
       Step step = mSteps[mCurrentStep];
       assert(step.type == PRESET);
 
-      if (mPresetHandler) {
+      if (mPresetHandler && mRunning) {
         mPresetHandler->morphTo(step.presetName, step.morphTime);
         //            std::cout << "recalling " << step.presetName <<
         //            std::endl;
