@@ -500,6 +500,8 @@ class ParameterWrapper : public ParameterMeta {
     }
   }
 
+  bool hasChange() { return mChanged; }
+
   /**
    * @brief call change callbacks if value has changed since last call
    */
