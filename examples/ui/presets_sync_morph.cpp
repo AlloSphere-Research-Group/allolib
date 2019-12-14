@@ -13,7 +13,7 @@ struct MyApp : public App {
   ParameterBool RunPresets{"Run Presets", "", 1.0};
 
   // Set time master mode to Async
-  PresetHandler presets{TimeMasterMode::TIME_MASTER_ASYNC, "presetsGUI"};
+  PresetHandler presets{TimeMasterMode::TIME_MASTER_FREE, "presetsGUI"};
 
   ControlGUI gui;
   Mesh mMeshCone;

@@ -66,7 +66,7 @@ namespace al {
 enum class TimeMasterMode {
   TIME_MASTER_AUDIO,
   TIME_MASTER_GRAPHICS,
-  TIME_MASTER_ASYNC,
+  TIME_MASTER_FREE,
   TIME_MASTER_CPU
 };
 

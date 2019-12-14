@@ -296,6 +296,26 @@ void PresetSequencer::registerTimeChangeCallback(
   }
 }
 
+float PresetSequencer::getSequenceStartOffset(std::string sequenceName) {
+  std::vector<Step> steps;
+  if (sequenceName == mCurrentSequence) {
+    mSequenceLock.lock();
+    steps = mSteps;
+    mSequenceLock.unlock();
+  } else {
+    steps = loadSequence(sequenceName);
+  }
+  float additionalDuration = 0.0f;
+  for (auto &step : steps) {
+    if (step.type == PRESET) {
+      break;
+    } else {
+      additionalDuration += step.waitTime;
+    }
+  }
+  return additionalDuration;
+}
+
 float PresetSequencer::getSequenceTotalDuration(std::string sequenceName) {
   std::vector<Step> steps;
   if (sequenceName == mCurrentSequence) {

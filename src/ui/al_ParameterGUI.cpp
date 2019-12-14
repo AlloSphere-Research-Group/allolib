@@ -679,6 +679,7 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
   struct SequencerState {
     float currentTime;
     float totalDuration;
+    float startOffset = 0.0f;
     std::vector<std::string> seqList;
   };
   static std::map<PresetSequencer *, SequencerState> stateMap;
@@ -704,6 +705,10 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
                 << std::endl;
       presetSequencer->loadSequence(
           stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
+
+      stateMap[presetSequencer].startOffset =
+          presetSequencer->getSequenceStartOffset(
+              stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
       stateMap[presetSequencer].totalDuration =
           presetSequencer->getSequenceTotalDuration(
               stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
@@ -728,6 +733,8 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
                 (int)stateMap[presetSequencer].seqList.size()) {
           presetSequencer->loadSequence(
               stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
+          state.startOffset = presetSequencer->getSequenceStartOffset(
+              stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
           state.totalDuration = presetSequencer->getSequenceTotalDuration(
               stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
         }
@@ -738,13 +745,13 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
         if (!presetSequencer->running()) {
           presetSequencer->stopSequence();
           if (presetSequencer->playbackFinished()) {
-            presetSequencer->setTime(0.0);
+            presetSequencer->setTime(-state.startOffset);
           }
           if (currentPresetSequencerItem >= 0) {
             double sliderTime = state.currentTime;
             presetSequencer->playSequence(
                 stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
-            presetSequencer->setTime(sliderTime);
+            presetSequencer->setTime(sliderTime - state.startOffset);
           } else {
             std::cout << "No sequence selected for playback." << std::endl;
           }
@@ -761,8 +768,9 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
       }
       float time = state.currentTime;
       //        std::cout << time << std::endl;
-      if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
-        std::cout << "Requested time:" << time << std::endl;
+      if (ImGui::SliderFloat("Position", &time, -state.startOffset,
+                             state.totalDuration - state.startOffset)) {
+        //        std::cout << "Requested time:" << time << std::endl;
         presetSequencer->setTime(time);
       }
     } else {

@@ -607,7 +607,7 @@ void PolySynth::render(Graphics &g) {
 }
 
 void PolySynth::update(double dt) {
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_ASYNC) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -620,7 +620,7 @@ void PolySynth::update(double dt) {
     }
     voice = voice->next;
   }
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_ASYNC) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
     processInactiveVoices();
   }
 }

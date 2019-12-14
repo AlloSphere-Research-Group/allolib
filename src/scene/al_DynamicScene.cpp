@@ -274,7 +274,7 @@ void DynamicScene::render(AudioIOData &io) {
 }
 
 void DynamicScene::update(double dt) {
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_ASYNC) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -301,7 +301,7 @@ void DynamicScene::update(double dt) {
     mWorkerThreads->waitForProcessingDone();
   }
   // Update
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_ASYNC) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
     processInactiveVoices();
   }
 }

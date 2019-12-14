@@ -287,6 +287,7 @@ class PresetSequencer : public osc::MessageConsumer {
   void registerTimeChangeCallback(std::function<void(float)> func,
                                   float minTimeDeltaSec = -1.0);
 
+  float getSequenceStartOffset(std::string sequenceName);
   float getSequenceTotalDuration(std::string sequenceName);
 
   // For programmatic control of the sequencer:

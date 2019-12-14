@@ -10,15 +10,27 @@
 using namespace al;
 using namespace std;
 
+// This example shows usage of the preset handler and preset sequencer in
+// TIME_MASTER_FREE mode. This means that instead of running the sequencer
+// and preset morphing in a separate CPU thread, the user is responsible
+// of calling the step functions. This also means that the user must call
+// setMorphStepTime() for the preset handler.
+
+// Using the TIME_MASTER_FREE mode usually results in smoother graphics display
+// But might incur in some jitter if you are also reading the parameters in
+// other contexts (e.g. the audio context).
+
+// See sequencergui.cpp example for details on PresetHandler and PresetSequencer
+
 struct MyApp : App {
   Mesh m;
 
   Parameter X{"x", "", 0.0, "", -2, 2};
   Parameter Y{"y", "", 0.0, "", -2, 2};
 
-  PresetHandler presetHandler{TimeMasterMode::TIME_MASTER_ASYNC, "sequencerDir",
+  PresetHandler presetHandler{TimeMasterMode::TIME_MASTER_FREE, "sequencerDir",
                               true};
-  PresetSequencer sequencer{TimeMasterMode::TIME_MASTER_ASYNC};
+  PresetSequencer sequencer{TimeMasterMode::TIME_MASTER_FREE};
 
   ControlGUI gui;
 
@@ -33,20 +45,15 @@ struct MyApp : App {
     gui << sequencer;
     gui.init();
 
-    sequencer.registerBeginCallback([&](PresetSequencer *) {
-      std::cout << "**** Started Sequence" << std::endl;
-    });
-    sequencer.registerEndCallback([&](bool finished, PresetSequencer *) {
-      if (finished) {
-        std::cout << "**** Sequence FINSIHED ***" << std::endl;
-      } else {
-        std::cout << "**** Sequence Stopped" << std::endl;
-      }
-    });
+    // Currently the preset handler requires setting this manually.
+    // In the future it will get picked up through the value passed
+    // in stepMorphing()
     presetHandler.setMorphStepTime(1.0f / graphicsDomain()->fps());
   }
 
   void onAnimate(double dt) override {
+    // As both the sequencer and the preset handler are in ASYNC mode, their
+    // step functions must be called
     sequencer.stepSequencer(dt);
     presetHandler.stepMorphing(dt);
   }
@@ -106,4 +113,5 @@ preset1:1.5:2.0
 int main() {
   writeExamplePresets();
   MyApp().start();
+  return 0;
 }
