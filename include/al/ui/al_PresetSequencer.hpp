@@ -127,7 +127,7 @@ class PresetSequencer : public osc::MessageConsumer {
 
   struct Step {
     StepType type = PRESET;
-    std::string presetName;
+    std::string name;
     float morphTime;  // The time to get to the preset
     float waitTime;   // The time to stay in the preset before the next step
     std::vector<ParameterField> params;

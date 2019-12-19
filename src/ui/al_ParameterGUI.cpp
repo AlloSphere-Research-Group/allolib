@@ -745,7 +745,9 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
         if (!presetSequencer->running()) {
           presetSequencer->stopSequence();
           if (presetSequencer->playbackFinished()) {
-            presetSequencer->setTime(-state.startOffset);
+            if (state.currentTime != 0) {
+              presetSequencer->setTime(-state.startOffset);
+            }
           }
           if (currentPresetSequencerItem >= 0) {
             double sliderTime = state.currentTime;
@@ -1178,13 +1180,15 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
       for (ParameterMeta *param : bundleGroup[currentBundle]->parameters()) {
         drawParameterMeta(param, suffix);
       }
-      for (auto bundle : bundleGroup[currentBundle]->bundles()) {
-        std::string subBundleName = bundle.first;
+      for (auto subbundleGroup : bundleGroup[currentBundle]->bundles()) {
+        std::string subBundleName = subbundleGroup.first;
         if (ImGui::CollapsingHeader(
                 (subBundleName + "##" + name + subBundleName).c_str(),
                 ImGuiTreeNodeFlags_CollapsingHeader)) {
-          for (auto *param : bundle.second->parameters()) {
-            drawParameterMeta({param}, suffix + subBundleName, 0);
+          for (auto *bundle : subbundleGroup.second) {
+            for (auto *param : bundle->parameters()) {
+              drawParameterMeta({param}, suffix + subBundleName, 0);
+            }
           }
         }
       }
@@ -1207,8 +1211,10 @@ void ParameterGUI::drawBundle(ParameterBundle *bundle) {
       ImGui::PushID(subBundleName.c_str());
       if (ImGui::CollapsingHeader(subBundleName.c_str(),
                                   ImGuiTreeNodeFlags_CollapsingHeader)) {
-        for (auto *param : innerBundle.second->parameters()) {
-          drawParameterMeta({param}, subBundleName, 0);
+        for (auto *bundle : innerBundle.second) {
+          for (auto *param : bundle->parameters()) {
+            drawParameterMeta({param}, subBundleName, 0);
+          }
         }
       }
       ImGui::PopID();

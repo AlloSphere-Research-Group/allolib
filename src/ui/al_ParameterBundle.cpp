@@ -1,9 +1,10 @@
 
+#include "al/ui/al_ParameterBundle.hpp"
+
 #include <cstring>
 #include <string>
 
 #include "al/protocol/al_OSC.hpp"
-#include "al/ui/al_ParameterBundle.hpp"
 #include "al/ui/al_ParameterServer.hpp"
 
 using namespace al;
@@ -153,9 +154,9 @@ void ParameterBundle::addBundle(ParameterBundle &bundle, std::string id) {
     id = std::to_string(mBundles.size());
   }
   if (mBundles.find(id) != mBundles.end()) {
-    std::cerr << "ERROR: Overwriting bundle id: " << id << std::endl;
+    mBundles[id] = std::vector<ParameterBundle *>();
   }
-  mBundles[id] = &bundle;
+  mBundles[id].push_back(&bundle);
   bundle.mBundleId = id;
   bundle.mParentPrefix = bundlePrefix();
 }
@@ -173,6 +174,8 @@ ParameterBundle &ParameterBundle::operator<<(ParameterMeta &parameter) {
 void ParameterBundle::addNotifier(OSCNotifier *notifier) {
   mNotifiers.push_back(notifier);
   for (auto subBundleGroup : bundles()) {
-    subBundleGroup.second->addNotifier(notifier);
+    for (auto *bundle : subBundleGroup.second) {
+      bundle->addNotifier(notifier);
+    }
   }
 }

@@ -180,10 +180,14 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
         p->get(fields);
         values[bundlePrefix + p->getFullAddress()] = fields;
       }
-      for (auto subBundle : bundleGroup.second.at(i)->bundles()) {
-        auto bundleStates = getBundleStates(subBundle.second, subBundle.first);
-        for (auto &bundleValues : bundleStates) {
-          values[bundlePrefix + "/" + bundleValues.first] = bundleValues.second;
+      // FIXME enable recursive nesting for bundles
+      for (auto subBundleGroup : bundleGroup.second.at(i)->bundles()) {
+        for (auto *bundle : subBundleGroup.second) {
+          auto bundleStates = getBundleStates(bundle, subBundleGroup.first);
+          for (auto &bundleValues : bundleStates) {
+            values[bundlePrefix + "/" + bundleValues.first] =
+                bundleValues.second;
+          }
         }
       }
     }
@@ -205,29 +209,47 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
 }
 
 void PresetHandler::recallPreset(std::string name) {
-  {
-    //    if (mMorphRemainingSteps.load() >= 0) {
-    //      mMorphRemainingSteps.store(0);
-    //    }
-    std::lock_guard<std::mutex> lk(mTargetLock);
-    mTargetValues = loadPresetValues(name);
-    mStartValues.clear();
-    // FIXME morph recursively inside bundles
-    for (auto targetValue : mTargetValues) {
-      bool valueSet = false;
-      for (auto *param : mParameters) {
-        if (param->getFullAddress() == targetValue.first) {
-          mStartValues[param->getFullAddress()] = std::vector<ParameterField>();
-          param->get(mStartValues[param->getFullAddress()]);
-          valueSet = true;
-          break;
-        }
-      }
-      if (!valueSet) {
-        mStartValues[targetValue.first] = targetValue.second;
-      }
-    }
-  }
+  morphTo(name, mMorphTime.get());
+  //  {
+  //    if (mTotalSteps.load() >= 0) {
+  //      mTotalSteps.store(1);
+
+  //    }
+  //    std::lock_guard<std::mutex> lk(mTargetLock);
+  //    mTargetValues = loadPresetValues(name);
+  //    mStartValues.clear();
+  //    // FIXME morph recursively inside bundles
+  //    for (auto targetValue : mTargetValues) {
+  //      bool valueSet = false;
+  //      for (auto *param : mParameters) {
+  //        if (param->getFullAddress() == targetValue.first) {
+  //          mStartValues[param->getFullAddress()] =
+  //          std::vector<ParameterField>();
+  //          param->get(mStartValues[param->getFullAddress()]);
+  //          valueSet = true;
+  //          break;
+  //        }
+  //      }
+  //      for (auto bundleGroup : mBundles) {
+  //        for (size_t i = 0; i < bundleGroup.second.size(); i++) {
+  //          std::string bundlePrefix =
+  //              "/" + bundleGroup.first + "/" + std::to_string(i);
+  //          for (auto *param : bundleGroup.second.at(i)->parameters()) {
+  //            if (bundlePrefix + param->getFullAddress() == targetValue.first)
+  //            {
+  //              mStartValues[bundlePrefix + param->getFullAddress()] =
+  //                  std::vector<ParameterField>();
+  //              param->get(mStartValues[bundlePrefix +
+  //              param->getFullAddress()]); valueSet = true; break;
+  //            }
+  //          }
+  //        }
+  //      }
+  //      if (!valueSet) {
+  //        mStartValues[targetValue.first] = targetValue.second;
+  //      }
+  //    }
+  //  }
 
   int index = -1;
   for (auto preset : mPresetsMap) {
@@ -280,8 +302,35 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
         mStartValues[param->getFullAddress()] = params;
       }
     }
+
+    std::function<void(std::vector<ParameterBundle *>, std::string)>
+        processBundleGroup = [&](std::vector<ParameterBundle *> bundles,
+                                 std::string prefix) {
+          for (unsigned int i = 0; i < bundles.size(); i++) {
+            std::string bundlePrefix = prefix + std::to_string(i);
+            for (auto *param : bundles.at(i)->parameters()) {
+              if (mTargetValues.find(bundlePrefix + param->getFullAddress()) !=
+                  mTargetValues.end()) {
+                mStartValues[bundlePrefix + param->getFullAddress()] =
+                    std::vector<ParameterField>();
+                param->get(
+                    mStartValues[bundlePrefix + param->getFullAddress()]);
+              }
+            }
+            for (auto bundleGroup : bundles.at(i)->bundles()) {
+              prefix += "/" + bundleGroup.first + "/";
+              processBundleGroup({bundleGroup.second}, prefix);
+            }
+          }
+        };
+
+    for (auto bundleGroup : mBundles) {
+      std::string prefix = "/" + bundleGroup.first + "/";
+      processBundleGroup(bundleGroup.second, prefix);
+    }
+
     mMorphStepCount = 0;
-    if (mMorphInterval <= 0.0) {
+    if (mMorphTime.get() <= 0.0) {
       mTotalSteps.store(1);
     } else {
       mTotalSteps.store(ceilf(mMorphTime.get() / mMorphInterval));
@@ -890,13 +939,37 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
           interpValues = endValue.second;
         }
 
-        // TODO interpolate bundles
         for (auto *param : mParameters) {
           if (param->getFullAddress() == startValue.first &&
               interpValues.size() > 0) {
             param->set(interpValues);
             break;
           }
+        }
+
+        std::function<void(std::vector<ParameterBundle *>, std::string)>
+            processBundleGroup = [&](std::vector<ParameterBundle *> bundles,
+                                     std::string prefix) {
+              for (unsigned int i = 0; i < bundles.size(); i++) {
+                std::string bundlePrefix = prefix + std::to_string(i);
+                for (auto *param : bundles.at(i)->parameters()) {
+                  if (bundlePrefix + param->getFullAddress() ==
+                          startValue.first &&
+                      interpValues.size() > 0) {
+                    param->set(interpValues);
+                    break;
+                  }
+                }
+                for (auto bundleGroup : bundles.at(i)->bundles()) {
+                  prefix += "/" + bundleGroup.first + "/";
+                  processBundleGroup({bundleGroup.second}, prefix);
+                }
+              }
+            };
+
+        for (auto bundleGroup : mBundles) {
+          std::string prefix = "/" + bundleGroup.first + "/";
+          processBundleGroup(bundleGroup.second, prefix);
         }
         continue;
       }
@@ -938,16 +1011,6 @@ void PresetHandler::stepMorphing() {
   if (stepCount <= totalSteps && totalSteps > 0) {
     double morphPhase = double(stepCount) / totalSteps;
     setInterpolatedValues(mStartValues, mTargetValues, morphPhase);
-
-    // FIXME implement bundle morphing
-    for (auto bundleGroup : mBundles) {
-      const std::string &bundleName = bundleGroup.first;
-      for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
-        std::string bundlePrefix = "/" + bundleName + "/" + std::to_string(i);
-        ParameterBundle *bundle = bundleGroup.second[i];
-        //          setParametersInBundle(bundle, bundlePrefix, this, factor);
-      }
-    }
   }
 }
 
@@ -967,9 +1030,11 @@ PresetHandler::ParameterStates PresetHandler::getBundleStates(
     p->get(values[bundlePrefix + p->getFullAddress()]);
   }
   for (auto b : bundle->bundles()) {
-    auto subBundleValues = getBundleStates(b.second, b.first);
-    for (auto bundleValue : subBundleValues) {
-      values[bundlePrefix + "/" + bundleValue.first] = bundleValue.second;
+    for (auto *bundle : b.second) {
+      auto subBundleValues = getBundleStates(bundle, b.first);
+      for (auto bundleValue : subBundleValues) {
+        values[bundlePrefix + "/" + bundleValue.first] = bundleValue.second;
+      }
     }
   }
   return values;

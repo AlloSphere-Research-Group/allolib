@@ -110,7 +110,7 @@ void SequenceRecorder::presetChanged(int index, void *sender, void *userData) {
   std::lock_guard<std::mutex> lk(recorder->mSequenceLock);
   //	recorder->mPresetName = presets->getCurrentPresetName();
   recorder->mStepToInsert.type = PresetSequencer::PRESET;
-  recorder->mStepToInsert.presetName = presets->getCurrentPresetName();
+  recorder->mStepToInsert.name = presets->getCurrentPresetName();
   recorder->mStepToInsert.morphTime = recorder->mPresetHandler->getMorphTime();
   recorder->mStepToInsert.waitTime = 0.0;
   recorder->mSequenceConditionVar.notify_one();
@@ -128,7 +128,7 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder,
   for (auto *param : recorder->mParameters) {
     PresetSequencer::Step step;
     step.type = PresetSequencer::PARAMETER;
-    step.presetName = param->getFullAddress();
+    step.name = param->getFullAddress();
     step.waitTime = 0.0f;
     step.morphTime = 0.0f;
     step.params = {param->toFloat()};
@@ -158,7 +158,7 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder,
         if (steps.back().type == PresetSequencer::PARAMETER) {
           PresetSequencer::Step fillerStep;
           fillerStep.type = PresetSequencer::PARAMETER;
-          fillerStep.presetName = "_";
+          fillerStep.name = "_";
           fillerStep.params = {0.0f};
           fillerStep.waitTime = timeDelta;
           steps.push_back(fillerStep);
@@ -183,16 +183,16 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder,
   std::string fileText;
   for (PresetSequencer::Step step : steps) {
     if (step.type == PresetSequencer::PRESET) {
-      fileText += step.presetName + ":" + std::to_string(step.morphTime) + ":" +
+      fileText += step.name + ":" + std::to_string(step.morphTime) + ":" +
                   std::to_string(step.waitTime) + "\n";
     } else if (step.type == PresetSequencer::PARAMETER) {
       if (step.params[0].type() == ParameterField::FLOAT) {
         fileText += "+" + std::to_string(step.waitTime) + ":" +
-                    step.presetName + ":" +
+                    step.name + ":" +
                     std::to_string(step.params[0].get<float>()) + "\n";
       } else if (step.params[0].type() == ParameterField::STRING) {
         fileText += "+" + std::to_string(step.waitTime) + ":" +
-                    step.presetName + ":" + step.params[0].get<std::string>() +
+                    step.name + ":" + step.params[0].get<std::string>() +
                     "\n";
       }
     }
@@ -249,7 +249,7 @@ void SequenceRecorder::registerParameter(ParameterMeta &p) {
     param->registerChangeCallback([&, param](float value) {
       std::lock_guard<std::mutex> lk(mSequenceLock);
       mStepToInsert.type = PresetSequencer::PARAMETER;
-      mStepToInsert.presetName = param->getFullAddress();
+      mStepToInsert.name = param->getFullAddress();
       mStepToInsert.params = {param->toFloat()};
       mSequenceConditionVar.notify_one();
     });
@@ -259,7 +259,7 @@ void SequenceRecorder::registerParameter(ParameterMeta &p) {
     param->registerChangeCallback([&, param](float value) {
       std::lock_guard<std::mutex> lk(mSequenceLock);
       mStepToInsert.type = PresetSequencer::PARAMETER;
-      mStepToInsert.presetName = param->getFullAddress();
+      mStepToInsert.name = param->getFullAddress();
       mStepToInsert.params = {param->get()};
       mSequenceConditionVar.notify_one();
     });
