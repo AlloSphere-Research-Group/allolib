@@ -752,8 +752,8 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
           if (currentPresetSequencerItem >= 0) {
             double sliderTime = state.currentTime;
             presetSequencer->playSequence(
-                stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
-            presetSequencer->setTime(sliderTime - state.startOffset);
+                stateMap[presetSequencer].seqList[currentPresetSequencerItem],
+                1.0, sliderTime - state.startOffset);
           } else {
             std::cout << "No sequence selected for playback." << std::endl;
           }

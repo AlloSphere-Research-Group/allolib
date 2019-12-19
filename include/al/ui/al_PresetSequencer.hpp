@@ -149,7 +149,8 @@ class PresetSequencer : public osc::MessageConsumer {
    * a sequence is playing when this command is issued, the current playback
    * is interrupted and the new sequence requested starts immediately.
    */
-  void playSequence(std::string sequenceName, double timeScale = 1.0f);
+  void playSequence(std::string sequenceName, double timeScale = 1.0f,
+                    double timeOffset = 0.0);
 
   void stopSequence(bool triggerCallbacks = true);
 

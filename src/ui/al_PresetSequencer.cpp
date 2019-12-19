@@ -25,7 +25,8 @@ PresetSequencer::PresetSequencer(TimeMasterMode timeMasterMode)
 
 PresetSequencer::~PresetSequencer() { stopCpuThread(); }
 
-void PresetSequencer::playSequence(std::string sequenceName, double timeScale) {
+void PresetSequencer::playSequence(std::string sequenceName, double timeScale,
+                                   double timeOffset) {
   stopSequence();
   mSequenceLock.lock();
 
@@ -48,6 +49,7 @@ void PresetSequencer::playSequence(std::string sequenceName, double timeScale) {
                               mSteps[mCurrentStep].morphTime);
     }
   }
+  setTime(timeOffset);
 
   if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU && mSequencerThread) {
     {
