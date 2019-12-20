@@ -10,19 +10,9 @@
 #include <stack>
 #include <vector>
 
+#include "al/app/al_ComputationDomain.hpp"
 #include "al/protocol/al_OSC.hpp"
 #include "al/spatial/al_Pose.hpp"
-
-#include "Gamma/Domain.h"
-#include "al/app/al_ComputationDomain.hpp"
-
-//#undef AL_USE_CUTTLEBONE
-
-#ifdef AL_USE_CUTTLEBONE
-#include "Cuttlebone/Cuttlebone.hpp"
-#else
-#include "al/protocol/al_OSC.hpp"
-#endif
 
 namespace al {
 
@@ -61,11 +51,6 @@ class StateReceiveDomain : public SynchronousDomain {
     tickSubdomains(true);
 
     assert(mState);  // State must have been set at this point
-#ifdef AL_USE_CUTTLEBONE
-    assert(mTaker);
-    mQueuedStates = mTaker->get(mState);
-    return true;
-#else
     mRecvLock.lock();
     if (newMessages > 0) {
       mQueuedStates = newMessages;
@@ -75,24 +60,16 @@ class StateReceiveDomain : public SynchronousDomain {
     mRecvLock.unlock();
     tickSubdomains(false);
     return true;
-#endif
   }
 
   bool cleanup(ComputationDomain *parent = nullptr) override {
     cleanupSubdomains(true);
-#ifdef AL_USE_CUTTLEBONE
-    mTaker->stop();
-    mTaker = nullptr;
-    cleanupSubdomains(false);
-    return true;
-#else
     mRecv = nullptr;
     mState = nullptr;
 
     //    std::cerr << "Not using Cuttlebone. Ignoring" << std::endl;
     cleanupSubdomains(false);
     return true;
-#endif
   }
 
   void configure(uint16_t port = 10100, std::string id = "state",
@@ -125,9 +102,6 @@ class StateReceiveDomain : public SynchronousDomain {
   uint16_t mPacketSize = 1400;
   std::string mId;
 
-#ifdef AL_USE_CUTTLEBONE
-  std::unique_ptr<cuttlebone::Taker<TSharedState>> mTaker;
-#else
   class Handler : public osc::PacketHandler {
    public:
     StateReceiveDomain *mOscDomain;
@@ -157,7 +131,6 @@ class StateReceiveDomain : public SynchronousDomain {
   uint16_t newMessages = 0;
   std::mutex mRecvLock;
   std::unique_ptr<osc::Recv> mRecv;
-#endif
 };
 
 template <class TSharedState>
@@ -165,13 +138,6 @@ bool StateReceiveDomain<TSharedState>::initialize(ComputationDomain *parent) {
   initializeSubdomains(true);
   assert(parent != nullptr);
 
-#ifdef AL_USE_CUTTLEBONE
-  mTaker =
-      std::make_unique<cuttlebone::Taker<TSharedState, mPacketSize, mPort>>();
-  mTaker->start();
-  initializeSubdomains(false);
-  return true;
-#else
   buf = std::make_unique<unsigned char[]>(sizeof(TSharedState));
   mRecv = std::make_unique<osc::Recv>();
   if (!mRecv || !mRecv->open(mPort, mAddress.c_str())) {
@@ -188,7 +154,6 @@ bool StateReceiveDomain<TSharedState>::initialize(ComputationDomain *parent) {
   std::cout << "Opened " << mAddress << ":" << mPort << std::endl;
   initializeSubdomains(false);
   return true;
-#endif
 }
 
 template <class TSharedState = DefaultState>
@@ -197,34 +162,14 @@ class StateSendDomain : public SynchronousDomain {
   bool initialize(ComputationDomain *parent = nullptr) override {
     initializeSubdomains(true);
 
-#ifdef AL_USE_CUTTLEBONE
-    mMaker =
-        std::make_unique<cuttlebone::Taker<TSharedState, mPacketSize, mPort>>();
-    mMaker->start();
     initializeSubdomains(false);
     return true;
-#else
-    //    mSend = std::make_unique<osc::Send>(mPort, mAddress.c_str());
-    ////    std::cout << "StateSendDomain not using Cuttlebone" << std::endl;
-    //    if (!mSend) {
-    //      std::cerr << "Can't create sender for StateSendDomain address:" <<
-    //      mAddress << " port:" << mPort <<std::endl;
-    //    }
-    initializeSubdomains(false);
-    return true;
-#endif
   }
 
   bool tick() override {
     tickSubdomains(true);
 
     assert(mState);  // State must have been set at this point
-#ifdef AL_USE_CUTTLEBONE
-    assert(mMaker);
-    mMaker->set(mState);
-    tickSubdomains(false);
-    return true;
-#else
     //    assert(mSend);
 
     //    osc::Blob b(&mState, sizeof(mState));
@@ -240,23 +185,14 @@ class StateSendDomain : public SynchronousDomain {
 
     tickSubdomains(false);
     return true;
-#endif
   }
 
   bool cleanup(ComputationDomain *parent = nullptr) override {
     cleanupSubdomains(true);
-#ifdef AL_USE_CUTTLEBONE
-    if (mMaker) {
-      mMaker->stop();
-    }
-    cleanupSubdomains(false);
-    return true;
-#else
     mState = nullptr;
     //    std::cerr << "Not using Cuttlebone. Ignoring" << std::endl;
     cleanupSubdomains(false);
     return true;
-#endif
   }
 
   void configure(uint16_t port, std::string id = "state",
@@ -286,22 +222,7 @@ class StateSendDomain : public SynchronousDomain {
   void setId(const std::string &id) { mId = id; }
 
  private:
-#ifdef AL_USE_CUTTLEBONE
-  std::unique_ptr<cuttlebone::Maker<TSharedState>> mMaker;
-#else
   std::unique_ptr<osc::Send> mSend;
-#endif
-
-#ifdef AL_USE_CUTTLEBONE
-  if (role() & ROLE_SIMULATOR) {
-    std::string broadcastAddress = configLoader.gets("broadcastAddress");
-    mMaker = std::make_unique<cuttlebone::Maker<TSharedState>>(
-        broadcastAddress.c_str());
-    mMaker->start();
-  } else if (role() & ROLE_RENDERER) {
-  }
-
-#endif
 
   std::string mId = "";
   uint16_t mPort = 10100;

@@ -44,15 +44,14 @@ class StateSimulationDomain : public SimulationDomain {
   StateSimulationDomain() { mState = std::make_shared<TSharedState>(); }
 
   virtual bool initialize(ComputationDomain *parent = nullptr) {
-    SimulationDomain::initialize(parent);
-    return true;
+    return SimulationDomain::initialize(parent);
   }
 
   TSharedState &state() { return *mState; }
 
   std::shared_ptr<TSharedState> statePtr() { return mState; }
 
-  std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(
+  virtual std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(
       std::string id = "") {
     auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(false);
     newDomain->setId(id);
@@ -60,7 +59,7 @@ class StateSimulationDomain : public SimulationDomain {
     return newDomain;
   }
 
-  std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(
+  virtual std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(
       std::string id = "") {
     auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(true);
     newDomain->setId(id);
@@ -68,7 +67,7 @@ class StateSimulationDomain : public SimulationDomain {
     return newDomain;
   }
 
- private:
+ protected:
   std::shared_ptr<TSharedState> mState;
 };
 
