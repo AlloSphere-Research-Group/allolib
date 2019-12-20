@@ -47,6 +47,7 @@
 */
 
 #include <stdio.h>
+
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -287,6 +288,11 @@ class File {
   /// Convert relative paths to absolute paths
   static std::string absolutePath(const std::string& path);
 
+  /// Returns current path in filesystem
+  /// This function should be replaced when moved to C++17 to
+  /// std::filesystem::current_path()
+  static std::string currentPath();
+
   /// Returns the base name of path.
 
   /// The base name is everything following the last slash.
@@ -323,9 +329,12 @@ class File {
   /// Search for file or directory back from current directory
 
   /// @param[in,out] rootPath	The input should contain the path to search
-  ///							relative to. If the input is empty, then "./"
-  ///is 							assumed. If a match is made, then the output is 							a string that can be
-  ///prefixed to 'matchPath' to 							get the actual location of the match.
+  ///							relative to. If the input is empty,
+  ///then
+  ///"./"
+  /// is 							assumed. If a match is made, then the output
+  /// is a string that can be prefixed to 'matchPath' to get the actual location
+  /// of the match.
   /// @param[in]  matchPath	File or directory to search for
   /// @param[in]  maxDepth	Maximum number of directories to search back
   /// \returns whether the file or directory was found
@@ -336,10 +345,11 @@ class File {
 
   /// @param[in,out] path		Input is a file or directory to search
   /// for.
-  ///							If the file is found, the output contains a series
-  ///of
-  ///							"../" prefixed to the input. Otherwise, the
-  ///input 							path is not modified.
+  ///							If the file is found, the output contains
+  ///a series of
+  ///							"../" prefixed to the input.
+  ///Otherwise, the input path is not
+  /// modified.
   /// @param[in]  maxDepth	Maximum number of directories to search back
   /// \returns whether the file or directory was found
   static bool searchBack(std::string& path, int maxDepth = 6);

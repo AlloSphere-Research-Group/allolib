@@ -14,9 +14,7 @@
 #include "al/app/al_OSCDomain.hpp"
 #include "al/app/al_OpenGLGraphicsDomain.hpp"
 #include "al/app/al_SimulationDomain.hpp"
-//#include "al_OpenVRDomain.hpp"
-
-#include "al/app/al_WindowApp.hpp"
+#include "al/graphics/al_Graphics.hpp"
 
 /** @defgroup App Application building tools
  *
@@ -59,7 +57,7 @@ class App {
   virtual bool onMouseDrag(Mouse const &m) { return true; }
   virtual bool onMouseMove(Mouse const &m) { return true; }
   virtual bool onMouseScroll(Mouse const &m) { return true; }
-  //  virtual void onResize(int w, int h) {}
+  virtual void onResize(int w, int h) {}
   //  virtual void onVisibility(bool v) {}
 
   void quit();  ///< Requests domain to quit.
@@ -69,10 +67,10 @@ class App {
   virtual Window &defaultWindow();
   virtual Graphics &graphics();
 
-  Viewpoint &view();
-  Pose &pose();
-  Lens &lens();
-  Nav &nav();
+  virtual Viewpoint &view();
+  virtual Pose &pose();
+  virtual Lens &lens();
+  virtual Nav &nav();
   NavInputControl &navControl();
   void fps(double f);
 

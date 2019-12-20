@@ -25,6 +25,10 @@ struct MyApp : public App {
     addSphere(mMesh, 0.1);
     mMesh.primitive(Mesh::LINES);
 
+    // You can set the display name for the parameter to be different to its
+    // name
+    z.displayName("Pos(Z)");
+
     nav() = Vec3d(0, 0, 2);
     // We must initialize ImGUI ourselves:
     imguiInit();

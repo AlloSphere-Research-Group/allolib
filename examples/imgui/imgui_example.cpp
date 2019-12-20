@@ -29,7 +29,7 @@ struct my_app : public App {
     // so need to flag active/inactive here
     navControl().active(!isImguiUsingInput());
 
-    // call beginIMGUI before everything, so info about gui status can be used
+    // call imguiBeginFrame before everything, so info about gui status can be used
     // to update app state
     imguiBeginFrame();
 

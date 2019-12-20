@@ -9,6 +9,8 @@
 #include <stack>
 #include <vector>
 
+#include "al/ui/al_Parameter.hpp"
+
 namespace al {
 class SynchronousDomain;
 
@@ -79,6 +81,19 @@ class ComputationDomain {
     mCleanupCallbacks.push_back(callback);
   }
 
+  /**
+   * @brief Return a list of parameters that control this domain
+   * @return list of parameters
+   *
+   * The parameters provided here provide runtime "continuous" parameters,
+   * for example like audio gain or eye separation. There should be a clear
+   * distinction between values that need to be set on domain intialization
+   * that must remain immutable during domain operation and parameters
+   * provided here that provide continuous adjustment to the domain's
+   * operation.
+   */
+  std::vector<ParameterMeta *> parameters() { return mParameters; }
+
  protected:
   /**
    * @brief initializeSubdomains should be called within the domain's
@@ -132,12 +147,14 @@ class ComputationDomain {
     }
   }
 
- protected:
   std::mutex mSubdomainLock;  // It is the domain's responsibility to lock and
                               // unlock while processing.
   double mTimeDrift{0.0};
   std::vector<std::pair<std::shared_ptr<SynchronousDomain>, bool>>
       mSubDomainList;
+
+  // Add parameters for domain control here
+  std::vector<ParameterMeta *> mParameters;
 
  private:
   std::vector<std::function<void(ComputationDomain *)>> mInitializeCallbacks;

@@ -49,8 +49,9 @@ set(headers
   include/al/app/al_App.hpp
   include/al/app/al_AudioApp.hpp
   include/al/app/al_DistributedApp.hpp
+  include/al/app/al_NodeConfiguration.hpp
   include/al/app/al_FPS.hpp/
-  include/al/app/al_WindowApp.hpp
+#  include/al/app/al_WindowApp.hpp
 
   include/al/app/al_AudioDomain.hpp
   include/al/app/al_ComputationDomain.hpp
@@ -121,6 +122,8 @@ set(headers
   include/al/sound/al_SoundFile.hpp
   include/al/spatial/al_HashSpace.hpp
   include/al/spatial/al_Pose.hpp
+  include/al/sphere/al_SphereUtils.hpp
+  include/al/sphere/al_PerProjection.hpp
   include/al/system/al_PeriodicThread.hpp
   include/al/system/al_Printing.hpp
   include/al/system/al_Thread.hpp
@@ -152,7 +155,7 @@ set(sources
   src/app/al_App.cpp
   src/app/al_AudioApp.cpp
   src/app/al_FPS.cpp
-  src/app/al_WindowApp.cpp
+#  src/app/al_WindowApp.cpp
   src/app/al_DistributedApp.cpp
 
   src/app/al_AudioDomain.cpp
@@ -253,6 +256,7 @@ set_target_properties(al PROPERTIES
 
 if (AL_WINDOWS)
   target_compile_options(al PRIVATE "")
+  target_compile_definitions(al PUBLIC NOMINMAX)
 else ()
   target_compile_options(al PRIVATE "-Wall")
 endif (AL_WINDOWS)

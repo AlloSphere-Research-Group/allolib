@@ -1,20 +1,23 @@
 
 #include "al/ui/al_FileSelector.hpp"
+
 #include "al/io/al_Imgui.hpp"
 
 using namespace al;
 
 FileSelector::FileSelector(std::string globalRoot,
-                           std::function<bool(std::string)> function) {
-  if (function) {
-    mFilterFunc = function;
+                           std::function<bool(std::string)> filterfunction) {
+  mFilterFunc = filterfunction;
+  if (globalRoot.size() > 0) {
+    mGlobalRoot = File::conformPathToOS(globalRoot);
   } else {
-    mFilterFunc = [](std::string) { return true; };
   }
-  mGlobalRoot = File::conformPathToOS(globalRoot);
 }
 
 void FileSelector::start(std::string currentDir) {
+  if (currentDir.size() == 0) {
+    currentDir = File::currentPath();
+  }
   mCurrentDir = currentDir;
   mSelectedItem = "";
   auto boundFunc = std::bind(&FileSelector::filteringFunctionWrapper, this,
@@ -30,6 +33,7 @@ bool FileSelector::drawFileSelector() {
 
   std::string rootButtonText = mGlobalRoot;
 
+  ImGui::PushID((void *)this);
   if (rootButtonText.size() != 0) {  // Global root set.
     ImGui::Text("Global root:%s", rootButtonText.c_str());
   }
@@ -64,7 +68,8 @@ bool FileSelector::drawFileSelector() {
   //          return File::isDirectory(rootButtonText + mCurrentDir + "/" +
   //          fp.file());});
   //    }
-  bool itemClicked = false;
+  bool enterDirectory = false;
+  bool applyItem = false;
 #ifdef AL_WINDOWS
   // show drive names for windows.
   if (items.count() == 0 && rootButtonText + mCurrentDir == "") {
@@ -93,24 +98,38 @@ bool FileSelector::drawFileSelector() {
       }
       if (File::isDirectory(newPath)) {
         mCurrentDir = newPath;
+        enterDirectory = true;
+        mSelectedItem = "";
+#ifdef AL_WINDOWS
+      } else if (newPath.size() == 2 && newPath[1] == ':') {
+        // For Windows drives
+        mCurrentDir = newPath;
+        enterDirectory = true;
+        mSelectedItem = "";
+#endif
+      } else {
+        applyItem = true;
       }
-      mSelectedItem = "";
-      itemClicked = true;
     }
   }
-  if (itemClicked) {
+  if (enterDirectory) {
     auto boundFunc = std::bind(&FileSelector::filteringFunctionWrapper, this,
                                std::placeholders::_1);
     items = filterInDir(rootButtonText + mCurrentDir, boundFunc);
   }
-  // FIXME push unique ids for these
-  if (ImGui::Button("Select##Directory")) {
+  if (ImGui::Button("Select##Directory") || applyItem) {
+    mActive = false;
+    ImGui::PopID();
+    if (mSelectedItem == "") {
+      return false;
+    }
     return true;
   }
   ImGui::SameLine();
   if (ImGui::Button("Cancel##Directory")) {
     mActive = false;
   }
+  ImGui::PopID();
   return false;
 }
 

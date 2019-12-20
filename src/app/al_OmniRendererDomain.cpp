@@ -32,7 +32,7 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
     }
   }
 
-  if (sphere::is_renderer()) {
+  if (sphere::isRendererMachine()) {
     spanAllDesktop();
     loadPerProjectionConfiguration(false);
     running_in_sphere_renderer = true;
@@ -84,7 +84,7 @@ void GLFWOpenGLOmniRendererDomain::setEyeToRenderForDesktopMode(int eye) {
 
 void GLFWOpenGLOmniRendererDomain::spanAllDesktop() {
   int width, height;
-  sphere::get_fullscreen_dimension(&width, &height);
+  sphere::getFullscreenDimension(&width, &height);
   if (width != 0 && height != 0) {
     mWindow->dimensions(0, 0, width, height);
     mWindow->decorated(false);
@@ -99,7 +99,7 @@ void GLFWOpenGLOmniRendererDomain::loadPerProjectionConfiguration(
   if (!desktop) {
     // need to be called before pp_render.init
     pp_render.load_calibration_data(
-        sphere::config_directory("data").c_str(),    // path
+        sphere::getCalibrationDirectory("data").c_str(),    // path
         sphere::renderer_hostname("config").c_str()  // hostname
     );  // parameters will be used to look for file ${path}/${hostname}.txt
     pp_render.init(mGraphics->lens());

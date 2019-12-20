@@ -216,6 +216,8 @@ void App::start() {
       std::bind(&App::onMouseMove, this, std::placeholders::_1);
   mDefaultWindowDomain->window().onMouseScroll =
       std::bind(&App::onMouseScroll, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onResize = std::bind(
+      &App::onResize, this, std::placeholders::_1, std::placeholders::_2);
   mDefaultWindowDomain->window().append(stdControls);
   stdControls.app = this;
   stdControls.mWindow = &mDefaultWindowDomain->window();

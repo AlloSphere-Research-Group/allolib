@@ -8,10 +8,9 @@
 #include <stack>
 #include <vector>
 
-#include "al_ComputationDomain.hpp"
-
 #include "Gamma/Domain.h"
 #include "al/io/al_AudioIO.hpp"
+#include "al_ComputationDomain.hpp"
 
 namespace al {
 
@@ -21,6 +20,7 @@ namespace al {
  */
 class AudioDomain : public AsynchronousDomain {
  public:
+  AudioDomain();
   virtual ~AudioDomain() {}
 
   // Domain management functions
@@ -48,6 +48,7 @@ class AudioDomain : public AsynchronousDomain {
   }
 
  private:
+  Parameter mGainParameter{"gain", "", 1.0, "", 0.0, 2.0};
   AudioIO mAudioIO;
 };
 
