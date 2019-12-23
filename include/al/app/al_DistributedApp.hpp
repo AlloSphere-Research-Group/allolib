@@ -29,6 +29,16 @@
 #endif
 
 namespace al {
+
+class AudioControl {
+ public:
+  void registerAudioIO(AudioIO &io) {
+    gain.registerChangeCallback([&io](float value) { io.gain(value); });
+  }
+
+  Parameter gain{"gain", "sound", 1.0, "alloapp", 0.0, 2.0};
+};
+
 /**
  * @brief DistributedApp class
  * @ingroup App
@@ -73,19 +83,19 @@ class DistributedAppWithState : public DistributedApp {
     // Replace Simulation domain with state simulation domain
     mSimulationDomain =
         mOpenGLGraphicsDomain
-            ->newSubDomain<StateSimulationDomain<TSharedState>>(true);
+            ->newSubDomain<StateDistributionDomain<TSharedState>>(true);
 
     if (rank == 0) {
       std::cout << "Running primary" << std::endl;
       auto sender =
-          std::static_pointer_cast<StateSimulationDomain<TSharedState>>(
+          std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
               mSimulationDomain)
               ->addStateSender("state");
       sender->configure(10101);
     } else {
       std::cout << "Running REPLICA" << std::endl;
       auto receiver =
-          std::static_pointer_cast<StateSimulationDomain<TSharedState>>(
+          std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
               mSimulationDomain)
               ->addStateReceiver("state");
       receiver->configure(10101);
@@ -95,7 +105,7 @@ class DistributedAppWithState : public DistributedApp {
   }
 
   TSharedState &state() {
-    return std::static_pointer_cast<StateSimulationDomain<TSharedState>>(
+    return std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
                mSimulationDomain)
         ->state();
   }

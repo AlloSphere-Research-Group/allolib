@@ -10,7 +10,7 @@
 #include <stack>
 #include <vector>
 
-#include "al/app/al_ComputationDomain.hpp"
+#include "al/app/al_SimulationDomain.hpp"
 #include "al/protocol/al_OSC.hpp"
 #include "al/spatial/al_Pose.hpp"
 
@@ -19,25 +19,33 @@ namespace al {
 struct DefaultState {
   Pose pose;
 };
+
 template <class TSharedState>
 class StateReceiveDomain;
 
 template <class TSharedState>
 class StateSendDomain;
 
+template <class TSharedState>
+class StateSimulationDomain;
+
 /**
  * @brief StateDistributionDomain class
  * @ingroup App
  */
-class StateDistributionDomain : public SynchronousDomain {
+template <class TSharedState = DefaultState>
+class StateDistributionDomain : public StateSimulationDomain<TSharedState> {
  public:
-  template <class TSharedState = DefaultState>
   std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(
       std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr);
 
-  template <class TSharedState = DefaultState>
   std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(
       std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr);
+
+  bool isSender() { return mIsSender; }
+
+ protected:
+  bool mIsSender{false};
 
  private:
 };
@@ -93,13 +101,14 @@ class StateReceiveDomain : public SynchronousDomain {
 
   void setId(const std::string &id) { mId = id; }
 
- private:
+ protected:
   std::shared_ptr<TSharedState> mState;
   int mQueuedStates{1};
-
   std::string mAddress{"localhost"};
   uint16_t mPort = 10100;
   uint16_t mPacketSize = 1400;
+
+ private:
   std::string mId;
 
   class Handler : public osc::PacketHandler {
@@ -221,33 +230,38 @@ class StateSendDomain : public SynchronousDomain {
 
   void setId(const std::string &id) { mId = id; }
 
- private:
-  std::unique_ptr<osc::Send> mSend;
+  void setAddress(std::string address) { mAddress = address; };
 
-  std::string mId = "";
+ protected:
+  std::shared_ptr<TSharedState> mState;
+  std::mutex mStateLock;
+  int mQueuedStates{0};
   uint16_t mPort = 10100;
   std::string mAddress{"localhost"};
   uint16_t mPacketSize = 1400;
 
-  std::shared_ptr<TSharedState> mState;
-  std::mutex mStateLock;
-  int mQueuedStates{0};
+ private:
+  std::unique_ptr<osc::Send> mSend;
+
+  std::string mId = "";
 };
 
 template <class TSharedState>
 std::shared_ptr<StateSendDomain<TSharedState>>
-StateDistributionDomain::addStateSender(
+StateDistributionDomain<TSharedState>::addStateSender(
     std::string id, std::shared_ptr<TSharedState> statePtr) {
-  auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(false);
+  auto newDomain =
+      this->template newSubDomain<StateSendDomain<TSharedState>>(false);
   newDomain->setId(id);
   return newDomain;
 }
 
 template <class TSharedState>
 std::shared_ptr<StateReceiveDomain<TSharedState>>
-StateDistributionDomain::addStateReceiver(
+StateDistributionDomain<TSharedState>::addStateReceiver(
     std::string id, std::shared_ptr<TSharedState> statePtr) {
-  auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(true);
+  auto newDomain =
+      this->template newSubDomain<StateReceiveDomain<TSharedState>>(true);
   newDomain->setId(id);
 
   return newDomain;

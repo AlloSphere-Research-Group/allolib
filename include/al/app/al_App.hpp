@@ -137,7 +137,7 @@ class App {
       WindowEventHandler &handler);
 
   // Access to audio domain
-  [[deprecated("Use call from domain directly")]] AudioIO &audioIO();
+  AudioIO &audioIO();
 
   void configureAudio(double audioRate = 44100, int audioBlockSize = 512,
                       int audioOutputs = -1, int audioInputs = -1);
@@ -195,9 +195,7 @@ class App {
   };
   StandardWindowAppKeyControls stdControls;
 
- protected:
-  void initializeDomains();
-
+  // Modify these with care
   std::shared_ptr<GLFWOpenGLWindowDomain> mDefaultWindowDomain;
 
   std::shared_ptr<OSCDomain> mOSCDomain;
@@ -205,17 +203,11 @@ class App {
   std::shared_ptr<OpenGLGraphicsDomain> mOpenGLGraphicsDomain;
   std::shared_ptr<SimulationDomain> mSimulationDomain;
 
+ protected:
+  void initializeDomains();
+
   std::vector<std::shared_ptr<AsynchronousDomain>> mDomainList;
   std::stack<std::shared_ptr<AsynchronousDomain>> mRunningDomains;
-};
-
-class AudioControl {
- public:
-  void registerAudioIO(AudioIO &io) {
-    gain.registerChangeCallback([&io](float value) { io.gain(value); });
-  }
-
-  Parameter gain{"gain", "sound", 1.0, "alloapp", 0.0, 2.0};
 };
 
 }  // namespace al
