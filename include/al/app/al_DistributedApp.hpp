@@ -63,10 +63,10 @@ class DistributedApp : public App, public NodeConfiguration {
   Nav &nav() override;
 
   std::shared_ptr<GLFWOpenGLOmniRendererDomain> omniRendering;
+  std::map<std::string, std::string> additionalConfig;
 
  private:
   AudioControl mAudioControl;
-  //  std::string mGlobalDataRootPath;
 
   std::map<std::string, std::string> mRoleMap;
 };
