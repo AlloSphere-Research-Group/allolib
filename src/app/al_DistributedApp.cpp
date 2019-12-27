@@ -1,5 +1,7 @@
 #include "al/app/al_DistributedApp.hpp"
 
+#include "al/sphere/al_SphereUtils.hpp"
+
 #ifdef AL_WINDOWS
 //#include <Windows.h>
 #include <WinSock2.h>
@@ -76,20 +78,15 @@ void DistributedApp::initialize() {
     }
   }
 
-  //      if (mRunDistributed) {
-  //          for (auto entry: mRoleMap) {
-  //              if (strncmp(name().c_str(), entry.first.c_str(),
-  //              name().size()) == 0) {
-  //                mRole = entry.second;
-  ////                std::cout << name() << ":Running distributed as " <<
-  /// roleName() << std::endl;
-  //              }
-  //          }
-
-  //      }
   if (hasCapability(CAP_SIMULATOR)) {
-    appConfig.setDefaultValue("broadcastAddress", std::string("192.168.0.255"));
-    appConfig.writeFile();
+    if (al::sphere::isSphereMachine()) {
+      appConfig.setDefaultValue("broadcastAddress",
+                                std::string("192.168.10.255"));
+      appConfig.writeFile();
+    }
+  }
+  if (appConfig.hasKey<std::string>("broadcastAddress")) {
+    additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
   }
 
   osc::Recv testServer;

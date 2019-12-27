@@ -26,6 +26,9 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
     mGraphics = std::make_unique<Graphics>();
   }
   if (!mWindow->created()) {
+    if (render_stereo) {
+      mWindow->displayMode(Window::DisplayMode::STEREO_BUF);
+    }
     bool ret = mWindow->create();
     if (ret) {
       mGraphics->init();
@@ -99,8 +102,8 @@ void GLFWOpenGLOmniRendererDomain::loadPerProjectionConfiguration(
   if (!desktop) {
     // need to be called before pp_render.init
     pp_render.load_calibration_data(
-        sphere::getCalibrationDirectory("data").c_str(),    // path
-        sphere::renderer_hostname("config").c_str()  // hostname
+        sphere::getCalibrationDirectory("data").c_str(),  // path
+        sphere::renderer_hostname("config").c_str()       // hostname
     );  // parameters will be used to look for file ${path}/${hostname}.txt
     pp_render.init(mGraphics->lens());
   } else {

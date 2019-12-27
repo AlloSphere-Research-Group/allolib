@@ -9,9 +9,8 @@
 #include <stack>
 #include <vector>
 
-#include "Gamma/Domain.h"
-#include "al_ComputationDomain.hpp"
-#include "al_StateDistributionDomain.hpp"
+#include "al/app/al_ComputationDomain.hpp"
+#include "al/app/al_StateDistributionDomain.hpp"
 
 namespace al {
 
@@ -36,35 +35,29 @@ class SimulationDomain : public SynchronousDomain {
 template <class TSharedState>
 class StateSimulationDomain : public SimulationDomain {
  public:
-  StateSimulationDomain() { mState = std::make_shared<TSharedState>(); }
-
-  virtual bool initialize(ComputationDomain *parent = nullptr) {
-    SimulationDomain::initialize(parent);
-    return true;
-  }
-
   TSharedState &state() { return *mState; }
 
   std::shared_ptr<TSharedState> statePtr() { return mState; }
 
-  std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(
-      std::string id = "") {
-    auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(false);
-    newDomain->setId(id);
-    newDomain->setStatePointer(statePtr());
-    return newDomain;
-  }
+  //  virtual std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(
+  //      std::string id = "") {
+  //    auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(false);
+  //    newDomain->setId(id);
+  //    newDomain->setStatePointer(statePtr());
+  //    return newDomain;
+  //  }
 
-  std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(
-      std::string id = "") {
-    auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(true);
-    newDomain->setId(id);
-    newDomain->setStatePointer(statePtr());
-    return newDomain;
-  }
+  //  virtual std::shared_ptr<StateReceiveDomain<TSharedState>>
+  //  addStateReceiver(
+  //      std::string id = "") {
+  //    auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(true);
+  //    newDomain->setId(id);
+  //    newDomain->setStatePointer(statePtr());
+  //    return newDomain;
+  //  }
 
- private:
-  std::shared_ptr<TSharedState> mState;
+ protected:
+  std::shared_ptr<TSharedState> mState{new TSharedState};
 };
 
 }  // namespace al
