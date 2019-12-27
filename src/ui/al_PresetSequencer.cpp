@@ -391,7 +391,7 @@ void PresetSequencer::updateTime(double time) {
     }
 
     updateSequencer();
-    if (mSteps.size() > mCurrentStep && mCurrentStep > 1) {
+    if (mSteps.size() > (mCurrentStep - 1) && mCurrentStep > 1) {
       Step step = mSteps[mCurrentStep - 1];
       std::string previousPreset = mSteps[mCurrentStep - 2].name;
       if (time > (mTargetTime - step.waitTime)) {
@@ -411,7 +411,7 @@ void PresetSequencer::updateTime(double time) {
                 previousPreset, step.name,
                 1.0 - (remainingMorphTime / step.morphTime));
           }
-          if (mRunning) {
+          if (mRunning || mStartRunning) {
             mPresetHandler->morphTo(step.name, remainingMorphTime);
           }
         }
@@ -429,29 +429,23 @@ void PresetSequencer::updateSequencer() {
 
   while (mTargetTime <= mCurrentTime && (mSteps.size() > mCurrentStep)) {
     // Reached target time. Process step
-    if (mSteps.size() > mCurrentStep) {
-      Step step = mSteps[mCurrentStep];
-      assert(step.type == PRESET);
+    Step step = mSteps[mCurrentStep];
+    assert(step.type == PRESET);
 
-      if (mPresetHandler && (mRunning || mStartRunning)) {
-        mPresetHandler->morphTo(step.name, step.morphTime);
-        //            std::cout << "recalling " << step.presetName <<
-        //            std::endl;
-      } else {
-        std::cerr << "No preset handler registered with PresetSequencer. "
-                     "Ignoring preset change."
-                  << std::endl;
-      }
-      mLastPresetTime = mTargetTime;
-      mParameterTargetTime = mTargetTime;
-      mTargetTime += step.morphTime + step.waitTime;
+    if (mPresetHandler && (mRunning || mStartRunning)) {
+      mPresetHandler->morphTo(step.name, step.morphTime);
+      //            std::cout << "recalling " << step.presetName <<
+      //            std::endl;
+    }
+    mLastPresetTime = mTargetTime;
+    mParameterTargetTime = mTargetTime;
+    mTargetTime += step.morphTime + step.waitTime;
+    mCurrentStep++;
+    // Now gather all parameter and event steps until next preset
+    while ((mSteps.size() > mCurrentStep) &&
+           mSteps[mCurrentStep].type != PRESET) {
+      mParameterList.push(mSteps[mCurrentStep]);
       mCurrentStep++;
-      // Now gather all parameter and event steps until next preset
-      while ((mSteps.size() > mCurrentStep) &&
-             mSteps[mCurrentStep].type != PRESET) {
-        mParameterList.push(mSteps[mCurrentStep]);
-        mCurrentStep++;
-      }
     }
   }
   // Apply pending parameter changes

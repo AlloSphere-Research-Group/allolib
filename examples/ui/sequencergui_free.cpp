@@ -60,7 +60,7 @@ struct MyApp : App {
 
   void onDraw(Graphics &g) override {
     g.clear(0);
-    if (sequencer.running() || !sequencer.playbackFinished()) {
+    if (sequencer.running()) {
       g.color(0.0, 1.0, 0.0);
     } else {
       g.color(0.0, 0.0, 1.0);
