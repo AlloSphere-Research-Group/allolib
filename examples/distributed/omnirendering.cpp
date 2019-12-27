@@ -1,17 +1,15 @@
 
 #include <iostream>
+
 #include "al/app/al_DistributedApp.hpp"
-#include "al/app/al_OmniRendererDomain.hpp"
+//#include "al/app/al_OmniRendererDomain.hpp"
 
 using namespace std;
 using namespace al;
 
 struct MyOmniRendererApp : DistributedApp {
   VAOMesh mesh;
-
-  //  Nav mNav;
-  //  Viewpoint mView {mNav.transformed()};
-  //  NavInputControl mNavControl {mNav};
+  ParameterPose currentPose{"currentPose"};
 
   bool DO_BLENDING = false;
   float alpha = 0.9f;
@@ -20,12 +18,16 @@ struct MyOmniRendererApp : DistributedApp {
     //    append(mNavControl);
     addIcosahedron(mesh);
     mesh.update();
+    parameterServer() << currentPose;
   }
 
-  //  void onAnimate(double dt) override {
-  //    mNav.step();
-  ////    pose(mView.pose()); // should not be in onDraw
-  //  }
+  void onAnimate(double dt) override {
+    if (isPrimary()) {
+      currentPose = pose();
+    } else {
+      pose().set(currentPose.get());
+    }
+  }
 
   void onDraw(Graphics& g) override {
     g.clear(0, 0, 1);

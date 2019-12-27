@@ -102,7 +102,9 @@ class ParameterBundle {
 
   std::vector<ParameterMeta *> &parameters() { return mParameters; }
 
-  std::map<std::string, ParameterBundle *> &bundles() { return mBundles; }
+  std::map<std::string, std::vector<ParameterBundle *>> &bundles() {
+    return mBundles;
+  }
 
   ParameterBundle &operator<<(ParameterMeta *parameter);
   ParameterBundle &operator<<(ParameterMeta &parameter);
@@ -118,7 +120,7 @@ class ParameterBundle {
                           // index to identify bundle.
 
   std::vector<ParameterMeta *> mParameters;
-  std::map<std::string, ParameterBundle *> mBundles;
+  std::map<std::string, std::vector<ParameterBundle *>> mBundles;
   std::vector<OSCNotifier *> mNotifiers;
 };
 

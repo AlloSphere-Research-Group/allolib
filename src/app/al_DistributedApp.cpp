@@ -1,5 +1,12 @@
 #include "al/app/al_DistributedApp.hpp"
 
+#include "al/sphere/al_SphereUtils.hpp"
+
+#ifdef AL_WINDOWS
+//#include <Windows.h>
+#include <WinSock2.h>
+#endif
+
 using namespace al;
 
 DistributedApp::DistributedApp() : App() {}
@@ -18,95 +25,84 @@ void DistributedApp::initialize() {
 #endif
   TomlLoader appConfig("distributed_app.toml");
   auto nodesTable = appConfig.root->get_table_array("node");
+  std::vector<std::string> mListeners;
   // First get role from config file
   if (nodesTable) {
     for (const auto &table : *nodesTable) {
       std::string host = *table->get_as<std::string>("host");
       std::string role = *table->get_as<std::string>("role");
 
-      if (strncmp(name().c_str(), host.c_str(), name().size()) == 0) {
+      if (name() == host) {
         // Now set capabilities from role
-        if (role == "desktop") {
-          mCapabilites = (Capability)(CAP_SIMULATOR | CAP_RENDERING |
-                                      CAP_AUDIO_IO | CAP_OSC);
-        } else if (role == "renderer") {
-          mCapabilites =
-              (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC);
-        } else if (role == "audio") {
-          mCapabilites = (Capability)(CAP_SIMULATOR | CAP_AUDIO_IO |
-                                      CAP_CONSOLE_IO | CAP_OSC);
-        } else if (role == "simulator") {
-          mCapabilites = (Capability)(CAP_SIMULATOR | CAP_CONSOLE_IO | CAP_OSC);
-        } else if (role == "replica") {
-          mCapabilites = (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING |
-                                      CAP_AUDIO_IO | CAP_OSC);
-        } else if (role == "control") {
-          mCapabilites = (Capability)(CAP_RENDERING | CAP_OSC);
-        } else {
-          std::cerr << "WARNING: Setting no capabilities for this app from "
-                       "config file"
-                    << std::endl;
-        }
+        setRole(role);
       }
       mRoleMap[host] = role;
-      if (table->contains("dataRoot") &&
-          strncmp(name().c_str(), host.c_str(), name().size()) ==
-              0) {  // Set configuration for this node when found
-        std::string dataRootValue = *table->get_as<std::string>("dataRoot");
-        mGlobalDataRootPath = File::conformPathToOS(dataRootValue);
+      if (table->contains("dataRoot")) {
+        if (name() == host) {  // Set configuration for this node when found
+          std::string dataRootValue = *table->get_as<std::string>("dataRoot");
+          dataRoot = File::conformPathToOS(dataRootValue);
+        }
       } else {
         std::cout << "WARNING: node " << host.c_str() << " not given dataRoot"
                   << std::endl;
       }
 
       if (table->contains("rank")) {
-        rank = *table->get_as<int>("rank");
+        if (name() == host) {  // Set configuration for this node when found
+          rank = *table->get_as<int>("rank");
+        }
       } else {
         std::cout << "WARNING: node " << host.c_str() << " not given rank"
                   << std::endl;
       }
       if (table->contains("group")) {
-        group = *table->get_as<int>("group");
+        if (name() == host) {  // Set configuration for this node when found
+          group = *table->get_as<int>("group");
+        }
       } else {
         std::cout << "WARNING: node " << host.c_str() << " not given group"
                   << std::endl;
       }
     }
   } else {  // No nodes table in config file. Use desktop role
-    mCapabilites =
-        (Capability)(CAP_SIMULATOR | CAP_RENDERING | CAP_AUDIO_IO | CAP_OSC);
-    group = 0;
+
+    auto defaultCapabilities = al::sphere::getSphereNodes();
+    if (defaultCapabilities.find(name()) != defaultCapabilities.end()) {
+      mCapabilites = defaultCapabilities[name()].mCapabilites;
+      group = defaultCapabilities[name()].group;
+      rank = defaultCapabilities[name()].rank;
+    } else {
+      mCapabilites =
+          (Capability)(CAP_SIMULATOR | CAP_RENDERING | CAP_AUDIO_IO | CAP_OSC);
+      group = 0;
+    }
   }
 
-  //      if (mRunDistributed) {
-  //          for (auto entry: mRoleMap) {
-  //              if (strncmp(name().c_str(), entry.first.c_str(),
-  //              name().size()) == 0) {
-  //                mRole = entry.second;
-  ////                std::cout << name() << ":Running distributed as " <<
-  /// roleName() << std::endl;
-  //              }
-  //          }
-
-  //      }
   if (hasCapability(CAP_SIMULATOR)) {
-    TomlLoader configLoader;
-    configLoader.setFile("distributed_app.toml");
-    configLoader.setDefaultValue("broadcastAddress",
-                                 std::string("192.168.0.255"));
-    configLoader.writeFile();
+    if (al::sphere::isSphereMachine()) {
+      appConfig.setDefaultValue("broadcastAddress",
+                                std::string("192.168.10.255"));
+      appConfig.writeFile();
+    }
+  }
+  if (appConfig.hasKey<std::string>("broadcastAddress")) {
+    additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
   }
 
   osc::Recv testServer;
   // probe to check if first port available, this will determine if this
   // application is the primary or the replica
   if (!testServer.open(mOSCDomain->port, mOSCDomain->interfaceIP.c_str())) {
+    // If port taken, run this instance as a renderer
     mCapabilites = (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC);
-    rank = 1;
+    rank = 99;
     std::cout << "Replica: " << name() << ":Running distributed" << std::endl;
-  } else {
+  } else if (rank == 0) {
     testServer.stop();
     std::cout << "Primary: " << name() << ":Running distributed" << std::endl;
+  } else {
+    testServer.stop();
+    std::cout << "Secondary: rank " << rank << std::endl;
   }
 
   if (hasCapability(CAP_AUDIO_IO)) {
@@ -181,9 +177,12 @@ void DistributedApp::start() {
         std::bind(&App::onMouseScroll, this, std::placeholders::_1);
   }
 
-  if (!isPrimary()) {
-    mSimulationDomain
-        ->disableProcessingCallback();  // Replicas won't call onAnimate()
+  if (isPrimary()) {
+    for (auto hostRole : mRoleMap) {
+      if (hostRole.first != name()) {
+        parameterServer().addListener(hostRole.first, oscDomain()->port);
+      }
+    }
   }
 
   onInit();
@@ -226,4 +225,46 @@ void al::DistributedApp::registerDynamicScene(DynamicScene &scene) {
   }
 
   scene.prepare(audioIO());
+}
+
+Graphics &DistributedApp::graphics() {
+  if (hasCapability(CAP_OMNIRENDERING)) {
+    return omniRendering->graphics();
+  } else {
+    return mDefaultWindowDomain->graphics();
+  }
+}
+
+Window &DistributedApp::defaultWindow() {
+  if (hasCapability(CAP_OMNIRENDERING)) {
+    return omniRendering->window();
+  } else {
+    return mDefaultWindowDomain->window();
+  }
+}
+
+Viewpoint &DistributedApp::view() {
+  if (hasCapability(CAP_OMNIRENDERING)) {
+    return omniRendering->view();
+  } else {
+    return mDefaultWindowDomain->view();
+  }
+}
+
+Pose &DistributedApp::pose() {
+  if (hasCapability(CAP_OMNIRENDERING)) {
+    return omniRendering->nav();
+  } else {
+    return mDefaultWindowDomain->nav();
+  }
+}
+
+Lens &DistributedApp::lens() { return view().lens(); }
+
+Nav &DistributedApp::nav() {
+  if (hasCapability(CAP_OMNIRENDERING)) {
+    return omniRendering->nav();
+  } else {
+    return mDefaultWindowDomain->nav();
+  }
 }

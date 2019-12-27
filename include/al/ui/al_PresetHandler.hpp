@@ -1,32 +1,30 @@
 #ifndef AL_PRESETHANDLER_H
 #define AL_PRESETHANDLER_H
 
-/*	Allocore --
-        Multimedia / virtual environment application class library
+/*	Allolib --
+   Multimedia / virtual environment application class library
 
-        Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
-   UCSB. Copyright (C) 2016. The Regents of the University of California. All
-   rights reserved.
+   Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
+   UCSB. Copyright (C) 2012-2018. The Regents of the University of California.
+   All rights reserved.
 
-        Redistribution and use in source and binary forms, with or without
-        modification, are permitted provided that the following conditions are
-   met:
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
 
-                Redistributions of source code must retain the above copyright
+   Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
 
-                Redistributions in binary form must reproduce the above
+   Redistributions in binary form must reproduce the above
    copyright notice, this list of conditions and the following disclaimer in the
-                documentation and/or other materials provided with the
-   distribution.
+   documentation and/or other materials provided with the distribution.
 
-                Neither the name of the University of California nor the names
-   of its contributors may be used to endorse or promote products derived from
-                this software without specific prior written permission.
+   Neither the name of the University of California nor the names of its
+   contributors may be used to endorse or promote products derived from this
+   software without specific prior written permission.
 
-        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
    IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
@@ -36,10 +34,10 @@
    OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
    ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-        File description:
-        Preset classes that encapsulates storing values for groups of parameters
-        File author(s):
-        Andrés Cabrera mantaraya36@gmail.com
+   File description:
+   Preset classes that encapsulates storing values for groups of parameters
+   File author(s):
+   Andrés Cabrera mantaraya36@gmail.com
 */
 
 #include <algorithm>
@@ -76,7 +74,19 @@ class PresetHandler {
    * @param verbose if true, print diagnostic messages
    *
    */
-  PresetHandler(std::string rootDirectory = "presets", bool verbose = false);
+  PresetHandler(std::string rootDirectory, bool verbose = false);
+
+  /**
+   * @brief Constructor with option to set time master mode
+   * @param timeMasterMode
+   *
+   * Only two modes are currently valid for PresetHandler:
+   * TIME_MASTER_CPU and TIME_MASTER_ASYNC. The first will start a CPU
+   * thread that handles morphing and setting values, the second does not
+   * start the thread, so user must manually call tick()
+   */
+  PresetHandler(TimeMasterMode timeMasterMode = TimeMasterMode::TIME_MASTER_CPU,
+                std::string rootDirectory = "presets", bool verbose = false);
 
   ~PresetHandler();
 
@@ -149,22 +159,19 @@ class PresetHandler {
    * A factor of 0 uses preset 1 and a factor of 1 uses preset 2. Values
    * in between result in linear interpolation of the values.
    */
-  void setInterpolatedPreset(int index1, int index2, double factor,
-                             bool synchronous = true);
+  void setInterpolatedPreset(int index1, int index2, double factor);
 
   void setInterpolatedPreset(std::string presetName1, std::string presetName2,
-                             double factor, bool synchronous = true);
+                             double factor);
 
+  //  static void setParameterValues(ParameterMeta *param,
+  //                                 std::vector<ParameterField> &values);
   /**
-   * @brief Interpolate between current values and new values according to
+   * @brief Interpolate between start and end values according to
    * factor
    */
-  static void setParameterValues(ParameterMeta *param,
-                                 std::vector<ParameterField> &values,
-                                 double factor = 1.0);
-
-  void morphTo(ParameterStates &parameterStates, float morphTime);
-  void stopMorph();
+  void setInterpolatedValues(ParameterStates &startValues,
+                             ParameterStates &endValues, double factor = 1.0);
 
   std::map<int, std::string> availablePresets();
   std::string getPresetName(int index);
@@ -185,6 +192,17 @@ class PresetHandler {
 
   float getMorphTime();
   void setMorphTime(float time);
+  void stopMorphing() { mTotalSteps.store(0); }
+  void morphTo(ParameterStates &parameterStates, float morphTime);
+  void morphTo(std::string presetName, float morphTime);
+
+  void setMorphStepTime(float stepTime) { mMorphInterval = stepTime; }
+
+  void stepMorphing(double stepTime);
+
+  /// Step morphing to adjust parameter values to next step. You need to call
+  /// this function only if TimeMasterMode is TIME_MASTER_ASYNC
+  void stepMorphing();
 
   void setSubDirectory(std::string directory);
   std::string getSubDirectory() { return mSubDir; }
@@ -276,140 +294,20 @@ class PresetHandler {
   void changeParameterValue(std::string presetName, std::string parameterPath,
                             float newValue);
 
-  static int asciiToPresetIndex(int ascii, int offset = 0) {
-    int index = -1;
+  /**
+   * @brief Map QWERTY ascii keys to presets 0-49
+   * @param ascii ascii code of the key to mapt
+   * @param offset add an offset on output
+   * @return the mapped value 0-39 plus offset. Returns -1 on failure to map.
+   *
+   * This maps four rows of 10 keys on the ASCII keyboard (regular QWERTY US
+   * keys) to numbers 0-39. This can be useful for quick preset mapping using
+   * the whole keyboard.
+   */
+  static int asciiToPresetIndex(int ascii, int offset = 0);
 
-    switch (ascii) {
-      case '1':
-        index = 0;
-        break;
-      case '2':
-        index = 1;
-        break;
-      case '3':
-        index = 2;
-        break;
-      case '4':
-        index = 3;
-        break;
-      case '5':
-        index = 4;
-        break;
-      case '6':
-        index = 5;
-        break;
-      case '7':
-        index = 6;
-        break;
-      case '8':
-        index = 7;
-        break;
-      case '9':
-        index = 8;
-        break;
-      case '0':
-        index = 9;
-        break;
-      case 'q':
-        index = 10;
-        break;
-      case 'w':
-        index = 11;
-        break;
-      case 'e':
-        index = 12;
-        break;
-      case 'r':
-        index = 13;
-        break;
-      case 't':
-        index = 14;
-        break;
-      case 'y':
-        index = 15;
-        break;
-      case 'u':
-        index = 16;
-        break;
-      case 'i':
-        index = 17;
-        break;
-      case 'o':
-        index = 18;
-        break;
-      case 'p':
-        index = 19;
-        break;
-      case 'a':
-        index = 20;
-        break;
-      case 's':
-        index = 21;
-        break;
-      case 'd':
-        index = 22;
-        break;
-      case 'f':
-        index = 23;
-        break;
-      case 'g':
-        index = 24;
-        break;
-      case 'h':
-        index = 25;
-        break;
-      case 'j':
-        index = 26;
-        break;
-      case 'k':
-        index = 27;
-        break;
-      case 'l':
-        index = 28;
-        break;
-      case ';':
-        index = 29;
-        break;
-        ;
-      case 'z':
-        index = 30;
-        break;
-      case 'x':
-        index = 31;
-        break;
-      case 'c':
-        index = 32;
-        break;
-      case 'v':
-        index = 33;
-        break;
-      case 'b':
-        index = 34;
-        break;
-      case 'n':
-        index = 35;
-        break;
-      case 'm':
-        index = 36;
-        break;
-      case ',':
-        index = 37;
-        break;
-      case '.':
-        index = 38;
-        break;
-      case '/':
-        index = 39;
-        break;
-    }
-    if (index >= 0) {
-      index += offset;
-    }
-
-    return index;
-  }
-
-  void verbose(bool isVerbose) { mVerbose = isVerbose; }
+  [[deprecated]] void verbose(bool isVerbose) { mVerbose = isVerbose; }
+  void setVerbose(bool isVerbose = true) { mVerbose = isVerbose; }
   bool verbose() { return mVerbose; }
 
   /**
@@ -430,39 +328,54 @@ class PresetHandler {
   bool savePresetValues(const ParameterStates &values, std::string presetName,
                         bool overwrite = true);
 
+  void setTimeMaster(TimeMasterMode masterMode);
+
+  void startCpuThread();
+  void stopCpuThread();
+
  private:
-  std::vector<float> getParameterValue(ParameterMeta *p);
-  void setParametersInBundle(ParameterBundle *bundle, std::string bundlePrefix,
-                             PresetHandler *handler, float factor = 1.0);
+  //  std::vector<float> getParameterValue(ParameterMeta *p);
+  //  void setParametersInBundle(ParameterBundle *bundle, std::string
+  //  bundlePrefix,
+  //                             PresetHandler *handler, double factor = 1.0);
   static void morphingFunction(PresetHandler *handler);
 
   ParameterStates getBundleStates(ParameterBundle *bundle, std::string id);
 
   bool mVerbose{false};
-  bool mUseCallbacks{false};
+  bool mUseCallbacks{true};
   std::string mRootDir;
   std::string mSubDir;  // Optional sub directory, e.g. for preset map archives
-  std::string mFileName;
+
   std::string mCurrentMapName;
+  std::string mCurrentPresetName;
   std::vector<ParameterMeta *> mParameters;
+
   std::vector<std::string> mSkipParameters;
   std::mutex mSkipParametersLock;
 
   std::map<std::string, std::vector<ParameterBundle *>> mBundles;
 
+  // Protects file writing from this class. Only one file may be written at
+  // a time.
   std::mutex mFileLock;
-  bool mRunning{false};  // To keep the morphing thread alive
-  // bool mMorph; // To be able to trip and stop morphing at any time.
-  std::atomic<int> mMorphRemainingSteps;
-  float mMorphInterval;
-  Parameter mMorphTime;
 
-  // std::mutex mMorphLock;
   std::mutex mTargetLock;
-  std::condition_variable mMorphConditionVar;
   ParameterStates mTargetValues;
+  ParameterStates mStartValues;
 
-  std::thread mMorphingThread;
+  TimeMasterMode mTimeMasterMode{TimeMasterMode::TIME_MASTER_CPU};
+
+  Parameter mMorphTime{"morphTime", "", 0.0, "", 0.0, 20.0};
+
+  std::atomic<uint64_t> mMorphStepCount{0};
+  std::atomic<uint64_t> mTotalSteps{0};
+  //  std::atomic<float> mCurrentMorphIndex;
+  bool mCpuThreadRunning{false};  // To keep the morphing thread alive
+  std::unique_ptr<std::thread> mMorphingThread;
+  //  std::condition_variable mMorphConditionVar;
+  double mMorphInterval{0.05};
+  //  std::atomic<bool> mMorphing;
 
   std::vector<std::function<void(int index, void *sender, void *userData)>>
       mCallbacks;
@@ -473,7 +386,6 @@ class PresetHandler {
   std::vector<std::function<void(std::string)>> mPresetsMapCbs;
 
   std::map<int, std::string> mPresetsMap;
-  std::string mCurrentPresetName;
 };
 
 }  // namespace al

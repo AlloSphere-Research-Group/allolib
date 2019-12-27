@@ -9,18 +9,35 @@
 using namespace al;
 
 struct MyApp : public App {
-  MyApp() {
-    presets << Number << Size << Red << Green
-            << Blue;  // Add parameters to preset handling
+  ParameterInt Number{"Number", "", 1, "", 0, 16};
+  ParameterMenu Shape{"Shape"};
+  Parameter Size{"Size", "", 0.3, "", 0.1, 2.0};
+  Parameter Red{"Red", "Color", 0.5, "", 0.0, 1.0};
+  Parameter Green{"Green", "Color", 1.0, "", 0.0, 1.0};
+  Parameter Blue{"Blue", "Color", 0.5, "", 0.0, 1.0};
+
+  PresetHandler presets{"presetsGUI"};
+
+  ControlGUI gui;
+
+  Light light;
+  Mesh mMeshCone;
+  Mesh mMeshCube;
+
+  void onInit() override {
+    // Add parameters to preset handling
+    presets << Number << Size << Red << Green << Blue << Shape;
+
+    Shape.setElements({"Cone", "Cube"});
 
     // Now make control GUI
     // You can add Parameter objects using the streaming operator.
     // They will all be laid out vertically
     gui << Number << Size;
-    gui << Red << Green << Blue;
+    gui << Red << Green << Blue << Shape;
 
     // Expose parameters to network (You can send OSC message to them
-    parameterServer() << Number << Size << Red << Green << Blue;
+    parameterServer() << Number << Size << Red << Green << Blue << Shape;
 
     // Print server configuration
     parameterServer().print();
@@ -29,8 +46,10 @@ struct MyApp : public App {
     // to control the presets.
     gui << presets;
 
-    addCone(mMesh);
-    mMesh.generateNormals();
+    addCone(mMeshCone);
+    mMeshCone.generateNormals();
+    addCube(mMeshCube);
+    mMeshCube.generateNormals();
   }
 
   virtual void onCreate() override {
@@ -49,25 +68,15 @@ struct MyApp : public App {
       g.translate((i % 4) - 2, (i / 4) - 2, -5);
       g.scale(Size.get());
       g.color(Red.get(), Green.get(), Blue.get());
-      g.draw(mMesh);
+      if (Shape.get() == 0) {
+        g.draw(mMeshCone);
+      } else {
+        g.draw(mMeshCube);
+      }
       g.popMatrix();
     }
     gui.draw(g);
   }
-
- private:
-  ParameterInt Number{"Number", "", 1, "", 0, 16};
-  Parameter Size{"Size", "", 0.3, "", 0.1, 2.0};
-  Parameter Red{"Red", "Color", 0.5, "", 0.0, 1.0};
-  Parameter Green{"Green", "Color", 1.0, "", 0.0, 1.0};
-  Parameter Blue{"Blue", "Color", 0.5, "", 0.0, 1.0};
-
-  PresetHandler presets{"presetsGUI"};
-
-  ControlGUI gui;
-
-  Light light;
-  Mesh mMesh;
 };
 
 int main(int argc, char *argv[]) {

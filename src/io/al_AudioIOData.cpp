@@ -1,11 +1,11 @@
+#include "al/io/al_AudioIOData.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring> /* memset() */
-
-#include "al/io/al_AudioIOData.hpp"
 
 namespace al {
 
@@ -121,7 +121,7 @@ unsigned int AudioIOData::channelsOut() const { return mNumO; }
 unsigned int AudioIOData::channelsBus() const { return mNumB; }
 
 double AudioIOData::framesPerSecond() const { return mFramesPerSecond; }
-unsigned int AudioIOData::framesPerBuffer() const { return mFramesPerBuffer; }
+uint64_t AudioIOData::framesPerBuffer() const { return mFramesPerBuffer; }
 double AudioIOData::secondsPerBuffer() const {
   return (double)framesPerBuffer() / framesPerSecond();
 }

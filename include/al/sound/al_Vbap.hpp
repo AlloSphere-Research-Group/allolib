@@ -92,7 +92,7 @@ class Vbap : public Spatializer {
   } VbapOptions;
 
   /// @param[in] sl	A speaker layout
-  Vbap(const SpeakerLayout& sl, bool is3D = false);
+  Vbap(const Speakers& sl, bool is3D = false);
 
   void setOptions(VbapOptions options) { mOptions = options; }
 

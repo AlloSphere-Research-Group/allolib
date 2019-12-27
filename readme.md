@@ -73,3 +73,12 @@ The library will be built in build/lib.
 # Building aplications with allolib
 
 There are two options provided to build allolib applications. The first is [allolib_playground](https://github.com/AlloSphere-Research-Group/allolib_playground) that is great for prototyping single file applications and for exploring the examples. For more complex projects with multiple source files and dependencies, use [allotemplate](https://github.com/AlloSphere-Research-Group/allotemplate)
+
+# Extensions
+
+Allolib provides an extension mechanism for libraries that have large or
+platform dependent dependencies. The stable set of extensions can be found in
+the [al_ext repo](https://github.com/AlloSphere-Research-Group/al_ext).
+The allotemplate repo linked above shows how to integrate them. al_ext
+is a separate repo that depends on the allolib library and provides cmake
+facilities for easy integration with it.

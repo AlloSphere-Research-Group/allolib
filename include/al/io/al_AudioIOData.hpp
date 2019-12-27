@@ -46,7 +46,9 @@
 */
 
 #include <cassert>
+#include <cinttypes>
 #include <cstdio>
+#include <cstring>
 
 namespace al {
 
@@ -63,13 +65,13 @@ static int resize(T*& buf, int n) {
   return n;
 }
 
-// Utility function to efficiently clear buffer (set all to 0)
+/// Utility function to efficiently clear buffer (set all to 0)
 template <class T>
-static void zero(T* buf, int n) {
+static void zero(T* buf, unsigned int n) {
   memset(buf, 0, n * sizeof(T));
 }
 
-// Utility function to deinterleave samples
+/// Utility function to deinterleave samples
 template <class T>
 static void deinterleave(T* dst, const T* src, int numFrames, int numChannels) {
   int numSamples = numFrames * numChannels;
@@ -226,9 +228,8 @@ class AudioIOData {
   unsigned int channelsOut()
       const;  ///< Get effective number of output channels
   unsigned int channelsBus() const;  ///< Get number of allocated bus channels
-  unsigned int framesPerBuffer()
-      const;                       ///< Get frames/buffer of audio I/O stream
-  double framesPerSecond() const;  ///< Get frames/second of audio I/O streams
+  uint64_t framesPerBuffer() const;  ///< Get frames/buffer of audio I/O stream
+  double framesPerSecond() const;    ///< Get frames/second of audio I/O streams
   double fps() const { return framesPerSecond(); }
   double secondsPerBuffer() const;  ///< Get seconds/buffer of audio I/O stream
 

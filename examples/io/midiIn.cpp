@@ -10,6 +10,7 @@ Lance Putnam, 12/2012
 */
 
 #include <stdio.h>
+
 #include "al/io/al_MIDI.hpp"
 using namespace al;
 
@@ -69,11 +70,11 @@ void midiCallback(double deltaTime, std::vector<unsigned char> *msg,
 }
 
 int main() {
-  MIDIIn midiIn;
+  RtMidiIn RtMidiIn;
 
   // Check available ports vs. specified
   unsigned portToOpen = 0;
-  unsigned numPorts = midiIn.getPortCount();
+  unsigned numPorts = RtMidiIn.getPortCount();
 
   if (portToOpen >= numPorts) {
     printf("Invalid port specifier!\n");
@@ -82,12 +83,12 @@ int main() {
   try {
     // Print out names of available input ports
     for (unsigned i = 0; i < numPorts; ++i) {
-      printf("Port %u: %s\n", i, midiIn.getPortName(i).c_str());
+      printf("Port %u: %s\n", i, RtMidiIn.getPortName(i).c_str());
     }
 
     // Open the port specified above
-    midiIn.openPort(portToOpen);
-  } catch (MIDIError &error) {
+    RtMidiIn.openPort(portToOpen);
+  } catch (RtMidiError &error) {
     error.printMessage();
     return 1;
   }
@@ -95,10 +96,10 @@ int main() {
   // Set our callback function.  This should be done immediately after
   // opening the port to avoid having incoming messages written to the
   // queue instead of sent to the callback function.
-  midiIn.setCallback(&midiCallback);
+  RtMidiIn.setCallback(&midiCallback);
 
   // Don't ignore sysex, timing, or active sensing messages.
-  midiIn.ignoreTypes(false, false, false);
+  RtMidiIn.ignoreTypes(false, false, false);
 
   printf("\nReading MIDI input ... press <enter> to quit.\n");
   getchar();

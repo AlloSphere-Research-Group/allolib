@@ -3,13 +3,15 @@
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
 #define DR_FLAC_IMPLEMENTATION
-#include "dr_flac.h"
-
 #include <cstdint>
 #include <cstring>
 #include <iostream>
 
-bool al::SoundFile::open(const char* path) {
+#include "dr_flac.h"
+
+using namespace al;
+
+bool SoundFile::open(const char* path) {
   auto len = std::strlen(path);
 
   if (len < 5) {
@@ -27,7 +29,7 @@ bool al::SoundFile::open(const char* path) {
       channels = (int)c;
       sampleRate = (int)s;
       frameCount = (long long int)f;
-      size_t n = size_t(channels * frameCount);
+      size_t n = size_t(c * f);
       data.resize(n);
       std::memcpy(data.data(), file_data, sizeof(float) * n);
       drwav_free(file_data);
@@ -56,7 +58,7 @@ bool al::SoundFile::open(const char* path) {
       channels = (int)c;
       sampleRate = (int)s;
       frameCount = (long long int)f;
-      size_t n = (size_t)(channels * frameCount);
+      size_t n = (size_t)(c * f);
       data.resize(n);
       std::memcpy(data.data(), file_data, sizeof(float) * n);
       drflac_free(file_data);
@@ -69,18 +71,18 @@ bool al::SoundFile::open(const char* path) {
   return false;
 }
 
-float* al::SoundFile::getFrame(long long int frame) {
+float* SoundFile::getFrame(long long int frame) {
   return data.data() + frame * channels;
 }
 
-al::SoundFile al::getResampledSoundFile(SoundFile* toConvert,
-                                        unsigned int newSampleRate) {
+SoundFile al::getResampledSoundFile(SoundFile* toConvert,
+                                    unsigned int newSampleRate) {
   // TODO!
   return {};
 }
 
-void al::SoundFilePlayer::getFrames(int numFrames, float* buffer,
-                                    int bufferLength) {
+void SoundFilePlayer::getFrames(uint64_t numFrames, float* buffer,
+                                int bufferLength) {
   if (pause || !soundFile) {
     for (int i = 0; i < bufferLength; i += 1) {
       buffer[i] = 0.0f;
@@ -115,4 +117,48 @@ void al::SoundFilePlayer::getFrames(int numFrames, float* buffer,
     }
   }
   frame += n;
+}
+
+SoundFileStreaming::SoundFileStreaming(const char* path) {
+  if (path) {
+    if (!open(path)) {
+      std::cerr << "ERROR opening file:" << path << std::endl;
+    }
+  }
+}
+
+SoundFileStreaming::~SoundFileStreaming() { close(); }
+
+uint32_t SoundFileStreaming::sampleRate() {
+  return static_cast<drwav*>(mImpl)->sampleRate;
+}
+
+uint64_t SoundFileStreaming::totalFrames() {
+  return static_cast<drwav*>(mImpl)->totalPCMFrameCount;
+}
+
+uint16_t SoundFileStreaming::numChannels() {
+  return static_cast<drwav*>(mImpl)->channels;
+}
+
+bool SoundFileStreaming::open(const char* path) {
+  close();
+  mImpl = new drwav;
+  if (!drwav_init_file((drwav*)mImpl, path)) {
+    return false;
+  }
+  return true;
+}
+
+void SoundFileStreaming::close() {
+  if (mImpl) {
+    drwav_uninit((drwav*)mImpl);
+    delete (drwav*)mImpl;
+  }
+}
+
+uint64_t SoundFileStreaming::getFrames(uint64_t numFrames, float* buffer) {
+  drwav_uint64 framesRead =
+      drwav_read_pcm_frames_f32((drwav*)mImpl, numFrames, buffer);
+  return framesRead;
 }

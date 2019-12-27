@@ -46,6 +46,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <functional>
+#include <future>
 #include <mutex>
 #include <queue>
 #include <string>
@@ -92,6 +93,24 @@ class Composition;
  *
  * The file should end with two colons (::).
  *
+ * Individual parameters can also be sequenced through the preset sequencer.
+ * They must be registered through registerParameter() or the streaming (<<)
+ * operator.
+ *
+ * The line should start with the '+' character followed by the delta time to
+ * the previous line. Note that parameters have delta times relative to both
+ * preset and parameter steps, but preset events are relative to other preset
+ * steps and ignore parameter and event steps.
+ *
+ * @code
+ * preset1:0.0:3.0
+ * +0.1:/X:0.3
+ * +0.1:/X:0.4
+ * +0.1:/X:0.5
+ * preset2:4.0:2.0
+ * ::
+ * @endcode
+ *
  * The directory where sequences are loaded is taken from the PresetHandler
  * object registered with the sequencer.
  *
@@ -100,22 +119,24 @@ class PresetSequencer : public osc::MessageConsumer {
   friend class Composition;
 
  public:
-  PresetSequencer();
+  PresetSequencer(
+      TimeMasterMode timeMasterMode = TimeMasterMode::TIME_MASTER_CPU);
   ~PresetSequencer() override;
 
   typedef enum { PRESET, EVENT, PARAMETER } StepType;
 
   struct Step {
     StepType type = PRESET;
-    std::string presetName;
+    std::string name;
     float morphTime;  // The time to get to the preset
     float waitTime;   // The time to stay in the preset before the next step
-    std::vector<float> params;
+    std::vector<ParameterField> params;
   };
 
   typedef struct {
     std::string eventName;
-    std::function<void(void *data, std::vector<float> &params)> callback;
+    std::function<void(void *data, std::vector<ParameterField> &params)>
+        callback;
     void *callbackData;
   } EventCallback;
 
@@ -128,7 +149,8 @@ class PresetSequencer : public osc::MessageConsumer {
    * a sequence is playing when this command is issued, the current playback
    * is interrupted and the new sequence requested starts immediately.
    */
-  void playSequence(std::string sequenceName, double timeScale = 1.0f);
+  void playSequence(std::string sequenceName, double timeScale = 1.0f,
+                    double timeOffset = 0.0);
 
   void stopSequence(bool triggerCallbacks = true);
 
@@ -145,21 +167,7 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   void rewind();
 
-  bool playbackFinished() { return mSteps.size() == 0; }
-
-  /**
-   * @brief Stores a copy of a sequence with its associated presets
-   * @param sequenceName Name of sequence without extension. Searched for in
-   * mDirectory
-   * @param overwrite if directory exists, delete it before writing if overwrite
-   * is true.
-   * @return returns false if there was any error archiving sequence
-   *
-   * Stores a copy of the sequence and all its associated presets in a new
-   * folder. A PresetHandler must be registered for this to work as this sets
-   * the current Sequence and preset directory.
-   */
-  bool archiveSequence(std::string sequenceName, bool overwrite = true);
+  bool playbackFinished() { return mSteps.size() == mCurrentStep; }
 
   /**
    * @brief getSequenceList returns a list of sequences in the current sequence
@@ -199,12 +207,7 @@ class PresetSequencer : public osc::MessageConsumer {
    * preset handler. The sequencer's directory is set to
    * the preset handler's directory
    */
-  PresetSequencer &registerPresetHandler(PresetHandler &presetHandler) {
-    mPresetHandler = &presetHandler;
-    mDirectory = mPresetHandler->getCurrentPath();
-    //		std::cout << "Path set to:" << mDirectory << std::endl;
-    return *this;
-  }
+  PresetSequencer &registerPresetHandler(PresetHandler &presetHandler);
 
   /**
    * @brief Register PresetHandler through the << operator
@@ -233,8 +236,8 @@ class PresetSequencer : public osc::MessageConsumer {
    * The sequence is searched in the PresetHandler current path or the
    *  PresetSequencer's directory if PresetHandler not registered.
    */
-  std::queue<Step> loadSequence(std::string sequenceName,
-                                double timeScale = 1.0f);
+  std::vector<Step> loadSequence(std::string sequenceName,
+                                 double timeScale = 1.0);
 
   std::string currentSequence() { return mCurrentSequence; }
 
@@ -248,7 +251,8 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   void registerEventCommand(
       std::string eventName,
-      std::function<void(void *data, std::vector<float> &params)> callback,
+      std::function<void(void *data, std::vector<ParameterField> &params)>
+          callback,
       void *data);
 
   void setOSCSubPath(std::string subPath) { mOSCsubPath = subPath; }
@@ -260,9 +264,7 @@ class PresetSequencer : public osc::MessageConsumer {
    * as it is ready to start playing before calling the first step.
    */
   void registerBeginCallback(
-      std::function<void(PresetSequencer *sender, void *userData)>
-          beginCallback,
-      void *userData = nullptr);
+      std::function<void(PresetSequencer *sender)> beginCallback);
 
   void enableBeginCallback(bool enable) { mBeginCallbackEnabled = enable; }
 
@@ -278,17 +280,15 @@ class PresetSequencer : public osc::MessageConsumer {
    * user prematurely, it will send false.
    */
   void registerEndCallback(
-      std::function<void(bool finished, PresetSequencer *sender,
-                         void *userData)>
-          endCallback,
-      void *userData = nullptr);
+      std::function<void(bool finished, PresetSequencer *sender)> endCallback);
 
   void enableEndCallback(bool enable) { mEndCallbackEnabled = enable; }
   void toggleEnableEndCallback() { mEndCallbackEnabled = !mEndCallbackEnabled; }
 
   void registerTimeChangeCallback(std::function<void(float)> func,
-                                  float minTimeDeltaSec = 0.05f);
+                                  float minTimeDeltaSec = -1.0);
 
+  float getSequenceStartOffset(std::string sequenceName);
   float getSequenceTotalDuration(std::string sequenceName);
 
   // For programmatic control of the sequencer:
@@ -303,127 +303,86 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   void appendStep(Step &newStep);
 
+  void setTimeMaster(TimeMasterMode masterMode);
+
+  /**
+   * @brief step sequencer forward dt amount of time
+   * @param dt amount of time (seconds) to step
+   *
+   * Any parameter and preset events that fall within this delta time will
+   * be applied.
+   */
+  void stepSequencer(double dt);
+
+  /**
+   * @brief move sequencer forward by time set using setSequencerStepTime()
+   */
+  void stepSequencer();
+
+  void setSequencerStepTime(double stepTime) { mGranularity = stepTime * 1e9; }
+
  protected:
   virtual bool consumeMessage(osc::Message &m,
                               std::string rootOSCPath) override;
+
+  void processTimeChangeRequest();
+  void updateTime(double time);
+
+  void updateSequencer();
 
  private:
   static void sequencerFunction(PresetSequencer *sequencer);
 
   std::string buildFullPath(std::string sequenceName);
 
-  std::queue<Step> mSteps;
-  std::queue<Step>
-      mMostRecentSequence;  // Steps from last sequence loaded from disk
+  void startCpuThread();
+  void stopCpuThread();
+
+  std::vector<Step> mSteps;
   std::string mDirectory;
   PresetHandler *mPresetHandler{nullptr};
   std::vector<ParameterMeta *> mParameters;
   std::string mOSCsubPath;
   std::string mCurrentSequence;
 
-  std::mutex mSequenceLock;
-  std::mutex mPlayWaitLock;
-  std::condition_variable mPlayWaitVariable;
-
   std::atomic<float> mTimeRequest{-1.0f};  // Request setting the current time.
                                            // Passes info to playback thread
 
-  bool mSequencerActive;
+  TimeMasterMode mTimeMasterMode;
+
+  bool mSequencerActive{false};
   bool mRunning;
-  bool mStartingRun;
-  std::unique_ptr<std::thread> mSequencerThread;
-  const int mGranularity = 10;  // milliseconds
+  bool mStartRunning;
+  std::queue<Step> mParameterList;
+  double mCurrentTime = 0.0;  // Current time (in seconds)
+  double mTargetTime;
+  double mLastPresetTime;  // To anchor parameter deltas
+  double mParameterTargetTime;
+  double mLastTimeUpdate = 0.0;
+  double mStepTime;
+
+  uint64_t mGranularity = 10e6;  // nanoseconds
   bool mBeginCallbackEnabled;
-  std::function<void(PresetSequencer *, void *userData)> mBeginCallback;
-  void *mBeginCallbackData;
+  std::function<void(PresetSequencer *)> mBeginCallback;
   bool mEndCallbackEnabled;
-  std::function<void(bool, PresetSequencer *, void *userData)> mEndCallback;
-  void *mEndCallbackData;
-
+  std::function<void(bool, PresetSequencer *)> mEndCallback;
   std::vector<EventCallback> mEventCallbacks;
-  std::function<void(float)> mTimeChangeCallback;
-  float mTimeChangeMinTimeDelta = 0;
-};
+  std::vector<std::function<void(float)>> mTimeChangeCallbacks;
+  float mTimeChangeMinTimeDelta = 0.05f;
 
-/// SequenceServer
-/// @ingroup UI
-class SequenceServer : public osc::PacketHandler, public OSCNotifier {
- public:
-  /**
-   * @brief SequenceServer constructor
-   *
-   * @param oscAddress The network address on which to listen to. If empty use
-   * all available network interfaces. Defaults to "127.0.0.1".
-   * @param oscPort The network port on which to listen. Defaults to 9012.
-   *
-   * The sequencer server triggers sequences when it receives a valid sequence
-   * name on OSC path /sequence.
-   */
+  // CPU thread
 
-  SequenceServer(std::string oscAddress = "127.0.0.1", int oscPort = 9012);
-  /**
-   * @brief using this constructor reuses the existing osc::Recv server from the
-   * ParameterServer object
-   * @param paramServer an existing ParameterServer object
-   *
-   * You will want to reuse an osc::Recv server when you want to expose the
-   * interface thorugh the same network port. Since network ports are exclusive,
-   * once a port is bound, it can't be used. You might need to expose the
-   * parameters on the same network port when using things like
-   * interface.simpleserver.js That must connect all interfaces to the same
-   * network port.
-   */
-  SequenceServer(ParameterServer &paramServer);
-  ~SequenceServer();
-
-  virtual void onMessage(osc::Message &m);
-
-  // Special cases of objects that are handled in specific ways
-  SequenceServer &registerSequencer(PresetSequencer &sequencer);
-  SequenceServer &registerRecorder(SequenceRecorder &recorder);
-  SequenceServer &registerMessageConsumer(osc::MessageConsumer &consumer);
-
-  /**
-   * @brief print prints information about the server to std::out
-   */
-  void print();
-
-  /**
-   * @brief stopServer stops the OSC server thread. Calling this function
-   * is sometimes required when this object is destroyed abruptly and the
-   * destructor is not called.
-   */
-  void stopServer();
-
-  SequenceServer &operator<<(PresetSequencer &sequencer) {
-    return registerSequencer(sequencer);
-  }
-  SequenceServer &operator<<(SequenceRecorder &recorder) {
-    return registerRecorder(recorder);
-  }
-  SequenceServer &operator<<(osc::MessageConsumer &consumer) {
-    return registerMessageConsumer(consumer);
-  }
-
-  void setAddress(std::string address);
-  std::string getAddress();
-
- protected:
-  //	void attachPacketHandler(osc::PacketHandler *handler);
-  static void changeCallback(int value, void *sender, void *userData);
-
- private:
-  osc::Recv *mServer;
-  PresetSequencer *mSequencer;
-  SequenceRecorder *mRecorder;
-  // ParameterServer *mParamServer;
-  std::vector<Composition *> mCompositions;
-  //	std::mutex mServerLock;
-  std::string mOSCpath;
-  std::string mOSCQueryPath;
-  //	std::mutex mHandlerLock;
-  //	std::vector<osc::PacketHandler *> mHandlers;
-  std::vector<osc::MessageConsumer *> mConsumers;
+  //  std::chrono::high_resolution_clock::time_point mSequenceStart =
+  //      std::chrono::high_resolution_clock::now();
+  std::unique_ptr<std::thread> mSequencerThread;
+  std::mutex mSequenceLock;
+  uint64_t mCurrentStep;
+  PresetHandler::ParameterStates mStartValues;
+  std::mutex mPlayWaitLock;
+  std::condition_variable mPlayWaitVariable;
+  //  std::mutex mPlayStartedLock;
+  //  std::condition_variable mPlayStartedVariable;
+  std::shared_ptr<std::promise<void>> mPlayPromiseObj;
 };
 
 }  // namespace al

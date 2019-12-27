@@ -1,4 +1,4 @@
-#include "al/sphere/al_Perprojection.hpp"
+#include "al/sphere/al_PerProjection.hpp"
 
 al::Mat4f al::get_cube_mat(int face) {
   switch (face) {

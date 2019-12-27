@@ -88,7 +88,7 @@ class AudioBackend {
 
   double time();
 
-  bool open(int framesPerSecond, int framesPerBuffer, void *userdata);
+  bool open(int framesPerSecond, unsigned int framesPerBuffer, void *userdata);
   bool close();
 
   bool start(int framesPerSecond, int framesPerBuffer, void *userdata);

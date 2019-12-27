@@ -46,6 +46,7 @@
 */
 
 #include <stdio.h>
+
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -53,7 +54,9 @@
 #include <string>
 #include <vector>
 
+#ifdef AL_WINDOWS
 #undef DELETE
+#endif
 
 namespace al {
 
@@ -123,7 +126,7 @@ class Keyboard {
   void meta(bool state);   ///< Set meta key state
   void shift(bool state);  ///< Set shift key state
 
-  void print(std::ostream& stream) const;  ///< Print keyboard state
+  void print(std::ostream &stream) const;  ///< Print keyboard state
 
  protected:
   friend class WindowImpl;
@@ -194,25 +197,25 @@ class WindowEventHandler {
   virtual ~WindowEventHandler();
 
   /// Called when a keyboard key is pressed
-  virtual bool keyDown(const Keyboard& k) { return true; }
+  virtual bool keyDown(const Keyboard &k) { return true; }
 
   /// Called when a keyboard key is released
-  virtual bool keyUp(const Keyboard& k) { return true; }
+  virtual bool keyUp(const Keyboard &k) { return true; }
 
   /// Called when a mouse button is pressed
-  virtual bool mouseDown(const Mouse& m) { return true; }
+  virtual bool mouseDown(const Mouse &m) { return true; }
 
   /// Called when the mouse moves while a button is down
-  virtual bool mouseDrag(const Mouse& m) { return true; }
+  virtual bool mouseDrag(const Mouse &m) { return true; }
 
   /// Called when the mouse moves
-  virtual bool mouseMove(const Mouse& m) { return true; }
+  virtual bool mouseMove(const Mouse &m) { return true; }
 
   /// Called when a mouse button is released
-  virtual bool mouseUp(const Mouse& m) { return true; }
+  virtual bool mouseUp(const Mouse &m) { return true; }
 
   /// Called when mouse scrolled
-  virtual bool mouseScroll(const Mouse& m) { return true; }
+  virtual bool mouseScroll(const Mouse &m) { return true; }
 
   /// Called whenever window dimensions change
   virtual bool resize(int dw, int dh) { return true; }
@@ -221,17 +224,17 @@ class WindowEventHandler {
   virtual bool visibility(bool v) { return true; }
 
   /// Return self
-  WindowEventHandler& windowEventHandler() { return *this; }
+  WindowEventHandler &windowEventHandler() { return *this; }
 
   bool attached() const { return NULL != mWindow; }
-  Window& window() { return *mWindow; }
-  const Window& window() const { return *mWindow; }
+  Window &window() { return *mWindow; }
+  const Window &window() const { return *mWindow; }
 
-  Window* mWindow;
+  Window *mWindow;
 
  private:
   friend class Window;
-  WindowEventHandler& window(Window* v) {
+  WindowEventHandler &window(Window *v) {
     mWindow = v;
     return *this;
   }
@@ -247,7 +250,7 @@ class WindowEventHandler {
 // class Window : public InputEventHandler, public WindowEventHandler {
 class Window {
  public:
-  typedef std::vector<WindowEventHandler*> WindowEventHandlers;
+  typedef std::vector<WindowEventHandler *> WindowEventHandlers;
 
   /// Window display mode bit flags
   enum DisplayMode : unsigned int {
@@ -306,10 +309,10 @@ class Window {
   /// Destroy current window and its associated graphics context
   void destroy();
 
-  const Keyboard& keyboard() const {
+  const Keyboard &keyboard() const {
     return mKeyboard;
   }                                              ///< Get current keyboard state
-  const Mouse& mouse() const { return mMouse; }  ///< Get current mouse state
+  const Mouse &mouse() const { return mMouse; }  ///< Get current mouse state
 
   double aspect() const;  ///< Get aspect ratio (width divided by height)
   bool created() const;   ///< Whether window has been created providing a valid
@@ -320,7 +323,7 @@ class Window {
   DisplayMode displayMode() const;    ///< Get current display mode
   bool enabled(DisplayMode v) const;  ///< Get whether display mode flag is set
   bool fullScreen() const;            ///< Get whether window is in fullscreen
-  const std::string& title() const;   ///< Get title of window
+  const std::string &title() const;   ///< Get title of window
   bool visible() const;               ///< Get whether window is visible
   bool vsync() const;                 ///< Get whether v-sync is enabled
 
@@ -340,7 +343,7 @@ class Window {
   void cursor(Cursor v);                        ///< Set cursor type
   void cursorHide(bool v);                      ///< Set cursor hiding
   void cursorHideToggle();                      ///< Toggle cursor hiding
-  void dimensions(const Dim& v);                ///< Set dimensions
+  void dimensions(const Dim &v);                ///< Set dimensions
   void dimensions(int w, int h);                ///< Set dimensions
   void dimensions(int x, int y, int w, int h);  ///< Set dimensions
   void displayMode(DisplayMode v);  ///< Set display mode; will recreate window
@@ -348,12 +351,12 @@ class Window {
 
   /// This will make the window go fullscreen without borders and,
   /// if posssible, without changing the display resolution.
-  void fullScreen(bool on);
+  void fullScreen(bool on, int monitorIndex = 0);
   void fullScreenToggle();  ///< Toggle fullscreen
   void hide();              ///< Hide window (if showing)
   void iconify();           ///< Iconify window
   // void show(); ///< Show window (if hidden)
-  void title(const std::string& v);  ///< Set title
+  void title(const std::string &v);  ///< Set title
   void vsync(bool v);  ///< Set whether to sync the frame rate to the monitor's
                        ///< refresh rate
   void decorated(bool b);
@@ -362,40 +365,41 @@ class Window {
   // return false is the event has been consumed and should not propagate
   // further.
 
-  std::function<bool(Keyboard const&)> onKeyDown = [](Keyboard const&) {
+  std::function<bool(Keyboard const &)> onKeyDown = [](Keyboard const &) {
     return true;
   };
-  std::function<bool(Keyboard const&)> onKeyUp = [](Keyboard const&) {
+  std::function<bool(Keyboard const &)> onKeyUp = [](Keyboard const &) {
     return true;
   };
-  std::function<bool(Mouse const&)> onMouseDown = [](Mouse const&) {
+  std::function<bool(Mouse const &)> onMouseDown = [](Mouse const &) {
     return true;
   };
-  std::function<bool(Mouse const&)> onMouseUp = [](Mouse const&) {
+  std::function<bool(Mouse const &)> onMouseUp = [](Mouse const &) {
     return true;
   };
-  std::function<bool(Mouse const&)> onMouseDrag = [](Mouse const&) {
+  std::function<bool(Mouse const &)> onMouseDrag = [](Mouse const &) {
     return true;
   };
-  std::function<bool(Mouse const&)> onMouseMove = [](Mouse const&) {
+  std::function<bool(Mouse const &)> onMouseMove = [](Mouse const &) {
     return true;
   };
-  std::function<bool(Mouse const&)> onMouseScroll = [](Mouse const&) {
+  std::function<bool(Mouse const &)> onMouseScroll = [](Mouse const &) {
     return true;
   };
+  std::function<void(int, int)> onResize = [](int, int) {};
 
-  WindowEventHandlers& windowEventHandlers() { return mWindowEventHandlers; }
+  WindowEventHandlers &windowEventHandlers() { return mWindowEventHandlers; }
 
   /// Append handler to window event handler list
   /// The order of handlers in the list matches their calling order.
-  Window& append(WindowEventHandler& v);
+  Window &append(WindowEventHandler &v);
 
   /// Prepend handler to input event handler list
   /// The order of handlers in the list matches their calling order.
-  Window& prepend(WindowEventHandler& v);
+  Window &prepend(WindowEventHandler &v);
 
   /// Remove all window event handlers matching argument
-  Window& remove(WindowEventHandler& v);
+  Window &remove(WindowEventHandler &v);
 
   /// Destroy all created windows
   static void destroyAll();
@@ -434,7 +438,7 @@ class Window {
   void implSetCursor();
   void implSetCursorHide();
   void implSetDimensions();
-  void implSetFullScreen();
+  void implSetFullScreen(int monitorIndex = 0);
   void implSetTitle();
   void implSetVSync();
   void implHide();
@@ -443,7 +447,7 @@ class Window {
   bool implShouldClose();
   void implClose();
 
-  Window& insert(WindowEventHandler& v, int i);
+  Window &insert(WindowEventHandler &v, int i);
 
 #define CALL(e)                                                  \
   {                                                              \
@@ -479,26 +483,28 @@ class Window {
     CALL(keyUp(mKeyboard));
     onKeyUp(mKeyboard);
   }
-  void callHandlersResize(int w, int h) { CALL(resize(w, h)); }
+  void callHandlersResize(int w, int h) {
+    CALL(resize(w, h));
+    onResize(w, h);
+  }
   void callHandlersVisibility(bool v) { CALL(visibility(v)); }
 #undef CALL
 
  public:
-  [[deprecated]] Window& add(WindowEventHandler* v) {
-    return append(*v);
-  }[[deprecated]] Window& prepend(WindowEventHandler* v) {
-    return prepend(*v);
-  }
-  [[deprecated]] Window& remove(WindowEventHandler* v) { return remove(*v); }
+  //  [[deprecated]] Window& add(WindowEventHandler* v) { return append(*v); }
+  //  [[deprecated]] Window& prepend(WindowEventHandler* v) { return
+  //  prepend(*v); }
+  //  [[deprecated]] Window& remove(WindowEventHandler* v) { return remove(*v);
+  //  }
 };
 
-inline Window::DisplayMode operator|(const Window::DisplayMode& a,
-                                     const Window::DisplayMode& b) {
+inline Window::DisplayMode operator|(const Window::DisplayMode &a,
+                                     const Window::DisplayMode &b) {
   return Window::DisplayMode(+a | +b);
 }
 
-inline Window::DisplayMode operator&(const Window::DisplayMode& a,
-                                     const Window::DisplayMode& b) {
+inline Window::DisplayMode operator&(const Window::DisplayMode &a,
+                                     const Window::DisplayMode &b) {
   return Window::DisplayMode(+a & +b);
 }
 

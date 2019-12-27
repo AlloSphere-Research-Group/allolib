@@ -1,5 +1,7 @@
 #include "al/graphics/al_Image.hpp"
+
 #include <cstring>
+
 #include "al_stb_image.hpp"
 
 namespace al {
@@ -24,6 +26,8 @@ bool Image::load(const std::string &filename) {
   if (!image_data.data) return false;
 
   int arr_size = 4 * image_data.width * image_data.height;
+  mWidth = image_data.width;
+  mHeight = image_data.height;
   mArray.resize(arr_size);
   static_assert(
       sizeof(unsigned char) == sizeof(uint8_t),

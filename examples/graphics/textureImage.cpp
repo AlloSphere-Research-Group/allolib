@@ -7,13 +7,13 @@ smooth.  This is because interpolation is done on the GPU.
   Karl Yerkes and Matt Wright (2011/10/10)
 */
 
-#include "al/core.hpp"
-#include "module/img/loadImage.hpp"
-
 #include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <vector>
+
+#include "al/app/al_App.hpp"
+#include "al/graphics/al_Image.hpp"
 
 using namespace al;
 using namespace std;
@@ -27,15 +27,16 @@ class MyApp : public App {
     //
     const char* filename = "data/hubble.jpg";
 
-    auto imageData = imgModule::loadImage(filename);
-    if (imageData.data.size() == 0) {
+    auto imageData = Image(filename);
+
+    if (imageData.array().size() == 0) {
       cout << "failed to load image" << endl;
     }
-    cout << "loaded image size: " << imageData.width << ", " << imageData.height
-         << endl;
+    cout << "loaded image size: " << imageData.width() << ", "
+         << imageData.height() << endl;
 
-    texture.create2D(imageData.width, imageData.height);
-    texture.submit(imageData.data.data(), GL_RGBA, GL_UNSIGNED_BYTE);
+    texture.create2D(imageData.width(), imageData.height());
+    texture.submit(imageData.array().data(), GL_RGBA, GL_UNSIGNED_BYTE);
 
     texture.filter(Texture::LINEAR);
   }

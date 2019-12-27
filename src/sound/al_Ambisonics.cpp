@@ -1,6 +1,6 @@
-#include <string.h>
-
 #include "al/sound/al_Ambisonics.hpp"
+
+#include <string.h>
 
 #ifdef USE_GAMMA
 #include "scl.h"
@@ -275,7 +275,7 @@ void AmbiDecode::setSpeakers(Speakers* spkrs) {
   //	for (unsigned i = 0; i < mSpeakers.size(); i++) {
   //		Speaker &spkr = spkrs->at(i);
   //		setSpeaker(i, spkr.deviceChannel, spkr.azimuth, spkr.elevation,
-  //spkr.gain);
+  // spkr.gain);
   //	}
   setSpeakers(*spkrs);
 }
@@ -378,10 +378,13 @@ void AmbiEncode::print(std::ostream& stream) {
 
 // Ambisonics Spatializer -----------------
 
-AmbisonicsSpatializer::AmbisonicsSpatializer(SpeakerLayout& sl, int dim,
-                                             int order, int flavor)
+AmbisonicsSpatializer::AmbisonicsSpatializer()
+    : Spatializer({}), mDecoder(3, 1, 8, 1), mEncoder(3, 1) {}
+
+AmbisonicsSpatializer::AmbisonicsSpatializer(Speakers& sl, int dim, int order,
+                                             int flavor)
     : Spatializer(sl),
-      mDecoder(dim, order, sl.numSpeakers(), flavor),
+      mDecoder(dim, order, sl.size(), flavor),
       mEncoder(dim, order){};
 
 void AmbisonicsSpatializer::zeroAmbi() {
@@ -437,8 +440,8 @@ void AmbisonicsSpatializer::renderBuffer(AudioIOData& io,
                                          const float* samples,
                                          const unsigned int& numFrames) {
   //	// compute azimuth & elevation of relative position in current
-  //listener's coordinate frame: 	Vec3d urel(relpos); 	urel.normalize();	// unit
-  //vector in axis listener->source
+  // listener's coordinate frame: 	Vec3d urel(relpos); urel.normalize();
+  // // unit vector in axis listener->source
 
   //	/* project into listener's coordinate frame:
   //		Vec3d axis;
@@ -460,7 +463,7 @@ void AmbisonicsSpatializer::renderBuffer(AudioIOData& io,
   //	for(int i = 0; i < numFrames; i++){
   ////		// cheaper:
   ////		Vec3d direction =
-  ///mListener->quatHistory()[i].rotateTransposed(urel);
+  /// mListener->quatHistory()[i].rotateTransposed(urel);
 
   ////		//mEncoder.direction(azimuth, elevation);
   ////		//mEncoder.direction(-rf, -rr, ru);

@@ -42,12 +42,8 @@
         Andrés Cabrera mantaraya36@gmail.com
 */
 
-#include "al/math/al_Vec.hpp"
-#include "al/protocol/al_OSC.hpp"
-#include "al/spatial/al_Pose.hpp"
-#include "al/types/al_Color.hpp"
-
 #include <float.h>
+
 #include <algorithm>
 #include <atomic>
 #include <cassert>
@@ -60,13 +56,30 @@
 #include <string>
 #include <vector>
 
+#include "al/math/al_Vec.hpp"
+#include "al/protocol/al_OSC.hpp"
+#include "al/spatial/al_Pose.hpp"
+#include "al/types/al_Color.hpp"
+
 namespace al {
+
+enum class TimeMasterMode {
+  TIME_MASTER_AUDIO,
+  TIME_MASTER_GRAPHICS,
+  TIME_MASTER_FREE,
+  TIME_MASTER_CPU
+};
 
 // ParameterField
 // @ingroup UI
 class ParameterField {
  public:
-  typedef enum { FLOAT, INT32, STRING } ParameterDataType;
+  typedef enum { FLOAT, INT32, STRING, NULLDATA } ParameterDataType;
+
+  ParameterField() {
+    mData = nullptr;
+    mType = NULLDATA;
+  }
 
   ParameterField(const float value) {
     mType = FLOAT;
@@ -77,7 +90,7 @@ class ParameterField {
   ParameterField(const double value) {
     mType = FLOAT;
     mData = new float;
-    *static_cast<float *>(mData) = value;
+    *static_cast<float *>(mData) = float(value);
   }
 
   ParameterField(const int32_t value) {
@@ -98,6 +111,23 @@ class ParameterField {
     *static_cast<std::string *>(mData) = value;
   }
 
+  virtual ~ParameterField() {
+    switch (mType) {
+      case FLOAT:
+        delete static_cast<float *>(mData);
+        break;
+      case STRING:
+        delete static_cast<std::string *>(mData);
+        break;
+      case INT32:
+        delete static_cast<int32_t *>(mData);
+        break;
+      case NULLDATA:
+        break;
+    }
+  }
+
+  // Copy constructor
   ParameterField(const ParameterField &paramField) : mType(paramField.mType) {
     switch (mType) {
       case FLOAT:
@@ -114,33 +144,39 @@ class ParameterField {
         *static_cast<int32_t *>(mData) =
             *static_cast<int32_t *>(paramField.mData);
         break;
+      case NULLDATA:
+        break;
     }
   }
 
-  virtual ~ParameterField() {
-    switch (mType) {
-      case FLOAT:
-        delete static_cast<float *>(mData);
-        break;
-      case STRING:
-        delete static_cast<std::string *>(mData);
-        break;
-      case INT32:
-        delete static_cast<int32_t *>(mData);
-        break;
-    }
+  // Move constructor
+  ParameterField(ParameterField &&that) noexcept
+      : mType(NULLDATA), mData(nullptr) {
+    swap(*this, that);
+  }
+
+  // Copy assignment operator
+  ParameterField &operator=(const ParameterField &other) {
+    ParameterField copy(other);
+    swap(*this, copy);
+    return *this;
+  }
+
+  // Move assignment operator
+  ParameterField &operator=(ParameterField &&that) {
+    swap(*this, that);
+    return *this;
+  }
+
+  friend void swap(ParameterField &lhs, ParameterField &rhs) noexcept {
+    std::swap(lhs.mData, rhs.mData);
+    std::swap(lhs.mType, rhs.mType);
   }
 
   ParameterDataType type() { return mType; }
 
-  //    float get() {
-  //        assert(mType == FLOAT);
-  //        return *static_cast<float *>(mData);
-  //    }
-
   template <typename type>
   type get() {
-    //        assert(mType == STRING);
     return *static_cast<type *>(mData);
   }
 
@@ -288,19 +324,20 @@ class ParameterMeta {
     return value;
   }
 
-  virtual void get(std::vector<ParameterField> &fields) {
+  virtual void get(std::vector<ParameterField> & /*fields*/) {
     std::cout
         << "get(std::vector<ParameteterField> &fields) not implemented for "
         << typeid(*this).name() << std::endl;
   }
 
-  virtual void set(std::vector<ParameterField> &fields) {
+  virtual void set(std::vector<ParameterField> & /*fields*/) {
     std::cout
         << "set(std::vector<ParameteterField> &fields) not implemented for "
         << typeid(*this).name() << std::endl;
   }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") {
+    (void)prefix;  // Remove compiler warning
     std::cout << "sendValue function not implemented for "
               << typeid(*this).name() << std::endl;
   }
@@ -469,6 +506,53 @@ class ParameterWrapper : public ParameterMeta {
    */
   void registerChangeCallback(ParameterChangeCallback cb);
 
+  /**
+   * @brief Determines whether value change callbacks are called synchronously
+   * @param synchronous
+   *
+   * If set to true, parameter change callbacks are called directly from the
+   * setter function, i.e. as soon as the parameter value changes. This behavior
+   * might be problematic in some cases, for example when an OSC message
+   * triggers a change in the opengl state. This will cause a crash as the
+   * opengl functions need to be called from the opengl context instead of from
+   * a thread in the network context. By setting this to false and then calling
+   * runChangeCallbacks within the opengl thread will call the callbacks
+   * whenever the value has changed, but at the right time, in the right
+   * context.
+   */
+  void setSynchronousCallbacks(bool synchronous = true) {
+    mSynchronous = synchronous;
+    if (mCallbacks.size() > 0 && mCallbacks[0] == mAsyncCallback) {
+      if (synchronous) {
+        mCallbacks.erase(mCallbacks.begin());
+      } else {
+        std::cout << "WARNING: setSynchronousCallbacks() already set to false"
+                  << std::endl;
+      }
+    } else {
+      if (!synchronous) {
+        mCallbacks.insert(mCallbacks.begin(), mAsyncCallback);
+      }
+    }
+  }
+
+  bool hasChange() { return mChanged; }
+
+  /**
+   * @brief call change callbacks if value has changed since last call
+   */
+  void processChange() {
+    if (mChanged && mCallbacks.size() > 0 && mCallbacks[0] == mAsyncCallback) {
+      auto callbackIt = mCallbacks.begin() + 1;
+      ParameterType value = get();
+      mChanged = false;
+      while (callbackIt != mCallbacks.end()) {
+        (*(*callbackIt))(value);
+        callbackIt++;
+      }
+    }
+  }
+
   std::vector<ParameterWrapper<ParameterType> *> operator<<(
       ParameterWrapper<ParameterType> &newParam) {
     std::vector<ParameterWrapper<ParameterType> *> paramList;
@@ -495,16 +579,24 @@ class ParameterWrapper : public ParameterMeta {
   ParameterType mMin;
   ParameterType mMax;
 
+  void runChangeCallbacksSynchronous(ParameterType &value);
+
   std::shared_ptr<ParameterProcessCallback> mProcessCallback;
   // void * mProcessUdata;
-  std::vector<std::shared_ptr<ParameterChangeCallback>> mCallbacks;
   // std::vector<void *> mCallbackUdata;
 
  private:
-  std::mutex
-      *mMutex;  // pointer to avoid having to explicitly declare copy/move
+  // pointer to avoid having to explicitly declare copy/move
+  std::mutex *mMutex;
   ParameterType mValue;
   ParameterType mValueCache;
+
+  bool mSynchronous{true};
+  std::shared_ptr<ParameterChangeCallback> mAsyncCallback;
+  bool mChanged{false};
+
+ private:
+  std::vector<std::shared_ptr<ParameterChangeCallback>> mCallbacks;
 };
 
 /**
@@ -608,7 +700,9 @@ class Parameter : public ParameterWrapper<float> {
   }
 
   virtual void set(std::vector<ParameterField> &fields) override {
+    assert(fields.size() == 1);
     if (fields.size() == 1) {
+      assert(fields[0].type() == ParameterField::FLOAT);
       set(fields[0].get<float>());
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
@@ -1211,6 +1305,9 @@ ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName,
   mValue = defaultValue;
   mValueCache = defaultValue;
   mMutex = new std::mutex;
+  std::shared_ptr<ParameterChangeCallback> mAsyncCallback =
+      std::make_shared<ParameterChangeCallback>(
+          [&](ParameterType value) { mChanged = true; });
 }
 
 template <class ParameterType>
@@ -1258,6 +1355,21 @@ void ParameterWrapper<ParameterType>::registerChangeCallback(
     typename ParameterWrapper::ParameterChangeCallback cb) {
   mCallbacks.push_back(std::make_shared<ParameterChangeCallback>(cb));
   // mCallbackUdata.push_back(userData);
+}
+
+template <class ParameterType>
+void ParameterWrapper<ParameterType>::runChangeCallbacksSynchronous(
+    ParameterType &value) {
+  for (auto cb : mCallbacks) {
+    if (cb == mAsyncCallback) {
+      // Async callback is just a marker and should be the first callback
+      // in the vector
+      mChanged = true;
+      return;
+    } else {
+      (*cb)(value);
+    }
+  }
 }
 
 }  // namespace al

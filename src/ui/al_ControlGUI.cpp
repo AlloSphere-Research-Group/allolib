@@ -1,12 +1,12 @@
 #include "al/ui/al_ControlGUI.hpp"
-#include "al/graphics/al_Graphics.hpp"
 
+#include "al/graphics/al_Graphics.hpp"
 #include "al/ui/al_SequenceRecorder.hpp"
 
 using namespace al;
 using namespace std;
 
-void ControlGUI::draw(Graphics &g) {
+void ControlGUI::draw(Graphics & /*g*/) {
   auto separatorAnchor = mSeparatorAnchors.begin();
   auto groupBeginAnchor = mGroupBeginAnchors.begin();
   auto groupNamesIt = mGroupNames.begin();

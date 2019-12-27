@@ -1,14 +1,12 @@
 #ifndef INCLUDE_OMNIRENDER_HPP
 #define INCLUDE_OMNIRENDER_HPP
 
-#include "al/sphere/al_Perprojection.hpp"
-#include "al/sphere/al_SphereUtils.hpp"
+#include <iostream>
 
 #include "al/app/al_OpenGLGraphicsDomain.hpp"
-//#include "al/graphics/al_GLFW.hpp"
 #include "al/graphics/al_Graphics.hpp"
-
-#include <iostream>
+#include "al/sphere/al_PerProjection.hpp"
+#include "al/sphere/al_SphereUtils.hpp"
 
 namespace al {
 
@@ -57,8 +55,19 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
   Graphics &graphics() { return *mGraphics; }
 
   // omni-stereo related functions
-  void stereo(bool b) { render_stereo = b; }
-  void toggleStereo() { render_stereo = !render_stereo; }
+  void stereo(bool b) {
+    if (mWindow && mWindow->enabled(Window::DisplayMode::STEREO_BUF) != b) {
+      if (b) {
+        mWindow->displayMode(Window::DisplayMode::DEFAULT_BUF |
+                             Window::DisplayMode::STEREO_BUF);
+      } else {
+        mWindow->displayMode(Window::DisplayMode::DEFAULT_BUF);
+      }
+    }
+    render_stereo = b;
+  }
+
+  void toggleStereo() { stereo(!render_stereo); }
   void omniResolution(int res) { pp_render.update_resolution(res); }
   int omniResolution() { return pp_render.res_; }
 

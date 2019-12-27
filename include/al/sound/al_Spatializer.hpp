@@ -60,7 +60,7 @@ namespace al {
 class Spatializer {
  public:
   /// @param[in] sl	A speaker layout to use
-  Spatializer(const SpeakerLayout& sl);
+  Spatializer(const Speakers& sl);
 
   virtual ~Spatializer() {}
 

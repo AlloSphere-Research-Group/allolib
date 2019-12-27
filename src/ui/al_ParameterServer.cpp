@@ -1,9 +1,9 @@
 
+#include "al/ui/al_ParameterServer.hpp"
+
 #include <algorithm>
 #include <cctype>
 #include <cstring>
-
-#include "al/ui/al_ParameterServer.hpp"
 
 using namespace al;
 
@@ -691,7 +691,10 @@ void ParameterServer::printBundleInfo(ParameterBundle *bundle, std::string id,
     printParameterInfo(p);
   }
   for (auto bundleGroup : bundle->bundles()) {
-    printBundleInfo(bundleGroup.second, bundleGroup.first, depth);
+    std::cout << " --- Subbundle: " << bundleGroup.first << std::endl;
+    for (auto *bundle : bundleGroup.second) {
+      printBundleInfo(bundle, bundleGroup.first, depth);
+    }
   }
   for (int i = 0; i < depth - 1; i++) std::cout << "  ";
   std::cout << "--- End Bundle: " << bundle->name() << " id: " << id

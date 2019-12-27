@@ -5,15 +5,16 @@
  * Andres Cabrera, 2018, 2019, mantaraya36@gmail.com
  */
 
+#include <iostream>
+#include <map>
+
 #include "al/app/al_App.hpp"
+#include "al/app/al_NodeConfiguration.hpp"
 #include "al/app/al_OmniRendererDomain.hpp"
 #include "al/io/al_Socket.hpp"
 #include "al/io/al_Toml.hpp"
 #include "al/scene/al_DistributedScene.hpp"
 #include "al/scene/al_DynamicScene.hpp"
-
-#include <iostream>
-#include <map>
 
 /*
  * MPI and cuttlebone are optional.
@@ -29,27 +30,21 @@
 
 namespace al {
 
-// TODO flow parameters
+class AudioControl {
+ public:
+  void registerAudioIO(AudioIO &io) {
+    gain.registerChangeCallback([&io](float value) { io.gain(value); });
+  }
+
+  Parameter gain{"gain", "sound", 1.0, "alloapp", 0.0, 2.0};
+};
 
 /**
  * @brief DistributedApp class
  * @ingroup App
  */
-struct DistributedApp : public App {
+class DistributedApp : public App, public NodeConfiguration {
  public:
-  typedef enum {
-    CAP_NONE = 0,
-    CAP_SIMULATOR = 1 << 1,
-    CAP_RENDERING = 1 << 2,
-    CAP_OMNIRENDERING = 1 << 3,
-    CAP_AUDIO_IO = 1 << 4,
-    CAP_OSC = 1 << 5,
-    CAP_CONSOLE_IO = 1 << 6,
-    CAP_USER =
-        1
-        << 7  // User defined capabilities can add from here through bitshifting
-  } Capability;
-
   DistributedApp();
 
   void start() override;
@@ -58,38 +53,22 @@ struct DistributedApp : public App {
 
   void initialize();
 
-  bool hasCapability(Capability cap) { return cap & mCapabilites; }
-
-  bool isPrimary() { return rank == 0; }
-
   void registerDynamicScene(DynamicScene &scene);
 
-  Graphics &graphics() override {
-    if (hasCapability(CAP_OMNIRENDERING)) {
-      return omniRendering->graphics();
-    } else {
-      return mDefaultWindowDomain->graphics();
-    }
-  }
+  Graphics &graphics() override;
+  Window &defaultWindow() override;
+  Viewpoint &view() override;
+  Pose &pose() override;
+  Lens &lens() override;
+  Nav &nav() override;
 
-  Window &defaultWindow() override {
-    if (hasCapability(CAP_OMNIRENDERING)) {
-      return omniRendering->window();
-    } else {
-      return mDefaultWindowDomain->window();
-    }
-  }
-
-  uint16_t rank{0};
-  uint16_t group{0};
   std::shared_ptr<GLFWOpenGLOmniRendererDomain> omniRendering;
+  std::map<std::string, std::string> additionalConfig;
 
  private:
   AudioControl mAudioControl;
-  std::string mGlobalDataRootPath;
 
   std::map<std::string, std::string> mRoleMap;
-  Capability mCapabilites{CAP_NONE};
 };
 
 template <class TSharedState>
@@ -104,19 +83,19 @@ class DistributedAppWithState : public DistributedApp {
     // Replace Simulation domain with state simulation domain
     mSimulationDomain =
         mOpenGLGraphicsDomain
-            ->newSubDomain<StateSimulationDomain<TSharedState>>(true);
+            ->newSubDomain<StateDistributionDomain<TSharedState>>(true);
 
     if (rank == 0) {
       std::cout << "Running primary" << std::endl;
       auto sender =
-          std::static_pointer_cast<StateSimulationDomain<TSharedState>>(
+          std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
               mSimulationDomain)
               ->addStateSender("state");
       sender->configure(10101);
     } else {
       std::cout << "Running REPLICA" << std::endl;
       auto receiver =
-          std::static_pointer_cast<StateSimulationDomain<TSharedState>>(
+          std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
               mSimulationDomain)
               ->addStateReceiver("state");
       receiver->configure(10101);
@@ -126,7 +105,7 @@ class DistributedAppWithState : public DistributedApp {
   }
 
   TSharedState &state() {
-    return std::static_pointer_cast<StateSimulationDomain<TSharedState>>(
+    return std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
                mSimulationDomain)
         ->state();
   }

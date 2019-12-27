@@ -2,7 +2,7 @@
 
 namespace al {
 
-Dbap::Dbap(const SpeakerLayout &sl, float focus)
+Dbap::Dbap(const Speakers &sl, float focus)
     : Spatializer(sl), mNumSpeakers(0), mFocus(focus) {
   mNumSpeakers = mSpeakers.size();
   std::cout << "DBAP Compiled with " << mNumSpeakers << " speakers"
