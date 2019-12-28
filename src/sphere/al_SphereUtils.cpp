@@ -142,7 +142,7 @@ std::map<std::string, NodeConfiguration> sphere::getSphereNodes() {
     snprintf(str, 3, "%02d", i);
     std::string name = "gr" + std::string(str);
     nodes[name] = NodeConfiguration{
-        0, i, "/alloshare",
+        i, 0, "/alloshare",
         (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC)};
   };
   return nodes;
