@@ -27,9 +27,10 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
   }
   if (!mWindow->created()) {
     if (render_stereo) {
-      mWindow->displayMode(Window::DisplayMode::STEREO_BUF);
+      mWindow->displayMode(mWindow->displayMode() | Window::DisplayMode::STEREO_BUF);
     }
     bool ret = mWindow->create();
+    window_is_stereo_buffered = mWindow->displayMode() & Window::DisplayMode::STEREO_BUF;
     if (ret) {
       mGraphics->init();
     }
