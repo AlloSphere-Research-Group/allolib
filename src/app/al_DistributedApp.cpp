@@ -9,8 +9,6 @@
 
 using namespace al;
 
-DistributedApp::DistributedApp() : App() {}
-
 void DistributedApp::initialize() {
 #ifdef AL_WINDOWS
   // Required to make sure gethostname() works....
