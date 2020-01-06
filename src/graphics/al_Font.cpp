@@ -1,5 +1,4 @@
 #include "al/graphics/al_Font.hpp"
-#include "al_stb_font.hpp"
 
 #include <cstdint>
 #include <cstdio>
@@ -7,6 +6,8 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+
+#include "al_stb_font.hpp"
 
 namespace al {
 
@@ -100,6 +101,21 @@ void Font::write(Mesh& mesh, const char* text, float worldHeight) {
   for (auto& v : mesh.vertices()) {
     v.x = v.x + xOffset;
   }
+}
+
+std::string Font::defaultFont() {
+#ifdef AL_WINDOWS
+  std::string fontDir = "C:/Windows/Fonts";
+  std::string fontPath = fontDir + "/" + "Arial.ttf";
+#elif defined(AL_OSX)
+  std::string fontDir = "/System/Library/Fonts";
+  std::string fontPath = fontDir + "/" + "Arial.ttf";
+#else
+  std::string fontDir = "/usr/share/fonts/truetype";
+  std::string fontPath = fontDir + "/" + "Arial.ttf";
+#endif
+
+  return fontPath;
 }
 
 #if 0

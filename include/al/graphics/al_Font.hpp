@@ -124,6 +124,8 @@ struct Font {
   void alignLeft() { alignFactorX = 0.0f; }
   void alignCenter() { alignFactorX = -0.5f; }
   void alignRight() { alignFactorX = -1.0f; }
+
+  static std::string defaultFont();
 };
 
 }  // namespace al
