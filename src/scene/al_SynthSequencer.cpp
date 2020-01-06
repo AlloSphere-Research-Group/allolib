@@ -44,15 +44,17 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   mMasterTime = startTime;
   double currentMasterTime = mMasterTime;
   const double startPad = 0.0;
-  std::list<SynthSequencerEvent> events =
-      loadSequence(sequenceName, currentMasterTime - startTime + startPad);
-  std::unique_lock<std::mutex> lk(mEventLock);
-  mLastSequencePlayed = sequenceName;
-  mEvents = events;
-  mNextEvent = 0;
+  if (sequenceName.size() > 0) {
+    std::list<SynthSequencerEvent> events =
+        loadSequence(sequenceName, currentMasterTime - startTime + startPad);
+    std::unique_lock<std::mutex> lk(mEventLock);
+    mLastSequencePlayed = sequenceName;
+    mEvents = events;
+    mNextEvent = 0;
+    lk.unlock();
+  }
   mPlaybackStartTime = currentMasterTime - startTime + startPad;
   mPlaying = true;
-  lk.unlock();
   for (auto cb : mSequenceBeginCallbacks) {
     cb(mLastSequencePlayed);
   }

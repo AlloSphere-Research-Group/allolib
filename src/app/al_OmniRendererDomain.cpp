@@ -16,6 +16,8 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
   //  0) {
   //    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
   //  }
+  bool ret = true;
+  ret &= initializeSubdomains(true);
   assert(strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
          0);
   mParent = static_cast<OpenGLGraphicsDomain *>(parent);
@@ -27,10 +29,12 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
   }
   if (!mWindow->created()) {
     if (render_stereo) {
-      mWindow->displayMode(mWindow->displayMode() | Window::DisplayMode::STEREO_BUF);
+      mWindow->displayMode(mWindow->displayMode() |
+                           Window::DisplayMode::STEREO_BUF);
     }
-    bool ret = mWindow->create();
-    window_is_stereo_buffered = mWindow->displayMode() & Window::DisplayMode::STEREO_BUF;
+    ret = mWindow->create();
+    window_is_stereo_buffered =
+        mWindow->displayMode() & Window::DisplayMode::STEREO_BUF;
     if (ret) {
       mGraphics->init();
     }
@@ -44,7 +48,8 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
     loadPerProjectionConfiguration();
     running_in_sphere_renderer = false;
   }
-  return true;
+  ret &= initializeSubdomains(false);
+  return ret;
 }
 
 bool GLFWOpenGLOmniRendererDomain::tick() {
@@ -74,6 +79,18 @@ bool GLFWOpenGLOmniRendererDomain::cleanup(ComputationDomain *parent) {
     mGraphics = nullptr;
   }
   return true;
+}
+
+void GLFWOpenGLOmniRendererDomain::stereo(bool b) {
+  if (mWindow && mWindow->enabled(Window::DisplayMode::STEREO_BUF) != b) {
+    if (b) {
+      mWindow->displayMode(Window::DisplayMode::DEFAULT_BUF |
+                           Window::DisplayMode::STEREO_BUF);
+    } else {
+      mWindow->displayMode(Window::DisplayMode::DEFAULT_BUF);
+    }
+  }
+  render_stereo = b;
 }
 
 void GLFWOpenGLOmniRendererDomain::loopEyeForDesktopMode() {

@@ -122,7 +122,8 @@ struct SynthEvent {
  * the audio callback (e.g. onSound() ) or the graphics callback (e.g. onDraw())
  *
  * A time master can be selected in the constructor to define where the
- * sequencer runs. TimeMasterMode::TIME_MASTER_AUDIO is more precise in time, but you might want
+ * sequencer runs. TimeMasterMode::TIME_MASTER_AUDIO is more precise in time,
+ but you might want
  * to use TIME_MASTER_GRAPHICS if your "note" produces no audio.
  *
  * Sequences can also be read from text files with the extension
@@ -168,8 +169,7 @@ struct SynthEvent {
 
 class SynthSequencer {
  public:
-  SynthSequencer(
-    TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_CPU) {
+  SynthSequencer(TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_CPU) {
     mInternalSynth = std::make_unique<PolySynth>(masterMode);
     registerSynth(*mInternalSynth.get());
   }
@@ -238,7 +238,7 @@ class SynthSequencer {
 
   void setTempo(float tempo) { mNormalizedTempo = tempo / 60.f; }
 
-  bool playSequence(std::string sequenceName, float startTime = 0.0f);
+  bool playSequence(std::string sequenceName = "", float startTime = 0.0f);
 
   void stopSequence();
   void setTime(float newTime);

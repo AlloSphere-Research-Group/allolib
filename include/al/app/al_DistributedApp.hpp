@@ -11,6 +11,7 @@
 #include "al/app/al_App.hpp"
 #include "al/app/al_NodeConfiguration.hpp"
 #include "al/app/al_OmniRendererDomain.hpp"
+#include "al/app/al_StateDistributionDomain.hpp"
 #include "al/io/al_Socket.hpp"
 #include "al/io/al_Toml.hpp"
 #include "al/scene/al_DistributedScene.hpp"
@@ -39,7 +40,7 @@ class DistributedApp : public App, public NodeConfiguration {
 
   std::string name();
 
-  void initialize();
+  virtual void initialize();
 
   void registerDynamicScene(DynamicScene &scene);
 
@@ -72,24 +73,6 @@ class DistributedAppWithState : public DistributedApp {
     mSimulationDomain =
         mOpenGLGraphicsDomain
             ->newSubDomain<StateDistributionDomain<TSharedState>>(true);
-
-    if (rank == 0) {
-      std::cout << "Running primary" << std::endl;
-      auto sender =
-          std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
-              mSimulationDomain)
-              ->addStateSender("state");
-      sender->configure(10101);
-    } else {
-      std::cout << "Running REPLICA" << std::endl;
-      auto receiver =
-          std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
-              mSimulationDomain)
-              ->addStateReceiver("state");
-      receiver->configure(10101);
-      mSimulationDomain
-          ->disableProcessingCallback();  // Replicas won't call onAnimate()
-    }
   }
 
   TSharedState &state() {
@@ -98,7 +81,25 @@ class DistributedAppWithState : public DistributedApp {
         ->state();
   }
 
-  void setTitle(std::string title) { defaultWindow().title(title); }
+  void initialize() override {
+    DistributedApp::initialize();
+    auto distDomain =
+        std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
+            mSimulationDomain);
+    if (isPrimary()) {
+      std::cout << "Running primary" << std::endl;
+      auto sender = distDomain->addStateSender("state", distDomain->statePtr());
+      sender->configure(10101);
+    } else {
+      std::cout << "Running REPLICA" << std::endl;
+      auto receiver =
+          distDomain->addStateReceiver("state", distDomain->statePtr());
+      receiver->configure(10101);
+      //      mSimulationDomain
+      //          ->disableProcessingCallback();  // Replicas won't call
+      //          onAnimate()
+    }
+  }
 
  private:
 };

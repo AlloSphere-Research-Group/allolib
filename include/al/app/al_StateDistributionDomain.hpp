@@ -253,6 +253,7 @@ StateDistributionDomain<TSharedState>::addStateSender(
   auto newDomain =
       this->template newSubDomain<StateSendDomain<TSharedState>>(false);
   newDomain->setId(id);
+  newDomain->setStatePointer(statePtr);
   return newDomain;
 }
 
@@ -264,6 +265,7 @@ StateDistributionDomain<TSharedState>::addStateReceiver(
       this->template newSubDomain<StateReceiveDomain<TSharedState>>(true);
   newDomain->setId(id);
 
+  newDomain->setStatePointer(statePtr);
   return newDomain;
 }
 

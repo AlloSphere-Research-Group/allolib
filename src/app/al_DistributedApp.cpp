@@ -85,6 +85,8 @@ void DistributedApp::initialize() {
   }
   if (appConfig.hasKey<std::string>("broadcastAddress")) {
     additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
+  } else {
+    additionalConfig["broadcastAddress"] = "127.0.0.1";
   }
 
   osc::Recv testServer;

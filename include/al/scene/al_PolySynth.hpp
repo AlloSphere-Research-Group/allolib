@@ -147,7 +147,7 @@ the other
    * Copy the values from the internal parameters that have been
    * registered using registerParameterAsField or the << operator.
    */
-  int getTriggerParams(float *pFields, int maxParams = -1);
+  virtual int getTriggerParams(float *pFields, int maxParams = -1);
 
   /**
    * @brief Get this instance's parameter fields

@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "al/app/al_ComputationDomain.hpp"
-#include "al/app/al_StateDistributionDomain.hpp"
 
 namespace al {
 
@@ -38,23 +37,6 @@ class StateSimulationDomain : public SimulationDomain {
   TSharedState &state() { return *mState; }
 
   std::shared_ptr<TSharedState> statePtr() { return mState; }
-
-  //  virtual std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(
-  //      std::string id = "") {
-  //    auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(false);
-  //    newDomain->setId(id);
-  //    newDomain->setStatePointer(statePtr());
-  //    return newDomain;
-  //  }
-
-  //  virtual std::shared_ptr<StateReceiveDomain<TSharedState>>
-  //  addStateReceiver(
-  //      std::string id = "") {
-  //    auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(true);
-  //    newDomain->setId(id);
-  //    newDomain->setStatePointer(statePtr());
-  //    return newDomain;
-  //  }
 
  protected:
   std::shared_ptr<TSharedState> mState{new TSharedState};
