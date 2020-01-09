@@ -50,6 +50,7 @@ class DistributedApp : public App, public NodeConfiguration {
   Pose &pose() override;
   Lens &lens() override;
   Nav &nav() override;
+  NavInputControl &navControl() override;
 
   std::shared_ptr<GLFWOpenGLOmniRendererDomain> omniRendering;
   std::map<std::string, std::string> additionalConfig;

@@ -268,3 +268,11 @@ Nav &DistributedApp::nav() {
     return mDefaultWindowDomain->nav();
   }
 }
+
+NavInputControl &DistributedApp::navControl() {
+  if (hasCapability(CAP_OMNIRENDERING)) {
+    return omniRendering->navControl();
+  } else {
+    return mDefaultWindowDomain->navControl();
+  }
+}

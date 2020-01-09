@@ -71,7 +71,7 @@ class App {
   virtual Pose &pose();
   virtual Lens &lens();
   virtual Nav &nav();
-  NavInputControl &navControl();
+  virtual NavInputControl &navControl();
   void fps(double f);
 
   // Access to default window domain

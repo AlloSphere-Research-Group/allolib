@@ -71,7 +71,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
           }
         }
         lk.unlock();
-        double timeIncrement = granularityns / 1.0e-9;
+        double timeIncrement = granularityns * 1.0e-9;
         double blockStartTime = mMasterTime;
         mMasterTime += timeIncrement;
         processEvents(blockStartTime, 1.0e9 / granularityns);
@@ -504,7 +504,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
       while (event->startTime <= mMasterTime) {
         event->offsetCounter =
             (event->startTime - blockStartTime) * fpsAdjusted;
-        if (event->type == SynthSequencerEvent::EVENT_VOICE) {
+        if (event->type == SynthSequencerEvent::EVENT_VOICE && event->voice) {
           mPolySynth->triggerOn(event->voice, event->offsetCounter);
           event->voiceId = event->voice->id();
           event->voice = nullptr;  // Voice has been consumed, all voices

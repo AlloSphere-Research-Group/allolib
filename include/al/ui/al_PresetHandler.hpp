@@ -374,7 +374,7 @@ class PresetHandler {
   bool mCpuThreadRunning{false};  // To keep the morphing thread alive
   std::unique_ptr<std::thread> mMorphingThread;
   //  std::condition_variable mMorphConditionVar;
-  double mMorphInterval{0.05};
+  double mMorphInterval{0.02};
   //  std::atomic<bool> mMorphing;
 
   std::vector<std::function<void(int index, void *sender, void *userData)>>
