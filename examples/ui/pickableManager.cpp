@@ -33,7 +33,7 @@ struct MyApp : public App {
       child->set(mBox);
       child->pose = Pose(Vec3f(0, 0, 0), Quatf());
       p->addChild(child);
-      mPickableManager += p;
+      mPickableManager << p;
     }
   }
 
