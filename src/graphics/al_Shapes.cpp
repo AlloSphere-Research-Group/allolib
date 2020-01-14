@@ -96,7 +96,22 @@ int addCube(Mesh& m, bool withNormalsAndTexcoords, float l) {
     m.vertex(l, -l, -l);
     m.vertex(-l, -l, -l);
 
-    return 6 * 4;
+    static const int indices[] = {
+      0,1,2, 2,3,0, //r
+      4,5,6, 6,7,4, //l
+      8,9,10, 10,11,8, //t
+      12,13,14, 14,15,12, //b
+      16,17,18, 18,19,16, //f
+      20,21,22, 22,23,20 //back
+    };
+    
+    int Nv = 6*4;
+
+    int offset = m.vertices().size() - Nv;
+    int num = sizeof(indices) / sizeof(*indices);
+    m.index(indices, num, offset);
+
+    return Nv;
   } else {
     /*
         0  1
@@ -404,11 +419,15 @@ int addSphereWithTexcoords(Mesh& m, double radius, int bands) {
       int first = (lat * (bands + 1)) + lon;
       int second = first + bands + 1;
       m.index(first);
-      m.index(second);
+      // m.index(second);
       m.index((first + 1));
       m.index(second);
+
+      m.index(second);
+      // m.index((second + 1));
+      m.index((first + 1));
       m.index((second + 1));
-      m.index((first + 1));
+
     }
   }
 

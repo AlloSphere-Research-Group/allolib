@@ -24,8 +24,6 @@ class PickableManager {
   }
   PickableManager &operator<<(Pickable &p) { return registerPickable(p); }
   PickableManager &operator<<(Pickable *p) { return registerPickable(*p); }
-  PickableManager &operator+=(Pickable &p) { return registerPickable(p); }
-  PickableManager &operator+=(Pickable *p) { return registerPickable(*p); }
 
   std::vector<Pickable *> pickables() { return mPickables; }
 
