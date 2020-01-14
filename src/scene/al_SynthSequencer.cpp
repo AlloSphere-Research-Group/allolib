@@ -59,27 +59,28 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
     cb(mLastSequencePlayed);
   }
   if (mMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
-    mCpuThread = std::make_shared<std::thread>([&](int granularityns = 1000) {
-      bool running = true;
-      auto startTime = std::chrono::high_resolution_clock::now();
-      while (running) {
-        std::unique_lock<std::mutex> lk(mEventLock);
-        if (mEvents.size() == 0) {
-          running = false;
-          if (verbose()) {
-            std::cout << "CPU play thread done." << std::endl;
+    mCpuThread =
+        std::make_shared<std::thread>([&](int granularityns = 1000000) {
+          auto startTime = std::chrono::high_resolution_clock::now();
+          bool running = true;
+          double timeIncrement = granularityns * 1.0e-9;
+          while (running) {
+            std::unique_lock<std::mutex> lk(mEventLock);
+            if (mEvents.size() == 0 || mPlaying == false) {
+              running = false;
+              if (verbose()) {
+                std::cout << "CPU play thread done." << std::endl;
+              }
+            }
+            lk.unlock();
+            double blockStartTime = mMasterTime;
+            mMasterTime += timeIncrement;
+            processEvents(blockStartTime, 1.0e9 / granularityns);
+            std::this_thread::sleep_until(
+                startTime + std::chrono::nanoseconds(uint32_t(granularityns)));
+            startTime += std::chrono::nanoseconds(uint32_t(granularityns));
           }
-        }
-        lk.unlock();
-        double timeIncrement = granularityns * 1.0e-9;
-        double blockStartTime = mMasterTime;
-        mMasterTime += timeIncrement;
-        processEvents(blockStartTime, 1.0e9 / granularityns);
-        std::this_thread::sleep_until(
-            startTime +
-            std::chrono::nanoseconds(uint32_t(mMasterTime * 1.0e9)));
-      }
-    });
+        });
   }
   return true;
 }
@@ -98,6 +99,11 @@ void SynthSequencer::stopSequence() {
   mEvents.clear();
   mNextEvent = 0;
   mPlaying = false;
+  if (mCpuThread) {
+    lk.unlock();
+    mCpuThread->join();
+    mCpuThread = nullptr;
+  }
 }
 
 void SynthSequencer::setTime(float newTime) {
@@ -497,9 +503,9 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
       auto iter = mEvents.begin();
       std::advance(iter, mNextEvent);
       auto event = iter;
-      while (event != mEvents.end() &&
-             event->startTime <= mMasterTime - blockStartTime) {
+      while (event != mEvents.end() && event->startTime < blockStartTime) {
         event++;
+        mNextEvent++;
       }
       while (event->startTime <= mMasterTime) {
         event->offsetCounter =
@@ -516,6 +522,12 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
             voice->setTriggerParams(event->fields.pFields);
             mPolySynth->triggerOn(voice, event->offsetCounter);
             event->voiceId = voice->id();
+
+            //            std::cout << " ++ trigger ON " << voice->id() << " "
+            //            << mMasterTime
+            //                      << "   " <<
+            //                      event->fields.pFields[0].get<float>()
+            //                      << std::endl;
             //            event->voice = voice;
           } else {
             std::cerr
@@ -545,10 +557,11 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
       double eventTermination = event.startTime + event.duration;
       if (event.voiceId >= 0 && eventTermination <= mMasterTime) {
         mPolySynth->triggerOff(event.voiceId);
+        //        std::cout << "trigger off " << event.voiceId << " " <<
+        //        eventTermination
+        //                  << " " << mMasterTime << std::endl;
         event.voiceId = -1;
-        //        std::cout << "trigger off " <<  event.voice->id() << " " <<
-        //        eventTermination << " " << mMasterTime  << std::endl;
-        //        event.voice = nullptr; // When an event gives up a voice, it
+        event.voice = nullptr;  // When an event gives up a voice, it
         //        is done.
         triggerOffThisBlock = true;
       }
