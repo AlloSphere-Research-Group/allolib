@@ -103,6 +103,15 @@ class SequenceRecorder : public osc::MessageConsumer {
   std::string lastSequenceName();
   std::string lastSequenceSubDir();
 
+  /**
+   * @brief setDirectory sets the working directory for the SequenceRecorder
+   * @param directory
+   *
+   * If a PresetHandler is registered, this value
+   * is ignored.
+   */
+  void setDirectory(std::string directory);
+
   std::string getCurrentPath() { return mPresetHandler->getCurrentPath(); }
 
   SequenceRecorder &operator<<(PresetHandler &handler) {
@@ -146,8 +155,8 @@ class SequenceRecorder : public osc::MessageConsumer {
   //	struct Step {
   //		std::string presetName;
   //		float delta; // The time to get to the preset
-  //		float duration; // The time to stay in the preset before the next
-  //step
+  //		float duration; // The time to stay in the preset before the
+  // next step
   //	};
 
   std::string mDirectory;

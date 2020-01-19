@@ -1,8 +1,15 @@
 
 #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
 #include "al/sphere/al_SphereUtils.hpp"
+
+// gethostname
+#ifdef AL_WINDOWS
+#include <Winsock2.h>
+#else
+#include <unistd.h>
+#endif
+
+#include <GLFW/glfw3.h>
 
 std::string al_get_hostname() {
   char hostname[256];
@@ -16,32 +23,36 @@ std::string al_get_hostname() {
 
 using namespace al;
 
-bool sphere::is_simulator(const std::string &host) {
+bool sphere::isSimulatorMachine(const std::string &host) {
   return (host.substr(0, 5) == "audio");
 }
 
-bool sphere::is_simulator() { return is_simulator(al_get_hostname()); }
+bool sphere::isSimulatorMachine() {
+  return isSimulatorMachine(al_get_hostname());
+}
 
-bool sphere::is_renderer(const std::string &host) {
+bool sphere::isRendererMachine(const std::string &host) {
   return (host.substr(0, 2) == "gr");
 }
 
-bool sphere::is_renderer() { return is_renderer(al_get_hostname()); }
+bool sphere::isRendererMachine() {
+  return isRendererMachine(al_get_hostname());
+}
 
 std::string sphere::renderer_hostname(const std::string &fallback) {
   auto const host = al_get_hostname();
-  if (is_renderer(host))
+  if (isRendererMachine(host))
     return host;
   else
     return fallback;
 }
 
-bool sphere::is_in_sphere() {
+bool sphere::isSphereMachine() {
   auto const host = al_get_hostname();
-  return is_simulator(host) || is_renderer(host);
+  return isSimulatorMachine(host) || isRendererMachine(host);
 }
 
-void sphere::get_fullscreen_dimension(int *width, int *height) {
+void sphere::getFullscreenDimension(int *width, int *height) {
   // Window Size in AlloSphere
 
   // considering Mosaic'ed displays as one bing screen
@@ -56,12 +67,12 @@ void sphere::get_fullscreen_dimension(int *width, int *height) {
   *width = 0;
   *height = 0;
 
-  GLFWmonitor** monitors = glfwGetMonitors(&count);
+  GLFWmonitor **monitors = glfwGetMonitors(&count);
 
   for (int i = 0; i < count; i += 1) {
     int x, y;
     glfwGetMonitorPos(monitors[i], &x, &y);
-    const GLFWvidmode* vm = glfwGetVideoMode(monitors[i]);
+    const GLFWvidmode *vm = glfwGetVideoMode(monitors[i]);
     int xmax = x + vm->width;
     int ymax = y + vm->height;
     if (*width < xmax) *width = xmax;
@@ -69,30 +80,32 @@ void sphere::get_fullscreen_dimension(int *width, int *height) {
   }
 }
 
-std::string sphere::config_directory(const std::string &dir_if_not_renderer) {
-  if (is_renderer())
+std::string sphere::getCalibrationDirectory(
+    const std::string &dir_if_not_renderer) {
+  if (isRendererMachine())
     return "/home/sphere/calibration-current/";
   else
     return dir_if_not_renderer;
 }
 
-std::string sphere::renderer_config_file_path(const std::string &host) {
+std::string sphere::getRendererCalibrationFilepath(const std::string &host) {
   return "/home/sphere/calibration-current/" + host + ".txt";
 }
 
-std::string sphere::renderer_config_file_path() {
-  return renderer_config_file_path(al_get_hostname());
+std::string sphere::getRendererCalibrationFilepath() {
+  return getRendererCalibrationFilepath(al_get_hostname());
 }
 
-std::string sphere::config_file_path(const std::string &path_if_not_renderer) {
+std::string sphere::getCalibrationFilepath(
+    const std::string &path_if_not_renderer) {
   auto const host = al_get_hostname();
-  if (is_renderer(host))
-    return renderer_config_file_path(host);
+  if (isRendererMachine(host))
+    return getRendererCalibrationFilepath(host);
   else
     return path_if_not_renderer;
 }
 
-std::vector<float> sphere::generate_equirect_sampletex(int width, int height) {
+std::vector<float> sphere::generateEquirectSampletex(int width, int height) {
   std::vector<float> arr;
   arr.resize(width * height * 4);
   for (int i = 0; i < width; i++) {
@@ -107,4 +120,30 @@ std::vector<float> sphere::generate_equirect_sampletex(int width, int height) {
     }
   }
   return arr;
+}
+
+std::map<std::string, NodeConfiguration> sphere::getSphereNodes() {
+  std::map<std::string, NodeConfiguration> nodes = {
+      {"ar01",
+       NodeConfiguration{
+           0, 0, "/Volumes/Data",
+           (Capability)(Capability::CAP_SIMULATOR | Capability::CAP_RENDERING |
+                        Capability::CAP_AUDIO_IO | Capability::CAP_OSC)}},
+      {"atari.1g",
+       NodeConfiguration{
+           0, 0, "e:/",
+           (Capability)(Capability::CAP_SIMULATOR | Capability::CAP_RENDERING |
+                        Capability::CAP_AUDIO_IO | Capability::CAP_OSC)}},
+
+  };
+
+  char str[3];
+  for (uint16_t i = 1; i <= 14; i++) {
+    snprintf(str, 3, "%02d", i);
+    std::string name = "gr" + std::string(str);
+    nodes[name] = NodeConfiguration{
+        i, 0, "/alloshare",
+        (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC)};
+  };
+  return nodes;
 }

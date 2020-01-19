@@ -64,7 +64,7 @@ class Dbap : public Spatializer {
  public:
   /// @param[in] sl		A speaker layout
   /// @param[in] focus	Amplitude focus to nearby speakers
-  Dbap(const SpeakerLayout& sl, float focus = 1.f);
+  Dbap(const Speakers& sl, float focus = 1.f);
 
   virtual void renderSample(AudioIOData& io, const Pose& listeningPose,
                             const float& sample,

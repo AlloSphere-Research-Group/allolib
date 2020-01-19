@@ -381,10 +381,10 @@ void AmbiEncode::print(std::ostream& stream) {
 AmbisonicsSpatializer::AmbisonicsSpatializer()
     : Spatializer({}), mDecoder(3, 1, 8, 1), mEncoder(3, 1) {}
 
-AmbisonicsSpatializer::AmbisonicsSpatializer(SpeakerLayout& sl, int dim,
-                                             int order, int flavor)
+AmbisonicsSpatializer::AmbisonicsSpatializer(Speakers& sl, int dim, int order,
+                                             int flavor)
     : Spatializer(sl),
-      mDecoder(dim, order, sl.numSpeakers(), flavor),
+      mDecoder(dim, order, sl.size(), flavor),
       mEncoder(dim, order){};
 
 void AmbisonicsSpatializer::zeroAmbi() {

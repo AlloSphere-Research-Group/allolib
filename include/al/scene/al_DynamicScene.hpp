@@ -52,11 +52,9 @@
 #include "al/math/al_Vec.hpp"
 #include "al/scene/al_SynthSequencer.hpp"
 #include "al/sound/al_Speaker.hpp"
-#include "al/spatial/al_DistAtten.hpp"
-#include "al/spatial/al_Pose.hpp"
-
 #include "al/sound/al_StereoPanner.hpp"
 #include "al/spatial/al_DistAtten.hpp"
+#include "al/spatial/al_Pose.hpp"
 
 namespace al {
 /**
@@ -98,7 +96,7 @@ class PositionedVoice : public SynthVoice {
    * @brief Override this function to apply transformations after the internal
    * transformations of the voice has been applied
    */
-  virtual void preProcess(Graphics &g) {}
+  virtual void preProcess(Graphics & /*g*/) {}
 
   /**
    * @brief For PositionedVoice, the pose (7 floats) and the size are appended
@@ -180,7 +178,7 @@ class ThreadPool {
   void waitForProcessingDone();
   ~ThreadPool();
 
-  unsigned int size() { return workers.size(); }
+  size_t size() { return workers.size(); }
 
   void stopThreads();
 
@@ -213,7 +211,7 @@ void ThreadPool::enqueue(F &&f, UpdateThreadFuncData &data) {
 class DynamicScene : public PolySynth {
  public:
   DynamicScene(int threadPoolSize = 0,
-               TimeMasterMode masterMode = TIME_MASTER_AUDIO);
+               TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_AUDIO);
 
   virtual ~DynamicScene();
 
@@ -225,7 +223,7 @@ class DynamicScene : public PolySynth {
    *  If not called, the default is stereo panning over two speakers.
    */
   template <class TSpatializer>
-  std::shared_ptr<TSpatializer> setSpatializer(SpeakerLayout &sl) {
+  std::shared_ptr<TSpatializer> setSpatializer(Speakers &sl) {
     mSpatializer = std::make_shared<TSpatializer>(sl);
     mSpatializer->compile();
     return std::static_pointer_cast<TSpatializer>(mSpatializer);

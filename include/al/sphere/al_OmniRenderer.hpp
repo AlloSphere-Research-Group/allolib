@@ -3,10 +3,9 @@
 
 #include <iostream>
 
-#include "al/sphere/al_Perprojection.hpp"
-#include "al/sphere/al_SphereUtils.hpp"
-
 #include "al/app/al_WindowApp.hpp"
+#include "al/sphere/al_PerProjection.hpp"
+#include "al/sphere/al_SphereUtils.hpp"
 //#include "al/graphics/al_GLFW.hpp"
 #include "al/graphics/al_Graphics.hpp"
 

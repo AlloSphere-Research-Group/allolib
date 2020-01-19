@@ -6,6 +6,7 @@
 // #include <map>
 
 #include "al/graphics/al_Graphics.hpp"
+#include "al/io/al_Window.hpp"
 #include "al/math/al_Ray.hpp"
 #include "al/ui/al_Pickable.hpp"
 
@@ -23,8 +24,6 @@ class PickableManager {
   }
   PickableManager &operator<<(Pickable &p) { return registerPickable(p); }
   PickableManager &operator<<(Pickable *p) { return registerPickable(*p); }
-  PickableManager &operator+=(Pickable &p) { return registerPickable(p); }
-  PickableManager &operator+=(Pickable *p) { return registerPickable(*p); }
 
   std::vector<Pickable *> pickables() { return mPickables; }
 

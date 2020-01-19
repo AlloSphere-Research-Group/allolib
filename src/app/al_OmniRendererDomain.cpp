@@ -16,6 +16,8 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
   //  0) {
   //    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
   //  }
+  bool ret = true;
+  ret &= initializeSubdomains(true);
   assert(strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
          0);
   mParent = static_cast<OpenGLGraphicsDomain *>(parent);
@@ -26,13 +28,19 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
     mGraphics = std::make_unique<Graphics>();
   }
   if (!mWindow->created()) {
-    bool ret = mWindow->create();
+    if (render_stereo) {
+      mWindow->displayMode(mWindow->displayMode() |
+                           Window::DisplayMode::STEREO_BUF);
+    }
+    ret = mWindow->create();
+    window_is_stereo_buffered =
+        mWindow->displayMode() & Window::DisplayMode::STEREO_BUF;
     if (ret) {
       mGraphics->init();
     }
   }
 
-  if (sphere::is_renderer()) {
+  if (sphere::isRendererMachine()) {
     spanAllDesktop();
     loadPerProjectionConfiguration(false);
     running_in_sphere_renderer = true;
@@ -40,7 +48,8 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
     loadPerProjectionConfiguration();
     running_in_sphere_renderer = false;
   }
-  return true;
+  ret &= initializeSubdomains(false);
+  return ret;
 }
 
 bool GLFWOpenGLOmniRendererDomain::tick() {
@@ -72,6 +81,18 @@ bool GLFWOpenGLOmniRendererDomain::cleanup(ComputationDomain *parent) {
   return true;
 }
 
+void GLFWOpenGLOmniRendererDomain::stereo(bool b) {
+  if (mWindow && mWindow->enabled(Window::DisplayMode::STEREO_BUF) != b) {
+    if (b) {
+      mWindow->displayMode(Window::DisplayMode::DEFAULT_BUF |
+                           Window::DisplayMode::STEREO_BUF);
+    } else {
+      mWindow->displayMode(Window::DisplayMode::DEFAULT_BUF);
+    }
+  }
+  render_stereo = b;
+}
+
 void GLFWOpenGLOmniRendererDomain::loopEyeForDesktopMode() {
   eye_to_render += 1;
   if (eye_to_render > 1) eye_to_render = -1;
@@ -84,7 +105,7 @@ void GLFWOpenGLOmniRendererDomain::setEyeToRenderForDesktopMode(int eye) {
 
 void GLFWOpenGLOmniRendererDomain::spanAllDesktop() {
   int width, height;
-  sphere::get_fullscreen_dimension(&width, &height);
+  sphere::getFullscreenDimension(&width, &height);
   if (width != 0 && height != 0) {
     mWindow->dimensions(0, 0, width, height);
     mWindow->decorated(false);
@@ -99,8 +120,8 @@ void GLFWOpenGLOmniRendererDomain::loadPerProjectionConfiguration(
   if (!desktop) {
     // need to be called before pp_render.init
     pp_render.load_calibration_data(
-        sphere::config_directory("data").c_str(),    // path
-        sphere::renderer_hostname("config").c_str()  // hostname
+        sphere::getCalibrationDirectory("data").c_str(),  // path
+        sphere::renderer_hostname("config").c_str()       // hostname
     );  // parameters will be used to look for file ${path}/${hostname}.txt
     pp_render.init(mGraphics->lens());
   } else {

@@ -122,7 +122,8 @@ struct SynthEvent {
  * the audio callback (e.g. onSound() ) or the graphics callback (e.g. onDraw())
  *
  * A time master can be selected in the constructor to define where the
- * sequencer runs. TIME_MASTER_AUDIO is more precise in time, but you might want
+ * sequencer runs. TimeMasterMode::TIME_MASTER_AUDIO is more precise in time,
+ but you might want
  * to use TIME_MASTER_GRAPHICS if your "note" produces no audio.
  *
  * Sequences can also be read from text files with the extension
@@ -168,13 +169,19 @@ struct SynthEvent {
 
 class SynthSequencer {
  public:
-  SynthSequencer(
-      PolySynth::TimeMasterMode masterMode = PolySynth::TIME_MASTER_CPU) {
+  SynthSequencer(TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_CPU) {
     mInternalSynth = std::make_unique<PolySynth>(masterMode);
     registerSynth(*mInternalSynth.get());
   }
 
   SynthSequencer(PolySynth &synth) { registerSynth(synth); }
+
+  ~SynthSequencer() {
+    stopSequence();
+    if (mCpuThread) {
+      mCpuThread->join();
+    }
+  }
 
   /// Insert this function within the audio callback
   void render(AudioIOData &io);
@@ -194,10 +201,10 @@ class SynthSequencer {
    * @param duration
    * @return a reference to the voice instance inserted
    *
-   * The voice will be inserted into the sequencer immediately, so you may want
-   * to add all your notes before starting the sequencer. If you need to insert
-   * events on the fly, use addVoice() or use triggerOn() directly on the
-   * PolySynth
+   * The voice will be inserted into the sequencer immediately, so you may
+   * want to add all your notes before starting the sequencer. If you need to
+   * insert events on the fly, use addVoice() or use triggerOn() directly on
+   * the PolySynth
    *
    * The TSynthVoice template must be a class inherited from SynthVoice.
    */
@@ -211,7 +218,8 @@ class SynthSequencer {
   void addVoice(TSynthVoice *voice, double startTime, double duration = -1);
 
   /**
-   * Insert configured voice into sequencer using time offset from current time
+   * Insert configured voice into sequencer using time offset from current
+   * time
    */
   template <class TSynthVoice>
   void addVoiceFromNow(TSynthVoice *voice, double startTime,
@@ -238,7 +246,7 @@ class SynthSequencer {
 
   void setTempo(float tempo) { mNormalizedTempo = tempo / 60.f; }
 
-  bool playSequence(std::string sequenceName, float startTime = 0.0f);
+  bool playSequence(std::string sequenceName = "", float startTime = 0.0f);
 
   void stopSequence();
   void setTime(float newTime);
@@ -268,9 +276,9 @@ class SynthSequencer {
    *
    * Note that this callback is called whenever the event list empties, so it
    * will be triggered after events added dynamically through addVoice() and
-   * addVoiceFromNow() are consumed. The callback will be called after the last
-   * trigger off time, which means there might still be voices being processed
-   * while if the have release envelopes, for example
+   * addVoiceFromNow() are consumed. The callback will be called after the
+   * last trigger off time, which means there might still be voices being
+   * processed while if the have release envelopes, for example
    */
   void registerSequenceEndCallback(std::function<void(std::string)> func);
 
@@ -295,7 +303,7 @@ class SynthSequencer {
   std::mutex mLoadingLock;
   bool mPlaying{false};
 
-  PolySynth::TimeMasterMode mMasterMode{PolySynth::TIME_MASTER_AUDIO};
+  TimeMasterMode mMasterMode{TimeMasterMode::TIME_MASTER_AUDIO};
   double mMasterTime{0.0};
   double mPlaybackStartTime{0.0};
 
@@ -306,8 +314,8 @@ class SynthSequencer {
   std::vector<std::pair<std::function<void(float)>, float>>
       mTimeChangeCallbacks;
   //    float mTimeChangeMinTimeDelta = 0;
-  std::vector<double>
-      mTimeAccumCallbackNs;  // Accumulator for tirggering time change callback.
+  std::vector<double> mTimeAccumCallbackNs;  // Accumulator for tirggering
+                                             // time change callback.
 
   std::vector<std::function<void(std::string sequenceName)>>
       mSequenceBeginCallbacks;

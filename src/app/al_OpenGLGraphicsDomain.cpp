@@ -1,15 +1,18 @@
+#include "al/app/al_OpenGLGraphicsDomain.hpp"
+
 #include <cstring>
 #include <iostream>
 
-#include "al/app/al_OpenGLGraphicsDomain.hpp"
 #include "al/io/al_Window.hpp"
 
 using namespace al;
 
 bool OpenGLGraphicsDomain::initialize(ComputationDomain *parent) {
   bool ret = true;
+  ret &= initializeSubdomains(true);
   initializeWindowManager();
   callInitializeCallbacks();
+  ret &= initializeSubdomains(false);
   return ret;
 }
 

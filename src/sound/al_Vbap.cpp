@@ -47,7 +47,7 @@ bool SpeakerTriple::loadVectors(const std::vector<Speaker> &spkrs) {
   return hasInverse;
 }
 
-Vbap::Vbap(const SpeakerLayout &sl, bool is3D) : Spatializer(sl), mIs3D(is3D) {}
+Vbap::Vbap(const Speakers &sl, bool is3D) : Spatializer(sl), mIs3D(is3D) {}
 
 void Vbap::addTriple(const SpeakerTriple &st) { mTriplets.push_back(st); }
 

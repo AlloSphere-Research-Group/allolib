@@ -153,13 +153,13 @@ void Nav::step(double dt) {
 }
 
 NavInputControl::NavInputControl(double vscale, double tscale)
-    : mNav(), mVScale(vscale), mTScale(tscale), mUseMouse(true) {}
+    : mNav(), mVScale(vscale), mTScale(tscale), mUseMouse(false) {}
 
 NavInputControl::NavInputControl(Nav& nav, double vscale, double tscale)
-    : mNav(&nav), mVScale(vscale), mTScale(tscale), mUseMouse(true) {}
+    : mNav(&nav), mVScale(vscale), mTScale(tscale), mUseMouse(false) {}
 
 NavInputControl::NavInputControl(const NavInputControl& v)
-    : mNav(v.mNav), mVScale(v.vscale()), mTScale(v.tscale()), mUseMouse(true) {}
+    : mNav(v.mNav), mVScale(v.vscale()), mTScale(v.tscale()), mUseMouse(false) {}
 
 bool NavInputControl::keyDown(const Keyboard& k) {
   if (!mActive) return true;

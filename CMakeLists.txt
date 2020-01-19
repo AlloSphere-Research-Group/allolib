@@ -49,6 +49,7 @@ set(headers
   include/al/app/al_App.hpp
   include/al/app/al_AudioApp.hpp
   include/al/app/al_DistributedApp.hpp
+  include/al/app/al_NodeConfiguration.hpp
   include/al/app/al_FPS.hpp/
 #  include/al/app/al_WindowApp.hpp
 
@@ -108,7 +109,7 @@ set(headers
   include/al/scene/al_SequencerMIDI.hpp
   include/al/scene/al_SynthSequencer.hpp
   include/al/sound/al_Ambisonics.hpp
-  include/al/sound/al_AudioScene.hpp
+#  include/al/sound/al_AudioScene.hpp
   include/al/sound/al_Biquad.hpp
   include/al/sound/al_Crossover.hpp
   include/al/sound/al_Dbap.hpp
@@ -121,6 +122,8 @@ set(headers
   include/al/sound/al_SoundFile.hpp
   include/al/spatial/al_HashSpace.hpp
   include/al/spatial/al_Pose.hpp
+  include/al/sphere/al_SphereUtils.hpp
+  include/al/sphere/al_PerProjection.hpp
   include/al/system/al_PeriodicThread.hpp
   include/al/system/al_Printing.hpp
   include/al/system/al_Thread.hpp
@@ -144,6 +147,7 @@ set(headers
   include/al/ui/al_Gnomon.hpp
   include/al/ui/al_Pickable.hpp
   include/al/ui/al_SequenceRecorder.hpp
+  include/al/ui/al_SequenceServer.hpp
   include/al/ui/al_HtmlInterfaceServer.hpp
   include/al/ui/al_PickableManager.hpp
 )
@@ -208,16 +212,18 @@ set(sources
   src/scene/al_PolySynth.cpp
   src/scene/al_SynthSequencer.cpp
   src/sound/al_Ambisonics.cpp
-  src/sound/al_AudioScene.cpp
+#  src/sound/al_AudioScene.cpp
   src/sound/al_Biquad.cpp
   src/sound/al_Dbap.cpp
   src/sound/al_Lbap.cpp
   src/sound/al_Vbap.cpp
   src/sound/al_Spatializer.cpp
+  src/sound/al_Speaker.cpp
   src/sound/al_StereoPanner.cpp
   src/sound/al_SoundFile.cpp
   src/spatial/al_HashSpace.cpp
   src/spatial/al_Pose.cpp
+  src/sphere/al_AlloSphereSpeakerLayout.cpp
   src/sphere/al_SphereUtils.cpp
   src/sphere/al_PerProjection.cpp
   src/system/al_PeriodicThread.cpp
@@ -235,6 +241,7 @@ set(sources
   src/ui/al_FileSelector.cpp
   src/ui/al_ParameterServer.cpp
   src/ui/al_SequenceRecorder.cpp
+  src/ui/al_SequenceServer.cpp
   src/ui/al_HtmlInterfaceServer.cpp
   src/ui/al_PresetHandler.cpp
   src/ui/al_PresetServer.cpp

@@ -1,7 +1,6 @@
 #ifndef INCLUDE_AL_OPENGL_HPP
 #define INCLUDE_AL_OPENGL_HPP
 
-// #include "GL/glew.h"
 #include "glad/glad.h"
 
 namespace al {
@@ -11,19 +10,19 @@ namespace gl {
 bool load();
 bool loaded();
 
-const char* versionString();
+const char *versionString();
 
 /// Get current GPU error string
 /// \returns the error string or an empty string if no error
 ///
-const char* errorString(bool verbose = false);
+const char *errorString(bool verbose = false);
 
 /// Print current GPU error state
 
 /// @param[in] msg    Custom error message
 /// @param[in] ID   Graphics object ID (-1 for none)
 /// \returns whether there was an error
-bool error(const char* msg = "", int ID = -1);
+bool error(const char *msg = "", int ID = -1);
 
 /// Returns number of bytes for given data type
 int numBytes(GLenum v);

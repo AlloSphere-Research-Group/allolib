@@ -1,4 +1,5 @@
 #include "al/io/al_Window.hpp"
+
 #include <stdio.h>
 
 namespace al {
@@ -68,11 +69,11 @@ void Mouse::scroll(double x, double y) {
   mScrollY = y;
 }
 
-WindowEventHandler::WindowEventHandler() : mWindow(NULL) {}
+WindowEventHandler::WindowEventHandler() : mWindow(nullptr) {}
 WindowEventHandler::~WindowEventHandler() { removeFromWindow(); }
 void WindowEventHandler::removeFromWindow() {
   if (attached()) {
-    window().remove(this);
+    window().remove(*this);
     mWindow = nullptr;
   }
 }
@@ -181,10 +182,10 @@ void Window::displayMode(DisplayMode v) {
   }
 }
 
-void Window::fullScreen(bool v) {
+void Window::fullScreen(bool v, int monitorIndex) {
   if (v != mFullScreen) {
     mFullScreen = v;
-    if (created()) implSetFullScreen();
+    if (created()) implSetFullScreen(monitorIndex);
   }
 }
 

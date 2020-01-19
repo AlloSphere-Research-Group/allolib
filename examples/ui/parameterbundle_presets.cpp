@@ -1,14 +1,15 @@
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-
 #include "al/ui/al_ControlGUI.hpp"
 #include "al/ui/al_Parameter.hpp"
 #include "al/ui/al_ParameterBundle.hpp"
 
 using namespace al;
+// This example shows usage of presets applied to parameter bundles
+// For this to work you only need to register each bundle instance with the gui
 
-// Create an 'agent' with parameters. For all agents have
+// Create an 'agent' with parameters. All agents have
 // the same parameters, but each one can have a different
 // value for them
 struct Thing {
@@ -50,6 +51,7 @@ struct MyApp : public App {
       gui << things[i].bundle;
       presetHandler << things[i].bundle;
     }
+    gui << presetHandler;  // Draw Preset Handler in gui
     navControl().disable();
     gui.init();
     //        presetHandler.verbose();
@@ -61,15 +63,6 @@ struct MyApp : public App {
       things[i].draw(g);
     }
     gui.draw(g);
-  }
-
-  bool onKeyDown(Keyboard const &k) override {
-    if (k.key() == '1') {
-      presetHandler.storePreset("bundles");
-    } else if (k.key() == '2') {
-      presetHandler.recallPreset("bundles");
-    }
-    return true;
   }
 
  private:

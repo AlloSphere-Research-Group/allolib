@@ -1,6 +1,6 @@
-#include <string>
-
 #include "al/ui/al_ParameterGUI.hpp"
+
+#include <string>
 
 using namespace al;
 using namespace std;
@@ -679,6 +679,7 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
   struct SequencerState {
     float currentTime;
     float totalDuration;
+    float startOffset = 0.0f;
     std::vector<std::string> seqList;
   };
   static std::map<PresetSequencer *, SequencerState> stateMap;
@@ -686,12 +687,11 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
     stateMap[presetSequencer] = SequencerState{0.0, 0.0, {}};
     float *currentTime = &(stateMap[presetSequencer].currentTime);
     presetSequencer->registerTimeChangeCallback(
-        [currentTime](float currTime) { *currentTime = currTime; }, 0.1f);
-    presetSequencer->registerBeginCallback(
-        [&](PresetSequencer *sender, void * /*userData*/) {
-          stateMap[presetSequencer].totalDuration =
-              sender->getSequenceTotalDuration(sender->currentSequence());
-        });
+        [currentTime](float currTime) { *currentTime = currTime; }, 0.05f);
+    presetSequencer->registerBeginCallback([&](PresetSequencer *sender) {
+      stateMap[presetSequencer].totalDuration =
+          sender->getSequenceTotalDuration(sender->currentSequence());
+    });
     stateMap[presetSequencer].seqList = presetSequencer->getSequenceList();
     if (stateMap[presetSequencer].seqList.size() > 64) {
       stateMap[presetSequencer].seqList.resize(64);
@@ -705,6 +705,10 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
                 << std::endl;
       presetSequencer->loadSequence(
           stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
+
+      stateMap[presetSequencer].startOffset =
+          presetSequencer->getSequenceStartOffset(
+              stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
       stateMap[presetSequencer].totalDuration =
           presetSequencer->getSequenceTotalDuration(
               stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
@@ -729,6 +733,8 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
                 (int)stateMap[presetSequencer].seqList.size()) {
           presetSequencer->loadSequence(
               stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
+          state.startOffset = presetSequencer->getSequenceStartOffset(
+              stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
           state.totalDuration = presetSequencer->getSequenceTotalDuration(
               stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
         }
@@ -736,32 +742,37 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
         //                presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
       }
       if (ImGui::Button("Play")) {
-        presetSequencer->stopSequence();
-        if (presetSequencer->playbackFinished()) {
-          presetSequencer->setTime(0.0);
-        }
-        if (currentPresetSequencerItem >= 0) {
-          double sliderTime = state.currentTime;
-          presetSequencer->playSequence(
-              stateMap[presetSequencer].seqList[currentPresetSequencerItem]);
-          presetSequencer->setTime(sliderTime);
-        } else {
-          std::cout << "No sequence selected for playback." << std::endl;
+        if (!presetSequencer->running()) {
+          presetSequencer->stopSequence();
+          if (presetSequencer->playbackFinished()) {
+            if (state.currentTime != 0) {
+              presetSequencer->setTime(-state.startOffset);
+            }
+          }
+          if (currentPresetSequencerItem >= 0) {
+            double sliderTime = state.currentTime;
+            presetSequencer->playSequence(
+                stateMap[presetSequencer].seqList[currentPresetSequencerItem],
+                1.0, sliderTime - state.startOffset);
+          } else {
+            std::cout << "No sequence selected for playback." << std::endl;
+          }
         }
       }
       ImGui::SameLine();
       if (ImGui::Button("Pause")) {
-        presetSequencer->stopSequence();
+        presetSequencer->stopSequence(false);
       }
       ImGui::SameLine();
       if (ImGui::Button("Stop")) {
         presetSequencer->stopSequence();
-        presetSequencer->rewind();
+        presetSequencer->setTime(stateMap[presetSequencer].totalDuration);
       }
       float time = state.currentTime;
       //        std::cout << time << std::endl;
-      if (ImGui::SliderFloat("Position", &time, 0.0f, state.totalDuration)) {
-        //            std::cout << "Requested time:" << time << std::endl;
+      if (ImGui::SliderFloat("Position", &time, -state.startOffset,
+                             state.totalDuration - state.startOffset)) {
+        //        std::cout << "Requested time:" << time << std::endl;
         presetSequencer->setTime(time);
       }
     } else {
@@ -1169,13 +1180,15 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
       for (ParameterMeta *param : bundleGroup[currentBundle]->parameters()) {
         drawParameterMeta(param, suffix);
       }
-      for (auto bundle : bundleGroup[currentBundle]->bundles()) {
-        std::string subBundleName = bundle.first;
+      for (auto subbundleGroup : bundleGroup[currentBundle]->bundles()) {
+        std::string subBundleName = subbundleGroup.first;
         if (ImGui::CollapsingHeader(
                 (subBundleName + "##" + name + subBundleName).c_str(),
                 ImGuiTreeNodeFlags_CollapsingHeader)) {
-          for (auto *param : bundle.second->parameters()) {
-            drawParameterMeta({param}, suffix + subBundleName, 0);
+          for (auto *bundle : subbundleGroup.second) {
+            for (auto *param : bundle->parameters()) {
+              drawParameterMeta({param}, suffix + subBundleName, 0);
+            }
           }
         }
       }
@@ -1198,8 +1211,10 @@ void ParameterGUI::drawBundle(ParameterBundle *bundle) {
       ImGui::PushID(subBundleName.c_str());
       if (ImGui::CollapsingHeader(subBundleName.c_str(),
                                   ImGuiTreeNodeFlags_CollapsingHeader)) {
-        for (auto *param : innerBundle.second->parameters()) {
-          drawParameterMeta({param}, subBundleName, 0);
+        for (auto *bundle : innerBundle.second) {
+          for (auto *param : bundle->parameters()) {
+            drawParameterMeta({param}, subBundleName, 0);
+          }
         }
       }
       ImGui::PopID();
