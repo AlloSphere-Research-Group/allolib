@@ -10,14 +10,27 @@
 using namespace al;
 using namespace std;
 
+// This example shows usage of the preset handler and preset sequencer in
+// TIME_MASTER_FREE mode. This means that instead of running the sequencer
+// and preset morphing in a separate CPU thread, the user is responsible
+// of calling the step functions. This also means that the user must call
+// setMorphStepTime() for the preset handler.
+
+// Using the TIME_MASTER_FREE mode usually results in smoother graphics display
+// But might incur in some jitter if you are also reading the parameters in
+// other contexts (e.g. the audio context).
+
+// See sequencergui.cpp example for details on PresetHandler and PresetSequencer
+
 struct MyApp : App {
   Mesh m;
 
   Parameter X{"x", "", 0.0, "", -2, 2};
   Parameter Y{"y", "", 0.0, "", -2, 2};
 
-  PresetHandler presetHandler{"sequencerDir", false};
-  PresetSequencer sequencer;
+  PresetHandler presetHandler{TimeMasterMode::TIME_MASTER_FREE, "sequencerDir",
+                              true};
+  PresetSequencer sequencer{TimeMasterMode::TIME_MASTER_FREE};
 
   ControlGUI gui;
 
@@ -29,30 +42,20 @@ struct MyApp : App {
 
     presetHandler << X << Y;     // Register parameters with preset handler
     sequencer << presetHandler;  // Register preset handler with sequencer
-    gui << X << Y << sequencer;
+    gui << sequencer;
     gui.init();
 
-    // Sequencer timing will run in a separate thread by default.
-    // You can set the sequencer "granularity", i.e. the minimum time
-    // between sequencer steps.
-    // A smaller number means less jitter in the sequencer at the expense
-    // of greater CPU usage. The default value is 0.05 (50 ms). Using 0.01
-    // Results is smoother visual movement.
-    sequencer.setSequencerStepTime(0.01);
-    // The begin callback is called whenever the sequence starts
-    sequencer.registerBeginCallback([&](PresetSequencer *) {
-      std::cout << "**** Started Sequence" << std::endl;
-    });
-    // The end callback is called when the sequence ends or is stopped
-    // The 'finished' argument is true if the sequence finished by
-    // itself. It will be false if the sequence was stopped by the user.
-    sequencer.registerEndCallback([&](bool finished, PresetSequencer *) {
-      if (finished) {
-        std::cout << "**** Sequence FINSIHED ***" << std::endl;
-      } else {
-        std::cout << "**** Sequence Stopped" << std::endl;
-      }
-    });
+    // Currently the preset handler requires setting this manually.
+    // In the future it will get picked up through the value passed
+    // in stepMorphing()
+    presetHandler.setMorphStepTime(1.0f / graphicsDomain()->fps());
+  }
+
+  void onAnimate(double dt) override {
+    // As both the sequencer and the preset handler are in ASYNC mode, their
+    // step functions must be called
+    sequencer.stepSequencer(dt);
+    presetHandler.stepMorphing(dt);
   }
 
   void onDraw(Graphics &g) override {
@@ -68,7 +71,6 @@ struct MyApp : App {
   }
 };
 
-// Function to write needed files for this example.
 void writeExamplePresets() {
   string sequence = R"(preset1:0.0:0.5
 preset2:3.0:1.0
@@ -111,4 +113,5 @@ preset1:1.5:2.0
 int main() {
   writeExamplePresets();
   MyApp().start();
+  return 0;
 }

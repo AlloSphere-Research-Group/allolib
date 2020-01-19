@@ -48,6 +48,11 @@
 #include "al/math/al_Vec.hpp"
 #include "al/spatial/al_Pose.hpp"
 
+#ifdef AL_WINDOWS
+#undef near
+#undef far
+#endif
+
 namespace al {
 
 /// Stores optics settings important for rendering

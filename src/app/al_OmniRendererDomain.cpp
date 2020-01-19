@@ -16,6 +16,8 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
   //  0) {
   //    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
   //  }
+  bool ret = true;
+  ret &= initializeSubdomains(true);
   assert(strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
          0);
   mParent = static_cast<OpenGLGraphicsDomain *>(parent);
@@ -26,13 +28,19 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
     mGraphics = std::make_unique<Graphics>();
   }
   if (!mWindow->created()) {
-    bool ret = mWindow->create();
+    if (render_stereo) {
+      mWindow->displayMode(mWindow->displayMode() |
+                           Window::DisplayMode::STEREO_BUF);
+    }
+    ret = mWindow->create();
+    window_is_stereo_buffered =
+        mWindow->displayMode() & Window::DisplayMode::STEREO_BUF;
     if (ret) {
       mGraphics->init();
     }
   }
 
-  if (sphere::is_renderer()) {
+  if (sphere::isRendererMachine()) {
     spanAllDesktop();
     loadPerProjectionConfiguration(false);
     running_in_sphere_renderer = true;
@@ -40,7 +48,8 @@ bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
     loadPerProjectionConfiguration();
     running_in_sphere_renderer = false;
   }
-  return true;
+  ret &= initializeSubdomains(false);
+  return ret;
 }
 
 bool GLFWOpenGLOmniRendererDomain::tick() {
@@ -72,6 +81,18 @@ bool GLFWOpenGLOmniRendererDomain::cleanup(ComputationDomain *parent) {
   return true;
 }
 
+void GLFWOpenGLOmniRendererDomain::stereo(bool b) {
+  if (mWindow && mWindow->enabled(Window::DisplayMode::STEREO_BUF) != b) {
+    if (b) {
+      mWindow->displayMode(Window::DisplayMode::DEFAULT_BUF |
+                           Window::DisplayMode::STEREO_BUF);
+    } else {
+      mWindow->displayMode(Window::DisplayMode::DEFAULT_BUF);
+    }
+  }
+  render_stereo = b;
+}
+
 void GLFWOpenGLOmniRendererDomain::loopEyeForDesktopMode() {
   eye_to_render += 1;
   if (eye_to_render > 1) eye_to_render = -1;
@@ -84,7 +105,7 @@ void GLFWOpenGLOmniRendererDomain::setEyeToRenderForDesktopMode(int eye) {
 
 void GLFWOpenGLOmniRendererDomain::spanAllDesktop() {
   int width, height;
-  sphere::get_fullscreen_dimension(&width, &height);
+  sphere::getFullscreenDimension(&width, &height);
   if (width != 0 && height != 0) {
     mWindow->dimensions(0, 0, width, height);
     mWindow->decorated(false);
@@ -99,8 +120,8 @@ void GLFWOpenGLOmniRendererDomain::loadPerProjectionConfiguration(
   if (!desktop) {
     // need to be called before pp_render.init
     pp_render.load_calibration_data(
-        sphere::config_directory("data").c_str(),    // path
-        sphere::renderer_hostname("config").c_str()  // hostname
+        sphere::getCalibrationDirectory("data").c_str(),  // path
+        sphere::renderer_hostname("config").c_str()       // hostname
     );  // parameters will be used to look for file ${path}/${hostname}.txt
     pp_render.init(mGraphics->lens());
   } else {
@@ -125,9 +146,9 @@ void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
       pp_render.set_eye(eye);
       for (int i = 0; i < pp_render.num_projections(); i++) {
         pp_render.set_projection(i);
-        mGraphics->depthTesting(true);
-        mGraphics->depthMask(true);
-        mGraphics->blending(false);
+        gl::depthTesting(true);
+        gl::depthMask(true);
+        gl::blending(false);
         onDraw(*mGraphics);
       }
     }
@@ -136,9 +157,9 @@ void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
     pp_render.set_eye(eye_to_render);
     for (int i = 0; i < pp_render.num_projections(); i++) {
       pp_render.set_projection(i);
-      mGraphics->depthTesting(true);
-      mGraphics->depthMask(true);
-      mGraphics->blending(false);
+      gl::depthTesting(true);
+      gl::depthMask(true);
+      gl::blending(false);
       onDraw(*mGraphics);
     }
   }
@@ -147,11 +168,10 @@ void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
   /* Settings for warp and blend composition sampling
    */
   mGraphics->omni(false);  // warp and blend composition done on flat rendering
-  mGraphics->eye(Graphics::MONO_EYE);      // stereo handled at capture stage
-  mGraphics->polygonMode(Graphics::FILL);  // to draw viewport filling quad
-  mGraphics->blending(false);  // blending already done when capturing
-  mGraphics->depthTesting(
-      false);  // no depth testing when drawing viewport slab
+  mGraphics->eye(Graphics::MONO_EYE);  // stereo handled at capture stage
+  gl::polygonMode(GL_FILL);            // to draw viewport filling quad
+  gl::blending(false);                 // blending already done when capturing
+  gl::depthTesting(false);  // no depth testing when drawing viewport slab
   mGraphics->pushViewport(0, 0, mWindow->fbWidth(),
                           mWindow->fbHeight());  // filling the whole window
 
@@ -160,36 +180,36 @@ void GLFWOpenGLOmniRendererDomain::drawUsingPerProjectionCapture() {
     if (window_is_stereo_buffered) {
       // rendering stereo in sphere
       glDrawBuffer(GL_BACK_LEFT);
-      mGraphics->clearColor(0, 0, 0);
-      mGraphics->clearDepth(1);
+      gl::clearColor(0, 0, 0);
+      gl::clearDepth(1);
       pp_render.composite(*mGraphics, 0);
       glDrawBuffer(GL_BACK_RIGHT);
-      mGraphics->clearColor(0, 0, 0);
-      mGraphics->clearDepth(1);
+      gl::clearColor(0, 0, 0);
+      gl::clearDepth(1);
       pp_render.composite(*mGraphics, 1);
     } else {  // rendering mono in sphere
       // std::cout << "sampling mono in sphere setup" << std::endl;
       glDrawBuffer(GL_BACK_LEFT);
-      mGraphics->clearColor(1, 0, 0);
-      mGraphics->clearDepth(1);
+      gl::clearColor(1, 0, 0);
+      gl::clearDepth(1);
       pp_render.composite(*mGraphics, (eye_to_render == 1) ? 1 : 0);
     }
   } else {
     if (window_is_stereo_buffered) {
       // rendering stereo on display other than sphere
       glDrawBuffer(GL_BACK_LEFT);
-      mGraphics->clearColor(0, 0, 0);
-      mGraphics->clearDepth(1);
+      gl::clearColor(0, 0, 0);
+      gl::clearDepth(1);
       pp_render.composite_desktop(*mGraphics, 0);  // texture[0]: left
       glDrawBuffer(GL_BACK_RIGHT);
-      mGraphics->clearColor(0, 0, 0);
-      mGraphics->clearDepth(1);
+      gl::clearColor(0, 0, 0);
+      gl::clearDepth(1);
       pp_render.composite_desktop(*mGraphics, 1);  // texture[1]: right
     } else {  // rendering mono on display other than sphere
       // std::cout << "sampling mono on flat display" << std::endl;
       glDrawBuffer(GL_BACK_LEFT);
-      mGraphics->clearColor(0.2, 0.2, 0.2);
-      mGraphics->clearDepth(1);
+      gl::clearColor(0.2, 0.2, 0.2);
+      gl::clearDepth(1);
       pp_render.composite_desktop(
           *mGraphics,
           (eye_to_render == 1) ? 1 : 0  // mono and left eye is

@@ -3,7 +3,7 @@
 using namespace al;
 
 DistributedScene::DistributedScene(std::string name, int threadPoolSize,
-                                   PolySynth::TimeMasterMode masterMode)
+                                   TimeMasterMode masterMode)
     : DynamicScene(threadPoolSize, masterMode) {
   mName = name;
 

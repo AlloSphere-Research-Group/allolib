@@ -129,10 +129,10 @@ struct MyApp : public App {
     static Light light;
 
     g.clear(0);
-    g.polygonMode(wireframe ? Graphics::LINE : Graphics::FILL);
+    gl::polygonMode(wireframe ? GL_LINE : GL_FILL);
     light.pos(1, 4, 1);
 
-    g.depthTesting(true);
+    gl::depthTesting(true);
     g.lighting(true);
     g.light(light);
     g.meshColor();

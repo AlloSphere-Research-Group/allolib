@@ -45,8 +45,8 @@ class SineEnv : public SynthVoice {
   void onProcess(Graphics& g) override {
     float spatialEnv = mAmpEnv.value();
     g.pushMatrix();
-    g.blending(true);
-    g.blendModeTrans();
+    gl::blending(true);
+    gl::blendTrans();
     g.translate(mOsc.freq() / 250 - 3, spatialEnv * 2 - 1, -8);
     g.color(spatialEnv, mOsc.freq() / 1000, spatialEnv, spatialEnv);
     g.draw(mMesh);

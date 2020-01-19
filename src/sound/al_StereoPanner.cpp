@@ -1,6 +1,6 @@
-#include <cstring>
-
 #include "al/sound/al_StereoPanner.hpp"
+
+#include <cstring>
 
 void al::StereoPanner::renderSample(al::AudioIOData &io,
                                     const al::Pose &listeningPose,
@@ -16,7 +16,8 @@ void al::StereoPanner::renderSample(al::AudioIOData &io,
     io.out(0, frameIndex) += gainL * sample;
     io.out(1, frameIndex) += gainR * sample;
   } else {  // don't pan
-    for (int i = 0; i < numSpeakers; i++) io.out(i, frameIndex) = sample;
+    for (unsigned int i = 0; i < numSpeakers; i++)
+      io.out(i, frameIndex) = sample;
   }
 }
 
@@ -34,12 +35,12 @@ void al::StereoPanner::renderBuffer(al::AudioIOData &io,
     float gainL, gainR;
     equalPowerPan(vec, gainL, gainR);
 
-    for (int i = 0; i < numFrames; i++) {
+    for (unsigned int i = 0; i < numFrames; i++) {
       bufL[i] += gainL * samples[i];
       bufR[i] += gainR * samples[i];
     }
   } else {  // dont pan
-    for (int i = 0; i < numSpeakers; i++) {
+    for (unsigned int i = 0; i < numSpeakers; i++) {
       memcpy(io.outBuffer(i), samples, sizeof(float) * numFrames);
     }
   }
@@ -48,7 +49,7 @@ void al::StereoPanner::renderBuffer(al::AudioIOData &io,
 void al::StereoPanner::equalPowerPan(const al::Vec3d &relPos, float &gainL,
                                      float &gainR) {
   double panVal = 0.5;
-  if (relPos.z != 0 || relPos.x != 0) {
+  if (relPos.z != 0.0 || relPos.x != 0.0) {
     panVal = 1.0 - std::fabs(std::atan2(relPos.z, relPos.x) / M_PI);
   }
 

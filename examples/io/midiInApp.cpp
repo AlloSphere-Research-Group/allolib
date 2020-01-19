@@ -10,22 +10,24 @@ Lance Putnam, 9/2013
 */
 
 #include <stdio.h>
+
 #include "al/app/al_App.hpp"
 #include "al/io/al_MIDI.hpp"
 using namespace al;
 
 class MyApp : public App, public MIDIMessageHandler {
  public:
-  MIDIIn midiIn;
+  RtMidiIn midiIn;
 
-  void onCreate() {
+  void onInit() {
     // Check for connected MIDI devices
     if (midiIn.getPortCount() > 0) {
-      // Bind ourself to the MIDIIn
+      // Bind ourself to the RtMidiIn object, to have the onMidiMessage()
+      // callback called whenever a MIDI message is received
       MIDIMessageHandler::bindTo(midiIn);
 
       // Open the last device found
-      int port = midiIn.getPortCount() - 1;
+      unsigned int port = midiIn.getPortCount() - 1;
       midiIn.openPort(port);
       printf("Opened port to %s\n", midiIn.getPortName(port).c_str());
     } else {
@@ -83,4 +85,7 @@ class MyApp : public App, public MIDIMessageHandler {
   }
 };
 
-int main() { MyApp().start(); }
+int main() {
+  MyApp().start();
+  return 0;
+}

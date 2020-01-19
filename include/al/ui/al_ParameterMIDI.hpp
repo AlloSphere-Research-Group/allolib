@@ -71,16 +71,16 @@ class ParameterMIDI : public MIDIMessageHandler {
  public:
   ParameterMIDI() {}
 
-  ParameterMIDI(int deviceIndex, bool verbose = false) {
-    MIDIMessageHandler::bindTo(mMidiIn);
+  ParameterMIDI(unsigned int deviceIndex, bool verbose = false) {
+    MIDIMessageHandler::bindTo(mRtMidiIn);
     mVerbose = verbose;
     try {
-      mMidiIn.openPort(deviceIndex);
+      mRtMidiIn.openPort(deviceIndex);
       printf("ParameterMIDI: Opened port to %s\n",
-             mMidiIn.getPortName(deviceIndex).c_str());
-    } catch (al::MIDIError &error) {
-      std::cout << "ParameterMIDI Warning: Could not open MIDI port "
-                << deviceIndex << std::endl;
+             mRtMidiIn.getPortName(deviceIndex).c_str());
+    } catch (RtMidiError &error) {
+      std::cout << "ParameterMIDI Warning opening MIDI port:"
+                << error.getMessage() << deviceIndex << std::endl;
     }
   }
 
@@ -89,15 +89,15 @@ class ParameterMIDI : public MIDIMessageHandler {
     open(deviceIndex, verbose);
   }
 
-  void open(int deviceIndex = 0) {
-    MIDIMessageHandler::bindTo(mMidiIn);
+  void open(unsigned int deviceIndex = 0) {
+    MIDIMessageHandler::bindTo(mRtMidiIn);
     try {
-      mMidiIn.openPort(deviceIndex);
+      mRtMidiIn.openPort(deviceIndex);
       printf("ParameterMIDI: Opened port to %s\n",
-             mMidiIn.getPortName(deviceIndex).c_str());
-    } catch (al::MIDIError &error) {
-      std::cout << "ParameterMIDI Warning: Could not open MIDI port "
-                << deviceIndex << std::endl;
+             mRtMidiIn.getPortName(deviceIndex).c_str());
+    } catch (RtMidiError &error) {
+      std::cout << "ParameterMIDI Warning opening MIDI port:"
+                << error.getMessage() << deviceIndex << std::endl;
     }
   }
 
@@ -107,7 +107,7 @@ class ParameterMIDI : public MIDIMessageHandler {
   }
 
   void close() {
-    mMidiIn.closePort();
+    mRtMidiIn.closePort();
     MIDIMessageHandler::clearBindings();
   }
 
@@ -174,7 +174,7 @@ class ParameterMIDI : public MIDIMessageHandler {
     mIncrementBindings.push_back(newBinding);
   }
 
-  bool isOpen() { return mMidiIn.isPortOpen(); }
+  bool isOpen() { return mRtMidiIn.isPortOpen(); }
 
   virtual void onMIDIMessage(const MIDIMessage &m) override {
     if (m.type() & MIDIByte::CONTROL_CHANGE) {
@@ -264,7 +264,7 @@ class ParameterMIDI : public MIDIMessageHandler {
   std::vector<NoteBinding> getCurrentNoteBindings() { return mNoteBindings; }
 
  private:
-  MIDIIn mMidiIn;
+  RtMidiIn mRtMidiIn;
   bool mVerbose;
   std::vector<ControlBinding> mControlBindings;
   std::vector<NoteBinding> mNoteBindings;

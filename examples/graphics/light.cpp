@@ -90,7 +90,7 @@ struct MyApp : App {
 
   void onDraw(Graphics& g) {
     g.clear(0, 0, 0);
-    g.depthTesting(true);
+    gl::depthTesting(true);
 
     // will be used when Graphics::texture() is called
     tex.bind();

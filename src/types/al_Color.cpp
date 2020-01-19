@@ -88,14 +88,14 @@ HSV& HSV::operator=(const RGB& c) {
 }
 
 // RGB operators
-RGB& RGB::operator=(const CIEXYZ& v) {
+RGB& RGB::operator=(const CIE_XYZ& v) {
   // using sRGB and reference white D65
   static const Mat3f transformMatrix(3.2405f, -1.5371f, -0.4985f, -0.9693f,
                                      1.8760f, 0.0416f, 0.0556f, -0.2040f,
                                      1.0572f);
   float X = v.x, Y = v.y, Z = v.z;
 
-  // convert CIEXYZ to rgb (linear with respect to energy)
+  // convert CIE_XYZ to rgb (linear with respect to energy)
   Vec3f xyz(X, Y, Z);
   Vec3f rgb = transformMatrix * xyz;
   float rl = rgb[0], gl = rgb[1], bl = rgb[2];
@@ -121,12 +121,13 @@ RGB& RGB::operator=(const CIEXYZ& v) {
   else if (b < 0.f)
     b = 0.f;
 
-  // cout << "RGB from CIEXYZ: {" << r << ", " << g << ", " << b << "}" << endl;
+  // cout << "RGB from CIE_XYZ: {" << r << ", " << g << ", " << b << "}" <<
+  // endl;
   return *this;
 }
 
-// CIEXYZ operators
-CIEXYZ& CIEXYZ::operator=(const RGB& v) {
+// CIE_XYZ operators
+CIE_XYZ& CIE_XYZ::operator=(const RGB& v) {
   // using sRGB and reference white D65
   static const Mat3f transformMatrix(0.4124f, 0.3576f, 0.1805f, 0.2126f,
                                      0.7152f, 0.0722f, 0.0193f, 0.1192f,
@@ -137,18 +138,19 @@ CIEXYZ& CIEXYZ::operator=(const RGB& v) {
   G = (float)(G <= 0.04045) ? G / 12.92 : pow(((G + 0.055) / 1.055), 2.4);
   B = (float)(B <= 0.04045) ? B / 12.92 : pow(((B + 0.055) / 1.055), 2.4);
 
-  // convert rgb to CIEXYZ
+  // convert rgb to CIE_XYZ
   Vec3f rgb(R, G, B);
   Vec3f xyz = transformMatrix * rgb;
   x = xyz[0];
   y = xyz[1];
   z = xyz[2];
 
-  // cout << "CIEXYZ from RGB: {" << x << ", " << y << ", " << z << "}" << endl;
+  // cout << "CIE_XYZ from RGB: {" << x << ", " << y << ", " << z << "}" <<
+  // endl;
   return *this;
 };
 
-CIEXYZ& CIEXYZ::operator=(const Lab& v) {
+CIE_XYZ& CIE_XYZ::operator=(const Lab& v) {
   float l, a, b, fx, fy, fz, xr, yr, zr;
   float epsilon = (216.0f / 24389.0f), kappa = (24389.0f / 27.0f);
   // using reference white D65
@@ -173,11 +175,12 @@ CIEXYZ& CIEXYZ::operator=(const Lab& v) {
   y = yr * Yn;
   z = zr * Zn;
 
-  // cout << "CIEXYZ from Lab: {" << x << ", " << y << ", " << z << "}" << endl;
+  // cout << "CIE_XYZ from Lab: {" << x << ", " << y << ", " << z << "}" <<
+  // endl;
   return *this;
 }
 
-CIEXYZ& CIEXYZ::operator=(const Luv& w) {
+CIE_XYZ& CIE_XYZ::operator=(const Luv& w) {
   float l, u, v, a, b, c, d, ur, vr;
   float epsilon = (216.0f / 24389.0f), kappa = (24389.0f / 27.0f);
   // using reference white D65
@@ -200,18 +203,19 @@ CIEXYZ& CIEXYZ::operator=(const Luv& w) {
   x = (d - b) / (a - c);
   z = x * a + b;
 
-  // cout << "CIEXYZ from Luv: {" << x << ", " << y << ", " << z << "}" << endl;
+  // cout << "CIE_XYZ from Luv: {" << x << ", " << y << ", " << z << "}" <<
+  // endl;
   return *this;
 }
 
 // Lab operators
-Lab& Lab::operator=(const CIEXYZ& v) {
+Lab& Lab::operator=(const CIE_XYZ& v) {
   float fx, fy, fz, xr, yr, zr;
   float epsilon = (216.0f / 24389.0f), kappa = (24389.0f / 27.0f);
   // using reference white D65
   float Xn = 0.95047f, Yn = 1.0f, Zn = 1.08883f;
 
-  // convert CIEXYZ to Lab
+  // convert CIE_XYZ to Lab
   xr = v.x / Xn;
   yr = v.y / Yn;
   zr = v.z / Zn;
@@ -253,7 +257,7 @@ HCLab& HCLab::operator=(const Lab& v) {
 }
 
 // Luv operators
-Luv& Luv::operator=(const CIEXYZ& w) {
+Luv& Luv::operator=(const CIE_XYZ& w) {
   float up, vp, ur, yr, vr, x, y, z;
   float epsilon = (216.0f / 24389.0f), kappa = (24389.0f / 27.0f);
   // using reference white D65
@@ -262,7 +266,7 @@ Luv& Luv::operator=(const CIEXYZ& w) {
   y = w.y;
   z = w.z;
 
-  // convert CIEXYZ to Luv
+  // convert CIE_XYZ to Luv
   ur = (4 * Xn) / (Xn + 15 * Yn + 3 * Zn);
   yr = w.y / Yn;
   vr = (9 * Yn) / (Xn + 15 * Yn + 3 * Zn);
@@ -301,27 +305,27 @@ HCLuv& HCLuv::operator=(const Luv& w) {
 }
 
 // RGB operators
-RGB& RGB::operator=(const Lab& v) { return *this = CIEXYZ(v); }
+RGB& RGB::operator=(const Lab& v) { return *this = CIE_XYZ(v); }
 
 RGB& RGB::operator=(const HCLab& v) { return *this = Lab(v); }
 
-RGB& RGB::operator=(const Luv& v) { return *this = CIEXYZ(v); }
+RGB& RGB::operator=(const Luv& v) { return *this = CIE_XYZ(v); }
 
 RGB& RGB::operator=(const HCLuv& v) { return *this = Luv(v); }
 
 // HSV operators
-HSV& HSV::operator=(const CIEXYZ& v) { return *this = RGB(v); }
+HSV& HSV::operator=(const CIE_XYZ& v) { return *this = RGB(v); }
 
-HSV& HSV::operator=(const Lab& v) { return *this = CIEXYZ(v); }
+HSV& HSV::operator=(const Lab& v) { return *this = CIE_XYZ(v); }
 
 HSV& HSV::operator=(const HCLab& v) { return *this = Lab(v); }
 
-HSV& HSV::operator=(const Luv& v) { return *this = CIEXYZ(v); }
+HSV& HSV::operator=(const Luv& v) { return *this = CIE_XYZ(v); }
 
 HSV& HSV::operator=(const HCLuv& v) { return *this = Luv(v); }
 
 // Color operators
-Color& Color::operator=(const CIEXYZ& v) { return *this = RGB(v); }
+Color& Color::operator=(const CIE_XYZ& v) { return *this = RGB(v); }
 
 Color& Color::operator=(const Lab& v) { return *this = RGB(v); }
 
@@ -332,7 +336,7 @@ Color& Color::operator=(const Luv& v) { return *this = RGB(v); }
 Color& Color::operator=(const HCLuv& v) { return *this = RGB(v); }
 
 // Colori operators
-Colori& Colori::operator=(const CIEXYZ& v) { return *this = RGB(v); }
+Colori& Colori::operator=(const CIE_XYZ& v) { return *this = RGB(v); }
 
 Colori& Colori::operator=(const Lab& v) { return *this = RGB(v); }
 

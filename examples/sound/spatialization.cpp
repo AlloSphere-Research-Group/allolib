@@ -1,3 +1,6 @@
+#include <atomic>
+#include <vector>
+
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include "al/math/al_Random.hpp"
@@ -9,9 +12,6 @@
 #include "al/sound/al_Vbap.hpp"
 #include "al/sphere/al_AlloSphereSpeakerLayout.hpp"
 #include "al/ui/al_Parameter.hpp"
-
-#include <atomic>
-#include <vector>
 
 using namespace al;
 using namespace std;
@@ -25,29 +25,18 @@ struct MyApp : public App {
   Spatializer *spatializer{nullptr};
 
   Mesh mMarker;
-  float speedMult = 0.04f;
+  double speedMult = 0.04f;
   double mElapsedTime = 0.0;
 
   ParameterVec3 srcpos{"srcPos", "", {0.0, 0.0, 0.0}};
   atomic<float> *mPeaks{nullptr};
 
-  SpeakerLayout speakerLayout;
+  Speakers speakerLayout;
 
   int speakerType = 0;
   int spatializerType = 0;
   unsigned long counter = 0;  // overall sample counter
 
-  MyApp() {
-    audioIO().channelsBus(1);
-    initSpeakers(0);
-    initSpatializer(1);
-  }
-
-  ~MyApp() override {
-    if (mPeaks) {
-      free(mPeaks);
-    }
-  }
   void initSpeakers(int type = -1) {
     if (type < 0) {
       type = (speakerType + 1) % 3;
@@ -63,9 +52,8 @@ struct MyApp : public App {
     if (mPeaks) {
       free(mPeaks);
     }
-    mPeaks =
-        new atomic<float>[speakerLayout.speakers().size()];  // Not being freed
-                                                             // in this example
+    mPeaks = new atomic<float>[speakerLayout.size()];  // Not being freed
+                                                       // in this example
   }
 
   void initSpatializer(int type) {
@@ -90,6 +78,7 @@ struct MyApp : public App {
   }
 
   void onInit() override {
+    audioIO().channelsBus(1);
     addDodecahedron(mMarker);
     initSpeakers(0);
     initSpatializer(1);
@@ -113,19 +102,18 @@ struct MyApp : public App {
   void onDraw(Graphics &g) override {
     g.clear(0);
 
-    g.blending(true);
-    g.blendModeTrans();
+    gl::blending(true);
+    gl::blendTrans();
     // Draw the speakers
-    Speakers sp = speakerLayout.speakers();
-    for (size_t i = 0; i < sp.size(); ++i) {
+    for (size_t i = 0; i < speakerLayout.size(); ++i) {
       g.pushMatrix();
       float xyz[3];
-      sp[i].posCart(xyz);
+      speakerLayout[i].posCart(xyz);
       g.translate(-xyz[1], xyz[2], -xyz[0]);
       float peak = mPeaks[i].load();
       g.scale(0.02f + fabs(peak) * 5);
       g.color(HSV(0.5f + (peak * 4)));
-      g.polygonLine();
+      gl::polygonLine();
       g.draw(mMarker);
       g.popMatrix();
     }
@@ -148,7 +136,7 @@ struct MyApp : public App {
 
     // Draw the source
     g.pushMatrix();
-    g.polygonFill();
+    gl::polygonFill();
     g.scale(0.8f);
     g.color(0.4f, 0.4f, 0.4f, 0.5f);
     g.draw(mMarker);
@@ -169,11 +157,10 @@ struct MyApp : public App {
     spatializer->finalize(io);
 
     // Now compute RMS to display the signal level for each speaker
-    Speakers &speakers = speakerLayout.speakers();
-    for (size_t speaker = 0; speaker < speakers.size(); speaker++) {
+    for (size_t speaker = 0; speaker < speakerLayout.size(); speaker++) {
       float rms = 0;
       for (unsigned int i = 0; i < io.framesPerBuffer(); i++) {
-        unsigned int deviceChannel = speakers[speaker].deviceChannel;
+        unsigned int deviceChannel = speakerLayout[speaker].deviceChannel;
         float sample = io.out(deviceChannel, i);
         rms += sample * sample;
       }
@@ -204,6 +191,12 @@ struct MyApp : public App {
     }
     audioIO().start();
     return true;
+  }
+
+  void onExit() override {
+    if (mPeaks) {
+      free(mPeaks);
+    }
   }
 };
 

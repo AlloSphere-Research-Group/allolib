@@ -152,8 +152,8 @@ struct MyApp : App {
                                  height() / 2, 1, 1000));
 
     g.clear(0);
-    g.polygonMode(Graphics::FILL);
-    g.depthTesting(true);
+    gl::polygonMode(GL_FILL);
+    gl::depthTesting(true);
     g.meshColor();
 
     // then individual transform can be done

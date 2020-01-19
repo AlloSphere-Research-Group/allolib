@@ -62,7 +62,7 @@ class World : public App {
     double my = space.dim() * mouse().y() / (double)height();
 
     g.projMatrix(Matrix4f::ortho(0, space.dim(), space.dim(), 0, -1, 1));
-    g.depthTesting(false);
+    gl::depthTesting(false);
 
     // draw space grid:
     {
@@ -93,7 +93,7 @@ class World : public App {
 
         m.vertex(o.pos);
       }
-      g.pointSize(2);
+      gl::pointSize(2);
       g.color(0.2, 0.5, 0.5);
       g.draw(m);
     }

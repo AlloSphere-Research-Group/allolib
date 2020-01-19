@@ -29,13 +29,13 @@ struct MyApp : public App {
   float read_buffer[AUDIO_BLOCK_SIZE * 4];
   float gain;
   int done;
-  SpeakerLayout speakerLayout;
+  Speakers speakerLayout;
 
   void onInit() override {
     // Create spatializer
     //        spatializer = new AmbisonicsSpatializer(speakerLayout, 2, 1);
     spatializer.configure(2, 1, 1);
-    spatializer.setSpeakerLayout(speakerLayout.speakers());
+    spatializer.setSpeakerLayout(speakerLayout);
     spatializer.numFrames(AUDIO_BLOCK_SIZE);
 
     gain = 1;

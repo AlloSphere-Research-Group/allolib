@@ -1,7 +1,7 @@
+#include "al/io/al_CSVReader.hpp"
+
 #include <cassert>
 #include <cctype>
-
-#include "al/io/al_CSVReader.hpp"
 
 using namespace al;
 
@@ -76,7 +76,7 @@ bool CSVReader::readFile(std::string fileName, bool hasColumnNames) {
     if (commaSeparated) {
       if ((unsigned long)std::count(line.begin(), line.end(), ',') ==
           mDataTypes.size() - 1) {  // Check that we have enough commas
-        int byteCount = 0;
+        size_t byteCount = 0;
         for (auto type : mDataTypes) {
           std::string field;
           std::getline(ss, field, ',');

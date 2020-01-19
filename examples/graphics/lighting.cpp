@@ -57,7 +57,7 @@ struct MyApp : public App {
 
   void onDraw(Graphics& g) {
     g.clear(0);
-    g.depthTesting(true);
+    gl::depthTesting(true);
 
     // Render sphere at light position; this will not be lit
     g.lighting(false);

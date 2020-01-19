@@ -108,7 +108,7 @@ struct MyApp : public App {
             (mirrorPose.pos() - nav().pos()).reflect(mirrorPose.uf()),
         mirrorPose.uu());
 
-    g.depthTesting(true);
+    gl::depthTesting(true);
 
     // render scene to frame buffer
     g.pushFramebuffer(fbo);

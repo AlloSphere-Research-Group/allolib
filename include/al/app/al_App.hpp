@@ -50,14 +50,14 @@ class App {
   virtual void onMessage(osc::Message &m) { (void)m; }
   virtual void onExit() {}
 
-  virtual bool onKeyDown(Keyboard const &k) { return true; }
-  virtual bool onKeyUp(Keyboard const &k) { return true; }
-  virtual bool onMouseDown(Mouse const &m) { return true; }
-  virtual bool onMouseUp(Mouse const &m) { return true; }
-  virtual bool onMouseDrag(Mouse const &m) { return true; }
-  virtual bool onMouseMove(Mouse const &m) { return true; }
-  virtual bool onMouseScroll(Mouse const &m) { return true; }
-  virtual void onResize(int w, int h) {}
+  virtual bool onKeyDown(Keyboard const & /*k*/) { return true; }
+  virtual bool onKeyUp(Keyboard const & /*k*/) { return true; }
+  virtual bool onMouseDown(Mouse const & /*m*/) { return true; }
+  virtual bool onMouseUp(Mouse const & /*m*/) { return true; }
+  virtual bool onMouseDrag(Mouse const & /*m*/) { return true; }
+  virtual bool onMouseMove(Mouse const & /*m*/) { return true; }
+  virtual bool onMouseScroll(Mouse const & /*m*/) { return true; }
+  virtual void onResize(int /*w*/, int /*h*/) {}
   //  virtual void onVisibility(bool v) {}
 
   void quit();  ///< Requests domain to quit.
@@ -67,11 +67,11 @@ class App {
   virtual Window &defaultWindow();
   virtual Graphics &graphics();
 
-  Viewpoint &view();
-  Pose &pose();
-  Lens &lens();
-  Nav &nav();
-  NavInputControl &navControl();
+  virtual Viewpoint &view();
+  virtual Pose &pose();
+  virtual Lens &lens();
+  virtual Nav &nav();
+  virtual NavInputControl &navControl();
   void fps(double f);
 
   // Access to default window domain
@@ -137,7 +137,7 @@ class App {
       WindowEventHandler &handler);
 
   // Access to audio domain
-  [[deprecated("Use call from domain directly")]] AudioIO &audioIO();
+  AudioIO &audioIO();
 
   void configureAudio(double audioRate = 44100, int audioBlockSize = 512,
                       int audioOutputs = -1, int audioInputs = -1);
@@ -195,9 +195,7 @@ class App {
   };
   StandardWindowAppKeyControls stdControls;
 
- protected:
-  void initializeDomains();
-
+  // Modify these with care
   std::shared_ptr<GLFWOpenGLWindowDomain> mDefaultWindowDomain;
 
   std::shared_ptr<OSCDomain> mOSCDomain;
@@ -205,17 +203,11 @@ class App {
   std::shared_ptr<OpenGLGraphicsDomain> mOpenGLGraphicsDomain;
   std::shared_ptr<SimulationDomain> mSimulationDomain;
 
+ protected:
+  void initializeDomains();
+
   std::vector<std::shared_ptr<AsynchronousDomain>> mDomainList;
   std::stack<std::shared_ptr<AsynchronousDomain>> mRunningDomains;
-};
-
-class AudioControl {
- public:
-  void registerAudioIO(AudioIO &io) {
-    gain.registerChangeCallback([&io](float value) { io.gain(value); });
-  }
-
-  Parameter gain{"gain", "sound", 1.0, "alloapp", 0.0, 2.0};
 };
 
 }  // namespace al

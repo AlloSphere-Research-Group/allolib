@@ -1,4 +1,5 @@
 #include "al/scene/al_DynamicScene.hpp"
+
 #include "al/graphics/al_Shapes.hpp"
 
 using namespace std;
@@ -58,7 +59,7 @@ void ThreadPool::stopThreads() {
 
 DynamicScene::DynamicScene(int threadPoolSize, TimeMasterMode masterMode)
     : PolySynth(masterMode) {
-  SpeakerLayout sl = StereoSpeakerLayout();  // Stereo by default
+  Speakers sl = StereoSpeakerLayout();  // Stereo by default
   setSpatializer<StereoPanner>(sl);
   if (threadPoolSize > 0) {
     mWorkerThreads = std::make_unique<ThreadPool>(threadPoolSize);
@@ -121,7 +122,7 @@ void DynamicScene::render(Graphics &g) {
     g.draw(mWorldMarker);
   }
 
-  if (mMasterMode == TIME_MASTER_GRAPHICS) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -145,7 +146,7 @@ void DynamicScene::render(Graphics &g) {
     }
     voice = voice->next;
   }
-  if (mMasterMode == TIME_MASTER_GRAPHICS) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
     processInactiveVoices();
   }
 }
@@ -157,7 +158,7 @@ void DynamicScene::render(AudioIOData &io) {
   assert(mSpatializer && "ERROR: call setSpatializer before starting audio");
   io.frame(0);
   mSpatializer->prepare(io);
-  if (mMasterMode == TIME_MASTER_AUDIO) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -267,13 +268,13 @@ void DynamicScene::render(AudioIOData &io) {
     io.frame(0);
     cb->onAudioCB(io);
   }
-  if (mMasterMode == TIME_MASTER_AUDIO) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
     processInactiveVoices();
   }
 }
 
 void DynamicScene::update(double dt) {
-  if (mMasterMode == TIME_MASTER_ASYNC) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -300,7 +301,7 @@ void DynamicScene::update(double dt) {
     mWorkerThreads->waitForProcessingDone();
   }
   // Update
-  if (mMasterMode == TIME_MASTER_ASYNC) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
     processInactiveVoices();
   }
 }
@@ -353,7 +354,7 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
       //                active voices are put in mThreadMap
       if (find(idsToProcess.begin(), idsToProcess.end(), voice->id()) !=
           idsToProcess.end()) {  // voice has been assigned to this thread
-        int offset = voice->getStartOffsetFrames(fpb);
+        unsigned int offset = voice->getStartOffsetFrames(fpb);
         if (offset < fpb) {
           io.frame(offset);
           int endOffsetFrames = voice->getEndOffsetFrames(fpb);

@@ -1,12 +1,12 @@
+#include <fstream>
+
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-
 #include "al/ui/al_ControlGUI.hpp"
 #include "al/ui/al_Parameter.hpp"
 #include "al/ui/al_PresetHandler.hpp"
 #include "al/ui/al_PresetSequencer.hpp"
-
-#include <fstream>
+#include "al/ui/al_SequenceServer.hpp"
 
 using namespace al;
 using namespace std;
