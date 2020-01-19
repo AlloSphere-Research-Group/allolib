@@ -1,13 +1,16 @@
 #include <cstdlib>
 #include <iostream>
 #include "al/app/al_App.hpp"
-#include "al/graphics/al_Shapes.hpp"
 #include "al/system/al_Signal.hpp"
 
 /*
 
   Example file for showcasing how to utilize al_Signal.hpp
 
+  SPACE key will put the program into a infinite while loop for testing purposes
+  onExit() gets triggered on both normal exits and interrupt signals.
+
+  Example shows sending an OSC message before the program quits.
   ** TODO: replace contents of onexit with signal safe instructions
 
   Kon Hyong Kim, 2019
@@ -27,42 +30,29 @@ struct MyApp : App {
   osc::Send client;
 
   void onCreate() override {
-    addTetrahedron(mesh);
-    lens().near(0.1).far(25).fovy(45);
-    nav().pos(0, 0, 4);
-    nav().quat().fromAxisAngle(0. * M_2PI, 0, 1, 0);
-
     client.open(port, addr);
 
     registerSigInt(this);  // *** need this line to register signal handler
   }
 
   void onExit() override {
+    // although we use std::cout here for testing purposes,
+    // avoid using functions that are not signal-safe.
     std::cout << "onExit!!!!" << std::endl;
 
+    // example function call
     exitExtra();
   }
 
   void exitExtra() {
-    client.send("/test", "handshakeoff", 1);
     std::cout << "doing extra stuff" << std::endl;
+    // should use signal-safe functions
+    client.send("/test", "handshakeoff", 1);
   }
 
-  void onAnimate(double dt) override {
-    double period = 10;
-    phase += dt / period;
-    if (phase >= 1.) phase -= 1.;
-  }
+  void onAnimate(double dt) override {}
 
-  void onDraw(Graphics& g) override {
-    g.clear(0, 0, 0);
-    g.polygonMode(Graphics::LINE);
-    g.pushMatrix();
-    g.rotate(phase * 360, 0, 1, 0);
-    g.color(1);
-    g.draw(mesh);
-    g.popMatrix();
-  }
+  void onDraw(Graphics& g) override {}
 
   bool onKeyDown(Keyboard const& k) override {
     if (k.key() == ' ') {
