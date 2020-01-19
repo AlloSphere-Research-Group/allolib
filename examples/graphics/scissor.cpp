@@ -97,13 +97,13 @@ struct MyApp : App {
   void onDraw(Graphics& g) override {
     g.clear(0, 0, 0);
 
-    g.depthTesting(true);
+    gl::depthTesting(true);
     g.light(light);
 
     auto draw_mesh = [this, &g]() {
       g.lighting(false);
       g.meshColor();
-      g.polygonMode(Graphics::FILL);
+      gl::polygonMode(GL_FILL);
       g.draw(axis);
 
       g.rotate(angle1, 0, 1, 0);
@@ -111,22 +111,22 @@ struct MyApp : App {
 
       g.lighting(true);
       g.meshColor();
-      g.polygonMode(Graphics::FILL);
+      gl::polygonMode(GL_FILL);
       g.draw(mesh);
 
       g.scale(1.01);
       g.color(0);
-      g.polygonMode(Graphics::LINE);
+      gl::polygonMode(GL_LINE);
       g.draw(mesh);
     };
 
     int w = fbWidth() / 2;
     int h = fbHeight() / 2;
-    g.scissorTest(true);
+    gl::scissorTest(true);
 
     {
       g.viewport(0, 0, w, h);
-      g.scissor(0, 0, w, h);
+      gl::scissorArea(0, 0, w, h);
       g.clear(0.9, 0.9, 0.5);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -138,7 +138,7 @@ struct MyApp : App {
 
     {
       g.viewport(w, 0, w, h);
-      g.scissor(w, 0, w, h);
+      gl::scissorArea(w, 0, w, h);
       g.clear(0.5, 0.9, 0.5);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -150,7 +150,7 @@ struct MyApp : App {
 
     {
       g.viewport(0, h, w, h);
-      g.scissor(0, h, w, h);
+      gl::scissorArea(0, h, w, h);
       g.clear(0.5, 0.9, 0.9);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -162,7 +162,7 @@ struct MyApp : App {
 
     {
       g.viewport(w, h, w, h);
-      g.scissor(w, h, w, h);
+      gl::scissorArea(w, h, w, h);
       g.clear(0.9, 0.5, 0.9);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -173,8 +173,8 @@ struct MyApp : App {
     }
 
     g.viewport(0, 0, fbWidth(), fbHeight());
-    g.scissorTest(false);
-    g.clearDepth(1);
+    gl::scissorTest(false);
+    gl::clearDepth(1);
 
     g.pushMatrix();
     draw_mesh();

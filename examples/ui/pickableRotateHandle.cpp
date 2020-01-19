@@ -55,11 +55,11 @@ struct MyApp : public App {
     g.lighting(false);
     pickable.drawBB(g);
 
-    g.depthTesting(false);
+    gl::depthTesting(false);
     pickable.pushMatrix(g);
     rh.draw(g);
     pickable.popMatrix(g);
-    g.depthTesting(true);
+    gl::depthTesting(true);
   }
 
   Vec3d unproject(Vec3d screenPos) {

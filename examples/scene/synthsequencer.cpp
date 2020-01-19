@@ -48,8 +48,8 @@ class SineEnv : public SynthVoice {
 
   void onProcess(Graphics &g) override {
     g.pushMatrix();
-    //        g.blending(true);
-    //        g.blendModeTrans();
+    //        gl::blending(true);
+    //        gl::blendTrans();
     g.translate(mOsc.freq() / 500 - 3, pow(mAmp, 0.3), -8);
     g.scale(1 - mDur, mDur, 1);
     g.color(1, mOsc.freq() / 1000, 1.0);

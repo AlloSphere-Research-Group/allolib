@@ -73,17 +73,17 @@ struct MyApp : public App {
   void onDraw(Graphics &g) {
     // draw lit mesh
     g.clear(0);
-    g.depthTesting(true);
+    gl::depthTesting(true);
     g.lighting(true);
     g.light(light);
 
-    g.polygonLine();  // as lines
+    gl::polygonLine();  // as lines
 
     // pass function to draw pickable and child meshes
     pickable.draw(g, [&](Pickable &p) {
       auto &b = dynamic_cast<PickableBB &>(p);
       if (p.depth == 3) {  // change rendering based on pickable depth
-        g.polygonFill();
+        gl::polygonFill();
         g.color(1, 0, 0);
       }
       b.drawMesh(g);

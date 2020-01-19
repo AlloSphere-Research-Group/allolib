@@ -143,10 +143,8 @@ void blending(bool doBlend) {
   else
     glDisable(GL_BLEND);
 }
-void depthMask(bool maskDepth) {
-  glDepthMask(maskDepth ? GL_TRUE : GL_FALSE);
-}
-void depthTest(bool testDepth) {
+void depthMask(bool maskDepth) { glDepthMask(maskDepth ? GL_TRUE : GL_FALSE); }
+void depthTesting(bool testDepth) {
   if (testDepth)
     glEnable(GL_DEPTH_TEST);
   else
@@ -172,13 +170,20 @@ void faceCulling(bool doCulling) {
 }
 void faceToCull(unsigned int face) { glCullFace(face); }
 void pointSize(float size) { glPointSize(size); }
-void polygonMode(unsigned int mode) {
-  glPolygonMode(GL_FRONT_AND_BACK, mode);
-}
+void lineWidth(float size) { glLineWidth(size); }
+void polygonMode(unsigned int mode) { glPolygonMode(GL_FRONT_AND_BACK, mode); }
 void blendMode(unsigned int src, unsigned int dst, unsigned int eq) {
   glBlendEquation(eq);
   glBlendFunc(src, dst);
 }
+
+void colorMask(bool r, bool g, bool b, bool a) {
+  glColorMask(r ? GL_TRUE : GL_FALSE, g ? GL_TRUE : GL_FALSE,
+              b ? GL_TRUE : GL_FALSE, a ? GL_TRUE : GL_FALSE);
+}
+
+void colorMask(bool b) { colorMask(b, b, b, b); }
+
 void clearColor(float r, float g, float b, float a) {
   float c[] = {r, g, b, a};
   glClearBufferfv(GL_COLOR, 0, c);
@@ -193,5 +198,5 @@ void clearBuffer(int buffer, float r, float g, float b, float a) {
 }
 void bufferToDraw(unsigned int buffer) { glDrawBuffer(buffer); }
 
-}
-}
+}  // namespace gl
+}  // namespace al

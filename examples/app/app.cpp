@@ -83,9 +83,6 @@ struct MyApp : public App {
     // not trigger, such as onMouseDrag.
     // window().remove(navControl());
 
-    // Set background color (default is black)
-    graphics().setClearColor(HSV(0.5, 1, 0.5));
-
     // Initialize audio so that App::onSound is called
     // Arguments: sample rate (Hz), block size, output channels, input channels
   }
@@ -122,12 +119,14 @@ struct MyApp : public App {
   // and eye (for stereoscopic). Typically, this is where you instruct the
   // GPU to render something.
   void onDraw(Graphics& g) override {
-    g.clear();
+    // clear with a specified color (default is black)
+    g.clear(HSV(0.5, 1, 0.5));
+
     // Note: we don't need to do all the normal graphics setup as this
     // is handled by the App
     // We can just draw our geometry immediately!
 
-    g.polygonMode(Graphics::LINE);  // wireframe mode
+    gl::polygonMode(GL_LINE);  // wireframe mode
     g.pushMatrix();
     g.rotate(phase * 360, 0, 1, 0);
     g.color(1);

@@ -228,9 +228,9 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //      pp_render.set_eye(eye);
 //      for (int i = 0; i < pp_render.num_projections(); i++) {
 //        pp_render.set_projection(i);
-//        mGraphics->depthTesting(true);
-//        mGraphics->depthMask(true);
-//        mGraphics->blending(false);
+//        gl::depthTesting(true);
+//        gl::depthMask(true);
+//        gl::blending(false);
 //        onDraw(*mGraphics);
 //      }
 //    }
@@ -239,9 +239,9 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //    pp_render.set_eye(eye_to_render);
 //    for (int i = 0; i < pp_render.num_projections(); i++) {
 //      pp_render.set_projection(i);
-//      mGraphics->depthTesting(true);
-//      mGraphics->depthMask(true);
-//      mGraphics->blending(false);
+//      gl::depthTesting(true);
+//      gl::depthMask(true);
+//      gl::blending(false);
 //      onDraw(*mGraphics);
 //    }
 //  }
@@ -251,9 +251,9 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //  */
 //  mGraphics->omni(false); // warp and blend composition done on flat rendering
 //  mGraphics->eye(Graphics::MONO_EYE);     // stereo handled at capture stage
-//  mGraphics->polygonMode(Graphics::FILL); // to draw viewport filling quad
-//  mGraphics->blending(false);     // blending already done when capturing
-//  mGraphics->depthTesting(false); // no depth testing when drawing viewport
+//  gl::polygonMode(GL_FILL); // to draw viewport filling quad
+//  gl::blending(false);     // blending already done when capturing
+//  gl::depthTesting(false); // no depth testing when drawing viewport
 //  slab mGraphics->pushViewport(0, 0, mWindow->fbWidth(), mWindow->fbHeight());
 //  // filling the whole window
 
@@ -262,36 +262,36 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
 //    if (window_is_stereo_buffered) {
 //      // rendering stereo in sphere
 //      glDrawBuffer(GL_BACK_LEFT);
-//      mGraphics->clearColor(0, 0, 0);
-//      mGraphics->clearDepth(1);
+//      gl::clearColor(0, 0, 0);
+//      gl::clearDepth(1);
 //      pp_render.composite(*mGraphics, 0);
 //      glDrawBuffer(GL_BACK_RIGHT);
-//      mGraphics->clearColor(0, 0, 0);
-//      mGraphics->clearDepth(1);
+//      gl::clearColor(0, 0, 0);
+//      gl::clearDepth(1);
 //      pp_render.composite(*mGraphics, 1);
 //    } else { // rendering mono in sphere
 //      // std::cout << "sampling mono in sphere setup" << std::endl;
 //      glDrawBuffer(GL_BACK_LEFT);
-//      mGraphics->clearColor(1, 0, 0);
-//      mGraphics->clearDepth(1);
+//      gl::clearColor(1, 0, 0);
+//      gl::clearDepth(1);
 //      pp_render.composite(*mGraphics, (eye_to_render == 1) ? 1 : 0);
 //    }
 //  } else {
 //    if (window_is_stereo_buffered) {
 //      // rendering stereo on display other than sphere
 //      glDrawBuffer(GL_BACK_LEFT);
-//      mGraphics->clearColor(0, 0, 0);
-//      mGraphics->clearDepth(1);
+//      gl::clearColor(0, 0, 0);
+//      gl::clearDepth(1);
 //      pp_render.composite_desktop(*mGraphics, 0); // texture[0]: left
 //      glDrawBuffer(GL_BACK_RIGHT);
-//      mGraphics->clearColor(0, 0, 0);
-//      mGraphics->clearDepth(1);
+//      gl::clearColor(0, 0, 0);
+//      gl::clearDepth(1);
 //      pp_render.composite_desktop(*mGraphics, 1); // texture[1]: right
 //    } else { // rendering mono on display other than sphere
 //      // std::cout << "sampling mono on flat display" << std::endl;
 //      glDrawBuffer(GL_BACK_LEFT);
-//      mGraphics->clearColor(0.2, 0.2, 0.2);
-//      mGraphics->clearDepth(1);
+//      gl::clearColor(0.2, 0.2, 0.2);
+//      gl::clearDepth(1);
 //      pp_render.composite_desktop(
 //          *mGraphics,
 //          (eye_to_render == 1) ? 1 : 0 // mono and left eye is

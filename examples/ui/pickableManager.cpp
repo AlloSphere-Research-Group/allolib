@@ -41,7 +41,7 @@ struct MyApp : public App {
 
   void onDraw(Graphics &g) override {
     g.clear();
-    g.depthTesting(true);
+    gl::depthTesting(true);
 
     for (auto pickable : mPickableManager.pickables()) {
       g.color(1, 1, 1);

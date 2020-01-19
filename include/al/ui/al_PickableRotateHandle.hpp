@@ -69,10 +69,11 @@ struct PickableRotateHandle : Pickable {
       }
       g.rotate(q);
       if (hover[i])
-        addCircle(m, size - dr,
-                  30);  //{ m.ribbonize(.03f);
-                        //m.primitive(Mesh::TRIANGLE_STRIP);}//g.lineWidth(3);
-      // else g.lineWidth(1);
+        addCircle(
+            m, size - dr,
+            30);  //{ m.ribbonize(.03f);
+                  // m.primitive(Mesh::TRIANGLE_STRIP);}//gl::lineWidth(3);
+      // else gl::lineWidth(1);
       g.draw(m);
       g.popMatrix();
     }

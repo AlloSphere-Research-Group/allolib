@@ -49,7 +49,7 @@ struct PickRayDemo : App {
 
   virtual void onDraw(Graphics& g) {
     g.clear(0);
-    g.depthTesting(true);
+    gl::depthTesting(true);
     g.lighting(true);
 
     for (int i = 0; i < N; i++) {

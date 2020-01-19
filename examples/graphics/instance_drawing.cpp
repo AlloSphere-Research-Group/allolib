@@ -160,10 +160,10 @@ struct MyApp : App {
     }
 
     g.clear(0);
-    g.polygonMode(Graphics::LINE);
-    g.depthTesting(false);
-    g.blending(true);
-    g.blendModeAdd();
+    gl::polygonMode(GL_LINE);
+    gl::depthTesting(false);
+    gl::blending(true);
+    gl::blendAdd();
 
     if (USE_INSTANCING) {
       g.shader(shader_instancing);

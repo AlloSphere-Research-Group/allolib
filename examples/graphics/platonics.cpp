@@ -79,7 +79,7 @@ class MyApp : public App {
   void onDraw(Graphics& g) {
     g.clear(0, 0, 0);
 
-    g.depthTesting(true);
+    gl::depthTesting(true);
     g.lighting(true);
 
     float angPos = 2 * M_PI / 5;
@@ -91,11 +91,11 @@ class MyApp : public App {
       g.rotate(angle1, 0, 1, 0);
       g.rotate(angle2, 1, 0, 0);
       g.color(0.5, 0.5, 0.5);
-      g.polygonMode(Graphics::FILL);
+      gl::polygonMode(GL_FILL);
       g.draw(solids[i]);
       g.scale(1.01);
       g.color(0);
-      g.polygonMode(Graphics::LINE);
+      gl::polygonMode(GL_LINE);
       g.draw(solids[i]);
       g.popMatrix();
     }

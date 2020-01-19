@@ -54,7 +54,7 @@ struct Gnomon {
   // floating gnomon in front of camera
   void drawFloating(Graphics &g, Pose pose, float scale) {
     g.pushMatrix();
-    g.polygonMode(Graphics::LINE);
+    gl::polygonMode(GL_LINE);
     Vec3d gnomZ = pose.pos() - (pose.uz() * 2);  // put in front of camera
     gnomZ -= (pose.uy() * .4);                   // translate to the bottom
     gnomZ -= (pose.ux() * .5);                   // translate to the left
@@ -71,7 +71,7 @@ struct Gnomon {
     g.pushMatrix();
     g.translate(pos);
     g.scale(scale);
-    // g.lineWidth(2);
+    // gl::lineWidth(2);
     g.draw(gnomonMesh);
     // drawLabels(g, cam_pose, .002, pos);
     drawArrows(g);
@@ -88,7 +88,7 @@ struct Gnomon {
     g.translate(pose.pos());
     g.rotate(pose.quat());
     g.scale(scale);
-    // g.lineWidth(2);
+    // gl::lineWidth(2);
     g.draw(gnomonMesh);
     drawArrows(g);
     // drawLabels(g, cam_pose, .002);
@@ -99,7 +99,7 @@ struct Gnomon {
     Quatf q;
     for (int i = 0; i < 3; i++) {
       glPushAttrib(GL_CURRENT_BIT);
-      g.polygonMode(Graphics::FILL);
+      gl::polygonMode(GL_FILL);
       g.pushMatrix();
       g.color(colors[i]);
       g.translate(gnomonMesh.vertices()[(i * 2) + 1]);
@@ -124,7 +124,7 @@ struct Gnomon {
   // void drawLabels(Graphics &g, Font &font, Pose cam_pose, float scale, Vec3f
   // offset = Vec3f(0,0,0)){
   //   // XYZ labels
-  //   g.polygonMode(Graphics::FILL);
+  //   gl::polygonMode(GL_FILL);
   //   glEnable(GL_BLEND);
   //   glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR);
   //   glEnable(GL_ALPHA_TEST);

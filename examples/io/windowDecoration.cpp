@@ -23,7 +23,7 @@ struct MyApp : App {
 
   void onDraw(Graphics& g) override {
     g.clear(0, 0, 0);
-    g.polygonMode(Graphics::LINE);
+    gl::polygonMode(GL_LINE);
     g.pushMatrix();
     g.rotate(phase * 360, 0, 1, 0);
     g.color(1);

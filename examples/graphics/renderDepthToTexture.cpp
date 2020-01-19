@@ -42,16 +42,16 @@ struct MyApp : App {
   void onResize(int w, int h) { updateFBO(w, h); }
 
   void onDraw(Graphics& g) {
-    g.depthTesting(
+    gl::depthTesting(
         true);  // the depth buffer is not updated if the depth test is disabled
 
     // To render our scene to the FBO, we must first bind it
     fbo.bind();
     g.viewport(0, 0, texDepth.width(), texDepth.height());
-    g.clearDepth();
+    gl::clearDepth();
 
     // Disable color rendering; we only want to write to the z-buffer
-    g.colorMask(false);
+    gl::colorMask(false);
 
     // Draw our scene
     g.draw(mesh);
@@ -60,7 +60,7 @@ struct MyApp : App {
     // Show depth buffer texture
     g.clear(1, 1, 1);
     g.viewport(0, 0, fbWidth(), fbHeight());
-    g.colorMask(true);
+    gl::colorMask(true);
     g.quadViewport(texDepth, -0.8, -0.8, 1.6, 1.6);
   }
 };

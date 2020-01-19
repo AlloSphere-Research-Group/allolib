@@ -142,8 +142,8 @@ struct MyApp : public App {
 
   void onDraw(Graphics& g) {
     g.clear(0);
-    g.depthTesting(true);
-    g.pointSize(8);
+    gl::depthTesting(true);
+    gl::pointSize(8);
     // g.nicest();
     // g.stroke(8);
     g.meshColor();
