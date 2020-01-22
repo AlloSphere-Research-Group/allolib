@@ -70,8 +70,8 @@ void DistributedApp::initialize() {
       group = defaultCapabilities[name()].group;
       rank = defaultCapabilities[name()].rank;
     } else {
-      mCapabilites =
-          (Capability)(CAP_SIMULATOR | CAP_RENDERING | CAP_AUDIO_IO | CAP_OSC);
+      setRole("desktop");
+      rank = 0;
       group = 0;
     }
   }
