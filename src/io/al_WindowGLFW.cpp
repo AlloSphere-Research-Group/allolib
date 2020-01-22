@@ -259,7 +259,13 @@ GLFWwindow* WindowImpl::mCurrentGLFWwindow = nullptr;
 
 Window::Window() { mImpl = make_unique<WindowImpl>(this); }
 
-Window::~Window() {}
+Window::~Window() {
+  for (auto* handler : mWindowEventHandlers) {
+    if (&handler->window() == this) {
+      handler->removeFromWindow();
+    }
+  }
+}
 
 bool Window::implCreate(bool is_verbose) {
   glfwDefaultWindowHints();
