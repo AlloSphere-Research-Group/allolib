@@ -919,7 +919,21 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
         assert(startValue.second.size() == endValue.second.size());
         if (factor != 1.0) {
           for (size_t i = 0; i < endValue.second.size(); i++) {
-            assert(startValue.second[i].type() == endValue.second[i].type());
+            if (startValue.second[i].type() != endValue.second[i].type()) {
+              if (startValue.second[i].type() == ParameterField::FLOAT &&
+                  endValue.second[i].type() == ParameterField::INT32) {
+                endValue.second[i] =
+                    ParameterField(float(endValue.second[i].get<int32_t>()));
+              } else if (endValue.second[i].type() == ParameterField::FLOAT &&
+                         startValue.second[i].type() == ParameterField::INT32) {
+                startValue.second[i] =
+                    ParameterField(float(startValue.second[i].get<int32_t>()));
+              } else {
+                std::cerr << "Parameter data type mismatch. Aborting."
+                          << std::endl;
+                return;
+              }
+            }
             if (startValue.second[i].type() == ParameterField::FLOAT) {
               interpValues.push_back(ParameterField(
                   startValue.second[i].get<float>() +
