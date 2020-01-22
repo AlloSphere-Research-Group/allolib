@@ -29,7 +29,7 @@ Font::Font(Font&& other) noexcept {
 Font& Font::operator=(Font&& other) noexcept {
   Impl* temp = impl;
   impl = other.impl;
-  other.impl = impl;
+  other.impl = temp;
   return *this;
 }
 
