@@ -324,13 +324,13 @@ class ParameterMeta {
     return value;
   }
 
-  virtual void get(std::vector<ParameterField> & /*fields*/) {
+  virtual void getFields(std::vector<ParameterField> & /*fields*/) {
     std::cout
         << "get(std::vector<ParameteterField> &fields) not implemented for "
         << typeid(*this).name() << std::endl;
   }
 
-  virtual void set(std::vector<ParameterField> & /*fields*/) {
+  virtual void setFields(std::vector<ParameterField> & /*fields*/) {
     std::cout
         << "set(std::vector<ParameteterField> &fields) not implemented for "
         << typeid(*this).name() << std::endl;
@@ -419,7 +419,7 @@ class ParameterWrapper : public ParameterMeta {
    * infinite recursion when a widget sets the parameter that then sets the
    * widget.
    */
-  virtual void setNoCalls(ParameterType value, void *blockReceiver = NULL) {
+  virtual void setNoCalls(ParameterType value, void *blockReceiver = nullptr) {
     //        if (value > mMax) value = mMax;
     //        if (value < mMin) value = mMin;
     if (mProcessCallback) {
@@ -695,11 +695,11 @@ class Parameter : public ParameterWrapper<float> {
     return value;
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     fields.emplace_back(ParameterField(get()));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     assert(fields.size() == 1);
     if (fields.size() == 1) {
       assert(fields[0].type() == ParameterField::FLOAT);
@@ -763,7 +763,7 @@ class ParameterInt : public ParameterWrapper<int32_t> {
    * registerChangeCallback() are not called. This is useful to avoid infinite
    * recursion when a widget sets the parameter that then sets the widget.
    */
-  virtual void setNoCalls(int32_t value, void *blockReceiver = NULL) override;
+  virtual void setNoCalls(int32_t value, void *blockReceiver = nullptr) override;
 
   /**
    * @brief get the parameter's value
@@ -787,11 +787,11 @@ class ParameterInt : public ParameterWrapper<int32_t> {
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     fields.emplace_back(ParameterField(get()));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
       set(fields[0].get<int32_t>());
     } else {
@@ -809,7 +809,7 @@ class ParameterInt : public ParameterWrapper<int32_t> {
 class ParameterBool : public Parameter {
  public:
   using Parameter::get;
-  using Parameter::set;
+  using Parameter::setFields;
   /**
    * @brief ParameterBool
    *
@@ -838,11 +838,11 @@ class ParameterBool : public Parameter {
 
   virtual void fromFloat(float value) override { set(value); }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
-    fields.emplace_back(ParameterField(get() == 1.0 ? 1 : 0));
+  virtual void getFields(std::vector<ParameterField> &fields) override {
+    fields.emplace_back(ParameterField(get() == 1.0f ? 1 : 0));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
       set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
     } else {
@@ -904,11 +904,11 @@ class ParameterString : public ParameterWrapper<std::string> {
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     fields.emplace_back(ParameterField(get()));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
       set(fields[0].get<std::string>());
     } else {
@@ -936,7 +936,7 @@ class ParameterVec3 : public ParameterWrapper<al::Vec3f> {
   float operator[](size_t index) {
     assert(index < INT_MAX);  // Hack to remove
     Vec3f vec = this->get();
-    return vec[int(index)];
+    return vec[index];
   }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
@@ -944,14 +944,14 @@ class ParameterVec3 : public ParameterWrapper<al::Vec3f> {
     sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z);
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     Vec3f vec = this->get();
     fields.emplace_back(ParameterField(vec.x));
     fields.emplace_back(ParameterField(vec.y));
     fields.emplace_back(ParameterField(vec.z));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 3) {
       Vec3f vec(fields[0].get<float>(), fields[1].get<float>(),
                 fields[2].get<float>());
@@ -990,7 +990,7 @@ class ParameterVec4 : public ParameterWrapper<al::Vec4f> {
     sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z, vec.w);
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     Vec4f vec = this->get();
     fields.emplace_back(ParameterField(vec.x));
     fields.emplace_back(ParameterField(vec.y));
@@ -998,7 +998,7 @@ class ParameterVec4 : public ParameterWrapper<al::Vec4f> {
     fields.emplace_back(ParameterField(vec.w));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 4) {
       Vec4f vec(fields[0].get<float>(), fields[1].get<float>(),
                 fields[2].get<float>(), fields[3].get<float>());
@@ -1040,7 +1040,7 @@ class ParameterPose : public ParameterWrapper<al::Pose> {
   //    float operator[](size_t index) { Pose vec = this->get(); return
   //    vec[index];}
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     Quatf quat = get().quat();
     Vec4f pos = get().pos();
     fields.emplace_back(ParameterField(pos.x));
@@ -1052,7 +1052,7 @@ class ParameterPose : public ParameterWrapper<al::Pose> {
     fields.emplace_back(ParameterField(quat.w));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 7) {
       Pose vec(Vec3f(fields[0].get<float>(), fields[1].get<float>(),
                      fields[2].get<float>()),
@@ -1131,11 +1131,11 @@ class ParameterMenu : public ParameterWrapper<int> {
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     fields.emplace_back(ParameterField(getCurrent()));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     // TODO an option should be added to allow storing the current element as
     // index instead of text.
     if (fields.size() == 1) {
@@ -1228,11 +1228,11 @@ class ParameterChoice : public ParameterWrapper<uint16_t> {
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     fields.emplace_back(ParameterField(get()));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     // TODO an option should be added to allow storing the current element as
     // index instead of text.
     if (fields.size() == 1) {
@@ -1251,7 +1251,7 @@ class ParameterChoice : public ParameterWrapper<uint16_t> {
 /// @ingroup UI
 class ParameterColor : public ParameterWrapper<al::Color> {
  public:
-  using ParameterWrapper<al::Color>::set;
+  using ParameterWrapper<al::Color>::setFields;
   using ParameterWrapper<al::Color>::get;
 
   ParameterColor(std::string parameterName, std::string Group = "",
@@ -1269,7 +1269,7 @@ class ParameterColor : public ParameterWrapper<al::Color> {
     sender.send(prefix + getFullAddress(), c.r, c.g, c.b, c.a);
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     Color vec = this->get();
     fields.emplace_back(ParameterField(vec.r));
     fields.emplace_back(ParameterField(vec.g));
@@ -1277,7 +1277,7 @@ class ParameterColor : public ParameterWrapper<al::Color> {
     fields.emplace_back(ParameterField(vec.a));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 4) {
       Color vec(fields[0].get<float>(), fields[1].get<float>(),
                 fields[2].get<float>(), fields[3].get<float>());
