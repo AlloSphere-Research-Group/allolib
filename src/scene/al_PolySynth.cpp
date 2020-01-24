@@ -380,8 +380,9 @@ std::shared_ptr<Parameter> SynthVoice::createInternalTriggerParameter(
 
 Parameter &SynthVoice::getInternalParameter(std::string name) {
   for (auto param : mInternalParameters) {
+    auto &p = *param;
     if (param->getName() == name &&
-        strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
+        strcmp(typeid(p).name(), typeid(Parameter).name()) == 0) {
       return *param;
     }
   }
