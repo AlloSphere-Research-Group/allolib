@@ -26,6 +26,7 @@ void DistributedApp::initialize() {
   std::vector<std::string> mListeners;
   // First get role from config file
   if (nodesTable) {
+    bool foundHost = false;
     for (const auto &table : *nodesTable) {
       std::string host = *table->get_as<std::string>("host");
       std::string role = *table->get_as<std::string>("role");
@@ -33,6 +34,7 @@ void DistributedApp::initialize() {
       if (name() == host) {
         // Now set capabilities from role
         setRole(role);
+        foundHost = true;
       }
       mRoleMap[host] = role;
       if (table->contains("dataRoot")) {
@@ -61,6 +63,16 @@ void DistributedApp::initialize() {
         std::cout << "WARNING: node " << host.c_str() << " not given group"
                   << std::endl;
       }
+    }
+    if (!foundHost) {  // if host name isn't found, use default settings and
+                       // warn
+      std::cout
+          << "WARNING: node " << name()
+          << " not found in node table!\n\t*Using default desktop setting!"
+          << std::endl;
+      setRole("desktop");
+      rank = 0;
+      group = 0;
     }
   } else {  // No nodes table in config file. Use desktop role
 
