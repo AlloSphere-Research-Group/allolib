@@ -102,8 +102,10 @@ class ParameterMIDI : public MIDIMessageHandler {
   }
 
   void open(int deviceIndex, bool verbose) {
-    open(deviceIndex);
     mVerbose = verbose;
+    if (deviceIndex >= 0) {
+      open(deviceIndex);
+    }
   }
 
   void close() {

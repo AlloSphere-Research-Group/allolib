@@ -195,6 +195,7 @@ void DistributedApp::start() {
         parameterServer().addListener(hostRole.first, oscDomain()->port);
       }
     }
+    parameterServer().notifyAll();
   }
 
   onInit();
