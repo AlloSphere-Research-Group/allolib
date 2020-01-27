@@ -950,6 +950,18 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
             }
           }
         } else {
+          assert(startValue.second.size() == endValue.second.size());
+          for (size_t i = 0; i < endValue.second.size(); i++) {
+            if (startValue.second[i].type() == ParameterField::FLOAT &&
+                endValue.second[i].type() == ParameterField::INT32) {
+              endValue.second[i] =
+                  ParameterField(float(endValue.second[i].get<int32_t>()));
+            } else if (endValue.second[i].type() == ParameterField::FLOAT &&
+                       startValue.second[i].type() == ParameterField::INT32) {
+              endValue.second[i] =
+                  ParameterField(int32_t(endValue.second[i].get<float>()));
+            }
+          }
           interpValues = endValue.second;
         }
 
@@ -1024,6 +1036,9 @@ void PresetHandler::stepMorphing() {
   uint64_t stepCount = mMorphStepCount.fetch_add(1);
   if (stepCount <= totalSteps && totalSteps > 0) {
     double morphPhase = double(stepCount) / totalSteps;
+    if (totalSteps == 1) {
+      morphPhase = 1.0;
+    }
     setInterpolatedValues(mStartValues, mTargetValues, morphPhase);
   }
 }

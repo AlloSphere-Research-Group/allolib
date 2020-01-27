@@ -793,6 +793,7 @@ class ParameterInt : public ParameterWrapper<int32_t> {
 
   virtual void set(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
+      assert(fields[0].type() == ParameterField::INT32);
       set(fields[0].get<int32_t>());
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
@@ -844,6 +845,7 @@ class ParameterBool : public Parameter {
 
   virtual void set(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
+      assert(fields[0].type() == ParameterField::INT32);
       set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()

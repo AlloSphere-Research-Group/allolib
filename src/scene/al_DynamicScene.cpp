@@ -426,7 +426,7 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
     scene->mAudioBusy--;
     scene->mAudioThreadDone.notify_one();
   }
-  std::cout << "Audio thread " << id << " done" << std::endl;
+  //  std::cout << "Audio thread " << id << " done" << std::endl;
 }
 
 bool PositionedVoice::setTriggerParams(float *pFields, int numFields) {
