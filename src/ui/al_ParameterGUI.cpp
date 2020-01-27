@@ -65,39 +65,40 @@ void ParameterGUI::drawParameterMeta(std::vector<ParameterMeta *> params,
                                      string suffix, int index) {
   assert(params.size() > 0);
 
-  if (strcmp(typeid(*params[index]).name(), typeid(ParameterBool).name()) ==
+  auto &param = *params[index];
+  if (strcmp(typeid(param).name(), typeid(ParameterBool).name()) ==
       0) {  // ParameterBool
-    drawParameterBool(dynamic_cast<ParameterBool *>(params[index]), suffix);
-  } else if (strcmp(typeid(*params[index]).name(), typeid(Parameter).name()) ==
+    drawParameterBool(dynamic_cast<ParameterBool *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(), typeid(Parameter).name()) ==
              0) {  // Parameter
-    drawParameter(dynamic_cast<Parameter *>(params[index]), suffix);
-  } else if (strcmp(typeid(*params[index]).name(),
+    drawParameter(dynamic_cast<Parameter *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(),
                     typeid(ParameterString).name()) == 0) {  // ParameterString
-    drawParameterString(dynamic_cast<ParameterString *>(params[index]), suffix);
-  } else if (strcmp(typeid(*params[index]).name(),
+    drawParameterString(dynamic_cast<ParameterString *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(),
                     typeid(ParameterInt).name()) == 0) {  // ParameterInt
-    drawParameterInt(dynamic_cast<ParameterInt *>(params[index]), suffix);
-  } else if (strcmp(typeid(*params[index]).name(),
+    drawParameterInt(dynamic_cast<ParameterInt *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(),
                     typeid(ParameterPose).name()) == 0) {  // ParameterPose
-    drawParameterPose(dynamic_cast<ParameterPose *>(params[index]), suffix);
-  } else if (strcmp(typeid(*params[index]).name(),
+    drawParameterPose(dynamic_cast<ParameterPose *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(),
                     typeid(ParameterMenu).name()) == 0) {  // ParameterMenu
-    drawMenu(dynamic_cast<ParameterMenu *>(params[index]), suffix);
-  } else if (strcmp(typeid(*params[index]).name(),
+    drawMenu(dynamic_cast<ParameterMenu *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(),
                     typeid(ParameterChoice).name()) == 0) {  // ParameterChoice
-    drawChoice(dynamic_cast<ParameterChoice *>(params[index]), suffix);
-  } else if (strcmp(typeid(*params[index]).name(),
+    drawChoice(dynamic_cast<ParameterChoice *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(),
                     typeid(ParameterVec3).name()) == 0) {  // ParameterVec3
-    drawVec3(dynamic_cast<ParameterVec3 *>(params[index]), suffix);
-  } else if (strcmp(typeid(*params[index]).name(),
+    drawVec3(dynamic_cast<ParameterVec3 *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(),
                     typeid(ParameterVec4).name()) == 0) {  // ParameterVec4
-    drawVec4(dynamic_cast<ParameterVec4 *>(params[index]), suffix);
-  } else if (strcmp(typeid(*params[index]).name(),
+    drawVec4(dynamic_cast<ParameterVec4 *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(),
                     typeid(ParameterColor).name()) == 0) {  // ParameterColor
-    drawParameterColor(dynamic_cast<ParameterColor *>(params[index]), suffix);
-  } else if (strcmp(typeid(*params[index]).name(), typeid(Trigger).name()) ==
+    drawParameterColor(dynamic_cast<ParameterColor *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(), typeid(Trigger).name()) ==
              0) {  // ParameterColor
-    drawTrigger(dynamic_cast<Trigger *>(params[index]), suffix);
+    drawTrigger(dynamic_cast<Trigger *>(&param), suffix);
   } else {
     // TODO this check should be performed on registration
     std::cout << "Unsupported Parameter type for display" << std::endl;
@@ -1161,14 +1162,13 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
         std::string paramName = bundleGroup[0]->parameters()[i]->getName();
         for (auto *bundle : bundleGroup) {
           auto &parameters = bundle->parameters();
+          auto &param = *parameters[i];
           if (parameters[i]->getName() == paramName) {
-            if (strcmp(typeid(*parameters[i]).name(),
-                       typeid(Parameter).name()) == 0) {
-              params.push_back(dynamic_cast<Parameter *>(parameters[i]));
-            } else if (strcmp(typeid(*parameters[i]).name(),
+            if (strcmp(typeid(param).name(), typeid(Parameter).name()) == 0) {
+              params.push_back(dynamic_cast<Parameter *>(&param));
+            } else if (strcmp(typeid(param).name(),
                               typeid(ParameterBool).name()) == 0) {
-              boolParams.push_back(
-                  dynamic_cast<ParameterBool *>(parameters[i]));
+              boolParams.push_back(dynamic_cast<ParameterBool *>(&param));
             }
           }
         }

@@ -457,7 +457,7 @@ void PresetSequencer::updateSequencer() {
         //          std::endl;
         for (auto *param : mParameters) {
           if (param->getFullAddress() == step.name) {
-            param->set(step.params);
+            param->setFields(step.params);
             break;
           }
         }

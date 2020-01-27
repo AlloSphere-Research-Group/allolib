@@ -10,20 +10,35 @@ namespace al {
 double noteToHz(double noteNumber) {
   return ::pow(2., (noteNumber - 69.) / 12.) * 440.;
 }
+
+int getMIDIDeviceIndex(std::string deviceName) {
+  RtMidiIn midi;
+  int deviceIndex = -1;
+  int numPorts = midi.getPortCount();
+  for (int i = 0; i < numPorts; i++) {
+    auto portName = midi.getPortName(i);
+    //        std::cout <<i << ":" << portName << std::endl;
+    if (portName == deviceName) {
+      deviceIndex = i;
+    }
+  }
+  return deviceIndex;
+}
+
 }  // namespace al
 
 const char* MIDIByte::messageTypeString(unsigned char statusByte) {
   switch (statusByte & MESSAGE_MASK) {
-    case NOTE_OFF:
-      return "NOTE_OFF";
-    case NOTE_ON:
-      return "NOTE_ON";
-    case CONTROL_CHANGE:
-      return "CONTROL_CHANGE";
-    case PROGRAM_CHANGE:
-      return "PROGRAM_CHANGE";
-    case PRESSURE_POLY:
-      return "PRESSURE_POLY";
+  case NOTE_OFF:
+    return "NOTE_OFF";
+  case NOTE_ON:
+    return "NOTE_ON";
+  case CONTROL_CHANGE:
+    return "CONTROL_CHANGE";
+  case PROGRAM_CHANGE:
+    return "PROGRAM_CHANGE";
+  case PRESSURE_POLY:
+    return "PRESSURE_POLY";
     case PRESSURE_CHAN:
       return "PRESSURE_CHAN";
     case PITCH_BEND:

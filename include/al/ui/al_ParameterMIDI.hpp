@@ -127,6 +127,42 @@ class ParameterMIDI : public MIDIMessageHandler {
   }
 
   /**
+  * Connect multiple MIDI controls to multivalue parameter.
+  *
+  * This allows connecting 3 different MIDI controls to the R,G,B values
+  * of ParameterColor or to the x,y,z values of ParameterPose
+  */
+
+  void connectControls(ParameterMeta &param, std::vector<int> controlNumbers,
+                          int channel = 1, std::vector<float> min = {},
+                          std::vector<float> max = {})
+  {
+    AbstractBinding newBinding;
+    newBinding.controlNumbers = controlNumbers;
+    newBinding.channel = channel - 1;
+    newBinding.param = &param;
+    std::vector<ParameterField> fields;
+    param.getFields(fields);
+    if (fields.size() < controlNumbers.size()) {
+      controlNumbers.resize(fields.size());
+      std::cout << "WARNING: connectPoseControl() resizing control numbers to match fields" << std::endl;
+    }
+    if (min.size() < controlNumbers.size()) {
+      for (int i = max.size(); i < controlNumbers.size(); i++) {
+        min.push_back(0.0);
+      }
+    }
+    if (max.size() < controlNumbers.size()) {
+      for (int i = max.size(); i < controlNumbers.size(); i++) {
+        max.push_back(1.0);
+      }
+    }
+    newBinding.min = min;
+    newBinding.max = max;
+    mAbstractBindings.push_back(newBinding);
+  }
+
+  /**
    * @brief connectNoteToValue
    * @param param the parameter to bind
    * @param channel MIDI channel (1-16)
@@ -178,7 +214,7 @@ class ParameterMIDI : public MIDIMessageHandler {
 
   virtual void onMIDIMessage(const MIDIMessage &m) override {
     if (m.type() & MIDIByte::CONTROL_CHANGE) {
-      for (ControlBinding binding : mControlBindings) {
+      for (ControlBinding &binding : mControlBindings) {
         if (m.channel() == binding.channel &&
             m.controlNumber() == binding.controlNumber) {
           float newValue =
@@ -186,21 +222,39 @@ class ParameterMIDI : public MIDIMessageHandler {
           binding.param->set(newValue);
         }
       }
+      for (auto &binding : mAbstractBindings) {
+        if (m.channel() == binding.channel) {
+
+          auto foundControl = std::find(binding.controlNumbers.begin(),
+                                        binding.controlNumbers.end(),
+                                        m.controlNumber() );
+          if (foundControl != binding.controlNumbers.end()) {
+            std::vector<ParameterField> currentFields;
+            binding.param->getFields(currentFields);
+            size_t index = std::distance(binding.controlNumbers.begin(), foundControl);
+            float newValue =
+                binding.min[index] + (m.controlValue() *
+                                      (binding.max[index]  - binding.min[index] ));
+            currentFields[index] = newValue;
+            binding.param->setFields(currentFields);
+          }
+        }
+      }
     }
     if (m.type() & MIDIByte::NOTE_ON && m.velocity() > 0) {
-      for (NoteBinding binding : mNoteBindings) {
+      for (NoteBinding &binding : mNoteBindings) {
         if (m.channel() == binding.channel &&
             m.noteNumber() == binding.noteNumber) {
           binding.param->set(binding.value);
         }
       }
-      for (IncrementBinding binding : mIncrementBindings) {
+      for (IncrementBinding &binding : mIncrementBindings) {
         if (m.channel() == binding.channel &&
             m.noteNumber() == binding.noteNumber) {
           binding.param->set(binding.param->get() + binding.increment);
         }
       }
-      for (ToggleBinding binding : mToggleBindings) {
+      for (ToggleBinding &binding : mToggleBindings) {
         if (m.channel() == binding.channel &&
             m.noteNumber() == binding.noteNumber) {
           if (binding.toggle == true) {
@@ -214,7 +268,7 @@ class ParameterMIDI : public MIDIMessageHandler {
       }
     } else if (m.type() & MIDIByte::NOTE_OFF ||
                (m.type() & MIDIByte::NOTE_ON && m.velocity() == 0)) {
-      for (ToggleBinding binding : mToggleBindings) {
+      for (ToggleBinding &binding : mToggleBindings) {
         if (m.channel() == binding.channel &&
             m.noteNumber() == binding.noteNumber) {
           if (binding.toggle != true) {
@@ -235,6 +289,14 @@ class ParameterMIDI : public MIDIMessageHandler {
     int channel;
     Parameter *param;
     float min, max;
+  };
+
+  struct AbstractBinding {
+    std::vector<int> controlNumbers;
+    int channel;
+    ParameterMeta *param;
+    std::vector<float> min;
+    std::vector<float> max;
   };
 
   struct NoteBinding {
@@ -270,6 +332,7 @@ class ParameterMIDI : public MIDIMessageHandler {
   std::vector<NoteBinding> mNoteBindings;
   std::vector<ToggleBinding> mToggleBindings;
   std::vector<IncrementBinding> mIncrementBindings;
+  std::vector<AbstractBinding> mAbstractBindings;
 };
 
 }  // namespace al

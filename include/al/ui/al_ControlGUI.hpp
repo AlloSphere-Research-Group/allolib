@@ -315,7 +315,7 @@ class ControlGUI {
                          // of groups
   std::vector<ParameterMeta *> mSeparatorAnchors;
 
-  ParameterGUI mParameterGUI;
+//  ParameterGUI mParameterGUI;
 
   PresetHandler *mPresetHandler{nullptr};
   int mPresetColumns, mPresetRows;
@@ -336,9 +336,9 @@ class ControlGUI {
 
   bool mManageIMGUI{true};
 
-  int mCurrentSequencerItem{0};
+//  int mCurrentSequencerItem{0};
   int mCurrentPresetSequencerItem{0};
-  bool mRecordButtonValue{false};
+//  bool mRecordButtonValue{false};
   char **mSequencerItems;
 
   std::map<std::string, int> mCurrentBundle;
