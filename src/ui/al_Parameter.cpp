@@ -17,12 +17,14 @@ Parameter::Parameter(std::string parameterName, std::string Group,
     : ParameterWrapper<float>(parameterName, Group, defaultValue, prefix, min,
                               max) {
   mFloatValue = defaultValue;
+  setDefault(defaultValue);
 }
 
 Parameter::Parameter(std::string parameterName, float defaultValue, float min,
                      float max)
     : ParameterWrapper<float>(parameterName, "", defaultValue, "", min, max) {
   mFloatValue = defaultValue;
+  setDefault(defaultValue);
 }
 
 float Parameter::get() { return mFloatValue; }
@@ -59,6 +61,7 @@ ParameterInt::ParameterInt(std::string parameterName, std::string Group,
     : ParameterWrapper<int32_t>(parameterName, Group, defaultValue, prefix, min,
                                 max) {
   mIntValue = defaultValue;
+  setDefault(defaultValue);
 }
 
 int32_t ParameterInt::get() { return mIntValue; }
@@ -94,41 +97,8 @@ ParameterBool::ParameterBool(std::string parameterName, std::string Group,
                              float max)
     : Parameter(parameterName, Group, defaultValue, prefix, min, max) {
   //	mFloatValue = defaultValue;
+  setDefault(defaultValue);
 }
-
-// void ParameterBool::setNoCalls(float value, void *blockReceiver)
-//{
-//	if (value > mMax) value = mMax;
-//	if (value < mMin) value = mMin;
-//	if (mProcessCallback) {
-//		value = mProcessCallback(value, mProcessUdata);
-//	}
-//	if (blockReceiver) {
-//		for(size_t i = 0; i < mCallbacks.size(); ++i) {
-//			if (mCallbacks[i]) {
-//				mCallbacks[i](value, this, mCallbackUdata[i],
-// blockReceiver);
-//			}
-//		}
-//	}
-
-//	mFloatValue = value;
-//}
-
-// void ParameterBool::set(float value)
-//{
-//	if (value > mMax) value = mMax;
-//	if (value < mMin) value = mMin;
-//	if (mProcessCallback) {
-//		value = mProcessCallback(value, mProcessUdata);
-//	}
-//	mFloatValue = value;
-//	for(size_t i = 0; i < mCallbacks.size(); ++i) {
-//		if (mCallbacks[i]) {
-//			mCallbacks[i](value, this, mCallbackUdata[i], NULL);
-//		}
-//	}
-//}
 
 // --------------------- ParameterMeta ------------
 

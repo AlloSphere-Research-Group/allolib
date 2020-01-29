@@ -410,6 +410,11 @@ class ParameterWrapper : public ParameterMeta {
   }
 
   /**
+   * @brief reset value to default value
+   */
+  virtual void reset() { set(mDefault); }
+
+  /**
    * @brief set the parameter's value without calling callbacks
    *
    * This function is thread-safe and can be called from any number of threads.
@@ -459,7 +464,7 @@ class ParameterWrapper : public ParameterMeta {
    * under the value set by this function.
    */
   void min(ParameterType minValue) { mMin = minValue; }
-  ParameterType min() { return mMin; }
+  ParameterType min() const { return mMin; }
 
   /**
    * @brief set the maximum value for the parameter
@@ -468,7 +473,12 @@ class ParameterWrapper : public ParameterMeta {
    * over the value set by this function.
    */
   void max(ParameterType maxValue) { mMax = maxValue; }
-  ParameterType max() { return mMax; }
+  ParameterType max() const { return mMax; }
+
+  void setDefault(const ParameterType &defaultValue) {
+    mDefault = defaultValue;
+  }
+  ParameterType getDefault() const { return mDefault; }
 
   // typedef ParameterType (*ParameterProcessCallback)(ParameterType value, void
   // *userData); typedef void (*ParameterChangeCallback)(ParameterType value,
@@ -579,6 +589,8 @@ class ParameterWrapper : public ParameterMeta {
   ParameterType mMin;
   ParameterType mMax;
 
+  ParameterType mDefault;
+
   void runChangeCallbacksSynchronous(ParameterType &value);
 
   std::shared_ptr<ParameterProcessCallback> mProcessCallback;
@@ -657,6 +669,7 @@ class Parameter : public ParameterWrapper<float> {
 
   Parameter(const al::Parameter &param) : ParameterWrapper<float>(param) {
     mFloatValue = param.mFloatValue;
+    setDefault(param.getDefault());
   }
 
   /**
@@ -745,6 +758,7 @@ class ParameterInt : public ParameterWrapper<int32_t> {
   ParameterInt(const al::ParameterInt &param)
       : ParameterWrapper<int32_t>(param) {
     mIntValue = param.mIntValue;
+    setDefault(param.getDefault());
   }
 
   /**
@@ -763,7 +777,8 @@ class ParameterInt : public ParameterWrapper<int32_t> {
    * registerChangeCallback() are not called. This is useful to avoid infinite
    * recursion when a widget sets the parameter that then sets the widget.
    */
-  virtual void setNoCalls(int32_t value, void *blockReceiver = nullptr) override;
+  virtual void setNoCalls(int32_t value,
+                          void *blockReceiver = nullptr) override;
 
   /**
    * @brief get the parameter's value
@@ -793,6 +808,7 @@ class ParameterInt : public ParameterWrapper<int32_t> {
 
   virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
+      assert(fields[0].type() == ParameterField::INT32);
       set(fields[0].get<int32_t>());
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
@@ -844,6 +860,7 @@ class ParameterBool : public Parameter {
 
   virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
+      assert(fields[0].type() == ParameterField::INT32);
       set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
@@ -1167,7 +1184,7 @@ class ParameterChoice : public ParameterWrapper<uint16_t> {
   ParameterChoice(std::string parameterName, std::string Group = "",
                   uint16_t defaultValue = 0, std::string prefix = "")
       : ParameterWrapper<uint16_t>(parameterName, Group, defaultValue, prefix) {
-    set(0);
+    setNoCalls(0);
   }
 
   uint16_t operator=(const uint16_t value) {
@@ -1305,6 +1322,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName,
   mValue = defaultValue;
   mValueCache = defaultValue;
   mMutex = new std::mutex;
+  setDefault(defaultValue);
   std::shared_ptr<ParameterChangeCallback> mAsyncCallback =
       std::make_shared<ParameterChangeCallback>(
           [&](ParameterType value) { mChanged = true; });
@@ -1319,6 +1337,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(
   mMin = min;
   mMax = max;
   mMutex = new std::mutex;
+  setDefault(defaultValue);
 }
 
 template <class ParameterType>
@@ -1331,6 +1350,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(
   // mProcessUdata = param.mProcessUdata;
   mCallbacks = param.mCallbacks;
   mMutex = new std::mutex;
+  setDefault(param.getDefault());
   // mCallbackUdata = param.mCallbackUdata;
 }
 
@@ -1375,7 +1395,3 @@ void ParameterWrapper<ParameterType>::runChangeCallbacksSynchronous(
 }  // namespace al
 
 #endif  // AL_PARAMETER_H
-
-// For backward compatibility, as ParameterServer was included in this file.
-// Should be removed at some point.
-//#include "al/ui/al_ParameterServer.hpp"
