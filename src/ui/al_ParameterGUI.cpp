@@ -111,39 +111,12 @@ void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix,
   assert(index < (int)params.size());
   auto &param = params[index];
   if (param->getHint("hide") == 1.0) return;
-  if (param->getHint("intcombo") == 1.0) {
-    int value = (int)param->get();
-    vector<string> values;
-    for (float i = param->min(); i <= param->max(); i++) {
-      // There's got to be a better way...
-      values.push_back(to_string((int)i));
-    }
-    auto vector_getter = [](void *vec, int idx, const char **out_text) {
-      auto &vector = *static_cast<std::vector<std::string> *>(vec);
-      if (idx < 0 || idx >= static_cast<int>(vector.size())) {
-        return false;
-      }
-      *out_text = vector.at(idx).c_str();
-      return true;
-    };
-    if (!values.empty()) {
-      bool changed = ImGui::Combo((param->displayName() + suffix).c_str(),
-                                  &value, vector_getter,
-                                  static_cast<void *>(&values), values.size());
-      if (changed) {
-        for (auto *p : params) {
-          p->set(value);
-        }
-      }
-    }
-  } else {
-    float value = param->get();
-    bool changed = ImGui::SliderFloat((param->displayName() + suffix).c_str(),
-                                      &value, param->min(), param->max());
-    if (changed) {
-      for (auto *p : params) {
-        p->set(value);
-      }
+  float value = param->get();
+  bool changed = ImGui::SliderFloat((param->displayName() + suffix).c_str(),
+                                    &value, param->min(), param->max());
+  if (changed) {
+    for (auto *p : params) {
+      p->set(value);
     }
   }
 }
@@ -188,21 +161,6 @@ void ParameterGUI::drawParameterBool(std::vector<ParameterBool *> params,
   if (changed) {
     param->set(value ? 1.0 : 0.0);
   }
-  //    }
-  //    else {
-  //        changed = ImGui::Button((param->displayName() + suffix).c_str());
-  //        if (changed) {
-  //            for (auto *p: params) {
-  //                p->set(1.0);
-  //            }
-  //        } else {
-  //            if (param->get() == 1.0) {
-  //                for (auto *p: params) {
-  //                    p->set(0.0);
-  //                }
-  //            }
-  //        }
-  //    }
 }
 
 void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
@@ -460,13 +418,7 @@ void ParameterGUI::drawTrigger(std::vector<Trigger *> params, string suffix,
     for (auto *p : params) {
       p->set(true);
     }
-  } /* else {
-       if (param->get() == 1.0) {
-           for (auto *p: params) {
-               p->set(0.0);
-           }
-       }
-   }*/
+  }
 }
 
 void ParameterGUI::drawNav(Nav *mNav, std::string suffix) {
@@ -514,6 +466,7 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(
     });
   }
   PresetHandlerState &state = stateMap[presetHandler];
+  float fontSize = ImGui::GetFontSize();
 
   std::string id = std::to_string((unsigned long)presetHandler);
   std::string suffix = "##PresetHandler" + id;
@@ -540,7 +493,8 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(
           ImGui::PushStyleColor(ImGuiCol_Border,
                                 ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         }
-        if (ImGui::Selectable(name.c_str(), is_selected, 0, ImVec2(18, 15))) {
+        if (ImGui::Selectable(name.c_str(), is_selected, 0,
+                              ImVec2(fontSize * 1.4, fontSize * 1.2))) {
           if (state.storeButtonState) {
             std::string saveName = state.enteredText;
             if (saveName.size() == 0) {
