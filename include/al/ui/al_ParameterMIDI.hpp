@@ -102,8 +102,10 @@ class ParameterMIDI : public MIDIMessageHandler {
   }
 
   void open(int deviceIndex, bool verbose) {
-    open(deviceIndex);
     mVerbose = verbose;
+    if (deviceIndex >= 0) {
+      open(deviceIndex);
+    }
   }
 
   void close() {
@@ -148,12 +150,12 @@ class ParameterMIDI : public MIDIMessageHandler {
       std::cout << "WARNING: connectPoseControl() resizing control numbers to match fields" << std::endl;
     }
     if (min.size() < controlNumbers.size()) {
-      for (int i = max.size(); i < controlNumbers.size(); i++) {
+      for (size_t i = max.size(); i < controlNumbers.size(); i++) {
         min.push_back(0.0);
       }
     }
     if (max.size() < controlNumbers.size()) {
-      for (int i = max.size(); i < controlNumbers.size(); i++) {
+      for (size_t i = max.size(); i < controlNumbers.size(); i++) {
         max.push_back(1.0);
       }
     }

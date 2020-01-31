@@ -53,7 +53,7 @@ void PresetHandler::setSubDirectory(std::string directory) {
 }
 
 void PresetHandler::registerPresetCallback(
-    std::function<void(int, void *, void *)> cb, void *userData) {
+    std::function<void(int index, void *presetHandler, void *userData)> cb, void *userData) {
   mCallbacks.push_back(cb);
   mCallbackUdata.push_back(userData);
 }

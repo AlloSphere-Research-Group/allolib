@@ -124,7 +124,7 @@ std::vector<float> sphere::generateEquirectSampletex(int width, int height) {
 
 std::map<std::string, NodeConfiguration> sphere::getSphereNodes() {
   std::map<std::string, NodeConfiguration> nodes = {
-      {"ar01",
+      {"ar01.1g",
        NodeConfiguration{
            0, 0, "/Volumes/Data",
            (Capability)(Capability::CAP_SIMULATOR | Capability::CAP_RENDERING |
