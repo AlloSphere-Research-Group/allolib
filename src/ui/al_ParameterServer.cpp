@@ -128,6 +128,10 @@ void OSCNotifier::notifyListeners(std::string OSCaddress,
              0) {  // ParameterColor
     ParameterColor *p = dynamic_cast<ParameterColor *>(param);
     notifyListeners(OSCaddress, p->get());
+  } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) ==
+             0) {  // Trigger
+    Trigger *p = dynamic_cast<Trigger *>(param);
+    notifyListeners(OSCaddress, p->get());
   } else {
     std::cout << "OSCNotifier::notifyListeners Unsupported Parameter type for "
                  "notification"
@@ -259,6 +263,12 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param) {
              0) {  // ParameterColor
     ParameterString *p = dynamic_cast<ParameterString *>(&param);
     p->registerChangeCallback([this, p](std::string value) {
+      notifyListeners(p->getFullAddress(), value);
+    });
+  } else if (strcmp(typeid(param).name(), typeid(Trigger).name()) ==
+             0) {  // Trigger
+    Trigger *p = dynamic_cast<Trigger *>(&param);
+    p->registerChangeCallback([this, p](float value) {
       notifyListeners(p->getFullAddress(), value);
     });
   } else {
@@ -650,7 +660,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) ==
-             0) {  // ParameterColor
+             0) {  // Trigger
     Trigger *p = dynamic_cast<Trigger *>(param);
     if (address == p->getFullAddress()) {
       if (m.typeTags().size() == 0) {
