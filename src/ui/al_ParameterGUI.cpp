@@ -172,12 +172,13 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
   if (ImGui::CollapsingHeader(("Pose:" + pose->displayName()).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader)) {
     Vec3d currentPos = pose->get().pos();
+    Quatd currQuat = pose->get().quat();
     float x = currentPos.x;
     if (ImGui::SliderFloat(("X" + suffix + pose->displayName()).c_str(), &x, -5,
                            5)) {
       currentPos.x = x;
       for (auto *p : params) {
-        p->set(Pose(currentPos, pose->get().quat()));
+        p->set(Pose(currentPos, currQuat));
       }
     }
     float y = currentPos.y;
@@ -185,7 +186,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
                            5)) {
       currentPos.y = y;
       for (auto *p : params) {
-        p->set(Pose(currentPos, pose->get().quat()));
+        p->set(Pose(currentPos, currQuat));
       }
     }
     float z = currentPos.z;
@@ -193,9 +194,50 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
                            -10, 0)) {
       currentPos.z = z;
       for (auto *p : params) {
-        p->set(Pose(currentPos, pose->get().quat()));
+        p->set(Pose(currentPos, currQuat));
       }
     }
+    ImGui::Text("Quaternion");
+    float w = currQuat.w;
+    if (ImGui::SliderFloat(("w" + suffix + pose->displayName()).c_str(), &w, 0,
+                           1)) {
+      currQuat.w = w;
+      currQuat.normalize();
+      for (auto *p : params) {
+        p->set(Pose(currentPos, currQuat));
+      }
+    }
+
+    x = currQuat.x;
+    if (ImGui::SliderFloat(("x" + suffix + pose->displayName()).c_str(), &x, 0,
+                           1)) {
+      currQuat.x = x;
+      currQuat.normalize();
+      for (auto *p : params) {
+        p->set(Pose(currentPos, currQuat));
+      }
+    }
+
+    y = currQuat.y;
+    if (ImGui::SliderFloat(("y" + suffix + pose->displayName()).c_str(), &y, 0,
+                           1)) {
+      currQuat.y = y;
+      currQuat.normalize();
+      for (auto *p : params) {
+        p->set(Pose(currentPos, currQuat));
+      }
+    }
+
+    z = currQuat.z;
+    if (ImGui::SliderFloat(("z" + suffix + pose->displayName()).c_str(), &z, 0,
+                           1)) {
+      currQuat.z = z;
+      currQuat.normalize();
+      for (auto *p : params) {
+        p->set(Pose(currentPos, currQuat));
+      }
+    }
+
     ImGui::Spacing();
   }
 }
@@ -453,7 +495,8 @@ ParameterGUI::PresetHandlerState &ParameterGUI::drawPresetHandler(
     PresetHandler *presetHandler, int presetColumns, int presetRows) {
   static std::map<PresetHandler *, PresetHandlerState> stateMap;
   if (stateMap.find(presetHandler) == stateMap.end()) {
-    //        std::cout << "Created state for " << (unsigned long) presetHandler
+    //        std::cout << "Created state for " << (unsigned long)
+    //        presetHandler
     //        << std::endl;
     stateMap[presetHandler] =
         PresetHandlerState{"", 0, presetHandler->availablePresetMaps()};
@@ -990,10 +1033,13 @@ void ParameterGUI::drawPresetMIDI(PresetMIDI *presetMidi) {
     if (presetMidi->isOpen()) {
       std::string noteBindings;
       noteBindings += "MIDI Note -> Channel, Preset Index";
-      //            for (auto &binding: presetMidi->getCurrentNoteBindings()) {
+      //            for (auto &binding: presetMidi->getCurrentNoteBindings())
+      //            {
       //                noteBindings += std::to_string(binding.noteNumber) + "
-      //                -> "; noteBindings += std::to_string(binding.channel) +
-      //                ":" + std::to_string(binding.presetIndex); noteBindings
+      //                -> "; noteBindings += std::to_string(binding.channel)
+      //                +
+      //                ":" + std::to_string(binding.presetIndex);
+      //                noteBindings
       //                += "\n";
       //            }
       ImGui::Text("%s", noteBindings.c_str());
