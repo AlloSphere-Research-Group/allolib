@@ -1,6 +1,8 @@
 #ifndef INCLUDE_AL_RENDER_MANAGER_HPP
 #define INCLUDE_AL_RENDER_MANAGER_HPP
 
+#include <unordered_map>
+
 #include "al/graphics/al_EasyFBO.hpp"
 #include "al/graphics/al_EasyVAO.hpp"
 #include "al/graphics/al_FBO.hpp"
@@ -10,8 +12,6 @@
 #include "al/math/al_Matrix4.hpp"
 #include "al/math/al_Quat.hpp"
 #include "al/math/al_Vec.hpp"
-
-#include <unordered_map>
 
 namespace al {
 
@@ -219,6 +219,8 @@ class RenderManager {
   void rotate(float angle, float x = 0., float y = 0., float z = 1.);
   /// Rotate current matrix
   void rotate(const Quatf& q);
+  /// Rotate current matrix
+  void rotate(const Quatd& q);
   /// Rotate current matrix
   /// \param[in] angle  angle, in degrees
   /// \param[in] axis   rotation axis
