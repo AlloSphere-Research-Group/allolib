@@ -403,9 +403,8 @@ class ParameterWrapper : public ParameterMeta {
     if (mProcessCallback) {
       value = (*mProcessCallback)(value);  //, mProcessUdata);
     }
-    for (auto cb : mCallbacks) {
-      (*cb)(value);
-    }
+
+    runChangeCallbacksSynchronous(value);
     setLocking(value);
   }
 
@@ -424,6 +423,7 @@ class ParameterWrapper : public ParameterMeta {
    * infinite recursion when a widget sets the parameter that then sets the
    * widget.
    */
+
   virtual void setNoCalls(ParameterType value, void *blockReceiver = nullptr) {
     //        if (value > mMax) value = mMax;
     //        if (value < mMin) value = mMin;
@@ -532,17 +532,13 @@ class ParameterWrapper : public ParameterMeta {
    */
   void setSynchronousCallbacks(bool synchronous = true) {
     mSynchronous = synchronous;
-    if (mCallbacks.size() > 0 && mCallbacks[0] == mAsyncCallback) {
+    if (mCallbacks.size() > 0 && mCallbacks[0] == nullptr) {
       if (synchronous) {
         mCallbacks.erase(mCallbacks.begin());
-      } else {
-        std::cout << "WARNING: setSynchronousCallbacks() already set to false"
-                  << std::endl;
       }
-    } else {
-      if (!synchronous) {
-        mCallbacks.insert(mCallbacks.begin(), mAsyncCallback);
-      }
+    }
+    if (synchronous) {
+      mCallbacks.insert(mCallbacks.begin(), nullptr);
     }
   }
 
@@ -552,7 +548,7 @@ class ParameterWrapper : public ParameterMeta {
    * @brief call change callbacks if value has changed since last call
    */
   void processChange() {
-    if (mChanged && mCallbacks.size() > 0 && mCallbacks[0] == mAsyncCallback) {
+    if (mChanged && mCallbacks.size() > 0 && mCallbacks[0] == nullptr) {
       auto callbackIt = mCallbacks.begin() + 1;
       ParameterType value = get();
       mChanged = false;
@@ -604,7 +600,6 @@ class ParameterWrapper : public ParameterMeta {
   ParameterType mValueCache;
 
   bool mSynchronous{true};
-  std::shared_ptr<ParameterChangeCallback> mAsyncCallback;
   bool mChanged{false};
 
  private:
@@ -1381,9 +1376,8 @@ template <class ParameterType>
 void ParameterWrapper<ParameterType>::runChangeCallbacksSynchronous(
     ParameterType &value) {
   for (auto cb : mCallbacks) {
-    if (cb == mAsyncCallback) {
-      // Async callback is just a marker and should be the first callback
-      // in the vector
+    if (cb == nullptr) {
+      // If first callback if nullptr, callbacks must be processed async
       mChanged = true;
       return;
     } else {
