@@ -314,6 +314,9 @@ class SynthGUIManager {
     }
   }
 
+  /**
+   * @brief Draws a panel with all the synth controls.
+   */
   void drawSynthControlPanel() {
     ParameterGUI::beginPanel(demangle(typeid(mControlVoice).name()).c_str());
     drawSynthWidgets();

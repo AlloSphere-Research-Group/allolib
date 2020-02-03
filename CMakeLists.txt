@@ -93,6 +93,7 @@ set(headers
   include/al/io/al_Imgui.hpp
   # include/al/io/al_Serial.hpp
   include/al/io/al_MIDI.hpp
+  include/al/io/al_PersistentConfig.hpp
   include/al/io/al_Toml.hpp
   include/al/io/al_Window.hpp
   include/al/math/al_Constants.hpp
