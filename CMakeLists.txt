@@ -47,11 +47,9 @@ add_subdirectory(external)
 
 set(headers
   include/al/app/al_App.hpp
-  include/al/app/al_AudioApp.hpp
   include/al/app/al_DistributedApp.hpp
   include/al/app/al_NodeConfiguration.hpp
   include/al/app/al_FPS.hpp/
-#  include/al/app/al_WindowApp.hpp
 
   include/al/app/al_AudioDomain.hpp
   include/al/app/al_ComputationDomain.hpp
@@ -60,7 +58,7 @@ set(headers
   include/al/app/al_OSCDomain.hpp
   include/al/app/al_SimulationDomain.hpp
   include/al/app/al_OmniRendererDomain.hpp
-#  include/al/app/al_StateDistributionDomain.hpp
+  include/al/app/al_StateDistributionDomain.hpp
 
   include/al/graphics/al_BufferObject.hpp
   include/al/graphics/al_DefaultShaders.hpp
@@ -91,7 +89,6 @@ set(headers
   include/al/io/al_CSVReader.hpp
   include/al/io/al_File.hpp
   include/al/io/al_Imgui.hpp
-  # include/al/io/al_Serial.hpp
   include/al/io/al_MIDI.hpp
   include/al/io/al_PersistentConfig.hpp
   include/al/io/al_Toml.hpp
@@ -110,7 +107,6 @@ set(headers
   include/al/scene/al_SequencerMIDI.hpp
   include/al/scene/al_SynthSequencer.hpp
   include/al/sound/al_Ambisonics.hpp
-#  include/al/sound/al_AudioScene.hpp
   include/al/sound/al_Biquad.hpp
   include/al/sound/al_Crossover.hpp
   include/al/sound/al_Dbap.hpp
@@ -155,9 +151,7 @@ set(headers
 
 set(sources
   src/app/al_App.cpp
-  src/app/al_AudioApp.cpp
   src/app/al_FPS.cpp
-#  src/app/al_WindowApp.cpp
   src/app/al_DistributedApp.cpp
 
   src/app/al_AudioDomain.cpp
@@ -166,7 +160,7 @@ set(sources
   src/app/al_OpenGLGraphicsDomain.cpp
   src/app/al_OSCDomain.cpp
   src/app/al_SimulationDomain.cpp
-#  src/app/al_StateDistributionDomain.cpp
+  src/app/al_StateDistributionDomain.cpp
 
   src/graphics/al_BufferObject.cpp
   src/graphics/al_DefaultShaders.cpp
@@ -201,7 +195,6 @@ set(sources
   src/io/al_Imgui.cpp
   src/io/al_imgui_impl.cpp
   src/io/al_MIDI.cpp
-  # src/io/al_Serial.cpp
   src/io/al_Toml.cpp
   src/io/al_Window.cpp
   src/io/al_WindowGLFW.cpp
@@ -213,7 +206,6 @@ set(sources
   src/scene/al_PolySynth.cpp
   src/scene/al_SynthSequencer.cpp
   src/sound/al_Ambisonics.cpp
-#  src/sound/al_AudioScene.cpp
   src/sound/al_Biquad.cpp
   src/sound/al_Dbap.cpp
   src/sound/al_Lbap.cpp
