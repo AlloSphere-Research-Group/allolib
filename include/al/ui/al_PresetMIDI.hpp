@@ -66,8 +66,9 @@ class PresetMIDI : public MIDIMessageHandler {
       mRtMidiIn.openPort(deviceIndex);
       printf("PresetMIDI: Opened port to %s\n",
              mRtMidiIn.getPortName(deviceIndex).c_str());
-    } catch (RtMidiError error) {
-      std::cout << "PresetMIDI Warning: Could not open MIDI port "
+    } catch (RtMidiError &error) {
+      std::cerr << error.getMessage() << std::endl;
+      std::cerr << "PresetMIDI Warning: Could not open MIDI port "
                 << deviceIndex << std::endl;
     }
     mMorphBinding.channel = mMorphBinding.controlNumber = -1;
@@ -106,7 +107,8 @@ class PresetMIDI : public MIDIMessageHandler {
         std::cerr << "PresetMIDI Warning: Could not open MIDI port "
                   << deviceIndex << std::endl;
       }
-    } catch (RtMidiError error) {
+    } catch (RtMidiError &error) {
+      std::cerr << error.getMessage() << std::endl;
       std::cerr << "PresetMIDI Warning: Could not open MIDI port "
                 << deviceIndex << std::endl;
     }
