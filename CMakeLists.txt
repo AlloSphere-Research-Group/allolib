@@ -239,6 +239,7 @@ set(sources
   src/ui/al_PresetHandler.cpp
   src/ui/al_PresetServer.cpp
   src/ui/al_Parameter.cpp
+  src/ui/al_Pickable.cpp
   src/ui/al_PresetMapper.cpp
 
 )
