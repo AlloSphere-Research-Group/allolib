@@ -109,7 +109,8 @@ class Vbap : public Spatializer {
   /// sphere...) but it can also be used creatively to make an area in space
   /// be reassigned somewhere else, or to a wider number of speakers.
   ///
-  void makePhantomChannel(int channelIndex, std::vector<int> assignedOutputs);
+  void makePhantomChannel(int channelIndex,
+                          std::vector<unsigned int> assignedOutputs);
 
   /// Set whether VBAP will use 3D (triangles) or 2D (speaker pairs)
   /// You must call compile after this function to ensure triples are
@@ -133,7 +134,7 @@ class Vbap : public Spatializer {
 
  private:
   std::vector<SpeakerTriple> mTriplets;
-  std::map<int, std::vector<int> > mPhantomChannels;
+  std::map<unsigned int, std::vector<unsigned int> > mPhantomChannels;
   //	Listener* mListener;
   bool mIs3D;
   VbapOptions mOptions;

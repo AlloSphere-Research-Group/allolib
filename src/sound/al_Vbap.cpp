@@ -67,8 +67,8 @@ Vec3d Vbap::computeGains(const Vec3d &vecA, const SpeakerTriple &speak) {
 
 // 2D VBAP, find pairs of speakers.
 void Vbap::findSpeakerPairs(const std::vector<Speaker> &spkrs) {
-  unsigned numSpeakers = spkrs.size();
-  unsigned j, index;
+  size_t numSpeakers = spkrs.size();
+  size_t j, index;
   std::vector<unsigned> speakerMapping;  // [numSpeakers]; // To map unordered
                                          // speakers into an ordered set.
   std::vector<float> speakerAngles;      // [numSpeakers];
@@ -86,7 +86,7 @@ void Vbap::findSpeakerPairs(const std::vector<Speaker> &spkrs) {
   }
 
   // Sort speakers into the map
-  for (unsigned i = 1; i < numSpeakers; i++) {
+  for (size_t i = 1; i < numSpeakers; i++) {
     // Only sort speakers that have elevation == 0. Ignore all other.
     //		if (spkrs[i].elevation == 0) {
 
@@ -136,7 +136,6 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker> &spkrs) {
   std::list<SpeakerTriple> triplets;
 
   unsigned numSpeakers = spkrs.size();
-  int numSpeakersSigned = (int)numSpeakers;
 
   // form all possible triples
   for (unsigned i = 0; i < numSpeakers; i++) {
@@ -342,7 +341,7 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker> &spkrs) {
   // Remove triplet if contains another speaker
   double thresh = 0.f;
   int spkInTri = 0;
-  for (int i = 0; i < numSpeakersSigned; ++i) {
+  for (size_t i = 0; i < numSpeakers; ++i) {
     Speaker s = spkrs[i];
     Vec3d vec = s.vec().normalized();
     unsigned int devChan = s.deviceChannel;
@@ -378,7 +377,7 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker> &spkrs) {
 }
 
 void Vbap::makePhantomChannel(int channelIndex,
-                              std::vector<int> assignedOutputs) {
+                              std::vector<unsigned int> assignedOutputs) {
   mPhantomChannels[channelIndex] = std::move(assignedOutputs);
   // mPhantomChannels[channelIndex] = assignedOutputs;
 }
@@ -427,7 +426,7 @@ void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
       auto it2 = mPhantomChannels.find(triple.s2Chan);
       auto it3 = mPhantomChannels.find(triple.s3Chan);
 
-      for (int i = 0; i < numFrames; ++i) {
+      for (size_t i = 0; i < numFrames; ++i) {
         float sample = samples[i];
         if (it1 != mPhantomChannels.end()) {  // vertex 1 is phantom
           float splitGain = gains[0] / mPhantomChannels.size();
@@ -494,7 +493,7 @@ void Vbap::renderSample(AudioIOData &io, const Pose &listeningPose,
 
   // Search thru the triplets array in search of a match for the source
   // position.
-  for (unsigned count = 0; count < mTriplets.size(); ++count) {
+  for (size_t count = 0; count < mTriplets.size(); ++count) {
     gains = computeGains(vec, mTriplets[currentTripletIndex]);
     if ((gains[0] >= 0) && (gains[1] >= 0) && (!mIs3D || (gains[2] >= 0))) {
       gains.normalize();
