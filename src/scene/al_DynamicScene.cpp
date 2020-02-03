@@ -357,7 +357,7 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
         unsigned int offset = voice->getStartOffsetFrames(fpb);
         if (offset < fpb) {
           io.frame(offset);
-          int endOffsetFrames = voice->getEndOffsetFrames(fpb);
+          unsigned int endOffsetFrames = voice->getEndOffsetFrames(fpb);
           if (endOffsetFrames > 0 && endOffsetFrames <= fpb) {
             voice->triggerOff(endOffsetFrames);
           }

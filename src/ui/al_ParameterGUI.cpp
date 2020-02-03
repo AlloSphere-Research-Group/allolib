@@ -856,7 +856,7 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
       ptrdiff_t pos =
           find(seqList.begin(), seqList.end(), state.loadedSequence) -
           seqList.begin();
-      if (pos < seqList.size()) {
+      if (size_t(pos) < seqList.size()) {
         state.currentItem = pos;
         state.newSequence = false;
         state.totalDuration =

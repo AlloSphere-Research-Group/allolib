@@ -51,7 +51,7 @@ void Dbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
     gain = powf(gain, mFocus);
 
     float *out = io.outBuffer(mDeviceChannels[k]);
-    for (int i = 0; i < numFrames; ++i) {
+    for (size_t i = 0; i < numFrames; ++i) {
       out[i] += gain * samples[i];
     }
   }
