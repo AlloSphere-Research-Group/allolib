@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
  */
 class CSVReader {
  public:
-  typedef enum { STRING, REAL, INTEGER, BOOLEAN, IGNORE_COLUMN } DataType;
+  typedef enum { STRING, REAL, INT64, BOOLEAN, IGNORE_COLUMN } DataType;
 
   CSVReader() {
     // TODO We could automatically add types by trying to parse the file

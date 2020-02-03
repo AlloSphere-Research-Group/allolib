@@ -81,7 +81,7 @@ bool CSVReader::readFile(std::string fileName, bool hasColumnNames) {
           std::string field;
           std::getline(ss, field, ',');
           size_t stringLen = std::min(maxStringSize - 1, field.size());
-          int32_t intValue;
+          int64_t intValue;
           double doubleValue;
           bool booleanValue;
           auto data = row + byteCount;
@@ -91,8 +91,8 @@ bool CSVReader::readFile(std::string fileName, bool hasColumnNames) {
               std::memcpy(data, field.data(), stringLen * sizeof(char));
               byteCount += maxStringSize * sizeof(char);
               break;
-            case INTEGER:
-              intValue = std::atoi(field.data());
+            case INT64:
+              intValue = std::atol(field.data());
               std::memcpy(data, &intValue, sizeof(int64_t));
               byteCount += sizeof(int64_t);
               break;
@@ -134,7 +134,7 @@ bool CSVReader::readFile(std::string fileName, bool hasColumnNames) {
                         .base(),
                     field.end());
         size_t stringLen = std::min(maxStringSize - 1, field.size());
-        int32_t intValue;
+        int64_t intValue;
         double doubleValue;
         bool booleanValue;
 
@@ -145,8 +145,8 @@ bool CSVReader::readFile(std::string fileName, bool hasColumnNames) {
             std::memcpy(data, field.data(), stringLen * sizeof(char));
             byteCount += maxStringSize * sizeof(char);
             break;
-          case INTEGER:
-            intValue = std::atoi(field.data());
+          case INT64:
+            intValue = std::atol(field.data());
             std::memcpy(data, &intValue, sizeof(int64_t));
             byteCount += sizeof(int64_t);
             break;
@@ -181,7 +181,7 @@ std::vector<double> CSVReader::getColumn(int index) {
       case STRING:
         offset += maxStringSize * sizeof(char);
         break;
-      case INTEGER:
+      case INT64:
         offset += sizeof(int64_t);
         break;
       case REAL:
@@ -210,7 +210,7 @@ size_t CSVReader::calculateRowLength() {
       case STRING:
         len += maxStringSize * sizeof(char);
         break;
-      case INTEGER:
+      case INT64:
         len += sizeof(int64_t);
         break;
       case REAL:
