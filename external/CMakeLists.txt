@@ -140,7 +140,6 @@ elseif (AL_WINDOWS)
 else(AL_LINUX)
     target_link_libraries(serial rt pthread)
 endif()
-message("serial")
 
   # c++14 It's very important to set this for the extension as not
   # setting it will cause targets upstream to not use c++14

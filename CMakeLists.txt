@@ -253,13 +253,21 @@ set_target_properties(al PROPERTIES
 )
 
 if (AL_WINDOWS)
-  target_compile_options(al PRIVATE "")
   target_compile_definitions(al PUBLIC NOMINMAX)
-else ()
-  target_compile_options(al PRIVATE "-Wall")
+else()
+    target_compile_options(al PRIVATE "-Wall")
 endif (AL_WINDOWS)
 
 target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
+
+if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
+    target_compile_options(al PUBLIC
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+        -Wall>
+        $<$<CXX_COMPILER_ID:MSVC>:
+        /wd4221 /wd4224 /wd4244  /wd4305  /wd4267 /wd4005 /wd4996>)
+    set_target_properties(al PROPERTIES LINK_FLAGS "/ignore:4099")
+endif()
 
 target_include_directories(al PUBLIC
   include
