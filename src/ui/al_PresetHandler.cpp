@@ -53,7 +53,8 @@ void PresetHandler::setSubDirectory(std::string directory) {
 }
 
 void PresetHandler::registerPresetCallback(
-    std::function<void(int index, void *presetHandler, void *userData)> cb, void *userData) {
+    std::function<void(int index, void *presetHandler, void *userData)> cb,
+    void *userData) {
   mCallbacks.push_back(cb);
   mCallbackUdata.push_back(userData);
 }
@@ -301,6 +302,20 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
 
 void PresetHandler::morphTo(std::string presetName, float morphTime) {
   auto parameterStates = loadPresetValues(presetName);
+  if (mUseCallbacks) {
+    int index = -1;
+    for (auto mapped : mPresetsMap) {
+      if (mapped.second == presetName) {
+        index = mapped.first;
+        break;
+      }
+    }
+    for (size_t i = 0; i < mCallbacks.size(); ++i) {
+      if (mCallbacks[i]) {
+        mCallbacks[i](index, this, mCallbackUdata[i]);
+      }
+    }
+  }
   morphTo(parameterStates, morphTime);
 }
 
