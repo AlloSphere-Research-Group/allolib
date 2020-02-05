@@ -153,7 +153,13 @@ void App::fullScreen(bool on) {
   }
 }
 
-void App::title(const std::string &v) { defaultWindow().title(v); }
+void App::title(const std::string &v) {
+  if (mDefaultWindowDomain) {
+    defaultWindow().title(v);
+  } else {
+    mOpenGLGraphicsDomain->nextWindowProperties.title = v;
+  }
+}
 
 void App::vsync(bool v) {
   if (mDefaultWindowDomain) {
