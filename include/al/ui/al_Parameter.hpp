@@ -1055,13 +1055,14 @@ class ParameterPose : public ParameterWrapper<al::Pose> {
   virtual void getFields(std::vector<ParameterField> &fields) override {
     Quatf quat = get().quat();
     Vec4f pos = get().pos();
+    fields.reserve(7);
     fields.emplace_back(ParameterField(pos.x));
     fields.emplace_back(ParameterField(pos.y));
     fields.emplace_back(ParameterField(pos.z));
+    fields.emplace_back(ParameterField(quat.w));
     fields.emplace_back(ParameterField(quat.x));
     fields.emplace_back(ParameterField(quat.y));
     fields.emplace_back(ParameterField(quat.z));
-    fields.emplace_back(ParameterField(quat.w));
   }
 
   virtual void setFields(std::vector<ParameterField> &fields) override {
