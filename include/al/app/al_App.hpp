@@ -142,8 +142,9 @@ class App {
   void configureAudio(double audioRate = 44100, int audioBlockSize = 512,
                       int audioOutputs = -1, int audioInputs = -1);
 
-  void configureAudio(AudioDevice &dev, double audioRate, int audioBlockSize,
-                      int audioOutputs, int audioInputs);
+  void configureAudio(AudioDevice &dev, double audioRate = -1,
+                      int audioBlockSize = 512, int audioOutputs = -1,
+                      int audioInputs = -1);
 
   // Access to OSC domain
   ParameterServer &parameterServer();

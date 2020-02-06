@@ -187,6 +187,9 @@ void App::configureAudio(double audioRate, int audioBlockSize, int audioOutputs,
 
 void App::configureAudio(AudioDevice &dev, double audioRate, int audioBlockSize,
                          int audioOutputs, int audioInputs) {
+  if (audioRate < 0) {
+    audioRate = AudioBackend::devicePreferredSamplingRate(dev.id());
+  }
   audioDomain()->configure(dev, audioRate, audioBlockSize, audioOutputs,
                            audioInputs);
 }
