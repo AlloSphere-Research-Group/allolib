@@ -82,14 +82,6 @@ class Graphics : public RenderManager {
   // clears color & depth buffer using al::Color class
   void clear(Color const& c) { clear(c.r, c.g, c.b, c.a); }
 
-  // GL_NONE       /  GL_COLOR_ATTACHMENTn
-  // GL_FRONT_LEFT /  GL_FRONT_RIGHT
-  // GL_BACK_LEFT  /  GL_BACK_RIGHT
-  void drawBuffer(unsigned int mode) {
-    // glDrawBuffers(GLsizei n, GLenum const* bufs);
-    glDrawBuffers(1, &mode);
-  }
-
   // extended, predefined render managing --------------------------------------
   void init();
 
