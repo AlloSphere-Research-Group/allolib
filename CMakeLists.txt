@@ -91,6 +91,7 @@ set(headers
   include/al/io/al_Imgui.hpp
   include/al/io/al_MIDI.hpp
   include/al/io/al_PersistentConfig.hpp
+  include/al/io/al_Socket.hpp
   include/al/io/al_Toml.hpp
   include/al/io/al_Window.hpp
   include/al/math/al_Constants.hpp
@@ -196,6 +197,7 @@ set(sources
   src/io/al_Imgui.cpp
   src/io/al_imgui_impl.cpp
   src/io/al_MIDI.cpp
+  src/io/al_Socket.cpp
   src/io/al_Toml.cpp
   src/io/al_Window.cpp
   src/io/al_WindowGLFW.cpp

@@ -47,6 +47,8 @@
 
 #include <string>
 
+#include "al/system/al_Time.hpp"
+
 namespace al {
 
 /// A network socket
@@ -77,8 +79,8 @@ class Socket {
 
   /// @param[in] port		Port number (valid range is 0-65535)
   /// @param[in] address	IP address
-  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is block
-  /// with timeout
+  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is
+  /// block with timeout
   /// @param[in] type		Protocol type
   Socket(uint16_t port, const char* address, al_sec timeout, int type);
 
@@ -123,7 +125,8 @@ class Socket {
   ///
   /// @param[in] t	Timeout in seconds.
   ///					If t > 0, the socket blocks with timeout
-  ///t. 					If t = 0, the socket never blocks. 					If t < 0, the socket blocks forever.
+  /// t. 					If t = 0, the socket never blocks. 					If t < 0, the
+  /// socket blocks forever.
   /// Note that setting the timeout will close and re-open the socket.
   void timeout(al_sec t);
 
@@ -183,8 +186,8 @@ class SocketClient : public Socket {
 
   /// @param[in] port		Remote port number (valid range is 0-65535)
   /// @param[in] address	Remote IP address
-  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is block
-  /// with timeout
+  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is
+  /// block with timeout
   /// @param[in] type		Protocol type
   SocketClient(uint16_t port, const char* address = "localhost",
                al_sec timeout = 0, int type = UDP | DGRAM)
@@ -208,10 +211,10 @@ class SocketServer : public Socket {
   SocketServer() {}
 
   /// @param[in] port		Local port number (valid range is 0-65535)
-  /// @param[in] address	Local IP address. If empty, will bind all network
-  /// interfaces to socket.
-  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is block
-  /// with timeout
+  /// @param[in] address	Local IP address. If empty, will bind all
+  /// network interfaces to socket.
+  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is
+  /// block with timeout
   /// @param[in] type		Protocol type
   SocketServer(uint16_t port, const char* address = "", al_sec timeout = 0,
                int type = UDP | DGRAM)
