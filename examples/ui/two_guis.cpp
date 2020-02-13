@@ -15,7 +15,7 @@ class MyApp : public App {
 
   ParameterColor color{"Color"};
 
-  void onCreate() {
+  void onCreate() override {
     nav() = Vec3d(0, 0, 2);
 
     addSphere(mMesh, 0.1);
@@ -33,7 +33,7 @@ class MyApp : public App {
     navControl().active(!mPositionGUI.usingInput() && !mColorGUI.usingInput());
   }
 
-  virtual void onDraw(Graphics &g) {
+  void onDraw(Graphics &g) override {
     g.clear(0);
 
     g.pushMatrix();
@@ -56,10 +56,11 @@ class MyApp : public App {
   Mesh mMesh;
 };
 
-int main(int argc, char *argv[]) {
+int main() {
   MyApp app;
   app.dimensions(800, 600);
   app.title("Presets GUI");
   app.fps(30);
   app.start();
+  return 0;
 }
