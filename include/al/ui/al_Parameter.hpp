@@ -595,7 +595,7 @@ class ParameterWrapper : public ParameterMeta {
 
  private:
   // pointer to avoid having to explicitly declare copy/move
-  std::mutex *mMutex;
+  std::unique_ptr<std::mutex> mMutex;
   ParameterType mValue;
   ParameterType mValueCache;
 
@@ -1306,7 +1306,7 @@ class ParameterColor : public ParameterWrapper<al::Color> {
 
 template <class ParameterType>
 ParameterWrapper<ParameterType>::~ParameterWrapper() {
-  delete mMutex;
+  //  delete mMutex;
 }
 
 template <class ParameterType>
@@ -1317,7 +1317,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName,
     : ParameterMeta(parameterName, group, prefix), mProcessCallback(nullptr) {
   mValue = defaultValue;
   mValueCache = defaultValue;
-  mMutex = new std::mutex;
+  mMutex = std::make_unique<std::mutex>();
   setDefault(defaultValue);
   std::shared_ptr<ParameterChangeCallback> mAsyncCallback =
       std::make_shared<ParameterChangeCallback>(
@@ -1332,7 +1332,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(
                                                         defaultValue, prefix) {
   mMin = min;
   mMax = max;
-  mMutex = new std::mutex;
+  mMutex = std::make_unique<std::mutex>();
   setDefault(defaultValue);
 }
 
@@ -1345,7 +1345,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(
   mProcessCallback = param.mProcessCallback;
   // mProcessUdata = param.mProcessUdata;
   mCallbacks = param.mCallbacks;
-  mMutex = new std::mutex;
+  mMutex = std::make_unique<std::mutex>();
   setDefault(param.getDefault());
   // mCallbackUdata = param.mCallbackUdata;
 }
