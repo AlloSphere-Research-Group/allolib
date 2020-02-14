@@ -59,6 +59,7 @@ class DistributedApp : public App, public NodeConfiguration {
   AudioControl mAudioControl;
 
   std::map<std::string, std::string> mRoleMap;
+  bool mFoundHost = false;
 };
 
 template <class TSharedState>

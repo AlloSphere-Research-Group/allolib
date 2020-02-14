@@ -25,8 +25,8 @@ void DistributedApp::initialize() {
   auto nodesTable = appConfig.root->get_table_array("node");
   std::vector<std::string> mListeners;
   // First get role from config file
+  mFoundHost = false;
   if (nodesTable) {
-    bool foundHost = false;
     for (const auto &table : *nodesTable) {
       std::string host = *table->get_as<std::string>("host");
       std::string role = *table->get_as<std::string>("role");
@@ -34,7 +34,7 @@ void DistributedApp::initialize() {
       if (name() == host) {
         // Now set capabilities from role
         setRole(role);
-        foundHost = true;
+        mFoundHost = true;
       }
       mRoleMap[host] = role;
       if (table->contains("dataRoot")) {
@@ -64,11 +64,11 @@ void DistributedApp::initialize() {
                   << std::endl;
       }
     }
-    if (!foundHost) {  // if host name isn't found, use default settings and
-                       // warn
+    if (!mFoundHost) {  // if host name isn't found, use default settings and
+                        // warn
       std::cout
           << "WARNING: node " << name()
-          << " not found in node table!\n\t*Using default desktop setting!"
+          << " not found in node table!\n\t*Using default desktop setting!*"
           << std::endl;
       setRole("desktop");
       rank = 0;
@@ -96,7 +96,11 @@ void DistributedApp::initialize() {
     }
   }
   if (appConfig.hasKey<std::string>("broadcastAddress")) {
-    additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
+    if (mFoundHost) {
+      additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
+    } else {
+      additionalConfig["broadcastAddress"] = "127.0.0.1";
+    }
   } else {
     additionalConfig["broadcastAddress"] = "127.0.0.1";
   }
@@ -190,9 +194,14 @@ void DistributedApp::start() {
   }
 
   if (isPrimary()) {
-    for (auto hostRole : mRoleMap) {
-      if (hostRole.first != name()) {
-        parameterServer().addListener(hostRole.first, oscDomain()->port);
+    if (!mFoundHost) {
+      std::cout << "WARNING: not adding extra listeners due to bad node table"
+                << std::endl;
+    } else {
+      for (auto hostRole : mRoleMap) {
+        if (hostRole.first != name()) {
+          parameterServer().addListener(hostRole.first, oscDomain()->port);
+        }
       }
     }
     parameterServer().notifyAll();
