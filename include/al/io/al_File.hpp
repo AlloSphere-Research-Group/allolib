@@ -455,6 +455,8 @@ class FileList {
 
   int count() { return static_cast<int>(mFiles.size()); }
 
+  void sort();
+
   void print(std::ostream& stream = std::cout) const;
 
   FilePath& operator[](int i) { return mFiles[i]; }

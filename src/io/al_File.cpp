@@ -352,6 +352,13 @@ bool Dir::removeRecursively(const std::string& path) {
   return minFileSys::deleteDirRecursively(path);
 }
 
+void FileList::sort() {
+  std::sort(mFiles.begin(), mFiles.end(),
+            [](const FilePath& a, const FilePath& b) -> bool {
+              return a.filepath() > b.filepath();
+            });
+}
+
 void FileList::print(std::ostream& stream) const {
   stream << "FileList:" << std::endl;
   std::vector<FilePath>::const_iterator it = mFiles.begin();
