@@ -109,7 +109,7 @@ std::string Font::defaultFont() {
   std::string fontPath = fontDir + "/" + "Arial.ttf";
 #elif defined(AL_OSX)
   std::string fontDir = "/Library/Fonts";
-  std::string fontPath = fontDir + "/" + "Arial Black.ttf";
+  std::string fontPath = fontDir + "/" + "Arial Unicode.ttf";
 #else
   std::string fontDir = "/usr/share/fonts/truetype";
   std::string fontPath = fontDir + "/dejavu/DejaVuSansMono.ttf";
