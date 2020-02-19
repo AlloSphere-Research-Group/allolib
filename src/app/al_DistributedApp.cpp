@@ -162,11 +162,9 @@ void DistributedApp::start() {
     omniRendering->window().onMouseScroll =
         std::bind(&App::onMouseScroll, this, std::placeholders::_1);
     if (!isPrimary()) {
-      std::cout << "Running REPLICA" << std::endl;
       omniRendering->drawOmni = true;
     }
   } else if (hasCapability(CAP_RENDERING)) {
-    std::cout << "Running Primary" << std::endl;
     mDefaultWindowDomain = graphicsDomain()->newWindow();
     mDefaultWindowDomain->initialize(graphicsDomain().get());
     mDefaultWindowDomain->window().append(stdControls);
@@ -194,10 +192,12 @@ void DistributedApp::start() {
   }
 
   if (isPrimary()) {
+    std::cout << "Running Primary" << std::endl;
     if (!mFoundHost) {
       std::cout << "WARNING: not adding extra listeners due to bad node table"
                 << std::endl;
     } else {
+      std::cout << "Running REPLICA" << std::endl;
       for (auto hostRole : mRoleMap) {
         if (hostRole.first != name()) {
           parameterServer().addListener(hostRole.first, oscDomain()->port);

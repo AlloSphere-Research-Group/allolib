@@ -79,6 +79,7 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
   bool window_is_stereo_buffered = false;
   int eye_to_render = -1;  // -1 for mono, 0: left, 1: right
 
+  /// Set this to false to render a regular view instead of omni
   bool drawOmni{true};
   Lens mLens;
   //  Pose mPose;

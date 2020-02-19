@@ -406,7 +406,7 @@ class PerProjectionRender {
       info.texture[1]->create2D(res_, res_, GL_RGBA8, GL_RGBA,
                                 GL_UNSIGNED_BYTE);
 
-      float fov = 3.1415926535 / 2;
+      float fov = 3.1415926535f / 2.f;
       Mat4f rmat = get_cube_mat(index);
       Mat4f proj;
       proj.set(1.0f / std::tan(fov / 2.0f), 0, 0, 0, 0,
@@ -416,7 +416,7 @@ class PerProjectionRender {
       Mat4f::multiply(info.pc_matrix, proj, rmat);
       info.r_matrix = rmat;
       info.p_matrix = proj;
-      info.tanFovDiv2 = tan(fov / 2.0);
+      info.tanFovDiv2 = std::tanf(fov / 2.0f);
       info.warp_texture.reset();
     }
 
@@ -519,8 +519,8 @@ class PerProjectionRender {
   }
 
   // void pose(Pose const& p) { pose_ = p; if (did_begin)
-  // g->viewMatrix(view_mat(pose_)); } Pose& pose() { return pose_; } Pose const&
-  // pose() const { return pose_; }
+  // g->viewMatrix(view_mat(pose_)); } Pose& pose() { return pose_; } Pose
+  // const& pose() const { return pose_; }
 
   void composite(Graphics& g, int eye = 0) {
     g.pushCamera(Viewpoint::IDENTITY);
