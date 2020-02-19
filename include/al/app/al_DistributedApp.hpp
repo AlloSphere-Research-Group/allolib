@@ -33,6 +33,35 @@ class AudioControl {
 /**
  * @brief DistributedApp class
  * @ingroup App
+ *
+ * This class will try to read a file called "distributed_app.toml" in the
+ * current directory to set roles and capabilities.
+ *
+ * The file should look like:
+ *
+@code
+broadcastAddress = "192.168.0.255"
+[[node]]
+  host = "ar01.1g"
+  rank = 0
+  role = "desktop"
+[[node]]
+  host = "gr02"
+  rank = 1
+  role = "renderer"
+[[node]]
+  host = "gr03"
+  rank = 1
+  role = "renderer"
+[[node]]
+  host = "gr04"
+  rank = 1
+  role = "renderer"
+@endcode
+
+  * The broadcast address is used for state sending and the node list sets the
+  * role and capabilities of the application if the hostname matches one of the
+  * nodes listed.
  */
 class DistributedApp : public App, public NodeConfiguration {
  public:
