@@ -901,6 +901,7 @@ void PresetHandler::stepMorphing() {
     if (totalSteps == 1) {
       morphPhase = 1.0;
     }
+    std::lock_guard<std::mutex> lk(mTargetLock);
     setInterpolatedValues(mStartValues, mTargetValues, morphPhase);
   }
 }
