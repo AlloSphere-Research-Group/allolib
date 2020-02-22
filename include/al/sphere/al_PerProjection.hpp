@@ -417,7 +417,7 @@ class PerProjectionRender {
       Mat4f::multiply(info.pc_matrix, proj, rmat);
       info.r_matrix = rmat;
       info.p_matrix = proj;
-      info.tanFovDiv2 = std::tanf(fov / 2.0f);
+      info.tanFovDiv2 = std::tan(fov / 2.0f);
       info.warp_texture.reset();
     }
 
