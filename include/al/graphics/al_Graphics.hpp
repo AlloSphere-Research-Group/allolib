@@ -74,9 +74,14 @@ class Graphics : public RenderManager {
   void clearColor(Color const& c) { gl::clearColor(c.r, c.g, c.b, c.a); }
 
   // clears color & depth buffer
-  void clear(float r = 0, float g = 0, float b = 0, float a = 1) {
+  void clear(float r, float g, float b, float a = 1.f) {
     gl::clearColor(r, g, b, a);
-    gl::clearDepth(1);
+    gl::clearDepth(1.f);
+  }
+
+  void clear(float grayscale, float a = 1.f) {
+    gl::clearColor(grayscale, grayscale, grayscale, a);
+    gl::clearDepth(1.f);
   }
 
   // clears color & depth buffer using al::Color class
@@ -90,22 +95,24 @@ class Graphics : public RenderManager {
     mTint = c;
     mUniformChanged = true;
   }
-  void tint(float r, float g, float b, float a = 1.0f) {
+  void tint(float r, float g, float b, float a = 1.f) {
     mTint.set(r, g, b, a);
     mUniformChanged = true;
   }
-  void tint(float grayscale, float a = 1.0f) {
+  void tint(float grayscale, float a = 1.f) {
     tint(grayscale, grayscale, grayscale, a);
   }
 
   // set to uniform color mode, using previously set uniform color
   void color();
   // set to uniform color mode, using provided color
-  void color(float r, float g, float b, float a = 1.0f);
+  void color(float r, float g, float b, float a = 1.f);
   // set to uniform color mode, using provided color
   void color(Color const& c);
   // set to uniform color mode, using provided color
-  void color(float k, float a = 1.0f) { color(k, k, k, a); }
+  void color(float grayscale, float a = 1.f) {
+    color(grayscale, grayscale, grayscale, a);
+  }
 
   // set to mesh color mode, using mesh's color array
   void meshColor();

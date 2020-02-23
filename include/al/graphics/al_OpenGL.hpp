@@ -78,10 +78,9 @@ void colorMask(bool r, bool g, bool b, bool a);
 /// Turn color mask on/off (all RGBA components)
 void colorMask(bool b);
 
-void clearColor(float r = 0, float g = 0, float b = 0, float a = 1);
-void clearDepth(float d = 1);
-void clearBuffer(int buffer, float r = 0, float g = 0, float b = 0,
-                 float a = 1);
+void clearColor(float r, float g, float b, float a = 1.f);
+void clearDepth(float d = 1.f);
+void clearBuffer(int buffer, float r, float g, float b, float a = 1.f);
 /// buffer=[GL_NONE, GL_FRONT_LEFT, GL_FRONT_RIGHT, GL_BACK_LEFT,
 ///         GL_BACK_RIGHT, GL_FRONT, GL_BACK, GL_LEFT, GL_RIGHT,
 ///         GL_FRONT_AND_BACK]
