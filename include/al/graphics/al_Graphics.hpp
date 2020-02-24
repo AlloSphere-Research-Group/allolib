@@ -79,7 +79,7 @@ class Graphics : public RenderManager {
     gl::clearDepth(1.f);
   }
 
-  void clear(float grayscale, float a = 1.f) {
+  void clear(float grayscale = 0.f, float a = 1.f) {
     gl::clearColor(grayscale, grayscale, grayscale, a);
     gl::clearDepth(1.f);
   }
