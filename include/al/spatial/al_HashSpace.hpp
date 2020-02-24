@@ -1,10 +1,10 @@
 #ifndef INCLUDE_AL_HASHSPACE_HPP
 #define INCLUDE_AL_HASHSPACE_HPP
 
-#include "al/math/al_Vec.hpp"
-
 #include <algorithm>
 #include <vector>
+
+#include "al/math/al_Vec.hpp"
 
 /*  Allocore --
   Multimedia / virtual environment application class library
@@ -76,7 +76,7 @@ class HashSpace {
  public:
   /// container for registered spatial elements
   struct Object {
-    Object() : hash(invalidHash()), next(NULL), prev(NULL), userdata(0) {}
+    Object() : hash(invalidHash()), next(nullptr), prev(nullptr), userdata(0) {}
 
     Vec3d pos;
     uint32_t hash;        ///< which voxel ID it belongs to (or invalidHash())
@@ -397,8 +397,10 @@ inline int HashSpace::Query ::operator()(const HashSpace& space, Vec3d center,
           Vec3d rel = space.wrapRelative(o->pos - center);
           double d2 = rel.magSqr();
           if (d2 >= minr2 && d2 <= maxr2) {
-            mObjects[nres].object = o;
-            mObjects[nres].distanceSquared = d2;
+            Result r;
+            r.object = o;
+            r.distanceSquared = d2;
+            mObjects.push_back(r);
             nres++;
           }
           o = o->next;
@@ -443,8 +445,10 @@ inline int HashSpace::Query ::operator()(const HashSpace& space,
             double d2 = rel.magSqr();
             if (d2 >= minr2 && d2 <= maxr2) {
               // here we could insert-sort based on distance...
-              mObjects[nres].object = o;
-              mObjects[nres].distanceSquared = d2;
+              Result r;
+              r.object = o;
+              r.distanceSquared = d2;
+              mObjects.push_back(r);
               nres++;
             }
           }
