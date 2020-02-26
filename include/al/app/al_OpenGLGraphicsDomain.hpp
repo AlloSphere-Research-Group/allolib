@@ -48,6 +48,8 @@ class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
 
   bool running() { return mRunning; }
 
+  // newWindow() must be called after domain has been initialized, as it also
+  // initializes the window domain.
   std::shared_ptr<GLFWOpenGLWindowDomain> newWindow();
 
   void closeWindow(std::shared_ptr<GLFWOpenGLWindowDomain> windowDomain) {

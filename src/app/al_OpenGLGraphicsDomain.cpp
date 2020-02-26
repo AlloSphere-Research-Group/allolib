@@ -66,6 +66,7 @@ bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
 
 std::shared_ptr<GLFWOpenGLWindowDomain> OpenGLGraphicsDomain::newWindow() {
   auto newWindowDomain = newSubDomain<GLFWOpenGLWindowDomain>();
+  newWindowDomain->initialize(this);
   newWindowDomain->window().decorated(nextWindowProperties.decorated);
   newWindowDomain->window().cursor(nextWindowProperties.cursor);
   newWindowDomain->window().cursorHide(!nextWindowProperties.cursorVisible);

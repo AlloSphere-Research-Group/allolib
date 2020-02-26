@@ -21,7 +21,14 @@ bool App::shouldQuit() {
 
 void App::fps(double f) { graphicsDomain()->fps(f); }
 
-Window &App::defaultWindow() { return mDefaultWindowDomain->window(); }
+Window &App::defaultWindow() {
+  if (!mDefaultWindowDomain) {
+    std::cerr
+        << "ERROR: calling function for Window before window is available!"
+        << std::endl;
+  }
+  return mDefaultWindowDomain->window();
+}
 
 Graphics &App::graphics() { return mDefaultWindowDomain->graphics(); }
 
@@ -201,7 +208,6 @@ ParameterServer &App::parameterServer() {
 void App::start() {
   initializeDomains();
   mDefaultWindowDomain = graphicsDomain()->newWindow();
-  mDefaultWindowDomain->initialize(graphicsDomain().get());
 
   mDefaultWindowDomain->onDraw =
       std::bind(&App::onDraw, this, std::placeholders::_1);
