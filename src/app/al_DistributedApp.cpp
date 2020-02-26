@@ -21,6 +21,32 @@ void DistributedApp::initialize() {
     std::cerr << "WSAStartup failed with error: " << err << std::endl;
   }
 #endif
+
+  if (!File::exists("distributed_app.toml")) {
+    if (al::sphere::isSphereMachine()) {
+      // If on sphere, create default config file
+      std::ofstream configfile;
+      configfile.open("distributed_app.toml");
+      configfile << "broadcastAddress = \"192.168.10.255\"" << std::endl;
+
+      configfile << "[[node]]" << std::endl;
+      configfile << "host = \"ar01.1g\"\n";
+      configfile << "rank = 0\n";
+      configfile << "group = 0\n";
+      configfile << "role = \"desktop\"\n\n";
+      for (uint16_t i = 1; i <= 14; i++) {
+        configfile << "[[node]]" << std::endl;
+        char str[3];
+        snprintf(str, 3, "%02d", i);
+        configfile << "host = \"gr" + std::string(str) + "\"\n";
+        configfile << "rank = " + std::to_string(i) + "\n";
+        configfile << "group = 0\n";
+        configfile << "role = \"renderer\"\n\n";
+      }
+      configfile.close();
+    }
+  }
+
   TomlLoader appConfig("distributed_app.toml");
   auto nodesTable = appConfig.root->get_table_array("node");
   std::vector<std::string> mListeners;
@@ -64,8 +90,8 @@ void DistributedApp::initialize() {
                   << std::endl;
       }
     }
-    if (!mFoundHost) {  // if host name isn't found, use default settings and
-                        // warn
+    if (!mFoundHost) {  // if host name isn't found, use default settings
+                        // and warn
       std::cout
           << "WARNING: node " << name()
           << " not found in node table!\n\t*Using default desktop setting!*"
@@ -75,7 +101,6 @@ void DistributedApp::initialize() {
       group = 0;
     }
   } else {  // No nodes table in config file. Use desktop role
-
     auto defaultCapabilities = al::sphere::getSphereNodes();
     if (defaultCapabilities.find(name()) != defaultCapabilities.end()) {
       mCapabilites = defaultCapabilities[name()].mCapabilites;

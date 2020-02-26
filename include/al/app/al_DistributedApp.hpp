@@ -40,7 +40,7 @@ class AudioControl {
  * The file should look like:
  *
 @code
-broadcastAddress = "192.168.0.255"
+broadcastAddress = "192.168.10.255"
 [[node]]
   host = "ar01.1g"
   rank = 0
