@@ -144,6 +144,6 @@ std::map<std::string, NodeConfiguration> sphere::getSphereNodes() {
     nodes[name] = NodeConfiguration{
         i, 0, "/alloshare",
         (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC)};
-  };
+  }
   return nodes;
 }

@@ -204,7 +204,7 @@ class RingBuffer : protected Alloc {
   }
 
   /// Get number of elements
-  int size() const { return mElems.size(); }
+  size_t size() const { return mElems.size(); }
 
   /// Get absolute index of most recently written element
   int pos() const { return mPos; }
