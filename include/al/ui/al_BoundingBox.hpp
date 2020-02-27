@@ -7,6 +7,8 @@
 #include "al/graphics/al_Shapes.hpp"
 #include "al/math/al_Vec.hpp"
 
+#include <limits>
+
 namespace al {
 
 /// @defgroup UI UI
