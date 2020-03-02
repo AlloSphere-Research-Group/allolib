@@ -48,7 +48,7 @@
 namespace al {
 
 /**
- * @brief The PresetMIDI class connects PresetHandler objects to MIDI messages
+ * @brief The SequencerMIDI class connects PolySynth objects to MIDI messages
  * @ingroup Scene
  *
  *
@@ -61,107 +61,26 @@ class SequencerMIDI : public MIDIMessageHandler {
  public:
   SequencerMIDI() {}
 
-  SequencerMIDI(int deviceIndex) : mSynth(nullptr) {
-    MIDIMessageHandler::bindTo(mRtMidiIn);
-    try {
-      mRtMidiIn.openPort(deviceIndex);
-      printf("PresetMIDI: Opened port to %s\n",
-             mRtMidiIn.getPortName(deviceIndex).c_str());
-    } catch (RtMidiError error) {
-      std::cout << "PresetMIDI Warning: Could not open MIDI port "
-                << deviceIndex << std::endl;
-    }
-  }
+  SequencerMIDI(int deviceIndex);
 
-  SequencerMIDI(int deviceIndex, PolySynth &synth)
-      : SequencerMIDI(deviceIndex) {
-    setSynthSequencer(synth);
-  }
+  SequencerMIDI(int deviceIndex, PolySynth &synth);
 
-  void init(int deviceIndex, PolySynth &synth) { open(deviceIndex, synth); }
+  void open(int deviceIndex, PolySynth &synth);
 
-  void open(int deviceIndex, PolySynth &synth) {
-    open(deviceIndex);
-    setSynthSequencer(synth);
-  }
+  void open(int deviceIndex);
 
-  void open(int deviceIndex) {
-    MIDIMessageHandler::bindTo(mRtMidiIn);
+  [[deprecated("Use open()")]] void init(int deviceIndex, PolySynth &synth);
 
-    if (mRtMidiIn.isPortOpen()) {
-      mRtMidiIn.closePort();
-    }
-    try {
-      if (deviceIndex >= 0 && deviceIndex < (int)mRtMidiIn.getPortCount()) {
-        mRtMidiIn.openPort(deviceIndex);
-        printf("PresetMIDI: Opened port to %s\n",
-               mRtMidiIn.getPortName(deviceIndex).c_str());
-      } else {
-        std::cerr << "PresetMIDI Warning: Could not open MIDI port "
-                  << deviceIndex << std::endl;
-      }
-    } catch (RtMidiError error) {
-      std::cerr << "PresetMIDI Warning: Could not open MIDI port "
-                << deviceIndex << std::endl;
-    }
-  }
+  void close();
 
-  void close() {
-    mRtMidiIn.closePort();
-    MIDIMessageHandler::clearBindings();
-  }
-
-  bool isOpen() { return mRtMidiIn.isPortOpen(); }
+  bool isOpen();
 
   void setSynthSequencer(PolySynth &synth) { mSynth = &synth; }
 
-  void connectNoteOnToFunction(std::function<void(int, int, int)> function) {
-    mNoteOnFunctions.push_back(function);
-  }
-  void connectNoteOffToFunction(std::function<void(int, int, int)> function) {
-    mNoteOffFunctions.push_back(function);
-  }
+  void connectNoteOnToFunction(std::function<void(int, int, int)> function);
+  void connectNoteOffToFunction(std::function<void(int, int, int)> function);
 
-  virtual void onMIDIMessage(const MIDIMessage &m) override {
-    if (m.type() == MIDIByte::NOTE_ON && m.velocity() > 0) {
-      for (auto function : mNoteOnFunctions) {
-        //				std::cout << binding.channel << " " <<
-        //binding.noteNumber << " " << binding.presetIndex << std::endl;
-        //				std::cout << (int) m.channel() <<
-        //std::endl;
-        function(m.noteNumber(), m.velocity(), m.channel());
-      }
-    } else if (m.type() == MIDIByte::NOTE_OFF ||
-               (m.type() == MIDIByte::NOTE_ON && m.velocity() == 0)) {
-      for (auto function : mNoteOffFunctions) {
-        //				std::cout << binding.channel << " " <<
-        //binding.noteNumber << " " << binding.presetIndex << std::endl;
-        //				std::cout << (int) m.channel() <<
-        //std::endl;
-        function(m.noteNumber(), m.velocity(), m.channel());
-      }
-    } else if (m.type() == MIDIByte::PROGRAM_CHANGE && m.velocity() > 0) {
-      //            for(ProgramBinding binding: mProgramBindings) {
-      //                //				std::cout <<
-      //                binding.channel << " " << binding.noteNumber << " " <<
-      //                binding.presetIndex << std::endl;
-      //                //				std::cout << (int)
-      //                m.channel() << std::endl; if (m.channel() ==
-      //                binding.channel
-      //                        && m.noteNumber() == binding.programNumber) {
-      //                    //					m.print();
-      //                    mPresetHandler->recallPreset(binding.presetIndex);
-      //                }
-      //            }
-    } else if (m.type() == MIDIByte::CONTROL_CHANGE) {
-      //            if (m.controlNumber() == mMorphBinding.controlNumber
-      //                    && m.channel() == mMorphBinding.channel) {
-      //                mPresetHandler->setMorphTime(mMorphBinding.min +
-      //                m.controlValue() * (mMorphBinding.max -
-      //                mMorphBinding.min));
-      //            }
-    }
-  }
+  virtual void onMIDIMessage(const MIDIMessage &m) override;
 
  private:
   PolySynth *mSynth;

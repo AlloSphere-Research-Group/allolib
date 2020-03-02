@@ -16,61 +16,21 @@ namespace al {
  */
 class PersistentConfig {
  public:
-  void setAppName(std::string appName) {
-    mAppName = appName;
-    //    std::cout << "Persistent config created for " << appName << std::endl;
-  }
+  /**
+   * @brief Set name of app. This determines the file name for the config file.
+   * @param appName
+   */
+  void setAppName(std::string appName);
 
-  void registerDouble(std::string name, double *value) {
-    mDoubles.push_back({name, value});
-  }
+  void registerDouble(std::string name, double *value);
 
-  void registerInt(std::string name, int64_t *value) {
-    mInts.push_back({name, value});
-  }
+  void registerInt(std::string name, int64_t *value);
 
-  void registerString(std::string name, std::string *value) {
-    mStrings.push_back({name, value});
-  }
+  void registerString(std::string name, std::string *value);
 
-  bool read() {
-    if (!File::exists(mAppName + ".toml")) {
-      write();
-    }
-    TomlLoader loader;
-    loader.setFile(mAppName + ".toml");
-    for (auto &configEntry : mDoubles) {
-      if (loader.hasKey<double>(configEntry.first)) {
-        *configEntry.second = loader.getd(configEntry.first);
-      }
-    }
-    for (auto &configEntry : mInts) {
-      if (loader.hasKey<int64_t>(configEntry.first)) {
-        *configEntry.second = loader.geti(configEntry.first);
-      }
-    }
-    for (auto &configEntry : mStrings) {
-      if (loader.hasKey<std::string>(configEntry.first)) {
-        *configEntry.second = loader.gets(configEntry.first);
-      }
-    }
-    return true;
-  }
+  bool read();
 
-  void write() {
-    TomlLoader loader;
-    loader.setFile(mAppName + ".toml");
-    for (auto &configEntry : mDoubles) {
-      loader.set(configEntry.first, *configEntry.second);
-    }
-    for (auto &configEntry : mInts) {
-      loader.set(configEntry.first, *configEntry.second);
-    }
-    for (auto &configEntry : mStrings) {
-      loader.set(configEntry.first, *configEntry.second);
-    }
-    loader.writeFile();
-  }
+  void write();
 
  private:
   std::string mAppName{"app"};

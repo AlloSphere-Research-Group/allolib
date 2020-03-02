@@ -50,12 +50,11 @@
 */
 #include <float.h>
 #include <stdio.h>
+
 #include "al/math/al_Constants.hpp"
 
 namespace al {
 
-///
-///
 ///
 /// @ingroup Sound
 template <typename T = double>

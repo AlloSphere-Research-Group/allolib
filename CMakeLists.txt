@@ -48,8 +48,8 @@ add_subdirectory(external)
 set(headers
   include/al/app/al_App.hpp
   include/al/app/al_DistributedApp.hpp
+  include/al/app/al_FPS.hpp
   include/al/app/al_NodeConfiguration.hpp
-  include/al/app/al_FPS.hpp/
 
   include/al/app/al_AudioDomain.hpp
   include/al/app/al_ComputationDomain.hpp
@@ -82,6 +82,7 @@ set(headers
   include/al/graphics/al_VAO.hpp
   include/al/graphics/al_VAOMesh.hpp
   include/al/graphics/al_Viewpoint.hpp
+
   include/al/io/al_Arduino.hpp
   include/al/io/al_AudioIO.hpp
   include/al/io/al_AudioIOData.hpp
@@ -94,19 +95,23 @@ set(headers
   include/al/io/al_Socket.hpp
   include/al/io/al_Toml.hpp
   include/al/io/al_Window.hpp
+
   include/al/math/al_Constants.hpp
   include/al/math/al_Mat.hpp
   include/al/math/al_Matrix4.hpp
   include/al/math/al_Quat.hpp
   include/al/math/al_StdRandom.hpp
   include/al/math/al_Vec.hpp
+
   include/al/protocol/al_OSC.hpp
+
   include/al/scene/al_DistributedScene.hpp
-  include/al/scene/al_PolySynth.hpp
-  include/al/scene/al_SynthRecorder.hpp
   include/al/scene/al_DynamicScene.hpp
+  include/al/scene/al_SynthRecorder.hpp
+  include/al/scene/al_PolySynth.hpp
   include/al/scene/al_SequencerMIDI.hpp
   include/al/scene/al_SynthSequencer.hpp
+
   include/al/sound/al_Ambisonics.hpp
   include/al/sound/al_Biquad.hpp
   include/al/sound/al_Crossover.hpp
@@ -119,15 +124,21 @@ set(headers
   include/al/sound/al_StereoPanner.hpp
   include/al/sound/al_Vbap.hpp
   include/al/sound/al_SoundFile.hpp
+
   include/al/spatial/al_HashSpace.hpp
   include/al/spatial/al_Pose.hpp
+  include/al/spatial/al_Curve.hpp
+
   include/al/sphere/al_SphereUtils.hpp
   include/al/sphere/al_PerProjection.hpp
+
   include/al/system/al_PeriodicThread.hpp
   include/al/system/al_Printing.hpp
   include/al/system/al_Thread.hpp
   include/al/system/al_Time.hpp
+
   include/al/types/al_Color.hpp
+
   include/al/ui/al_BoundingBox.hpp
   include/al/ui/al_Parameter.hpp
   include/al/ui/al_PickableRotateHandle.hpp
@@ -153,8 +164,8 @@ set(headers
 
 set(sources
   src/app/al_App.cpp
-  src/app/al_FPS.cpp
   src/app/al_DistributedApp.cpp
+  src/app/al_FPS.cpp
 
   src/app/al_AudioDomain.cpp
   src/app/al_ComputationDomain.cpp
@@ -174,8 +185,6 @@ set(sources
   src/graphics/al_GPUObject.cpp
   src/graphics/al_Graphics.cpp
   src/graphics/al_Image.cpp
-  src/graphics/al_stb_image.cpp
-  src/graphics/al_stb_font.cpp
   src/graphics/al_Isosurface.cpp
   src/graphics/al_Lens.cpp
   src/graphics/al_Light.cpp
@@ -188,6 +197,10 @@ set(sources
   src/graphics/al_VAO.cpp
   src/graphics/al_VAOMesh.cpp
   src/graphics/al_Viewpoint.cpp
+
+  src/graphics/al_stb_image.cpp
+  src/graphics/al_stb_font.cpp
+
   src/io/al_Arduino.cpp
   src/io/al_AudioIO.cpp
   src/io/al_AudioIOData.cpp
@@ -195,45 +208,58 @@ set(sources
   src/io/al_CSVReader.cpp
   src/io/al_File.cpp
   src/io/al_Imgui.cpp
-  src/io/al_imgui_impl.cpp
   src/io/al_MIDI.cpp
+  src/io/al_PersistentConfig.cpp
   src/io/al_Socket.cpp
   src/io/al_Toml.cpp
   src/io/al_Window.cpp
+
   src/io/al_WindowGLFW.cpp
+  src/io/al_imgui_impl.cpp
+
   src/math/al_StdRandom.cpp
+
   src/protocol/al_OSC.cpp
+
   src/scene/al_DistributedScene.cpp
   src/scene/al_DynamicScene.cpp
   src/scene/al_SynthRecorder.cpp
   src/scene/al_PolySynth.cpp
+  src/scene/al_SequencerMIDI.cpp
   src/scene/al_SynthSequencer.cpp
+
   src/sound/al_Ambisonics.cpp
   src/sound/al_Biquad.cpp
   src/sound/al_Dbap.cpp
   src/sound/al_Lbap.cpp
-  src/sound/al_Vbap.cpp
   src/sound/al_Spatializer.cpp
   src/sound/al_Speaker.cpp
   src/sound/al_SpeakerAdjustment.cpp
   src/sound/al_StereoPanner.cpp
+  src/sound/al_Vbap.cpp
   src/sound/al_SoundFile.cpp
+
   src/spatial/al_HashSpace.cpp
   src/spatial/al_Pose.cpp
+
   src/sphere/al_AlloSphereSpeakerLayout.cpp
   src/sphere/al_SphereUtils.cpp
   src/sphere/al_PerProjection.cpp
+
   src/system/al_PeriodicThread.cpp
   src/system/al_Printing.cpp
   src/system/al_ThreadNative.cpp
   src/system/al_Time.cpp
+
   src/types/al_Color.cpp
+
   src/ui/al_Composition.cpp
   src/ui/al_ParameterBundle.cpp
   src/ui/al_PresetMIDI.cpp
   src/ui/al_ControlGUI.cpp
   src/ui/al_Dialog.cpp
   src/ui/al_ParameterGUI.cpp
+  src/ui/al_ParameterMIDI.cpp
   src/ui/al_PresetSequencer.cpp
   src/ui/al_FileSelector.cpp
   src/ui/al_ParameterServer.cpp
