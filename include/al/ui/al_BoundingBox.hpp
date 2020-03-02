@@ -7,25 +7,87 @@
 #include "al/graphics/al_Shapes.hpp"
 #include "al/math/al_Vec.hpp"
 
+#include <limits>
+
 namespace al {
 
 /// @defgroup UI UI
 
-/// BoundingBox
-/// @ingroup UI
-struct BoundingBox {
+struct BoundingBoxData {
   Vec3f min, max;
   Vec3f cen, dim;
+
+  BoundingBoxData() { reset(); }
+  BoundingBoxData(const Vec3f &min_, const Vec3f &max_) : min(min_), max(max_) {
+    dim = max - min;
+    Vec3f halfDim = dim / 2;
+    cen = min + halfDim;
+  }
+
+  void set(const Vec3f &min_, const Vec3f &max_) {
+    min.set(min_);
+    max.set(max_);
+    dim = max - min;
+    Vec3f halfDim = dim / 2;
+    cen = min + halfDim;
+  }
+
+  void setCenterDim(const Vec3f &cen_, const Vec3f &dim_) {
+    cen.set(cen_);
+    dim.set(dim_);
+    min = cen - dim / 2;
+    max = cen + dim / 2;
+  }
+
+  bool contains(const Vec3d &p) {
+    if (p.x < min.x || p.x > max.x) return false;
+    if (p.y < min.y || p.y > max.y) return false;
+    if (p.z < min.z || p.z > max.z) return false;
+    return true;
+  }
+
+  inline void reset() {
+    min = {0, 0, 0};
+    max = {0, 0, 0};
+  }
+
+  inline void resetInv() {
+    min = {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
+           std::numeric_limits<float>::min()};
+    max = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+           std::numeric_limits<float>::max()};
+  }
+
+  inline void includePoint(al::Vec3f &pos) {
+    if (pos.x > max.x) {
+      max.x = pos.x;
+    } else if (pos.x < min.x) {
+      min.x = pos.x;
+    }
+    if (pos.y > max.y) {
+      max.y = pos.y;
+    } else if (pos.y < min.y) {
+      min.y = pos.y;
+    }
+    if (pos.z > max.z) {
+      max.z = pos.z;
+    } else if (pos.z < min.z) {
+      min.z = pos.z;
+    }
+  }
+};
+
+/// BoundingBox
+/// @ingroup UI
+struct BoundingBox : public BoundingBoxData {
   Mesh mesh, tics, gridMesh[2];
   float glUnitLength;
   float ticsPerUnit;
 
   BoundingBox() : glUnitLength(1.0), ticsPerUnit(10.0) {}
 
-  BoundingBox(const Vec3f &min_, const Vec3f &max_) : min(min_), max(max_) {
-    dim = max - min;
-    Vec3f halfDim = dim / 2;
-    cen = min + halfDim;
+  BoundingBox(const Vec3f &min_, const Vec3f &max_)
+      : BoundingBoxData(min_, max_) {
     getMesh();
     getTics();
   }
@@ -38,29 +100,15 @@ struct BoundingBox {
   }
 
   void set(const Vec3f &min_, const Vec3f &max_) {
-    min.set(min_);
-    max.set(max_);
-    dim = max - min;
-    Vec3f halfDim = dim / 2;
-    cen = min + halfDim;
+    BoundingBoxData::set(min, max);
     getMesh();
     getTics();
   }
 
   void setCenterDim(const Vec3f &cen_, const Vec3f &dim_) {
-    cen.set(cen_);
-    dim.set(dim_);
-    min = cen - dim / 2;
-    max = cen + dim / 2;
+    BoundingBoxData::setCenterDim(cen, dim);
     getMesh();
     getTics();
-  }
-
-  bool contains(const Vec3d &p) {
-    if (p.x < min.x || p.x > max.x) return false;
-    if (p.y < min.y || p.y > max.y) return false;
-    if (p.z < min.z || p.z > max.z) return false;
-    return true;
   }
 
   Mesh &getMesh() {

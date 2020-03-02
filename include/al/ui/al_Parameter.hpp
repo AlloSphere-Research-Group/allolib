@@ -258,6 +258,9 @@ class ParameterMeta {
 
   virtual ~ParameterMeta() {}
 
+  // Don't allow copy
+  ParameterMeta(const ParameterMeta &) = delete;
+
   /**
    * @brief return the full OSC address for the parameter
    *
