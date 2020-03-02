@@ -1,5 +1,6 @@
 #include "al/graphics/al_Font.hpp"
 
+#include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -53,6 +54,7 @@ bool Font::load(const char* filename, int fontSize, int bitmapSize) {
 }
 
 void Font::write(Mesh& mesh, const char* text, float worldHeight) {
+  assert(impl->fontData.charData.size() > 0 && "Error - font not loaded.");
   mesh.reset();
 
   float xpos = 0;

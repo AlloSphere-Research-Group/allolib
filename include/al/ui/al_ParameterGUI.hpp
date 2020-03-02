@@ -64,7 +64,7 @@ class BundleGUIManager;
 /// @ingroup UI
 class ParameterGUI {
  public:
-  //    static void initialize() { imguiInit(); }
+  //    static void init() { imguiInit(); }
   //    static void cleanup() { imguiShutdown(); }
 
   static inline void draw(ParameterMeta *param) { drawParameterMeta(param); }

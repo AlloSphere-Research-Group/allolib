@@ -44,6 +44,9 @@
     Keehong Youn, 2019, younkeehong@gmail.com
 */
 
+#include <map>
+
+#include "al/graphics/al_Graphics.hpp"
 #include "al/graphics/al_Mesh.hpp"
 #include "al/graphics/al_Texture.hpp"
 
@@ -127,6 +130,44 @@ struct Font {
 
   static std::string defaultFont();
 };
+
+struct FontRenderer : public Font {
+  Mesh fontMesh;
+
+  void write(const char* text, float worldHeight = 1.0f) {
+    Font::write(fontMesh, text, worldHeight);
+  }
+
+  static void render(Graphics& g, const char* text, Vec3d position,
+                     float worldHeight = 1.0, int fontSize = 24,
+                     const char* filename = Font::defaultFont().c_str(),
+                     int bitmapSize = 1024) {
+    static std::map<std::string, FontRenderer> renderers;
+    if (renderers.find(std::string(text)) == renderers.end()) {
+      renderers[std::string(text)] = FontRenderer();
+      renderers[text].load(filename, fontSize, bitmapSize);
+    }
+    FontRenderer& renderer = renderers[text];
+    renderer.write(text, worldHeight);
+    renderer.renderAt(g, position);
+  }
+
+  void render(Graphics& g) {
+    gl::blending(true);
+    gl::blendTrans();
+    g.texture();
+    tex.bind();
+    g.draw(fontMesh);
+    tex.unbind();
+  }
+
+  void renderAt(Graphics& g, Vec3d position) {
+    g.pushMatrix();
+    g.translate(position);
+    render(g);
+    g.popMatrix();
+  }
+};  // namespace al
 
 }  // namespace al
 
