@@ -71,37 +71,21 @@ class Graphics : public RenderManager {
   };
 
   // clears color buffer using al::Color class
-  void clearColor(Color const& c) { gl::clearColor(c.r, c.g, c.b, c.a); }
+  void clearColor(Color const& c);
 
   // clears color & depth buffer
-  void clear(float r, float g, float b, float a = 1.f) {
-    gl::clearColor(r, g, b, a);
-    gl::clearDepth(1.f);
-  }
-
-  void clear(float grayscale = 0.f, float a = 1.f) {
-    gl::clearColor(grayscale, grayscale, grayscale, a);
-    gl::clearDepth(1.f);
-  }
-
+  void clear(float r, float g, float b, float a = 1.f);
+  void clear(float grayscale = 0.f, float a = 1.f);
   // clears color & depth buffer using al::Color class
-  void clear(Color const& c) { clear(c.r, c.g, c.b, c.a); }
+  void clear(Color const& c);
 
   // extended, predefined render managing --------------------------------------
   void init();
 
   // set overall tint, regardless of rendering mode
-  void tint(Color const& c) {
-    mTint = c;
-    mUniformChanged = true;
-  }
-  void tint(float r, float g, float b, float a = 1.f) {
-    mTint.set(r, g, b, a);
-    mUniformChanged = true;
-  }
-  void tint(float grayscale, float a = 1.f) {
-    tint(grayscale, grayscale, grayscale, a);
-  }
+  void tint(Color const& c);
+  void tint(float r, float g, float b, float a = 1.f);
+  void tint(float grayscale, float a = 1.f);
 
   // set to uniform color mode, using previously set uniform color
   void color();
@@ -110,9 +94,7 @@ class Graphics : public RenderManager {
   // set to uniform color mode, using provided color
   void color(Color const& c);
   // set to uniform color mode, using provided color
-  void color(float grayscale, float a = 1.f) {
-    color(grayscale, grayscale, grayscale, a);
-  }
+  void color(float grayscale, float a = 1.f);
 
   // set to mesh color mode, using mesh's color array
   void meshColor();
@@ -151,20 +133,13 @@ class Graphics : public RenderManager {
   // use user made non-default shader. with this call user should set uniforms
   // manually (but stiil use allolib interface for mesh and model/view/proj
   // matrices)
-  void shader(ShaderProgram& s) {
-    mColoringMode = ColoringMode::CUSTOM;
-    RenderManager::shader(s);
-  }
-  ShaderProgram& shader() { return RenderManager::shader(); }
-  ShaderProgram* shaderPtr() { return RenderManager::shaderPtr(); }
+  void shader(ShaderProgram& s);
+  ShaderProgram& shader();
+  ShaderProgram* shaderPtr();
 
   using RenderManager::camera;  // makes camera(Viewpoint::SpecialType v)
                                 // accessible
-  void camera(Viewpoint const& v) override {
-    mLens = v.lens();
-    mUniformChanged = true;
-    RenderManager::camera(v);
-  }
+  void camera(Viewpoint const& v) override;
 
   void send_lighting_uniforms(ShaderProgram& s,
                               lighting_shader_uniforms const& u);
@@ -175,31 +150,16 @@ class Graphics : public RenderManager {
   static const float LEFT_EYE;
   static const float RIGHT_EYE;
   static const float MONO_EYE;
-  void eye(float e) {
-    mEye = e;
-    mUniformChanged = true;
-  }
 
+  void eye(float e);
   float eye() { return mEye; }
 
   Lens const& lens() const { return mLens; }
+  Lens& lens();
+  void lens(Lens const& l);
 
-  Lens& lens() {
-    mUniformChanged = true;
-    return mLens;
-  }
-
-  void lens(Lens const& l) {
-    mUniformChanged = true;
-    mLens = l;
-  }
-
-  void omni(bool b) {
-    is_omni = b;
-    mRenderModeChanged = true;
-  }
-
-  bool omni() { return is_omni; }
+  void omni(bool b);
+  bool omni();
 
  private:
   bool initialized = false;
