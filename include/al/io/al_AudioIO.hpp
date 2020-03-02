@@ -266,7 +266,6 @@ class AudioIO : public AudioIOData {
   bool mAutoZeroOut;  // whether to automatically zero output buffers each block
   std::vector<AudioCallback *> mAudioCallbacks;
 
-  //	void init(int outChannels, int inChannels);			//
   void reopen();  // reopen stream (restarts stream if needed)
   void resizeBuffer(bool forOutput);
   void operator=(const AudioIO &) = delete;  // Disallow copy

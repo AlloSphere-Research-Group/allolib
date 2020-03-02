@@ -36,7 +36,7 @@ class App {
   std::shared_ptr<DomainType> newDomain() {
     auto newDomain = std::make_shared<DomainType>();
     mDomainList.push_back(newDomain);
-    //    if (!newDomain->initialize()) {
+    //    if (!newDomain->init()) {
     //      std::cerr << "ERROR initializing domain " << std::endl;
     //    }
     return newDomain;

@@ -25,9 +25,9 @@ class ComputationDomain {
    * @param parent
    * @return
    *
-   * Multiple calls to initialize() should be allowed.
+   * Multiple calls to init() should be allowed.
    */
-  virtual bool initialize(ComputationDomain *parent = nullptr);
+  virtual bool init(ComputationDomain *parent = nullptr);
 
   virtual bool cleanup(ComputationDomain *parent = nullptr);
 
@@ -178,7 +178,7 @@ class AsynchronousDomain : public ComputationDomain {
    * @brief start the asyncrhonous execution of the domain
    * @return true if start was successful
    *
-   * Assumes that initialize() has already been called.
+   * Assumes that init() has already been called.
    */
   virtual bool start() = 0;
 
@@ -225,7 +225,7 @@ std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
   assert(dynamic_cast<SynchronousDomain *>(newDomain.get()));
   if (newDomain) {
     mSubDomainList.push_back({newDomain, prepend});
-    //    if (newDomain->initialize(this)) {
+    //    if (newDomain->init(this)) {
     //    } else {
     //      newDomain = nullptr;
     //    }

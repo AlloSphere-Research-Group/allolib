@@ -53,7 +53,7 @@ class StateDistributionDomain : public StateSimulationDomain<TSharedState> {
 template <class TSharedState = DefaultState>
 class StateReceiveDomain : public SynchronousDomain {
  public:
-  bool initialize(ComputationDomain *parent = nullptr) override;
+  bool init(ComputationDomain *parent = nullptr) override;
 
   bool tick() override {
     tickSubdomains(true);
@@ -143,7 +143,7 @@ class StateReceiveDomain : public SynchronousDomain {
 };
 
 template <class TSharedState>
-bool StateReceiveDomain<TSharedState>::initialize(ComputationDomain *parent) {
+bool StateReceiveDomain<TSharedState>::init(ComputationDomain *parent) {
   initializeSubdomains(true);
   assert(parent != nullptr);
 
@@ -168,7 +168,7 @@ bool StateReceiveDomain<TSharedState>::initialize(ComputationDomain *parent) {
 template <class TSharedState = DefaultState>
 class StateSendDomain : public SynchronousDomain {
  public:
-  bool initialize(ComputationDomain *parent = nullptr) override {
+  bool init(ComputationDomain *parent = nullptr) override {
     initializeSubdomains(true);
 
     initializeSubdomains(false);

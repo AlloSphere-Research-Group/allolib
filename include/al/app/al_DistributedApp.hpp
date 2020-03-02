@@ -69,7 +69,7 @@ class DistributedApp : public App, public NodeConfiguration {
 
   std::string name();
 
-  virtual void initialize();
+  virtual void init();
 
   void registerDynamicScene(DynamicScene &scene);
 
@@ -112,8 +112,8 @@ class DistributedAppWithState : public DistributedApp {
         ->state();
   }
 
-  void initialize() override {
-    DistributedApp::initialize();
+  void init() override {
+    DistributedApp::init();
     auto distDomain =
         std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
             mSimulationDomain);

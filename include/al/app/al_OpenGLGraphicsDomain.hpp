@@ -38,7 +38,7 @@ class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
   virtual ~OpenGLGraphicsDomain() {}
 
   // Domain functions
-  bool initialize(ComputationDomain *parent = nullptr) override;
+  bool init(ComputationDomain *parent = nullptr) override;
   bool start() override;
   bool stop() override;
   bool cleanup(ComputationDomain *parent = nullptr) override;
@@ -76,7 +76,7 @@ class GLFWOpenGLWindowDomain : public SynchronousDomain {
  public:
   GLFWOpenGLWindowDomain();
   // Domain functions
-  bool initialize(ComputationDomain *parent = nullptr) override;
+  bool init(ComputationDomain *parent = nullptr) override;
 
   bool tick() override;
 

@@ -9,7 +9,7 @@
 
 using namespace al;
 
-void DistributedApp::initialize() {
+void DistributedApp::init() {
 #ifdef AL_WINDOWS
   // Required to make sure gethostname() works....
   WORD wVersionRequested;
@@ -156,14 +156,14 @@ void DistributedApp::initialize() {
 }
 
 void DistributedApp::start() {
-  initialize();
+  init();
   initializeDomains();
   stdControls.app = this;
 
   if (hasCapability(CAP_OMNIRENDERING)) {
     omniRendering =
         graphicsDomain()->newSubDomain<GLFWOpenGLOmniRendererDomain>();
-    omniRendering->initialize(graphicsDomain().get());
+    omniRendering->init(graphicsDomain().get());
     omniRendering->window().append(stdControls);
 
     omniRendering->window().append(omniRendering->navControl());
@@ -191,7 +191,7 @@ void DistributedApp::start() {
     }
   } else if (hasCapability(CAP_RENDERING)) {
     mDefaultWindowDomain = graphicsDomain()->newWindow();
-    mDefaultWindowDomain->initialize(graphicsDomain().get());
+    mDefaultWindowDomain->init(graphicsDomain().get());
     mDefaultWindowDomain->window().append(stdControls);
     stdControls.app = this;
     stdControls.mWindow = &mDefaultWindowDomain->window();

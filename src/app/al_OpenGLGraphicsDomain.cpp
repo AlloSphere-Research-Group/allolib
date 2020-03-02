@@ -7,7 +7,7 @@
 
 using namespace al;
 
-bool OpenGLGraphicsDomain::initialize(ComputationDomain *parent) {
+bool OpenGLGraphicsDomain::init(ComputationDomain *parent) {
   bool ret = true;
   ret &= initializeSubdomains(true);
   initializeWindowManager();
@@ -66,7 +66,7 @@ bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
 
 std::shared_ptr<GLFWOpenGLWindowDomain> OpenGLGraphicsDomain::newWindow() {
   auto newWindowDomain = newSubDomain<GLFWOpenGLWindowDomain>();
-  newWindowDomain->initialize(this);
+  newWindowDomain->init(this);
   newWindowDomain->window().decorated(nextWindowProperties.decorated);
   newWindowDomain->window().cursor(nextWindowProperties.cursor);
   newWindowDomain->window().cursorHide(!nextWindowProperties.cursorVisible);
@@ -86,7 +86,7 @@ GLFWOpenGLWindowDomain::GLFWOpenGLWindowDomain() {
   mGraphics = std::make_unique<Graphics>();
 }
 
-bool GLFWOpenGLWindowDomain::initialize(ComputationDomain *parent) {
+bool GLFWOpenGLWindowDomain::init(ComputationDomain *parent) {
   //  if (strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
   //  0) {
   //    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();

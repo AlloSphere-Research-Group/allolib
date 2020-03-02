@@ -12,7 +12,7 @@ bool ComputationDomain::initializeSubdomains(bool pre) {
       auto syncSubDomain =
           std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
       if (syncSubDomain) {
-        ret &= syncSubDomain->initialize(this);
+        ret &= syncSubDomain->init(this);
       }
     }
   }
@@ -48,7 +48,7 @@ bool ComputationDomain::cleanupSubdomains(bool pre) {
   return ret;
 }
 
-bool ComputationDomain::initialize(ComputationDomain *parent) {
+bool ComputationDomain::init(ComputationDomain *parent) {
   bool ret = initializeSubdomains(true);
   ret &= initializeSubdomains(false);
   return ret;

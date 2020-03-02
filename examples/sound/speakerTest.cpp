@@ -2,11 +2,11 @@
 
 */
 
-#include "al/app/al_App.hpp"
-#include "al/math/al_Random.hpp"
-
 #include <cstdlib>
 #include <iostream>
+
+#include "al/app/al_App.hpp"
+#include "al/math/al_Random.hpp"
 #include "al/ui/al_ControlGUI.hpp"
 
 using namespace al;

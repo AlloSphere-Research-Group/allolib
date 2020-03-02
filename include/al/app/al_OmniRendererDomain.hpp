@@ -18,7 +18,7 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
  public:
   GLFWOpenGLOmniRendererDomain();
   // Domain functions
-  bool initialize(ComputationDomain *parent = nullptr) override;
+  bool init(ComputationDomain *parent = nullptr) override;
 
   bool tick() override;
 

@@ -9,6 +9,7 @@ Tim Wood, Nov. 2015
 */
 
 #include <iostream>
+
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 

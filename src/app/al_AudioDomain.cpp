@@ -9,7 +9,7 @@ AudioDomain::AudioDomain() {
       [&](float value) { mAudioIO.gain(value); });
 }
 
-bool AudioDomain::initialize(ComputationDomain *parent) {
+bool AudioDomain::init(ComputationDomain *parent) {
   (void)parent;
   bool ret = true;
   callInitializeCallbacks();

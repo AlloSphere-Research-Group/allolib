@@ -11,7 +11,7 @@ GLFWOpenGLOmniRendererDomain::GLFWOpenGLOmniRendererDomain() {
   mGraphics = std::make_unique<Graphics>();
 }
 
-bool GLFWOpenGLOmniRendererDomain::initialize(al::ComputationDomain *parent) {
+bool GLFWOpenGLOmniRendererDomain::init(al::ComputationDomain *parent) {
   //  if (strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
   //  0) {
   //    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();

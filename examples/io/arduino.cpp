@@ -53,7 +53,7 @@ class MyApp : public App {
     // Use last port, likely the right one on Windows
     auto lastPort = ports.back().port;
     // Initialize serial port
-    arduino.initialize(lastPort, 9600);
+    arduino.init(lastPort, 9600);
   }
 
   void onAnimate(double dt) {

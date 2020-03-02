@@ -32,7 +32,7 @@ class Arduino {
    * less if the internal buffer fills
    */
 
-  bool initialize(std::string port = "", unsigned long baud = 9600,
+  bool init(std::string port = "", unsigned long baud = 9600,
                   uint32_t granularity = 50);
 
   void cleanup();

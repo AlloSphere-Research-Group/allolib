@@ -282,7 +282,7 @@ void App::initializeDomains() {
     } else {
       std::cout << "WARNING: Domain unknown for auto connection" << std::endl;
     }
-    if (!domain->initialize()) {
+    if (!domain->init()) {
       std::cerr << "ERROR initializing domain " << std::endl;
     }
   }
