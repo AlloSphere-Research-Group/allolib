@@ -120,7 +120,7 @@ class DistributedAppWithState : public DistributedApp {
     if (isPrimary()) {
       std::cout << "Running primary" << std::endl;
       auto sender = distDomain->addStateSender("state", distDomain->statePtr());
-      sender->configure(10101);
+      sender->configure(10101, "state", additionalConfig["broadcastAddress"]);
     } else {
       std::cout << "Running REPLICA" << std::endl;
       auto receiver =

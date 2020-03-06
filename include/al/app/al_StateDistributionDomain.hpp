@@ -81,8 +81,7 @@ class StateReceiveDomain : public SynchronousDomain {
   }
 
   void configure(uint16_t port = 10100, std::string id = "state",
-                 std::string address = "localhost",
-                 uint16_t packetSize = 1400) {
+                 std::string address = "0.0.0.0", uint16_t packetSize = 1400) {
     mPort = port;
     mId = id;
     mAddress = address;
