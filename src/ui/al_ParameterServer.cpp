@@ -9,7 +9,7 @@ using namespace al;
 
 // OSCNotifier implementation -------------------------------------------------
 
-OSCNotifier::OSCNotifier() { mHandshakeHandler.notifier = this; }
+OSCNotifier::OSCNotifier() {}
 
 OSCNotifier::~OSCNotifier() {
   for (osc::Send *sender : mOSCSenders) {

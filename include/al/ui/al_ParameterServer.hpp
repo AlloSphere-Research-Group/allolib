@@ -50,7 +50,6 @@
 
 namespace al {
 
-constexpr int handshakeServerPort = 16987;
 constexpr int listenerFirstPort = 14000;
 
 class OSCNode {
@@ -73,11 +72,6 @@ class OSCNode {
       std::cerr << "Could not start listener on address " << address
                 << std::endl;
     }
-
-    // Broadcast handshake
-    // FIXME broadcast on all network interfaces
-    osc::Send handshake(handshakeServerPort, "127.0.0.1");
-    handshake.send("/handshake", listenerFirstPort + offset);
   }
 
  protected:
@@ -154,56 +148,9 @@ class OSCNotifier {
     mListenerLock.unlock();
   }
 
-  void startHandshakeServer(std::string address = "0.0.0.0") {
-    if (mHandshakeServer.open(handshakeServerPort, address.c_str())) {
-      mHandshakeServer.handler(mHandshakeHandler);
-      mHandshakeServer.start();
-      std::cout << "Handshake server running on " << address << ":"
-                << handshakeServerPort << std::endl;
-    } else {
-      std::cout << "failed to start handshake server" << std::endl;
-    }
-    for (int i = 0; i < 100;
-         i++) {  // Check to see if there are any listeners already running
-      osc::Send handshake(listenerFirstPort + i, "127.0.0.1");
-      handshake.send("/requestHandshake", handshakeServerPort);
-    }
-  }
-
  protected:
   std::mutex mListenerLock;
   std::vector<osc::Send *> mOSCSenders;
-
-  class HandshakeHandler : public osc::PacketHandler {
-   public:
-    OSCNotifier *notifier;
-    virtual void onMessage(osc::Message &m) override {
-      if (m.addressPattern() == "/handshake" && m.typeTags() == "i") {
-        std::unique_lock<std::mutex> lk(notifier->mNodeLock);
-        int commandPort;
-        m >> commandPort;
-        notifier->mNodes.push_back({m.senderAddress(), commandPort});
-        std::cout << "handshake from " << m.senderAddress() << ":"
-                  << commandPort << std::endl;
-
-        osc::Send listenerRequest(commandPort, m.senderAddress().c_str());
-        listenerRequest.send("/requestListenerInfo",
-                             notifier->mHandshakeServer.port());
-      } else if (m.addressPattern() == "/registerListener" &&
-                 m.typeTags() == "i") {
-        int listenerPort;
-        m >> listenerPort;
-        notifier->addListener(m.senderAddress(), listenerPort);
-        std::cout << "Registered listener " << m.senderAddress() << ":"
-                  << listenerPort << std::endl;
-      } else {
-        std::cout << "Unhandled command" << std::endl;
-        m.print();
-      }
-    }
-  } mHandshakeHandler;
-
-  osc::Recv mHandshakeServer;
 
   std::vector<std::pair<std::string, uint16_t>> mNodes;
   std::mutex mNodeLock;
