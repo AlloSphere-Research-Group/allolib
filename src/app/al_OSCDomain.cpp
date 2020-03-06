@@ -13,7 +13,6 @@ bool OSCDomain::init(ComputationDomain *parent) {
 
 bool OSCDomain::start() {
   if (mParameterServer.listen(port, interfaceIP)) {
-    mParameterServer.startHandshakeServer();
     return true;
   } else {
     uint16_t primaryPort = port;
