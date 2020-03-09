@@ -67,6 +67,34 @@ void Texture::create2D(unsigned int width, unsigned int height, int internal,
   unbind_temp();
 }
 
+void Texture::create2DArray(unsigned int width, unsigned int height, unsigned int depth,  
+                            int internal, unsigned int format, unsigned int type) {
+
+  mTarget = GL_TEXTURE_2D_ARRAY,
+  mInternalFormat = internal;
+  mWidth = width;
+  mHeight = height;
+  mDepth = depth;
+  mFormat = format;
+  mType = type;
+
+  // force sending params
+  mFilterUpdated = true;
+  mWrapUpdated = true;
+  mUsingMipmapUpdated = true;
+
+  create();
+  bind_temp();
+  glTexImage3D(mTarget,
+             0,  // level
+             mInternalFormat, mWidth, mHeight, mDepth,
+             0,  // border
+             mFormat, mType, nullptr);
+  update_filter();
+  update_wrap();
+  unbind_temp();
+}
+
 void Texture::createCubemap(unsigned int size, int internal,
                             unsigned int format, unsigned int type) {
   mTarget = GL_TEXTURE_CUBE_MAP;
@@ -251,6 +279,7 @@ void Texture::submit(const void *pixels, unsigned int format,
       glTexSubImage2D(target(), 0, 0, 0, width(), height(), format, type,
                       pixels);
       break;
+    case GL_TEXTURE_2D_ARRAY:
     case GL_TEXTURE_3D:
       glTexSubImage3D(target(), 0, 0, 0, 0, width(), height(), depth(), format,
                       type, pixels);
