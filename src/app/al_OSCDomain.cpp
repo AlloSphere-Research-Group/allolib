@@ -6,13 +6,14 @@ bool OSCDomain::init(ComputationDomain *parent) {
   (void)parent;
   mHandler.mOscDomain = this;
   mParameterServer.registerOSCListener(
-      &mHandler);  // Have the parameter server pass unhandled messages to this
-                   // app's onMessage virtual function
+      &mHandler); // Have the parameter server pass unhandled messages to this
+                  // app's onMessage virtual function
   return true;
 }
 
 bool OSCDomain::start() {
   if (mParameterServer.listen(port, interfaceIP)) {
+    mParameterServer.startHandshakeServer();
     return true;
   } else {
     uint16_t primaryPort = port;

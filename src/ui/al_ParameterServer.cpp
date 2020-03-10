@@ -9,7 +9,7 @@ using namespace al;
 
 // OSCNotifier implementation -------------------------------------------------
 
-OSCNotifier::OSCNotifier() {}
+OSCNotifier::OSCNotifier() { mHandshakeHandler.notifier = this; }
 
 OSCNotifier::~OSCNotifier() {
   for (osc::Send *sender : mOSCSenders) {
@@ -93,43 +93,43 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, Color value) {
 void OSCNotifier::notifyListeners(std::string OSCaddress,
                                   ParameterMeta *param) {
   if (strcmp(typeid(*param).name(), typeid(ParameterBool).name()) ==
-      0) {  // ParameterBool
+      0) { // ParameterBool
     ParameterBool *p = dynamic_cast<ParameterBool *>(param);
     notifyListeners(OSCaddress, p->get());
   } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) ==
-             0) {  // Parameter
+             0) { // Parameter
     Parameter *p = dynamic_cast<Parameter *>(param);
     notifyListeners(OSCaddress, p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
-             0) {  // ParameterString
+             0) { // ParameterString
     ParameterString *p = dynamic_cast<ParameterString *>(param);
     notifyListeners(OSCaddress, p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) ==
-             0) {  // ParameterPose
+             0) { // ParameterPose
     ParameterPose *p = dynamic_cast<ParameterPose *>(param);
     notifyListeners(OSCaddress, p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) ==
-             0) {  // ParameterMenu
+             0) { // ParameterMenu
     ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
     notifyListeners(OSCaddress, p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) ==
-             0) {  // ParameterChoice
+             0) { // ParameterChoice
     ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
     notifyListeners(OSCaddress, p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) ==
-             0) {  // ParameterVec3
+             0) { // ParameterVec3
     ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
     notifyListeners(OSCaddress, p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterVec4).name()) ==
-             0) {  // ParameterVec4
+             0) { // ParameterVec4
     ParameterVec4 *p = dynamic_cast<ParameterVec4 *>(param);
     notifyListeners(OSCaddress, p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) ==
-             0) {  // ParameterColor
+             0) { // ParameterColor
     ParameterColor *p = dynamic_cast<ParameterColor *>(param);
     notifyListeners(OSCaddress, p->get());
   } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) ==
-             0) {  // Trigger
+             0) { // Trigger
     Trigger *p = dynamic_cast<Trigger *>(param);
     notifyListeners(OSCaddress, p->get());
   } else {
@@ -200,13 +200,13 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param) {
   mParameterLock.unlock();
   mListenerLock.lock();
   if (strcmp(typeid(param).name(), typeid(ParameterBool).name()) ==
-      0) {  // ParameterBool
+      0) { // ParameterBool
     ParameterBool *p = dynamic_cast<ParameterBool *>(&param);
     p->registerChangeCallback([this, p](float value) {
       notifyListeners(p->getFullAddress(), value);
     });
   } else if (strcmp(typeid(param).name(), typeid(Parameter).name()) ==
-             0) {  // Parameter
+             0) { // Parameter
     //        std::cout << "Register parameter " << param.getName() <<
     //        std::endl;
     Parameter *p = dynamic_cast<Parameter *>(&param);
@@ -214,7 +214,7 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param) {
       notifyListeners(p->getFullAddress(), value);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterInt).name()) ==
-             0) {  // ParameterInt
+             0) { // ParameterInt
     //        std::cout << "Register parameter " << param.getName() <<
     //        std::endl;
     ParameterInt *p = dynamic_cast<ParameterInt *>(&param);
@@ -222,37 +222,37 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param) {
       notifyListeners(p->getFullAddress(), value);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterPose).name()) ==
-             0) {  // ParameterPose
+             0) { // ParameterPose
     ParameterPose *p = dynamic_cast<ParameterPose *>(&param);
     p->registerChangeCallback([this, p](al::Pose value) {
       notifyListeners(p->getFullAddress(), value);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterMenu).name()) ==
-             0) {  // ParameterMenu
+             0) { // ParameterMenu
     ParameterMenu *p = dynamic_cast<ParameterMenu *>(&param);
     p->registerChangeCallback(
         [this, p](int value) { notifyListeners(p->getFullAddress(), value); });
   } else if (strcmp(typeid(param).name(), typeid(ParameterChoice).name()) ==
-             0) {  // ParameterChoice
+             0) { // ParameterChoice
     ParameterChoice *p = dynamic_cast<ParameterChoice *>(&param);
     p->registerChangeCallback([this, p](uint16_t value) {
       notifyListeners(p->getFullAddress(), (int)value);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterVec3).name()) ==
-             0) {  // ParameterVec3
+             0) { // ParameterVec3
     ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(&param);
 
     p->registerChangeCallback([this, p](al::Vec3f value) {
       notifyListeners(p->getFullAddress(), value);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterVec4).name()) ==
-             0) {  // ParameterVec4
+             0) { // ParameterVec4
     ParameterVec4 *p = dynamic_cast<ParameterVec4 *>(&param);
     p->registerChangeCallback([this, p](al::Vec4f value) {
       notifyListeners(p->getFullAddress(), value);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterColor).name()) ==
-             0) {  // ParameterColor
+             0) { // ParameterColor
     ParameterColor *p = dynamic_cast<ParameterColor *>(&param);
 
     p->registerChangeCallback([this, p](Color value) {
@@ -260,13 +260,13 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param) {
       notifyListeners(p->getFullAddress(), valueVec);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterString).name()) ==
-             0) {  // ParameterColor
+             0) { // ParameterColor
     ParameterString *p = dynamic_cast<ParameterString *>(&param);
     p->registerChangeCallback([this, p](std::string value) {
       notifyListeners(p->getFullAddress(), value);
     });
   } else if (strcmp(typeid(param).name(), typeid(Trigger).name()) ==
-             0) {  // Trigger
+             0) { // Trigger
     Trigger *p = dynamic_cast<Trigger *>(&param);
     p->registerChangeCallback([this, p](float value) {
       notifyListeners(p->getFullAddress(), value);
@@ -280,8 +280,8 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param) {
   return *this;
 }
 
-ParameterServer &ParameterServer::registerParameterBundle(
-    ParameterBundle &bundle) {
+ParameterServer &
+ParameterServer::registerParameterBundle(ParameterBundle &bundle) {
   if (mCurrentActiveBundle.find(bundle.name()) == mCurrentActiveBundle.end()) {
     mParameterBundles[bundle.name()] = std::vector<ParameterBundle *>();
     mCurrentActiveBundle[bundle.name()] = 0;
@@ -303,7 +303,7 @@ void ParameterServer::unregisterParameter(ParameterMeta &param) {
 }
 
 void ParameterServer::onMessage(osc::Message &m) {
-  m.resetStream();  // Needs to be moved to caller...
+  m.resetStream(); // Needs to be moved to caller...
   if (mVerbose) {
     m.print();
   }
@@ -526,7 +526,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
                                                    std::string address,
                                                    osc::Message &m) {
   if (strcmp(typeid(*param).name(), typeid(ParameterBool).name()) ==
-      0) {  // ParameterBool
+      0) { // ParameterBool
     ParameterBool *p = dynamic_cast<ParameterBool *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "f") {
       float val;
@@ -538,7 +538,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
     }
     // notifyListeners(p->getFullAddress(), p->get());
   } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) ==
-             0) {  // Parameter
+             0) { // Parameter
     Parameter *p = dynamic_cast<Parameter *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "f") {
       float val;
@@ -550,7 +550,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
     }
     // notifyListeners(p->getFullAddress(), p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name()) ==
-             0) {  // ParameterInt
+             0) { // ParameterInt
     ParameterInt *p = dynamic_cast<ParameterInt *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "i") {
       int32_t val;
@@ -562,7 +562,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
     }
     // notifyListeners(p->getFullAddress(), p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
-             0) {  // Parameter
+             0) { // Parameter
     ParameterString *p = dynamic_cast<ParameterString *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "s") {
       std::string val;
@@ -574,7 +574,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
     }
     // notifyListeners(p->getFullAddress(), p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) ==
-             0) {  // ParameterPose
+             0) { // ParameterPose
     ParameterPose *p = dynamic_cast<ParameterPose *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "fffffff") {
       float x, y, z, w, qx, qy, qz;
@@ -615,7 +615,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) ==
-             0) {  // ParameterMenu
+             0) { // ParameterMenu
     ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "i") {
       int value;
@@ -624,7 +624,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) ==
-             0) {  // ParameterChoice
+             0) { // ParameterChoice
     ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "i") {
       int value;
@@ -633,7 +633,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) ==
-             0) {  // ParameterVec3
+             0) { // ParameterVec3
     ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "fff") {
       float x, y, z;
@@ -642,7 +642,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(ParameterVec4).name()) ==
-             0) {  // ParameterVec4
+             0) { // ParameterVec4
     ParameterVec4 *p = dynamic_cast<ParameterVec4 *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "ffff") {
       float a, b, c, d;
@@ -651,7 +651,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
     }
     return true;
   } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) ==
-             0) {  // ParameterColor
+             0) { // ParameterColor
     ParameterColor *p = dynamic_cast<ParameterColor *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "ffff") {
       float a, b, c, d;
@@ -660,7 +660,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) ==
-             0) {  // Trigger
+             0) { // Trigger
     Trigger *p = dynamic_cast<Trigger *>(param);
     if (address == p->getFullAddress()) {
       if (m.typeTags().size() == 0) {
@@ -691,13 +691,15 @@ void ParameterServer::printParameterInfo(ParameterMeta *p) {
 
 void ParameterServer::printBundleInfo(ParameterBundle *bundle, std::string id,
                                       int depth) {
-  for (int i = 0; i < depth; i++) std::cout << "  ";
+  for (int i = 0; i < depth; i++)
+    std::cout << "  ";
   std::cout << "--- Bundle: " << bundle->name() << " id: " << id << " index "
             << bundle->bundleIndex() << " prefix " << bundle->bundlePrefix()
             << std::endl;
   depth++;
   for (auto *p : bundle->parameters()) {
-    for (int i = 0; i < depth; i++) std::cout << "  ";
+    for (int i = 0; i < depth; i++)
+      std::cout << "  ";
     printParameterInfo(p);
   }
   for (auto bundleGroup : bundle->bundles()) {
@@ -706,7 +708,8 @@ void ParameterServer::printBundleInfo(ParameterBundle *bundle, std::string id,
       printBundleInfo(bundle, bundleGroup.first, depth);
     }
   }
-  for (int i = 0; i < depth - 1; i++) std::cout << "  ";
+  for (int i = 0; i < depth - 1; i++)
+    std::cout << "  ";
   std::cout << "--- End Bundle: " << bundle->name() << " id: " << id
             << std::endl;
 }

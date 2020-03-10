@@ -50,10 +50,11 @@
 
 namespace al {
 
+constexpr int handshakeServerPort = 16987;
 constexpr int listenerFirstPort = 14000;
 
 class OSCNode {
- public:
+public:
   OSCNode() { mCommandHandler.node = this; }
 
   void startCommandListener(std::string address = "0.0.0.0") {
@@ -72,18 +73,23 @@ class OSCNode {
       std::cerr << "Could not start listener on address " << address
                 << std::endl;
     }
+
+    // Broadcast handshake
+    // FIXME broadcast on all network interfaces
+    osc::Send handshake(handshakeServerPort, "127.0.0.1");
+    handshake.send("/handshake", listenerFirstPort + offset);
   }
 
- protected:
+protected:
   virtual void runCommand(osc::Message &m) = 0;
 
- private:
+private:
   class CommandHandler : public osc::PacketHandler {
-   public:
+  public:
     OSCNode *node;
     virtual void onMessage(osc::Message &m) override {
       std::cout << "command handler got" << std::endl;
-      //            m.print();
+      m.print();
       node->runCommand(m);
     }
   } mCommandHandler;
@@ -91,7 +97,7 @@ class OSCNode {
 };
 
 class OSCNotifier {
- public:
+public:
   OSCNotifier();
   virtual ~OSCNotifier();
 
@@ -147,15 +153,61 @@ class OSCNotifier {
     }
     mListenerLock.unlock();
   }
+  void startHandshakeServer(std::string address = "0.0.0.0") {
+    if (mHandshakeServer.open(handshakeServerPort, address.c_str())) {
+      mHandshakeServer.handler(mHandshakeHandler);
+      mHandshakeServer.start();
+      std::cout << "Handshake server running on " << address << ":"
+                << handshakeServerPort << std::endl;
+    } else {
+      std::cout << "failed to start handshake server" << std::endl;
+    }
+    for (int i = 0; i < 100;
+         i++) { // Check to see if there are any listeners already running
+      osc::Send handshake(listenerFirstPort + i, "127.0.0.1");
+      handshake.send("/requestHandshake", handshakeServerPort);
+    }
+  }
 
- protected:
+protected:
   std::mutex mListenerLock;
   std::vector<osc::Send *> mOSCSenders;
+
+  class HandshakeHandler : public osc::PacketHandler {
+  public:
+    OSCNotifier *notifier;
+    virtual void onMessage(osc::Message &m) override {
+      if (m.addressPattern() == "/handshake" && m.typeTags() == "i") {
+        std::unique_lock<std::mutex> lk(notifier->mNodeLock);
+        int commandPort;
+        m >> commandPort;
+        notifier->mNodes.push_back({m.senderAddress(), commandPort});
+        std::cout << "ParameterServer handshake from " << m.senderAddress()
+                  << ":" << commandPort << std::endl;
+
+        osc::Send listenerRequest(commandPort, m.senderAddress().c_str());
+        listenerRequest.send("/requestListenerInfo",
+                             notifier->mHandshakeServer.port());
+      } else if (m.addressPattern() == "/registerListener" &&
+                 m.typeTags() == "i") {
+        int listenerPort;
+        m >> listenerPort;
+        notifier->addListener(m.senderAddress(), listenerPort);
+        std::cout << "Registered listener " << m.senderAddress() << ":"
+                  << listenerPort << std::endl;
+      } else {
+        std::cout << "Unhandled command" << std::endl;
+        m.print();
+      }
+    }
+  } mHandshakeHandler;
+
+  osc::Recv mHandshakeServer;
 
   std::vector<std::pair<std::string, uint16_t>> mNodes;
   std::mutex mNodeLock;
 
- private:
+private:
 };
 
 /**
@@ -170,8 +222,8 @@ class OSCNotifier {
 class ParameterServer : public osc::PacketHandler,
                         public OSCNotifier,
                         public OSCNode {
-  friend class PresetServer;  // To be able to take over the OSC server
- public:
+  friend class PresetServer; // To be able to take over the OSC server
+public:
   /**
    * @brief ParameterServer constructor
    *
@@ -299,7 +351,7 @@ class ParameterServer : public osc::PacketHandler,
                                            std::string address,
                                            osc::Message &m);
 
- protected:
+protected:
   static void changeCallback(float value, void *sender, void *userData,
                              void *blockThis);
   static void changeStringCallback(std::string value, void *sender,
@@ -334,7 +386,7 @@ class ParameterServer : public osc::PacketHandler,
                                std::string rootAddress);
 
   std::vector<std::pair<std::string, uint16_t>>
-      mNotifiers;  // List of primary nodes
+      mNotifiers; // List of primary nodes
 
   std::vector<osc::PacketHandler *> mPacketHandlers;
   std::vector<std::pair<osc::MessageConsumer *, std::string>> mMessageConsumers;
@@ -352,6 +404,6 @@ class ParameterServer : public osc::PacketHandler,
   bool mVerbose{false};
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_PARAMETERSERVER_H
+#endif // AL_PARAMETERSERVER_H
