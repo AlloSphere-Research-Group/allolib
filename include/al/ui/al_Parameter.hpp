@@ -66,6 +66,7 @@ namespace al {
 enum class TimeMasterMode {
   TIME_MASTER_AUDIO,
   TIME_MASTER_GRAPHICS,
+  TIME_MASTER_UPDATE,
   TIME_MASTER_FREE,
   TIME_MASTER_CPU
 };
@@ -73,7 +74,7 @@ enum class TimeMasterMode {
 // ParameterField
 // @ingroup UI
 class ParameterField {
- public:
+public:
   typedef enum { FLOAT, INT32, STRING, NULLDATA } ParameterDataType;
 
   ParameterField() {
@@ -113,39 +114,39 @@ class ParameterField {
 
   virtual ~ParameterField() {
     switch (mType) {
-      case FLOAT:
-        delete static_cast<float *>(mData);
-        break;
-      case STRING:
-        delete static_cast<std::string *>(mData);
-        break;
-      case INT32:
-        delete static_cast<int32_t *>(mData);
-        break;
-      case NULLDATA:
-        break;
+    case FLOAT:
+      delete static_cast<float *>(mData);
+      break;
+    case STRING:
+      delete static_cast<std::string *>(mData);
+      break;
+    case INT32:
+      delete static_cast<int32_t *>(mData);
+      break;
+    case NULLDATA:
+      break;
     }
   }
 
   // Copy constructor
   ParameterField(const ParameterField &paramField) : mType(paramField.mType) {
     switch (mType) {
-      case FLOAT:
-        mData = new float;
-        *static_cast<float *>(mData) = *static_cast<float *>(paramField.mData);
-        break;
-      case STRING:
-        mData = new std::string;
-        *static_cast<std::string *>(mData) =
-            *static_cast<std::string *>(paramField.mData);
-        break;
-      case INT32:
-        mData = new int32_t;
-        *static_cast<int32_t *>(mData) =
-            *static_cast<int32_t *>(paramField.mData);
-        break;
-      case NULLDATA:
-        break;
+    case FLOAT:
+      mData = new float;
+      *static_cast<float *>(mData) = *static_cast<float *>(paramField.mData);
+      break;
+    case STRING:
+      mData = new std::string;
+      *static_cast<std::string *>(mData) =
+          *static_cast<std::string *>(paramField.mData);
+      break;
+    case INT32:
+      mData = new int32_t;
+      *static_cast<int32_t *>(mData) =
+          *static_cast<int32_t *>(paramField.mData);
+      break;
+    case NULLDATA:
+      break;
     }
   }
 
@@ -175,13 +176,9 @@ class ParameterField {
 
   ParameterDataType type() { return mType; }
 
-  template <typename type>
-  type get() {
-    return *static_cast<type *>(mData);
-  }
+  template <typename type> type get() { return *static_cast<type *>(mData); }
 
-  template <typename type>
-  void set(type value) {
+  template <typename type> void set(type value) {
     if (std::is_same<type, float>::value) {
       if (mType == FLOAT) {
         *static_cast<type *>(mData) = value;
@@ -233,7 +230,7 @@ class ParameterField {
     }
   }
 
- private:
+private:
   ParameterDataType mType;
   void *mData;
 };
@@ -246,7 +243,7 @@ class Parameter;
  * @ingroup UI
  */
 class ParameterMeta {
- public:
+public:
   /**
    * @brief ParameterMeta
    * @param parameterName
@@ -340,21 +337,21 @@ class ParameterMeta {
   }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") {
-    (void)prefix;  // Remove compiler warning
+    (void)prefix; // Remove compiler warning
     std::cout << "sendValue function not implemented for "
               << typeid(*this).name() << std::endl;
   }
 
   void set(ParameterMeta *p);
 
- protected:
+protected:
   std::string mFullAddress;
   std::string mParameterName;
   std::string mDisplayName;
   std::string mGroup;
   std::string mPrefix;
 
-  std::map<std::string, float> mHints;  // Provide hints for behavior
+  std::map<std::string, float> mHints; // Provide hints for behavior
 };
 
 /**
@@ -362,9 +359,8 @@ class ParameterMeta {
  * class from the ParameterType template parameter
  * @ingroup UI
  */
-template <class ParameterType>
-class ParameterWrapper : public ParameterMeta {
- public:
+template <class ParameterType> class ParameterWrapper : public ParameterMeta {
+public:
   /**
    * @brief ParameterWrapper
    *
@@ -404,7 +400,7 @@ class ParameterWrapper : public ParameterMeta {
     //        if (value > mMax) value = mMax;
     //        if (value < mMin) value = mMin;
     if (mProcessCallback) {
-      value = (*mProcessCallback)(value);  //, mProcessUdata);
+      value = (*mProcessCallback)(value); //, mProcessUdata);
     }
 
     runChangeCallbacksSynchronous(value);
@@ -431,7 +427,7 @@ class ParameterWrapper : public ParameterMeta {
     //        if (value > mMax) value = mMax;
     //        if (value < mMin) value = mMin;
     if (mProcessCallback) {
-      value = (*mProcessCallback)(value);  //, mProcessUdata);
+      value = (*mProcessCallback)(value); //, mProcessUdata);
     }
 
     if (blockReceiver) {
@@ -562,15 +558,15 @@ class ParameterWrapper : public ParameterMeta {
     }
   }
 
-  std::vector<ParameterWrapper<ParameterType> *> operator<<(
-      ParameterWrapper<ParameterType> &newParam) {
+  std::vector<ParameterWrapper<ParameterType> *>
+  operator<<(ParameterWrapper<ParameterType> &newParam) {
     std::vector<ParameterWrapper<ParameterType> *> paramList;
     paramList.push_back(&newParam);
     return paramList;
   }
 
-  std::vector<ParameterWrapper<ParameterType> *> &operator<<(
-      std::vector<ParameterWrapper<ParameterType> *> &paramVector) {
+  std::vector<ParameterWrapper<ParameterType> *> &
+  operator<<(std::vector<ParameterWrapper<ParameterType> *> &paramVector) {
     paramVector.push_back(this);
     return paramVector;
   }
@@ -584,7 +580,7 @@ class ParameterWrapper : public ParameterMeta {
     return *this;
   }
 
- protected:
+protected:
   ParameterType mMin;
   ParameterType mMax;
 
@@ -596,7 +592,7 @@ class ParameterWrapper : public ParameterMeta {
   // void * mProcessUdata;
   // std::vector<void *> mCallbackUdata;
 
- private:
+private:
   // pointer to avoid having to explicitly declare copy/move
   std::unique_ptr<std::mutex> mMutex;
   ParameterType mValue;
@@ -605,7 +601,7 @@ class ParameterWrapper : public ParameterMeta {
   bool mSynchronous{true};
   bool mChanged{false};
 
- private:
+private:
   std::vector<std::shared_ptr<ParameterChangeCallback>> mCallbacks;
 };
 
@@ -642,7 +638,7 @@ class ParameterWrapper : public ParameterMeta {
  */
 
 class Parameter : public ParameterWrapper<float> {
- public:
+public:
   /**
    * @brief Parameter
    *
@@ -725,14 +721,14 @@ class Parameter : public ParameterWrapper<float> {
     sender.send(prefix + getFullAddress(), get());
   }
 
- private:
+private:
   float mFloatValue;
 };
 
 /// ParamaterInt
 /// @ingroup UI
 class ParameterInt : public ParameterWrapper<int32_t> {
- public:
+public:
   /**
    * @brief ParameterInt
    *
@@ -814,14 +810,14 @@ class ParameterInt : public ParameterWrapper<int32_t> {
     }
   }
 
- private:
+private:
   int32_t mIntValue;
 };
 
 /// ParamaterBool
 /// @ingroup UI
 class ParameterBool : public Parameter {
- public:
+public:
   using Parameter::get;
   using Parameter::setFields;
   /**
@@ -870,7 +866,7 @@ class ParameterBool : public Parameter {
 // Symbolizes a distributed action that
 // has no value per se, but that can be used to trigger actions
 class Trigger : public ParameterWrapper<bool> {
- public:
+public:
   Trigger(std::string parameterName, std::string Group = "",
           std::string prefix = "")
       : ParameterWrapper<bool>(parameterName, Group, false, prefix) {}
@@ -894,7 +890,7 @@ class Trigger : public ParameterWrapper<bool> {
 /// ParameterString
 /// @ingroup UI
 class ParameterString : public ParameterWrapper<std::string> {
- public:
+public:
   using ParameterWrapper<std::string>::get;
   using ParameterWrapper<std::string>::set;
 
@@ -934,7 +930,7 @@ class ParameterString : public ParameterWrapper<std::string> {
 };
 
 class ParameterVec3 : public ParameterWrapper<al::Vec3f> {
- public:
+public:
   using ParameterWrapper<al::Vec3f>::get;
   using ParameterWrapper<al::Vec3f>::set;
 
@@ -949,7 +945,7 @@ class ParameterVec3 : public ParameterWrapper<al::Vec3f> {
   }
 
   float operator[](size_t index) {
-    assert(index < INT_MAX);  // Hack to remove
+    assert(index < INT_MAX); // Hack to remove
     Vec3f vec = this->get();
     return vec[index];
   }
@@ -981,7 +977,7 @@ class ParameterVec3 : public ParameterWrapper<al::Vec3f> {
 /// ParameterVec4
 /// @ingroup UI
 class ParameterVec4 : public ParameterWrapper<al::Vec4f> {
- public:
+public:
   using ParameterWrapper<al::Vec4f>::get;
   using ParameterWrapper<al::Vec4f>::set;
 
@@ -1028,7 +1024,7 @@ class ParameterVec4 : public ParameterWrapper<al::Vec4f> {
 /// ParameterPose
 /// @ingroup UI
 class ParameterPose : public ParameterWrapper<al::Pose> {
- public:
+public:
   using ParameterWrapper<al::Pose>::get;
   using ParameterWrapper<al::Pose>::set;
 
@@ -1085,7 +1081,7 @@ class ParameterPose : public ParameterWrapper<al::Pose> {
 /// ParameterMenu
 /// @ingroup UI
 class ParameterMenu : public ParameterWrapper<int> {
- public:
+public:
   using ParameterWrapper<int>::set;
   using ParameterWrapper<int>::get;
 
@@ -1162,7 +1158,7 @@ class ParameterMenu : public ParameterWrapper<int> {
     }
   }
 
- private:
+private:
   std::mutex mElementsLock;
   std::vector<std::string> mElements;
 };
@@ -1176,7 +1172,7 @@ class ParameterMenu : public ParameterWrapper<int> {
  *
  */
 class ParameterChoice : public ParameterWrapper<uint16_t> {
- public:
+public:
   using ParameterWrapper<uint16_t>::get;
   using ParameterWrapper<uint16_t>::set;
 
@@ -1259,14 +1255,14 @@ class ParameterChoice : public ParameterWrapper<uint16_t> {
     }
   }
 
- private:
+private:
   std::vector<std::string> mElements;
 };
 
 /// ParameterColor
 /// @ingroup UI
 class ParameterColor : public ParameterWrapper<al::Color> {
- public:
+public:
   using ParameterWrapper<al::Color>::setFields;
   using ParameterWrapper<al::Color>::get;
 
@@ -1390,6 +1386,6 @@ void ParameterWrapper<ParameterType>::runChangeCallbacksSynchronous(
   }
 }
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_PARAMETER_H
+#endif // AL_PARAMETER_H

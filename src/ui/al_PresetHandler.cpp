@@ -28,13 +28,19 @@ PresetHandler::PresetHandler(std::string rootDirectory, bool verbose)
 
 PresetHandler::PresetHandler(TimeMasterMode timeMasterMode,
                              std::string rootDirectory, bool verbose)
-    : mVerbose(verbose),
-      mRootDir(rootDirectory),
+    : mVerbose(verbose), mRootDir(rootDirectory),
       mTimeMasterMode(timeMasterMode) {
   setCurrentPresetMap("default");
   setRootPath(rootDirectory);
   if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
     startCpuThread();
+  }
+
+  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS ||
+      mTimeMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
+    std::cerr << "ERROR: PresetSequencer: TimeMasterMode not supported, "
+                 "treating as TIME_MASTER_CPU"
+              << std::endl;
   }
 }
 
@@ -144,7 +150,7 @@ void PresetHandler::storePreset(std::string name) {
       if (index <= preset.first) {
         index = preset.first + 1;
       }
-    }  // FIXME this should look for the first "empty" preset.
+    } // FIXME this should look for the first "empty" preset.
   }
   storePreset(index, name);
 }
@@ -606,7 +612,7 @@ void PresetHandler::setCurrentPresetMap(std::string mapName, bool autoCreate) {
     for (int i = 0; i < preset_files.count(); i += 1) {
       const FilePath &path = preset_files[i];
       const std::string &name = path.file();
-      presets.push_back(name.substr(0, name.size() - 7));  // exclude extension
+      presets.push_back(name.substr(0, name.size() - 7)); // exclude extension
     }
 
     for (size_t i = 0; i < presets.size(); ++i) {
@@ -642,127 +648,127 @@ int PresetHandler::asciiToPresetIndex(int ascii, int offset) {
   int index = -1;
 
   switch (ascii) {
-    case '1':
-      index = 0;
-      break;
-    case '2':
-      index = 1;
-      break;
-    case '3':
-      index = 2;
-      break;
-    case '4':
-      index = 3;
-      break;
-    case '5':
-      index = 4;
-      break;
-    case '6':
-      index = 5;
-      break;
-    case '7':
-      index = 6;
-      break;
-    case '8':
-      index = 7;
-      break;
-    case '9':
-      index = 8;
-      break;
-    case '0':
-      index = 9;
-      break;
-    case 'q':
-      index = 10;
-      break;
-    case 'w':
-      index = 11;
-      break;
-    case 'e':
-      index = 12;
-      break;
-    case 'r':
-      index = 13;
-      break;
-    case 't':
-      index = 14;
-      break;
-    case 'y':
-      index = 15;
-      break;
-    case 'u':
-      index = 16;
-      break;
-    case 'i':
-      index = 17;
-      break;
-    case 'o':
-      index = 18;
-      break;
-    case 'p':
-      index = 19;
-      break;
-    case 'a':
-      index = 20;
-      break;
-    case 's':
-      index = 21;
-      break;
-    case 'd':
-      index = 22;
-      break;
-    case 'f':
-      index = 23;
-      break;
-    case 'g':
-      index = 24;
-      break;
-    case 'h':
-      index = 25;
-      break;
-    case 'j':
-      index = 26;
-      break;
-    case 'k':
-      index = 27;
-      break;
-    case 'l':
-      index = 28;
-      break;
-    case ';':
-      index = 29;
-      break;
-      ;
-    case 'z':
-      index = 30;
-      break;
-    case 'x':
-      index = 31;
-      break;
-    case 'c':
-      index = 32;
-      break;
-    case 'v':
-      index = 33;
-      break;
-    case 'b':
-      index = 34;
-      break;
-    case 'n':
-      index = 35;
-      break;
-    case 'm':
-      index = 36;
-      break;
-    case ',':
-      index = 37;
-      break;
-    case '.':
-      index = 38;
-      break;
-    case '/':
-      index = 39;
-      break;
+  case '1':
+    index = 0;
+    break;
+  case '2':
+    index = 1;
+    break;
+  case '3':
+    index = 2;
+    break;
+  case '4':
+    index = 3;
+    break;
+  case '5':
+    index = 4;
+    break;
+  case '6':
+    index = 5;
+    break;
+  case '7':
+    index = 6;
+    break;
+  case '8':
+    index = 7;
+    break;
+  case '9':
+    index = 8;
+    break;
+  case '0':
+    index = 9;
+    break;
+  case 'q':
+    index = 10;
+    break;
+  case 'w':
+    index = 11;
+    break;
+  case 'e':
+    index = 12;
+    break;
+  case 'r':
+    index = 13;
+    break;
+  case 't':
+    index = 14;
+    break;
+  case 'y':
+    index = 15;
+    break;
+  case 'u':
+    index = 16;
+    break;
+  case 'i':
+    index = 17;
+    break;
+  case 'o':
+    index = 18;
+    break;
+  case 'p':
+    index = 19;
+    break;
+  case 'a':
+    index = 20;
+    break;
+  case 's':
+    index = 21;
+    break;
+  case 'd':
+    index = 22;
+    break;
+  case 'f':
+    index = 23;
+    break;
+  case 'g':
+    index = 24;
+    break;
+  case 'h':
+    index = 25;
+    break;
+  case 'j':
+    index = 26;
+    break;
+  case 'k':
+    index = 27;
+    break;
+  case 'l':
+    index = 28;
+    break;
+  case ';':
+    index = 29;
+    break;
+    ;
+  case 'z':
+    index = 30;
+    break;
+  case 'x':
+    index = 31;
+    break;
+  case 'c':
+    index = 32;
+    break;
+  case 'v':
+    index = 33;
+    break;
+  case 'b':
+    index = 34;
+    break;
+  case 'n':
+    index = 35;
+    break;
+  case 'm':
+    index = 36;
+    break;
+  case ',':
+    index = 37;
+    break;
+  case '.':
+    index = 38;
+    break;
+  case '/':
+    index = 39;
+    break;
   }
   if (index >= 0) {
     index += offset;
@@ -913,8 +919,8 @@ void PresetHandler::morphingFunction(al::PresetHandler *handler) {
   }
 }
 
-PresetHandler::ParameterStates PresetHandler::getBundleStates(
-    ParameterBundle *bundle, std::string id) {
+PresetHandler::ParameterStates
+PresetHandler::getBundleStates(ParameterBundle *bundle, std::string id) {
   ParameterStates values;
   std::string bundlePrefix = bundle->name() + "/" + id;
   for (ParameterMeta *p : bundle->parameters()) {
@@ -932,11 +938,11 @@ PresetHandler::ParameterStates PresetHandler::getBundleStates(
   return values;
 }
 
-PresetHandler::ParameterStates PresetHandler::loadPresetValues(
-    std::string name) {
+PresetHandler::ParameterStates
+PresetHandler::loadPresetValues(std::string name) {
   ParameterStates preset;
-  std::lock_guard<std::mutex> lock(mFileLock);  // Protect loading and saving
-  std::lock_guard<std::mutex> lock2(mSkipParametersLock);  // Protect skip list
+  std::lock_guard<std::mutex> lock(mFileLock); // Protect loading and saving
+  std::lock_guard<std::mutex> lock2(mSkipParametersLock); // Protect skip list
   std::string path = getCurrentPath();
   if (path.back() != '/') {
     path += "/";
@@ -1068,6 +1074,12 @@ void PresetHandler::setTimeMaster(TimeMasterMode masterMode) {
     mCpuThreadRunning = true;
     mMorphingThread =
         std::make_unique<std::thread>(PresetHandler::morphingFunction, this);
+  }
+  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS ||
+      mTimeMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
+    std::cerr << "ERROR: PresetSequencer: TimeMasterMode not supported, "
+                 "treating as TIME_MASTER_CPU"
+              << std::endl;
   }
 }
 

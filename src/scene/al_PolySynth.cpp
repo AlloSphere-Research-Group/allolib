@@ -11,7 +11,7 @@ using namespace al;
 #include <memory>
 
 std::string al::demangle(const char *name) {
-  int status = -4;  // some arbitrary value to eliminate the compiler warning
+  int status = -4; // some arbitrary value to eliminate the compiler warning
 
   // enable c++11 by passing the flag -std=c++11 to g++
   std::unique_ptr<char, void (*)(void *)> res{
@@ -40,172 +40,172 @@ std::string al::demangle(const char *name) { return name; }
 
 int al::asciiToIndex(int asciiKey, int offset) {
   switch (asciiKey) {
-    case '1':
-      return offset + 0;
-    case '2':
-      return offset + 1;
-    case '3':
-      return offset + 2;
-    case '4':
-      return offset + 3;
-    case '5':
-      return offset + 4;
-    case '6':
-      return offset + 5;
-    case '7':
-      return offset + 6;
-    case '8':
-      return offset + 7;
-    case '9':
-      return offset + 8;
-    case '0':
-      return offset + 9;
+  case '1':
+    return offset + 0;
+  case '2':
+    return offset + 1;
+  case '3':
+    return offset + 2;
+  case '4':
+    return offset + 3;
+  case '5':
+    return offset + 4;
+  case '6':
+    return offset + 5;
+  case '7':
+    return offset + 6;
+  case '8':
+    return offset + 7;
+  case '9':
+    return offset + 8;
+  case '0':
+    return offset + 9;
 
-    case 'q':
-      return offset + 10;
-    case 'w':
-      return offset + 11;
-    case 'e':
-      return offset + 12;
-    case 'r':
-      return offset + 13;
-    case 't':
-      return offset + 14;
-    case 'y':
-      return offset + 15;
-    case 'u':
-      return offset + 16;
-    case 'i':
-      return offset + 17;
-    case 'o':
-      return offset + 18;
-    case 'p':
-      return offset + 19;
-    case 'a':
-      return offset + 20;
+  case 'q':
+    return offset + 10;
+  case 'w':
+    return offset + 11;
+  case 'e':
+    return offset + 12;
+  case 'r':
+    return offset + 13;
+  case 't':
+    return offset + 14;
+  case 'y':
+    return offset + 15;
+  case 'u':
+    return offset + 16;
+  case 'i':
+    return offset + 17;
+  case 'o':
+    return offset + 18;
+  case 'p':
+    return offset + 19;
+  case 'a':
+    return offset + 20;
 
-    case 's':
-      return offset + 21;
-    case 'd':
-      return offset + 22;
-    case 'f':
-      return offset + 23;
-    case 'g':
-      return offset + 24;
-    case 'h':
-      return offset + 25;
-    case 'j':
-      return offset + 26;
-    case 'k':
-      return offset + 27;
-    case 'l':
-      return offset + 28;
-    case ';':
-      return offset + 29;
+  case 's':
+    return offset + 21;
+  case 'd':
+    return offset + 22;
+  case 'f':
+    return offset + 23;
+  case 'g':
+    return offset + 24;
+  case 'h':
+    return offset + 25;
+  case 'j':
+    return offset + 26;
+  case 'k':
+    return offset + 27;
+  case 'l':
+    return offset + 28;
+  case ';':
+    return offset + 29;
 
-    case 'z':
-      return offset + 30;
-    case 'x':
-      return offset + 31;
-    case 'c':
-      return offset + 32;
-    case 'v':
-      return offset + 33;
-    case 'b':
-      return offset + 34;
-    case 'n':
-      return offset + 35;
-    case 'm':
-      return offset + 36;
-    case ',':
-      return offset + 37;
-    case '.':
-      return offset + 38;
-    case '/':
-      return offset + 39;
+  case 'z':
+    return offset + 30;
+  case 'x':
+    return offset + 31;
+  case 'c':
+    return offset + 32;
+  case 'v':
+    return offset + 33;
+  case 'b':
+    return offset + 34;
+  case 'n':
+    return offset + 35;
+  case 'm':
+    return offset + 36;
+  case ',':
+    return offset + 37;
+  case '.':
+    return offset + 38;
+  case '/':
+    return offset + 39;
   }
   return 0;
 }
 
 int al::asciiToMIDI(int asciiKey, int offset) {
   switch (asciiKey) {
-    //	case '1': return offset + 0;
-    case '2':
-      return offset + 73;
-    case '3':
-      return offset + 75;
-      //	case '4': return offset + 3;
-    case '5':
-      return offset + 78;
-    case '6':
-      return offset + 80;
-    case '7':
-      return offset + 82;
-      //	case '8': return offset + 7;
-    case '9':
-      return offset + 85;
-    case '0':
-      return offset + 87;
+  //	case '1': return offset + 0;
+  case '2':
+    return offset + 73;
+  case '3':
+    return offset + 75;
+    //	case '4': return offset + 3;
+  case '5':
+    return offset + 78;
+  case '6':
+    return offset + 80;
+  case '7':
+    return offset + 82;
+    //	case '8': return offset + 7;
+  case '9':
+    return offset + 85;
+  case '0':
+    return offset + 87;
 
-    case 'q':
-      return offset + 72;
-    case 'w':
-      return offset + 74;
-    case 'e':
-      return offset + 76;
-    case 'r':
-      return offset + 77;
-    case 't':
-      return offset + 79;
-    case 'y':
-      return offset + 81;
-    case 'u':
-      return offset + 83;
-    case 'i':
-      return offset + 84;
-    case 'o':
-      return offset + 86;
-    case 'p':
-      return offset + 88;
+  case 'q':
+    return offset + 72;
+  case 'w':
+    return offset + 74;
+  case 'e':
+    return offset + 76;
+  case 'r':
+    return offset + 77;
+  case 't':
+    return offset + 79;
+  case 'y':
+    return offset + 81;
+  case 'u':
+    return offset + 83;
+  case 'i':
+    return offset + 84;
+  case 'o':
+    return offset + 86;
+  case 'p':
+    return offset + 88;
 
-      //	case 'a': return offset + 20;
-    case 's':
-      return offset + 61;
-    case 'd':
-      return offset + 63;
-      //	case 'f': return offset + 23;
-    case 'g':
-      return offset + 66;
-    case 'h':
-      return offset + 68;
-    case 'j':
-      return offset + 70;
-      //	case 'k': return offset + 27;
-    case 'l':
-      return offset + 73;
-    case ';':
-      return offset + 75;
+    //	case 'a': return offset + 20;
+  case 's':
+    return offset + 61;
+  case 'd':
+    return offset + 63;
+    //	case 'f': return offset + 23;
+  case 'g':
+    return offset + 66;
+  case 'h':
+    return offset + 68;
+  case 'j':
+    return offset + 70;
+    //	case 'k': return offset + 27;
+  case 'l':
+    return offset + 73;
+  case ';':
+    return offset + 75;
 
-    case 'z':
-      return offset + 60;
-    case 'x':
-      return offset + 62;
-    case 'c':
-      return offset + 64;
-    case 'v':
-      return offset + 65;
-    case 'b':
-      return offset + 67;
-    case 'n':
-      return offset + 69;
-    case 'm':
-      return offset + 71;
-    case ',':
-      return offset + 72;
-    case '.':
-      return offset + 74;
-    case '/':
-      return offset + 76;
+  case 'z':
+    return offset + 60;
+  case 'x':
+    return offset + 62;
+  case 'c':
+    return offset + 64;
+  case 'v':
+    return offset + 65;
+  case 'b':
+    return offset + 67;
+  case 'n':
+    return offset + 69;
+  case 'm':
+    return offset + 71;
+  case ',':
+    return offset + 72;
+  case '.':
+    return offset + 74;
+  case '/':
+    return offset + 76;
   }
   return 0;
 }
@@ -314,7 +314,7 @@ int SynthVoice::getTriggerParams(float *pFields, int maxParams) {
     if (param.type() == ParameterField::FLOAT) {
       *pFields++ = param.get<float>();
     } else {
-      *pFields++ = 0.0f;  // Ignore strings...
+      *pFields++ = 0.0f; // Ignore strings...
     }
     count++;
   }
@@ -347,7 +347,7 @@ void SynthVoice::triggerOn(int offsetFrames) {
 
 void SynthVoice::triggerOff(int offsetFrames) {
   mOffOffsetFrames =
-      offsetFrames;  // TODO implement offset frames for trigger off.
+      offsetFrames; // TODO implement offset frames for trigger off.
   // Currently ignoring and turning off at start of buffer
   onTriggerOff();
 }
@@ -370,8 +370,9 @@ int SynthVoice::getEndOffsetFrames(unsigned int framesPerBuffer) {
   return frames;
 }
 
-std::shared_ptr<Parameter> SynthVoice::createInternalTriggerParameter(
-    std::string name, float defaultValue, float minValue, float maxValue) {
+std::shared_ptr<Parameter>
+SynthVoice::createInternalTriggerParameter(std::string name, float defaultValue,
+                                           float minValue, float maxValue) {
   mInternalParameters.push_back(
       std::make_shared<Parameter>(name, defaultValue, minValue, maxValue));
   registerTriggerParameter(*mInternalParameters.back().get());
@@ -455,9 +456,9 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id,
       std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
       voice->next = mVoicesToInsert;
       voice->mActive =
-          true;  // We need to mark this here to avoid race conditions if
-                 // active() is checked on separate thread, and the voice
-                 // removed before it has been triggered.
+          true; // We need to mark this here to avoid race conditions if
+                // active() is checked on separate thread, and the voice
+                // removed before it has been triggered.
       mVoicesToInsert = voice;
     }
     return thisId;
@@ -480,7 +481,7 @@ void PolySynth::allNotesOff() { mAllNotesOff = true; }
 
 SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc) {
   std::unique_lock<std::mutex> lk(
-      mFreeVoiceLock);  // Only one getVoice() call at a time
+      mFreeVoiceLock); // Only one getVoice() call at a time
   SynthVoice *freeVoice = mFreeVoices;
   SynthVoice *previousVoice = nullptr;
   while (freeVoice) {
@@ -500,8 +501,8 @@ SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc) {
     previousVoice = freeVoice;
     freeVoice = freeVoice->next;
   }
-  if (!freeVoice) {  // No free voice in list, so we need to allocate it
-                     //  But only allocate if allocation has not been disabled
+  if (!freeVoice) { // No free voice in list, so we need to allocate it
+                    //  But only allocate if allocation has not been disabled
     if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) ==
         mNoAllocationList.end()) {
       // TODO report current polyphony for more informed allocation of polyphony
@@ -516,7 +517,7 @@ SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc) {
 
 SynthVoice *PolySynth::getFreeVoice() {
   std::unique_lock<std::mutex> lk(
-      mFreeVoiceLock);  // Only one getVoice() call at a time
+      mFreeVoiceLock); // Only one getVoice() call at a time
   SynthVoice *freeVoice = mFreeVoices;
   if (freeVoice) {
     mFreeVoices = freeVoice->next;
@@ -608,7 +609,7 @@ void PolySynth::render(Graphics &g) {
 }
 
 void PolySynth::update(double dt) {
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_UPDATE) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -621,7 +622,7 @@ void PolySynth::update(double dt) {
     }
     voice = voice->next;
   }
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_UPDATE) {
     processInactiveVoices();
   }
 }

@@ -13,13 +13,17 @@
 using namespace al;
 
 PresetSequencer::PresetSequencer(TimeMasterMode timeMasterMode)
-    : mRunning(false),
-      mBeginCallbackEnabled(false),
-      mEndCallbackEnabled(false),
+    : mRunning(false), mBeginCallbackEnabled(false), mEndCallbackEnabled(false),
       mSequencerThread(nullptr) {
   mTimeMasterMode = timeMasterMode;
   if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
     startCpuThread();
+  }
+  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS ||
+      mTimeMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
+    std::cerr << "ERROR: PresetSequencer: TimeMasterMode not supported, "
+                 "treating as TIME_MASTER_CPU"
+              << std::endl;
   }
 }
 
@@ -102,7 +106,7 @@ void PresetSequencer::rewind() {
   if (mSequenceLock.try_lock()) {
     setTime(0.0);
     mSequenceLock.unlock();
-  } else {  // If lock can't be acquired, request time change
+  } else { // If lock can't be acquired, request time change
     setTime(0.0);
   }
 }
@@ -164,7 +168,7 @@ void PresetSequencer::sequencerFunction(al::PresetSequencer *sequencer) {
     //    std::cout << "Sequence finished." << std::endl;
     if (sequencer->mPresetHandler) {
       std::this_thread::sleep_for(std::chrono::milliseconds(
-          100));  // Give a little time to process any pending preset changes.
+          100)); // Give a little time to process any pending preset changes.
       sequencer->mPresetHandler->stopMorphing();
     }
     if (sequencer->mEndCallbackEnabled && sequencer->mEndCallback != nullptr) {
@@ -184,8 +188,8 @@ void PresetSequencer::setHandlerSubDirectory(std::string subDir) {
   }
 }
 
-PresetSequencer &PresetSequencer::registerPresetHandler(
-    PresetHandler &presetHandler) {
+PresetSequencer &
+PresetSequencer::registerPresetHandler(PresetHandler &presetHandler) {
   mPresetHandler = &presetHandler;
   // We need to take over the preset handler timing.
   //  mPresetHandler->setTimeMaster(TimeMasterMode::TIME_MASTER_CPU);
@@ -194,8 +198,8 @@ PresetSequencer &PresetSequencer::registerPresetHandler(
   return *this;
 }
 
-std::vector<PresetSequencer::Step> PresetSequencer::loadSequence(
-    std::string sequenceName, double timeScale) {
+std::vector<PresetSequencer::Step>
+PresetSequencer::loadSequence(std::string sequenceName, double timeScale) {
   std::vector<Step> steps;
   std::string fullName = buildFullPath(sequenceName);
   std::ifstream f(fullName);
@@ -218,7 +222,7 @@ std::vector<PresetSequencer::Step> PresetSequencer::loadSequence(
     if (name.size() > 0 && name[0] == '@') {
       Step step;
       step.type = EVENT;
-      step.name = name.substr(1);  // chop initial '@'
+      step.name = name.substr(1); // chop initial '@'
       step.morphTime = std::stof(delta) * timeScale;
       step.waitTime = std::stof(duration) * timeScale;
 

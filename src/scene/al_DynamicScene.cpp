@@ -52,14 +52,15 @@ void ThreadPool::stopThreads() {
   cv_task.notify_all();
   latch.unlock();
   // all threads terminate, then we're done.
-  for (auto &t : workers) t.join();
+  for (auto &t : workers)
+    t.join();
 }
 
 // ------------------------------------------------
 
 DynamicScene::DynamicScene(int threadPoolSize, TimeMasterMode masterMode)
     : PolySynth(masterMode) {
-  Speakers sl = StereoSpeakerLayout();  // Stereo by default
+  Speakers sl = StereoSpeakerLayout(); // Stereo by default
   setSpatializer<StereoPanner>(sl);
   if (threadPoolSize > 0) {
     mWorkerThreads = std::make_unique<ThreadPool>(threadPoolSize);
@@ -168,7 +169,7 @@ void DynamicScene::render(AudioIOData &io) {
   auto *voice = mActiveVoices;
   int fpb = internalAudioIO.framesPerBuffer();
   if (mAudioThreads.size() == 0 ||
-      !mThreadedAudio) {  // Not using worker threads
+      !mThreadedAudio) { // Not using worker threads
     // Render active voices
     while (voice) {
       if (voice->active()) {
@@ -240,7 +241,7 @@ void DynamicScene::render(AudioIOData &io) {
       }
       voice = voice->next;
     }
-  } else {  // Process Audio Threaded
+  } else { // Process Audio Threaded
     mAudioBusy = 0;
     for (auto &tmap : mThreadMap) {
       tmap.second.resize(0);
@@ -274,13 +275,13 @@ void DynamicScene::render(AudioIOData &io) {
 }
 
 void DynamicScene::update(double dt) {
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_UPDATE) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
   }
 
-  if (!mWorkerThreads || !mThreadedUpdate) {  // Not using worker threads
+  if (!mWorkerThreads || !mThreadedUpdate) { // Not using worker threads
     auto *voice = mActiveVoices;
     while (voice) {
       if (voice->active()) {
@@ -288,7 +289,7 @@ void DynamicScene::update(double dt) {
       }
       voice = voice->next;
     }
-  } else {  // Using worker threads
+  } else { // Using worker threads
 
     auto *voice = mActiveVoices;
     while (voice) {
@@ -301,7 +302,7 @@ void DynamicScene::update(double dt) {
     mWorkerThreads->waitForProcessingDone();
   }
   // Update
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_UPDATE) {
     processInactiveVoices();
   }
 }
@@ -309,9 +310,9 @@ void DynamicScene::update(double dt) {
 void DynamicScene::print(ostream &stream) {
   stream << "Audio Distance Attenuation:";
   const char *s = nullptr;
-#define PROCESS_VAL(p) \
-  case (p):            \
-    s = #p;            \
+#define PROCESS_VAL(p)                                                         \
+  case (p):                                                                    \
+    s = #p;                                                                    \
     break;
   switch (mDistAtten.law()) {
     PROCESS_VAL(ATTEN_NONE);
@@ -353,7 +354,7 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
       //                if (voice->active()) { // No need to check as only
       //                active voices are put in mThreadMap
       if (find(idsToProcess.begin(), idsToProcess.end(), voice->id()) !=
-          idsToProcess.end()) {  // voice has been assigned to this thread
+          idsToProcess.end()) { // voice has been assigned to this thread
         unsigned int offset = voice->getStartOffsetFrames(fpb);
         if (offset < fpb) {
           io.frame(offset);
@@ -433,7 +434,7 @@ bool PositionedVoice::setTriggerParams(float *pFields, int numFields) {
   bool ok = SynthVoice::setTriggerParams(pFields, numFields);
   if (numFields ==
       (int)mTriggerParams.size() +
-          8) {  // If seven extra, it means pose and size are there too
+          8) { // If seven extra, it means pose and size are there too
     pFields += mTriggerParams.size();
     double x = *pFields++;
     double y = *pFields++;
@@ -455,7 +456,7 @@ bool PositionedVoice::setTriggerParams(std::vector<float> &pFields,
   bool ok = SynthVoice::setTriggerParams(pFields, noCalls);
   if (pFields.size() ==
       mTriggerParams.size() +
-          8) {  // If seven extra, it means pose and size are there too
+          8) { // If seven extra, it means pose and size are there too
     size_t index = mTriggerParams.size();
     double x = pFields[index++];
     double y = pFields[index++];
@@ -484,7 +485,7 @@ bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields,
   bool ok = SynthVoice::setTriggerParams(pFields);
   if (pFields.size() ==
       mTriggerParams.size() +
-          8) {  // If seven extra, it means pose and size are there too
+          8) { // If seven extra, it means pose and size are there too
     size_t index = mTriggerParams.size();
     double x = pFields[index++].get<float>();
     double y = pFields[index++].get<float>();
