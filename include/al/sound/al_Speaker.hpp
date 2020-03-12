@@ -56,13 +56,13 @@ namespace al {
 ///
 /// @ingroup Sound
 class Speaker {
- public:
-  unsigned int deviceChannel;  ///< Index in the output device channels array
-  float azimuth;               ///< Angle from forward to left vector
-  float elevation;             ///< Angle from forward-right plane to up vector
-  int group;                   ///< Group identifier
-  float radius;                ///< Distance from center of listening space
-  float gain;                  ///< Gain of speaker
+public:
+  unsigned int deviceChannel; ///< Index in the output device channels array
+  float azimuth;              ///< Angle from forward to left vector
+  float elevation;            ///< Angle from forward-right plane to up vector
+  int group;                  ///< Group identifier
+  float radius;               ///< Distance from center of listening space
+  float gain;                 ///< Gain of speaker
 
   /// @param[in] deviceChan		audio device output channel
   /// @param[in] az				azimuth of speaker
@@ -73,13 +73,12 @@ class Speaker {
           int group = 0, float radius = 1.f, float gain = 1.f);
 
   /// Get position in Cartesian coordinate (in audio space)
-  template <class T>
-  Speaker& posCart(T* xyz) {
+  template <class T> Speaker &posCart(T *xyz) {
     using namespace std;
     float elr = toRad(elevation);
     float azr = toRad(azimuth);
     float cosel = cos(elr);
-    xyz[0] = cos(azr) * cosel * radius;
+    xyz[0] = -cos(azr) * cosel * radius;
     xyz[1] = sin(azr) * cosel * radius;
     xyz[2] = sin(elr) * radius;
     return *this;
@@ -147,5 +146,5 @@ Speakers OctalSpeakerLayout(unsigned int deviceChannelStart = 0,
 /// @ingroup allocore
 Speakers CubeLayout(unsigned int deviceChannelStart = 0);
 
-}  // namespace al
+} // namespace al
 #endif

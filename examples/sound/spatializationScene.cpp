@@ -25,7 +25,7 @@ using namespace std;
 // Sound source
 struct Source : public PositionedVoice {
   Mesh mMarker;
-  unsigned long counter = 0;  // overall sample counter
+  unsigned long counter = 0; // overall sample counter
 
   void init() override { addDodecahedron(mMarker); }
 
@@ -88,14 +88,15 @@ struct MyApp : public App {
     if (mPeaks) {
       free(mPeaks);
     }
-    mPeaks = new atomic<float>[speakerLayout.size()];  // Not being freed
-                                                       // in this example
+    mPeaks = new atomic<float>[speakerLayout.size()]; // Not being freed
+                                                      // in this example
   }
 
   void initSpatializer(int type = -1) {
     if (type == -1) {
       type = spatializerType + 1;
-      if (type == 7) type = 1;
+      if (type == 7)
+        type = 1;
     }
     spatializerType = type;
     if (type == 1) {
@@ -153,7 +154,7 @@ struct MyApp : public App {
       g.pushMatrix();
       float xyz[3];
       speakerLayout[i].posCart(xyz);
-      g.translate(-xyz[1], xyz[2], -xyz[0]);
+      g.translate(xyz[1], xyz[2], xyz[0]);
       float peak = mPeaks[i].load();
       g.scale(0.02 + fabs(peak) * 5);
       g.color(HSV(0.5 + (peak * 4)));

@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <typeinfo>  // For class name instrospection
+#include <typeinfo> // For class name instrospection
 
 using namespace al;
 
@@ -24,12 +24,16 @@ void SynthSequencer::render(AudioIOData &io) {
 
 void SynthSequencer::render(Graphics &g) {
   if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
-    double timeIncrement = 1.0 / mFps;
-    double blockStartTime = mMasterTime;
-    mMasterTime += timeIncrement;
-    processEvents(blockStartTime, mNormalizedTempo * mFps);
+    update(1.0 / mFps);
   }
   mPolySynth->render(g);
+}
+
+void SynthSequencer::update(double dt) {
+  double timeIncrement = dt;
+  double blockStartTime = mMasterTime;
+  mMasterTime += timeIncrement;
+  processEvents(blockStartTime, mNormalizedTempo * mFps);
 }
 
 void SynthSequencer::print() {
@@ -165,8 +169,9 @@ std::string SynthSequencer::buildFullPath(std::string sequenceName) {
   return fullName;
 }
 
-std::list<SynthSequencerEvent> SynthSequencer::loadSequence(
-    std::string sequenceName, double timeOffset, double timeScale) {
+std::list<SynthSequencerEvent>
+SynthSequencer::loadSequence(std::string sequenceName, double timeOffset,
+                             double timeScale) {
   std::unique_lock<std::mutex> lk(mLoadingLock);
   std::list<SynthSequencerEvent> events;
   std::string fullName = buildFullPath(sequenceName);
@@ -214,7 +219,7 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(
         std::istringstream iss(myString);
         float f;
         iss >> std::noskipws >>
-            f;  // noskipws considers leading whitespace invalid
+            f; // noskipws considers leading whitespace invalid
         // Check the entire string was consumed and if either failbit or badbit
         // is set
         return iss.eof() && !iss.fail();
@@ -222,11 +227,11 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(
 
       while (currentIndex < fieldsString.size()) {
         if (fieldsString[currentIndex] == '"') {
-          if (processingString) {  // String end
+          if (processingString) { // String end
             pFields.push_back(stringAccum);
             stringAccum.clear();
             processingString = false;
-          } else {  // String begin
+          } else { // String begin
             processingString = true;
           }
         } else if (fieldsString[currentIndex] == ' ' ||
@@ -235,7 +240,7 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(
                    fieldsString[currentIndex] == '\r') {
           if (processingString) {
             stringAccum += fieldsString[currentIndex];
-          } else if (stringAccum.size() > 0) {  // accumulate
+          } else if (stringAccum.size() > 0) { // accumulate
             if (isFloat(stringAccum)) {
               pFields.push_back(stof(stringAccum));
             } else {
@@ -244,7 +249,7 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(
             //                            std::cout << stringAccum << std::endl;
             stringAccum.clear();
           }
-        } else {  // Accumulate character
+        } else { // Accumulate character
           stringAccum += fieldsString[currentIndex];
         }
         currentIndex++;
@@ -257,8 +262,8 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(
         }
       }
 
-      if (false) {  // Insert event as EVENT_VOICE. This is not good as it
-                    // forces preallocating all the events...
+      if (false) { // Insert event as EVENT_VOICE. This is not good as it
+                   // forces preallocating all the events...
         SynthVoice *newVoice = mPolySynth->getVoice(name);
         if (newVoice) {
           if (!newVoice->setTriggerParams(pFields)) {
@@ -268,8 +273,7 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(
               std::cout << field.type() << " ";
             }
             std::cout << std::endl;
-            mPolySynth->insertFreeVoice(
-                newVoice);  // Return voice to sequencer.
+            mPolySynth->insertFreeVoice(newVoice); // Return voice to sequencer.
           } else {
             double absoluteTime = timeOffset + startTime;
             // Insert into event list, sorted.
@@ -304,7 +308,7 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(
         insertedEvent->fields.name = name;
         insertedEvent->voice = nullptr;
         insertedEvent->fields.pFields =
-            pFields;  // TODO it would be nice not to have to copy here...
+            pFields; // TODO it would be nice not to have to copy here...
       }
 
       //                std::cout << "Done reading sequence" << std::endl;
@@ -359,8 +363,8 @@ std::list<SynthSequencerEvent> SynthSequencer::loadSequence(
           insertedEvent->type = SynthSequencerEvent::EVENT_VOICE;
           insertedEvent->startTime = absoluteTime;
           insertedEvent->duration =
-              -1;  // Turn on events have undetermined duration until a turn off
-                   // is found later
+              -1; // Turn on events have undetermined duration until a turn off
+                  // is found later
           insertedEvent->voice = newVoice;
           //                        std::cout << "Inserted event " << id << " at
           //                        time " << startTime << std::endl;
@@ -513,9 +517,9 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
         if (event->type == SynthSequencerEvent::EVENT_VOICE && event->voice) {
           mPolySynth->triggerOn(event->voice, event->offsetCounter);
           event->voiceId = event->voice->id();
-          event->voice = nullptr;  // Voice has been consumed, all voices
-                                   // reamining in the event list are put back
-                                   // in the synth's free voice pool
+          event->voice = nullptr; // Voice has been consumed, all voices
+                                  // reamining in the event list are put back
+                                  // in the synth's free voice pool
         } else if (event->type == SynthSequencerEvent::EVENT_PFIELDS) {
           auto *voice = mPolySynth->getVoice(event->fields.name);
           if (voice) {
@@ -561,7 +565,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
         //        eventTermination
         //                  << " " << mMasterTime << std::endl;
         event.voiceId = -1;
-        event.voice = nullptr;  // When an event gives up a voice, it
+        event.voice = nullptr; // When an event gives up a voice, it
         //        is done.
         triggerOffThisBlock = true;
       }
@@ -570,7 +574,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
       }
     }
     if (allEventsDone &&
-        triggerOffThisBlock) {  // This block marks the end of the sequence
+        triggerOffThisBlock) { // This block marks the end of the sequence
       mPlaying = false;
       for (auto cb : mSequenceEndCallbacks) {
         cb(mLastSequencePlayed);

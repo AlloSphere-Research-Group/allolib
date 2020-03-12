@@ -51,6 +51,7 @@
 #include "al/math/al_Vec.hpp"
 #include "al/types/al_Color.hpp"
 #include <vector>
+#include <cstring> // for memcpy in serialize() and deserialize()
 
 namespace al {
 

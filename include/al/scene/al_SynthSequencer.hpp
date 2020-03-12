@@ -69,7 +69,7 @@ namespace al {
 @ingroup Scene
 */
 class SynthSequencerEvent {
- public:
+public:
   SynthSequencerEvent() {}
 
   ~SynthSequencerEvent() {}
@@ -78,12 +78,12 @@ class SynthSequencerEvent {
 
   double startTime{0};
   double duration{-1};
-  int offsetCounter{0};  // To offset event within audio buffer
+  int offsetCounter{0}; // To offset event within audio buffer
 
   EventType type{EVENT_VOICE};
 
   typedef struct {
-    std::string name;  // instrument name
+    std::string name; // instrument name
     std::vector<ParameterField> pFields;
   } ParamFields;
 
@@ -168,7 +168,7 @@ struct SynthEvent {
  */
 
 class SynthSequencer {
- public:
+public:
   SynthSequencer(TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_CPU) {
     mInternalSynth = std::make_unique<PolySynth>(masterMode);
     registerSynth(*mInternalSynth.get());
@@ -189,11 +189,13 @@ class SynthSequencer {
   /// Insert this function within the graphics callback
   void render(Graphics &g);
 
+  void update(double dt);
+
   /// Set the frame rate at which the graphics run (i.e. how often
   /// render(Graphics &g) will be called
   void setGraphicsFrameRate(float fps) {
     mFps = fps;
-  }  // TODO this should be handled through Gamma Domains
+  } // TODO this should be handled through Gamma Domains
 
   /**
    * @brief insert an event in the sequencer
@@ -244,7 +246,7 @@ class SynthSequencer {
   bool verbose() { return mVerbose; }
   void verbose(bool verbose) { mVerbose = verbose; }
 
-  void setTempo(float tempo) { mNormalizedTempo = tempo / 60.f; }
+  void setTempo(float tempo) { mNormalizedTempo = tempo / 60.; }
 
   bool playSequence(std::string sequenceName = "", float startTime = 0.0f);
 
@@ -286,7 +288,7 @@ class SynthSequencer {
 
   void operator<<(PolySynth &synth) { return registerSynth(synth); }
 
- private:
+private:
   PolySynth *mPolySynth;
   std::unique_ptr<PolySynth> mInternalSynth;
 
@@ -294,11 +296,11 @@ class SynthSequencer {
   bool mVerbose{false};
   std::string mLastSequencePlayed;
 
-  double mFps{30};  // graphics frames per second
+  double mFps{30}; // graphics frames per second
 
   unsigned int mNextEvent{0};
   std::list<SynthSequencerEvent>
-      mEvents;  // List of events sorted by start time.
+      mEvents; // List of events sorted by start time.
   std::mutex mEventLock;
   std::mutex mLoadingLock;
   bool mPlaying{false};
@@ -307,15 +309,15 @@ class SynthSequencer {
   double mMasterTime{0.0};
   double mPlaybackStartTime{0.0};
 
-  float mNormalizedTempo{1.0f};  // Linearly normalized inverted around 60 bpm
-                                 // (1.0 = 60bpm, 0.5 = 120 bpm)
+  double mNormalizedTempo{1.0}; // Linearly normalized inverted around 60 bpm
+                                // (1.0 = 60bpm, 0.5 = 120 bpm)
 
   // Time change callback
   std::vector<std::pair<std::function<void(float)>, float>>
       mTimeChangeCallbacks;
   //    float mTimeChangeMinTimeDelta = 0;
-  std::vector<double> mTimeAccumCallbackNs;  // Accumulator for tirggering
-                                             // time change callback.
+  std::vector<double> mTimeAccumCallbackNs; // Accumulator for tirggering
+                                            // time change callback.
 
   std::vector<std::function<void(std::string sequenceName)>>
       mSequenceBeginCallbacks;
@@ -362,6 +364,6 @@ void SynthSequencer::addVoiceFromNow(TSynthVoice *voice, double startTime,
   addVoice(voice, mMasterTime + startTime + triggerOffset, duration);
 }
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_SYNTHSEQUENCER_HPP
+#endif // AL_SYNTHSEQUENCER_HPP
