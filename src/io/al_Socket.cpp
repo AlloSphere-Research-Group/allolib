@@ -29,6 +29,12 @@ socket as many times as you want, and the connect() on UDP socket, of course,
 does not perform any handshake for connection.)
 */
 
+#ifdef AL_WINDOWS
+
+#else
+#include <sys/ioctl.h>
+#endif
+
 #include "al/io/al_Socket.hpp"
 
 //#include "al/system/al_Config.h"
@@ -39,11 +45,11 @@ using namespace al;
 #if defined(AL_SOCKET_DUMMY)
 
 class Socket::Impl {
- public:
+public:
   Impl() {}
-  Impl(uint16_t port, const char* address, float timeout_, int type) {}
+  Impl(uint16_t port, const char *address, float timeout_, int type) {}
 
-  const std::string& address() const {
+  const std::string &address() const {
     static std::string s;
     return s;
   }
@@ -59,10 +65,10 @@ class Socket::Impl {
   bool connect() { return false; }
   void timeout(float v) {}
   bool listen() { return false; }
-  bool accept(Socket::Impl* newSock) { return false; }
+  bool accept(Socket::Impl *newSock) { return false; }
   bool opened() const { return false; }
-  int recv(char* buffer, int maxlen, char* from) { return 0; }
-  int send(const char* buffer, int len) { return 0; }
+  int recv(char *buffer, int maxlen, char *from) { return 0; }
+  int send(const char *buffer, int len) { return 0; }
 };
 
 /*static*/ std::string Socket::hostIP() { return "0.0.0.0"; }
@@ -77,7 +83,7 @@ class Socket::Impl {
 #if defined(AL_WINDOWS)
 #include <WS2tcpip.h>
 #include <WinSock2.h>
-#include <string.h>  // memset
+#include <string.h> // memset
 
 // Initialization singleton
 struct WsInit {
@@ -108,18 +114,18 @@ const char *errorString() {
 typedef SOCKET SocketHandle;
 #define SHUT_RDWR SD_BOTH
 DWORD secToTimeout(float t) {
-  return t >= 0. ? DWORD(t * 1000. + 0.5) : 4294967295;  // msec
+  return t >= 0. ? DWORD(t * 1000. + 0.5) : 4294967295; // msec
 }
 
-#else  // POSIX
+#else // POSIX
 
-#include <arpa/inet.h>  // inet_ntoa
+#include <arpa/inet.h> // inet_ntoa
 #include <errno.h>
-#include <netdb.h>   // gethostbyname
-#include <string.h>  // memset, strerror
+#include <netdb.h>  // gethostbyname
+#include <string.h> // memset, strerror
 #include <sys/socket.h>
-#include <sys/time.h>  // timeval
-#include <unistd.h>    // close, gethostname
+#include <sys/time.h> // timeval
+#include <unistd.h>   // close, gethostname
 
 #include <sstream>
 
@@ -128,7 +134,8 @@ const char *errorString() { return strerror(errno); }
 #define INIT_SOCKET
 typedef int SocketHandle;
 timeval secToTimeout(float t) {
-  if (t < 0) t = 2147483520.;  // largest representable 32-bit int
+  if (t < 0)
+    t = 2147483520.; // largest representable 32-bit int
   timeval tv;
   tv.tv_sec = int(t);
   tv.tv_usec = (t - tv.tv_sec) * 1000000;
@@ -142,7 +149,7 @@ timeval secToTimeout(float t) {
 #endif
 
 class Socket::Impl {
- public:
+public:
   Impl() { INIT_SOCKET; }
 
   Impl(uint16_t port, const char *address, float timeout_, int type) : Impl() {
@@ -166,59 +173,59 @@ class Socket::Impl {
 
     int sockProto = type & 127;
     switch (sockProto) {
-      case TCP:
-        sockProto = IPPROTO_TCP;
-        break;
-      case UDP:
-        sockProto = IPPROTO_UDP;
-        break;
-      case SCTP:
+    case TCP:
+      sockProto = IPPROTO_TCP;
+      break;
+    case UDP:
+      sockProto = IPPROTO_UDP;
+      break;
+    case SCTP:
 #ifdef IPPROTO_SCTP
-        sockProto = IPPROTO_SCTP;
-        break;
+      sockProto = IPPROTO_SCTP;
+      break;
 #else
-        AL_WARN("Socket::SCTP not supported on this platform.");
-        return false;
+      AL_WARN("Socket::SCTP not supported on this platform.");
+      return false;
 #endif
-      default:;
+    default:;
     }
 
     int sockType = type & (127 << 8);
     switch (sockType) {
-      case STREAM:
+    case STREAM:
+      sockType = SOCK_STREAM;
+      break;
+    case DGRAM:
+      sockType = SOCK_DGRAM;
+      break;
+    case 0: // unspecified; choose sensible default, if possible
+      switch (sockProto) {
+      case TCP:
         sockType = SOCK_STREAM;
         break;
-      case DGRAM:
+      case UDP:
+      case SCTP:
         sockType = SOCK_DGRAM;
         break;
-      case 0:  // unspecified; choose sensible default, if possible
-        switch (sockProto) {
-          case TCP:
-            sockType = SOCK_STREAM;
-            break;
-          case UDP:
-          case SCTP:
-            sockType = SOCK_DGRAM;
-            break;
-          default:;
-        }
+      default:;
+      }
     }
 
     int sockFamily = type & (127 << 16);
     switch (sockFamily) {
-      case 0:
-      case INET:
-        sockFamily = AF_INET;
-        break;
-      case INET6:
+    case 0:
+    case INET:
+      sockFamily = AF_INET;
+      break;
+    case INET6:
 #ifdef AF_INET6
-        sockFamily = AF_INET6;
-        break;
+      sockFamily = AF_INET6;
+      break;
 #else
-        AL_WARN("Socket::INET6 not supported on this platform.");
-        return false;
+      AL_WARN("Socket::INET6 not supported on this platform.");
+      return false;
 #endif
-      default:;
+    default:;
     }
 
     struct addrinfo hints;
@@ -231,14 +238,14 @@ class Socket::Impl {
 
     char addr[16] = "\0";
     if (mAddress.empty() ||
-        mAddress == "0.0.0.0") {  // assume this means it's a server
-                                  //      addr = nullptr;
+        mAddress == "0.0.0.0") { // assume this means it's a server
+                                 //      addr = nullptr;
       hints.ai_flags = AI_PASSIVE;
     }
     strncpy(addr, mAddress.c_str(), 16);
 
     // Resolve address and port
-    char portAsString[5 + 1] = {0};  // max port number 65535
+    char portAsString[5 + 1] = {0}; // max port number 65535
     {
       auto s = std::to_string(mPort);
       s.copy(portAsString, s.size());
@@ -283,7 +290,7 @@ class Socket::Impl {
 
   bool reopen() { return open(mPort, mAddress, mTimeout, mType); }
 
-  bool bind() {  // for server-side
+  bool bind() { // for server-side
     if (opened()) {
       struct addrinfo *p;
       for (p = mAddrInfo; p != nullptr; p = p->ai_next) {
@@ -294,9 +301,8 @@ class Socket::Impl {
         bool r = true;
         // SO_REUSEADDR: "The rules used in validating addresses supplied to
         // bind should allow reuse of local addresses."
-        if (SOCKET_ERROR == ::setsockopt(mSocketHandle, SOL_SOCKET,
-                                         SO_EXCLUSIVEADDRUSE, (char *)&r,
-                                         sizeof(r))) {
+        if (SOCKET_ERROR ==
+            ::setsockopt(mSocketHandle, SOL_SOCKET, 0, (char *)&r, sizeof(r))) {
           AL_WARN("unable to set SO_REUSEADDR on socket at %s:%i: %s",
                   mAddress.c_str(), mPort, errorString());
         }
@@ -316,7 +322,7 @@ class Socket::Impl {
     return false;
   }
 
-  bool connect() {  // for client-side
+  bool connect() { // for client-side
     if (opened()) {
       if (SOCKET_ERROR == ::connect(mSocketHandle, mAddrInfo->ai_addr,
                                     (int)mAddrInfo->ai_addrlen)) {
@@ -333,13 +339,13 @@ class Socket::Impl {
     mTimeout = v;
     auto to = secToTimeout(v);
     for (auto opt : {SO_SNDTIMEO, SO_RCVTIMEO}) {
-      if (mTimeout < 0) {  // necessary?
+      if (mTimeout < 0) { // necessary?
 #ifdef AL_WINDOWS
         decltype(WSABUF::len) nb = 0;
         ::ioctlsocket(mSocketHandle, FIONBIO, &nb);
 #else
         int nb = 0;
-        ::ioctl(mSocket, FIONBIO, &nb);
+        ::ioctl(mSocketHandle, FIONBIO, &nb);
 #endif
       } else if (SOCKET_ERROR == ::setsockopt(mSocketHandle, SOL_SOCKET, opt,
                                               (char *)&to, sizeof(to))) {
@@ -390,20 +396,20 @@ class Socket::Impl {
     }
     char address[64];
     switch (pl_one_addr.sin_family) {
-      case AF_INET:
-        inet_ntop(AF_INET, &(((struct sockaddr_in *)&pl_one_addr)->sin_addr),
-                  address, 64);
-        break;
+    case AF_INET:
+      inet_ntop(AF_INET, &(((struct sockaddr_in *)&pl_one_addr)->sin_addr),
+                address, 64);
+      break;
 
-        //      case AF_INET6:
-        //        inet_ntop(AF_INET6, &(((struct sockaddr_in6
-        //        *)&pl_one_addr)->sin6_addr),
-        //                  address, 64);
-        //        break;
+      //      case AF_INET6:
+      //        inet_ntop(AF_INET6, &(((struct sockaddr_in6
+      //        *)&pl_one_addr)->sin6_addr),
+      //                  address, 64);
+      //        break;
 
-      default:
-        strncpy(address, "Unknown AF", 64);
-        return NULL;
+    default:
+      strncpy(address, "Unknown AF", 64);
+      return NULL;
     }
     newSock->mAddress = address;
     newSock->mPort = pl_one_addr.sin_port;
@@ -420,7 +426,7 @@ class Socket::Impl {
     return (int)::send(mSocketHandle, buffer, len, 0);
   }
 
- private:
+private:
   int mType = 0;
   float mTimeout = -1;
   std::string mAddress;
@@ -456,13 +462,13 @@ class Socket::Impl {
   return buf;
 }
 
-#endif  // native socket
+#endif // native socket
 
 // Everything below is common across all platforms
 
 Socket::Socket() : mImpl(new Impl) {}
 
-Socket::Socket(uint16_t port, const char* address, al_sec timeout, int type)
+Socket::Socket(uint16_t port, const char *address, al_sec timeout, int type)
     : mImpl(new Impl(port, address, timeout, type)) {}
 
 Socket::~Socket() {
@@ -470,7 +476,7 @@ Socket::~Socket() {
   delete mImpl;
 }
 
-const std::string& Socket::address() const { return mImpl->address(); }
+const std::string &Socket::address() const { return mImpl->address(); }
 
 bool Socket::opened() const { return mImpl->opened(); }
 
@@ -484,7 +490,7 @@ bool Socket::connect() { return mImpl->connect(); }
 
 void Socket::close() { mImpl->close(); }
 
-bool Socket::open(uint16_t port, const char* address, al_sec timeout,
+bool Socket::open(uint16_t port, const char *address, al_sec timeout,
                   int type) {
   std::string addressChecked;
   if (address) {
@@ -495,17 +501,17 @@ bool Socket::open(uint16_t port, const char* address, al_sec timeout,
 
 void Socket::timeout(al_sec v) { mImpl->timeout(v); }
 
-size_t Socket::recv(char* buffer, size_t maxlen, char* from) {
+size_t Socket::recv(char *buffer, size_t maxlen, char *from) {
   return mImpl->recv(buffer, maxlen, from);
 }
 
-size_t Socket::send(const char* buffer, size_t len) {
+size_t Socket::send(const char *buffer, size_t len) {
   return mImpl->send(buffer, len);
 }
 
 bool Socket::listen() { return mImpl->listen(); }
 
-bool Socket::accept(Socket& sock) { return mImpl->accept(sock.mImpl); }
+bool Socket::accept(Socket &sock) { return mImpl->accept(sock.mImpl); }
 
 bool SocketClient::onOpen() { return connect(); }
 
