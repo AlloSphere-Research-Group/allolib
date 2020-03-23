@@ -32,7 +32,7 @@ TEST_CASE("VBAP 8 speakers") {
   }
 
   Pose pose;
-  pose.pos(0, 0, -4);  // Center
+  pose.pos(0, 0, -4); // Center
   audioData.zeroOut();
   vbapPanner.renderBuffer(audioData, pose, samples, fpb);
 
@@ -44,42 +44,41 @@ TEST_CASE("VBAP 8 speakers") {
     }
   }
 
-  pose.pos(-2, 0, 0);  // Hard Left
+  pose.pos(-2, 0, 0); // Hard Left
   audioData.zeroOut();
   vbapPanner.renderBuffer(audioData, pose, samples, fpb);
 
   audioData.frame(0);
   for (unsigned int i = 0; i < fpb; i++) {
-    REQUIRE(audioData.out(0, i) == 0.0f);
-    REQUIRE(audioData.out(1, i) == 0.0f);
-    REQUIRE(audioData.out(2, i) == i + 0.5f);
-    for (unsigned int chan = 3; chan < 8; chan++) {
+    for (unsigned int chan = 0; chan < 6; chan++) {
       REQUIRE(almostEqual(audioData.out(chan, i), 0.0f));
     }
+    REQUIRE(almostEqual(audioData.out(6, i), i + 0.5f));
+    REQUIRE(almostEqual(audioData.out(7, i), 0.0f));
   }
 
-  pose.pos(1, 0, -1);  // 45 deg. front right
+  pose.pos(1, 0, -1); // 45 deg. front right
   audioData.zeroOut();
   vbapPanner.renderBuffer(audioData, pose, samples, fpb);
 
   audioData.frame(0);
   for (unsigned int i = 0; i < fpb; i++) {
     REQUIRE(almostEqual(audioData.out(0, i), 0.0f));
-    REQUIRE(almostEqual(audioData.out(7, i), i + 0.5));
-    for (unsigned int chan = 1; chan < 7; chan++) {
+    REQUIRE(almostEqual(audioData.out(1, i), i + 0.5));
+    for (unsigned int chan = 2; chan < 8; chan++) {
       REQUIRE(almostEqual(audioData.out(chan, i), 0.0f));
     }
   }
 
-  pose.pos(1 * tan(M_PI * 0.125), 0, -1);  // 22.5 deg. front right
+  pose.pos(1 * tan(M_PI * 0.125), 0, -1); // 22.5 deg. front right
   audioData.zeroOut();
   vbapPanner.renderBuffer(audioData, pose, samples, fpb);
 
   audioData.frame(0);
   for (unsigned int i = 0; i < fpb; i++) {
     REQUIRE(almostEqual(audioData.out(0, i), (i + 0.5) * sin(M_PI * 0.25)));
-    REQUIRE(almostEqual(audioData.out(7, i), (i + 0.5) * sin(M_PI * 0.25)));
-    for (unsigned int chan = 1; chan < 7; chan++) {
+    REQUIRE(almostEqual(audioData.out(1, i), (i + 0.5) * sin(M_PI * 0.25)));
+    for (unsigned int chan = 2; chan < 8; chan++) {
       REQUIRE(almostEqual(audioData.out(chan, i), 0.0f));
     }
   }
@@ -97,8 +96,8 @@ TEST_CASE("VBAP 3D tetrahedron") {
 
   vbapPanner.set3D(true);
   vbapPanner.setOptions(
-      Vbap::KEEP_SAME_ELEVATION);  // Curently needed to preserve tetrahedron
-                                   // triplets
+      Vbap::KEEP_SAME_ELEVATION); // Curently needed to preserve tetrahedron
+                                  // triplets
   vbapPanner.compile();
   //    vbapPanner.print();
 
@@ -114,7 +113,7 @@ TEST_CASE("VBAP 3D tetrahedron") {
   }
 
   Pose pose;
-  pose.pos(0, 4 * tan(M_PI / 6.0), -4);  // Center
+  pose.pos(0, 4 * tan(M_PI / 6.0), -4); // Center
   audioData.zeroOut();
   vbapPanner.renderBuffer(audioData, pose, samples, fpb);
   for (unsigned int i = 0; i < fpb; i++) {
@@ -125,17 +124,17 @@ TEST_CASE("VBAP 3D tetrahedron") {
     }
   }
 
-  pose.pos(cos(M_PI / 6.0), 0.0, -sin(M_PI / 6.0));  // Middle of right face
+  pose.pos(cos(M_PI / 6.0), 0.0, -sin(M_PI / 6.0)); // Middle of right face
   audioData.zeroOut();
   vbapPanner.renderBuffer(audioData, pose, samples, fpb);
   for (unsigned int i = 0; i < fpb; i++) {
     REQUIRE(almostEqual(audioData.out(0, i), (i + 0.5) * sqrt(1 / 3.0)));
-    REQUIRE(almostEqual(audioData.out(2, i),
-                        (i + 0.5) * sqrt(1 / 3.0f)));  // 0.225427702
+    REQUIRE(almostEqual(audioData.out(1, i),
+                        (i + 0.5) * sqrt(1 / 3.0f))); // 0.225427702
     REQUIRE(almostEqual(audioData.out(3, i),
-                        (i + 0.5) * sqrt(1 / 3.0)));  // 0.323040754
+                        (i + 0.5) * sqrt(1 / 3.0))); // 0.323040754
 
-    REQUIRE(almostEqual(audioData.out(1, i), 0.0));
+    REQUIRE(almostEqual(audioData.out(2, i), 0.0));
   }
 }
 
