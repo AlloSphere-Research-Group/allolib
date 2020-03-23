@@ -226,14 +226,16 @@ class Socket::Impl {
     hints.ai_family = sockFamily;
     hints.ai_socktype = sockType;
     hints.ai_protocol = sockProto;
+    // FIXME set
+    //    hints.ai_flags = AI_PASSIVE;
 
-    const char *addr;
-    if (mAddress.empty()) {  // assume this means it's a server
-      addr = nullptr;
+    char addr[16] = "\0";
+    if (mAddress.empty() ||
+        mAddress == "0.0.0.0") {  // assume this means it's a server
+                                  //      addr = nullptr;
       hints.ai_flags = AI_PASSIVE;
-    } else {
-      addr = mAddress.c_str();
     }
+    strncpy(addr, mAddress.c_str(), 16);
 
     // Resolve address and port
     char portAsString[5 + 1] = {0};  // max port number 65535
@@ -248,11 +250,12 @@ class Socket::Impl {
       close();
       return false;
     }
+
     // printf("family=%d\n", mAddrInfo->ai_family);
 
-    // Create socket
-    mSocket = socket(mAddrInfo->ai_family, mAddrInfo->ai_socktype,
-                     mAddrInfo->ai_protocol);
+    //    // Create socket
+    mSocketHandle = socket(mAddrInfo->ai_family, mAddrInfo->ai_socktype,
+                           mAddrInfo->ai_protocol);
     if (!opened()) {
       AL_WARN("failed to create socket at %s:%i: %s", address.c_str(), port,
               errorString());
@@ -271,10 +274,10 @@ class Socket::Impl {
       freeaddrinfo(mAddrInfo);
       mAddrInfo = nullptr;
     }
-    if (INVALID_SOCKET != mSocket) {
-      shutdown(mSocket, SHUT_RDWR);
-      closesocket(mSocket);
-      mSocket = INVALID_SOCKET;
+    if (INVALID_SOCKET != mSocketHandle) {
+      shutdown(mSocketHandle, SHUT_RDWR);
+      closesocket(mSocketHandle);
+      mSocketHandle = INVALID_SOCKET;
     }
   }
 
@@ -282,30 +285,41 @@ class Socket::Impl {
 
   bool bind() {  // for server-side
     if (opened()) {
-      // SO_REUSEADDR: "The rules used in validating addresses supplied to bind
-      // should allow reuse of local addresses."
-      int r = 1;
-      if (SOCKET_ERROR == ::setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR,
-                                       (char *)&r, sizeof(r))) {
-        AL_WARN("unable to set SO_REUSEADDR on socket at %s:%i: %s",
-                mAddress.c_str(), mPort, errorString());
-      }
+      struct addrinfo *p;
+      for (p = mAddrInfo; p != nullptr; p = p->ai_next) {
+        if ((mSocketHandle = socket(p->ai_family, p->ai_socktype,
+                                    p->ai_protocol)) == SOCKET_ERROR) {
+          continue;
+        }
+        bool r = true;
+        // SO_REUSEADDR: "The rules used in validating addresses supplied to
+        // bind should allow reuse of local addresses."
+        if (SOCKET_ERROR == ::setsockopt(mSocketHandle, SOL_SOCKET,
+                                         SO_EXCLUSIVEADDRUSE, (char *)&r,
+                                         sizeof(r))) {
+          AL_WARN("unable to set SO_REUSEADDR on socket at %s:%i: %s",
+                  mAddress.c_str(), mPort, errorString());
+        }
 
-      if (SOCKET_ERROR ==
-          ::bind(mSocket, mAddrInfo->ai_addr, (int)mAddrInfo->ai_addrlen)) {
-        AL_WARN("unable to bind socket at %s:%i: %s", mAddress.c_str(), mPort,
-                errorString());
-        close();
-        return false;
+        if (::bind(mSocketHandle, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
+          shutdown(mSocketHandle, SHUT_RDWR);
+          closesocket(mSocketHandle);
+          mSocketHandle = INVALID_SOCKET;
+          //          printf("Error binding\n");
+          continue;
+        }
+
+        // success!
+        return true;
       }
     }
-    return true;
+    return false;
   }
 
   bool connect() {  // for client-side
     if (opened()) {
-      if (SOCKET_ERROR ==
-          ::connect(mSocket, mAddrInfo->ai_addr, (int)mAddrInfo->ai_addrlen)) {
+      if (SOCKET_ERROR == ::connect(mSocketHandle, mAddrInfo->ai_addr,
+                                    (int)mAddrInfo->ai_addrlen)) {
         AL_WARN("unable to connect socket at %s:%i: %s", mAddress.c_str(),
                 mPort, errorString());
         close();
@@ -319,17 +333,16 @@ class Socket::Impl {
     mTimeout = v;
     auto to = secToTimeout(v);
     for (auto opt : {SO_SNDTIMEO, SO_RCVTIMEO}) {
-      /*if(mTimeout < 0){ // necessary?
-              #ifdef AL_WINDOWS
-              decltype(WSABUF::len) nb = 0;
-              ::ioctlsocket(mSocket, FIONBIO, &nb);
-              #else
-              int nb = 0;
-              ::ioctl(mSocket, FIONBIO, &nb);
-              #endif
-      } else */
-      if (SOCKET_ERROR ==
-          ::setsockopt(mSocket, SOL_SOCKET, opt, (char *)&to, sizeof(to))) {
+      if (mTimeout < 0) {  // necessary?
+#ifdef AL_WINDOWS
+        decltype(WSABUF::len) nb = 0;
+        ::ioctlsocket(mSocketHandle, FIONBIO, &nb);
+#else
+        int nb = 0;
+        ::ioctl(mSocket, FIONBIO, &nb);
+#endif
+      } else if (SOCKET_ERROR == ::setsockopt(mSocketHandle, SOL_SOCKET, opt,
+                                              (char *)&to, sizeof(to))) {
         AL_WARN("unable to set timeout on socket at %s:%i: %s",
                 mAddress.c_str(), mPort, errorString());
       }
@@ -337,7 +350,7 @@ class Socket::Impl {
   }
 
   bool listen() {
-    if (SOCKET_ERROR == ::listen(mSocket, SOMAXCONN)) {
+    if (SOCKET_ERROR == ::listen(mSocketHandle, SOMAXCONN)) {
       AL_WARN("unable to listen at %s:%i: %s", mAddress.c_str(), mPort,
               errorString());
       return false;
@@ -365,17 +378,46 @@ class Socket::Impl {
     // Inherit timeout from parent
     newSock->timeout(mTimeout);
     return true;*/
-    return false;
+    //    int pl_one, pl_two;
+    socklen_t pl_one_len;
+    struct sockaddr_in pl_one_addr;
+    pl_one_len = sizeof(pl_one_addr);
+    newSock->mSocketHandle =
+        ::accept(mSocketHandle, (struct sockaddr *)&pl_one_addr, &pl_one_len);
+    if (newSock->mSocketHandle == SOCKET_ERROR) {
+      printf("Error in syscall accept.");
+      return false;
+    }
+    char address[64];
+    switch (pl_one_addr.sin_family) {
+      case AF_INET:
+        inet_ntop(AF_INET, &(((struct sockaddr_in *)&pl_one_addr)->sin_addr),
+                  address, 64);
+        break;
+
+        //      case AF_INET6:
+        //        inet_ntop(AF_INET6, &(((struct sockaddr_in6
+        //        *)&pl_one_addr)->sin6_addr),
+        //                  address, 64);
+        //        break;
+
+      default:
+        strncpy(address, "Unknown AF", 64);
+        return NULL;
+    }
+    newSock->mAddress = address;
+    newSock->mPort = pl_one_addr.sin_port;
+    return true;
   }
 
-  bool opened() const { return INVALID_SOCKET != mSocket; }
+  bool opened() const { return INVALID_SOCKET != mSocketHandle; }
 
   size_t recv(char *buffer, size_t maxlen, char *from) {
-    return ::recv(mSocket, buffer, maxlen, 0);
+    return ::recv(mSocketHandle, buffer, maxlen, 0);
   }
 
   int send(const char *buffer, int len) {
-    return (int)::send(mSocket, buffer, len, 0);
+    return (int)::send(mSocketHandle, buffer, len, 0);
   }
 
  private:
@@ -384,7 +426,7 @@ class Socket::Impl {
   std::string mAddress;
   uint16_t mPort = 0;
   struct addrinfo *mAddrInfo = nullptr;
-  SocketHandle mSocket = INVALID_SOCKET;
+  SocketHandle mSocketHandle = INVALID_SOCKET;
 };
 
 /*static*/ std::string Socket::hostIP() {
@@ -444,7 +486,11 @@ void Socket::close() { mImpl->close(); }
 
 bool Socket::open(uint16_t port, const char* address, al_sec timeout,
                   int type) {
-  return mImpl->open(port, address, timeout, type) && onOpen();
+  std::string addressChecked;
+  if (address) {
+    addressChecked = address;
+  }
+  return mImpl->open(port, addressChecked, timeout, type) && onOpen();
 }
 
 void Socket::timeout(al_sec v) { mImpl->timeout(v); }
