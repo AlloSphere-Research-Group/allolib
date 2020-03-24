@@ -854,8 +854,11 @@ public:
 
   virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
-      assert(fields[0].type() == ParameterField::INT32);
-      set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
+      if (fields[0].type() == ParameterField::INT32) {
+        set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
+      } else if (fields[0].type() == ParameterField::FLOAT) {
+        set(fields[0].get<float>());
+      }
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
