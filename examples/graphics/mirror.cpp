@@ -6,10 +6,10 @@ This example demonstrates how to use a fbo to render a reflection to a texture.
 
 Author:
 Tim Wood, Nov. 2015
+Kon Hyong Kim, Mar. 2020
 */
 
 #include <iostream>
-
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
 
@@ -99,15 +99,26 @@ struct MyApp : public App {
 
     // reflect position of nav relative to mirror across mirror plane normal,
     // then add mirror position offset
+
     mirrorCam.pos() = (nav().pos() - mirrorPose.pos()).reflect(mirrorPose.uf());
     mirrorCam.pos() += mirrorPose.pos();
 
     // face toward a point along reflected direction from nav to mirror across
     // mirror plane normal, keep mirror up vector
+
     mirrorCam.faceToward(
         mirrorCam.pos() +
             (mirrorPose.pos() - nav().pos()).reflect(mirrorPose.uf()),
         mirrorPose.uu());
+
+    // calculate the approximate FOV for the mirror based on the center point.
+    // This is not 100% optically accurate, with distortions near side of the
+    // mirror
+    float distFromMirrorPlane =
+        (nav().pos() - mirrorPose.pos()).dot(mirrorPose.uf());
+    float distFromMirrorCenter = (nav().pos() - mirrorPose.pos()).mag();
+    float mirrorFOV = 180.f * M_1_PI * 2.f * atan2(1.f, distFromMirrorPlane) *
+                      distFromMirrorPlane / distFromMirrorCenter;
 
     gl::depthTesting(true);
 
@@ -115,18 +126,21 @@ struct MyApp : public App {
     g.pushFramebuffer(fbo);
     g.pushViewport(0, 0, 1024, 1024);
     g.clear(0.2, 0.2, 0.2, 0.2);
-    g.pushProjMatrix(Matrix4f::perspective(45, 1, 0.001, 100));
+    g.pushProjMatrix(Matrix4f::perspective(mirrorFOV, 1, 0.001, 100));
     g.pushViewMatrix(Matrix4f::lookAt(mirrorCam.ux(), mirrorCam.uy(),
                                       mirrorCam.uz(), mirrorCam.pos()));
 
-    drawScene(g);  // draw scene to mirror fbo
+    // only draw scene from one side of the mirror
+    if (distFromMirrorPlane > 0) {
+      drawScene(g);  // draw scene to mirror fbo
 
-    g.pushMatrix();
-    g.translate(nav().pos());  // draw nav as sphere in mirror fbo
-    g.lighting(false);
-    g.color(light.diffuse());
-    g.draw(sphere);
-    g.popMatrix();
+      g.pushMatrix();
+      g.translate(nav().pos());  // draw nav as sphere in mirror fbo
+      g.lighting(false);
+      g.color(light.diffuse());
+      g.draw(sphere);
+      g.popMatrix();
+    }
 
     g.popProjMatrix();
     g.popViewMatrix();
