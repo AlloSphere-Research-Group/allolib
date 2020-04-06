@@ -49,7 +49,7 @@ For installation through Chocolatey:
 
 ### Ubuntu/Debian
 
-    sudo apt install build-essential git git-lfs cmake libsndfile1-dev libassimp-dev libasound-dev libxrandr-dev libopengl-dev libxinerama-dev libxcursor-dev xinput
+    sudo apt install build-essential git git-lfs cmake libsndfile1-dev libassimp-dev libasound-dev libxrandr-dev libopengl-dev libxinerama-dev libxcursor-dev libxi-dev
     
 allolib requires gcc >= 7. If you need to build on older versions, you can use a ppa to get gcc:
 
