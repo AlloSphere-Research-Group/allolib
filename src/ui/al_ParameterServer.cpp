@@ -139,6 +139,22 @@ void OSCNotifier::notifyListeners(std::string OSCaddress,
   }
 }
 
+void OSCNotifier::startHandshakeServer(std::string address) {
+  if (mHandshakeServer.open(handshakeServerPort, address.c_str())) {
+    mHandshakeServer.handler(mHandshakeHandler);
+    mHandshakeServer.start();
+    std::cout << "Handshake server running on " << address << ":"
+              << handshakeServerPort << std::endl;
+  } else {
+    std::cout << "failed to start handshake server" << std::endl;
+  }
+  for (int i = 0; i < 100;
+       i++) { // Check to see if there are any listeners already running
+    osc::Send handshake(listenerFirstPort + i, "127.0.0.1");
+    handshake.send("/requestHandshake", handshakeServerPort);
+  }
+}
+
 // ParameterServer ------------------------------------------------------------
 
 ParameterServer::ParameterServer(std::string oscAddress, int oscPort,
@@ -146,6 +162,8 @@ ParameterServer::ParameterServer(std::string oscAddress, int oscPort,
     : mServer(nullptr) {
   mOscAddress = oscAddress;
   mOscPort = oscPort;
+  OSCNotifier::mHandshakeHandler.mParameterServer = this;
+
   if (autoStart) {
     listen(oscPort, oscAddress);
   }
@@ -683,6 +701,29 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
   return false;
 }
 
+void ParameterServer::runCommand(osc::Message &m) {
+  if (m.addressPattern() == "/requestListenerInfo") {
+    if (m.typeTags() == "si") {
+      std::string addr;
+      m >> addr;
+      int port;
+      m >> port;
+      //        mNotifiers.push_back({addr, port});
+      std::cout << "Sending listener info to: " << addr << ":" << port
+                << std::endl;
+      std::string serverAddress = mServer->address();
+      if (serverAddress == "0.0.0.0" || serverAddress.size() == 0) {
+        serverAddress = "127.0.0.1";
+      }
+      osc::Send listenerRequest(port, m.senderAddress().c_str());
+      listenerRequest.send("/registerListener", serverAddress, mServer->port());
+    } else {
+      std::cerr << "ERROR: Unexpected typetags for /requestListenerInfo"
+                << std::endl;
+    }
+  }
+}
+
 void ParameterServer::printParameterInfo(ParameterMeta *p) {
   std::cout << "Parameter " << p->getName() << "(" << p->displayName() << ")"
             << "[" << typeid(*p).name() << "] : " << p->getFullAddress()
@@ -733,5 +774,33 @@ void ParameterServer::setValuesForBundleGroup(
         setValuesForBundleGroup(m, {subBundleGroups.second}, rootAddress);
       }
     }
+  }
+}
+
+void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
+  if (m.addressPattern() == "/handshake" && m.typeTags() == "i") {
+    std::unique_lock<std::mutex> lk(notifier->mNodeLock);
+    int commandPort;
+    m >> commandPort;
+    notifier->mNodes.push_back({m.senderAddress(), commandPort});
+    std::cout << "ParameterServer handshake from " << m.senderAddress() << ":"
+              << commandPort << std::endl;
+
+    osc::Send listenerRequest(commandPort, m.senderAddress().c_str());
+    listenerRequest.send("/requestListenerInfo",
+                         notifier->mHandshakeServer.port());
+  } else if (m.addressPattern() == "/registerListener" && m.typeTags() == "i") {
+    int listenerPort;
+    m >> listenerPort;
+    notifier->addListener(m.senderAddress(), listenerPort);
+    std::cout << "Registered listener " << m.senderAddress() << ":"
+              << listenerPort << std::endl;
+  } else if (m.addressPattern() == "/requestListenerInfo") {
+    mParameterServer->runCommand(m);
+
+  } else {
+
+    std::cout << "Unhandled command" << std::endl;
+    m.print();
   }
 }
