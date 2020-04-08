@@ -138,16 +138,18 @@ struct FontRenderer : public Font {
     Font::write(fontMesh, text, worldHeight);
   }
 
-  static void render(Graphics& g, const char* text, Vec3d position,
+  static void render(Graphics &g, const char *text, Vec3d position,
                      float worldHeight = 1.0, int fontSize = 24,
-                     const char* filename = Font::defaultFont().c_str(),
+                     const char *filename = Font::defaultFont().c_str(),
                      int bitmapSize = 1024) {
     static std::map<std::string, FontRenderer> renderers;
-    if (renderers.find(std::string(text)) == renderers.end()) {
-      renderers[std::string(text)] = FontRenderer();
-      renderers[text].load(filename, fontSize, bitmapSize);
+    if (renderers.find(std::string(filename)) == renderers.end()) {
+      renderers[std::string(filename)] = FontRenderer();
+      renderers[filename].load(filename, fontSize, bitmapSize);
     }
-    FontRenderer& renderer = renderers[text];
+    // FIXME check bitmap size for case when font is reused with different
+    // resolution
+    FontRenderer &renderer = renderers[filename];
     renderer.write(text, worldHeight);
     renderer.renderAt(g, position);
   }
