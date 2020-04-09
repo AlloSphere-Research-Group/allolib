@@ -453,6 +453,17 @@ private:
   return "";
 }
 
+std::string Socket::nameToIp(std::string name) {
+  hostent *record = gethostbyname(name.c_str());
+  if (record == NULL) {
+    printf("Could not resolve: %s is unavailable\n", name.c_str());
+    return name;
+  }
+  in_addr *address = (in_addr *)record->h_addr;
+  std::string ip_address = inet_ntoa(*address);
+  return ip_address;
+}
+
 /*static*/ std::string Socket::hostName() {
   INIT_SOCKET;
   char buf[256] = {0};
