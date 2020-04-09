@@ -788,11 +788,15 @@ void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
 
     osc::Send listenerRequest(commandPort, m.senderAddress().c_str());
     listenerRequest.send("/requestListenerInfo",
+                         notifier->mHandshakeServer.address(),
                          notifier->mHandshakeServer.port());
-  } else if (m.addressPattern() == "/registerListener" && m.typeTags() == "i") {
+  } else if (m.addressPattern() == "/registerListener" &&
+             m.typeTags() == "si") {
+    std::string addr;
+    m >> addr;
     int listenerPort;
     m >> listenerPort;
-    notifier->addListener(m.senderAddress(), listenerPort);
+    notifier->addListener(addr, listenerPort);
     std::cout << "Registered listener " << m.senderAddress() << ":"
               << listenerPort << std::endl;
   } else if (m.addressPattern() == "/requestListenerInfo") {
