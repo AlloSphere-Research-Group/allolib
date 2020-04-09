@@ -64,7 +64,7 @@ void DistributedApp::init() {
       }
       mRoleMap[host] = role;
       if (table->contains("dataRoot")) {
-        if (name() == host) {  // Set configuration for this node when found
+        if (name() == host) { // Set configuration for this node when found
           std::string dataRootValue = *table->get_as<std::string>("dataRoot");
           dataRoot = File::conformPathToOS(dataRootValue);
         }
@@ -74,7 +74,7 @@ void DistributedApp::init() {
       }
 
       if (table->contains("rank")) {
-        if (name() == host) {  // Set configuration for this node when found
+        if (name() == host) { // Set configuration for this node when found
           rank = *table->get_as<int>("rank");
         }
       } else {
@@ -82,7 +82,7 @@ void DistributedApp::init() {
                   << std::endl;
       }
       if (table->contains("group")) {
-        if (name() == host) {  // Set configuration for this node when found
+        if (name() == host) { // Set configuration for this node when found
           group = *table->get_as<int>("group");
         }
       } else {
@@ -90,8 +90,8 @@ void DistributedApp::init() {
                   << std::endl;
       }
     }
-    if (!mFoundHost) {  // if host name isn't found, use default settings
-                        // and warn
+    if (!mFoundHost) { // if host name isn't found, use default settings
+                       // and warn
       std::cout
           << "WARNING: node " << name()
           << " not found in node table!\n\t*Using default desktop setting!*"
@@ -100,7 +100,7 @@ void DistributedApp::init() {
       rank = 0;
       group = 0;
     }
-  } else {  // No nodes table in config file. Use desktop role
+  } else { // No nodes table in config file. Use desktop role
     auto defaultCapabilities = al::sphere::getSphereNodes();
     if (defaultCapabilities.find(name()) != defaultCapabilities.end()) {
       mCapabilites = defaultCapabilities[name()].mCapabilites;
@@ -219,7 +219,8 @@ void DistributedApp::start() {
   if (isPrimary()) {
     std::cout << "Running Primary" << std::endl;
     if (!mFoundHost) {
-      std::cout << "WARNING: not adding extra listeners due to bad node table"
+      std::cout << "WARNING: not adding extra listeners due to missing node "
+                   "table in distributed_app.toml"
                 << std::endl;
     } else {
       std::cout << "Running REPLICA" << std::endl;

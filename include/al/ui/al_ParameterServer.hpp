@@ -135,15 +135,23 @@ public:
    * then.
    *
    */
-  void notifyListeners(std::string OSCaddress, float value);
-  void notifyListeners(std::string OSCaddress, int value);
-  void notifyListeners(std::string OSCaddress, std::string value);
-  void notifyListeners(std::string OSCaddress, Vec3f value);
-  void notifyListeners(std::string OSCaddress, Vec4f value);
-  void notifyListeners(std::string OSCaddress, Pose value);
-  void notifyListeners(std::string OSCaddress, Color value);
+  void notifyListeners(std::string OSCaddress, float value,
+                       ValueSource *src = nullptr);
+  void notifyListeners(std::string OSCaddress, int value,
+                       ValueSource *src = nullptr);
+  void notifyListeners(std::string OSCaddress, std::string value,
+                       ValueSource *src = nullptr);
+  void notifyListeners(std::string OSCaddress, Vec3f value,
+                       ValueSource *src = nullptr);
+  void notifyListeners(std::string OSCaddress, Vec4f value,
+                       ValueSource *src = nullptr);
+  void notifyListeners(std::string OSCaddress, Pose value,
+                       ValueSource *src = nullptr);
+  void notifyListeners(std::string OSCaddress, Color value,
+                       ValueSource *src = nullptr);
 
-  void notifyListeners(std::string OSCaddress, ParameterMeta *param);
+  void notifyListeners(std::string OSCaddress, ParameterMeta *param,
+                       ValueSource *src);
 
   void send(osc::Packet &p) {
     mListenerLock.lock();
