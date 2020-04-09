@@ -149,8 +149,9 @@ public:
     mListenerLock.lock();
     for (osc::Send *sender : mOSCSenders) {
       sender->send(p);
-      std::cout << "Notifying " << sender->address() << ":" << sender->port()
-                << std::endl;
+      //      std::cout << "Notifying " << sender->address() << ":" <<
+      //      sender->port()
+      //                << std::endl;
     }
     mListenerLock.unlock();
   }

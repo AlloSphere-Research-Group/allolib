@@ -148,7 +148,7 @@ timeval secToTimeout(float t) {
 
 #endif
 
-class Socket::Impl {
+struct Socket::Impl {
 public:
   Impl() { INIT_SOCKET; }
 
@@ -409,7 +409,7 @@ public:
 
     default:
       strncpy(address, "Unknown AF", 64);
-      return NULL;
+      return false;
     }
     newSock->mAddress = address;
     newSock->mPort = pl_one_addr.sin_port;
