@@ -9,9 +9,13 @@ namespace al {
 /**
  * @brief The DistributedScene class
  * @ingroup Scene
+ *
+ * This scene can be registered with a ParameterServer to replicate the scene
+ * across the network. All events and internal parameters will be forwarded
+ * to scene copies
  */
 class DistributedScene : public DynamicScene, public osc::MessageConsumer {
- public:
+public:
   DistributedScene(std::string name = "scene", int threadPoolSize = 0,
                    TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_CPU);
 
@@ -27,12 +31,12 @@ class DistributedScene : public DynamicScene, public osc::MessageConsumer {
   virtual bool consumeMessage(osc::Message &m,
                               std::string rootOSCPath = "") override;
 
- protected:
- private:
+protected:
+private:
   OSCNotifier *mNotifier{nullptr};
   std::string mName;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_DISTRIBUTEDSCENE_HPP
+#endif // AL_DISTRIBUTEDSCENE_HPP

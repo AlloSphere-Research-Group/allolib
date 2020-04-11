@@ -13,9 +13,11 @@ namespace al {
 /**
  * @brief GLFWOpenGLOmniRendererDomain class
  * @ingroup App
+ *
+ * This domain can only be instantiated as a subdomain of OpenGLGraphicsDomain
  */
 class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
- public:
+public:
   GLFWOpenGLOmniRendererDomain();
   // Domain functions
   bool init(ComputationDomain *parent = nullptr) override;
@@ -77,24 +79,24 @@ class GLFWOpenGLOmniRendererDomain : public SynchronousDomain {
   bool render_stereo = true;
   bool running_in_sphere_renderer = false;
   bool window_is_stereo_buffered = false;
-  int eye_to_render = -1;  // -1 for mono, 0: left, 1: right
+  int eye_to_render = -1; // -1 for mono, 0: left, 1: right
 
   /// Set this to false to render a regular view instead of omni
   bool drawOmni{true};
   Lens mLens;
   //  Pose mPose;
 
- private:
+private:
   std::unique_ptr<Window> mWindow;
 
   std::unique_ptr<Graphics> mGraphics;
 
   OpenGLGraphicsDomain *mParent;
 
-  Nav mNav;  // is a Pose itself and also handles manipulation of pose
-  Viewpoint mView{mNav.transformed()};  // Pose with Lens and acts as camera
-  NavInputControl mNavControl{mNav};    // interaction with keyboard and mouse
+  Nav mNav; // is a Pose itself and also handles manipulation of pose
+  Viewpoint mView{mNav.transformed()}; // Pose with Lens and acts as camera
+  NavInputControl mNavControl{mNav};   // interaction with keyboard and mouse
 };
-}  // namespace al
+} // namespace al
 
 #endif

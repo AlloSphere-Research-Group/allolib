@@ -18,10 +18,6 @@ SequencerMIDI::SequencerMIDI(int deviceIndex, PolySynth &synth)
   setSynthSequencer(synth);
 }
 
-void SequencerMIDI::init(int deviceIndex, PolySynth &synth) {
-  open(deviceIndex, synth);
-}
-
 void SequencerMIDI::open(int deviceIndex, PolySynth &synth) {
   open(deviceIndex);
   setSynthSequencer(synth);

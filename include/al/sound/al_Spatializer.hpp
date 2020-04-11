@@ -44,10 +44,6 @@
 
 #include <iostream>
 
-#ifdef AL_DEPRECATED
-#include "al/sound/al_AudioScene.hpp"
-#endif
-
 #include "al/io/al_AudioIOData.hpp"
 #include "al/sound/al_Speaker.hpp"
 #include "al/spatial/al_Pose.hpp"
@@ -58,9 +54,9 @@ namespace al {
 ///
 /// @ingroup Sound
 class Spatializer {
- public:
+public:
   /// @param[in] sl	A speaker layout to use
-  Spatializer(const Speakers& sl);
+  Spatializer(const Speakers &sl);
 
   virtual ~Spatializer() {}
 
@@ -71,24 +67,24 @@ class Spatializer {
 
   /// Called once per listener, before sources are rendered. ex. zero ambisonics
   /// coefficients
-  virtual void prepare(AudioIOData& io) {}
+  virtual void prepare(AudioIOData &io) {}
 
   /// Render audio buffer in position
-  virtual void renderBuffer(AudioIOData& io, const Pose& listeningPose,
-                            const float* samples,
-                            const unsigned int& numFrames) = 0;
+  virtual void renderBuffer(AudioIOData &io, const Pose &listeningPose,
+                            const float *samples,
+                            const unsigned int &numFrames) = 0;
 
   /// Render audio sample in position
-  virtual void renderSample(AudioIOData& io, const Pose& listeningPose,
-                            const float& sample,
-                            const unsigned int& frameIndex) = 0;
+  virtual void renderSample(AudioIOData &io, const Pose &listeningPose,
+                            const float &sample,
+                            const unsigned int &frameIndex) = 0;
 
   /// Called once per listener, after sources are rendered. ex. ambisonics
   /// decode
-  virtual void finalize(AudioIOData& io) {}
+  virtual void finalize(AudioIOData &io) {}
 
   /// Print out information about spatializer
-  virtual void print(std::ostream& stream = std::cout) {}
+  virtual void print(std::ostream &stream = std::cout) {}
 
   /// Get number of speakers
   int numSpeakers() const { return int(mSpeakers.size()); }
@@ -96,34 +92,13 @@ class Spatializer {
   /// Set number of frames
   virtual void numFrames(unsigned int v) { mNumFrames = v; }
 
- protected:
-#ifdef AL_DEPRECATED
-  /// Render each source per sample
-  [[deprecated("use renderSample() instead")]] virtual void perform(
-      AudioIOData& io, SoundSource& src, Vec3d& reldir, const int& frameIndex) {
-    renderSample(io, reldir, src.readSample(frameIndex), frameIndex);
-  }
-
-  /// Render each source per buffer
-  [[deprecated("use renderBuffer() instead")]] virtual void perform(
-      AudioIOData& io, SoundSource& src, Vec3d& reldir) {
-    if (mBuffer.size() != io.framesPerBuffer()) {
-      mBuffer.resize(io.framesPerBuffer());
-    }
-    for (unsigned int i = 0; i < io.framesPerBuffer(); i++) {
-      double readIndex = (io.framesPerBuffer() - i - 1);
-      mBuffer[i] = src.readSample(readIndex);
-    }
-    //		src.getBuffer()
-    renderBuffer(io, reldir, mBuffer.data(), io.framesPerBuffer());
-  }
-#endif
+protected:
   Speakers mSpeakers;
 
-  std::vector<float> mBuffer;  // temporary frame buffer
+  std::vector<float> mBuffer; // temporary frame buffer
   unsigned int mNumFrames{0};
 };
 
-}  // namespace al
+} // namespace al
 
 #endif

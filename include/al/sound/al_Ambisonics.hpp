@@ -59,8 +59,6 @@
 #include "al/spatial/al_DistAtten.hpp"
 #include "al/spatial/al_Pose.hpp"
 
-//#define MAX_ORDER 3
-
 /*
         TODO: near-field compensation
         acknowledges that the speakers are at a finite distance from the
@@ -114,7 +112,7 @@ namespace al {
 ///
 /// @ingroup Sound
 class AmbiBase {
- public:
+public:
   /// @param[in] dim		number of spatial dimensions (2 or 3)
   /// @param[in] order	highest spherical harmonic order
   AmbiBase(int dim, int order);
@@ -128,7 +126,7 @@ class AmbiBase {
   int order() const { return mOrder; }
 
   /// Get Ambisonic channel weights
-  const float* weights() const { return mWeights; }
+  const float *weights() const { return mWeights; }
 
   /// Returns total number of Ambisonic domain (B-format) channels
   int channels() const { return mChannels; }
@@ -146,19 +144,19 @@ class AmbiBase {
 
   /// Compute spherical harmonic weights based on azimuth and elevation
   /// azimuth is anti-clockwise; both azimuth and elevation are in degrees
-  static void encodeWeightsFuMa(float* weights, int dim, int order,
+  static void encodeWeightsFuMa(float *weights, int dim, int order,
                                 float azimuth, float elevation);
 
   /// Compute spherical harmonic weights based on unit direction vector (in the
   /// listener's coordinate frame)
-  static void encodeWeightsFuMa(float* ws, int dim, int order, float x, float y,
+  static void encodeWeightsFuMa(float *ws, int dim, int order, float x, float y,
                                 float z);
 
   /// Brute force 3rd order.  Weights must be of size 16.
-  static void encodeWeightsFuMa16(float* weights, float azimuth,
+  static void encodeWeightsFuMa16(float *weights, float azimuth,
                                   float elevation);
   /// (x,y,z unit vector in the listener's coordinate frame)
-  static void encodeWeightsFuMa16(float* ws, float x, float y, float z);
+  static void encodeWeightsFuMa16(float *ws, float x, float y, float z);
 
   static int orderToChannels(int dim, int order);
   static int orderToChannelsH(int orderH);
@@ -167,21 +165,20 @@ class AmbiBase {
   static int channelsToOrder(int channels);
   static int channelsToDimensions(int channels);
 
- protected:
-  int mDim;         // dimensions - 2d or 3d
-  int mOrder;       // order - 0th, 1st, 2nd, or 3rd
-  int mChannels;    // cached for efficiency
-  float* mWeights;  // weights for each ambi channel
+protected:
+  int mDim;        // dimensions - 2d or 3d
+  int mOrder;      // order - 0th, 1st, 2nd, or 3rd
+  int mChannels;   // cached for efficiency
+  float *mWeights; // weights for each ambi channel
 
-  template <typename T>
-  static void resize(T*& a, int n);
+  template <typename T> static void resize(T *&a, int n);
 };
 
 /// Higher Order Ambisonic Decoding class
 ///
 /// @ingroup Sound
 class AmbiDecode : public AmbiBase {
- public:
+public:
   /// @param[in] dim			number of spatial dimensions (2 or 3)
   /// @param[in] order		highest spherical harmonic order
   /// @param[in] numSpeakers	number of speakers
@@ -195,7 +192,7 @@ class AmbiDecode : public AmbiBase {
   /// @param[in ] enc				input Ambisonic domain buffers
   /// (non-interleaved)
   /// @param[in ] numDecFrames	number of frames in time domain buffers
-  virtual void decode(float* dec, const float* enc, int numDecFrames) const;
+  virtual void decode(float *dec, const float *enc, int numDecFrames) const;
 
   float decodeWeight(int speaker, int channel) const {
     return mWeights[channel] * mDecodeMatrix[speaker * channels() + channel];
@@ -207,7 +204,7 @@ class AmbiDecode : public AmbiBase {
   /// Returns number of speakers
   int numSpeakers() const { return mNumSpeakers; }
 
-  void print(std::ostream& stream) const;
+  void print(std::ostream &stream) const;
 
   /// Set decoding algorithm
   void flavor(int type);
@@ -223,8 +220,8 @@ class AmbiDecode : public AmbiBase {
   // void zero();					///< Zeroes out internal
   // ambisonic frame.
 
-  void setSpeakers(Speakers* spkrs);
-  void setSpeakers(Speakers& spkrs);
+  void setSpeakers(Speakers *spkrs);
+  void setSpeakers(Speakers &spkrs);
 
   //	float * azimuths();				///< Returns pointer to
   // speaker azimuths.
@@ -233,16 +230,16 @@ class AmbiDecode : public AmbiBase {
   // pointer to ambisonic channel frame used by decode(int)
 
   /// Get speaker
-  Speaker& speaker(int num) { return mSpeakers[num]; }
+  Speaker &speaker(int num) { return mSpeakers[num]; }
 
   virtual void onChannelsChange();
 
- protected:
+protected:
   int mNumSpeakers;
-  int mFlavor;           // decode flavor
-  float* mDecodeMatrix;  // deccoding matrix for each ambi channel & speaker
-                         // cols are channels and rows are speakers
-  float mWOrder[5];      // weights for each order
+  int mFlavor;          // decode flavor
+  float *mDecodeMatrix; // deccoding matrix for each ambi channel & speaker
+                        // cols are channels and rows are speakers
+  float mWOrder[5];     // weights for each order
   Speakers mSpeakers;
   // float * mPositions;		// speakers' azimuths + elevations
   // float * mFrame;			// an ambisonic channel frame used for
@@ -251,8 +248,8 @@ class AmbiDecode : public AmbiBase {
   void updateChanWeights();
   void resizeArrays(int numChannels, int numSpeakers);
 
-  float decode(float* encFrame, int encNumChannels,
-               int speakerNum);  // is this useful?
+  float decode(float *encFrame, int encNumChannels,
+               int speakerNum); // is this useful?
 
   static float flavorWeights[4][5][5];
 };
@@ -261,7 +258,7 @@ class AmbiDecode : public AmbiBase {
 ///
 /// @ingroup Sound
 class AmbiEncode : public AmbiBase {
- public:
+public:
   /// @param[in] dim			number of spatial dimensions (2 or 3)
   /// @param[in] order		highest spherical harmonic order
   AmbiEncode(int dim, int order) : AmbiBase(dim, order) {}
@@ -278,7 +275,7 @@ class AmbiEncode : public AmbiBase {
   /// @param[in] numFrames	number of frames in time buffer
   /// @param[in] timeIndex	index at which to encode time sample
   /// @param[in] timeSample	value of time sample
-  void encode(float* ambiChans, int numFrames, int timeIndex,
+  void encode(float *ambiChans, int numFrames, int timeIndex,
               float timeSample) const;
 
   /// Encode buffer with constant position throughout buffer
@@ -286,7 +283,7 @@ class AmbiEncode : public AmbiBase {
   /// @param ambiChans	Ambisonic domain channels (non-interleaved)
   /// @param input		time-domain sample buffer to encode
   /// @param numFrames	number of frames to encode
-  void encode(float* ambiChans, const float* input, int numFrames);
+  void encode(float *ambiChans, const float *input, int numFrames);
 
   /// Encode a buffer of samples
 
@@ -296,7 +293,7 @@ class AmbiEncode : public AmbiBase {
   /// @param[in] input		time-domain sample buffer to encode
   /// @param[in] numFrames	number of frames to encode
   template <class XYZ>
-  void encode(float* ambiChans, const XYZ* dir, const float* input,
+  void encode(float *ambiChans, const XYZ *dir, const float *input,
               int numFrames);
 
   /// Set spherical direction of source to be encoded
@@ -310,23 +307,23 @@ class AmbiEncode : public AmbiBase {
   /// (x,y,z unit vector in the listener's coordinate frame)
   void direction(float x, float y, float z);
 
-  void print(std::ostream& stream);
+  void print(std::ostream &stream);
 };
 
 /// Ambisonic coder
 ///
 /// @ingroup Sound
 class AmbisonicsSpatializer : public Spatializer {
- public:
+public:
   AmbisonicsSpatializer();
-  AmbisonicsSpatializer(Speakers& sl, int dim = 2, int order = 1,
+  AmbisonicsSpatializer(Speakers &sl, int dim = 2, int order = 1,
                         int flavor = 1);
 
   void zeroAmbi();
 
   void configure(int dim, int order, int flavor);
 
-  float* ambiChans(unsigned channel = 0);
+  float *ambiChans(unsigned channel = 0);
 
   virtual void compile() override;
 
@@ -334,23 +331,23 @@ class AmbisonicsSpatializer : public Spatializer {
 
   void numSpeakers(int num);
 
-  void setSpeakerLayout(const Speakers& speakers);
+  void setSpeakerLayout(const Speakers &speakers);
 
-  virtual void prepare(AudioIOData& io) override;
+  virtual void prepare(AudioIOData &io) override;
 
-  virtual void renderBuffer(AudioIOData& io, const Pose& listeningPose,
-                            const float* samples,
-                            const unsigned int& numFrames) override;
+  virtual void renderBuffer(AudioIOData &io, const Pose &listeningPose,
+                            const float *samples,
+                            const unsigned int &numFrames) override;
 
-  virtual void renderSample(AudioIOData& io, const Pose& listeningPose,
-                            const float& sample,
-                            const unsigned int& frameIndex) override;
+  virtual void renderSample(AudioIOData &io, const Pose &listeningPose,
+                            const float &sample,
+                            const unsigned int &frameIndex) override;
 
-  virtual void finalize(AudioIOData& io) override;
+  virtual void finalize(AudioIOData &io) override;
 
-  virtual void print(std::ostream& stream = std::cout) override;
+  virtual void print(std::ostream &stream = std::cout) override;
 
- private:
+private:
   AmbiDecode mDecoder;
   AmbiEncode mEncoder;
   std::vector<float> mAmbiDomainChannels;
@@ -371,18 +368,18 @@ inline int AmbiBase::orderToChannelsV(int orderV) { return orderV * orderV; }
 inline int AmbiBase::channelsToOrder(int channels) {
   int order = -1;
   switch (channels) {
-    case 3:
-    case 4:
-      order = 1;
-      break;
-    case 9:
-      order = 2;
-      break;
-    case 16:
-      order = 3;
-      break;
-    default:
-      order = -1;
+  case 3:
+  case 4:
+    order = 1;
+    break;
+  case 9:
+    order = 2;
+    break;
+  case 16:
+    order = 3;
+    break;
+  default:
+    order = -1;
   }
   return order;
 }
@@ -390,22 +387,21 @@ inline int AmbiBase::channelsToOrder(int channels) {
 inline int AmbiBase::channelsToDimensions(int channels) {
   int dim = 3;
   switch (channels) {
-    case 3:
-      dim = 2;
-      break;
-    case 4:
-    case 9:
-    case 16:
-      dim = 3;
-      break;
-    default:
-      dim = -1;
+  case 3:
+    dim = 2;
+    break;
+  case 4:
+  case 9:
+  case 16:
+    dim = 3;
+    break;
+  default:
+    dim = -1;
   }
   return dim;
 }
 
-template <typename T>
-void AmbiBase::resize(T*& a, int n) {
+template <typename T> void AmbiBase::resize(T *&a, int n) {
   delete[] a;
   a = new T[n];
   memset(a, 0, n * sizeof(T));
@@ -413,12 +409,13 @@ void AmbiBase::resize(T*& a, int n) {
 
 // AmbiDecode
 
-inline float AmbiDecode::decode(float* encFrame, int encNumChannels,
+inline float AmbiDecode::decode(float *encFrame, int encNumChannels,
                                 int speakerNum) {
   float smp = 0;
-  float* dec = mDecodeMatrix + speakerNum * channels();
-  float* wc = mWeights;
-  for (int i = 0; i < encNumChannels; ++i) smp += *dec++ * *wc++ * *encFrame++;
+  float *dec = mDecodeMatrix + speakerNum * channels();
+  float *wc = mWeights;
+  for (int i = 0; i < encNumChannels; ++i)
+    smp += *dec++ * *wc++ * *encFrame++;
   return smp;
 }
 
@@ -454,32 +451,33 @@ inline void AmbiEncode::direction(float x, float y, float z) {
   AmbiBase::encodeWeightsFuMa(mWeights, mDim, mOrder, x, y, z);
 }
 
-inline void AmbiEncode::encode(float* ambiChans, int numFrames, int timeIndex,
+inline void AmbiEncode::encode(float *ambiChans, int numFrames, int timeIndex,
                                float timeSample) const {
 // "Iterate" through spherical harmonics using Duff's device.
 // This requires only a simple jump per time sample.
-#define CS(chanindex)                               \
-  case chanindex:                                   \
-    ambiChans[chanindex * numFrames + timeIndex] += \
+#define CS(chanindex)                                                          \
+  case chanindex:                                                              \
+    ambiChans[chanindex * numFrames + timeIndex] +=                            \
         weights()[chanindex] * timeSample;
   int ch = channels() - 1;
   switch (ch) {
     CS(15)
     CS(14)
     CS(13)
-    CS(12) CS(11) CS(10) CS(9) CS(8) CS(7) CS(6) CS(5) CS(4) CS(3) CS(2) CS(1)
+    CS(12)
+    CS(11) CS(10) CS(9) CS(8) CS(7) CS(6) CS(5) CS(4) CS(3) CS(2) CS(1)
         CS(0) default:;
   }
 #undef CS
 }
 
-inline void AmbiEncode::encode(float* ambiChans, const float* input,
+inline void AmbiEncode::encode(float *ambiChans, const float *input,
                                int numFrames) {
-  float* pAmbi = ambiChans;  // non-interleaved ambi buffers, we can use fast
-                             // pointer arithmetic
+  float *pAmbi = ambiChans; // non-interleaved ambi buffers, we can use fast
+                            // pointer arithmetic
 
   for (int c = 0; c < channels(); ++c) {
-    const float* pInput = input;
+    const float *pInput = input;
     float weight = weights()[c];
     for (int i = 0; i < numFrames; ++i) {
       *pAmbi++ += weight * *pInput++;
@@ -488,7 +486,7 @@ inline void AmbiEncode::encode(float* ambiChans, const float* input,
 }
 
 template <class XYZ>
-void AmbiEncode::encode(float* ambiChans, const XYZ* dir, const float* input,
+void AmbiEncode::encode(float *ambiChans, const XYZ *dir, const float *input,
                         int numFrames) {
   // TODO: how can we efficiently encode a moving source?
 
@@ -518,10 +516,10 @@ void AmbiEncode::encode(float* ambiChans, const XYZ* dir, const float* input,
   }
 }
 
-inline float* AmbisonicsSpatializer::ambiChans(unsigned channel) {
+inline float *AmbisonicsSpatializer::ambiChans(unsigned channel) {
   assert(mNumFrames != 0 && "number of frames not set.");
   return &mAmbiDomainChannels[channel * mNumFrames];
 }
 
-}  // namespace al
+} // namespace al
 #endif

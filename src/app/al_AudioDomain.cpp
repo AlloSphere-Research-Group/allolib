@@ -53,6 +53,12 @@ void AudioDomain::configure(AudioDevice &dev, double audioRate,
   audioIO().channelsOut(audioOutputs);
 }
 
+void AudioDomain::AppAudioCB(AudioIOData &io) {
+  AudioDomain &app = io.user<AudioDomain>();
+  io.frame(0);
+  app.onSound(app.audioIO());
+}
+
 // -----
 bool GammaAudioDomain::start() {
   bool ret = true;

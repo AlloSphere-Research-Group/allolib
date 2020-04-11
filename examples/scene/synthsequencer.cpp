@@ -5,9 +5,9 @@
     Description:
 */
 
-#include <cstdio>        // for printing to stdout
-#define GAMMA_H_INC_ALL  // define this to include all header files
-#define GAMMA_H_NO_IO    // define this to avoid bringing AudioIO from Gamma
+#include <cstdio>       // for printing to stdout
+#define GAMMA_H_INC_ALL // define this to include all header files
+#define GAMMA_H_NO_IO   // define this to avoid bringing AudioIO from Gamma
 
 #include "Gamma/Gamma.h"
 
@@ -28,7 +28,7 @@ using namespace al;
 // Don't forget to define an onTriggerOn() function to reset envelopes or
 // values for each triggering
 class SineEnv : public SynthVoice {
- public:
+public:
   float mAmp;
   float mDur;
 
@@ -64,15 +64,15 @@ class SineEnv : public SynthVoice {
 // use the render() functions from the SynthSequencer to produce audio and
 // graphics in the corresponding callback
 class MyApp : public App {
- public:
-  virtual void onSound(AudioIOData &io) override {
-    s.render(io);  // Render audio
+public:
+  void onSound(AudioIOData &io) override {
+    s.render(io); // Render audio
   }
 
-  virtual void onDraw(Graphics &g) override {
-    s.print();  // Prints information on active and free voices
+  void onDraw(Graphics &g) override {
+    s.print(); // Prints information on active and free voices
     g.clear(0.4);
-    s.render(g);  // Render graphics
+    s.render(g); // Render graphics
   }
 
   SynthSequencer s;

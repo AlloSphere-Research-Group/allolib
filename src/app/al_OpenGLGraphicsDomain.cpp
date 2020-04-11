@@ -21,7 +21,7 @@ bool OpenGLGraphicsDomain::start() {
     mRunning = true;
     bool ret = true;
     ret &= initializeSubdomains(true);
-    startFPS();  // WindowApp (FPS)
+    startFPS(); // WindowApp (FPS)
     ret &= initializeSubdomains(false);
 
     preOnCreate();
@@ -50,7 +50,7 @@ bool OpenGLGraphicsDomain::stop() {
 
   ret &= cleanupSubdomains(true);
 
-  onExit();  // user defined
+  onExit(); // user defined
   postOnExit();
 
   ret &= cleanupSubdomains(false);
@@ -77,6 +77,11 @@ std::shared_ptr<GLFWOpenGLWindowDomain> OpenGLGraphicsDomain::newWindow() {
   newWindowDomain->window().vsync(nextWindowProperties.vsync);
 
   return newWindowDomain;
+}
+
+void OpenGLGraphicsDomain::closeWindow(
+    std::shared_ptr<GLFWOpenGLWindowDomain> windowDomain) {
+  removeSubDomain(std::static_pointer_cast<SynchronousDomain>(windowDomain));
 }
 
 /// Window Domain ----------------------

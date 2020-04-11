@@ -65,8 +65,10 @@ int asciiToMIDI(int asciiKey, int offset = 0);
  * @brief The SynthVoice class
  * @ingroup Scene
  *
+ * To create new voices for a PolySynth, inherit from this class and override
+ * the onProcess() functions.
  * When inheriting this class you must provide a default construct that takes no
- * arguments
+ * arguments.
  */
 class SynthVoice {
   friend class PolySynth; // PolySynth needs to access private members like
@@ -426,9 +428,10 @@ private:
 };
 
 /**
-@brief PolySynth class
-@ingroup Scene
-*/
+ * @brief A PolySynth manages polyphony and rendering of SynthVoice instances.
+ * @ingroup Scene
+ *
+ */
 class PolySynth {
 public:
   friend class SynthSequencer;

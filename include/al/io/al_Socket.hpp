@@ -127,8 +127,8 @@ public:
   ///
   /// @param[in] t	Timeout in seconds.
   ///					If t > 0, the socket blocks with timeout
-  /// t. 					If t = 0, the socket never blocks. 					If t
-  /// < 0, the socket blocks forever. Note that setting the timeout will close
+  /// t. 					If t = 0, the socket never blocks. 					If
+  /// t < 0, the socket blocks forever. Note that setting the timeout will close
   /// and re-open the socket.
   void timeout(al_sec t);
 
@@ -228,11 +228,11 @@ protected:
   virtual bool onOpen();
 };
 
-/// \deprecated Use SocketClient
-typedef SocketClient SocketSend;
+///// \deprecated Use SocketClient
+// typedef SocketClient SocketSend;
 
-/// \deprecated Use SocketServer
-typedef SocketServer SocketRecv;
+///// \deprecated Use SocketServer
+// typedef SocketServer SocketRecv;
 
 } // namespace al
 

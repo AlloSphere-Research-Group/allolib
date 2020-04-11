@@ -20,6 +20,10 @@ typedef enum {
   // User defined capabilities can add from here through bitshifting
 } Capability;
 
+/**
+ * @brief The NodeConfiguration struct describes a distributed node and its
+ * capabilities
+ */
 struct NodeConfiguration {
   uint16_t rank{0};
   uint16_t group{0};
@@ -55,6 +59,6 @@ struct NodeConfiguration {
   }
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // INCLUDE_AL_NODECONFIGURATION
+#endif // INCLUDE_AL_NODECONFIGURATION

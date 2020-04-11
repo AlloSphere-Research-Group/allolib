@@ -12,9 +12,14 @@ namespace al {
 /**
  * @brief ConsoleDomain class
  * @ingroup App
+ *
+ * This domain is a blocking domain, i.e. blocks on start(). Set the onLine()
+ * function to get lines entered in the console. My default, the domain exits
+ * when the line is empty (when return is pressed). You can use this domain
+ * instead of app to build your own command line classes.
  */
 class ConsoleDomain : public AsynchronousDomain {
- public:
+public:
   bool init(ComputationDomain *parent = nullptr) override { return true; }
 
   bool start() override {
@@ -37,9 +42,9 @@ class ConsoleDomain : public AsynchronousDomain {
         return true;
       };
 
- private:
+private:
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // CONSOLEDOMAIN_H
+#endif // CONSOLEDOMAIN_H

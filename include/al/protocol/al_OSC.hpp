@@ -264,13 +264,8 @@ public:
   /// Called for each message contained in packet
   virtual void onMessage(Message &m) = 0;
 
-  // FIXME: For backwards compatibility. Remove when updating API
-  void parse(const char *packet, int size, TimeTag timeTag = 1) {
-    parse(packet, size, timeTag, nullptr);
-  }
-
-  void parse(const char *packet, int size, TimeTag timeTag,
-             const char *senderAddr);
+  void parse(const char *packet, int size, TimeTag timeTag = 1,
+             const char *senderAddr = nullptr);
 };
 
 /// Interface for classes that can consume OSC messages
