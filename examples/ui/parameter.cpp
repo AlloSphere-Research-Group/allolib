@@ -19,7 +19,6 @@ struct MyApp : public App {
   // The parameter will clamp values between min and max
   Parameter X{"X", "", 0.0, "", -1.0, 1.0};
   Parameter Y{"Y", "", 0.0, "", -1.0, 1.0};
-
   Mesh m;
 
   void onCreate() override {
@@ -32,7 +31,7 @@ struct MyApp : public App {
     // Have something to draw in a mesh
     addTorus(m);
     m.primitive(Mesh::LINE_STRIP);
-    navControl().disable();  // Disable keyboard control of navigation
+    navControl().disable(); // Disable keyboard control of navigation
     std::cout << "Press 'w', 'x', 'a' or 'd'." << std::endl;
   }
 
@@ -40,7 +39,7 @@ struct MyApp : public App {
     g.clear();
     g.pushMatrix();
     // You can use the parameters as if they were regular floats (in most cases)
-    g.translate(X, Y, -6.0);  // Draw a mesh at X,Y
+    g.translate(X, Y, -6.0); // Draw a mesh at X,Y
     g.draw(m);
     g.popMatrix();
   }
@@ -48,20 +47,20 @@ struct MyApp : public App {
   bool onKeyDown(const Keyboard &k) override {
     // Use keyboard to control position of element
     switch (k.key()) {
-      case 'w':
-        Y = Y + 0.1;
-        break;
-      case 'x':
-        Y = Y - 0.1;
-        break;
-      case 'a':
-        X = X - 0.1;
-        break;
-      case 'd':
-        X = X + 0.1;
-        break;
-      default:
-        break;
+    case 'w':
+      Y = Y + 0.1;
+      break;
+    case 'x':
+      Y = Y - 0.1;
+      break;
+    case 'a':
+      X = X - 0.1;
+      break;
+    case 'd':
+      X = X + 0.1;
+      break;
+    default:
+      break;
     }
     return true;
   }
