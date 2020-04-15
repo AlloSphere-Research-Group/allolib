@@ -191,9 +191,7 @@ public:
 
   /// Set the frame rate at which the graphics run (i.e. how often
   /// render(Graphics &g) will be called
-  void setGraphicsFrameRate(float fps) {
-    mFps = fps;
-  } // TODO this should be handled through Gamma Domains
+  void setGraphicsFrameRate(float fps) { mFps = fps; }
 
   /**
    * @brief insert an event in the sequencer
@@ -259,6 +257,12 @@ public:
                                               double timeOffset = 0,
                                               double timeScale = 1.0);
 
+  /**
+   * @brief play the event list provided all other events in list are discarded
+   */
+  void playEvents(std::list<SynthSequencerEvent> events,
+                  double timeOffset = 0.1);
+
   std::vector<std::string> getSequenceList();
 
   double getSequenceDuration(std::string sequenceName);
@@ -294,7 +298,7 @@ private:
   bool mVerbose{false};
   std::string mLastSequencePlayed;
 
-  double mFps{30}; // graphics frames per second
+  double mFps{0}; // graphics frames per second
 
   unsigned int mNextEvent{0};
   std::list<SynthSequencerEvent>

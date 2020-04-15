@@ -23,6 +23,7 @@ void SynthSequencer::render(AudioIOData &io) {
 }
 
 void SynthSequencer::render(Graphics &g) {
+  assert(mFps > 0);
   if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
     update(1.0 / mFps);
   }
@@ -33,7 +34,8 @@ void SynthSequencer::update(double dt) {
   double timeIncrement = dt;
   double blockStartTime = mMasterTime;
   mMasterTime += timeIncrement;
-  processEvents(blockStartTime, mNormalizedTempo * mFps);
+
+  processEvents(blockStartTime, mNormalizedTempo);
 }
 
 void SynthSequencer::print() {
@@ -439,6 +441,18 @@ SynthSequencer::loadSequence(std::string sequenceName, double timeOffset,
     std::cout << "Error reading:" << fullName << std::endl;
   }
   return events;
+}
+
+void SynthSequencer::playEvents(std::list<SynthSequencerEvent> events,
+                                double timeOffset) {
+
+  double currentMasterTime = mMasterTime;
+  for (auto &event : events) {
+    event.startTime += currentMasterTime + timeOffset;
+  }
+
+  std::unique_lock<std::mutex> lk(mEventLock);
+  mEvents = events;
 }
 
 std::vector<std::string> SynthSequencer::getSequenceList() {
