@@ -24,7 +24,7 @@ std::string al_get_hostname() {
 using namespace al;
 
 bool sphere::isSimulatorMachine(const std::string &host) {
-  return (host.substr(0, 5) == "audio");
+  return (host.substr(0, 4) == "ar01");
 }
 
 bool sphere::isSimulatorMachine() {

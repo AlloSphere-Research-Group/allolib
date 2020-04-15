@@ -193,6 +193,8 @@ void DynamicScene::render(AudioIOData &io) {
             // Rotate vector according to listener-rotation
             Quatd srcRot = mListenerPose.quat();
             listeningDir = srcRot.rotate(direction);
+            // FIXME horrible hack!!!
+            listeningDir.y = -listeningDir.y;
             posOffsets = posVoice->audioOutOffsets();
             assert(posOffsets.size() == 0 ||
                    posOffsets.size() == posVoice->numOutChannels());
