@@ -287,3 +287,34 @@ void App::initializeDomains() {
     }
   }
 }
+
+bool App::StandardWindowAppKeyControls::keyDown(const Keyboard &k) {
+  if (k.ctrl()) {
+    switch (k.key()) {
+    case 'q':
+      app->quit();
+      return false;
+      //          case 'h':
+      //            window().hide();
+      //            return false;
+      //          case 'm':
+      //            window().iconify();
+      //            return false;
+    case 'u':
+      window().cursorHideToggle();
+      return false;
+      //          case 'w':
+      //            app->graphicsDomain()->closeWindow(app->mDefaultWindowDomain);
+      //            return false;
+    default:;
+    }
+  } else {
+    switch (k.key()) {
+    case Keyboard::ESCAPE:
+      window().fullScreenToggle();
+      return false;
+    default:;
+    }
+  }
+  return true;
+}

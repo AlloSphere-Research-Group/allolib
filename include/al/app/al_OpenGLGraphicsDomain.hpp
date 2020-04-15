@@ -32,9 +32,11 @@ struct WindowSetupProperties {
 /**
  * @brief OpenGLGraphicsDomain class
  * @ingroup App
+ *
+ * This domain prepares a GLFW OpenGL domain.
  */
 class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
- public:
+public:
   virtual ~OpenGLGraphicsDomain() {}
 
   // Domain functions
@@ -48,13 +50,16 @@ class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
 
   bool running() { return mRunning; }
 
-  // newWindow() must be called after domain has been initialized, as it also
-  // initializes the window domain.
+  /**
+   * @brief Create a new window
+   * @return the new window domain
+   *
+   * newWindow() must be called after domain has been initialized, as it also
+   * initializes the window domain, which requires an opengl context.
+   */
   std::shared_ptr<GLFWOpenGLWindowDomain> newWindow();
 
-  void closeWindow(std::shared_ptr<GLFWOpenGLWindowDomain> windowDomain) {
-    removeSubDomain(std::static_pointer_cast<SynchronousDomain>(windowDomain));
-  }
+  void closeWindow(std::shared_ptr<GLFWOpenGLWindowDomain> windowDomain);
 
   // Next window details
   WindowSetupProperties nextWindowProperties;
@@ -67,13 +72,22 @@ class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
 
   virtual void postOnExit() {}
 
- private:
+private:
   std::atomic<bool> mShouldQuitApp{false};
   bool mRunning{false};
 };
 
+/**
+ * @brief Domain for a GLFW window
+ *
+ * set the onNewFrame, preOnDraw, onDraw and postOnDraw to determine what is
+ * drawn in the window.
+ *
+ * You can get mouse and keyboard events through the Window instance avaialable
+ * through window()
+ */
 class GLFWOpenGLWindowDomain : public SynchronousDomain {
- public:
+public:
   GLFWOpenGLWindowDomain();
   // Domain functions
   bool init(ComputationDomain *parent = nullptr) override;
@@ -82,6 +96,18 @@ class GLFWOpenGLWindowDomain : public SynchronousDomain {
 
   bool cleanup(ComputationDomain *parent = nullptr) override;
 
+  /**
+   * Called once on every frame loop
+   */
+  std::function<void()> onNewFrame = [this]() {
+    mNav.smooth(std::pow(0.0001, mTimeDrift));
+    mNav.step(mTimeDrift * mParent->fps());
+  };
+
+  /**
+   * Called once before every draw call, when view and context has been
+   * prepared
+   */
   std::function<void()> preOnDraw = [this]() {
     mGraphics->framebuffer(FBO::DEFAULT);
     mGraphics->viewport(0, 0, mWindow->fbWidth(), mWindow->fbHeight());
@@ -90,13 +116,15 @@ class GLFWOpenGLWindowDomain : public SynchronousDomain {
     mGraphics->color(1, 1, 1);
   };
 
-  virtual void onNewFrame() {
-    mNav.smooth(std::pow(0.0001, mTimeDrift));
-    mNav.step(mTimeDrift * mParent->fps());
-  }
-
+  /**
+   * Set this function to determine what is drawn
+   */
   std::function<void(Graphics &)> onDraw = [](Graphics &) {};
 
+  /**
+   * Called once after every draw call, when view and context has been
+   * prepared
+   */
   std::function<void()> postOnDraw = []() {};
 
   Viewpoint &view() { return mView; }
@@ -112,18 +140,18 @@ class GLFWOpenGLWindowDomain : public SynchronousDomain {
 
   Graphics &graphics() { return *mGraphics; }
 
- private:
+private:
   std::unique_ptr<Window> mWindow;
 
   std::unique_ptr<Graphics> mGraphics;
 
   OpenGLGraphicsDomain *mParent;
 
-  Nav mNav;  // is a Pose itself and also handles manipulation of pose
-  Viewpoint mView{mNav.transformed()};  // Pose with Lens and acts as camera
-  NavInputControl mNavControl{mNav};    // interaction with keyboard and mouse
+  Nav mNav; // is a Pose itself and also handles manipulation of pose
+  Viewpoint mView{mNav.transformed()}; // Pose with Lens and acts as camera
+  NavInputControl mNavControl{mNav};   // interaction with keyboard and mouse
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // GRAPHICSDOMAIN_H
+#endif // GRAPHICSDOMAIN_H

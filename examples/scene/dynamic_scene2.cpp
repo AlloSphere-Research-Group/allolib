@@ -22,19 +22,19 @@ struct Thing {
 
 struct SimpleVoice : PositionedVoice {
   Sine<> oscillator;
-  LFO<> lfo;  // 4 Hz Square wave for envelopeY
+  LFO<> lfo; // 4 Hz Square wave for envelopeY
 
   float lfoValue{0.0f};
 
-  virtual void onProcess(AudioIOData& io) override {
+  virtual void onProcess(AudioIOData &io) override {
     while (io()) {
       lfoValue = lfo.downU();
       io.out(0) = oscillator() * lfoValue * 0.1f;
     }
   }
 
-  virtual void onProcess(Graphics& g) override {
-    Thing* thing = (Thing*)userData();
+  virtual void onProcess(Graphics &g) override {
+    Thing *thing = (Thing *)userData();
     g.color(lfoValue);
     g.draw(thing->mesh);
   }
@@ -62,7 +62,7 @@ struct MyApp : App {
     // on
     for (float i = 0.1f; i < 11; ++i) {
       // First allocate voice
-      auto* freeVoice = scene.getVoice<SimpleVoice>();
+      auto *freeVoice = scene.getVoice<SimpleVoice>();
       // Then configure voice
       freeVoice->oscillator.freq(330 * i);
       freeVoice->lfo.freq(0.3f + i * 0.25f);
@@ -74,18 +74,18 @@ struct MyApp : App {
     }
   }
 
-  void onAnimate(double /*dt*/) {
-    scene.listenerPose(nav());  // Set the scene listener to the current nav
+  void onAnimate(double /*dt*/) override {
+    scene.listenerPose(nav()); // Set the scene listener to the current nav
   }
 
-  void onDraw(Graphics& g) override {
+  void onDraw(Graphics &g) override {
     g.clear(0.2f);
     gl::polygonLine();
     gl::depthTesting(true);
     scene.render(g);
   }
 
-  virtual void onSound(AudioIOData& io) override { scene.render(io); }
+  virtual void onSound(AudioIOData &io) override { scene.render(io); }
 };
 
 int main() {

@@ -10,14 +10,14 @@ struct MyApp : App {
   bool show_gui = true;
   Mesh m;
 
-  void onCreate() {
+  void onCreate() override {
     imguiInit();
     addSphere(m);
     nav().pos(0, 0, 10);
     nav().setHome();
   }
 
-  void onAnimate(double dt) {
+  void onAnimate(double dt) override {
     navControl().active(!isImguiUsingInput());
 
     if (show_gui) {
@@ -44,15 +44,16 @@ struct MyApp : App {
     }
   }
 
-  void onDraw(Graphics& g) override {
+  void onDraw(Graphics &g) override {
     g.clear(clear_color);
     g.color(grayscale);
     g.draw(m);
 
-    if (show_gui) imguiDraw();
+    if (show_gui)
+      imguiDraw();
   }
 
-  bool onKeyDown(const Keyboard& k) override {
+  bool onKeyDown(const Keyboard &k) override {
     if (k.key() == 'g') {
       show_gui = !show_gui;
     }
@@ -65,4 +66,5 @@ struct MyApp : App {
 int main() {
   MyApp app;
   app.start();
+  return 0;
 }

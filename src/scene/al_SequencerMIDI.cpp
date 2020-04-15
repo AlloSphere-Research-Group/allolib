@@ -7,7 +7,7 @@ SequencerMIDI::SequencerMIDI(int deviceIndex) : mSynth(nullptr) {
     mRtMidiIn.openPort(deviceIndex);
     printf("PresetMIDI: Opened port to %s\n",
            mRtMidiIn.getPortName(deviceIndex).c_str());
-  } catch (RtMidiError error) {
+  } catch (RtMidiError &error) {
     std::cout << "PresetMIDI Warning: Could not open MIDI port " << deviceIndex
               << std::endl;
   }
@@ -16,10 +16,6 @@ SequencerMIDI::SequencerMIDI(int deviceIndex) : mSynth(nullptr) {
 SequencerMIDI::SequencerMIDI(int deviceIndex, PolySynth &synth)
     : SequencerMIDI(deviceIndex) {
   setSynthSequencer(synth);
-}
-
-void SequencerMIDI::init(int deviceIndex, PolySynth &synth) {
-  open(deviceIndex, synth);
 }
 
 void SequencerMIDI::open(int deviceIndex, PolySynth &synth) {
@@ -42,7 +38,7 @@ void SequencerMIDI::open(int deviceIndex) {
       std::cerr << "PresetMIDI Warning: Could not open MIDI port "
                 << deviceIndex << std::endl;
     }
-  } catch (RtMidiError error) {
+  } catch (RtMidiError &error) {
     std::cerr << "PresetMIDI Warning: Could not open MIDI port " << deviceIndex
               << std::endl;
   }

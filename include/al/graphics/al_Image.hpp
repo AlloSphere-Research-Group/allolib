@@ -8,25 +8,24 @@
    UCSB. Copyright (C) 2012. The Regents of the University of California. All
    rights reserved.
 
-        Redistribution and use in source and binary forms, with or without
-        modification, are permitted provided that the following conditions are
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
    met:
 
-                Redistributions of source code must retain the above copyright
+   Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
 
-                Redistributions in binary form must reproduce the above
-   copyright notice, this list of conditions and the following disclaimer in the
-                documentation and/or other materials provided with the
-   distribution.
+   Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
 
-                Neither the name of the University of California nor the names
+   Neither the name of the University of California nor the names
    of its contributors may be used to endorse or promote products derived from
-                this software without specific prior written permission.
+   this software without specific prior written permission.
 
-        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
    IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
@@ -37,11 +36,11 @@
    ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-        File description:
-        Loads and saves images
+   File description:
+    Loads and saves images
 
-        File author(s):
-        Graham Wakefield, 2010, grrrwaaa@gmail.com
+   File author(s):
+    Graham Wakefield, 2010, grrrwaaa@gmail.com
     Keehong Youn, 2019, younkeehong@gmail.com
 */
 
@@ -51,21 +50,13 @@
 
 namespace al {
 
-/*
-    Loads image as 8-bit 4 channels RGBA
-    Supported formats: PNG, JPG, ...
-    Implementation uses stb_image.h >> https://github.com/nothings/stb
-*/
-
 /**
 @brief Interface for loading image files
 
-                Loads image as 8-bit 4 channels RGBA
-                Supported formats: PNG, JPG, ...
-                Implementation uses stb_image.h from
-https://github.com/nothings/stb
-
 @ingroup Graphics
+
+Loads image as 8-bit 4 channels RGBA. Supported formats: PNG, JPG, ...
+Implementation uses stb_image.h >> https://github.com/nothings/stb
 */
 
 struct Image {
@@ -117,14 +108,10 @@ struct Image {
   const std::vector<uint8_t> &array() const { return mArray; }
 
   /// Get pointer to pixels
-  template <typename T = RGBAPix>
-  T *pixels() {
-    return (T *)(mArray.data());
-  }
+  template <typename T = RGBAPix> T *pixels() { return (T *)(mArray.data()); }
 
   /// Get pointer to pixels (read-only)
-  template <typename T = RGBAPix>
-  const T *pixels() const {
+  template <typename T = RGBAPix> const T *pixels() const {
     return (const T *)(mArray.data());
   }
 
@@ -168,8 +155,7 @@ struct Image {
 
   /// Warning: doesn't check that Pix has matching type/component count.
   /// Warning: no bounds checking performed on x and y.
-  template <typename Pix = RGBAPix>
-  Pix &at(unsigned x, unsigned y) {
+  template <typename Pix = RGBAPix> Pix &at(unsigned x, unsigned y) {
     auto pixel_index = x + y * width();
     return *reinterpret_cast<RGBAPix *>(mArray.data() + 4 * pixel_index);
     // return *array().cell<Pix>(x, y);
@@ -209,8 +195,7 @@ struct Image {
   /// @param[in] dimY		number of pixels in y direction
   /// @param[in] format	pixel color format
   /// \returns True on success; false otherwise.
-  template <typename T>
-  bool resize(int dimX, int dimY /*, Format format */) {
+  template <typename T> bool resize(int dimX, int dimY /*, Format format */) {
     mArray.resize(4 * dimX * dimY);
     // mArray.formatAligned(components(format), Array::type<T>(), dimX, dimY,
     // 1);
@@ -260,5 +245,5 @@ struct Image {
   //};
 };
 
-}  // namespace al
+} // namespace al
 #endif

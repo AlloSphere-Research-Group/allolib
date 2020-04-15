@@ -5,29 +5,29 @@
 /*	Allolib --
         Multimedia / virtual environment application class library
 
-        Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
-   UCSB. Copyright (C) 2012-2018. The Regents of the University of California.
-        All rights reserved.
+   Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology, UCSB.
+   Copyright (C) 2012-2018. The Regents of the University of California.
+   All rights reserved.
 
-        Redistribution and use in source and binary forms, with or without
-        modification, are permitted provided that the following conditions are
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
    met:
 
-                Redistributions of source code must retain the above copyright
+   Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
 
-                Redistributions in binary form must reproduce the above
+   Redistributions in binary form must reproduce the above
    copyright notice, this list of conditions and the following disclaimer in the
-                documentation and/or other materials provided with the
+   documentation and/or other materials provided with the
    distribution.
 
-                Neither the name of the University of California nor the names
+   Neither the name of the University of California nor the names
    of its contributors may be used to endorse or promote products derived from
-                this software without specific prior written permission.
+   this software without specific prior written permission.
 
-        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
    IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
@@ -59,8 +59,6 @@
 #include "al/io/al_File.hpp"
 #include "al/scene/al_PolySynth.hpp"
 #include "al/ui/al_Parameter.hpp"
-
-//#include "Gamma/Domain.h"
 
 namespace al {
 
@@ -193,9 +191,7 @@ public:
 
   /// Set the frame rate at which the graphics run (i.e. how often
   /// render(Graphics &g) will be called
-  void setGraphicsFrameRate(float fps) {
-    mFps = fps;
-  } // TODO this should be handled through Gamma Domains
+  void setGraphicsFrameRate(float fps) { mFps = fps; }
 
   /**
    * @brief insert an event in the sequencer
@@ -261,6 +257,12 @@ public:
                                               double timeOffset = 0,
                                               double timeScale = 1.0);
 
+  /**
+   * @brief play the event list provided all other events in list are discarded
+   */
+  void playEvents(std::list<SynthSequencerEvent> events,
+                  double timeOffset = 0.1);
+
   std::vector<std::string> getSequenceList();
 
   double getSequenceDuration(std::string sequenceName);
@@ -296,7 +298,7 @@ private:
   bool mVerbose{false};
   std::string mLastSequencePlayed;
 
-  double mFps{30}; // graphics frames per second
+  double mFps{0}; // graphics frames per second
 
   unsigned int mNextEvent{0};
   std::list<SynthSequencerEvent>

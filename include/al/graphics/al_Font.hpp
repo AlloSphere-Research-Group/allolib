@@ -59,19 +59,19 @@ namespace al {
 
 struct Font {
   struct Impl;
-  Impl* impl;
+  Impl *impl;
   Texture tex;
   float alignFactorX = 0.0f;
 
   Font();
 
   // no copy
-  Font(const Font&) = delete;
-  Font& operator=(const Font&) = delete;
+  Font(const Font &) = delete;
+  Font &operator=(const Font &) = delete;
 
   // but movable
-  Font(Font&& other) noexcept;
-  Font& operator=(Font&& other) noexcept;
+  Font(Font &&other) noexcept;
+  Font &operator=(Font &&other) noexcept;
 
   ~Font();
 
@@ -80,7 +80,7 @@ struct Font {
   /// \param[in] fontSize        size of font
   /// \param[in] bitmapSize      size of font bitmap
   /// \returns whether font loaded successfully
-  bool load(const char* filename, int fontSize, int bitmapSize);
+  bool load(const char *filename, int fontSize, int bitmapSize);
 
   /*! Render text geometry
       Render text into geometry for drawing a string of text using the bitmap
@@ -99,7 +99,7 @@ struct Font {
       </pre>
 
   */
-  void write(Mesh& mesh, const char* text, float worldHeight);
+  void write(Mesh &mesh, const char *text, float worldHeight);
 
   /// Returns the width of a text string, in pixels
   // float width(const char* text) const;
@@ -131,28 +131,34 @@ struct Font {
   static std::string defaultFont();
 };
 
+/**
+ * @brief Convenience class to simplify rendering text
+ *
+ */
 struct FontRenderer : public Font {
   Mesh fontMesh;
 
-  void write(const char* text, float worldHeight = 1.0f) {
+  void write(const char *text, float worldHeight = 1.0f) {
     Font::write(fontMesh, text, worldHeight);
   }
 
-  static void render(Graphics& g, const char* text, Vec3d position,
+  static void render(Graphics &g, const char *text, Vec3d position,
                      float worldHeight = 1.0, int fontSize = 24,
-                     const char* filename = Font::defaultFont().c_str(),
+                     const char *filename = Font::defaultFont().c_str(),
                      int bitmapSize = 1024) {
     static std::map<std::string, FontRenderer> renderers;
-    if (renderers.find(std::string(text)) == renderers.end()) {
-      renderers[std::string(text)] = FontRenderer();
-      renderers[text].load(filename, fontSize, bitmapSize);
+    if (renderers.find(std::string(filename)) == renderers.end()) {
+      renderers[std::string(filename)] = FontRenderer();
+      renderers[filename].load(filename, fontSize, bitmapSize);
     }
-    FontRenderer& renderer = renderers[text];
+    // FIXME check bitmap size for case when font is reused with different
+    // resolution
+    FontRenderer &renderer = renderers[filename];
     renderer.write(text, worldHeight);
     renderer.renderAt(g, position);
   }
 
-  void render(Graphics& g) {
+  void render(Graphics &g) {
     gl::blending(true);
     gl::blendTrans();
     g.texture();
@@ -161,14 +167,14 @@ struct FontRenderer : public Font {
     tex.unbind();
   }
 
-  void renderAt(Graphics& g, Vec3d position) {
+  void renderAt(Graphics &g, Vec3d position) {
     g.pushMatrix();
     g.translate(position);
     render(g);
     g.popMatrix();
   }
-};  // namespace al
+}; // namespace al
 
-}  // namespace al
+} // namespace al
 
 #endif

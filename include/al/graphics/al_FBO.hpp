@@ -50,10 +50,6 @@
 
 namespace al {
 
-/// Render buffer object
-
-/// Render buffer objects are used for offscreen rendering. They are a single
-/// image of a renderable internal format, such as color, depth, or stencil.
 ///
 /// @ingroup allocore
 
@@ -78,11 +74,14 @@ GL_DEPTH24_STENCIL8, GL_DEPTH32F_STENCIL8
 */
 
 /**
-@brief RBO class
-@ingroup Graphics
-*/
+ * @brief Render buffer object class
+ * @ingroup Graphics
+ *
+ * Render buffer objects are used for offscreen rendering. They are a single
+ * image of a renderable internal format, such as color, depth, or stencil.
+ */
 class RBO : public GPUObject {
- public:
+public:
   /// @param[in] format  internal format of buffer
   RBO(unsigned int format = GL_DEPTH_COMPONENT16);
 
@@ -92,7 +91,7 @@ class RBO : public GPUObject {
   unsigned int format() const;
 
   /// Set internal pixel format
-  RBO& format(unsigned int v);
+  RBO &format(unsigned int v);
 
   /// Bind object
   void bind();
@@ -119,31 +118,37 @@ class RBO : public GPUObject {
   static void bind(unsigned id);
   static bool resize(unsigned int format, unsigned width, unsigned height);
 
- protected:
+protected:
   unsigned int mFormat;
 
   virtual void onCreate();
   virtual void onDestroy();
 };
 
-/// Frame buffer object
-
-/// A frame buffer object is an application-created frame buffer that is
-/// non-displayable. A single FBO can have multiple rendering destinations
-/// (attachments) for color, depth, and stencil information. If the attachment
-/// is a texture, then the FBO does "render-to-texture". If the attachment is
-/// a render buffer object, then the FBO does "offscreen rendering".
-/// A single FBO can have multiple color attachments, but only one depth and
-/// one stencil attachment. Switching the attachments (attach/detach calls) is
-/// much faster than using multiple FBOs.
-/// All attachments must have the same dimensions and all color attachments
-/// must have the same pixel format. These are standard requirements of an FBO,
-/// not an implementation-imposed limitation.
 ///
-/// @ingroup Graphics
 
+///
+///
+///
+/**
+ * @brief Frame buffer object class
+ * @ingroup Graphics
+ *
+ * A frame buffer object is an application-created frame buffer that is
+ * non-displayable. A single FBO can have multiple rendering destinations
+ * (attachments) for color, depth, and stencil information. If the attachment
+ * is a texture, then the FBO does "render-to-texture". If the attachment is
+ * a render buffer object, then the FBO does "offscreen rendering".
+ * A single FBO can have multiple color attachments, but only one depth and
+ * one stencil attachment. Switching the attachments (attach/detach calls) is
+ * much faster than using multiple FBOs.
+ * All attachments must have the same dimensions and all color attachments
+ * must have the same pixel format. These are standard requirements of an FBO,
+ * not an implementation-imposed limitation.
+ *
+ */
 class FBO : public GPUObject {
- public:
+public:
   /// Attachment type
   enum Attachment {
     COLOR_ATTACHMENT0 = GL_COLOR_ATTACHMENT0,
@@ -158,28 +163,28 @@ class FBO : public GPUObject {
   ~FBO() { destroy(); }
 
   /// Attach RBO at specified attachment point
-  FBO& attachRBO(const RBO& rbo, unsigned int attachment = GL_DEPTH_ATTACHMENT);
+  FBO &attachRBO(const RBO &rbo, unsigned int attachment = GL_DEPTH_ATTACHMENT);
 
   /// Detach RBO at specified attachment point
-  FBO& detachRBO(unsigned int attachment);
+  FBO &detachRBO(unsigned int attachment);
 
   /// Attach a texture
 
   /// @param[in] texID  texture ID
   /// @param[in] attach  Attachment type
   /// @param[in] level  mipmap level of texture
-  FBO& attachTexture2D(Texture const& tex,
+  FBO &attachTexture2D(Texture const &tex,
                        unsigned int attach = GL_COLOR_ATTACHMENT0,
                        int level = 0);
 
   /// Detach texture at a specified attachment point and mipmap level
-  FBO& detachTexture2D(unsigned int attachment, int level = 0);
+  FBO &detachTexture2D(unsigned int attachment, int level = 0);
 
-  FBO& attachCubemapFace(Texture const& tex, unsigned int target_face,
+  FBO &attachCubemapFace(Texture const &tex, unsigned int target_face,
                          unsigned int attachment = GL_COLOR_ATTACHMENT0,
                          int level = 0);
 
-  FBO& detachCubemapFace(unsigned int target_face, unsigned int attachment,
+  FBO &detachCubemapFace(unsigned int target_face, unsigned int attachment,
                          int level = 0);
 
   /// Bind object (start rendering to attached objects)
@@ -193,8 +198,8 @@ class FBO : public GPUObject {
 
   /// Get status of frame buffer object
   GLenum status();
-  const char* statusString();
-  const char* statusString(GLenum stat);
+  const char *statusString();
+  const char *statusString(GLenum stat);
 
   static void bind(unsigned fboID);
   static void renderBuffer(unsigned rboID, unsigned int attachment);
@@ -205,13 +210,13 @@ class FBO : public GPUObject {
                                  unsigned int attachment = GL_COLOR_ATTACHMENT0,
                                  int level = 0);
 
- protected:
+protected:
   virtual void onCreate();
   virtual void onDestroy();
 
- public:
+public:
   static unsigned int const DEFAULT{0};
 };
 
-}  // namespace al
+} // namespace al
 #endif

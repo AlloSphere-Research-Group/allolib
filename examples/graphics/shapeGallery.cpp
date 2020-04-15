@@ -23,11 +23,12 @@ struct MyApp : public App {
   bool wireframe = false;
   bool vertexLight = false;
 
-  void onCreate() { nav().pullBack(5.5); }
+  void onCreate() override { nav().pullBack(5.5); }
 
-  void onAnimate(double dt) {
+  void onAnimate(double dt) override {
     angle += 2 * dt;
-    if (angle > 360) angle -= 360;
+    if (angle > 360)
+      angle -= 360;
 
     // Clear all the meshes
     for (int i = 0; i < Nm; ++i) {
@@ -38,64 +39,64 @@ struct MyApp : public App {
 
     // Create a sphere
     addSphere(meshes[S++],
-              1,            // radius
-              3 + mx * 16,  // slices
-              2 + my * 16   // stacks
+              1,           // radius
+              3 + mx * 16, // slices
+              2 + my * 16  // stacks
     );
 
     // Create an icosphere
     addIcosphere(meshes[S++],
-                 1,      // radius
-                 mx * 4  // subdivisions
+                 1,     // radius
+                 mx * 4 // subdivisions
     );
 
     // Create a cone/pyramid
     addCone(meshes[S++],
-            1,                    // radius
-            Vec3f(0, 0, 2 * my),  // apex
-            3 + mx * 16,          // slices (number of planes)
-            1                     // cycles
+            1,                   // radius
+            Vec3f(0, 0, 2 * my), // apex
+            3 + mx * 16,         // slices (number of planes)
+            1                    // cycles
     );
 
     // Create a disc/regular polygon
     addDisc(meshes[S++],
-            1,           // radius
-            3 + mx * 16  // slices (polygon order)
+            1,          // radius
+            3 + mx * 16 // slices (polygon order)
     );
 
     // Create a prism
     addPrism(meshes[S++],
-             1,            // bottom radius
-             0.5,          // top radius
-             2,            // height
-             3 + mx * 16,  // slices
-             my * 0.5      // twist
+             1,           // bottom radius
+             0.5,         // top radius
+             2,           // height
+             3 + mx * 16, // slices
+             my * 0.5     // twist
     );
 
     // Create an annulus
     addAnnulus(meshes[S++],
-               my,           // inner radius
-               1,            // outer radius
-               3 + mx * 16,  // slices
-               0             // twist
+               my,          // inner radius
+               1,           // outer radius
+               3 + mx * 16, // slices
+               0            // twist
     );
 
     // Create an open cylinder
     addCylinder(meshes[S++],
-                my,          // radius
-                2,           // height
-                3 + mx * 16  // slices
+                my,         // radius
+                2,          // height
+                3 + mx * 16 // slices
     );
 
     // Create a height map using a surface
     addSurface(meshes[S++],
-               3 + mx * 32,  // number of points along x
-               3 + mx * 32   // number of points along y
+               3 + mx * 32, // number of points along x
+               3 + mx * 32  // number of points along y
     );
     {
-      Mesh& m = meshes[S - 1];
+      Mesh &m = meshes[S - 1];
       for (int i = 0; i < m.vertices().size(); ++i) {
-        Mesh::Vertex& v = m.vertices()[i];
+        Mesh::Vertex &v = m.vertices()[i];
         float r = ::hypot(v.x, v.y);
         v.z = ::exp(-8 * r * r);
       }
@@ -103,10 +104,10 @@ struct MyApp : public App {
 
     // Create a torus
     addTorus(meshes[S++],
-             0.3,          // minor radius
-             0.7,          // major radius
-             3 + my * 16,  // minor resolution
-             3 + mx * 16,  // major resolution
+             0.3,         // minor radius
+             0.7,         // major radius
+             3 + my * 16, // minor resolution
+             3 + mx * 16, // major resolution
              0.5);
 
     // Scale and generate normals
@@ -125,7 +126,7 @@ struct MyApp : public App {
     }
   }
 
-  void onDraw(Graphics& g) {
+  void onDraw(Graphics &g) override {
     static Light light;
 
     g.clear(0);
@@ -149,19 +150,19 @@ struct MyApp : public App {
     }
   }
 
-  bool onKeyDown(const Keyboard& k) override {
+  bool onKeyDown(const Keyboard &k) override {
     switch (k.key()) {
-      case 'f':
-        wireframe ^= true;
-        break;
-      case 'l':
-        vertexLight ^= true;
-        break;
+    case 'f':
+      wireframe ^= true;
+      break;
+    case 'l':
+      vertexLight ^= true;
+      break;
     }
     return true;
   }
 
-  bool onMouseMove(const Mouse& m) override {
+  bool onMouseMove(const Mouse &m) override {
     mx = float(m.x()) / defaultWindow().width();
     my = float(m.y()) / defaultWindow().height();
     return true;
@@ -173,4 +174,5 @@ int main() {
   app.dimensions(600, 600);
   app.title("shape gallery");
   app.start();
+  return 0;
 }

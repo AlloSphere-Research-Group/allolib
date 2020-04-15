@@ -20,7 +20,7 @@
 namespace al {
 
 class AudioControl {
- public:
+public:
   void registerAudioIO(AudioIO &io) {
     gain.registerChangeCallback([&io](float value) { io.gain(value); });
   }
@@ -62,9 +62,13 @@ broadcastAddress = "192.168.10.255"
   * The broadcast address is used for state sending and the node list sets the
   * role and capabilities of the application if the hostname matches one of the
   * nodes listed.
+  *
+  * By default, if no configuration file is found, the application will be
+  * primary if the primary port is available. if it is not, it will become a
+  * secondary application communicating to a primary on localhost.
  */
 class DistributedApp : public App, public NodeConfiguration {
- public:
+public:
   void start() override;
 
   std::string name();
@@ -84,20 +88,34 @@ class DistributedApp : public App, public NodeConfiguration {
   std::shared_ptr<GLFWOpenGLOmniRendererDomain> omniRendering;
   std::map<std::string, std::string> additionalConfig;
 
- private:
+private:
   AudioControl mAudioControl;
 
   std::map<std::string, std::string> mRoleMap;
   bool mFoundHost = false;
 };
 
+/**
+ *
+ * Provides a class to ditribute synchronous state. By default, OSC blobs are
+ * used which are currently limited in size by the osc library, so it wil fail
+ * even with small states. If cuttlebone is available through
+ * al_ext/stateditribution you can have this app use cuttlebone instead.
+ *
+ * If you are feeling adventurous, you can modify oscpack to allow larger packet
+ * buffer.
+ *
+ * Currently, the state simulation domain is injected as a subdomain of the
+ * graphics domain i.e. it runs synchronously to graphics domain, calling
+ * onAnimate() within the graphics loop. This architure will allow
+ * running onAnimate() on a separate thrad if desired.
+ */
 template <class TSharedState>
 class DistributedAppWithState : public DistributedApp {
- public:
+public:
   DistributedAppWithState() : DistributedApp() {
     // State will be same memory for local, but will be synced on the network
     // for separate instances
-
     mOpenGLGraphicsDomain->removeSubDomain(simulationDomain());
 
     // Replace Simulation domain with state simulation domain
@@ -126,15 +144,12 @@ class DistributedAppWithState : public DistributedApp {
       auto receiver =
           distDomain->addStateReceiver("state", distDomain->statePtr());
       receiver->configure(10101);
-      //      mSimulationDomain
-      //          ->disableProcessingCallback();  // Replicas won't call
-      //          onAnimate()
     }
   }
 
- private:
+private:
 };
 
-}  // namespace al
+} // namespace al
 
 #endif

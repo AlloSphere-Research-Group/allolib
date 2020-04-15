@@ -71,6 +71,11 @@ enum class TimeMasterMode {
   TIME_MASTER_CPU
 };
 
+struct ValueSource {
+  std::string ipAddr;
+  uint16_t port;
+};
+
 // ParameterField
 // @ingroup UI
 class ParameterField {
@@ -396,16 +401,18 @@ public:
    * It blocks to lock a mutex so its use in critical contexts should be
    * avoided.
    */
-  virtual void set(ParameterType value) {
+  virtual void set(ParameterType value, ValueSource *src = nullptr) {
     //        if (value > mMax) value = mMax;
     //        if (value < mMin) value = mMin;
     if (mProcessCallback) {
       value = (*mProcessCallback)(value); //, mProcessUdata);
     }
 
-    runChangeCallbacksSynchronous(value);
+    runChangeCallbacksSynchronous(value, src);
     setLocking(value);
   }
+
+  virtual void setExternal(ParameterType value, ValueSource) {}
 
   /**
    * @brief reset value to default value
@@ -487,6 +494,9 @@ public:
       ParameterProcessCallback;
   typedef const std::function<void(ParameterType)> ParameterChangeCallback;
 
+  typedef const std::function<void(ParameterType, ValueSource *)>
+      ParameterChangeCallbackSrc;
+
   /**
    * @brief setProcessingCallback sets a callback to be called whenever the
    * parameter value changes
@@ -514,6 +524,8 @@ public:
    * @param cb
    */
   void registerChangeCallback(ParameterChangeCallback cb);
+
+  void registerChangeCallback(ParameterChangeCallbackSrc cb);
 
   /**
    * @brief Determines whether value change callbacks are called synchronously
@@ -586,7 +598,7 @@ protected:
 
   ParameterType mDefault;
 
-  void runChangeCallbacksSynchronous(ParameterType &value);
+  void runChangeCallbacksSynchronous(ParameterType &value, ValueSource *src);
 
   std::shared_ptr<ParameterProcessCallback> mProcessCallback;
   // void * mProcessUdata;
@@ -603,6 +615,7 @@ private:
 
 private:
   std::vector<std::shared_ptr<ParameterChangeCallback>> mCallbacks;
+  std::vector<std::shared_ptr<ParameterChangeCallbackSrc>> mCallbacksSrc;
 };
 
 /**
@@ -672,7 +685,7 @@ public:
    * This function is thread-safe and can be called from any number of threads
    * It does not block and relies on the atomicity of float.
    */
-  virtual void set(float value) override;
+  virtual void set(float value, ValueSource *src = nullptr) override;
 
   /**
    * @brief set the parameter's value without calling callbacks
@@ -761,7 +774,7 @@ public:
    * This function is thread-safe and can be called from any number of threads
    * It does not block and relies on the atomicity of float.
    */
-  virtual void set(int32_t value) override;
+  virtual void set(int32_t value, ValueSource *src = nullptr) override;
 
   /**
    * @brief set the parameter's value without calling callbacks
@@ -854,8 +867,11 @@ public:
 
   virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
-      assert(fields[0].type() == ParameterField::INT32);
-      set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
+      if (fields[0].type() == ParameterField::INT32) {
+        set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
+      } else if (fields[0].type() == ParameterField::FLOAT) {
+        set(fields[0].get<float>());
+      }
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
@@ -1367,14 +1383,21 @@ void ParameterWrapper<ParameterType>::setProcessingCallback(
 
 template <class ParameterType>
 void ParameterWrapper<ParameterType>::registerChangeCallback(
-    typename ParameterWrapper::ParameterChangeCallback cb) {
+    ParameterChangeCallback cb) {
   mCallbacks.push_back(std::make_shared<ParameterChangeCallback>(cb));
   // mCallbackUdata.push_back(userData);
 }
 
 template <class ParameterType>
+void ParameterWrapper<ParameterType>::registerChangeCallback(
+    ParameterChangeCallbackSrc cb) {
+  mCallbacksSrc.push_back(std::make_shared<ParameterChangeCallbackSrc>(cb));
+  // mCallbackUdata.push_back(userData);
+}
+
+template <class ParameterType>
 void ParameterWrapper<ParameterType>::runChangeCallbacksSynchronous(
-    ParameterType &value) {
+    ParameterType &value, ValueSource *src) {
   for (auto cb : mCallbacks) {
     if (cb == nullptr) {
       // If first callback if nullptr, callbacks must be processed async
@@ -1383,6 +1406,9 @@ void ParameterWrapper<ParameterType>::runChangeCallbacksSynchronous(
     } else {
       (*cb)(value);
     }
+  }
+  for (auto cb : mCallbacksSrc) {
+    (*cb)(value, src);
   }
 }
 

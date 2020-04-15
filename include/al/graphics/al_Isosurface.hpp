@@ -63,24 +63,25 @@
                         This code is public domain.
 */
 
+#include "al/graphics/al_Mesh.hpp"
+#include "al/types/al_Buffer.hpp"
 #include <map>
 #include <unordered_map>
 #include <vector>
-#include "al/graphics/al_Mesh.hpp"
-#include "al/types/al_Buffer.hpp"
-//#include "al/io/al_MRC.hpp"
 
 namespace al {
 
-/// Isosurface generated using marching cubes
-/// @ingroup Graphics
+/**
+ * @brief Isosurface generated using marching cubes
+ * @ingroup Graphics
+ */
 class Isosurface : public Mesh {
- public:
+public:
   struct EdgeVertex {
-    Vec3i pos;         // cell coordinates
-    Vec3i corners[2];  // edge corners as offsets from cell coordinates
-    float x, y, z;     // vertex position
-    float mu;          // fraction along edge of vertex
+    Vec3i pos;        // cell coordinates
+    Vec3i corners[2]; // edge corners as offsets from cell coordinates
+    float x, y, z;    // vertex position
+    float mu;         // fraction along edge of vertex
 
     /// Returns position of edge vertices
     Vec3i edgePos(int i) const { return pos + corners[i]; }
@@ -92,11 +93,11 @@ class Isosurface : public Mesh {
 
   struct VertexAction {
     virtual ~VertexAction() {}
-    virtual void operator()(const Isosurface::EdgeVertex& v, Isosurface& s) = 0;
+    virtual void operator()(const Isosurface::EdgeVertex &v, Isosurface &s) = 0;
   };
 
   struct NoVertexAction : public VertexAction {
-    virtual void operator()(const EdgeVertex& v, Isosurface& s) {}
+    virtual void operator()(const EdgeVertex &v, Isosurface &s) {}
   };
 
   static NoVertexAction noVertexAction;
@@ -104,7 +105,7 @@ class Isosurface : public Mesh {
   /// @param[in] level	value to construct surface on
   /// @param[in] action	user defined functor called upon adding a new edge
   /// vertex
-  Isosurface(float level = 0, VertexAction& action = noVertexAction);
+  Isosurface(float level = 0, VertexAction &action = noVertexAction);
 
   virtual ~Isosurface();
 
@@ -121,16 +122,15 @@ class Isosurface : public Mesh {
 
   /// \returns true upon success and false if the surface is not valid
   ///
-  bool volumeLengths(double& volLengthX, double& volLengthY,
-                     double& volLengthZ) const;
+  bool volumeLengths(double &volLengthX, double &volLengthY,
+                     double &volLengthZ) const;
 
   // Get unique identifier of 3d position indices
   int posID(int ix, int iy, int iz) const {
     return ix + mNF[0] * (iy + mNF[1] * iz);
   }
 
-  template <class VEC3I>
-  int posID(const VEC3I& i3) const {
+  template <class VEC3I> int posID(const VEC3I &i3) const {
     return posID(i3[0], i3[1], i3[2]);
   }
 
@@ -143,31 +143,31 @@ class Isosurface : public Mesh {
   }
 
   /// Set individual dimensions of the scalar field
-  Isosurface& fieldDims(int nx, int ny, int nz);
+  Isosurface &fieldDims(int nx, int ny, int nz);
 
   /// Set all dimensions of the scalar field
-  Isosurface& fieldDims(int n) { return fieldDims(n, n, n); }
+  Isosurface &fieldDims(int n) { return fieldDims(n, n, n); }
 
   /// Set individual lengths of cell
-  Isosurface& cellLengths(double dx, double dy, double dz);
+  Isosurface &cellLengths(double dx, double dy, double dz);
 
   /// Set all lengths of cell
-  Isosurface& cellLengths(double v) { return cellLengths(v, v, v); }
+  Isosurface &cellLengths(double v) { return cellLengths(v, v, v); }
 
   /// Set isolevel
-  Isosurface& level(float v) {
+  Isosurface &level(float v) {
     mIsolevel = v;
     return *this;
   }
 
   /// Set whether to compute normals
-  Isosurface& normals(bool v) {
+  Isosurface &normals(bool v) {
     mComputeNormals = v;
     return *this;
   }
 
   /// Set whether to normalize normals (if being computed)
-  Isosurface& normalize(bool v) {
+  Isosurface &normalize(bool v) {
     mNormalize = v;
     return *this;
   }
@@ -183,20 +183,19 @@ class Isosurface : public Mesh {
   /// This should be called in between calls to begin() and end().
   ///
   template <class T>
-  void addCell(int ix, int iy, int iz, const T& xyz, const T& Xyz, const T& xYz,
-               const T& XYz, const T& xyZ, const T& XyZ, const T& xYZ,
-               const T& XYZ) {
+  void addCell(int ix, int iy, int iz, const T &xyz, const T &Xyz, const T &xYz,
+               const T &XYz, const T &xyZ, const T &XyZ, const T &xYZ,
+               const T &XYZ) {
     int inds[3] = {ix, iy, iz};
     const float vals[8] = {xyz, Xyz, xYz, XYz, xyZ, XyZ, xYZ, XYZ};
     addCell(inds, vals);
   }
 
   /// Add a cell from a scalar field
-  void addCell(const int* indices3, const float* values8);
+  void addCell(const int *indices3, const float *values8);
 
   /// Generate isosurface from scalar field
-  template <class T>
-  void generate(const T* scalarField);
+  template <class T> void generate(const T *scalarField);
 
   /// Generate isosurface from scalar field
 
@@ -205,7 +204,7 @@ class Isosurface : public Mesh {
   /// to generate the surface. Thus, the surface is evaluated on a total of
   /// (nX-1)*(nY-1)*(nZ-1) cells.
   template <class T>
-  void generate(const T* scalarField, int nX, int nY, int nZ, float cellLengthX,
+  void generate(const T *scalarField, int nX, int nY, int nZ, float cellLengthX,
                 float cellLengthY, float cellLengthZ) {
     fieldDims(nX, nY, nZ);
     cellLengths(cellLengthX, cellLengthY, cellLengthZ);
@@ -213,7 +212,7 @@ class Isosurface : public Mesh {
   }
 
   template <class T>
-  void generate(const T* scalarField, int n, float cellLength) {
+  void generate(const T *scalarField, int n, float cellLength) {
     generate(scalarField, n, n, n, cellLength, cellLength, cellLength);
   }
 
@@ -225,7 +224,7 @@ class Isosurface : public Mesh {
   mrc.header().cella[1]/glUnitLength, mrc.header().cella[2]/glUnitLength);
   }*/
 
-  void vertexAction(VertexAction& a) { mVertexAction = &a; }
+  void vertexAction(VertexAction &a) { mVertexAction = &a; }
 
   const bool inBox() const { return mInBox; }
 
@@ -235,9 +234,9 @@ class Isosurface : public Mesh {
   /// is mostly dense and box shaped, i.e., a rectangular cuboid. If the
   /// isosurface is to be computed on sparse or irregularly shaped grid, then
   /// it is recommended to set this to false to save memory.
-  Isosurface& inBox(bool v);
+  Isosurface &inBox(bool v);
 
- protected:
+protected:
   struct IsosurfaceHashInt {
     size_t operator()(int v) const { return v; }
     //	size_t operator()(int v) const { return v*2654435761UL; }
@@ -245,38 +244,37 @@ class Isosurface : public Mesh {
 
   typedef std::unordered_map<int, int, IsosurfaceHashInt> EdgeToVertex;
 
-  EdgeToVertex mEdgeToVertex;  // map from edge ID to vertex
+  EdgeToVertex mEdgeToVertex; // map from edge ID to vertex
 
   // TODO - This never gets used???
   std::vector<EdgeTriangle>
-      mEdgeTriangles;  // surface triangles in terms of edge IDs
+      mEdgeTriangles; // surface triangles in terms of edge IDs
 
   std::vector<int> mEdgeToVertexArray;
   //	al::Buffer<int> mTempEdges;
 
-  double mL[3];            // cell length in x, y, and z directions
-  int mNF[3];              // number of field points in x, y, and z directions
-  int mEdgeIDOffsets[12];  // used to obtain edge ID from vertex ID and edge
-                           // number
-  float mIsolevel;         // isosurface level
-  VertexAction* mVertexAction;
-  bool mValidSurface;    // indicates whether a valid surface is present
-  bool mComputeNormals;  // whether to compute normals
-  bool mNormalize;       // whether to normalize normals
+  double mL[3];           // cell length in x, y, and z directions
+  int mNF[3];             // number of field points in x, y, and z directions
+  int mEdgeIDOffsets[12]; // used to obtain edge ID from vertex ID and edge
+                          // number
+  float mIsolevel;        // isosurface level
+  VertexAction *mVertexAction;
+  bool mValidSurface;   // indicates whether a valid surface is present
+  bool mComputeNormals; // whether to compute normals
+  bool mNormalize;      // whether to normalize normals
   bool mInBox;
 
   EdgeVertex calcIntersection(int nX, int nY, int nZ, int nEdgeNo,
-                              const float* vals) const;
+                              const float *vals) const;
   void addEdgeVertex(int x, int y, int z, int cellID, int edge,
-                     const float* vals);
+                     const float *vals);
 
   void compressTriangles();
 };
 
 // Implementation ______________________________________________________________
 
-template <class T>
-void Isosurface::generate(const T* vals) {
+template <class T> void Isosurface::generate(const T *vals) {
   inBox(true);
   begin();
 
@@ -319,6 +317,6 @@ void Isosurface::generate(const T* vals) {
   end();
 }
 
-}  // namespace al
+} // namespace al
 
 #endif

@@ -58,11 +58,12 @@ namespace al {
 class Speaker {
 public:
   unsigned int deviceChannel; ///< Index in the output device channels array
-  float azimuth;              ///< Angle from forward to left vector
-  float elevation;            ///< Angle from forward-right plane to up vector
-  int group;                  ///< Group identifier
-  float radius;               ///< Distance from center of listening space
-  float gain;                 ///< Gain of speaker
+  float azimuth;              ///< Angle from forward to right vector (i.e. CW)
+  float elevation; ///< Angle from forward-right plane to up vector (0 is
+                   ///< "horizon")
+  int group;       ///< Group identifier
+  float radius;    ///< Distance from center of listening space
+  float gain;      ///< Gain of speaker
 
   /// @param[in] deviceChan		audio device output channel
   /// @param[in] az				azimuth of speaker
@@ -116,7 +117,7 @@ Speakers SpeakerRingLayout(unsigned int deviceChannelStart = 0,
   mSpeakers.reserve(N);
   for (unsigned int i = 0; i < N; ++i) {
     mSpeakers.emplace_back(Speaker(
-        i + deviceChannelStart, 360.f / N * i + phase, 0.f, 0, radius, gain));
+        i + deviceChannelStart, (360.f / N) * i + phase, 0.f, 0, radius, gain));
   }
   return mSpeakers;
 };

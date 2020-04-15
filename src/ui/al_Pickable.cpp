@@ -173,17 +173,22 @@ bool PickableBB::onEvent(PickEvent e, Hit h) {
         return false;
 
     case RotateRay:
-      if (selected.get() == 1.0f) {
-        Vec3f dir = h.ray(selectDist) - selectPos;
-        Quatf q = Quatf().fromEuler(dir.x * 0.5f, -dir.y * 0.5f, 0);
-
+      if (selected.get() == 1.0f) {        
+        Vec3f p = pose.get().pos();
+        Vec3f v1 = (selectPos - p).normalize(); 
+        Vec3f v2 = (h.ray(selectDist) - p).normalize(); 
+        Vec3f n = v1.cross(v2); // axis of rotation
+        double angle = acos(v1.dot(v2));
+        Quatf qf = Quatf().fromAxisAngle(angle, n).normalize();
+          
         Vec3f p1 = transformVecWorld(bb.cen);
-        pose.setQuat(q * prevPose.quat());
+        pose.setQuat(qf * prevPose.quat());
         Vec3f p2 = transformVecWorld(bb.cen);
         pose.setPos(pose.get().pos() + p1 - p2);
         return true;
       } else
         return false;
+
 
     case RotatePose:
       if (selected.get() == 1.0f) {

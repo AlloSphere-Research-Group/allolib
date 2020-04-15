@@ -78,13 +78,13 @@ void BoundingBox::set(const Mesh &mesh) {
 }
 
 void BoundingBox::set(const Vec3f &min_, const Vec3f &max_) {
-  BoundingBoxData::set(min, max);
+  BoundingBoxData::set(min_, max_);
   getMesh();
   getTics();
 }
 
 void BoundingBox::setCenterDim(const Vec3f &cen_, const Vec3f &dim_) {
-  BoundingBoxData::setCenterDim(cen, dim);
+  BoundingBoxData::setCenterDim(cen_, dim_);
   getMesh();
   getTics();
 }

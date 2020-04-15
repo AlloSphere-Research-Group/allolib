@@ -32,7 +32,7 @@ struct MyApp : public App {
     addCone(mMeshCone);
   }
 
-  virtual void onCreate() override {
+  void onCreate() override {
     nav().pos(Vec3d(0, 0, 8));
     // Disable mouse nav to avoid naving while changing gui controls.
     navControl().useMouse(false);
@@ -43,7 +43,7 @@ struct MyApp : public App {
     gui.init();
   }
 
-  virtual void onAnimate(double dt) {
+  void onAnimate(double dt) override {
     // If you uncheck Run Presets, selecting presets will have no effect
     if (RunPresets.get() == 1.0) {
       // Set parameter values to next step in morph (if morphing)
@@ -51,7 +51,7 @@ struct MyApp : public App {
     }
   }
 
-  virtual void onDraw(Graphics &g) override {
+  void onDraw(Graphics &g) override {
     g.clear(0);
     g.scale(Size.get());
     g.draw(mMeshCone);

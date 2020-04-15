@@ -62,11 +62,13 @@ namespace al {
 */
 
 /**
- * @brief The PositionedVoice class
+ * @brief A PositionedVoice is a rendering class that can have a position and
+ * size.
  * @ingroup Scene
+ *
  */
 class PositionedVoice : public SynthVoice {
- public:
+public:
   const Pose pose() { return mPose.get(); }
 
   float size() { return mSize.get(); }
@@ -142,7 +144,7 @@ class PositionedVoice : public SynthVoice {
     return pFields;
   }
 
- protected:
+protected:
   /**
    * @brief Set voice as part of a replica distributed scene
    */
@@ -153,13 +155,13 @@ class PositionedVoice : public SynthVoice {
   //    ParameterPose mPose {"_pose"};
   //    Parameter mSize {"_size", "", 1.0};
   std::vector<Vec3f>
-      mAudioOutPositionOffsets;  // This vector is added to the voice's position
-                                 // to determine the specific position of the
-                                 // audio out
+      mAudioOutPositionOffsets; // This vector is added to the voice's position
+                                // to determine the specific position of the
+                                // audio out
 
   bool mUseDistAtten{true};
-  bool mIsReplica{false};  // If voice is replica, it should not send its
-                           // internal state but listen for changes.
+  bool mIsReplica{false}; // If voice is replica, it should not send its
+                          // internal state but listen for changes.
 };
 
 struct UpdateThreadFuncData {
@@ -170,11 +172,10 @@ struct UpdateThreadFuncData {
 // thread pool from
 // https://stackoverflow.com/questions/23896421/efficiently-waiting-for-all-tasks-in-a-threadpool-to-finish
 class ThreadPool {
- public:
+public:
   ThreadPool(unsigned int n = std::thread::hardware_concurrency());
 
-  template <class F>
-  void enqueue(F &&f, UpdateThreadFuncData &data);
+  template <class F> void enqueue(F &&f, UpdateThreadFuncData &data);
   void waitForProcessingDone();
   ~ThreadPool();
 
@@ -182,7 +183,7 @@ class ThreadPool {
 
   void stopThreads();
 
- private:
+private:
   std::vector<std::thread> workers;
   std::deque<std::pair<std::function<void(UpdateThreadFuncData)>,
                        UpdateThreadFuncData>>
@@ -196,8 +197,7 @@ class ThreadPool {
   void thread_proc();
 };
 
-template <class F>
-void ThreadPool::enqueue(F &&f, UpdateThreadFuncData &data) {
+template <class F> void ThreadPool::enqueue(F &&f, UpdateThreadFuncData &data) {
   std::unique_lock<std::mutex> lock(queue_mutex);
   tasks.emplace_back(std::pair<std::function<void(UpdateThreadFuncData)>,
                                UpdateThreadFuncData>(std::forward<F>(f), data));
@@ -209,7 +209,7 @@ void ThreadPool::enqueue(F &&f, UpdateThreadFuncData &data) {
  * @ingroup Scene
  */
 class DynamicScene : public PolySynth {
- public:
+public:
   DynamicScene(int threadPoolSize = 0,
                TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_AUDIO);
 
@@ -287,8 +287,8 @@ class DynamicScene : public PolySynth {
     mAudioThreads.clear();
   }
 
- protected:
- private:
+protected:
+private:
   // A speaker layout and spatializer
   std::shared_ptr<Spatializer> mSpatializer;
 
@@ -296,7 +296,7 @@ class DynamicScene : public PolySynth {
   DistAtten<> mDistAtten;
 
   // For threaded simulation
-  std::unique_ptr<ThreadPool> mWorkerThreads;  // Update worker threads
+  std::unique_ptr<ThreadPool> mWorkerThreads; // Update worker threads
   bool mThreadedUpdate{true};
 
   // For threaded audio
@@ -304,14 +304,14 @@ class DynamicScene : public PolySynth {
   std::vector<std::thread> mAudioThreads;
   std::vector<AudioIOData> mThreadedAudioData;
   std::map<int, std::vector<int>>
-      mThreadMap;  // Defines which threads run which voices. Key is thread id,
-                   // value is voice ids.
+      mThreadMap; // Defines which threads run which voices. Key is thread id,
+                  // value is voice ids.
   std::condition_variable mThreadTrigger;
   std::condition_variable mAudioThreadDone;
   std::mutex mSpatializerLock;
   AudioIOData
-      *externalAudioIO;  // This is captured by the audio callback and passed to
-                         // the audio threads. Protected by mSpatializerLock
+      *externalAudioIO; // This is captured by the audio callback and passed to
+                        // the audio threads. Protected by mSpatializerLock
   std::mutex mThreadTriggerLock;
   bool mSynthRunning{true};
   unsigned int mAudioBusy = 0;
@@ -325,6 +325,6 @@ class DynamicScene : public PolySynth {
   Mesh mWorldMarker;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_DYNAMICSCENE_HPP
+#endif // AL_DYNAMICSCENE_HPP

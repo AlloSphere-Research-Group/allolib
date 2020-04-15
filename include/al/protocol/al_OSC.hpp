@@ -63,9 +63,9 @@ namespace osc {
 /// @ingroup allocore
 struct Blob {
   Blob() {}
-  explicit Blob(const void* data_, unsigned long size_)
+  explicit Blob(const void *data_, unsigned long size_)
       : data(data_), size(size_) {}
-  const void* data;
+  const void *data;
   unsigned long size;
 };
 
@@ -83,19 +83,19 @@ typedef unsigned long long TimeTag;
 ///
 /// @ingroup allocore
 class Packet {
- public:
+public:
   /// @param[in] size			size, in bytes, of the packet buffer
   Packet(int size = 1024);
 
   /// @param[in] contents		buffer to copy packet data from
   /// @param[in] size			size, in bytes, of the packet buffer
-  Packet(const char* contents, size_t size);
+  Packet(const char *contents, size_t size);
 
   ~Packet();
 
-  const char* data() const;  ///< Get raw packet data
-  bool isMessage() const;    ///< Whether packet is a message
-  bool isBundle() const;     ///< Whether packet is a bundle
+  const char *data() const; ///< Get raw packet data
+  bool isMessage() const;   ///< Whether packet is a message
+  bool isBundle() const;    ///< Whether packet is a bundle
 
   /// Pretty-print raw packet bytes
   void printRaw() const;
@@ -104,26 +104,25 @@ class Packet {
   size_t size() const;
 
   /// Begin a new bundle
-  Packet& beginBundle(TimeTag timeTag = 1);
+  Packet &beginBundle(TimeTag timeTag = 1);
 
   /// End bundle
-  Packet& endBundle();
+  Packet &endBundle();
 
   /// Start a new message
-  Packet& beginMessage(const std::string& addressPattern);
+  Packet &beginMessage(const std::string &addressPattern);
 
   /// End message
-  Packet& endMessage();
+  Packet &endMessage();
 
   /// Add zero argument message
-  Packet& addMessage(const std::string& addr) {
+  Packet &addMessage(const std::string &addr) {
     beginMessage(addr);
     return endMessage();
   }
 
   /// Add one argument message
-  template <class A>
-  Packet& addMessage(const std::string& addr, const A& a) {
+  template <class A> Packet &addMessage(const std::string &addr, const A &a) {
     beginMessage(addr);
     (*this) << a;
     return endMessage();
@@ -131,7 +130,7 @@ class Packet {
 
   /// Add two argument message
   template <class A, class B>
-  Packet& addMessage(const std::string& addr, const A& a, const B& b) {
+  Packet &addMessage(const std::string &addr, const A &a, const B &b) {
     beginMessage(addr);
     (*this) << a << b;
     return endMessage();
@@ -139,8 +138,8 @@ class Packet {
 
   /// Add three argument message
   template <class A, class B, class C>
-  Packet& addMessage(const std::string& addr, const A& a, const B& b,
-                     const C& c) {
+  Packet &addMessage(const std::string &addr, const A &a, const B &b,
+                     const C &c) {
     beginMessage(addr);
     (*this) << a << b << c;
     return endMessage();
@@ -148,8 +147,8 @@ class Packet {
 
   /// Add four argument message
   template <class A, class B, class C, class D>
-  Packet& addMessage(const std::string& addr, const A& a, const B& b,
-                     const C& c, const D& d) {
+  Packet &addMessage(const std::string &addr, const A &a, const B &b,
+                     const C &c, const D &d) {
     beginMessage(addr);
     (*this) << a << b << c << d;
     return endMessage();
@@ -157,8 +156,8 @@ class Packet {
 
   /// Add five argument message
   template <class A, class B, class C, class D, class E>
-  Packet& addMessage(const std::string& addr, const A& a, const B& b,
-                     const C& c, const D& d, const E& e) {
+  Packet &addMessage(const std::string &addr, const A &a, const B &b,
+                     const C &c, const D &d, const E &e) {
     beginMessage(addr);
     (*this) << a << b << c << d << e;
     return endMessage();
@@ -166,8 +165,8 @@ class Packet {
 
   /// Add six argument message
   template <class A, class B, class C, class D, class E, class F>
-  Packet& addMessage(const std::string& addr, const A& a, const B& b,
-                     const C& c, const D& d, const E& e, const F& f) {
+  Packet &addMessage(const std::string &addr, const A &a, const B &b,
+                     const C &c, const D &d, const E &e, const F &f) {
     beginMessage(addr);
     (*this) << a << b << c << d << e << f;
     return endMessage();
@@ -175,29 +174,29 @@ class Packet {
 
   /// Add seven argument message
   template <class A, class B, class C, class D, class E, class F, class G>
-  Packet& addMessage(const std::string& addr, const A& a, const B& b,
-                     const C& c, const D& d, const E& e, const F& f,
-                     const G& g) {
+  Packet &addMessage(const std::string &addr, const A &a, const B &b,
+                     const C &c, const D &d, const E &e, const F &f,
+                     const G &g) {
     beginMessage(addr);
     (*this) << a << b << c << d << e << f << g;
     return endMessage();
   }
 
-  Packet& operator<<(int v);                 ///< Add integer to message
-  Packet& operator<<(unsigned v);            ///< Add integer to message
-  Packet& operator<<(float v);               ///< Add float to message
-  Packet& operator<<(double v);              ///< Add double to message
-  Packet& operator<<(char v);                ///< Add char to message
-  Packet& operator<<(const char* v);         ///< Add C-string to message
-  Packet& operator<<(const std::string& v);  ///< Add string to message
-  Packet& operator<<(const Blob& v);         ///< Add Blob to message
+  Packet &operator<<(int v);                ///< Add integer to message
+  Packet &operator<<(unsigned v);           ///< Add integer to message
+  Packet &operator<<(float v);              ///< Add float to message
+  Packet &operator<<(double v);             ///< Add double to message
+  Packet &operator<<(char v);               ///< Add char to message
+  Packet &operator<<(const char *v);        ///< Add C-string to message
+  Packet &operator<<(const std::string &v); ///< Add string to message
+  Packet &operator<<(const Blob &v);        ///< Add Blob to message
 
   /// Clear current packet contents
-  Packet& clear();
+  Packet &clear();
 
- protected:
+protected:
   class Impl;
-  Impl* mImpl;
+  Impl *mImpl;
   std::vector<char> mData;
 };
 
@@ -205,14 +204,14 @@ class Packet {
 ///
 /// @ingroup allocore
 class Message {
- public:
+public:
   /// @param[in] message		raw OSC message bytes
   /// @param[in] size			number of bytes in message
   /// @param[in] timeTag		time tag of message (inherited from
   /// bundle)
   /// @param[in] senderAddr	IP address of sender
-  Message(const char* message, int size, const TimeTag& timeTag = 1,
-          const char* senderAddr = nullptr);
+  Message(const char *message, int size, const TimeTag &timeTag = 1,
+          const char *senderAddr = nullptr);
   ~Message();
 
   /// Pretty-print message information
@@ -222,32 +221,32 @@ class Message {
 
   /// If the message is contained within a bundle, it will inherit the
   /// time tag of the bundle, otherwise the time tag will be 1 (immediate).
-  const TimeTag& timeTag() const { return mTimeTag; }
+  const TimeTag &timeTag() const { return mTimeTag; }
 
   /// Get address pattern
-  const std::string& addressPattern() const { return mAddressPattern; }
+  const std::string &addressPattern() const { return mAddressPattern; }
 
   const std::string senderAddress() const { return std::string(mSenderAddr); }
 
   /// Get type tags
-  const std::string& typeTags() const { return mTypeTags; }
+  const std::string &typeTags() const { return mTypeTags; }
 
   /// Reset stream for converting from raw message bytes to types
-  Message& resetStream();
+  Message &resetStream();
 
-  Message& operator>>(int& v);     ///< Extract next stream element as integer
-  Message& operator>>(float& v);   ///< Extract next stream element as float
-  Message& operator>>(double& v);  ///< Extract next stream element as double
-  Message& operator>>(char& v);    ///< Extract next stream element as char
-  Message& operator>>(
-      const char*& v);  ///< Extract next stream element as C-string
-  Message& operator>>(
-      std::string& v);           ///< Extract next stream element as string
-  Message& operator>>(Blob& v);  ///< Extract next stream element as Blob
+  Message &operator>>(int &v);    ///< Extract next stream element as integer
+  Message &operator>>(float &v);  ///< Extract next stream element as float
+  Message &operator>>(double &v); ///< Extract next stream element as double
+  Message &operator>>(char &v);   ///< Extract next stream element as char
+  Message &
+  operator>>(const char *&v); ///< Extract next stream element as C-string
+  Message &
+  operator>>(std::string &v);   ///< Extract next stream element as string
+  Message &operator>>(Blob &v); ///< Extract next stream element as Blob
 
- protected:
+protected:
   class Impl;
-  Impl* mImpl;
+  Impl *mImpl;
   std::string mAddressPattern;
   std::string mTypeTags;
   TimeTag mTimeTag;
@@ -259,19 +258,14 @@ class Message {
 ///
 /// @ingroup allocore
 class PacketHandler {
- public:
+public:
   virtual ~PacketHandler() {}
 
   /// Called for each message contained in packet
-  virtual void onMessage(Message& m) = 0;
+  virtual void onMessage(Message &m) = 0;
 
-  // FIXME: For backwards compatibility. Remove when updating API
-  void parse(const char* packet, int size, TimeTag timeTag = 1) {
-    parse(packet, size, timeTag, nullptr);
-  }
-
-  void parse(const char* packet, int size, TimeTag timeTag,
-             const char* senderAddr);
+  void parse(const char *packet, int size, TimeTag timeTag = 1,
+             const char *senderAddr = nullptr);
 };
 
 /// Interface for classes that can consume OSC messages
@@ -282,10 +276,10 @@ class PacketHandler {
 ///
 /// @ingroup allocore
 class MessageConsumer {
- public:
+public:
   virtual ~MessageConsumer() {}
   /// Returns true if message was consumed by this class
-  virtual bool consumeMessage(Message& m, std::string rootOSCPath) = 0;
+  virtual bool consumeMessage(Message &m, std::string rootOSCPath) = 0;
 };
 
 /// Socket for sending OSC packets
@@ -293,11 +287,11 @@ class MessageConsumer {
 /// @ingroup allocore
 class Send : public Packet {
   class SocketSender;
-  std::unique_ptr<SocketSender> sockerSender;
+  std::unique_ptr<SocketSender> socketSender;
   std::string mAddress = "";
   uint16_t mPort = 0;
 
- public:
+public:
   Send();
   Send(int size);
 
@@ -306,77 +300,76 @@ class Send : public Packet {
   /// @param[in] timeout	< 0: block forever; = 0: no blocking; > 0 block
   /// with timeout
   /// @param[in] size 	Packet buffer size
-  Send(uint16_t port, const char* address = "localhost", al_sec timeout = 0,
+  Send(uint16_t port, const char *address = "localhost", al_sec timeout = 0,
        int size = 1024);
 
   ~Send();
 
-  bool open(uint16_t port, const char* address);
+  bool open(uint16_t port, const char *address);
 
-  const std::string& address() const { return mAddress; }
+  const std::string &address() const { return mAddress; }
   uint16_t port() const { return mPort; }
 
   /// Send and clear current packet contents
   size_t send();
 
   /// Send a packet
-  size_t send(const Packet& p);
+  size_t send(const Packet &p);
 
   /// Send zero argument message immediately
-  size_t send(const std::string& addr) {
+  size_t send(const std::string &addr) {
     addMessage(addr);
     return send();
   }
 
   /// Send one argument message immediately
-  template <class A>
-  size_t send(const std::string& addr, const A& a) {
+  template <class A> size_t send(const std::string &addr, const A &a) {
     addMessage(addr, a);
     return send();
   }
 
   /// Send two argument message immediately
   template <class A, class B>
-  size_t send(const std::string& addr, const A& a, const B& b) {
+  size_t send(const std::string &addr, const A &a, const B &b) {
     addMessage(addr, a, b);
     return send();
   }
 
   /// Send three argument message immediately
   template <class A, class B, class C>
-  size_t send(const std::string& addr, const A& a, const B& b, const C& c) {
+  size_t send(const std::string &addr, const A &a, const B &b, const C &c) {
     addMessage(addr, a, b, c);
     return send();
   }
 
   /// Send four argument message immediately
   template <class A, class B, class C, class D>
-  size_t send(const std::string& addr, const A& a, const B& b, const C& c,
-              const D& d) {
+  size_t send(const std::string &addr, const A &a, const B &b, const C &c,
+              const D &d) {
     addMessage(addr, a, b, c, d);
     return send();
   }
 
   /// Send five argument message immediately
   template <class A, class B, class C, class D, class E>
-  size_t send(const std::string& addr, const A& a, const B& b, const C& c,
-              const D& d, const E& e) {
+  size_t send(const std::string &addr, const A &a, const B &b, const C &c,
+              const D &d, const E &e) {
     addMessage(addr, a, b, c, d, e);
     return send();
   }
 
   /// Send six argument message immediately
   template <class A, class B, class C, class D, class E, class F>
-  size_t send(const std::string& addr, const A& a, const B& b, const C& c,
-              const D& d, const E& e, const F& f) {
+  size_t send(const std::string &addr, const A &a, const B &b, const C &c,
+              const D &d, const E &e, const F &f) {
     addMessage(addr, a, b, c, d, e, f);
     return send();
   }
 
   /// Send seven argument message immediately
   template <class A, class B, class C, class D, class E, class F, class G>
-  size_t send(const std::string& addr, const A& a, const B& b, const C& c,
-              const D& d, const E& e, const F& f, const G& g) {
+  size_t send(const std::string &addr, const A &a, const B &b, const C &c,
+              const D &d, const E &e, const F &f, const G &g) {
     addMessage(addr, a, b, c, d, e, f, g);
     return send();
   }
@@ -391,7 +384,7 @@ class Recv {
   class SocketReceiver;
   std::unique_ptr<SocketReceiver> socketReceiver;
 
- public:
+public:
   Recv();
 
   /// @param[in] port		Port number (valid range is 0-65535)
@@ -399,34 +392,34 @@ class Recv {
   /// interfaces to socket.
   /// @param[in] timeout	< 0: block forever; = 0: no blocking; > 0 block
   /// with timeout
-  Recv(uint16_t port, const char* address = "", al_sec timeout = 0);
+  Recv(uint16_t port, const char *address = "", al_sec timeout = 0);
 
   virtual ~Recv();
 
-  bool open(uint16_t port, const char* address = "", al_sec timeout = 0);
+  bool open(uint16_t port, const char *address = "", al_sec timeout = 0);
 
   bool isOpen() { return mOpen; }
 
-  const std::string& address() const { return mAddress; }
+  const std::string &address() const { return mAddress; }
   uint16_t port() const { return mPort; }
 
   /// Whether background polling is activated
   bool background() const { return mBackground; }
 
   /// Get current received packet data
-  const char* data() const { return &mBuffer[0]; }
+  const char *data() const { return &mBuffer[0]; }
 
   /// Set size of internal buffer
   void bufferSize(int n) { mBuffer.resize(n); }
 
   /// Set packet handling routine
-  Recv& handler(PacketHandler& v) {
+  Recv &handler(PacketHandler &v) {
     mHandlers.clear();
     return appendHandler(v);
   }
 
   /// Add a packet handler to list. All handlers get all messages
-  Recv& appendHandler(PacketHandler& v) {
+  Recv &appendHandler(PacketHandler &v) {
     mHandlers.push_back(&v);
     return *this;
   }
@@ -445,13 +438,13 @@ class Recv {
   /// Stop the background polling
   void stop();
 
-  void parse(const char* packet, int size, const char* senderAddr);
+  void parse(const char *packet, int size, const char *senderAddr);
   void loop();
 
-  static bool portAvailable(uint16_t port, const char* address = "");
+  static bool portAvailable(uint16_t port, const char *address = "");
 
- protected:
-  std::vector<PacketHandler*> mHandlers;
+protected:
+  std::vector<PacketHandler *> mHandlers;
   std::vector<char> mBuffer;
   al::Thread mThread;
   bool mBackground;
@@ -460,7 +453,7 @@ class Recv {
   bool mOpen{false};
 };
 
-}  // namespace osc
-}  // namespace al
+} // namespace osc
+} // namespace al
 
 #endif

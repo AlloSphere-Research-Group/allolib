@@ -24,12 +24,12 @@ struct PickRayDemo : App {
   Mesh m;
 
   Vec3f pos[N];
-  Vec3f offset[N];   // difference from intersection to center of sphere
-  float dist[N];     // distance of intersection
-  bool hover[N];     // mouse is hovering over sphere
-  bool selected[N];  // mouse is down over sphere
+  Vec3f offset[N];  // difference from intersection to center of sphere
+  float dist[N];    // distance of intersection
+  bool hover[N];    // mouse is hovering over sphere
+  bool selected[N]; // mouse is down over sphere
 
-  void onCreate() {
+  void onCreate() override {
     nav().pos(0, 0, 10);
     light.pos(0, 0, 10);
     addSphere(m, 0.5);
@@ -47,7 +47,7 @@ struct PickRayDemo : App {
     navControl().useMouse(false);
   }
 
-  virtual void onDraw(Graphics& g) {
+  virtual void onDraw(Graphics &g) override {
     g.clear(0);
     gl::depthTesting(true);
     g.lighting(true);
@@ -67,7 +67,7 @@ struct PickRayDemo : App {
   }
 
   Vec3d unproject(Vec3d screenPos) {
-    auto& g = graphics();
+    auto &g = graphics();
     auto mvp = g.projMatrix() * g.viewMatrix() * g.modelMatrix();
     Matrix4d invprojview = Matrix4d::inverse(mvp);
     Vec4d worldPos4 = invprojview.transform(screenPos);
@@ -91,7 +91,7 @@ struct PickRayDemo : App {
     return r;
   }
 
-  bool onMouseMove(const Mouse& m) override {
+  bool onMouseMove(const Mouse &m) override {
     // make a ray from mouse location
     Rayd r = getPickRay(m.x(), m.y());
 
@@ -104,7 +104,7 @@ struct PickRayDemo : App {
     }
     return true;
   }
-  bool onMouseDown(const Mouse& m) override {
+  bool onMouseDown(const Mouse &m) override {
     Rayd r = getPickRay(m.x(), m.y());
 
     for (int i = 0; i < N; i++) {
@@ -120,7 +120,7 @@ struct PickRayDemo : App {
     }
     return true;
   }
-  bool onMouseDrag(const Mouse& m) override {
+  bool onMouseDrag(const Mouse &m) override {
     Rayd r = getPickRay(m.x(), m.y());
 
     for (int i = 0; i < N; i++) {
@@ -132,13 +132,15 @@ struct PickRayDemo : App {
     }
     return true;
   }
-  bool onMouseUp(const Mouse& m) override {
+  bool onMouseUp(const Mouse &m) override {
     // deselect all spheres
-    for (int i = 0; i < N; i++) selected[i] = false;
+    for (int i = 0; i < N; i++)
+      selected[i] = false;
     return true;
   }
 };
 int main() {
   PickRayDemo app;
   app.start();
+  return 0;
 }

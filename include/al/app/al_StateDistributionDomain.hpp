@@ -20,45 +20,47 @@ struct DefaultState {
   Pose pose;
 };
 
-template <class TSharedState>
-class StateReceiveDomain;
+template <class TSharedState> class StateReceiveDomain;
 
-template <class TSharedState>
-class StateSendDomain;
+template <class TSharedState> class StateSendDomain;
 
-template <class TSharedState>
-class StateSimulationDomain;
+template <class TSharedState> class StateSimulationDomain;
 
 /**
- * @brief StateDistributionDomain class
+ * @brief Domain for distributing state for a simulation domain
  * @ingroup App
+ *
+ * This domain can insert a domain sender or receiver to synchronize state
+ * across the network.
  */
 template <class TSharedState = DefaultState>
 class StateDistributionDomain : public StateSimulationDomain<TSharedState> {
- public:
-  std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(
-      std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr);
+public:
+  std::shared_ptr<StateSendDomain<TSharedState>>
+  addStateSender(std::string id = "",
+                 std::shared_ptr<TSharedState> statePtr = nullptr);
 
-  std::shared_ptr<StateReceiveDomain<TSharedState>> addStateReceiver(
-      std::string id = "", std::shared_ptr<TSharedState> statePtr = nullptr);
+  std::shared_ptr<StateReceiveDomain<TSharedState>>
+  addStateReceiver(std::string id = "",
+                   std::shared_ptr<TSharedState> statePtr = nullptr);
 
   bool isSender() { return mIsSender; }
 
- protected:
+protected:
   bool mIsSender{false};
 
- private:
+private:
 };
 
 template <class TSharedState = DefaultState>
 class StateReceiveDomain : public SynchronousDomain {
- public:
+public:
   bool init(ComputationDomain *parent = nullptr) override;
 
   bool tick() override {
     tickSubdomains(true);
 
-    assert(mState);  // State must have been set at this point
+    assert(mState); // State must have been set at this point
     mRecvLock.lock();
     if (newMessages > 0) {
       mQueuedStates = newMessages;
@@ -100,18 +102,18 @@ class StateReceiveDomain : public SynchronousDomain {
 
   void setId(const std::string &id) { mId = id; }
 
- protected:
+protected:
   std::shared_ptr<TSharedState> mState;
   int mQueuedStates{1};
   std::string mAddress{"localhost"};
   uint16_t mPort = 10100;
   uint16_t mPacketSize = 1400;
 
- private:
+private:
   std::string mId;
 
   class Handler : public osc::PacketHandler {
-   public:
+  public:
     StateReceiveDomain *mOscDomain;
     void onMessage(osc::Message &m) override {
       //      m.print();
@@ -166,7 +168,7 @@ bool StateReceiveDomain<TSharedState>::init(ComputationDomain *parent) {
 
 template <class TSharedState = DefaultState>
 class StateSendDomain : public SynchronousDomain {
- public:
+public:
   bool init(ComputationDomain *parent = nullptr) override {
     initializeSubdomains(true);
 
@@ -177,7 +179,7 @@ class StateSendDomain : public SynchronousDomain {
   bool tick() override {
     tickSubdomains(true);
 
-    assert(mState);  // State must have been set at this point
+    assert(mState); // State must have been set at this point
     //    assert(mSend);
 
     //    osc::Blob b(&mState, sizeof(mState));
@@ -231,7 +233,7 @@ class StateSendDomain : public SynchronousDomain {
 
   void setAddress(std::string address) { mAddress = address; };
 
- protected:
+protected:
   std::shared_ptr<TSharedState> mState;
   std::mutex mStateLock;
   int mQueuedStates{0};
@@ -239,7 +241,7 @@ class StateSendDomain : public SynchronousDomain {
   std::string mAddress{"localhost"};
   uint16_t mPacketSize = 1400;
 
- private:
+private:
   std::unique_ptr<osc::Send> mSend;
 
   std::string mId = "";
@@ -268,6 +270,6 @@ StateDistributionDomain<TSharedState>::addStateReceiver(
   return newDomain;
 }
 
-}  // namespace al
+} // namespace al
 
-#endif  // STATEDISTRIBUTIONDOMAIN_H
+#endif // STATEDISTRIBUTIONDOMAIN_H

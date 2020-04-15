@@ -58,42 +58,42 @@ struct ThreadFunction {
 /// C-style thread function with user data
 struct CThreadFunction : public ThreadFunction {
   /// Prototype of thread execution function
-  typedef void* (*CFunc)(void* userData);
+  typedef void *(*CFunc)(void *userData);
 
   /// @param[in] threadFunc	thread execution function
   /// @param[in] userData		user data passed into thread execution
   /// function
-  CThreadFunction(CFunc threadFunc = 0, void* userData = 0)
+  CThreadFunction(CFunc threadFunc = 0, void *userData = 0)
       : func(threadFunc), user(userData) {}
 
   void operator()() { func(user); }
 
-  CFunc func;  ///< Thread execution function
-  void* user;  ///< User data passed into thread execution function
+  CFunc func; ///< Thread execution function
+  void *user; ///< User data passed into thread execution function
 };
 
 /// Thread
 ///
 /// @ingroup System
 class Thread {
- public:
+public:
   /// Create thread without starting
   Thread();
 
   /// @param[in] func			thread function object
-  Thread(ThreadFunction& func);
+  Thread(ThreadFunction &func);
 
   /// @param[in] cFunc		thread C function
   /// @param[in] userData		user data passed to C function
-  Thread(void* (*cFunc)(void* userData), void* userData);
+  Thread(void *(*cFunc)(void *userData), void *userData);
 
   /// Copy constructor
-  Thread(const Thread& other);
+  Thread(const Thread &other);
 
   ~Thread();
 
   /// Set whether thread will automatically join upon destruction
-  Thread& joinOnDestroy(bool v) {
+  Thread &joinOnDestroy(bool v) {
     mJoinOnDestroy = v;
     return *this;
   }
@@ -102,35 +102,36 @@ class Thread {
 
   /// @param[in] v	priority of thread in [0, 99]. A value greater than 0
   ///					makes the thread "real-time".
-  Thread& priority(int v);
+  Thread &priority(int v);
 
   /// Start executing thread function
-  bool start(ThreadFunction& func);
+  bool start(ThreadFunction &func);
 
   /// Start executing thread C function with user data
-  bool start(void* (*threadFunc)(void* userData), void* userData);
+  bool start(void *(*threadFunc)(void *userData), void *userData);
 
   /// Block the calling routine indefinitely until the thread terminates
 
   ///	This function suspends execution of the calling routine until the thread
-  ///has 	terminated.  It will return immediately if the thread was already
-  ///	terminated.  A \e true return value signifies successful termination.
-  ///	A \e false return value indicates a problem with the wait call.
+  /// has 	terminated.  It will return immediately if the thread was
+  /// already 	terminated.  A \e true return value signifies successful
+  /// termination. 	A \e false return value indicates a problem with the
+  /// wait call.
   bool join();
 
   /// Return pointer to current OS thread object
 
   /// E.g., if using pthreads internally, will return the pthread_t.
   ///
-  static void* current();
+  static void *current();
 
   // Stuff for assignment
-  friend void swap(Thread& a, Thread& b);
-  Thread& operator=(Thread other);
+  friend void swap(Thread &a, Thread &b);
+  Thread &operator=(Thread other);
 
- protected:
+protected:
   struct Impl;
-  Impl* mImpl;
+  Impl *mImpl;
   CThreadFunction mCFunc;
   bool mJoinOnDestroy;
 };
@@ -138,9 +139,8 @@ class Thread {
 /// Multiple threads acting as a single work unit
 ///
 /// @ingroup System
-template <class ThreadFunction>
-class Threads {
- public:
+template <class ThreadFunction> class Threads {
+public:
   /// A thread and function
   struct Worker {
     Thread thread;
@@ -169,30 +169,31 @@ class Threads {
     for (int i = 0; i < size(); ++i) {
       thread(i).start(function(i));
     }
-    if (joinAll) join();
+    if (joinAll)
+      join();
   }
 
   /// Join all worker threads
   void join() {
-    for (int i = 0; i < size(); ++i) thread(i).join();
+    for (int i = 0; i < size(); ++i)
+      thread(i).join();
   }
 
   /// Get a worker
-  Worker& worker(int i) { return mWorkers[i]; }
+  Worker &worker(int i) { return mWorkers[i]; }
 
   /// Get a worker thread
-  Thread& thread(int i) { return worker(i).thread; }
+  Thread &thread(int i) { return worker(i).thread; }
 
   /// Get a worker thread function
-  ThreadFunction& function(int i) { return worker(i).function; }
+  ThreadFunction &function(int i) { return worker(i).function; }
 
   /// Get worker sub-interval range of a full interval [min, max)
 
   /// This is useful for determining how to break up for loops into
   /// sub-intervals. E.g., if the full loop interval is [ 0, N ), then the
   /// ith worker's interval is [ range(N)*i, range(N)*(i+1) ).
-  template <class T>
-  double range(T max, T min = T(0)) {
+  template <class T> double range(T max, T min = T(0)) {
     return (max - min) / double(size());
   }
 
@@ -203,32 +204,32 @@ class Threads {
   /// @param[in]  i			worker index
   /// @param[in]  max			full interval max endpoint
   /// @param[in]  min			full interval min endpoint
-  template <class T>
-  void getInterval(T* interval, int i, T max, T min = T(0)) {
+  template <class T> void getInterval(T *interval, int i, T max, T min = T(0)) {
     double diam = range(max, min);
     double left = diam * i + min;
     interval[0] = left;
     interval[1] = left + diam;
   }
 
- protected:
+protected:
   int mSize;
-  Worker* mWorkers;
+  Worker *mWorkers;
 
   void clear() {
-    if (mWorkers) delete[] mWorkers;
+    if (mWorkers)
+      delete[] mWorkers;
   }
 };
 
 // -----------------------------------------------------------------------------
 // Inline implementation
 
-inline bool Thread::start(void* (*threadFunc)(void* userData), void* userData) {
+inline bool Thread::start(void *(*threadFunc)(void *userData), void *userData) {
   mCFunc.func = threadFunc;
   mCFunc.user = userData;
   return start(mCFunc);
 }
 
-}  // namespace al
+} // namespace al
 
 #endif

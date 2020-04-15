@@ -51,7 +51,6 @@
 #include "al/math/al_Vec.hpp"
 #include "al/types/al_Color.hpp"
 #include <vector>
-#include <cstring> // for memcpy in serialize() and deserialize()
 
 namespace al {
 
@@ -381,65 +380,6 @@ public:
 
   /// Print information about Mesh
   void print(FILE *dst = stderr) const;
-
-  /**
-   * @brief serialize mesh data
-   * @param mesh
-   * @param meshData
-   * @param numVertices
-   * @param numIndices
-   * @param numColors
-   *
-   * You should check before calling this function that there
-   * The binary format for serialization is bound to change, so don't rely on
-   * it.
-   */
-  static void serialize(Mesh &mesh, char *meshData, size_t &numVertices,
-                        size_t &numIndices, size_t &numColors,
-                        size_t meshDataSize) {
-    size_t numBytes = (mesh.vertices().size() * 3 * sizeof(float)) +
-                      (mesh.indices().size() * sizeof(unsigned int)) +
-                      (mesh.colors().size() * 4 * sizeof(float));
-    if (numBytes > meshDataSize) {
-      numVertices = numIndices = numColors = 0;
-      return;
-    }
-    numVertices = mesh.vertices().size();
-    for (auto vertex : mesh.vertices()) {
-      memcpy(meshData, vertex.elems(), 3 * sizeof(float));
-      meshData += 3 * sizeof(float);
-    }
-    numIndices = mesh.indices().size();
-    for (auto index : mesh.indices()) {
-      memcpy(meshData, &index, sizeof(unsigned int));
-      *meshData++ = sizeof(unsigned int);
-    }
-    numColors = mesh.colors().size();
-    for (auto color : mesh.colors()) {
-
-      memcpy(meshData, color.components, 4 * sizeof(float));
-      meshData += 4 * sizeof(float);
-    }
-  }
-
-  static void deserialize(Mesh &mesh, char *meshData, size_t numVertices,
-                          size_t numIndices, size_t numColors) {
-    mesh.vertices().resize(numVertices); // Allocate upfront if needed
-    for (auto &vertex : mesh.vertices()) {
-      memcpy(vertex.elems(), meshData, 3 * sizeof(float));
-      meshData += 3 * sizeof(float);
-    }
-    mesh.indices().resize(numIndices); // Allocate upfront if needed
-    for (auto &index : mesh.indices()) {
-      memcpy(&index, meshData, sizeof(unsigned int));
-      *meshData++ = sizeof(unsigned int);
-    }
-    mesh.colors().resize(numColors); // Allocate upfront if needed
-    for (auto &color : mesh.colors()) {
-      memcpy(color.components, meshData, 3 * sizeof(float));
-      meshData += 4 * sizeof(float);
-    }
-  }
 
 protected:
   // Only populated (size>0) buffers will be used

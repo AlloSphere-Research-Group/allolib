@@ -173,9 +173,13 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
   }
   ParameterStates values;
   for (ParameterMeta *p : mParameters) {
-    std::vector<ParameterField> fields;
-    p->getFields(fields);
-    values[p->getFullAddress()] = fields;
+    std::string address = p->getFullAddress();
+    if (std::find(mSkipParameters.begin(), mSkipParameters.end(), address) ==
+        mSkipParameters.end()) {
+      std::vector<ParameterField> fields;
+      p->getFields(fields);
+      values[address] = fields;
+    }
   }
   for (auto bundleGroup : mBundles) {
     std::string bundleName = "/" + bundleGroup.first + "/";

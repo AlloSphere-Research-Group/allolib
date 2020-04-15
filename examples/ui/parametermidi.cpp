@@ -24,7 +24,7 @@ struct MyApp : App {
     parameterMIDI.connectControl(Speed, 10, 1);
 
     // Open MIDI device 0
-    parameterMIDI.init(0);
+    parameterMIDI.open(0);
   }
 
   void onCreate() override {
@@ -32,7 +32,7 @@ struct MyApp : App {
     nav().pos(0, 0, 4);
   }
 
-  void onDraw(Graphics& g) override {
+  void onDraw(Graphics &g) override {
     g.clear(0);
     g.pushMatrix();
     g.translate(std::sin(x), 0, 0);

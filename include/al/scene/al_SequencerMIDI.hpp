@@ -53,12 +53,31 @@ namespace al {
  *
  *
 @code
+PolySynth synth;
 
+SequencerMIDI seq;
+seq.open(0, synth);
+
+seq.connectNoteOnToFunction(
+          [&](int note, int vel, int chan) {
+    if (chan != 1) {
+        return;
+    }
+    auto voicePtr = mSynth->getVoice<Voice1>();
+
+    if (voicePtr) {
+        // Set voice params from MIDI data
+        voice->note = note;
+        voice->vel = vel;
+        // then trigger note
+        mScene.triggerOn(voice, 0);
+    }
+});
 @endcode
  *
  */
 class SequencerMIDI : public MIDIMessageHandler {
- public:
+public:
   SequencerMIDI() {}
 
   SequencerMIDI(int deviceIndex);
@@ -69,7 +88,7 @@ class SequencerMIDI : public MIDIMessageHandler {
 
   void open(int deviceIndex);
 
-  [[deprecated("Use open()")]] void init(int deviceIndex, PolySynth &synth);
+  //  [[deprecated("Use open()")]] void init(int deviceIndex, PolySynth &synth);
 
   void close();
 
@@ -82,7 +101,7 @@ class SequencerMIDI : public MIDIMessageHandler {
 
   virtual void onMIDIMessage(const MIDIMessage &m) override;
 
- private:
+private:
   PolySynth *mSynth;
 
   RtMidiIn mRtMidiIn;
@@ -90,6 +109,6 @@ class SequencerMIDI : public MIDIMessageHandler {
   std::vector<std::function<void(int, int, int)>> mNoteOffFunctions;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_SEQUENCERMIDI_H
+#endif // AL_SEQUENCERMIDI_H
