@@ -20,6 +20,7 @@ class SynchronousDomain;
  */
 class ComputationDomain {
 public:
+  virtual ~ComputationDomain() {}
   /**
    * @brief initialize
    * @param parent

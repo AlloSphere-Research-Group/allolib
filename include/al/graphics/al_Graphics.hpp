@@ -61,7 +61,7 @@ namespace al {
 @ingroup Graphics
 */
 class Graphics : public RenderManager {
- public:
+public:
   enum class ColoringMode : unsigned int {
     UNIFORM,
     MESH,
@@ -70,20 +70,22 @@ class Graphics : public RenderManager {
     CUSTOM
   };
 
+  virtual ~Graphics() {}
+
   // clears color buffer using al::Color class
-  void clearColor(Color const& c);
+  void clearColor(Color const &c);
 
   // clears color & depth buffer
   void clear(float r, float g, float b, float a = 1.f);
   void clear(float grayscale = 0.f, float a = 1.f);
   // clears color & depth buffer using al::Color class
-  void clear(Color const& c);
+  void clear(Color const &c);
 
   // extended, predefined render managing --------------------------------------
   void init();
 
   // set overall tint, regardless of rendering mode
-  void tint(Color const& c);
+  void tint(Color const &c);
   void tint(float r, float g, float b, float a = 1.f);
   void tint(float grayscale, float a = 1.f);
 
@@ -92,7 +94,7 @@ class Graphics : public RenderManager {
   // set to uniform color mode, using provided color
   void color(float r, float g, float b, float a = 1.f);
   // set to uniform color mode, using provided color
-  void color(Color const& c);
+  void color(Color const &c);
   // set to uniform color mode, using provided color
   void color(float grayscale, float a = 1.f);
 
@@ -107,7 +109,7 @@ class Graphics : public RenderManager {
   void material();
 
   // set to material mode, using provied material
-  void material(Material const& m);
+  void material(Material const &m);
 
   // enable/disable lighting
   void lighting(bool b);
@@ -124,25 +126,25 @@ class Graphics : public RenderManager {
   void toggleLight(int idx);
 
   // does not enable lighting, call lighting(true) to enable lighting
-  void light(Light const& l, int idx = 0);
+  void light(Light const &l, int idx = 0);
 
-  void quad(Texture& tex, float x, float y, float w, float h);
-  void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2,
+  void quad(Texture &tex, float x, float y, float w, float h);
+  void quadViewport(Texture &tex, float x = -1, float y = -1, float w = 2,
                     float h = 2);
 
   // use user made non-default shader. with this call user should set uniforms
   // manually (but stiil use allolib interface for mesh and model/view/proj
   // matrices)
-  void shader(ShaderProgram& s);
-  ShaderProgram& shader();
-  ShaderProgram* shaderPtr();
+  void shader(ShaderProgram &s);
+  ShaderProgram &shader();
+  ShaderProgram *shaderPtr();
 
-  using RenderManager::camera;  // makes camera(Viewpoint::SpecialType v)
-                                // accessible
-  void camera(Viewpoint const& v) override;
+  using RenderManager::camera; // makes camera(Viewpoint::SpecialType v)
+                               // accessible
+  void camera(Viewpoint const &v) override;
 
-  void send_lighting_uniforms(ShaderProgram& s,
-                              lighting_shader_uniforms const& u);
+  void send_lighting_uniforms(ShaderProgram &s,
+                              lighting_shader_uniforms const &u);
   void update() override;
 
   // to pass to the shader, combined with mLens.eyeSep(),
@@ -154,14 +156,14 @@ class Graphics : public RenderManager {
   void eye(float e);
   float eye() { return mEye; }
 
-  Lens const& lens() const { return mLens; }
-  Lens& lens();
-  void lens(Lens const& l);
+  Lens const &lens() const { return mLens; }
+  Lens &lens();
+  void lens(Lens const &l);
 
   void omni(bool b);
   bool omni();
 
- private:
+private:
   bool initialized = false;
 
   Color mColor{1, 1, 1, 1};
@@ -233,5 +235,5 @@ class Graphics : public RenderManager {
   float mEye = 0.0f;
 };
 
-}  // namespace al
+} // namespace al
 #endif
