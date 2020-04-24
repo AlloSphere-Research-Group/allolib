@@ -347,6 +347,12 @@ public:
               << typeid(*this).name() << std::endl;
   }
 
+  virtual void sendMeta(osc::Send &sender, std::string prefix = "") {
+    (void)prefix; // Remove compiler warning
+    std::cout << "sendMeta function not implemented for "
+              << typeid(*this).name() << std::endl;
+  }
+
   void set(ParameterMeta *p);
 
 protected:
@@ -734,6 +740,11 @@ public:
     sender.send(prefix + getFullAddress(), get());
   }
 
+  virtual void sendMeta(osc::Send &sender, std::string prefix = "") override {
+    sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                mPrefix, min(), max());
+  }
+
 private:
   float mFloatValue;
 };
@@ -823,6 +834,11 @@ public:
     }
   }
 
+  virtual void sendMeta(osc::Send &sender, std::string prefix = "") override {
+    sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                mPrefix, min(), max());
+  }
+
 private:
   int32_t mIntValue;
 };
@@ -876,6 +892,11 @@ public:
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
     }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string prefix = "") override {
+    sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                mPrefix, min(), max());
   }
 };
 
@@ -942,6 +963,11 @@ public:
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
     }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string prefix = "") override {
+    sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                mPrefix, min(), max());
   }
 };
 

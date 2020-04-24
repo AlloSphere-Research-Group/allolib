@@ -219,6 +219,7 @@ ParameterServer::~ParameterServer() {
     mServer->stop();
     delete mServer;
     mServer = nullptr;
+    notifyListeners("/quit", 0.0f, nullptr);
   }
 }
 
@@ -369,23 +370,6 @@ void ParameterServer::onMessage(osc::Message &m) {
   m.resetStream(); // Needs to be moved to caller...
   if (mVerbose) {
     m.print();
-  }
-  std::string requestAddress = "/sendAllParameters";
-  if (m.addressPattern() == requestAddress) {
-    if (m.typeTags() == "si") {
-      std::string address;
-      int port;
-      m >> address >> port;
-      if (address == "0.0.0.0") {
-        address = m.senderAddress();
-      }
-      sendAllParameters(address, port);
-    } else if (m.typeTags() == "i") {
-      int port;
-      m >> port;
-      sendAllParameters(m.senderAddress(), port);
-    }
-    return;
   }
   mParameterLock.lock();
   for (ParameterMeta *param : mParameters) {
@@ -542,6 +526,13 @@ void ParameterServer::sendAllParameters(std::string IPaddress, int oscPort) {
   }
   for (ParameterMeta *param : mParameters) {
     param->sendValue(sender);
+  }
+}
+
+void ParameterServer::sendParameterDetails(std::string IPaddress, int oscPort) {
+  osc::Send sender(oscPort, IPaddress.c_str());
+  for (ParameterMeta *param : mParameters) {
+    param->sendMeta(sender);
   }
 }
 
@@ -768,6 +759,34 @@ void ParameterServer::runCommand(osc::Message &m) {
       std::cerr << "ERROR: Unexpected typetags for /requestListenerInfo"
                 << std::endl;
     }
+  } else if (m.addressPattern() == "/sendAllParameters") {
+    std::cout << "/sendAllParameters" << std::endl;
+    if (m.typeTags() == "si") {
+      std::string address;
+      int port;
+      m >> address >> port;
+      if (address == "0.0.0.0") {
+        address = m.senderAddress();
+      }
+      sendAllParameters(address, port);
+    } else if (m.typeTags() == "i") {
+      int port;
+      m >> port;
+      sendAllParameters(m.senderAddress(), port);
+    }
+    return;
+  } else if (m.addressPattern() == "/sendParametersMeta") {
+    std::cout << "/sendParametersMeta" << std::endl;
+    if (m.typeTags() == "si") {
+      std::string address;
+      int port;
+      m >> address >> port;
+      sendParameterDetails(m.senderAddress(), port);
+    }
+    return;
+  } else {
+    std::cout << "Unhandled command" << std::endl;
+    m.print();
   }
 }
 
@@ -829,6 +848,14 @@ void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
     std::unique_lock<std::mutex> lk(notifier->mNodeLock);
     int commandPort;
     m >> commandPort;
+    for (auto node : notifier->mNodes) {
+      if (node.first == m.senderAddress() && node.second == commandPort) {
+        std::cout << "Received unnecessary handshake from " << m.senderAddress()
+                  << ":" << commandPort << std::endl;
+        return;
+      }
+    }
+
     notifier->mNodes.push_back({m.senderAddress(), commandPort});
     std::cout << "ParameterServer handshake from " << m.senderAddress() << ":"
               << commandPort << std::endl;
@@ -846,12 +873,25 @@ void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
     notifier->addListener(addr, listenerPort);
     std::cout << "Registered listener " << m.senderAddress() << ":"
               << listenerPort << std::endl;
-  } else if (m.addressPattern() == "/requestListenerInfo") {
-    mParameterServer->runCommand(m);
+  } else if (m.addressPattern() == "/goodbye" && m.typeTags() == "si") {
+    std::string addr;
+    m >> addr;
+    int port;
+    m >> port;
 
+    std::unique_lock<std::mutex> lk(notifier->mNodeLock);
+    for (auto node = notifier->mNodes.begin(); node != notifier->mNodes.end();
+         node++) {
+      if (node->first == addr && node->second == port) {
+        std::cout << "Parameter server said goodbye " << m.senderAddress()
+                  << ":" << port << std::endl;
+        notifier->mNodes.erase(node);
+        break;
+      }
+    }
   } else {
-
-    std::cout << "Unhandled command" << std::endl;
-    m.print();
+    std::cout << "Running parameter server command" << std::endl;
+    // TODO do we need to verify command should be forwarded to ParameterServer?
+    mParameterServer->runCommand(m);
   }
 }

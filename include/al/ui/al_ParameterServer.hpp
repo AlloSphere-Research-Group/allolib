@@ -315,6 +315,8 @@ public:
    */
   void sendAllParameters(std::string IPaddress, int oscPort);
 
+  void sendParameterDetails(std::string IPaddress, int oscPort);
+
   void requestAllParameters(std::string IPaddress, int oscPort);
 
   virtual void onMessage(osc::Message &m) override;
