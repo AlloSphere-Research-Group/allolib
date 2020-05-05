@@ -74,6 +74,8 @@ public:
    */
   double timeDelta() { return mTimeDrift; }
 
+  void setTimeDelta(double delta) { mTimeDrift = delta; }
+
   /**
    * @brief register callbacks to be called in the init() function
    * @param callback

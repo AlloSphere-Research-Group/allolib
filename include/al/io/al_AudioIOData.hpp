@@ -93,6 +93,18 @@ static void interleave(T* dst, const T* src, int numFrames, int numChannels) {
   }
 }
 
+/// Utility function to interleave samples
+template <class T>
+static void interleave(T *dst, T **src, int numFrames, int numChannels) {
+  int numSamples = numFrames * numChannels;
+  for (int c = 0; c < numChannels; c++) {
+    float *channelSrc = src[c];
+    for (int i = c; i < numSamples; i += numChannels) {
+      dst[i] = *channelSrc++;
+    }
+  }
+}
+
 /// Audio device information
 ///
 /// @ingroup IO

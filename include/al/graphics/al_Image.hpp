@@ -115,6 +115,9 @@ struct Image {
     return (const T *)(mArray.data());
   }
 
+  static bool saveImage(std::string fileName, unsigned char *pixs, int width,
+                        int height, bool flipVertically = false);
+
   /// Get number of bytes per pixel
   // unsigned bytesPerPixel() const { return allo_type_size(array().type()) *
   // array().components(); }
