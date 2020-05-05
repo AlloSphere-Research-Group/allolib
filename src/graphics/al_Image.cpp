@@ -52,7 +52,7 @@ bool Image::saveImage(std::string fileName, unsigned char *pixs, int width,
                       int height, bool flipVertically) {
 
   al_stbSetFlipVertically(flipVertically);
-  al_stbWriteImage(fileName.c_str(), pixs, width, height);
+  return al_stbWriteImage(fileName.c_str(), pixs, width, height);
 }
 
 } // namespace al
