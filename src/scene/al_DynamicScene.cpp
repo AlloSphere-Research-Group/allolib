@@ -2,6 +2,8 @@
 
 #include "al/graphics/al_Shapes.hpp"
 
+#include <algorithm>
+
 using namespace std;
 using namespace al;
 
@@ -329,6 +331,35 @@ void DynamicScene::print(ostream &stream) {
   mSpatializer->print(stream);
 
   PolySynth::print(stream);
+}
+
+void DynamicScene::sortByDistance(Vec3d viewPos) {
+  // For now a working but inefficient way of sorting
+  std::vector<PositionedVoice *> voices;
+  voices.reserve(128);
+  auto voice = mActiveVoices;
+  while (voice) {
+    voices.push_back((PositionedVoice *)voice);
+    voice = voice->next;
+  }
+  std::sort(voices.begin(), voices.end(),
+            [&](PositionedVoice *a, PositionedVoice *b) -> bool {
+              auto distA = (a->pose().pos() - viewPos).mag();
+              auto distB = (b->pose().pos() - viewPos).mag();
+              return distA >= distB;
+            });
+
+  auto sortedVoices = voices.begin();
+  mActiveVoices = *sortedVoices;
+  auto previousVoice = mActiveVoices;
+  sortedVoices++;
+
+  while (sortedVoices != voices.end()) {
+    previousVoice->next = *sortedVoices;
+    previousVoice = *sortedVoices;
+    sortedVoices++;
+  }
+  previousVoice->next = nullptr;
 }
 
 void DynamicScene::updateThreadFunc(UpdateThreadFuncData data) {
