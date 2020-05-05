@@ -2,6 +2,7 @@
 
 #include "al/graphics/al_Image.hpp"
 
+#include <condition_variable>
 #include <thread>
 
 void al::AppRecorder::startRecordingOffline(double totalTime) {
