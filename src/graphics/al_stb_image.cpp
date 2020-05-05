@@ -32,7 +32,7 @@ void al_stbFreeImage(al_stbImageData *img) {
 
 bool al_stbWriteImage(const char *fileName, const unsigned char *data,
                       int width, int height) {
-  return stbi_write_png(fileName, width, height, 3, data, width * 3);
+  return stbi_write_png(fileName, width, height, 3, data, width * 3) == 0;
 }
 
 void al_stbSetFlipVertically(bool set) {
