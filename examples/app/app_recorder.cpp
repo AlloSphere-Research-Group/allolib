@@ -76,6 +76,7 @@ struct MyApp : public App {
     } else if (k.key() == 's') {
       rec.stopRecording();
     }
+    return true;
   }
 };
 
