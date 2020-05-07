@@ -131,8 +131,24 @@ void DynamicScene::render(Graphics &g) {
     processVoiceTurnOff();
   }
   std::unique_lock<std::mutex> lk(mGraphicsLock);
-  SynthVoice *voice = mActiveVoices;
+  std::vector<PositionedVoice *> voices;
+  voices.reserve(128);
+  auto voice = mActiveVoices;
   while (voice) {
+    voices.push_back((PositionedVoice *)voice);
+    voice = voice->next;
+  }
+  if (mSortDrawingByDistance) {
+    // For now a working but inefficient way of sorting
+    auto viewPos = mListenerPose.pos();
+    std::sort(voices.begin(), voices.end(),
+              [&](PositionedVoice *a, PositionedVoice *b) -> bool {
+                auto distA = (a->pose().pos() - viewPos).mag();
+                auto distB = (b->pose().pos() - viewPos).mag();
+                return distA >= distB;
+              });
+  }
+  for (auto voice : voices) {
     // TODO implement offset?
     if (voice->active()) {
       g.pushMatrix();
@@ -147,7 +163,6 @@ void DynamicScene::render(Graphics &g) {
       voice->onProcess(g);
       g.popMatrix();
     }
-    voice = voice->next;
   }
   if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
     processInactiveVoices();
@@ -333,33 +348,8 @@ void DynamicScene::print(ostream &stream) {
   PolySynth::print(stream);
 }
 
-void DynamicScene::sortByDistance(Vec3d viewPos) {
-  // For now a working but inefficient way of sorting
-  std::vector<PositionedVoice *> voices;
-  voices.reserve(128);
-  auto voice = mActiveVoices;
-  while (voice) {
-    voices.push_back((PositionedVoice *)voice);
-    voice = voice->next;
-  }
-  std::sort(voices.begin(), voices.end(),
-            [&](PositionedVoice *a, PositionedVoice *b) -> bool {
-              auto distA = (a->pose().pos() - viewPos).mag();
-              auto distB = (b->pose().pos() - viewPos).mag();
-              return distA >= distB;
-            });
-
-  auto sortedVoices = voices.begin();
-  mActiveVoices = *sortedVoices;
-  auto previousVoice = mActiveVoices;
-  sortedVoices++;
-
-  while (sortedVoices != voices.end()) {
-    previousVoice->next = *sortedVoices;
-    previousVoice = *sortedVoices;
-    sortedVoices++;
-  }
-  previousVoice->next = nullptr;
+void DynamicScene::sortDrawingByDistance(bool sort) {
+  mSortDrawingByDistance = sort;
 }
 
 void DynamicScene::updateThreadFunc(UpdateThreadFuncData data) {

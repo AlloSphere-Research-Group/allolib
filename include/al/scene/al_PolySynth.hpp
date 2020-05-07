@@ -957,7 +957,7 @@ protected:
   SynthVoice *mActiveVoices{nullptr};
   std::mutex mVoiceToInsertLock;
   std::mutex mFreeVoiceLock;
-  std::mutex mGraphicsLock;
+  std::mutex mGraphicsLock; // TODO: remove this lock?
 
   bool m_useInternalAudioIO = true;
   bool m_internalAudioConfigured = false;

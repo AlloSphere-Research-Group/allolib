@@ -42,8 +42,8 @@ struct MyVoice : public PositionedVoice {
 };
 
 struct MyApp : public App {
-  DynamicScene scene{0, TimeMasterMode::TIME_MASTER_GRAPHICS};
-  bool sortByDistance{false};
+  DynamicScene scene;
+  bool sortByDistance{true};
 
   void onCreate() {
     // Insert 8 voices in 'random' order.
@@ -60,9 +60,6 @@ struct MyApp : public App {
     g.clear(0);
     gl::blendTrans();
     gl::depthTesting(true);
-    if (sortByDistance) {
-      scene.sortByDistance(nav().pos());
-    }
     scene.render(g);
   }
 
@@ -71,6 +68,8 @@ struct MyApp : public App {
   bool onKeyDown(const Keyboard &k) {
     if (k.key() == ' ') {
       sortByDistance = !sortByDistance;
+
+      scene.sortDrawingByDistance(sortByDistance);
       std::cout << "sorting set to " << sortByDistance << std::endl;
     }
     return true;

@@ -272,17 +272,9 @@ public:
   void showWorldMarker(bool show = true) { mDrawWorldMarker = show; }
 
   /**
-   * @brief Sort all active voices by distance from pose, closest first.
-   *
-   * This is not thread safe so it must be run in the same context as the
-   * processVoices() function. Where this happens depends on the time master
-   * mode. Because the time master mode is TIME_MASTER_CPU by default, it is not
-   * safe to call this function until you have set the time master to something
-   * different.
-   * This function also assumes all voices are positioned voices, and there is
-   * no check to verify if they are, which will cause crashing if they are not.
+   * @brief Enables/disables sorting by distance to listener on graphics render
    */
-  void sortByDistance(Vec3d viewPos);
+  void sortDrawingByDistance(bool sort = true);
 
   /**
    * @brief Stop all audio threads. No processing is possible after calling this
@@ -308,6 +300,7 @@ private:
   Pose mListenerPose;
   DistAtten<> mDistAtten;
 
+  bool mSortDrawingByDistance{true};
   // For threaded simulation
   std::unique_ptr<ThreadPool> mWorkerThreads; // Update worker threads
   bool mThreadedUpdate{true};
