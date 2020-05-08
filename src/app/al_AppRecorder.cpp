@@ -2,6 +2,8 @@
 
 #include "al/graphics/al_Image.hpp"
 
+#include "Gamma/SoundFile.h"
+
 #include <condition_variable>
 #include <thread>
 
@@ -23,6 +25,7 @@ void al::AppRecorder::startRecordingOffline(double totalTime) {
   if (!Dir::make(outPath)) {
     std::cerr << "Error creating directory: " << outPath << std::endl;
   }
+#ifdef AL_LIBSNDFILE
   gam::SoundFile sf(outPath + "audio.wav");
   sf.channels(audioIO.channelsOut());
   sf.frameRate(audioIO.framesPerSecond());
@@ -30,6 +33,10 @@ void al::AppRecorder::startRecordingOffline(double totalTime) {
     std::cerr << "Error opening file for write: " << outPath + "audio.wav"
               << std::endl;
   }
+#else
+  std::cout << "Warning: libsndfile not available. Not recording audio"
+            << std::endl;
+#endif
   float *interleavedBuf = (float *)calloc(
       audioIO.channelsOut() * audioIO.framesPerBuffer(), sizeof(float));
   float **outbuf = (float **)malloc(audioIO.channelsOut() * sizeof(float *));
@@ -49,9 +56,11 @@ void al::AppRecorder::startRecordingOffline(double totalTime) {
         audioIO.frame(0);
         mAudioDomain->onSound(audioIO);
         audioTime += audioIO.framesPerBuffer() / audioIO.framesPerSecond();
+#ifdef AL_LIBSNDFILE
         interleave(interleavedBuf, outbuf, audioIO.framesPerBuffer(),
                    audioIO.channelsOut());
         sf.write(interleavedBuf, audioIO.framesPerBuffer());
+#endif
       }
     }
   });
@@ -96,7 +105,9 @@ void al::AppRecorder::startRecordingOffline(double totalTime) {
     audioSignal.notify_one();
   }
   audioProcessingThread.join();
+#ifdef AL_LIBSNDFILE
   sf.close();
+#endif
   free(interleavedBuf);
   free(outbuf);
 
@@ -121,8 +132,10 @@ void al::AppRecorder::startRecordingOffline(double totalTime) {
   std::string args;
   args += " -r " + std::to_string(mGraphicsDomain->fps());
   args += " -i " + outPath + "/out%d.png";
-  args += " -i " + outPath + "audio.wav -c:a aac -b:a 192k";
 
+#ifdef AL_LIBSNDFILE
+  args += " -i " + outPath + "audio.wav -c:a aac -b:a 192k";
+#endif
   args += " -pix_fmt yuv420p";
   // for compatibility with outdated media players
   // args += " -crf 20 -preset slower";
