@@ -308,7 +308,11 @@ target_include_directories(al PUBLIC
   external/Gamma
   external/rtaudio
   external/rtmidi
+  external/imgui
+  external/glad/include
+  external/json/include
   external/glew/include
+  external/cpptoml/include
 )
 
 target_link_libraries(al PUBLIC
