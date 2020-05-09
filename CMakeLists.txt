@@ -294,6 +294,10 @@ endif (AL_WINDOWS)
 
 target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
 
+if(SNDFILE_LIBRARY)
+  target_compile_definitions(al PUBLIC AL_LIBSNDFILE)
+endif(SNDFILE_LIBRARY)
+
 if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
     target_compile_options(al PUBLIC
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:

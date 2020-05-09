@@ -10,8 +10,6 @@
 #include "al/app/al_SimulationDomain.hpp"
 #include "al/io/al_File.hpp"
 
-#include "Gamma/SoundFile.h"
-
 /** @defgroup App Tools for recording audio and video from an App
  *
  */
