@@ -165,6 +165,10 @@ public:
   }
   void startHandshakeServer(std::string address = "0.0.0.0");
 
+  void appendCommandHandler(osc::PacketHandler &handler) {
+    mHandshakeServer.appendHandler(handler);
+  }
+
 protected:
   std::mutex mListenerLock;
   std::vector<osc::Send *> mOSCSenders;

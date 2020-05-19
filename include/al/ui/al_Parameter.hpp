@@ -347,8 +347,9 @@ public:
               << typeid(*this).name() << std::endl;
   }
 
-  virtual void sendMeta(osc::Send &sender, std::string prefix = "") {
-    (void)prefix; // Remove compiler warning
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") {
+    (void)bundleName; // Remove compiler warning
     std::cout << "sendMeta function not implemented for "
               << typeid(*this).name() << std::endl;
   }
@@ -740,9 +741,15 @@ public:
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void sendMeta(osc::Send &sender, std::string prefix = "") override {
-    sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                mPrefix, min(), max());
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  mPrefix, min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), mPrefix, min(), max());
+    }
   }
 
 private:
@@ -834,9 +841,15 @@ public:
     }
   }
 
-  virtual void sendMeta(osc::Send &sender, std::string prefix = "") override {
-    sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                mPrefix, min(), max());
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  mPrefix, min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), mPrefix, min(), max());
+    }
   }
 
 private:
@@ -894,9 +907,16 @@ public:
     }
   }
 
-  virtual void sendMeta(osc::Send &sender, std::string prefix = "") override {
-    sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                mPrefix, min(), max());
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  mPrefix, min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), mPrefix, min(), max());
+    }
   }
 };
 
@@ -919,10 +939,10 @@ public:
   void trigger() { set(true); }
 };
 
-// These three types are blocking, should not be used in time-critical contexts
-// like the audio callback. The classes were explicitly defined to overcome
-// the issues related to the > and < operators needed when validating minumum
-// and maximum values for the parameter
+// These three types are blocking, should not be used in time-critical
+// contexts like the audio callback. The classes were explicitly defined to
+// overcome the issues related to the > and < operators needed when validating
+// minumum and maximum values for the parameter
 
 /// ParameterString
 /// @ingroup UI
@@ -965,9 +985,15 @@ public:
     }
   }
 
-  virtual void sendMeta(osc::Send &sender, std::string prefix = "") override {
-    sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                mPrefix, min(), max());
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  mPrefix, min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), mPrefix, min(), max());
+    }
   }
 };
 
