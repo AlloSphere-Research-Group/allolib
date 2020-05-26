@@ -182,6 +182,17 @@ public:
     return endMessage();
   }
 
+  /// Add eight argument message
+  template <class A, class B, class C, class D, class E, class F, class G,
+            class H>
+  Packet &addMessage(const std::string &addr, const A &a, const B &b,
+                     const C &c, const D &d, const E &e, const F &f, const G &g,
+                     const H &h) {
+    beginMessage(addr);
+    (*this) << a << b << c << d << e << f << g << h;
+    return endMessage();
+  }
+
   Packet &operator<<(int v);                ///< Add integer to message
   Packet &operator<<(unsigned v);           ///< Add integer to message
   Packet &operator<<(float v);              ///< Add float to message
@@ -263,9 +274,6 @@ public:
 
   /// Called for each message contained in packet
   virtual void onMessage(Message &m) = 0;
-
-  void parse(const char *packet, int size, TimeTag timeTag = 1,
-             const char *senderAddr = nullptr);
 };
 
 /// Interface for classes that can consume OSC messages
@@ -373,6 +381,14 @@ public:
     addMessage(addr, a, b, c, d, e, f, g);
     return send();
   }
+  /// Send eight argument message immediately
+  template <class A, class B, class C, class D, class E, class F, class G,
+            class H>
+  size_t send(const std::string &addr, const A &a, const B &b, const C &c,
+              const D &d, const E &e, const F &f, const G &g, const H &h) {
+    addMessage(addr, a, b, c, d, e, f, g, h);
+    return send();
+  }
 };
 
 /// Socket for receiving OSC packets
@@ -442,6 +458,10 @@ public:
   void loop();
 
   static bool portAvailable(uint16_t port, const char *address = "");
+
+  static std::vector<std::shared_ptr<Message>>
+  parse(const char *packet, int size, TimeTag timeTag = 1,
+        const char *senderAddr = nullptr);
 
 protected:
   std::vector<PacketHandler *> mHandlers;

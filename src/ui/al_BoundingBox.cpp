@@ -27,40 +27,18 @@ void BoundingBoxData::setCenterDim(const Vec3f &cen_, const Vec3f &dim_) {
 }
 
 bool BoundingBoxData::contains(const Vec3d &p) {
-  if (p.x < min.x || p.x > max.x) return false;
-  if (p.y < min.y || p.y > max.y) return false;
-  if (p.z < min.z || p.z > max.z) return false;
+  if (p.x < min.x || p.x > max.x)
+    return false;
+  if (p.y < min.y || p.y > max.y)
+    return false;
+  if (p.z < min.z || p.z > max.z)
+    return false;
   return true;
 }
 
 void BoundingBoxData::reset() {
   min = {0, 0, 0};
   max = {0, 0, 0};
-}
-
-void BoundingBoxData::resetInv() {
-  min = {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
-         std::numeric_limits<float>::min()};
-  max = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
-         std::numeric_limits<float>::max()};
-}
-
-void BoundingBoxData::includePoint(Vec3f &pos) {
-  if (pos.x > max.x) {
-    max.x = pos.x;
-  } else if (pos.x < min.x) {
-    min.x = pos.x;
-  }
-  if (pos.y > max.y) {
-    max.y = pos.y;
-  } else if (pos.y < min.y) {
-    min.y = pos.y;
-  }
-  if (pos.z > max.z) {
-    max.z = pos.z;
-  } else if (pos.z < min.z) {
-    min.z = pos.z;
-  }
 }
 
 BoundingBox::BoundingBox() : glUnitLength(1.0), ticsPerUnit(10.0) {}
@@ -99,21 +77,24 @@ Mesh &BoundingBox::getMesh() {
 
 void BoundingBox::draw(Graphics &g, bool drawTics) {
   g.draw(mesh);
-  if (drawTics) g.draw(tics);
+  if (drawTics)
+    g.draw(tics);
 }
 
 Mesh &BoundingBox::getTics() {
   tics.reset();
   Vec3f halfDim = dim / 2;
-  float ticLen = 0.1;  // tic length multiplier
+  float ticLen = 0.1; // tic length multiplier
   // x tics
   for (int i = 0; i < dim.x * ticsPerUnit; i++) {
     for (int z = 0; z < 2; z++) {
       for (int y = -1; y < 2; y++) {
         if (y != 0) {
           float len = ticLen;
-          if (i % 5 == 0) len *= 2;
-          if (i % 10 == 0) len *= 1.5;
+          if (i % 5 == 0)
+            len *= 2;
+          if (i % 10 == 0)
+            len *= 1.5;
           tics.vertex((i / ticsPerUnit) - halfDim.x, y * halfDim.y, z * dim.z);
           tics.vertex((i / ticsPerUnit) - halfDim.x, y * halfDim.y - (len * y),
                       z * dim.z);
@@ -131,8 +112,10 @@ Mesh &BoundingBox::getTics() {
       for (int x = -1; x < 2; x++) {
         if (x != 0) {
           float len = ticLen;
-          if (i % 5 == 0) len *= 2;
-          if (i % 10 == 0) len *= 1.5;
+          if (i % 5 == 0)
+            len *= 2;
+          if (i % 10 == 0)
+            len *= 1.5;
           tics.vertex(x * halfDim.x, (i / ticsPerUnit) - halfDim.y, z * dim.z);
           tics.vertex(x * halfDim.x - (len * x), (i / ticsPerUnit) - halfDim.y,
                       z * dim.z);
@@ -150,8 +133,10 @@ Mesh &BoundingBox::getTics() {
       for (int x = -1; x < 2; x++) {
         if (x != 0) {
           float len = ticLen;
-          if (i % 5 == 0) len *= 2;
-          if (i % 10 == 0) len *= 1.5;
+          if (i % 5 == 0)
+            len *= 2;
+          if (i % 10 == 0)
+            len *= 1.5;
           tics.vertex(z * dim.x - halfDim.x, x * halfDim.y, (i / ticsPerUnit));
           tics.vertex(z * dim.x - halfDim.x, x * halfDim.y - (len * x),
                       (i / ticsPerUnit));

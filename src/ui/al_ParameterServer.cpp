@@ -381,6 +381,9 @@ void ParameterServer::onMessage(osc::Message &m) {
     auto oscAddress = m.addressPattern();
     setValuesForBundleGroup(m, bundleGroup.second, oscAddress);
   }
+
+  // FIXME these handlers should not be kept by ParameterServer, but should be
+  // set for the Recv object.
   for (osc::PacketHandler *handler : mPacketHandlers) {
     m.resetStream();
     handler->onMessage(m);
@@ -533,6 +536,15 @@ void ParameterServer::sendParameterDetails(std::string IPaddress, int oscPort) {
   osc::Send sender(oscPort, IPaddress.c_str());
   for (ParameterMeta *param : mParameters) {
     param->sendMeta(sender);
+  }
+
+  for (auto bundleGroup : mParameterBundles) {
+    for (auto bundle : bundleGroup.second) {
+      for (ParameterMeta *param : bundle->parameters()) {
+        param->sendMeta(sender, bundle->name(),
+                        std::to_string(bundle->bundleIndex()));
+      }
+    }
   }
 }
 
@@ -740,6 +752,8 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
 }
 
 void ParameterServer::runCommand(osc::Message &m) {
+  // These are commands that are common to primary and secondary instances.
+
   if (m.addressPattern() == "/requestListenerInfo") {
     if (m.typeTags() == "si") {
       std::string addr;
@@ -844,6 +858,7 @@ void ParameterServer::setValuesForBundleGroup(
 }
 
 void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
+  // These are the commands processed by the primary instance
   if (m.addressPattern() == "/handshake" && m.typeTags() == "i") {
     std::unique_lock<std::mutex> lk(notifier->mNodeLock);
     int commandPort;
@@ -855,7 +870,6 @@ void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
         return;
       }
     }
-
     notifier->mNodes.push_back({m.senderAddress(), commandPort});
     std::cout << "ParameterServer handshake from " << m.senderAddress() << ":"
               << commandPort << std::endl;
