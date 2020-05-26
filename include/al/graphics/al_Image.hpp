@@ -115,8 +115,19 @@ struct Image {
     return (const T *)(mArray.data());
   }
 
+  /**
+   * @brief saveImage
+   * @param fileName
+   * @param pixs
+   * @param width
+   * @param height
+   * @param flipVertically
+   * @param numComponents use 3 for RGB and 4 for RGBA
+   * @return
+   */
   static bool saveImage(std::string fileName, unsigned char *pixs, int width,
-                        int height, bool flipVertically = false);
+                        int height, bool flipVertically = false,
+                        int numComponents = 3);
 
   /// Get number of bytes per pixel
   // unsigned bytesPerPixel() const { return allo_type_size(array().type()) *

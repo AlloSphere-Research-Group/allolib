@@ -12,7 +12,7 @@ al_stbImageData al_stbLoadImage(const char *filename);
 void al_stbFreeImage(al_stbImageData *img);
 
 bool al_stbWriteImage(const char *fileName, const unsigned char *data,
-                      int width, int height);
+                      int width, int height, int numComponents = 3);
 
 void al_stbSetFlipVertically(bool set);
 

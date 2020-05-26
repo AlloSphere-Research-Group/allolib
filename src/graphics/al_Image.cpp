@@ -49,10 +49,10 @@ bool Image::save(const std::string &filename) {
 }
 
 bool Image::saveImage(std::string fileName, unsigned char *pixs, int width,
-                      int height, bool flipVertically) {
+                      int height, bool flipVertically, int numComponents) {
 
   al_stbSetFlipVertically(flipVertically);
-  return al_stbWriteImage(fileName.c_str(), pixs, width, height);
+  return al_stbWriteImage(fileName.c_str(), pixs, width, height, numComponents);
 }
 
 } // namespace al
