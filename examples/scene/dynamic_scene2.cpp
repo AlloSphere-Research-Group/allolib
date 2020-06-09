@@ -22,7 +22,7 @@ struct Thing {
 
 struct SimpleVoice : PositionedVoice {
   Sine<> oscillator;
-  LFO<> lfo; // 4 Hz Square wave for envelopeY
+  LFO<> lfo;  // 4 Hz Square wave for envelopeY
 
   float lfoValue{0.0f};
 
@@ -75,13 +75,13 @@ struct MyApp : App {
   }
 
   void onAnimate(double /*dt*/) override {
-    scene.listenerPose(nav()); // Set the scene listener to the current nav
+    scene.listenerPose(nav());  // Set the scene listener to the current nav
   }
 
   void onDraw(Graphics &g) override {
     g.clear(0.2f);
-    gl::polygonLine();
-    gl::depthTesting(true);
+    g.polygonLine();
+    g.depthTesting(true);
     scene.render(g);
   }
 

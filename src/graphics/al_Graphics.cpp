@@ -9,22 +9,6 @@ const float Graphics::LEFT_EYE = -1.0f;
 const float Graphics::RIGHT_EYE = 1.0f;
 const float Graphics::MONO_EYE = 0.0f;
 
-void Graphics::clearColor(const Color& c) {
-  gl::clearColor(c.r, c.g, c.b, c.a);
-}
-
-void Graphics::clear(float r, float g, float b, float a) {
-  gl::clearColor(r, g, b, a);
-  gl::clearDepth(1.f);
-}
-
-void Graphics::clear(float grayscale, float a) {
-  gl::clearColor(grayscale, grayscale, grayscale, a);
-  gl::clearDepth(1.f);
-}
-
-void Graphics::clear(const Color& c) { clear(c.r, c.g, c.b, c.a); }
-
 void Graphics::init() {
   if (initialized) return;
 

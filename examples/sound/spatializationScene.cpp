@@ -25,14 +25,14 @@ using namespace std;
 // Sound source
 struct Source : public PositionedVoice {
   Mesh mMarker;
-  unsigned long counter = 0; // overall sample counter
+  unsigned long counter = 0;  // overall sample counter
 
   void init() override { addDodecahedron(mMarker); }
 
   void onProcess(Graphics &g) override {
     // Draw the source
     g.pushMatrix();
-    gl::polygonFill();
+    g.polygonFill();
     g.scale(0.8f);
     g.color(0.4f, 0.4f, 0.4f, 0.5f);
     g.draw(mMarker);
@@ -88,15 +88,14 @@ struct MyApp : public App {
     if (mPeaks) {
       free(mPeaks);
     }
-    mPeaks = new atomic<float>[speakerLayout.size()]; // Not being freed
-                                                      // in this example
+    mPeaks = new atomic<float>[speakerLayout.size()];  // Not being freed
+                                                       // in this example
   }
 
   void initSpatializer(int type = -1) {
     if (type == -1) {
       type = spatializerType + 1;
-      if (type == 7)
-        type = 1;
+      if (type == 7) type = 1;
     }
     spatializerType = type;
     if (type == 1) {
@@ -147,8 +146,8 @@ struct MyApp : public App {
   void onDraw(Graphics &g) override {
     g.clear(0);
 
-    gl::blending(true);
-    gl::blendTrans();
+    g.blending(true);
+    g.blendTrans();
     // Draw the speakers
     for (int i = 0; i < (int)speakerLayout.size(); ++i) {
       g.pushMatrix();
@@ -158,7 +157,7 @@ struct MyApp : public App {
       float peak = mPeaks[i].load();
       g.scale(0.02 + fabs(peak) * 5);
       g.color(HSV(0.5 + (peak * 4)));
-      gl::polygonLine();
+      g.polygonLine();
       g.draw(mPoly);
       g.popMatrix();
     }

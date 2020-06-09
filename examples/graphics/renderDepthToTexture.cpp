@@ -48,10 +48,10 @@ struct MyApp : App {
     // To render our scene to the FBO, we must first bind it
     fbo.bind();
     g.viewport(0, 0, texDepth.width(), texDepth.height());
-    gl::clearDepth();
+    g.clearDepth();
 
     // Disable color rendering; we only want to write to the z-buffer
-    gl::colorMask(false);
+    g.colorMask(false);
 
     // Draw our scene
     g.draw(mesh);
@@ -60,7 +60,7 @@ struct MyApp : App {
     // Show depth buffer texture
     g.clear(1, 1, 1);
     g.viewport(0, 0, fbWidth(), fbHeight());
-    gl::colorMask(true);
+    g.colorMask(true);
     g.quadViewport(texDepth, -0.8, -0.8, 1.6, 1.6);
   }
 };

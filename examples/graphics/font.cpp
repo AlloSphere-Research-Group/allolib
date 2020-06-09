@@ -17,8 +17,8 @@ struct MyApp : public App {
 
   void onDraw(Graphics& g) {
     g.clear(0.5, 0.5, 0.5);
-    gl::blending(true);
-    gl::blendTrans();
+    g.blending(true);
+    g.blendTrans();
     // g.camera(Viewpoint::IDENTITY); // Ortho [-1:1] x [-1:1]
     g.texture();
     font.tex.bind();

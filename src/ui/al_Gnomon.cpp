@@ -37,8 +37,8 @@ void Gnomon::draw(Graphics &g) {
 
 void Gnomon::drawFloating(Graphics &g, Pose pose, double scale) {
   g.pushMatrix();
-  gl::polygonFill();
-  //  gl::polygonMode(GL_LINE);
+  g.polygonFill();
+  //  g.polygonLine();
   Vec3d gnomZ = pose.pos() - (pose.uz() * 2);  // put in front of camera
   gnomZ -= (pose.uy() * .4);                   // translate to the bottom
   gnomZ -= (pose.ux() * .5);                   // translate to the left
@@ -55,7 +55,7 @@ void Gnomon::drawAtPos(Graphics &g, Vec3f pos, Pose cam_pose, double scale) {
   g.pushMatrix();
   g.translate(pos);
   g.scale(scale);
-  // gl::lineWidth(2);
+  // g.lineWidth(2);
 
   g.meshColor();
   g.draw(gnomonMesh);
@@ -73,7 +73,7 @@ void Gnomon::drawAtPose(Graphics &g, Pose pose, Pose cam_pose, double scale) {
   g.translate(pose.pos());
   g.rotate(pose.quat());
   g.scale(scale);
-  // gl::lineWidth(2);
+  // g.lineWidth(2);
   g.draw(gnomonMesh);
   drawArrows(g);
   // drawLabels(g, cam_pose, .002);
@@ -84,7 +84,7 @@ void Gnomon::drawArrows(Graphics &g) {
   Quatf q;
   for (int i = 0; i < 3; i++) {
     //    glPushAttrib(GL_CURRENT_BIT);
-    gl::polygonFill();
+    g.polygonFill();
     g.meshColor();
     g.pushMatrix();
     g.color(colors[i]);

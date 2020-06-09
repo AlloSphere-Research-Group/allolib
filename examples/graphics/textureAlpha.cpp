@@ -71,8 +71,8 @@ struct MyApp : public App {
 
     // Here we activate transparent blending. This mixes source and
     // destination colors according to the source's alpha value.
-    gl::blending(true);
-    gl::blendTrans();
+    g.blending(true);
+    g.blendTrans();
 
     // Render texture on a rectangle in world space ...
     g.quad(tex, -1, -1, 2, 2);
@@ -81,7 +81,7 @@ struct MyApp : public App {
     // g.quadViewport(tex);
 
     // Turn off blending
-    gl::blending(false);
+    g.blending(false);
   }
 };
 

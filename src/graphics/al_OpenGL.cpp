@@ -137,22 +137,31 @@ GLenum toDataType<double>() {
   return GL_DOUBLE;
 }
 
+void bufferToDraw(unsigned int buffer) { glDrawBuffer(buffer); }
+
+void viewport(int left, int bottom, int width, int height) {
+  glViewport(left, bottom, width, height);
+}
+
 void blending(bool doBlend) {
   if (doBlend)
     glEnable(GL_BLEND);
   else
     glDisable(GL_BLEND);
 }
-void depthMask(bool maskDepth) { glDepthMask(maskDepth ? GL_TRUE : GL_FALSE); }
+void blendMode(unsigned int src, unsigned int dst, unsigned int eq) {
+  glBlendEquation(eq);
+  glBlendFunc(src, dst);
+}
+
 void depthTesting(bool testDepth) {
   if (testDepth)
     glEnable(GL_DEPTH_TEST);
   else
     glDisable(GL_DEPTH_TEST);
 }
-void viewport(int left, int bottom, int width, int height) {
-  glViewport(left, bottom, width, height);
-}
+void depthMask(bool maskDepth) { glDepthMask(maskDepth ? GL_TRUE : GL_FALSE); }
+
 void scissorTest(bool testScissor) {
   if (testScissor)
     glEnable(GL_SCISSOR_TEST);
@@ -162,27 +171,25 @@ void scissorTest(bool testScissor) {
 void scissorArea(int left, int bottom, int width, int height) {
   glScissor(left, bottom, width, height);
 }
-void faceCulling(bool doCulling) {
+
+void culling(bool doCulling) {
   if (doCulling)
     glEnable(GL_CULL_FACE);
   else
     glDisable(GL_CULL_FACE);
 }
-void faceToCull(unsigned int face) { glCullFace(face); }
-void pointSize(float size) { glPointSize(size); }
-void lineWidth(float size) { glLineWidth(size); }
+void cullFace(unsigned int face) { glCullFace(face); }
+
 void polygonMode(unsigned int mode) { glPolygonMode(GL_FRONT_AND_BACK, mode); }
-void blendMode(unsigned int src, unsigned int dst, unsigned int eq) {
-  glBlendEquation(eq);
-  glBlendFunc(src, dst);
-}
 
 void colorMask(bool r, bool g, bool b, bool a) {
   glColorMask(r ? GL_TRUE : GL_FALSE, g ? GL_TRUE : GL_FALSE,
               b ? GL_TRUE : GL_FALSE, a ? GL_TRUE : GL_FALSE);
 }
-
 void colorMask(bool b) { colorMask(b, b, b, b); }
+
+void pointSize(float size) { glPointSize(size); }
+void lineWidth(float size) { glLineWidth(size); }
 
 void clearColor(float r, float g, float b, float a) {
   float c[] = {r, g, b, a};
@@ -196,7 +203,6 @@ void clearBuffer(int buffer, float r, float g, float b, float a) {
   float c[] = {r, g, b, a};
   glClearBufferfv(GL_COLOR, buffer, c);
 }
-void bufferToDraw(unsigned int buffer) { glDrawBuffer(buffer); }
 
 }  // namespace gl
 }  // namespace al
