@@ -17,12 +17,12 @@ struct MyApp : public App {
     g.clear(0.3);
     g.pushMatrix();
     g.translate(0, 0, -1.5);
-    gl::polygonFill();
+    g.polygonFill();
     g.quad(tex, -1, -1, 2, 2);
     g.popMatrix();
 
     g.color(1);
-    gl::polygonLine();
+    g.polygonLine();
     g.draw(m);
   }
 
