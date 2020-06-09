@@ -58,8 +58,9 @@ struct MyApp : public App {
 
   void onDraw(Graphics &g) {
     g.clear(0);
-    gl::blendTrans();
-    gl::depthTesting(true);
+    g.blending(true);
+    g.blendTrans();
+    g.depthTesting(true);
     scene.render(g);
   }
 
