@@ -62,13 +62,16 @@ class PickableManager {
     event(PickEvent(Point, r));
   }
   void onMouseDown(Graphics &g, const Mouse &m, int w, int h) {
+    x = m.x(); y = m.y();
     Rayd r = getPickRay(g, m.x(), m.y(), w, h);
     event(PickEvent(Pick, r));
   }
   void onMouseDrag(Graphics &g, const Mouse &m, int w, int h) {
+    int dx = m.x() - x;
+    int dy = m.y() - y;
     Rayd r = getPickRay(g, m.x(), m.y(), w, h);
     if (m.right())
-      event(PickEvent(RotateRay, r));
+      event(PickEvent(RotateTurntable, r, Pose(Vec3f(), g.viewMatrix().toQuat()), Vec3f(dx,dy,0)));
     else if (m.middle())
       event(PickEvent(Scale, r, -m.dy()));
     else
@@ -103,6 +106,7 @@ class PickableManager {
   Hit mLastPoint;
   Hit mLastPick;
   Vec3d selectOffset;
+  int x,y;
 
   Vec3d unproject(Graphics &g, Vec3d screenPos, bool view = true) {
     auto v = Matrix4d::identity();

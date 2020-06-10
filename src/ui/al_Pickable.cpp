@@ -172,7 +172,7 @@ bool PickableBB::onEvent(PickEvent e, Hit h) {
       } else
         return false;
 
-    case RotateRay:
+    case RotateRayTrackball:
       if (selected.get() == 1.0f) {        
         Vec3f p = pose.get().pos();
         Vec3f v1 = (selectPos - p).normalize(); 
@@ -183,6 +183,40 @@ bool PickableBB::onEvent(PickEvent e, Hit h) {
           
         Vec3f p1 = transformVecWorld(bb.cen);
         pose.setQuat(qf * prevPose.quat());
+        Vec3f p2 = transformVecWorld(bb.cen);
+        pose.setPos(pose.get().pos() + p1 - p2);
+        return true;
+      } else
+        return false;
+
+    case RotateRay:
+      if (selected.get() == 1.0f) {
+        float dist = (h.ray.o - pose.get().pos()).mag();
+        float amt = dist / 10 * (-10) + 10; // 0 - 10+ -> 10 - 0.1
+        if(amt < 0.1) amt = 0.1;
+        Vec3f dir = h.ray(selectDist) - selectPos;
+        Quatf q = Quatf().fromEuler(amt * dir.x, amt * -dir.y, 0);
+        Vec3f p1 = transformVecWorld(bb.cen);
+        pose.setQuat(q * prevPose.quat());
+        Vec3f p2 = transformVecWorld(bb.cen);
+        pose.setPos(pose.get().pos() + p1 - p2);
+        return true;
+      } else
+        return false;
+
+    case RotateTurntable:
+      if (selected.get() == 1.0f) {
+        float amt = 0.005;
+       
+        // Quatf qy = Quatf().fromAxisAngle(amt*e.vec.x, Vec3f(0,1,0)).normalize();
+        Quatf qy = Quatf().fromAxisAngle(amt*e.vec.x, e.pose.quat().toVectorY()).normalize();
+        Quatf qx = Quatf().fromAxisAngle(amt*e.vec.y, e.pose.quat().toVectorX()).normalize();
+        // Quatf q = Quatf().fromEuler(amt * e.vec.x, amt * e.vec.y, 0);
+
+        Vec3f p1 = transformVecWorld(bb.cen);
+        // pose.setQuat(q * prevPose.quat());
+        // pose.setQuat(qy * qx * prevPose.quat());
+        pose.setQuat(qx * prevPose.quat() * qy);
         Vec3f p2 = transformVecWorld(bb.cen);
         pose.setPos(pose.get().pos() + p1 - p2);
         return true;

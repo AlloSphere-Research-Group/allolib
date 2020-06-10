@@ -19,6 +19,8 @@ enum PickEventType {
   Drag,
   TranslateRay,
   RotateRay,
+  RotateRayTrackball,
+  RotateTurntable,
   RotatePose,
   Scale
 };
@@ -27,12 +29,13 @@ struct PickEvent {
   PickEventType type;
   Rayd ray;
   Pose pose;
+  Vec3f vec;
   float amount;
 
   PickEvent(PickEventType t, Rayd r) : type(t), ray(r) {}
   PickEvent(PickEventType t, Rayd r, Pose p) : type(t), ray(r), pose(p) {}
-  PickEvent(PickEventType t, Rayd r, Vec3f v)
-      : type(t), ray(r), pose(v, Quatf()) {}
+  PickEvent(PickEventType t, Rayd r, Vec3f v) : type(t), ray(r), vec(v) {}
+  PickEvent(PickEventType t, Rayd r, Pose p, Vec3f v) : type(t), ray(r), pose(p), vec(v) {}
   PickEvent(PickEventType t, Rayd r, float v) : type(t), ray(r), amount(v) {}
   PickEvent(PickEventType t, Pose p) : type(t), pose(p) {}
   PickEvent(PickEventType t, float v) : type(t), amount(v) {}
