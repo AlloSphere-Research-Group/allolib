@@ -143,6 +143,8 @@ class CSVReader {
   std::vector<DataStruct> copyToStruct() {
     std::vector<DataStruct> output;
     if (sizeof(DataStruct) < calculateRowLength()) {
+      std::cout << "WARNING: DataStruct size is too small for CSV file!"
+                << std::endl;
       return output;
     }
     for (auto row : mData) {
