@@ -155,16 +155,14 @@ bool PickableBB::onEvent(PickEvent e, Hit h) {
           if (p) {
             // std::cout << "pre: " << newPos << std::endl;
 
-            newPos = min(newPos, p->bb.max - scaleVec.get() * bb.dim / 2);
+            newPos = min(newPos, p->bb.max - bb.max);
             // std::cout << "mid: " << newPos << std::endl;
 
-            newPos = max(newPos, p->bb.min + scaleVec.get() * bb.dim / 2);
+            newPos = max(newPos, p->bb.min - bb.min);
 
             // std::cout << "post: " << newPos << std::endl;
-            // std::cout << "min: " << p->bb.min << " max: " << p->bb.max << "
-            // scale: " << scaleVec.get() << " hdim: " << bb.dim / 2  <<
-            // std::endl;
-            // newPos -= bb.dim / 2;
+            // std::cout << "pmin: " << p->bb.min << " pmax: " << p->bb.max << std::endl;
+            // std::cout << "min: " << bb.min << " max: " << bb.max << std::endl;
           }
         }
         pose = Pose(newPos, pose.get().quat());
