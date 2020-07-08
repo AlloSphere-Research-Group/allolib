@@ -139,6 +139,7 @@ void DynamicScene::render(Graphics &g) {
     voice = voice->next;
   }
   if (mSortDrawingByDistance) {
+    // FIXME this is crashing in some undetermined cases.
     // For now a working but inefficient way of sorting
     auto viewPos = mListenerPose.pos();
     std::sort(voices.begin(), voices.end(),

@@ -144,13 +144,20 @@ struct SynthEvent {
  * Turnoff
  * - absTime eventId
  *
+ * When using Turnon and Turnoff events, be careful not to use ids set
+ * automatically for @ events.
+ *
  * eventId looks of the oldest id match adn turns it off
  * e.g. - 1.3 25
  *
  * Tempo
- * t absTime tempoBpm
+ * t tempoBpm
  *
- * e.g. t 4.5 120
+ * e.g. t 120
+ *
+ * Only the last tempo statement present in a file will have effect, overriding
+ any
+ * previous ones.
  *
  * Insert another sequence
  * = absTime sequenceName timeScale
@@ -162,6 +169,7 @@ struct SynthEvent {
  *
  * All events following will have this offset added to their start time.
  Negative numbers are allowed.
+ *
  *
  */
 

@@ -23,8 +23,8 @@ void SynthSequencer::render(AudioIOData &io) {
 }
 
 void SynthSequencer::render(Graphics &g) {
-  assert(mFps > 0);
   if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
+    assert(mFps > 0);
     update(1.0 / mFps);
   }
   mPolySynth->render(g);
@@ -399,8 +399,12 @@ SynthSequencer::loadSequence(std::string sequenceName, double timeOffset,
     } else if (command == '=' && ss.get() == ' ') {
       std::string time, sequenceName, timeScaleInFile;
       std::getline(ss, time, ' ');
-      std::getline(ss, sequenceName, ' ');
-      std::getline(ss, timeScaleInFile);
+      while (sequenceName.size() == 0 && ss.good()) {
+        std::getline(ss, sequenceName, ' ');
+      }
+      while (timeScaleInFile.size() == 0 && ss.good()) {
+        std::getline(ss, timeScaleInFile);
+      }
       if (sequenceName.at(0) == '"') {
         sequenceName = sequenceName.substr(1);
       }
