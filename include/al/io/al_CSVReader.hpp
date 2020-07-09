@@ -174,7 +174,7 @@ class CSVReader {
 
   void setBasePath(std::string basePath) { mBasePath = basePath; }
 
- private:
+ protected:
   size_t calculateRowLength();
 
   const size_t maxStringSize = 32;
