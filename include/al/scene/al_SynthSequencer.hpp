@@ -176,6 +176,7 @@ struct SynthEvent {
 class SynthSequencer {
 public:
   SynthSequencer(TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_CPU) {
+    mMasterMode = masterMode;
     mInternalSynth = std::make_unique<PolySynth>(masterMode);
     registerSynth(*mInternalSynth.get());
   }

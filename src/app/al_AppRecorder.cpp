@@ -8,8 +8,14 @@
 #include <thread>
 
 void al::AppRecorder::startRecordingOffline(double totalTime) {
+  if (!mAudioDomain || !mWindowDomain) {
+    std::cerr << "ERROR starting AppRecorder::startRecordingOffline"
+              << std::endl;
+    std::cerr << "Call AppRecorder::connectApp() before calling." << std::endl;
+  }
   mAudioDomain->stop();
   auto &audioIO = mAudioDomain->audioIO();
+  audioIO.zeroOut();
 
   auto recordingDomain = mGraphicsDomain->newSubDomain<RecordingDomain>();
   double audioTime = 0.0;
@@ -131,6 +137,7 @@ void al::AppRecorder::startRecordingOffline(double totalTime) {
 
   std::string args;
   args += " -r " + std::to_string(mGraphicsDomain->fps());
+  args += " -framerate " + std::to_string(mGraphicsDomain->fps());
   args += " -i " + outPath + "/out%d.png";
 
 #ifdef AL_LIBSNDFILE

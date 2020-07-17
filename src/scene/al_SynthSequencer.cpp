@@ -25,17 +25,20 @@ void SynthSequencer::render(AudioIOData &io) {
 void SynthSequencer::render(Graphics &g) {
   if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
     assert(mFps > 0);
-    update(1.0 / mFps);
+    double blockStartTime = mMasterTime;
+    mMasterTime += (1.0 / mFps);
+    processEvents(blockStartTime, mNormalizedTempo);
   }
   mPolySynth->render(g);
 }
 
 void SynthSequencer::update(double dt) {
-  double timeIncrement = dt;
-  double blockStartTime = mMasterTime;
-  mMasterTime += timeIncrement;
-
-  processEvents(blockStartTime, mNormalizedTempo);
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_UPDATE) {
+    double blockStartTime = mMasterTime;
+    mMasterTime += dt;
+    processEvents(blockStartTime, mNormalizedTempo);
+  }
+  mPolySynth->update(dt);
 }
 
 void SynthSequencer::print() {
