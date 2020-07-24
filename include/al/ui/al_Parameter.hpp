@@ -549,13 +549,12 @@ public:
    * context.
    */
   void setSynchronousCallbacks(bool synchronous = true) {
-    mSynchronous = synchronous;
     if (mCallbacks.size() > 0 && mCallbacks[0] == nullptr) {
       if (synchronous) {
         mCallbacks.erase(mCallbacks.begin());
       }
     }
-    if (synchronous) {
+    if (!synchronous) {
       mCallbacks.insert(mCallbacks.begin(), nullptr);
     }
   }
@@ -617,7 +616,6 @@ private:
   ParameterType mValue;
   ParameterType mValueCache;
 
-  bool mSynchronous{true};
   bool mChanged{false};
 
 private:

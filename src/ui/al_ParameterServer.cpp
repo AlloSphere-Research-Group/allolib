@@ -765,6 +765,7 @@ void ParameterServer::runCommand(osc::Message &m) {
                 << std::endl;
       std::string serverAddress = mServer->address();
       if (serverAddress == "0.0.0.0" || serverAddress.size() == 0) {
+        // FIXME this should be solved on the other end
         serverAddress = "127.0.0.1";
       }
       osc::Send listenerRequest(port, m.senderAddress().c_str());
@@ -908,4 +909,28 @@ void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
     // TODO do we need to verify command should be forwarded to ParameterServer?
     mParameterServer->runCommand(m);
   }
+}
+
+void OSCNode::startCommandListener(std::string address) {
+  int offset = 0;
+  while (!mNetworkListener.open(listenerFirstPort + offset, address.c_str()) &&
+         (offset < 128)) {
+    offset++;
+  }
+  if (offset < 128) {
+    mNetworkListener.start();
+    std::cout << " OSCNotifier listening on " << address << ":"
+              << listenerFirstPort + offset << std::endl;
+  } else {
+    std::cerr << "Could not start listener on address " << address << std::endl;
+  }
+
+  // Broadcast handshake
+  // FIXME broadcast on all network interfaces
+  osc::Send handshake(handshakeServerPort, "127.0.0.1");
+  handshake.send("/handshake", listenerFirstPort + offset);
+}
+
+void OSCNode::registerServerHandler(osc::PacketHandler *handler) {
+  mNetworkListener.appendHandler(*handler);
 }
