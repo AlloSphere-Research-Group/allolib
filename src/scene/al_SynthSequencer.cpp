@@ -23,19 +23,22 @@ void SynthSequencer::render(AudioIOData &io) {
 }
 
 void SynthSequencer::render(Graphics &g) {
-  assert(mFps > 0);
   if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
-    update(1.0 / mFps);
+    assert(mFps > 0);
+    double blockStartTime = mMasterTime;
+    mMasterTime += (1.0 / mFps);
+    processEvents(blockStartTime, mNormalizedTempo);
   }
   mPolySynth->render(g);
 }
 
 void SynthSequencer::update(double dt) {
-  double timeIncrement = dt;
-  double blockStartTime = mMasterTime;
-  mMasterTime += timeIncrement;
-
-  processEvents(blockStartTime, mNormalizedTempo);
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_UPDATE) {
+    double blockStartTime = mMasterTime;
+    mMasterTime += dt;
+    processEvents(blockStartTime, mNormalizedTempo);
+  }
+  mPolySynth->update(dt);
 }
 
 void SynthSequencer::print() {
@@ -399,8 +402,12 @@ SynthSequencer::loadSequence(std::string sequenceName, double timeOffset,
     } else if (command == '=' && ss.get() == ' ') {
       std::string time, sequenceName, timeScaleInFile;
       std::getline(ss, time, ' ');
-      std::getline(ss, sequenceName, ' ');
-      std::getline(ss, timeScaleInFile);
+      while (sequenceName.size() == 0 && ss.good()) {
+        std::getline(ss, sequenceName, ' ');
+      }
+      while (timeScaleInFile.size() == 0 && ss.good()) {
+        std::getline(ss, timeScaleInFile);
+      }
       if (sequenceName.at(0) == '"') {
         sequenceName = sequenceName.substr(1);
       }

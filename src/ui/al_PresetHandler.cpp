@@ -377,9 +377,11 @@ void PresetHandler::recallPresetSynchronous(std::string name) {
         }
         param->setFields(mTargetValues[param->getFullAddress()]);
       } else {
-        std::cerr << "Warning: parameter " << param->getFullAddress()
-                  << "not matched" << __FILE__ << "  " << __FUNCTION__
-                  << std::endl;
+        if (verbose()) {
+          std::cerr << "Warning: parameter " << param->getFullAddress()
+                    << "not matched" << __FILE__ << "  " << __FUNCTION__
+                    << std::endl;
+        }
       }
     }
     // FIXME recall bundles

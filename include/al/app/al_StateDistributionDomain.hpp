@@ -46,8 +46,16 @@ public:
 
   bool isSender() { return mIsSender; }
 
+  void disconnect() {
+    for (auto sendrecv : mSendRecvDomains) {
+      this->removeSubDomain(sendrecv);
+    }
+  }
+
 protected:
   bool mIsSender{false};
+
+  std::vector<std::shared_ptr<SynchronousDomain>> mSendRecvDomains;
 
 private:
 };
@@ -255,6 +263,7 @@ StateDistributionDomain<TSharedState>::addStateSender(
       this->template newSubDomain<StateSendDomain<TSharedState>>(false);
   newDomain->setId(id);
   newDomain->setStatePointer(statePtr);
+  mSendRecvDomains.push_back(newDomain);
   return newDomain;
 }
 
@@ -265,8 +274,8 @@ StateDistributionDomain<TSharedState>::addStateReceiver(
   auto newDomain =
       this->template newSubDomain<StateReceiveDomain<TSharedState>>(true);
   newDomain->setId(id);
-
   newDomain->setStatePointer(statePtr);
+  mSendRecvDomains.push_back(newDomain);
   return newDomain;
 }
 

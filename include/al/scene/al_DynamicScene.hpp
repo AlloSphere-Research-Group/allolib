@@ -300,7 +300,7 @@ private:
   Pose mListenerPose;
   DistAtten<> mDistAtten;
 
-  bool mSortDrawingByDistance{true};
+  bool mSortDrawingByDistance{false};
   // For threaded simulation
   std::unique_ptr<ThreadPool> mWorkerThreads; // Update worker threads
   bool mThreadedUpdate{true};
