@@ -164,6 +164,7 @@ void al::AppRecorder::startRecordingOffline(double totalTime) {
 
   // TODO: thread this; std::system blocks until the command finishes
   std::system(cmd.c_str());
+  std::cout << cmd << std::endl;
 
   std::cout << "Done calling ffmpeg on " + outPath << std::endl;
 }

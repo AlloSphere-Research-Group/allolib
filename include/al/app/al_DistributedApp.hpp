@@ -73,7 +73,14 @@ public:
 
   std::string name();
 
-  virtual void init();
+  /**
+   * @brief prepares domains and configuration
+   *
+   * You can run this function manually to change domain behavior before the
+   * domains are actually started, for example to disable state sharing on a
+   * primary application.
+   */
+  virtual void prepare();
 
   void registerDynamicScene(DynamicScene &scene);
 
@@ -90,6 +97,8 @@ public:
 
 private:
   AudioControl mAudioControl;
+
+  bool initialized{false};
 
   std::map<std::string, std::string> mRoleMap;
   bool mFoundHost = false;
@@ -130,21 +139,31 @@ public:
         ->state();
   }
 
-  void init() override {
-    DistributedApp::init();
+  //  void init() override {
+  //    DistributedApp::init();
+  //  }
+
+  void start() override {
+    prepare();
     auto distDomain =
         std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
             mSimulationDomain);
     if (isPrimary()) {
-      std::cout << "Running primary" << std::endl;
-      auto sender = distDomain->addStateSender("state", distDomain->statePtr());
-      sender->configure(10101, "state", additionalConfig["broadcastAddress"]);
+      if (hasCapability(CAP_STATE_SEND)) {
+        std::cout << "Running primary with state send" << std::endl;
+        auto sender =
+            distDomain->addStateSender("state", distDomain->statePtr());
+        sender->configure(10101, "state", additionalConfig["broadcastAddress"]);
+      } else {
+        std::cout << "Not enabling state sending for primary." << std::endl;
+      }
     } else {
       std::cout << "Running REPLICA" << std::endl;
       auto receiver =
           distDomain->addStateReceiver("state", distDomain->statePtr());
       receiver->configure(10101);
     }
+    DistributedApp::start();
   }
 
 private:

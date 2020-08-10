@@ -9,7 +9,10 @@
 
 using namespace al;
 
-void DistributedApp::init() {
+void DistributedApp::prepare() {
+  if (initialized) {
+    return;
+  }
 #ifdef AL_WINDOWS
   // Required to make sure gethostname() works....
   WORD wVersionRequested;
@@ -153,11 +156,13 @@ void DistributedApp::init() {
         std::find(mDomainList.begin(), mDomainList.end(), mAudioDomain));
   }
   parameterServer() << mAudioControl.gain;
+
+  initializeDomains();
+  initialized = true;
 }
 
 void DistributedApp::start() {
-  init();
-  initializeDomains();
+  prepare();
   stdControls.app = this;
 
   if (hasCapability(CAP_OMNIRENDERING)) {
