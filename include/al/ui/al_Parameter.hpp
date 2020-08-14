@@ -156,8 +156,8 @@ public:
   }
 
   // Move constructor
-  ParameterField(ParameterField &&that) noexcept
-      : mType(NULLDATA), mData(nullptr) {
+  ParameterField(ParameterField &&that) noexcept : mType(NULLDATA),
+                                                   mData(nullptr) {
     swap(*this, that);
   }
 
@@ -1293,6 +1293,14 @@ public:
       }
     }
     return selected;
+  }
+
+  void set(std::vector<int8_t> on) {
+    uint16_t value = 0;
+    for (auto onBit : on) {
+      value |= 1 << onBit;
+    }
+    set(value);
   }
 
   virtual float toFloat() override {
