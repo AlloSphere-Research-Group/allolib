@@ -430,7 +430,13 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id,
   if (verbose()) {
     std::cout << "Trigger on ";
     for (auto *param : voice->triggerParameters()) {
-      std::cout << param->getName() << ":" << param->toFloat() << " ";
+      if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) == 0) {
+        std::cout << param->getName() << ":"
+                  << static_cast<ParameterString *>(param)->get() << " ";
+
+      } else {
+        std::cout << param->getName() << ":" << param->toFloat() << " ";
+      }
     }
     std::cout << std::endl;
   }
