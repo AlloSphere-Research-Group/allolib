@@ -341,14 +341,14 @@ void ParameterGUI::drawChoice(std::vector<ParameterChoice *> params,
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
     for (unsigned int i = 0; i < elements.size(); i++) {
       bool state = value & (1 << i);
-      if (ImGui::Checkbox((elements[i] + suffix + param->getName()).c_str(),
-                          &state)) {
-        std::cout << elements[i] + suffix + param->getName() << std::endl;
+      ImGui::PushID((const void *)param);
+      if (ImGui::Checkbox((elements[i] + suffix).c_str(), &state)) {
         value ^= (-(state) ^ value) & (1UL << i); // Set an individual bit
         for (auto *p : params) {
           p->set(value);
         }
       }
+      ImGui::PopID();
     }
   }
 }
