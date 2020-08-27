@@ -27,14 +27,14 @@ There are two paths for Windows installation. One through Visual Studio and one 
 
 For installation through Visual Studio:
 
- 1. Install Visual Studio 2017 Community Edition from https://visualstudio.microsoft.com/downloads/
+ 1. Install Visual Studio 2017 or 2019 Community Edition from https://visualstudio.microsoft.com/downloads/
  2. During installation options:
 
     a. Install "Desktop development with C++" workload
 
-    b. Install Individual components: C++/CLI support, Git for Windows, Visual C++ Tools for Cmake
+    b. Install Individual components: C++/CLI support (make sure the version matches your compiler version), Git for Windows, Visual C++ Tools for Cmake
 
-For installation through Chocolatey:
+For installation through Chocolatey (not currently recommended, but let us know if it works):
 
  * Install Chocolatey: Aim your browser at https://chocolatey.org/install. Follow the directions there to install Chocolatey. Wait for this to finish before moving on.
  * Use the choco command to install a C++ compiler. Open cmd.exe (Command Prompt) as administrator and run this command: choco install -y visualstudio2017buildtools visualstudio2017-workload-vctools
