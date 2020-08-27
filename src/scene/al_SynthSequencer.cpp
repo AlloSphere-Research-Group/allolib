@@ -62,7 +62,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
     mNextEvent = 0;
     lk.unlock();
   }
-  mPlaybackStartTime = currentMasterTime - startTime + startPad;
+  mPlaybackStartTime = currentMasterTime + startPad;
   mPlaying = true;
   for (auto cb : mSequenceBeginCallbacks) {
     cb(mLastSequencePlayed);
@@ -545,8 +545,8 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
           auto *voice = mPolySynth->getVoice(event->fields.name);
           if (voice) {
             voice->setTriggerParams(event->fields.pFields);
-            mPolySynth->triggerOn(voice, event->offsetCounter);
-            event->voiceId = voice->id();
+
+            event->voiceId = mPolySynth->triggerOn(voice, event->offsetCounter);
 
             //            std::cout << " ++ trigger ON " << voice->id() << " "
             //            << mMasterTime

@@ -14,16 +14,16 @@
 #include <vector>
 
 namespace minFileSys {
-void readDir(const std::string& name, std::vector<std::string>& v);
-bool pathExists(std::string const& path);
-bool isPathDir(std::string const& path);
-bool isDirEmpty(std::string const& dir_path);
-void copyFile(std::string const& orig, std::string const& cpyd);
-bool deleteFile(std::string const& f);
-bool createDir(std::string const& dir_path);
-bool deleteDir(std::string const& dir_path);             // only for empty dir
-bool deleteDirRecursively(std::string const& dir_path);  // delete non-empty dir
-std::string addPath(std::string parent, std::string const& child);
+void readDir(const std::string &name, std::vector<std::string> &v);
+bool pathExists(std::string const &path);
+bool isPathDir(std::string const &path);
+bool isDirEmpty(std::string const &dir_path);
+void copyFile(std::string const &orig, std::string const &cpyd);
+bool deleteFile(std::string const &f);
+bool createDir(std::string const &dir_path);
+bool deleteDir(std::string const &dir_path);             // only for empty dir
+bool deleteDirRecursively(std::string const &dir_path);  // delete non-empty dir
+std::string addPath(std::string parent, std::string const &child);
 std::string currentPath();
 }  // namespace minFileSys
 
@@ -68,7 +68,7 @@ std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 namespace minFileSys {
 
-inline std::string addPath(std::string parent, std::string const& child) {
+inline std::string addPath(std::string parent, std::string const &child) {
 #ifdef ITS_WINDOWS
   if (parent[parent.size() - 1] != '\\') parent += "\\";
   parent += child;
@@ -83,7 +83,7 @@ inline std::string addPath(std::string parent, std::string const& child) {
 }
 
 // http://www.martinbroadhurst.com/list-the-files-in-a-directory-in-c.html
-inline void readDir(const std::string& name, std::vector<std::string>& v) {
+inline void readDir(const std::string &name, std::vector<std::string> &v) {
   if (!pathExists(name)) {
     std::cout << "[!] [readDir] " << name << " does not exist" << std::endl;
     return;
@@ -116,8 +116,8 @@ inline void readDir(const std::string& name, std::vector<std::string>& v) {
 #endif
 
 #ifdef ITS_POSIX
-  DIR* dirp = opendir(name.c_str());
-  struct dirent* dp;
+  DIR *dirp = opendir(name.c_str());
+  struct dirent *dp;
   while ((dp = readdir(dirp)) != NULL) {
     if (std::strcmp(dp->d_name, ".") == 0) continue;
     if (std::strcmp(dp->d_name, "..") == 0) continue;
@@ -127,7 +127,7 @@ inline void readDir(const std::string& name, std::vector<std::string>& v) {
 #endif
 }
 
-inline bool pathExists(std::string const& path) {
+inline bool pathExists(std::string const &path) {
 #ifdef ITS_WINDOWS
   // unicode
   // return !(INVALID_FILE_ATTRIBUTES == GetFileAttributes(path.c_str()));
@@ -141,7 +141,7 @@ inline bool pathExists(std::string const& path) {
 #endif
 }
 
-inline bool isPathDir(std::string const& path) {
+inline bool isPathDir(std::string const &path) {
 #ifdef ITS_WINDOWS
   // unicode
   // auto attr = GetFileAttributes(path.c_str());
@@ -158,7 +158,7 @@ inline bool isPathDir(std::string const& path) {
 #endif
 }
 
-inline bool isDirEmpty(std::string const& dir_path) {
+inline bool isDirEmpty(std::string const &dir_path) {
 #ifdef ITS_WINDOWS
   std::string pattern(dir_path);
   pattern.append("\\*");
@@ -186,8 +186,8 @@ inline bool isDirEmpty(std::string const& dir_path) {
 #endif
 
 #ifdef ITS_POSIX
-  DIR* dirp = opendir(dir_path.c_str());
-  struct dirent* dp;
+  DIR *dirp = opendir(dir_path.c_str());
+  struct dirent *dp;
   while ((dp = readdir(dirp)) != NULL) {
     if (std::strcmp(dp->d_name, ".") == 0) continue;
     if (std::strcmp(dp->d_name, "..") == 0) continue;
@@ -199,7 +199,7 @@ inline bool isDirEmpty(std::string const& dir_path) {
 #endif
 }
 
-inline void copyFile(std::string const& orig, std::string const& cpyd) {
+inline void copyFile(std::string const &orig, std::string const &cpyd) {
   std::ifstream origStream{orig, std::ios::binary};
   std::ofstream cpydStream{cpyd, std::ios::binary};
   cpydStream << origStream.rdbuf();
@@ -207,7 +207,7 @@ inline void copyFile(std::string const& orig, std::string const& cpyd) {
   cpydStream.close();
 }
 
-inline bool deleteFile(std::string const& f) {
+inline bool deleteFile(std::string const &f) {
 #ifdef ITS_WINDOWS
   // unicode
   // DeleteFile(f.c_str());
@@ -218,13 +218,13 @@ inline bool deleteFile(std::string const& f) {
 #endif
 
 #ifdef ITS_POSIX
-  // 0​ upon success or non-zero value on error.
+  // 0 upon success or non-zero value on error.
   auto result = std::remove(f.c_str());
   return (result == 0);
 #endif
 }
 
-inline bool createDir(std::string const& path) {
+inline bool createDir(std::string const &path) {
   if (pathExists(path)) {
     std::cout << "[!] [createDir] " << path << " already exists" << std::endl;
     return true;
@@ -279,7 +279,7 @@ inline bool createDir(std::string const& path) {
 #endif
 }
 
-inline bool deleteDir(std::string const& dir_path) {
+inline bool deleteDir(std::string const &dir_path) {
   if (!pathExists(dir_path)) {
     std::cout << "[!] [deleteDir] " << dir_path << " does not exist"
               << std::endl;
@@ -374,7 +374,7 @@ inline bool delete_files_that_starts_with(std::string prefix) {
 }
 #endif  // ITS_WINDOWS
 
-inline bool deleteDirRecursively(std::string const& dir_path) {
+inline bool deleteDirRecursively(std::string const &dir_path) {
   if (!pathExists(dir_path)) {
     std::cout << "[!] [deleteDirRecursively] " << dir_path << " does not exist"
               << std::endl;
@@ -389,7 +389,7 @@ inline bool deleteDirRecursively(std::string const& dir_path) {
   // contained it can fail because the directory isn't (yet) empty. This talk
   // explains the problem in detail and gives a safer way to delete a
   // directory/tree on Windows: youtube.com/watch?v=uhRWMGBjlO8
-  // – Adrian McCarthy
+  // - Adrian McCarthy
 
   // deleting a directory tree on Windows
   // 1. enumerate directory contents
@@ -411,7 +411,7 @@ inline bool deleteDirRecursively(std::string const& dir_path) {
 #ifdef ITS_POSIX
   std::vector<std::string> files;
   readDir(dir_path, files);
-  for (auto const& f : files) {
+  for (auto const &f : files) {
     auto added_path = addPath(dir_path, f);
     std::cout << added_path << std::endl;
     if (isPathDir(added_path)) {
