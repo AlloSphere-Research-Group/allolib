@@ -105,6 +105,7 @@ set(headers
   include/al/math/al_Vec.hpp
 
   include/al/protocol/al_OSC.hpp
+  include/al/protocol/al_CommandConnection.hpp
 
   include/al/scene/al_DistributedScene.hpp
   include/al/scene/al_DynamicScene.hpp
@@ -222,6 +223,7 @@ set(sources
   src/math/al_StdRandom.cpp
 
   src/protocol/al_OSC.cpp
+  src/protocol/al_CommandConnection.cpp
 
   src/scene/al_DistributedScene.cpp
   src/scene/al_DynamicScene.cpp
