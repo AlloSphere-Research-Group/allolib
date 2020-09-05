@@ -11,18 +11,24 @@
 using namespace al;
 
 // Parameter ------------------------------------------------------------------
-Parameter::Parameter(std::string parameterName, std::string Group,
-                     float defaultValue, std::string prefix, float min,
-                     float max)
-    : ParameterWrapper<float>(parameterName, Group, defaultValue, prefix, min,
-                              max) {
+Parameter::Parameter(std::string parameterName, std::string group,
+                     float defaultValue, float min, float max)
+    : ParameterWrapper<float>(parameterName, group, defaultValue, min, max) {
   mFloatValue = defaultValue;
   setDefault(defaultValue);
 }
 
 Parameter::Parameter(std::string parameterName, float defaultValue, float min,
                      float max)
-    : ParameterWrapper<float>(parameterName, "", defaultValue, "", min, max) {
+    : ParameterWrapper<float>(parameterName, "", defaultValue, min, max) {
+  mFloatValue = defaultValue;
+  setDefault(defaultValue);
+}
+
+Parameter::Parameter(std::string parameterName, std::string Group,
+                     float defaultValue, std::string prefix, float min,
+                     float max)
+    : ParameterWrapper<float>(parameterName, Group, defaultValue, min, max) {
   mFloatValue = defaultValue;
   setDefault(defaultValue);
 }
@@ -60,10 +66,16 @@ void Parameter::set(float value, ValueSource *src) {
 // ParameterInt
 // ------------------------------------------------------------------
 ParameterInt::ParameterInt(std::string parameterName, std::string Group,
-                           int32_t defaultValue, std::string prefix,
+                           int32_t defaultValue, int32_t min, int32_t max)
+    : ParameterWrapper<int32_t>(parameterName, Group, defaultValue, min, max) {
+  mIntValue = defaultValue;
+  setDefault(defaultValue);
+}
+
+ParameterInt::ParameterInt(std::string parameterName, std::string Group,
+                           int32_t defaultValue, std::string /*prefix*/,
                            int32_t min, int32_t max)
-    : ParameterWrapper<int32_t>(parameterName, Group, defaultValue, prefix, min,
-                                max) {
+    : ParameterWrapper<int32_t>(parameterName, Group, defaultValue, min, max) {
   mIntValue = defaultValue;
   setDefault(defaultValue);
 }
@@ -101,6 +113,13 @@ void ParameterInt::set(int32_t value, ValueSource *src) {
 // ParameterBool
 // ------------------------------------------------------------------
 ParameterBool::ParameterBool(std::string parameterName, std::string Group,
+                             float defaultValue, float min, float max)
+    : Parameter(parameterName, Group, defaultValue, min, max) {
+  //	mFloatValue = defaultValue;
+  setDefault(defaultValue);
+}
+
+ParameterBool::ParameterBool(std::string parameterName, std::string Group,
                              float defaultValue, std::string prefix, float min,
                              float max)
     : Parameter(parameterName, Group, defaultValue, prefix, min, max) {
@@ -110,9 +129,8 @@ ParameterBool::ParameterBool(std::string parameterName, std::string Group,
 
 // --------------------- ParameterMeta ------------
 
-ParameterMeta::ParameterMeta(std::string parameterName, std::string group,
-                             std::string prefix)
-    : mParameterName(parameterName), mGroup(group), mPrefix(prefix) {
+ParameterMeta::ParameterMeta(std::string parameterName, std::string group)
+    : mParameterName(parameterName), mGroup(group) {
   // TODO: Add better heuristics for slash handling
 
   using namespace std;
@@ -122,10 +140,7 @@ ParameterMeta::ParameterMeta(std::string parameterName, std::string group,
   auto _parameterName =
       sregex_iterator(parameterName.begin(), parameterName.end(), re);
   auto _group = sregex_iterator(group.begin(), group.end(), re);
-  auto _prefix = sregex_iterator(prefix.begin(), prefix.end(), re);
   auto none = sregex_iterator();
-  if (_prefix != none)
-    mFullAddress += "/" + _prefix->str();
   if (_group != none)
     mFullAddress += "/" + _group->str();
   if (_parameterName != none) {

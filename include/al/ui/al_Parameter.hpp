@@ -255,8 +255,7 @@ public:
    * @param group
    * @param prefix
    */
-  ParameterMeta(std::string parameterName, std::string group = "",
-                std::string prefix = "");
+  ParameterMeta(std::string parameterName, std::string group = "");
 
   virtual ~ParameterMeta() {}
 
@@ -361,7 +360,6 @@ protected:
   std::string mParameterName;
   std::string mDisplayName;
   std::string mGroup;
-  std::string mPrefix;
 
   std::map<std::string, float> mHints; // Provide hints for behavior
 };
@@ -390,12 +388,11 @@ public:
    * the value.
    */
   ParameterWrapper(std::string parameterName, std::string group = "",
-                   ParameterType defaultValue = ParameterType(),
-                   std::string prefix = "");
+                   ParameterType defaultValue = ParameterType());
 
   ParameterWrapper(std::string parameterName, std::string Group,
-                   ParameterType defaultValue, std::string prefix,
-                   ParameterType min, ParameterType max);
+                   ParameterType defaultValue, ParameterType min,
+                   ParameterType max);
 
   ParameterWrapper(const ParameterWrapper &param);
 
@@ -418,8 +415,6 @@ public:
     runChangeCallbacksSynchronous(value, src);
     setLocking(value);
   }
-
-  virtual void setExternal(ParameterType value, ValueSource) {}
 
   /**
    * @brief reset value to default value
@@ -663,8 +658,6 @@ public:
    * @param parameterName The name of the parameter
    * @param Group The group the parameter belongs to
    * @param defaultValue The initial value for the parameter
-   * @param prefix An address prefix that is prepended to the parameter's OSC
-   * address
    * @param min Minimum value for the parameter
    * @param max Maximum value for the parameter
    *
@@ -672,12 +665,15 @@ public:
    * single float. It realies on float being atomic on the platform so there
    * is no locking. This is a safe assumption for most platforms today.
    */
-  Parameter(std::string parameterName, std::string Group,
-            float defaultValue = 0, std::string prefix = "",
-            float min = -99999.0, float max = 99999.0);
+  Parameter(std::string parameterName, std::string group = "",
+            float defaultValue = 0, float min = -99999.0, float max = 99999.0);
 
-  Parameter(std::string parameterName, float defaultValue = 0,
-            float min = -99999.0, float max = 99999.0);
+  Parameter(std::string parameterName, float defaultValue, float min = -99999.0,
+            float max = 99999.0);
+
+  [[deprecated("Prefix is ignored")]] Parameter(
+      std::string parameterName, std::string Group, float defaultValue,
+      std::string prefix, float min = -99999.0, float max = 99999.0);
 
   Parameter(const al::Parameter &param) : ParameterWrapper<float>(param) {
     mFloatValue = param.mFloatValue;
@@ -743,10 +739,10 @@ public:
                         std::string id = "") override {
     if (bundleName.size() == 0) {
       sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  mPrefix, min(), max());
+                  std::string(), min(), max());
     } else {
       sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), mPrefix, min(), max());
+                  getGroup(), getDefault(), std::string(), min(), max());
     }
   }
 
@@ -764,8 +760,6 @@ public:
    * @param parameterName The name of the parameter
    * @param Group The group the parameter belongs to
    * @param defaultValue The initial value for the parameter
-   * @param prefix An address prefix that is prepended to the parameter's OSC
-   * address
    * @param min Minimum value for the parameter
    * @param max Maximum value for the parameter
    *
@@ -775,8 +769,11 @@ public:
    * desktop platforms today.
    */
   ParameterInt(std::string parameterName, std::string Group = "",
-               int32_t defaultValue = 0, std::string prefix = "",
-               int32_t min = 0, int32_t max = 127);
+               int32_t defaultValue = 0, int32_t min = 0, int32_t max = 127);
+
+  [[deprecated("Prefix is ignored")]] ParameterInt(
+      std::string parameterName, std::string Group, int32_t defaultValue,
+      std::string prefix, int32_t min = 0, int32_t max = 127);
 
   ParameterInt(const al::ParameterInt &param)
       : ParameterWrapper<int32_t>(param) {
@@ -843,10 +840,10 @@ public:
                         std::string id = "") override {
     if (bundleName.size() == 0) {
       sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  mPrefix, min(), max());
+                  std::string(), min(), max());
     } else {
       sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), mPrefix, min(), max());
+                  getGroup(), getDefault(), std::string(), min(), max());
     }
   }
 
@@ -876,8 +873,11 @@ public:
    * the platform.
    */
   ParameterBool(std::string parameterName, std::string Group = "",
-                float defaultValue = 0, std::string prefix = "", float min = 0,
-                float max = 1.0);
+                float defaultValue = 0, float min = 0, float max = 1.0);
+
+  [[deprecated("Prefix is ignored")]] ParameterBool(
+      std::string parameterName, std::string Group, float defaultValue,
+      std::string prefix, float min = 0, float max = 1.0);
 
   bool operator=(bool value) {
     this->set(value ? 1.0f : 0.0f);
@@ -910,10 +910,10 @@ public:
 
     if (bundleName.size() == 0) {
       sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  mPrefix, min(), max());
+                  std::string(), min(), max());
     } else {
       sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), mPrefix, min(), max());
+                  getGroup(), getDefault(), std::string(), min(), max());
     }
   }
 };
@@ -922,9 +922,8 @@ public:
 // has no value per se, but that can be used to trigger actions
 class Trigger : public ParameterWrapper<bool> {
 public:
-  Trigger(std::string parameterName, std::string Group = "",
-          std::string prefix = "")
-      : ParameterWrapper<bool>(parameterName, Group, false, prefix) {}
+  Trigger(std::string parameterName, std::string Group = "")
+      : ParameterWrapper<bool>(parameterName, Group, false) {}
 
   virtual float toFloat() override { return get() ? 1.0f : 0.0f; }
 
@@ -950,9 +949,14 @@ public:
   using ParameterWrapper<std::string>::set;
 
   ParameterString(std::string parameterName, std::string Group = "",
-                  std::string defaultValue = "", std::string prefix = "")
-      : ParameterWrapper<std::string>(parameterName, Group, defaultValue,
-                                      prefix) {}
+                  std::string defaultValue = "")
+      : ParameterWrapper<std::string>(parameterName, Group, defaultValue) {}
+
+  [[deprecated("Prefix is ignored")]] ParameterString(std::string parameterName,
+                                                      std::string Group,
+                                                      std::string defaultValue,
+                                                      std::string /*prefix*/)
+      : ParameterWrapper<std::string>(parameterName, Group, defaultValue) {}
 
   virtual float toFloat() override {
     float value = 0.0;
@@ -987,10 +991,10 @@ public:
                         std::string id = "") override {
     if (bundleName.size() == 0) {
       sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  mPrefix, min(), max());
+                  std::string(), min(), max());
     } else {
       sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), mPrefix, min(), max());
+                  getGroup(), getDefault(), std::string(), min(), max());
     }
   }
 };
@@ -1001,9 +1005,8 @@ public:
   using ParameterWrapper<al::Vec3f>::set;
 
   ParameterVec3(std::string parameterName, std::string Group = "",
-                al::Vec3f defaultValue = al::Vec3f(), std::string prefix = "")
-      : ParameterWrapper<al::Vec3f>(parameterName, Group, defaultValue,
-                                    prefix) {}
+                al::Vec3f defaultValue = al::Vec3f())
+      : ParameterWrapper<al::Vec3f>(parameterName, Group, defaultValue) {}
 
   ParameterVec3 operator=(const Vec3f vec) {
     this->set(vec);
@@ -1048,9 +1051,8 @@ public:
   using ParameterWrapper<al::Vec4f>::set;
 
   ParameterVec4(std::string parameterName, std::string Group = "",
-                al::Vec4f defaultValue = al::Vec4f(), std::string prefix = "")
-      : ParameterWrapper<al::Vec4f>(parameterName, Group, defaultValue,
-                                    prefix) {}
+                al::Vec4f defaultValue = al::Vec4f())
+      : ParameterWrapper<al::Vec4f>(parameterName, Group, defaultValue) {}
 
   ParameterVec4 operator=(const Vec4f vec) {
     this->set(vec);
@@ -1095,9 +1097,8 @@ public:
   using ParameterWrapper<al::Pose>::set;
 
   ParameterPose(std::string parameterName, std::string Group = "",
-                al::Pose defaultValue = al::Pose(), std::string prefix = "")
-      : ParameterWrapper<al::Pose>(parameterName, Group, defaultValue, prefix) {
-  }
+                al::Pose defaultValue = al::Pose())
+      : ParameterWrapper<al::Pose>(parameterName, Group, defaultValue) {}
 
   al::Pose operator=(const al::Pose vec) {
     this->set(vec);
@@ -1152,8 +1153,8 @@ public:
   using ParameterWrapper<int>::get;
 
   ParameterMenu(std::string parameterName, std::string Group = "",
-                int defaultValue = 0, std::string prefix = "")
-      : ParameterWrapper<int>(parameterName, Group, defaultValue, prefix) {}
+                int defaultValue = 0)
+      : ParameterWrapper<int>(parameterName, Group, defaultValue) {}
 
   int operator=(const int value) {
     this->set(value);
@@ -1237,18 +1238,18 @@ private:
  * whether an element is selected or not.
  *
  */
-class ParameterChoice : public ParameterWrapper<uint16_t> {
+class ParameterChoice : public ParameterWrapper<uint64_t> {
 public:
-  using ParameterWrapper<uint16_t>::get;
-  using ParameterWrapper<uint16_t>::set;
+  using ParameterWrapper<uint64_t>::get;
+  using ParameterWrapper<uint64_t>::set;
 
   ParameterChoice(std::string parameterName, std::string Group = "",
-                  uint16_t defaultValue = 0, std::string prefix = "")
-      : ParameterWrapper<uint16_t>(parameterName, Group, defaultValue, prefix) {
+                  uint64_t defaultValue = 0)
+      : ParameterWrapper<uint64_t>(parameterName, Group, defaultValue) {
     setNoCalls(0);
   }
 
-  uint16_t operator=(const uint16_t value) {
+  ParameterChoice &operator=(const uint64_t value) {
     this->set(value);
     return *this;
   }
@@ -1256,8 +1257,8 @@ public:
   void setElements(std::vector<std::string> &elements, bool allOn = false) {
     mElements = elements;
     min(0);
-    assert((1 << (elements.size() - 1)) < UINT16_MAX);
-    max(1 << (elements.size() - 1));
+    assert((1 << (elements.size() - 1)) < UINT64_MAX);
+    max((uint64_t)1 << (elements.size() - 1));
     if (allOn) {
       uint16_t value = 0;
       for (unsigned int i = 0; i < elements.size(); i++) {
@@ -1268,13 +1269,13 @@ public:
   }
 
   void setElementSelected(std::string name, bool selected = true) {
-    for (unsigned int i = 0; i < mElements.size(); i++) {
+    for (size_t i = 0; i < mElements.size(); i++) {
       if (mElements[i] == name) {
-        uint16_t value = get();
+        uint64_t value = get();
         if (selected) {
-          value |= 1 << i;
+          value |= 1L << i;
         } else {
-          value ^= value | 1 << i;
+          value ^= value | 1L << i;
         }
         set(value);
       }
@@ -1285,8 +1286,8 @@ public:
 
   std::vector<std::string> getSelectedElements() {
     std::vector<std::string> selected;
-    for (unsigned int i = 0; i < mElements.size(); i++) {
-      if (get() & (1 << i)) {
+    for (uint64_t i = 0; i < mElements.size(); i++) {
+      if (get() & ((uint64_t)1 << i)) {
         if (mElements.size() > i) {
           selected.push_back(mElements[i]);
         }
@@ -1296,9 +1297,14 @@ public:
   }
 
   void set(std::vector<int8_t> on) {
-    uint16_t value = 0;
+    uint64_t value = 0;
     for (auto onBit : on) {
-      value |= 1 << onBit;
+      if (onBit < 64) {
+        value |= 1 << onBit;
+      } else {
+        std::cerr << __FILE__ << " " << __FUNCTION__
+                  << " bit index too high. Ignoring" << std::endl;
+      }
     }
     set(value);
   }
@@ -1308,14 +1314,17 @@ public:
     // return std::stof(getCurrent());
   }
 
-  virtual void fromFloat(float value) override { set((int)value); }
+  virtual void fromFloat(float value) override { set((uint64_t)value); }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
+    sender.send(prefix + getFullAddress(), (int32_t)get());
   }
 
   virtual void getFields(std::vector<ParameterField> &fields) override {
-    fields.emplace_back(ParameterField(get()));
+    if (get() > INT32_MAX) {
+      std::cerr << "WARNING: Can't fit choice value." << std::endl;
+    }
+    fields.emplace_back(ParameterField((int32_t)get()));
   }
 
   virtual void setFields(std::vector<ParameterField> &fields) override {
@@ -1341,9 +1350,8 @@ public:
   using ParameterWrapper<al::Color>::get;
 
   ParameterColor(std::string parameterName, std::string Group = "",
-                 al::Color defaultValue = al::Color(), std::string prefix = "")
-      : ParameterWrapper<al::Color>(parameterName, Group, defaultValue,
-                                    prefix) {}
+                 al::Color defaultValue = al::Color())
+      : ParameterWrapper<al::Color>(parameterName, Group, defaultValue) {}
 
   ParameterColor operator=(const al::Color vec) {
     this->set(vec);
@@ -1385,9 +1393,8 @@ ParameterWrapper<ParameterType>::~ParameterWrapper() {
 template <class ParameterType>
 ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName,
                                                   std::string group,
-                                                  ParameterType defaultValue,
-                                                  std::string prefix)
-    : ParameterMeta(parameterName, group, prefix), mProcessCallback(nullptr) {
+                                                  ParameterType defaultValue)
+    : ParameterMeta(parameterName, group), mProcessCallback(nullptr) {
   mValue = defaultValue;
   mValueCache = defaultValue;
   mMutex = std::make_unique<std::mutex>();
@@ -1398,11 +1405,13 @@ ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName,
 }
 
 template <class ParameterType>
-ParameterWrapper<ParameterType>::ParameterWrapper(
-    std::string parameterName, std::string group, ParameterType defaultValue,
-    std::string prefix, ParameterType min, ParameterType max)
+ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName,
+                                                  std::string group,
+                                                  ParameterType defaultValue,
+                                                  ParameterType min,
+                                                  ParameterType max)
     : ParameterWrapper<ParameterType>::ParameterWrapper(parameterName, group,
-                                                        defaultValue, prefix) {
+                                                        defaultValue) {
   mMin = min;
   mMax = max;
   mMutex = std::make_unique<std::mutex>();
@@ -1412,7 +1421,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(
 template <class ParameterType>
 ParameterWrapper<ParameterType>::ParameterWrapper(
     const ParameterWrapper<ParameterType> &param)
-    : ParameterMeta(param.mParameterName, param.mGroup, param.mPrefix) {
+    : ParameterMeta(param.mParameterName, param.mGroup) {
   mMin = param.mMin;
   mMax = param.mMax;
   mProcessCallback = param.mProcessCallback;

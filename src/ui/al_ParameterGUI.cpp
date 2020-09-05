@@ -343,7 +343,7 @@ void ParameterGUI::drawChoice(std::vector<ParameterChoice *> params,
       bool state = value & (1 << i);
       ImGui::PushID((const void *)param);
       if (ImGui::Checkbox((elements[i] + suffix).c_str(), &state)) {
-        value ^= (-(state) ^ value) & (1UL << i); // Set an individual bit
+        value ^= ((!state) ^ value) & (1UL << i); // Set an individual bit
         for (auto *p : params) {
           p->set(value);
         }

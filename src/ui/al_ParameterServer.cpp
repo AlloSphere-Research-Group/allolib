@@ -159,7 +159,7 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, ParameterMeta *param,
   } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) ==
              0) { // ParameterChoice
     ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
-    notifyListeners(OSCaddress, p->get(), src);
+    notifyListeners(OSCaddress, (int32_t)p->get(), src);
   } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) ==
              0) { // ParameterVec3
     ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
