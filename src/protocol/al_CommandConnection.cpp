@@ -56,8 +56,8 @@ void CommandConnection::stop() {
 
 /// =====================================
 ///
-bool CommandServer::ping(double timeoutSecs) {
-  bool allResponded = true;
+std::vector<float> CommandServer::ping(double timeoutSecs) {
+  std::vector<float> pingTimes;
 
   mConnectionsLock.lock();
   for (auto listener : mServerConnections) {
@@ -68,10 +68,10 @@ bool CommandServer::ping(double timeoutSecs) {
     auto startTime = al_steady_time();
     unsigned char message[2] = {0, 0};
 
-    message[0] = COMMAND_PING;
+    message[0] = PING;
     listener->send((const char *)message, 2);
     size_t bytes = 0;
-    // TODO need to check everyone responded
+    // FIXME need to check responses
 
     //    auto endTime = al_steady_time();
     //    if (bytes == 2 && message[0] == COMMAND_PONG) {
@@ -88,7 +88,7 @@ bool CommandServer::ping(double timeoutSecs) {
 
   mConnectionsLock.unlock();
 
-  return allResponded;
+  return pingTimes;
 }
 
 size_t CommandServer::connectionCount() {
@@ -133,7 +133,7 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
         uint8_t message[16];
         int bytesRecv = incomingConnectionSocket->recv((char *)message, 16);
         if (bytesRecv > 0 && bytesRecv < 9) {
-          if (message[0] == COMMAND_HANDSHAKE) {
+          if (message[0] == HANDSHAKE) {
             uint16_t port;
             Convert::from_bytes((const uint8_t *)&message[1], port);
 
@@ -143,7 +143,7 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                         << std::endl;
             }
 
-            message[0] = COMMAND_HANDSHAKE_ACK;
+            message[0] = HANDSHAKE_ACK;
             message[1] = '\0';
 
             auto bytesSent =
@@ -158,23 +158,31 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
             mConnectionThreads.emplace_back(
                 std::make_unique<std::thread>([&](al::Socket *client) {
                   while (mRunning) {
-                    uint8_t commandMessage[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-                    size_t bytes = client->recv((char *)commandMessage, 8);
+                    uint8_t commandMessage[1024];
+                    size_t bytes = client->recv((char *)commandMessage, 1024);
 
-                    if (bytes > 0 && bytes < 9) {
-                      if (commandMessage[0] == COMMAND_PONG) {
+                    if (bytes > 0 && bytes < 1025) {
+                      if (commandMessage[0] == PONG) {
                         if (mVerbose) {
                           std::cout << "Got pong for " << client->address()
                                     << ":" << client->port() << std::endl;
                         }
+                      } else if (commandMessage[0] == GOODBYE) {
+                        std::cerr << "Goodbye not implemented" << std::endl;
+                      } else if (commandMessage[0] == HANDSHAKE) {
+                        std::cerr << "Unexpected handshake received"
+                                  << std::endl;
                       } else {
-                        if (!processIncomingMessage(commandMessage, bytes,
-                                                    client)) {
-                          std::cerr << "ERROR processing server message"
-                                    << std::endl;
+                        Message message(commandMessage, bytes);
+                        while (!message.empty()) {
+                          message.print();
+                          if (!processIncomingMessage(message, client)) {
+                            std::cerr << "ERROR processing server message"
+                                      << std::endl;
+                          }
                         }
                       }
-                    } else if (bytes != SIZE_MAX) {
+                    } else if (bytes != SIZE_MAX && bytes != 0) {
                       std::cerr << "ERROR unexpected command size" << bytes
                                 << std::endl;
                       mRunning = false;
@@ -256,17 +264,15 @@ uint16_t CommandServer::waitForConnections(uint16_t connectionCount,
   return 0;
 }
 
-bool CommandServer::sendCommand(uint8_t command) {
+bool CommandServer::sendMessage(std::vector<uint8_t> message) {
   bool ret = true;
   for (auto listener : mServerConnections) {
     if (mVerbose) {
       std::cout << "Sending command to " << listener->address() << ":"
                 << listener->port() << std::endl;
     }
-    unsigned char message[2] = {0, 0};
-
-    message[0] = command;
-    ret &= listener->send((const char *)message, 2) == 2;
+    ret &= listener->send((const char *)message.data(), message.size()) ==
+           message.size();
   }
   return ret;
 }
@@ -292,7 +298,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
     mState = CommandConnection::CLIENT;
     mRunning = true;
     unsigned char message[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    message[0] = COMMAND_HANDSHAKE;
+    message[0] = HANDSHAKE;
     auto b = Convert::to_bytes(mSocket.port());
     message[1] = b[0];
     message[2] = b[1];
@@ -302,7 +308,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
       std::cerr << "ERROR sending handshake" << std::endl;
     }
     size_t bytesRecv = mSocket.recv((char *)message, 8);
-    if (bytesRecv == 2 && message[0] == COMMAND_HANDSHAKE_ACK) {
+    if (bytesRecv == 2 && message[0] == HANDSHAKE_ACK) {
       if (mVerbose) {
         std::cout << "Client got handshake ack" << std::endl;
       }
@@ -324,19 +330,22 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
       size_t bytes = mSocket.recv((char *)commandMessage, 8);
 
       if (bytes > 0 && bytes < 9) {
-        if (commandMessage[0] == COMMAND_PING) {
+        if (commandMessage[0] == PING) {
           clientHandlePing(mSocket);
         } else {
-          if (!processIncomingMessage(commandMessage, bytes, &mSocket)) {
-            std::cerr << "ERROR: Unrecognized client message "
-                      << (int)commandMessage[0] << " at " << mSocket.address()
-                      << ":" << mSocket.port() << std::endl;
+          Message message(commandMessage, bytes);
+          while (!message.empty()) {
+            if (!processIncomingMessage(message, &mSocket)) {
+              std::cerr << "ERROR: Unrecognized client message "
+                        << (int)commandMessage[0] << " at " << mSocket.address()
+                        << ":" << mSocket.port() << std::endl;
+            }
           }
         }
-      } /*else if (bytes != SIZE_MAX && bytes != 0) {
-        std::cerr << "ERROR unexpected command size " << bytes << std::endl;
+      } else if (bytes != SIZE_MAX && bytes != 0) {
+        std::cerr << "ERROR unexpected command size" << bytes << std::endl;
         mRunning = false;
-      }*/
+      }
     }
     //        connectionSocket.close();
     if (mVerbose) {
@@ -353,7 +362,7 @@ void CommandClient::clientHandlePing(Socket &client) {
     std::cout << "client got ping request" << std::endl;
   }
   char buffer[2] = {0, 0};
-  buffer[0] = COMMAND_PONG;
+  buffer[0] = PONG;
   //  std::cout << "sending pong" << std::endl;
   int bytesSent = client.send((const char *)buffer, 2);
   if (bytesSent != 2) {

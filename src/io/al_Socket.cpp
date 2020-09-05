@@ -487,7 +487,6 @@ public:
     newSock->mSocketHandle =
         ::accept(mSocketHandle, (struct sockaddr *)&pl_one_addr, &pl_one_len);
     if (newSock->mSocketHandle == SOCKET_ERROR) {
-      printf("Error in syscall accept.");
       return false;
     }
     char address[64];

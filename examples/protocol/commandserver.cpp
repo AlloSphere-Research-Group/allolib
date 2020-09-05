@@ -24,12 +24,11 @@ public:
     }
   }
 
-  bool processIncomingMessage(uint8_t *message, size_t length,
-                              Socket *src) override {
+  bool processIncomingMessage(Message &m, Socket *src) override {
 
-    if (message[0] == TELL_SERVER_ORDER) {
-      std::cout << "Got order from " << src->port() << " for "
-                << (char *)(message + 1) << std::endl;
+    if (m.getByte() == TELL_SERVER_ORDER) {
+      std::cout << "Got order from " << src->port() << " for " << m.getString()
+                << std::endl;
       return true;
     }
     return false;
@@ -38,15 +37,13 @@ public:
 
 class MyClient : public CommandClient {
 public:
-  bool processIncomingMessage(uint8_t *message, size_t length,
-                              Socket *src) override {
+  bool processIncomingMessage(Message &m, Socket *src) override {
 
-    if (message[0] == ASK_CLIENT_FOR_ORDER) {
+    if (m.getByte() == ASK_CLIENT_FOR_ORDER) {
       std::cout << src->port() << ":Let me think..." << std::endl;
 
-      uint8_t message[7] = {0, 'w', 'a', 't', 'e', 'r', 0};
+      uint8_t message[7] = {TELL_SERVER_ORDER, 'w', 'a', 't', 'e', 'r', 0};
 
-      message[0] = TELL_SERVER_ORDER;
       if (!(mSocket.send((const char *)message, 7) == 7)) {
         std::cerr << "ERROR sending reply" << std::endl;
         return false;
@@ -79,18 +76,13 @@ int main() {
   server.waitForConnections(1);
 
   //  Ping from server
-  if (server.ping()) {
-    //    std::cout << "Client responded ping" << std::endl;
-  } else {
-    //    std::cerr << "Ping timeout" << std::endl;
-  }
+  server.ping();
+
   al_sleep(1.0);
   // Send message from server that generates a reply from the client
   server.initiateConversation();
 
   al_sleep(1.0);
-  std::cout << "Press enter to exit." << std::endl;
-  getchar();
   client.stop();
   client2.stop();
   server.stop();

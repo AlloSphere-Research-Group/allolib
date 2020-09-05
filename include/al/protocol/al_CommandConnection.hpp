@@ -60,21 +60,87 @@
 
 namespace al {
 
+class Message {
+public:
+  Message(uint8_t *message, size_t length) : mData(message), mSize(length) {}
+  std::string getString() {
+    size_t startIndex = mReadIndex;
+    while (mReadIndex < mSize && mData[mReadIndex] != 0x00) {
+      mReadIndex++;
+    }
+    std::string s;
+    if (mReadIndex < mSize && mReadIndex != startIndex) {
+      s.resize(mReadIndex - startIndex);
+      s.assign((const char *)&mData[startIndex]);
+    }
+    mReadIndex++; // skip final null
+    return s;
+  }
+
+  bool empty() { return mSize == 0 || mReadIndex == mSize; }
+
+  uint8_t getByte() {
+    uint8_t val = mData[mReadIndex];
+    mReadIndex++;
+    return val;
+  }
+
+  template <typename DataType> DataType get() {
+    DataType val;
+    memcpy(&val, &mData[mReadIndex], sizeof(DataType));
+    mReadIndex += sizeof(DataType);
+    return val;
+  }
+
+  uint32_t getUint32() {
+    uint32_t val;
+    memcpy(&val, &mData[mReadIndex], 4);
+    mReadIndex += 4;
+    return val;
+  }
+
+  std::vector<std::string> getVectorString() {
+    std::vector<std::string> vs;
+    uint8_t count = mData[mReadIndex];
+    mReadIndex++;
+    for (uint8_t i = 0; i < count; i++) {
+      vs.push_back(getString());
+    }
+    return vs;
+  }
+
+  void print() {
+    std::string s;
+    if (mReadIndex < mSize && mSize > 0) {
+      s.resize(mSize - mReadIndex);
+      strncpy((char *)s.data(), (char *)&mData[mReadIndex], mSize - mReadIndex);
+      std::cout << s << std::endl;
+    }
+  }
+
+private:
+  uint8_t *mData;
+  const size_t mSize;
+  size_t mReadIndex{0};
+};
+
 class CommandConnection {
 public:
   typedef enum {
-    COMMAND_HANDSHAKE = 1,
-    COMMAND_HANDSHAKE_ACK,
-    COMMAND_PING,
-    COMMAND_PONG,
-    COMMAND_LAST_INTERNAL,
+    HANDSHAKE = 1,
+    HANDSHAKE_ACK,
+    GOODBYE,
+    GOODBYE_ACK,
+    PING,
+    PONG,
+    COMMAND_QUIT,
+    COMMAND_LAST_INTERNAL = 32,
   } InternalCommands;
 
   virtual bool start(uint16_t port, const char *addr) = 0;
   virtual void stop();
 
-  virtual bool processIncomingMessage(uint8_t *message, size_t length,
-                                      Socket *src) {
+  virtual bool processIncomingMessage(Message &message, Socket *src) {
     return false;
   };
   void verbose(bool verbose = true) { mVerbose = verbose; }
@@ -94,7 +160,8 @@ protected:
 
 class CommandServer : public CommandConnection {
 public:
-  bool start(uint16_t serverPort, const char *serverAddr) override;
+  bool start(uint16_t serverPort = 34450,
+             const char *serverAddr = "localhost") override;
   void stop() override;
 
   /**
@@ -106,17 +173,16 @@ public:
   /**
    * @brief Wait for timeoutSecs for reply from all.
    * @param timeoutSecs
-   * @return true if all nodes replied by timeout
+   * @return ping time for each connection. If time > timeout no ping received
    *
-   * On primary, ping is sent and wait for replies. On secondary, this line
-   * is ignored. If timeout is 0, this function blocks until all replies are
-   * received or
+   * If timeout is 0, this function blocks until all replies are
+   * received
    */
-  bool ping(double timeoutSecs = 1.0);
+  std::vector<float> ping(double timeoutSecs = 1.0);
 
   size_t connectionCount();
 
-  bool sendCommand(uint8_t command);
+  bool sendMessage(std::vector<uint8_t> message);
 
 protected:
 private:
