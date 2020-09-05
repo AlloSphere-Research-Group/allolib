@@ -4,40 +4,6 @@
 
 using namespace al;
 
-#ifdef __GNUG__
-#include <cxxabi.h>
-
-#include <cstdlib>
-#include <memory>
-
-std::string al::demangle(const char *name) {
-  int status = -4; // some arbitrary value to eliminate the compiler warning
-
-  // enable c++11 by passing the flag -std=c++11 to g++
-  std::unique_ptr<char, void (*)(void *)> res{
-      abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
-
-  return (status == 0) ? res.get() : name;
-}
-
-#else
-
-#if AL_WINDOWS
-
-// does nothing if not g++
-std::string al::demangle(const char *name) {
-  // Windows prepends "struct " or "class " here, so remove it
-  auto demangled = std::string(name);
-  return demangled.substr(demangled.find(' ') + 1);
-}
-
-#else
-// does nothing if not g++
-std::string al::demangle(const char *name) { return name; }
-#endif
-
-#endif
-
 int al::asciiToIndex(int asciiKey, int offset) {
   switch (asciiKey) {
   case '1':
@@ -134,14 +100,14 @@ int al::asciiToMIDI(int asciiKey, int offset) {
     return offset + 73;
   case '3':
     return offset + 75;
-    //	case '4': return offset + 3;
+  //	case '4': return offset + 3;
   case '5':
     return offset + 78;
   case '6':
     return offset + 80;
   case '7':
     return offset + 82;
-    //	case '8': return offset + 7;
+  //	case '8': return offset + 7;
   case '9':
     return offset + 85;
   case '0':
@@ -168,19 +134,19 @@ int al::asciiToMIDI(int asciiKey, int offset) {
   case 'p':
     return offset + 88;
 
-    //	case 'a': return offset + 20;
+  //	case 'a': return offset + 20;
   case 's':
     return offset + 61;
   case 'd':
     return offset + 63;
-    //	case 'f': return offset + 23;
+  //	case 'f': return offset + 23;
   case 'g':
     return offset + 66;
   case 'h':
     return offset + 68;
   case 'j':
     return offset + 70;
-    //	case 'k': return offset + 27;
+  //	case 'k': return offset + 27;
   case 'l':
     return offset + 73;
   case ';':
@@ -236,8 +202,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterMenu *>(param)->setNoCalls(it->get<float>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterString).name()) == 0) {
-          static_cast<ParameterString *>(param)->setNoCalls(
-              std::to_string(it->get<float>()));
+          static_cast<ParameterString *>(param)
+              ->setNoCalls(std::to_string(it->get<float>()));
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -246,12 +212,12 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
       } else if (it->type() == ParameterField::STRING) {
         if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
             0) {
-          static_cast<ParameterString *>(param)->setNoCalls(
-              it->get<std::string>());
+          static_cast<ParameterString *>(param)
+              ->setNoCalls(it->get<std::string>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterMenu).name()) == 0) {
-          static_cast<ParameterMenu *>(param)->setCurrent(
-              it->get<std::string>(), noCalls);
+          static_cast<ParameterMenu *>(param)
+              ->setCurrent(it->get<std::string>(), noCalls);
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -273,8 +239,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterMenu *>(param)->set(it->get<float>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterString).name()) == 0) {
-          static_cast<ParameterString *>(param)->set(
-              std::to_string(it->get<float>()));
+          static_cast<ParameterString *>(param)
+              ->set(std::to_string(it->get<float>()));
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -286,8 +252,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterString *>(param)->set(it->get<std::string>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterMenu).name()) == 0) {
-          static_cast<ParameterMenu *>(param)->setCurrent(
-              it->get<std::string>(), noCalls);
+          static_cast<ParameterMenu *>(param)
+              ->setCurrent(it->get<std::string>(), noCalls);
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "

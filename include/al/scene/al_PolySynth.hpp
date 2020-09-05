@@ -52,10 +52,9 @@
 #include "al/io/al_AudioIOData.hpp"
 #include "al/types/al_SingleRWRingBuffer.hpp"
 #include "al/ui/al_Parameter.hpp"
+#include "al/io/al_File.hpp"
 
 namespace al {
-
-std::string demangle(const char *name); // Utility function.
 
 int asciiToIndex(int asciiKey, int offset = 0);
 
@@ -658,8 +657,7 @@ public:
    */
   void registerTriggerOnCallback(
       std::function<bool(SynthVoice *voice, int offsetFrames, int id,
-                         void *userData)>
-          cb,
+                         void *userData)> cb,
       void *userData = nullptr);
 
   /**
@@ -764,8 +762,7 @@ public:
   void setVoiceBusChannels(uint16_t channels) { mVoiceBusChannels = channels; }
 
   typedef const std::function<void(AudioIOData &internalVoiceIO,
-                                   Pose &channelPose)>
-      BusRoutingCallback;
+                                   Pose &channelPose)> BusRoutingCallback;
 
   /**
    * @brief setBusRoutingCallback
@@ -977,8 +974,7 @@ protected:
 
   typedef std::pair<
       std::function<bool(SynthVoice *voice, int offsetFrames, int id, void *)>,
-      void *>
-      TriggerOnCallback;
+      void *> TriggerOnCallback;
   std::vector<TriggerOnCallback> mTriggerOnCallbacks;
 
   typedef std::pair<std::function<bool(int id, void *)>, void *>

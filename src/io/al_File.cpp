@@ -1,6 +1,6 @@
 #include "al/io/al_File.hpp"
 
-#include <stdlib.h>  // realpath (POSIX), _fullpath (Windows)
+#include <stdlib.h> // realpath (POSIX), _fullpath (Windows)
 
 #include "minFileSys.hpp"
 
@@ -8,8 +8,8 @@
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #define NOMINMAX
-#include <direct.h>   // _getcwd
-#include <windows.h>  // TCHAR, LPCTSTR
+#include <direct.h>  // _getcwd
+#include <windows.h> // TCHAR, LPCTSTR
 #define platform_getcwd _getcwd
 #ifndef PATH_MAX
 #define PATH_MAX 260
@@ -18,13 +18,47 @@
 #else
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>  // getcwd (POSIX)
+#include <unistd.h> // getcwd (POSIX)
 #define platform_getcwd getcwd
 #endif
 
 #include <cstring>
 #include <iostream>
 #include <memory>
+
+#ifdef __GNUG__
+#include <cxxabi.h>
+
+#include <cstdlib>
+#include <memory>
+
+std::string al::demangle(const char *name) {
+  int status = -4; // some arbitrary value to eliminate the compiler warning
+
+  // enable c++11 by passing the flag -std=c++11 to g++
+  std::unique_ptr<char, void (*)(void *)> res{
+      abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
+
+  return (status == 0) ? res.get() : name;
+}
+
+#else
+
+#if AL_WINDOWS
+
+// does nothing if not g++
+std::string al::demangle(const char *name) {
+  // Windows prepends "struct " or "class " here, so remove it
+  auto demangled = std::string(name);
+  return demangled.substr(demangled.find(' ') + 1);
+}
+
+#else
+// does nothing if not g++
+std::string al::demangle(const char *name) { return name; }
+#endif
+
+#endif
 
 namespace al {
 
@@ -40,12 +74,14 @@ namespace al {
 
 File::File(std::string path, std::string mode, bool open_)
     : mPath(path), mMode(mode), mContent(0), mSizeBytes(0), mFP(0) {
-  if (open_) open();
+  if (open_)
+    open();
 }
 
-File::File(const FilePath& path, std::string mode, bool open_)
+File::File(const FilePath &path, std::string mode, bool open_)
     : mPath(path.filepath()), mMode(mode), mContent(0), mSizeBytes(0), mFP(0) {
-  if (open_) open();
+  if (open_)
+    open();
 }
 
 File::~File() {
@@ -54,7 +90,8 @@ File::~File() {
 }
 
 void File::allocContent(int n) {
-  if (mContent) freeContent();
+  if (mContent)
+    freeContent();
   mContent = new char[n + 1];
   mContent[n] = '\0';
 }
@@ -72,7 +109,7 @@ void File::getSize() {
   mSizeBytes = r;
 }
 
-bool File::open(const std::string& path_, const std::string& mode_) {
+bool File::open(const std::string &path_, const std::string &mode_) {
   path(path_);
   mode(mode_);
   return open();
@@ -90,12 +127,13 @@ bool File::open() {
 }
 
 void File::close() {
-  if (opened()) fclose(mFP);
+  if (opened())
+    fclose(mFP);
   mFP = 0;
   mSizeBytes = 0;
 }
 
-const char* File::readAll() {
+const char *File::readAll() {
   if (opened() && mMode[0] == 'r') {
     int n = size();
     // printf("reading %d bytes from %s\n", n, path().c_str());
@@ -108,14 +146,14 @@ const char* File::readAll() {
   return mContent;
 }
 
-std::string File::read(const std::string& path) {
+std::string File::read(const std::string &path) {
   File f(path, "rb");
   f.open();
   auto str = f.readAll();
   return str ? str : "";
 }
 
-int File::write(const std::string& path, const void* v, int size, int items) {
+int File::write(const std::string &path, const void *v, int size, int items) {
   File f(path, "w");
   int r = 0;
   if (f.open()) {
@@ -125,11 +163,11 @@ int File::write(const std::string& path, const void* v, int size, int items) {
   return r;
 }
 
-int File::write(const std::string& path, const std::string& data) {
+int File::write(const std::string &path, const std::string &data) {
   return File::write(path, &data[0], data.size());
 }
 
-bool File::remove(const std::string& path) {
+bool File::remove(const std::string &path) {
   if (!File::isDirectory(path)) {
     // return ::remove(path.c_str()) == 0;
     return minFileSys::deleteFile(path.c_str());
@@ -137,7 +175,7 @@ bool File::remove(const std::string& path) {
   return false;
 }
 
-bool File::copy(const std::string& srcPath, const std::string& dstPath,
+bool File::copy(const std::string &srcPath, const std::string &dstPath,
                 unsigned int bufferSize) {
   std::unique_ptr<char> buffer(new char[bufferSize]);
   if (!File::exists(srcPath) || File::isDirectory(srcPath)) {
@@ -169,7 +207,7 @@ bool File::copy(const std::string& srcPath, const std::string& dstPath,
   return writeComplete;
 }
 
-std::string File::conformDirectory(const std::string& path) {
+std::string File::conformDirectory(const std::string &path) {
   if (path[0]) {
     if (AL_FILE_DELIMITER != path[path.size() - 1]) {
       return path + AL_FILE_DELIMITER;
@@ -179,7 +217,7 @@ std::string File::conformDirectory(const std::string& path) {
   return "." AL_FILE_DELIMITER_STR;
 }
 
-std::string File::conformPathToOS(const std::string& path) {
+std::string File::conformPathToOS(const std::string &path) {
   std::string res;
 
   // Ensure delimiters are correct
@@ -202,7 +240,7 @@ std::string File::conformPathToOS(const std::string& path) {
         }
       }
     } else {
-      if (c == '.' && i > 0) {  // Don't remove first dot
+      if (c == '.' && i > 0) { // Don't remove first dot
         previousIsDot = true;
       } else {
         previousIsDot = false;
@@ -219,19 +257,19 @@ std::string File::conformPathToOS(const std::string& path) {
   return res;
 }
 
-std::string File::absolutePath(const std::string& path) {
+std::string File::absolutePath(const std::string &path) {
 #ifdef AL_WINDOWS
   TCHAR dirPart[4096];
-  TCHAR** filePart = {NULL};
+  TCHAR **filePart = {NULL};
   GetFullPathName((LPCTSTR)path.c_str(), sizeof(dirPart), dirPart, filePart);
-  std::string result = (char*)dirPart;
+  std::string result = (char *)dirPart;
   if (filePart != NULL && *filePart != 0) {
-    result += (char*)*filePart;
+    result += (char *)*filePart;
   }
   return result;
 #else
   char temp[PATH_MAX];
-  char* result = realpath(path.c_str(), temp);
+  char *result = realpath(path.c_str(), temp);
   return result ? result : "";
 #endif
 }
@@ -244,20 +282,20 @@ std::string File::currentPath() {
   return File::conformPathToOS(currentDir);
 }
 
-std::string File::baseName(const std::string& path, const std::string& suffix) {
-  auto posSlash =
-      path.find_last_of("/\\");  // handle '/' or '\' path delimiters
+std::string File::baseName(const std::string &path, const std::string &suffix) {
+  auto posSlash = path.find_last_of("/\\"); // handle '/' or '\' path delimiters
   if (path.npos == posSlash)
-    posSlash = 0;  // no slash
+    posSlash = 0; // no slash
   else
     ++posSlash;
   auto posSuffix = suffix.empty() ? path.npos : path.find(suffix, posSlash);
   auto len = path.npos;
-  if (path.npos != posSuffix) len = posSuffix - posSlash;
+  if (path.npos != posSuffix)
+    len = posSuffix - posSlash;
   return path.substr(posSlash, len);
 }
 
-std::string File::directory(const std::string& path) {
+std::string File::directory(const std::string &path) {
   size_t pos = path.find_last_of(AL_FILE_DELIMITER);
   if (std::string::npos != pos) {
     return path.substr(0, pos + 1);
@@ -265,7 +303,7 @@ std::string File::directory(const std::string& path) {
   return "." AL_FILE_DELIMITER_STR;
 }
 
-std::string File::extension(const std::string& path) {
+std::string File::extension(const std::string &path) {
   size_t pos = path.find_last_of('.');
   if (path.npos != pos) {
     return path.substr(pos);
@@ -273,7 +311,7 @@ std::string File::extension(const std::string& path) {
   return "";
 }
 
-static std::string stripEndSlash(const std::string& path) {
+static std::string stripEndSlash(const std::string &path) {
   if (path.size() < 2) {
     return path;
   }
@@ -283,16 +321,16 @@ static std::string stripEndSlash(const std::string& path) {
   return path;
 }
 
-bool File::exists(const std::string& path) {
+bool File::exists(const std::string &path) {
   // struct stat s;
   // return ::stat(stripEndSlash(path).c_str(), &s) == 0;
   return minFileSys::pathExists(path);
 }
 
-bool File::isDirectory(const std::string& path) {
+bool File::isDirectory(const std::string &path) {
   struct stat s;
-  if (0 == ::stat(stripEndSlash(path).c_str(), &s)) {  // exists?
-    if (s.st_mode & S_IFDIR) {                         // is dir?
+  if (0 == ::stat(stripEndSlash(path).c_str(), &s)) { // exists?
+    if (s.st_mode & S_IFDIR) {                        // is dir?
       return true;
     }
   }
@@ -300,32 +338,34 @@ bool File::isDirectory(const std::string& path) {
   return false;
 }
 
-bool File::searchBack(std::string& prefixPath, const std::string& matchPath,
+bool File::searchBack(std::string &prefixPath, const std::string &matchPath,
                       int maxDepth) {
   if (prefixPath[0]) {
     prefixPath = conformDirectory(prefixPath);
   }
   int i = 0;
   for (; i < maxDepth; ++i) {
-    if (File::exists(prefixPath + matchPath)) break;
+    if (File::exists(prefixPath + matchPath))
+      break;
     prefixPath += ".." AL_FILE_DELIMITER_STR;
   }
   return i < maxDepth;
 }
 
-bool File::searchBack(std::string& path, int maxDepth) {
+bool File::searchBack(std::string &path, int maxDepth) {
   std::string prefix = "";
   bool r = searchBack(prefix, path);
-  if (r) path = prefix + path;
+  if (r)
+    path = prefix + path;
   return r;
 }
 
-FilePath::FilePath(const std::string& file, const std::string& path)
+FilePath::FilePath(const std::string &file, const std::string &path)
     : mPath(path), mFile(file) {
   mPath = File::conformPathToOS(mPath);
 }
 
-FilePath::FilePath(const std::string& fullpath) {
+FilePath::FilePath(const std::string &fullpath) {
   size_t found = fullpath.rfind(AL_FILE_DELIMITER);
   if (found != std::string::npos) {
     mPath = fullpath.substr(0, found + 1);
@@ -337,47 +377,47 @@ FilePath::FilePath(const std::string& fullpath) {
 }
 
 // bool Dir::make(const std::string& path, bool recursive)
-bool Dir::make(const std::string& path) {
+bool Dir::make(const std::string &path) {
   // return Impl().make(path, -1, recursive);
   return minFileSys::createDir(path);
 }
 
-bool Dir::remove(const std::string& path) {
+bool Dir::remove(const std::string &path) {
   // return Impl().remove(path);
   return minFileSys::deleteDir(path);
 }
 
-bool Dir::removeRecursively(const std::string& path) {
+bool Dir::removeRecursively(const std::string &path) {
   // return Impl().removeRecursively(path);
   return minFileSys::deleteDirRecursively(path);
 }
 
 void FileList::sort() {
   std::sort(mFiles.begin(), mFiles.end(),
-            [](const FilePath& a, const FilePath& b) -> bool {
+            [](const FilePath &a, const FilePath &b) -> bool {
               return a.filepath() > b.filepath();
             });
 }
 
-void FileList::print(std::ostream& stream) const {
+void FileList::print(std::ostream &stream) const {
   stream << "FileList:" << std::endl;
   std::vector<FilePath>::const_iterator it = mFiles.begin();
   while (it != mFiles.end()) {
-    const FilePath& f = (*it++);
+    const FilePath &f = (*it++);
     stream << f.filepath() << std::endl;
   }
 }
 
-SearchPaths::SearchPaths(const std::string& file) {
+SearchPaths::SearchPaths(const std::string &file) {
   FilePath fp(file);
   addAppPaths(fp.path());
 }
 
-SearchPaths::SearchPaths(int argc, char* const argv[], bool recursive) {
+SearchPaths::SearchPaths(int argc, char *const argv[], bool recursive) {
   addAppPaths(argc, argv, recursive);
 }
 
-SearchPaths::SearchPaths(const SearchPaths& cpy)
+SearchPaths::SearchPaths(const SearchPaths &cpy)
     : mSearchPaths(cpy.mSearchPaths), mAppPath(cpy.mAppPath) {}
 
 void SearchPaths::addAppPaths(std::string path, bool recursive) {
@@ -386,14 +426,14 @@ void SearchPaths::addAppPaths(std::string path, bool recursive) {
   addSearchPath(filepath, recursive);
 }
 
-void SearchPaths::addAppPaths(int argc, const char** argv, bool recursive) {
+void SearchPaths::addAppPaths(int argc, const char **argv, bool recursive) {
   addAppPaths(recursive);
   if (argc > 0) {
     addAppPaths(File::directory(argv[0]), recursive);
   }
 }
 
-void SearchPaths::addAppPaths(int argc, char* const argv[], bool recursive) {
+void SearchPaths::addAppPaths(int argc, char *const argv[], bool recursive) {
   addAppPaths(recursive);
   if (argc > 0) {
     addAppPaths(File::directory(argv[0]), recursive);
@@ -408,7 +448,7 @@ void SearchPaths::addAppPaths(bool recursive) {
   }
 }
 
-void SearchPaths::addSearchPath(const std::string& src, bool recursive) {
+void SearchPaths::addSearchPath(const std::string &src, bool recursive) {
   std::string path = File::conformDirectory(src);
 
   // check for duplicates
@@ -424,18 +464,18 @@ void SearchPaths::addSearchPath(const std::string& src, bool recursive) {
   mSearchPaths.push_front(searchpath(path, recursive));
 }
 
-void SearchPaths::print(std::ostream& stream) const {
+void SearchPaths::print(std::ostream &stream) const {
   stream << "SearchPath " << this << " appPath: " << appPath() << std::endl;
   std::list<searchpath>::const_iterator it = mSearchPaths.begin();
   while (it != mSearchPaths.end()) {
-    const SearchPaths::searchpath& sp = (*it++);
+    const SearchPaths::searchpath &sp = (*it++);
     stream << "SearchPath" << this << " appPath: " << sp.first
            << "(recursive: " << sp.second << ")" << std::endl;
   }
 }
 
-FilePath SearchPaths::find(const std::string& filename) {
-  for (auto const& s : mSearchPaths) {
+FilePath SearchPaths::find(const std::string &filename) {
+  for (auto const &s : mSearchPaths) {
     auto const path = s.first;
     if (!minFileSys::pathExists(path)) {
       continue;
@@ -451,9 +491,9 @@ FilePath SearchPaths::find(const std::string& filename) {
   return FilePath();
 }
 
-FileList SearchPaths::filter(bool (*f)(FilePath const&)) {
+FileList SearchPaths::filter(bool (*f)(FilePath const &)) {
   FileList filtered;
-  for (auto const& s : mSearchPaths) {
+  for (auto const &s : mSearchPaths) {
     auto const path = s.first;
     if (!minFileSys::pathExists(path)) {
       continue;
@@ -468,7 +508,7 @@ FileList SearchPaths::filter(bool (*f)(FilePath const&)) {
 
 FileList SearchPaths::listAll() {
   FileList fileList;
-  for (auto const& s : mSearchPaths) {
+  for (auto const &s : mSearchPaths) {
     auto const path = s.first;
     if (!minFileSys::pathExists(path)) {
       continue;
@@ -481,12 +521,12 @@ FileList SearchPaths::listAll() {
   return fileList;
 }
 
-FileList itemListInDir(std::string const& dir) {
+FileList itemListInDir(std::string const &dir) {
   auto dir_ = File::conformDirectory(dir);
   FileList fileList;
   std::vector<std::string> children;
   minFileSys::readDir(dir, children);
-  for (auto const& c : children) {
+  for (auto const &c : children) {
     if (c == "." || c == "..") {
       continue;
     }
@@ -495,12 +535,12 @@ FileList itemListInDir(std::string const& dir) {
   return fileList;
 }
 
-FileList fileListFromDir(std::string const& dir) {
+FileList fileListFromDir(std::string const &dir) {
   auto dir_ = File::conformDirectory(dir);
   FileList fileList;
   std::vector<std::string> children;
   minFileSys::readDir(dir, children);
-  for (auto const& c : children) {
+  for (auto const &c : children) {
     if (c == "." || c == "..") {
       continue;
     }
@@ -515,12 +555,12 @@ FileList fileListFromDir(std::string const& dir) {
   return fileList;
 }
 
-FilePath searchFileFromDir(std::string const& filename,
-                           std::string const& dir) {
+FilePath searchFileFromDir(std::string const &filename,
+                           std::string const &dir) {
   auto dir_ = File::conformDirectory(dir);
   std::vector<std::string> children;
   minFileSys::readDir(dir_, children);
-  for (auto const& c : children) {
+  for (auto const &c : children) {
     if (c == "." || c == "..") {
       continue;
     }
@@ -538,13 +578,13 @@ FilePath searchFileFromDir(std::string const& filename,
   return FilePath();
 }
 
-FileList filterInDir(std::string const& dir,
-                     std::function<bool(FilePath const&)> f, bool recursive) {
+FileList filterInDir(std::string const &dir,
+                     std::function<bool(FilePath const &)> f, bool recursive) {
   FileList filtered;
   auto dir_ = File::conformDirectory(dir);
   std::vector<std::string> children;
   minFileSys::readDir(dir_, children);
-  for (auto const& c : children) {
+  for (auto const &c : children) {
     if (c == "." || c == "..") {
       continue;
     }
@@ -562,7 +602,7 @@ FileList filterInDir(std::string const& dir,
   return filtered;
 }
 
-bool checkExtension(std::string const& filename, std::string const& extension) {
+bool checkExtension(std::string const &filename, std::string const &extension) {
   int filelen = filename.size();
   int extlen = extension.size();
   if (filelen <= extlen) {
@@ -574,8 +614,8 @@ bool checkExtension(std::string const& filename, std::string const& extension) {
   return false;
 }
 
-bool checkExtension(FilePath const& filepath, std::string const& extension) {
+bool checkExtension(FilePath const &filepath, std::string const &extension) {
   return checkExtension(filepath.file(), extension);
 }
 
-}  // namespace al
+} // namespace al
