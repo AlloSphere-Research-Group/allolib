@@ -545,7 +545,7 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
   PresetHandlerState &state = stateMap[presetHandler];
   float fontSize = ImGui::GetFontSize();
 
-  std::string id = std::to_string((unsigned long)presetHandler);
+  std::string id = std::to_string((uint64_t)presetHandler);
   std::string suffix = "##PresetHandler" + id;
   ImGui::PushID(suffix.c_str());
 
@@ -748,7 +748,7 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
     }
   }
   SequencerState &state = stateMap[presetSequencer];
-  std::string id = std::to_string((unsigned long)presetSequencer);
+  std::string id = std::to_string((uint64_t)presetSequencer);
   std::string suffix = "##PresetSequencer" + id;
   ImGui::PushID(suffix.c_str());
   if (ImGui::CollapsingHeader("Preset Sequencer",
@@ -879,7 +879,7 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
   }
   SynthSequencerState &state = stateMap[synthSequencer];
 
-  std::string id = std::to_string((unsigned long)synthSequencer);
+  std::string id = std::to_string((uint64_t)synthSequencer);
   std::string suffix = "##EventSequencer" + id;
   ImGui::PushID(suffix.c_str());
   std::string headerLabel = "Event Sequencer";
@@ -999,7 +999,7 @@ void ParameterGUI::drawParameterMIDI(ParameterMIDI *midi) {
   }
   ParameterMIDIState &state = stateMap[midi];
 
-  ImGui::PushID(std::to_string((unsigned long)midi).c_str());
+  ImGui::PushID(std::to_string((uint64_t)midi).c_str());
   if (ImGui::CollapsingHeader("Paramter MIDI",
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -1061,7 +1061,7 @@ void ParameterGUI::drawPresetMIDI(PresetMIDI *presetMidi) {
   }
   PresetMIDIState &state = stateMap[presetMidi];
 
-  ImGui::PushID(std::to_string((unsigned long)presetMidi).c_str());
+  ImGui::PushID(std::to_string((uint64_t)presetMidi).c_str());
   if (ImGui::CollapsingHeader("Preset MIDI",
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -1115,7 +1115,7 @@ void ParameterGUI::drawAudioIO(AudioIO *io) {
     updateDevices(stateMap[io]);
   }
   AudioIOState &state = stateMap[io];
-  ImGui::PushID(std::to_string((unsigned long)io).c_str());
+  ImGui::PushID(std::to_string((uint64_t)io).c_str());
   if (ImGui::CollapsingHeader("Audio", ImGuiTreeNodeFlags_CollapsingHeader |
                                            ImGuiTreeNodeFlags_DefaultOpen)) {
     if (io->isOpen()) {
@@ -1235,7 +1235,7 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
 
 void ParameterGUI::drawBundle(ParameterBundle *bundle) {
   auto name = bundle->name();
-  ImGui::PushID((name + std::to_string((unsigned long)bundle)).c_str());
+  ImGui::PushID((name + std::to_string((uint64_t)bundle)).c_str());
 
   if (ImGui::CollapsingHeader(name.c_str())) {
     for (ParameterMeta *param : bundle->parameters()) {

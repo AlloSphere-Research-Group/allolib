@@ -1273,9 +1273,9 @@ public:
       if (mElements[i] == name) {
         uint64_t value = get();
         if (selected) {
-          value |= 1L << i;
+          value |= UINT64_C(1) << i;
         } else {
-          value ^= value | 1L << i;
+          value ^= value | UINT64_C(1) << i;
         }
         set(value);
       }
@@ -1300,7 +1300,7 @@ public:
     uint64_t value = 0;
     for (auto onBit : on) {
       if (onBit < 64) {
-        value |= 1 << onBit;
+        value |= UINT64_C(1) << onBit;
       } else {
         std::cerr << __FILE__ << " " << __FUNCTION__
                   << " bit index too high. Ignoring" << std::endl;
