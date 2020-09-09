@@ -1111,7 +1111,7 @@ void AudioIO::channelsBus(int num) {
   AudioIOData::channelsBus(num);
 }
 
-void AudioIO::setStreamName(std::string name) { mBackend-> }
+void AudioIO::setStreamName(std::string name) { mBackend->setStreamName(name); }
 
 void AudioIO::channels(int num, bool forOutput) {
   // printf("Requested %d %s channels\n", num, forOutput?"output":"input");
