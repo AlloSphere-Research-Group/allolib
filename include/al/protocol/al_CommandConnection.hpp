@@ -118,6 +118,17 @@ public:
     }
   }
 
+  uint8_t *data() { return mData; }
+  size_t size() { return mSize; }
+
+  void pushReadIndex(size_t numBytes) {
+    mReadIndex += numBytes;
+    if (mReadIndex > mSize) {
+      std::cerr << "Message pushed too far" << std::endl;
+    }
+  }
+  void setReadIndex(size_t numBytes) { mReadIndex = numBytes; }
+
 private:
   uint8_t *mData;
   const size_t mSize;
@@ -181,8 +192,15 @@ public:
   std::vector<float> ping(double timeoutSecs = 1.0);
 
   size_t connectionCount();
-
-  bool sendMessage(std::vector<uint8_t> message);
+  /**
+   * @brief sendMessage
+   * @param message
+   * @param dst
+   * @return
+   *
+   * if dst is nullptr, the message is sent to all registered sockets
+   */
+  bool sendMessage(std::vector<uint8_t> message, Socket *dst = nullptr);
 
 protected:
 private:

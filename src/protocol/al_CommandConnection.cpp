@@ -264,15 +264,23 @@ uint16_t CommandServer::waitForConnections(uint16_t connectionCount,
   return 0;
 }
 
-bool CommandServer::sendMessage(std::vector<uint8_t> message) {
+bool CommandServer::sendMessage(std::vector<uint8_t> message, al::Socket *dst) {
   bool ret = true;
-  for (auto listener : mServerConnections) {
-    if (mVerbose) {
-      std::cout << "Sending command to " << listener->address() << ":"
-                << listener->port() << std::endl;
+  if (message.size() == 0) {
+    return false;
+  }
+  if (!dst) {
+    for (auto listener : mServerConnections) {
+      if (mVerbose) {
+        std::cout << "Sending command to " << listener->address() << ":"
+                  << listener->port() << std::endl;
+      }
+      ret &= listener->send((const char *)message.data(), message.size()) ==
+             message.size();
     }
-    ret &= listener->send((const char *)message.data(), message.size()) ==
-           message.size();
+  } else {
+    ret = dst->send((const char *)message.data(), message.size()) ==
+          message.size();
   }
   return ret;
 }
