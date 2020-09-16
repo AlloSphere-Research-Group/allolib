@@ -38,7 +38,7 @@ void SequencerMIDI::open(int deviceIndex) {
       std::cerr << "PresetMIDI Warning: Could not open MIDI port "
                 << deviceIndex << std::endl;
     }
-  } catch (RtMidiError &error) {
+  } catch (RtMidiError & /*error*/) {
     std::cerr << "PresetMIDI Warning: Could not open MIDI port " << deviceIndex
               << std::endl;
   }

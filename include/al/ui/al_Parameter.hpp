@@ -1257,7 +1257,7 @@ public:
   void setElements(std::vector<std::string> &elements, bool allOn = false) {
     mElements = elements;
     min(0);
-    assert((1 << (elements.size() - 1)) < UINT64_MAX);
+    assert(((uint64_t)1 << (elements.size() - 1)) < UINT64_MAX);
     max((uint64_t)1 << (elements.size() - 1));
     if (allOn) {
       uint16_t value = 0;
