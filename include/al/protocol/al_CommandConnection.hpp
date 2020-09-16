@@ -118,8 +118,9 @@ public:
     }
   }
 
-  uint8_t *data() { return mData; }
+  uint8_t *data() { return mData + mReadIndex; }
   size_t size() { return mSize; }
+  size_t remainingBytes() { return mSize - mReadIndex; }
 
   void pushReadIndex(size_t numBytes) {
     mReadIndex += numBytes;
@@ -154,6 +155,7 @@ public:
   virtual bool processIncomingMessage(Message &message, Socket *src) {
     return false;
   };
+
   void verbose(bool verbose = true) { mVerbose = verbose; }
 
 protected:

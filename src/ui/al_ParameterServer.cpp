@@ -187,7 +187,7 @@ void OSCNotifier::startHandshakeServer(std::string address) {
   if (mHandshakeServer.open(handshakeServerPort, address.c_str())) {
     mHandshakeServer.handler(mHandshakeHandler);
     mHandshakeServer.start();
-    std::cout << "Handshake server running on " << address << ":"
+    std::cout << "Parameter OSC Handshake server running on " << address << ":"
               << handshakeServerPort << std::endl;
   } else {
     std::cout << "failed to start handshake server" << std::endl;
