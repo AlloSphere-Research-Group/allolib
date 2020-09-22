@@ -60,6 +60,7 @@
 #include "al/protocol/al_OSC.hpp"
 #include "al/spatial/al_Pose.hpp"
 #include "al/types/al_Color.hpp"
+#include "al/types/al_ValueSource.hpp"
 
 namespace al {
 
@@ -69,11 +70,6 @@ enum class TimeMasterMode {
   TIME_MASTER_UPDATE,
   TIME_MASTER_FREE,
   TIME_MASTER_CPU
-};
-
-struct ValueSource {
-  std::string ipAddr;
-  uint16_t port;
 };
 
 // ParameterField

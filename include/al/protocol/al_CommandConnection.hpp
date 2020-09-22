@@ -57,6 +57,7 @@
 
 #include "al/io/al_Socket.hpp"
 #include "al/types/al_SingleRWRingBuffer.hpp"
+#include "al/types/al_ValueSource.hpp"
 
 namespace al {
 
@@ -156,10 +157,26 @@ public:
     return false;
   };
 
+  /**
+   * @brief sendMessage
+   * @param message
+   * @param dst
+   * @return
+   *
+   * if dst is nullptr, the message is sent to all connected sockets
+   * If src is not nullptr, the message will not be sent to it
+   */
+  virtual bool sendMessage(uint8_t *message, size_t length,
+                           Socket *dst = nullptr, ValueSource *src = nullptr) {
+    return true;
+  };
+
   void verbose(bool verbose = true) { mVerbose = verbose; }
 
 protected:
   typedef enum { SERVER, CLIENT, NONE } BarrierState;
+  uint16_t mVersion = 0,
+           mRevision = 0; // Subclasses must set these to ensure compatibility
   BarrierState mState{BarrierState::NONE};
   std::mutex mConnectionsLock;
   bool mRunning{false};
@@ -167,6 +184,7 @@ protected:
   std::vector<std::unique_ptr<std::thread>> mDataThreads;
   std::vector<std::shared_ptr<al::Socket>>
       mServerConnections; // Only available on server.
+  std::vector<std::pair<uint16_t, uint16_t>> mConnectionVersions;
   al::Socket mSocket; // Bootstrap socket for server, main socket for client.
   bool mVerbose{false};
 };
@@ -202,7 +220,8 @@ public:
    *
    * if dst is nullptr, the message is sent to all registered sockets
    */
-  bool sendMessage(std::vector<uint8_t> message, Socket *dst = nullptr);
+  bool sendMessage(uint8_t *message, size_t length, Socket *dst = nullptr,
+                   ValueSource *src = nullptr) override;
 
 protected:
 private:
@@ -213,7 +232,22 @@ private:
 
 class CommandClient : public CommandConnection {
 public:
-  bool start(uint16_t serverPort, const char *serverAddr) override;
+  bool start(uint16_t serverPort = 34450,
+             const char *serverAddr = "localhost") override;
+
+  bool sendMessage(uint8_t *message, size_t length, Socket *dst = nullptr,
+                   al::ValueSource *src = nullptr) override {
+    bool ret = true;
+    for (auto connection : mServerConnections) {
+      if (!src || (connection->address() != src->ipAddr &&
+                   connection->port() != src->port)) {
+        ret &= connection->send((const char *)message, length) == length;
+      }
+    }
+    return ret;
+  }
+
+  bool isConnected() { return mRunning && mSocket.opened(); }
 
 protected:
   void clientHandlePing(Socket &client);

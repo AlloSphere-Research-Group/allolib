@@ -135,17 +135,26 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
         int bytesRecv = incomingConnectionSocket->recv((char *)message, 1024);
         if (bytesRecv > 0 && bytesRecv < 1025) {
           if (message[0] == HANDSHAKE) {
-            uint16_t port;
-            Convert::from_bytes((const uint8_t *)&message[1], port);
+            uint16_t version = 0;
+            uint16_t revision = 0;
+            if (bytesRecv >= 9) {
+              Convert::from_bytes((const uint8_t *)&message[1], version);
+              Convert::from_bytes((const uint8_t *)&message[5], revision);
+            }
 
             if (mVerbose) {
               std::cout << "Handshake for "
-                        << incomingConnectionSocket->address() << ":" << port
-                        << std::endl;
+                        << incomingConnectionSocket->address() << ":"
+                        << incomingConnectionSocket->port() << std::endl;
+              std::cout << "Protocol version " << version << " revision "
+                        << revision << std::endl;
             }
 
             message[0] = HANDSHAKE_ACK;
             message[1] = '\0';
+            memcpy(message + 2, &mVersion, sizeof(uint16_t));
+            memcpy(message + 2 + sizeof(uint16_t), &mRevision,
+                   sizeof(uint16_t));
 
             auto bytesSent =
                 incomingConnectionSocket->send((const char *)message, 2);
@@ -154,6 +163,8 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
             }
             mConnectionsLock.lock();
             mServerConnections.emplace_back(incomingConnectionSocket);
+            mConnectionVersions.emplace_back(
+                std::pair<uint16_t, uint16_t>{version, revision});
             mConnectionsLock.unlock();
 
             mConnectionThreads.emplace_back(std::make_unique<std::thread>(
@@ -276,23 +287,28 @@ uint16_t CommandServer::waitForConnections(uint16_t connectionCount,
   return 0;
 }
 
-bool CommandServer::sendMessage(std::vector<uint8_t> message, al::Socket *dst) {
+bool CommandServer::sendMessage(uint8_t *message, size_t length,
+                                al::Socket *dst, al::ValueSource *src) {
+
   bool ret = true;
-  if (message.size() == 0) {
+  if (length == 0) {
     return false;
   }
+
   if (!dst) {
-    for (auto listener : mServerConnections) {
-      if (mVerbose) {
-        std::cout << "Sending command to " << listener->address() << ":"
-                  << listener->port() << std::endl;
+    for (auto connection : mServerConnections) {
+      if (!src || (connection->address() != src->ipAddr &&
+                   connection->port() != src->port)) {
+        if (mVerbose) {
+          std::cout << "Sending command to " << connection->address() << ":"
+                    << connection->port() << std::endl;
+        }
+        ret &= connection->send((const char *)message, length) == length;
       }
-      ret &= listener->send((const char *)message.data(), message.size()) ==
-             message.size();
     }
+
   } else {
-    ret = dst->send((const char *)message.data(), message.size()) ==
-          message.size();
+    ret = dst->send((const char *)message, length) == length;
   }
   return ret;
 }
