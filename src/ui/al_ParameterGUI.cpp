@@ -643,7 +643,6 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
       }
       ImGui::Text("Click on a preset number to store.");
     } else {
-      vector<string> mapList = presetHandler->availablePresetMaps();
       //          ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);
       if (ImGui::BeginCombo("Preset Map", state.currentBank.data())) {
         stateMap[presetHandler].mapList = presetHandler->availablePresetMaps();
@@ -683,6 +682,8 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
           file.open(path, ios::out);
           file.close();
           state.newMap = false;
+
+          stateMap[presetHandler].mapList = presetHandler->availablePresetMaps();
         }
         ImGui::SameLine();
         if (ImGui::Button("Cancel")) {
