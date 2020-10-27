@@ -188,6 +188,11 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                                   << std::endl;
                       } else {
                         Message message(commandMessage, bytes);
+                        if (mVerbose) {
+                          std::cout << "Server recieved message from "
+                                    << client->address() << ":"
+                                    << client->port() << std::endl;
+                        }
                         if (!processIncomingMessage(message, client.get())) {
                           std::cerr << "ERROR: Unrecognized client message "
                                     << (int)commandMessage[0] << " at "
@@ -346,7 +351,8 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
     size_t bytesRecv = mSocket.recv((char *)message, 8);
     if (bytesRecv == 2 && message[0] == HANDSHAKE_ACK) {
       if (mVerbose) {
-        std::cout << "Client got handshake ack" << std::endl;
+        std::cout << "Client got handshake ack from " << mSocket.address()
+                  << ":" << mSocket.port() << std::endl;
       }
       mRunning = true;
     } else {
@@ -371,6 +377,10 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
           clientHandlePing(mSocket);
         } else {
           Message message(commandMessage, bytes);
+          if (mVerbose) {
+            std::cout << "Client recieved message from " << mSocket.address()
+                      << ":" << mSocket.port() << std::endl;
+          }
           if (!processIncomingMessage(message, &mSocket)) {
             std::cerr << "ERROR: Unrecognized client message "
                       << (int)commandMessage[0] << " at " << mSocket.address()

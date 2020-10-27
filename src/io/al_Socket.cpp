@@ -496,11 +496,11 @@ public:
                 address, 64);
       break;
 
-    //      case AF_INET6:
-    //        inet_ntop(AF_INET6, &(((struct sockaddr_in6
-    //        *)&pl_one_addr)->sin6_addr),
-    //                  address, 64);
-    //        break;
+      //      case AF_INET6:
+      //        inet_ntop(AF_INET6, &(((struct sockaddr_in6
+      //        *)&pl_one_addr)->sin6_addr),
+      //                  address, 64);
+      //        break;
 
     default:
       strncpy(address, "Unknown AF", 64);
@@ -600,6 +600,8 @@ bool Socket::open(uint16_t port, const char *address, al_sec timeout,
                   int type) {
   std::string addressChecked;
   if (address) {
+    mValueSource.ipAddr = address;
+    mValueSource.port = port;
     addressChecked = address;
   }
   return mImpl->open(port, addressChecked, timeout, type) && onOpen();
@@ -617,8 +619,17 @@ size_t Socket::send(const char *buffer, size_t len) {
 
 bool Socket::listen() { return mImpl->listen(); }
 
-bool Socket::accept(Socket &sock) { return mImpl->accept(sock.mImpl); }
+bool Socket::accept(Socket &sock) {
+  bool accepted = mImpl->accept(sock.mImpl);
+  if (accepted) {
+    sock.mValueSource.ipAddr = sock.address();
+    sock.mValueSource.port = sock.port();
+  }
+  return accepted;
+}
 
 bool SocketClient::onOpen() { return connect(); }
 
 bool SocketServer::onOpen() { return bind(); }
+
+ValueSource *Socket::valueSource() { return &mValueSource; }

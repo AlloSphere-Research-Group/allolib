@@ -171,7 +171,7 @@ public:
     return true;
   };
 
-  void verbose(bool verbose = true) { mVerbose = verbose; }
+  void setVerbose(bool verbose) { mVerbose = verbose; }
 
 protected:
   typedef enum { SERVER, CLIENT, NONE } BarrierState;
@@ -196,9 +196,9 @@ public:
   void stop() override;
 
   /**
- * @brief Block until connectionCount connections are established
- * @return number of connections acquired during wait
- */
+   * @brief Block until connectionCount connections are established
+   * @return number of connections acquired during wait
+   */
   uint16_t waitForConnections(uint16_t connectionCount, double timeout = 60.0);
 
   /**

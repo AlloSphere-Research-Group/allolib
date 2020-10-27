@@ -48,6 +48,7 @@
 #include <string>
 
 #include "al/system/al_Time.hpp"
+#include "al/types/al_ValueSource.hpp"
 
 namespace al {
 
@@ -127,9 +128,9 @@ public:
   ///
   /// @param[in] t	Timeout in seconds.
   ///					If t > 0, the socket blocks with timeout
-  /// t. 					If t = 0, the socket never blocks. 					If
-  /// t < 0, the socket blocks forever. Note that setting the timeout will close
-  /// and re-open the socket.
+  /// t. 					If t = 0, the socket never
+  /// blocks. If t < 0, the socket blocks forever. Note that setting the timeout
+  /// will close and re-open the socket.
   void timeout(al_sec t);
 
   /// Read data from a network
@@ -166,6 +167,8 @@ public:
   /// socket address pair of this connection.
   bool accept(Socket &sock);
 
+  ValueSource *valueSource();
+
 protected:
   // Called after a successful call to open
   virtual bool onOpen() { return true; }
@@ -173,6 +176,7 @@ protected:
 private:
   struct Impl;
   Impl *mImpl;
+  ValueSource mValueSource;
 };
 
 /// Client socket
