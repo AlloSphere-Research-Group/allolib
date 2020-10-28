@@ -294,7 +294,6 @@ uint16_t CommandServer::waitForConnections(uint16_t connectionCount,
 
 bool CommandServer::sendMessage(uint8_t *message, size_t length,
                                 al::Socket *dst, al::ValueSource *src) {
-
   bool ret = true;
   if (length == 0) {
     return false;
@@ -302,10 +301,10 @@ bool CommandServer::sendMessage(uint8_t *message, size_t length,
 
   if (!dst) {
     for (auto connection : mServerConnections) {
-      if (!src || (connection->address() != src->ipAddr &&
-                   connection->port() != src->port)) {
+      if (!src || connection->address() != src->ipAddr ||
+          connection->port() != src->port) {
         if (mVerbose) {
-          std::cout << "Sending command to " << connection->address() << ":"
+          std::cout << "Sending message to " << connection->address() << ":"
                     << connection->port() << std::endl;
         }
         ret &= connection->send((const char *)message, length) == length;
@@ -313,6 +312,10 @@ bool CommandServer::sendMessage(uint8_t *message, size_t length,
     }
 
   } else {
+    if (mVerbose) {
+      std::cout << "Sending message to " << dst->address() << ":" << dst->port()
+                << std::endl;
+    }
     ret = dst->send((const char *)message, length) == length;
   }
   return ret;
@@ -420,4 +423,32 @@ void CommandClient::clientHandlePing(Socket &client) {
   if (bytesSent != 2) {
     std::cerr << "ERROR: sent bytes mismatch for pong" << std::endl;
   }
+}
+
+bool CommandClient::sendMessage(uint8_t *message, size_t length, Socket *dst,
+                                al::ValueSource *src) {
+  bool ret = true;
+  if (length == 0) {
+    return false;
+  }
+
+  if (!dst) {
+    if (!src || mSocket.address() != src->ipAddr ||
+        mSocket.port() != src->port) {
+      if (mVerbose) {
+        std::cout << "Sending message to " << mSocket.address() << ":"
+                  << mSocket.port() << std::endl;
+      }
+      ret = mSocket.send((const char *)message, length) == length;
+    }
+  } else {
+    if (mSocket.address() != dst->address() || mSocket.port() != dst->port()) {
+      if (mVerbose) {
+        std::cout << "Sending message to " << dst->address() << ":"
+                  << dst->port() << std::endl;
+      }
+      ret = dst->send((const char *)message, length) == length;
+    }
+  }
+  return ret;
 }

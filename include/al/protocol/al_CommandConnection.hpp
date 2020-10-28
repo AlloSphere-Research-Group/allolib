@@ -236,16 +236,7 @@ public:
              const char *serverAddr = "localhost") override;
 
   bool sendMessage(uint8_t *message, size_t length, Socket *dst = nullptr,
-                   al::ValueSource *src = nullptr) override {
-    bool ret = true;
-    for (auto connection : mServerConnections) {
-      if (!src || (connection->address() != src->ipAddr &&
-                   connection->port() != src->port)) {
-        ret &= connection->send((const char *)message, length) == length;
-      }
-    }
-    return ret;
-  }
+                   al::ValueSource *src = nullptr) override;
 
   bool isConnected() { return mRunning && mSocket.opened(); }
 
