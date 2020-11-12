@@ -50,9 +50,9 @@
 
 #include "al/graphics/al_Graphics.hpp"
 #include "al/io/al_AudioIOData.hpp"
+#include "al/io/al_File.hpp"
 #include "al/types/al_SingleRWRingBuffer.hpp"
 #include "al/ui/al_Parameter.hpp"
-#include "al/io/al_File.hpp"
 
 namespace al {
 
@@ -657,7 +657,8 @@ public:
    */
   void registerTriggerOnCallback(
       std::function<bool(SynthVoice *voice, int offsetFrames, int id,
-                         void *userData)> cb,
+                         void *userData)>
+          cb,
       void *userData = nullptr);
 
   /**
@@ -748,9 +749,7 @@ public:
    * Always call prepare() after calling this function. The changes are only
    * applied by prepare().
    */
-  void setVoiceMaxOutputChannels(uint16_t channels) {
-    mVoiceMaxOutputChannels = channels;
-  }
+  void setVoiceMaxOutputChannels(uint16_t channels);
 
   /**
    * @brief Determines the number of buses for the internal AudioIOData objects
@@ -762,7 +761,8 @@ public:
   void setVoiceBusChannels(uint16_t channels) { mVoiceBusChannels = channels; }
 
   typedef const std::function<void(AudioIOData &internalVoiceIO,
-                                   Pose &channelPose)> BusRoutingCallback;
+                                   Pose &channelPose)>
+      BusRoutingCallback;
 
   /**
    * @brief setBusRoutingCallback
@@ -772,9 +772,18 @@ public:
    * and prior to the function call to process spatialization. Can be used to
    * route signals to buses.
    */
-  void setBusRoutingCallback(BusRoutingCallback cb) {
-    mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
-  }
+  void setBusRoutingCallback(BusRoutingCallback cb);
+
+  /**
+   * @brief Set channel map for output.
+   * @param channelMap
+   *
+   * The index into the vector refers to the output channel in the voice buffer,
+   * the value is the channel index to write for audio output. This operation
+   * should be performed only when audio is not running. Channel mapping is
+   * ignored in DynamicScene and DistributedScene.
+   */
+  void setChannelMap(std::vector<size_t> channelMap);
 
   /**
    * @brief Set the time in seconds to wait between sequencer updates when time
@@ -974,7 +983,8 @@ protected:
 
   typedef std::pair<
       std::function<bool(SynthVoice *voice, int offsetFrames, int id, void *)>,
-      void *> TriggerOnCallback;
+      void *>
+      TriggerOnCallback;
   std::vector<TriggerOnCallback> mTriggerOnCallbacks;
 
   typedef std::pair<std::function<bool(int id, void *)>, void *>
@@ -1003,6 +1013,7 @@ protected:
   Creators mCreators;
   // Disallow auto allocation for class name. Set in allocateVoice()
   std::vector<std::string> mNoAllocationList;
+  std::vector<size_t> mChannelMap; // Maps synth output to audio channels
 
   bool mRunCPUClock{true};
   double mCpuGranularitySec = 0.001; // 1ms

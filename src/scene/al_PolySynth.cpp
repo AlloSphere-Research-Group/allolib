@@ -202,8 +202,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterMenu *>(param)->setNoCalls(it->get<float>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterString).name()) == 0) {
-          static_cast<ParameterString *>(param)
-              ->setNoCalls(std::to_string(it->get<float>()));
+          static_cast<ParameterString *>(param)->setNoCalls(
+              std::to_string(it->get<float>()));
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -212,12 +212,12 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
       } else if (it->type() == ParameterField::STRING) {
         if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
             0) {
-          static_cast<ParameterString *>(param)
-              ->setNoCalls(it->get<std::string>());
+          static_cast<ParameterString *>(param)->setNoCalls(
+              it->get<std::string>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterMenu).name()) == 0) {
-          static_cast<ParameterMenu *>(param)
-              ->setCurrent(it->get<std::string>(), noCalls);
+          static_cast<ParameterMenu *>(param)->setCurrent(
+              it->get<std::string>(), noCalls);
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -239,8 +239,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterMenu *>(param)->set(it->get<float>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterString).name()) == 0) {
-          static_cast<ParameterString *>(param)
-              ->set(std::to_string(it->get<float>()));
+          static_cast<ParameterString *>(param)->set(
+              std::to_string(it->get<float>()));
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -252,8 +252,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterString *>(param)->set(it->get<std::string>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterMenu).name()) == 0) {
-          static_cast<ParameterMenu *>(param)
-              ->setCurrent(it->get<std::string>(), noCalls);
+          static_cast<ParameterMenu *>(param)->setCurrent(
+              it->get<std::string>(), noCalls);
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -535,7 +535,7 @@ void PolySynth::render(AudioIOData &io) {
           internalAudioIO.frame(offset);
           while (io() && internalAudioIO()) {
             for (int i = 0; i < mVoiceMaxOutputChannels; i++) {
-              io.out(i) += internalAudioIO.out(i);
+              io.out(mChannelMap[i]) += internalAudioIO.out(i);
             }
             for (int i = 0; i < mVoiceBusChannels; i++) {
               io.bus(i) += internalAudioIO.bus(i);
@@ -775,6 +775,26 @@ SynthVoice *PolySynth::allocateVoice(std::string name) {
     }
   }
   return nullptr;
+}
+
+void PolySynth::setVoiceMaxOutputChannels(uint16_t channels) {
+  mVoiceMaxOutputChannels = channels;
+  for (size_t i = 0; i < channels; i++) {
+    mChannelMap[i] = i;
+  }
+}
+
+void PolySynth::setBusRoutingCallback(PolySynth::BusRoutingCallback cb) {
+  mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
+}
+
+void PolySynth::setChannelMap(std::vector<size_t> channelMap) {
+  if (channelMap.size() != mVoiceMaxOutputChannels) {
+    std::cerr << "ERROR setting channel map. " << __FUNCTION__
+              << " in " __FILE__ << ":" << __LINE__ << std::endl;
+    return;
+  }
+  mChannelMap = channelMap;
 }
 
 void PolySynth::startCpuClockThread() {
