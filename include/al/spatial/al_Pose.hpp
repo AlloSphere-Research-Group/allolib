@@ -45,11 +45,11 @@
   Wesley Smith, 2010, wesley.hoke@gmail.com
 */
 
-#include <stdio.h>
-#include <iostream>
 #include "al/math/al_Matrix4.hpp"
 #include "al/math/al_Quat.hpp"
 #include "al/math/al_Vec.hpp"
+#include <iostream>
+#include <stdio.h>
 
 namespace al {
 
@@ -61,13 +61,13 @@ namespace al {
 ///
 /// @ingroup Spatial
 class Pose {
- public:
+public:
   /// @param[in] pos    Initial position
   /// @param[in] ori    Initial orientation
-  Pose(const Vec3d& pos = Vec3d(0), const Quatd& ori = Quatd::identity());
+  Pose(const Vec3d &pos = Vec3d(0), const Quatd &ori = Quatd::identity());
 
   /// Copy constructor
-  Pose(const Pose& p);
+  Pose(const Pose &p);
 
   /// Get identity
   static Pose identity() { return Pose().setIdentity(); }
@@ -75,33 +75,38 @@ class Pose {
   // Arithmetic operations
 
   /// Get pose transformed by another pose
-  Pose operator*(const Pose& v) const { return Pose(*this) *= v; }
+  Pose operator*(const Pose &v) const { return Pose(*this) *= v; }
 
   /// Translate and rotate by argument
-  Pose& operator*=(const Pose& v) {
+  Pose &operator*=(const Pose &v) {
     mVec += v.vec();
     mQuat *= v.quat();
     return *this;
   }
 
+  // Returns true if both vector and quat are equal
+  bool operator==(const Pose &v) const {
+    return (mVec == v.pos()) && (mQuat == v.quat());
+  }
+
   /// Turn to face a given world-coordinate point
-  void faceToward(const Vec3d& p, double amt = 1.);
+  void faceToward(const Vec3d &p, double amt = 1.);
 
   /// Turn to face a given world-coordinate point, while maintaining an up
   /// vector
-  void faceToward(const Vec3d& point, const Vec3d& up, double amt = 1.);
+  void faceToward(const Vec3d &point, const Vec3d &up, double amt = 1.);
 
   /// Get "position" vector
-  Vec3d& pos() { return mVec; }
-  const Vec3d& pos() const { return mVec; }
+  Vec3d &pos() { return mVec; }
+  const Vec3d &pos() const { return mVec; }
 
   /// Get vector component
-  Vec3d& vec() { return mVec; }
-  const Vec3d& vec() const { return mVec; }
+  Vec3d &vec() { return mVec; }
+  const Vec3d &vec() const { return mVec; }
 
   /// Get quaternion component (represents orientation)
-  Quatd& quat() { return mQuat; }
-  const Quatd& quat() const { return mQuat; }
+  Quatd &quat() { return mQuat; }
+  const Quatd &quat() const { return mQuat; }
 
   double x() const { return mVec[0]; }
   double y() const { return mVec[1]; }
@@ -114,8 +119,8 @@ class Pose {
   Mat4d directionMatrix() const;
 
   /// Get the azimuth, elevation & distance from this to another point
-  void toAED(const Vec3d& to, double& azimuth, double& elevation,
-             double& distance) const;
+  void toAED(const Vec3d &to, double &azimuth, double &elevation,
+             double &distance) const;
 
   /// Get world space X unit vector
   Vec3d ux() const { return quat().toVectorX(); }
@@ -128,7 +133,7 @@ class Pose {
 
   /// Get world space unit vectors
   template <class T>
-  void unitVectors(Vec<3, T>& ux, Vec<3, T>& uy, Vec<3, T>& uz) const {
+  void unitVectors(Vec<3, T> &ux, Vec<3, T> &uy, Vec<3, T> &uz) const {
     quat().toVectorX<T>(ux);
     quat().toVectorY<T>(uy);
     quat().toVectorZ<T>(uz);
@@ -136,7 +141,7 @@ class Pose {
 
   /// Get local right, up, and forward unit vectors
   template <class T>
-  void directionVectors(Vec<3, T>& ur, Vec<3, T>& uu, Vec<3, T>& uf) const {
+  void directionVectors(Vec<3, T> &ur, Vec<3, T> &uu, Vec<3, T> &uf) const {
     unitVectors(ur, uu, uf);
     uf = -uf;
   }
@@ -152,12 +157,12 @@ class Pose {
 
   /// Get a linear-interpolated Pose between this and another
   // (useful ingredient for smooth animations, estimations, etc.)
-  Pose lerp(const Pose& target, double amt) const;
+  Pose lerp(const Pose &target, double amt) const;
 
   // Setters
 
   /// Copy all attributes from another Pose
-  Pose& set(Pose& src) {
+  Pose &set(Pose &src) {
     mVec = src.pos();
     mQuat = src.quat();
     // mParentTransform = &(src.parentTransform());
@@ -165,7 +170,7 @@ class Pose {
   }
 
   /// Set state from another Pose
-  Pose& set(const Pose& src) {
+  Pose &set(const Pose &src) {
     mVec = src.vec();
     mQuat = src.quat();
     // mParentTransform = &(src.parentTransform());
@@ -173,7 +178,7 @@ class Pose {
   }
 
   /// Set to identity transform
-  Pose& setIdentity() {
+  Pose &setIdentity() {
     quat().setIdentity();
     vec().set(0);
     // mParentTransform = nullptr;
@@ -181,24 +186,19 @@ class Pose {
   }
 
   /// Set position
-  template <class T>
-  Pose& pos(const Vec<3, T>& v) {
-    return vec(v);
-  }
+  template <class T> Pose &pos(const Vec<3, T> &v) { return vec(v); }
 
   /// Set position from individual components
-  Pose& pos(double x, double y, double z) { return vec(Vec3d(x, y, z)); }
+  Pose &pos(double x, double y, double z) { return vec(Vec3d(x, y, z)); }
 
   /// Set vector component
-  template <class T>
-  Pose& vec(const Vec<3, T>& v) {
+  template <class T> Pose &vec(const Vec<3, T> &v) {
     mVec.set(v);
     return *this;
   }
 
   /// Set quaternion component
-  template <class T>
-  Pose& quat(const Quat<T>& v) {
+  template <class T> Pose &quat(const Quat<T> &v) {
     quat() = v;
     return *this;
   }
@@ -220,10 +220,10 @@ class Pose {
   /// Print to standard output
   void print() const;
 
- protected:
-  Vec3d mVec;   // position in 3-space
-  Quatd mQuat;  // orientation of reference frame as a quaternion (relative to
-                // global axes)
+protected:
+  Vec3d mVec;  // position in 3-space
+  Quatd mQuat; // orientation of reference frame as a quaternion (relative to
+               // global axes)
   // const Pose* mParentTransform;  // parent transform, nullptr if none
 };
 
@@ -234,48 +234,48 @@ class Pose {
 ///
 /// @ingroup Spatial
 class SmoothPose : public Pose {
- public:
-  SmoothPose(const Pose& init = Pose(), double psmooth = 0.9,
+public:
+  SmoothPose(const Pose &init = Pose(), double psmooth = 0.9,
              double qsmooth = 0.9);
 
   // step toward the target:
-  SmoothPose& operator()() {
+  SmoothPose &operator()() {
     pos().lerp(mTarget.pos(), 1. - mPF);
     quat().slerpTo(mTarget.quat(), 1. - mQF);
     return *this;
   }
 
   // set and update:
-  SmoothPose& operator()(const Pose& p) {
+  SmoothPose &operator()(const Pose &p) {
     target(p);
     return (*this)();
   }
 
   // set the target to smoothly interpolate to:
-  Pose& target() { return mTarget; }
-  void target(const Pose& p) { mTarget.set(p); }
-  void target(const Vec3d& p) { mTarget.pos().set(p); }
-  void target(const Quatd& p) { mTarget.quat().set(p); }
+  Pose &target() { return mTarget; }
+  void target(const Pose &p) { mTarget.set(p); }
+  void target(const Vec3d &p) { mTarget.pos().set(p); }
+  void target(const Quatd &p) { mTarget.quat().set(p); }
 
   // set immediately (without smoothing):
-  void jump(Pose& p) {
+  void jump(Pose &p) {
     target(p);
     set(p);
   }
-  void jump(Vec3d& v) {
+  void jump(Vec3d &v) {
     target(v);
     pos().set(v);
   }
-  void jump(Quatd& q) {
+  void jump(Quatd &q) {
     target(q);
     quat().set(q);
   }
 
- protected:
+protected:
   Pose mTarget;
   double mPF, mQF;
 };
 
-}  // namespace al
+} // namespace al
 
 #endif
