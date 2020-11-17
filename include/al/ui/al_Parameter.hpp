@@ -152,8 +152,8 @@ public:
   }
 
   // Move constructor
-  ParameterField(ParameterField &&that) noexcept : mType(NULLDATA),
-                                                   mData(nullptr) {
+  ParameterField(ParameterField &&that) noexcept
+      : mType(NULLDATA), mData(nullptr) {
     swap(*this, that);
   }
 
@@ -1242,7 +1242,7 @@ public:
   ParameterChoice(std::string parameterName, std::string Group = "",
                   uint64_t defaultValue = 0)
       : ParameterWrapper<uint64_t>(parameterName, Group, defaultValue) {
-    setNoCalls(0);
+    setNoCalls(defaultValue);
   }
 
   ParameterChoice &operator=(const uint64_t value) {
