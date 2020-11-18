@@ -145,6 +145,7 @@ set(headers
   include/al/ui/al_Composition.hpp
   include/al/ui/al_ControlGUI.hpp
   include/al/ui/al_Dialog.hpp
+  include/al/ui/al_DiscreteParameterValues.hpp
   include/al/ui/al_FileSelector.hpp
   include/al/ui/al_Gnomon.hpp
   include/al/ui/al_HtmlInterfaceServer.hpp
@@ -261,6 +262,7 @@ set(sources
   src/ui/al_Composition.cpp
   src/ui/al_ControlGUI.cpp
   src/ui/al_Dialog.cpp
+  src/ui/al_DiscreteParameterValues.cpp
   src/ui/al_FileSelector.cpp
   src/ui/al_Gnomon.cpp
   src/ui/al_HtmlInterfaceServer.cpp
