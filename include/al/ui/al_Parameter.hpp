@@ -1241,9 +1241,7 @@ public:
 
   ParameterChoice(std::string parameterName, std::string Group = "",
                   uint64_t defaultValue = 0)
-      : ParameterWrapper<uint64_t>(parameterName, Group, defaultValue) {
-    setNoCalls(defaultValue);
-  }
+      : ParameterWrapper<uint64_t>(parameterName, Group, defaultValue) {}
 
   ParameterChoice &operator=(const uint64_t value) {
     this->set(value);
