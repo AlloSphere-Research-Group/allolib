@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cassert>
 
+#include <cstring>
+
 using namespace al;
 
 DiscreteParameterValues::DiscreteParameterValues(
@@ -181,7 +183,7 @@ std::string DiscreteParameterValues::idAt(size_t x) {
   if (x < mIds.size()) {
     return mIds[x];
   } else if (mIds.size() == 0 && x < size()) {
-    return std::to_string(mValues[x]);
+    return std::to_string(at(x));
   } else {
     return std::string();
   }
