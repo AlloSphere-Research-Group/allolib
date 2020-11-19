@@ -152,8 +152,8 @@ public:
   }
 
   // Move constructor
-  ParameterField(ParameterField &&that) noexcept
-      : mType(NULLDATA), mData(nullptr) {
+  ParameterField(ParameterField &&that) noexcept : mType(NULLDATA),
+                                                   mData(nullptr) {
     swap(*this, that);
   }
 
@@ -593,6 +593,9 @@ protected:
   ParameterType mMin;
   ParameterType mMax;
 
+  ParameterType mValue;
+  ParameterType mValueCache;
+
   ParameterType mDefault;
 
   void runChangeCallbacksSynchronous(ParameterType &value, ValueSource *src);
@@ -604,8 +607,6 @@ protected:
 private:
   // pointer to avoid having to explicitly declare copy/move
   std::unique_ptr<std::mutex> mMutex;
-  ParameterType mValue;
-  ParameterType mValueCache;
 
   bool mChanged{false};
 
@@ -672,7 +673,7 @@ public:
       std::string prefix, float min = -99999.0, float max = 99999.0);
 
   Parameter(const al::Parameter &param) : ParameterWrapper<float>(param) {
-    mFloatValue = param.mFloatValue;
+    mValue = param.mValue;
     setDefault(param.getDefault());
   }
 
@@ -703,7 +704,7 @@ public:
    */
   virtual float get() override;
 
-  virtual float toFloat() override { return mFloatValue; }
+  virtual float toFloat() override { return mValue; }
 
   virtual void fromFloat(float value) override { set(value); }
 
@@ -743,7 +744,6 @@ public:
   }
 
 private:
-  float mFloatValue;
 };
 
 /// ParamaterInt

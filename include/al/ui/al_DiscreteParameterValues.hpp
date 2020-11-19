@@ -66,7 +66,8 @@ public:
   // Access to complete sets
   template <typename VecDataType> std::vector<VecDataType> getValues() {
     // TODO validate sizes
-    return std::vector<VecDataType>(mValues, mValues + (size() * mDataSize));
+    return std::vector<VecDataType>((float *)mValues,
+                                    (float *)mValues + size());
   }
   void *getValuesPtr() { return mValues; }
 

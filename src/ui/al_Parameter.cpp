@@ -14,14 +14,14 @@ using namespace al;
 Parameter::Parameter(std::string parameterName, std::string group,
                      float defaultValue, float min, float max)
     : ParameterWrapper<float>(parameterName, group, defaultValue, min, max) {
-  mFloatValue = defaultValue;
+  mValue = defaultValue;
   setDefault(defaultValue);
 }
 
 Parameter::Parameter(std::string parameterName, float defaultValue, float min,
                      float max)
     : ParameterWrapper<float>(parameterName, "", defaultValue, min, max) {
-  mFloatValue = defaultValue;
+  mValue = defaultValue;
   setDefault(defaultValue);
 }
 
@@ -29,11 +29,11 @@ Parameter::Parameter(std::string parameterName, std::string Group,
                      float defaultValue, std::string prefix, float min,
                      float max)
     : ParameterWrapper<float>(parameterName, Group, defaultValue, min, max) {
-  mFloatValue = defaultValue;
+  mValue = defaultValue;
   setDefault(defaultValue);
 }
 
-float Parameter::get() { return mFloatValue; }
+float Parameter::get() { return mValue; }
 
 void Parameter::setNoCalls(float value, void *blockReceiver) {
   if (value > mMax)
@@ -47,7 +47,7 @@ void Parameter::setNoCalls(float value, void *blockReceiver) {
     runChangeCallbacksSynchronous(value, nullptr);
   }
 
-  mFloatValue = value;
+  mValue = value;
 }
 
 void Parameter::set(float value, ValueSource *src) {
@@ -60,7 +60,7 @@ void Parameter::set(float value, ValueSource *src) {
   }
 
   runChangeCallbacksSynchronous(value, src);
-  mFloatValue = value;
+  mValue = value;
 }
 
 // ParameterInt
@@ -115,7 +115,7 @@ void ParameterInt::set(int32_t value, ValueSource *src) {
 ParameterBool::ParameterBool(std::string parameterName, std::string Group,
                              float defaultValue, float min, float max)
     : Parameter(parameterName, Group, defaultValue, min, max) {
-  //	mFloatValue = defaultValue;
+  mValue = defaultValue;
   setDefault(defaultValue);
 }
 
@@ -123,7 +123,7 @@ ParameterBool::ParameterBool(std::string parameterName, std::string Group,
                              float defaultValue, std::string prefix, float min,
                              float max)
     : Parameter(parameterName, Group, defaultValue, prefix, min, max) {
-  //	mFloatValue = defaultValue;
+  mValue = defaultValue;
   setDefault(defaultValue);
 }
 

@@ -127,6 +127,7 @@ void DiscreteParameterValues::append(void *values, size_t count,
     free(oldValues);
   } else {
     mValues = (unsigned char *)malloc(count * mDataSize);
+    mSize = count;
   }
 
   memcpy(mValues + (oldSize * mDataSize), values, count * mDataSize);
