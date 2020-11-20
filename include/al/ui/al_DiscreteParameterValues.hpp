@@ -9,6 +9,7 @@ namespace al {
 
 class DiscreteParameterValues {
 public:
+  // TODO add support for in16 and uint16
   typedef enum {
     BOOL,
     FLOAT,
@@ -68,8 +69,8 @@ public:
   // Access to complete sets
   template <typename VecDataType> std::vector<VecDataType> getValues() {
     // TODO validate sizes
-    return std::vector<VecDataType>((float *)mValues,
-                                    (float *)mValues + size());
+    return std::vector<VecDataType>((VecDataType *)mValues,
+                                    (VecDataType *)mValues + size());
   }
   void *getValuesPtr() { return mValues; }
 

@@ -138,8 +138,8 @@ void DiscreteParameterValues::append(void *values, size_t count,
   }
   auto idIt = mIds.begin() + oldSize;
   auto valuesPtr = mValues + oldSize;
-  for (size_t i = 0; i < count; i++) {
-    if (useIds) {
+  if (useIds) {
+    for (size_t i = 0; i < count; i++) {
       *idIt = idprefix + valueToString(valuesPtr);
       idIt++;
     }
