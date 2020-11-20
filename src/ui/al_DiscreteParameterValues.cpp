@@ -142,8 +142,8 @@ void DiscreteParameterValues::append(void *values, size_t count,
     for (size_t i = 0; i < count; i++) {
       *idIt = idprefix + valueToString(valuesPtr);
       idIt++;
+      valuesPtr += mDataSize;
     }
-    valuesPtr += mDataSize;
   }
 }
 
