@@ -251,6 +251,10 @@ std::string DiscreteParameterValues::valueToString(void *value) {
     uint64_t val = *(static_cast<uint64_t *>(value));
     valueStr = std::to_string(val);
   } break;
+    //  case STRING: {
+    //    std::string val = (static_cast<char *>(value));
+    //    valueStr = val;
+    //  } break;
   }
   return valueStr;
 }

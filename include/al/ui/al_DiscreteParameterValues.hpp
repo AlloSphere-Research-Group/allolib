@@ -10,6 +10,7 @@ namespace al {
 class DiscreteParameterValues {
 public:
   typedef enum {
+    BOOL,
     FLOAT,
     DOUBLE,
     INT8,
@@ -17,7 +18,8 @@ public:
     INT32,
     UINT32,
     INT64,
-    UINT64
+    UINT64,
+    STRING
   } Datatype;
 
   DiscreteParameterValues(Datatype datatype = FLOAT);

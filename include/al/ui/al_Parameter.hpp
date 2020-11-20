@@ -1143,16 +1143,16 @@ public:
 
 /// ParameterMenu
 /// @ingroup UI
-class ParameterMenu : public ParameterWrapper<int> {
+class ParameterMenu : public ParameterWrapper<int32_t> {
 public:
-  using ParameterWrapper<int>::set;
-  using ParameterWrapper<int>::get;
+  using ParameterWrapper<int32_t>::set;
+  using ParameterWrapper<int32_t>::get;
 
   ParameterMenu(std::string parameterName, std::string Group = "",
                 int defaultValue = 0)
       : ParameterWrapper<int>(parameterName, Group, defaultValue) {}
 
-  int operator=(const int value) {
+  int operator=(const int32_t value) {
     this->set(value);
     return *this;
   }
@@ -1171,7 +1171,7 @@ public:
     int current = get();
     std::lock_guard<std::mutex> lk(mElementsLock);
     if (mElements.size() > 0 && current >= 0 &&
-        current < int(mElements.size())) {
+        current < int32_t(mElements.size())) {
       return mElements[current];
     } else {
       return "";
@@ -1182,7 +1182,7 @@ public:
     mElementsLock.lock();
     auto position = std::find(mElements.begin(), mElements.end(), element);
     bool found = position != mElements.end();
-    int foundPosition = (int)std::distance(mElements.begin(), position);
+    int foundPosition = (int32_t)std::distance(mElements.begin(), position);
     mElementsLock.unlock();
     if (found) {
       if (noCalls) {
@@ -1200,7 +1200,7 @@ public:
     // return std::stof(getCurrent());
   }
 
-  virtual void fromFloat(float value) override { set((int)value); }
+  virtual void fromFloat(float value) override { set((int32_t)value); }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
     sender.send(prefix + getFullAddress(), get());
