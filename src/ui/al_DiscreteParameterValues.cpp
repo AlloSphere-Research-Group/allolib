@@ -195,6 +195,10 @@ size_t DiscreteParameterValues::getIndexForValue(float value) {
   size_t paramIndex = SIZE_MAX;
   if (size() == 0) {
     return SIZE_MAX;
+  } else if (size() == 1) {
+    if (value == valueToFloat(mValues)) {
+      return 0;
+    }
   }
   for (size_t it = 0; it < size() - 1; it++) {
     auto v0 = valueToFloat(&(mValues[it * mDataSize]));
