@@ -202,8 +202,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterMenu *>(param)->setNoCalls(it->get<float>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterString).name()) == 0) {
-          static_cast<ParameterString *>(param)->setNoCalls(
-              std::to_string(it->get<float>()));
+          static_cast<ParameterString *>(param)
+              ->setNoCalls(std::to_string(it->get<float>()));
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -212,12 +212,12 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
       } else if (it->type() == ParameterField::STRING) {
         if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
             0) {
-          static_cast<ParameterString *>(param)->setNoCalls(
-              it->get<std::string>());
+          static_cast<ParameterString *>(param)
+              ->setNoCalls(it->get<std::string>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterMenu).name()) == 0) {
-          static_cast<ParameterMenu *>(param)->setCurrent(
-              it->get<std::string>(), noCalls);
+          static_cast<ParameterMenu *>(param)
+              ->setCurrent(it->get<std::string>(), noCalls);
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -239,8 +239,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterMenu *>(param)->set(it->get<float>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterString).name()) == 0) {
-          static_cast<ParameterString *>(param)->set(
-              std::to_string(it->get<float>()));
+          static_cast<ParameterString *>(param)
+              ->set(std::to_string(it->get<float>()));
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -252,8 +252,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterString *>(param)->set(it->get<std::string>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterMenu).name()) == 0) {
-          static_cast<ParameterMenu *>(param)->setCurrent(
-              it->get<std::string>(), noCalls);
+          static_cast<ParameterMenu *>(param)
+              ->setCurrent(it->get<std::string>(), noCalls);
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -535,7 +535,11 @@ void PolySynth::render(AudioIOData &io) {
           internalAudioIO.frame(offset);
           while (io() && internalAudioIO()) {
             for (int i = 0; i < mVoiceMaxOutputChannels; i++) {
-              io.out(mChannelMap[i]) += internalAudioIO.out(i);
+              if (mChannelMap.size() > i) {
+                io.out(mChannelMap[i]) += internalAudioIO.out(i);
+              } else {
+                io.out(i) += internalAudioIO.out(i);
+              }
             }
             for (int i = 0; i < mVoiceBusChannels; i++) {
               io.bus(i) += internalAudioIO.bus(i);
