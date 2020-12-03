@@ -98,6 +98,15 @@ size_t CommandServer::connectionCount() {
   return numConnections;
 }
 
+std::vector<std::pair<std::string, uint16_t>> CommandServer::connections() {
+  std::vector<std::pair<std::string, uint16_t>> cs;
+  std::unique_lock<std::mutex> lk(mConnectionsLock);
+  for (auto conn : mServerConnections) {
+    cs.push_back({conn->address(), conn->port()});
+  }
+  return cs;
+}
+
 bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
   al_sec timeout = 0.5;
   if (!mSocket.open(serverPort, serverAddr, timeout, al::Socket::TCP)) {

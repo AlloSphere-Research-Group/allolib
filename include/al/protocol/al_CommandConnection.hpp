@@ -212,6 +212,8 @@ public:
   std::vector<float> ping(double timeoutSecs = 1.0);
 
   size_t connectionCount();
+
+  std::vector<std::pair<std::string, uint16_t>> connections();
   /**
    * @brief sendMessage
    * @param message
