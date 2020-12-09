@@ -555,7 +555,10 @@ public:
   /**
    * @brief call change callbacks if value has changed since last call
    */
-  void processChange() {
+  bool processChange() {
+    if (!mChanged) {
+      return false;
+    }
     if (mChanged && mCallbacks.size() > 0 && mCallbacks[0] == nullptr) {
       auto callbackIt = mCallbacks.begin() + 1;
       ParameterType value = get();
@@ -565,6 +568,7 @@ public:
         callbackIt++;
       }
     }
+    return true;
   }
 
   std::vector<ParameterWrapper<ParameterType> *>
