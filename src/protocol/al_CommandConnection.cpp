@@ -139,10 +139,10 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                     << incomingConnectionSocket->address() << ":"
                     << incomingConnectionSocket->port() << std::endl;
         }
-        uint8_t message[1024];
+        uint8_t message[8192];
 
-        int bytesRecv = incomingConnectionSocket->recv((char *)message, 1024);
-        if (bytesRecv > 0 && bytesRecv < 1025) {
+        int bytesRecv = incomingConnectionSocket->recv((char *)message, 8192);
+        if (bytesRecv > 0 && bytesRecv <= 8192) {
           if (message[0] == HANDSHAKE) {
             uint16_t version = 0;
             uint16_t revision = 0;
@@ -178,32 +178,36 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
 
             mConnectionThreads.emplace_back(std::make_unique<std::thread>(
                 [&](std::shared_ptr<Socket> client) {
-                  uint8_t commandMessage[2048];
+                  uint8_t commandMessage[8192];
                   size_t bufferSize = 0;
                   while (mRunning) {
                     size_t bytes = client->recv(
-                        (char *)(commandMessage + bufferSize), 1024);
+                        (char *)(commandMessage + bufferSize), 4096);
 
-                    if (bytes > 0 && bytes < 1025) {
+                    while (bytes > 0 && bytes < 4095) {
                       if (commandMessage[0] == PONG) {
                         if (mVerbose) {
-                          std::cout << "Got pong for " << client->address()
-                                    << ":" << client->port() << std::endl;
+                          std::cout << __FILE__ << "Got pong for "
+                                    << client->address() << ":"
+                                    << client->port() << std::endl;
                         }
                       } else if (commandMessage[0] == GOODBYE) {
-                        std::cerr << "Goodbye not implemented" << std::endl;
+                        std::cerr << __FILE__ << "Goodbye not implemented"
+                                  << std::endl;
                       } else if (commandMessage[0] == HANDSHAKE) {
-                        std::cerr << "Unexpected handshake received"
+                        std::cerr << __FILE__ << "Unexpected handshake received"
                                   << std::endl;
                       } else {
                         Message message(commandMessage, bytes);
                         if (mVerbose) {
-                          std::cout << "Server recieved message from "
-                                    << client->address() << ":"
-                                    << client->port() << std::endl;
+                          std::cout
+                              << __FILE__ << "Server recieved message from "
+                              << client->address() << ":" << client->port()
+                              << std::endl;
                         }
                         if (!processIncomingMessage(message, client.get())) {
-                          std::cerr << "ERROR: Unrecognized client message "
+                          std::cerr << __FILE__
+                                    << "ERROR: Unrecognized client message "
                                     << (int)commandMessage[0] << " at "
                                     << mSocket.address() << ":"
                                     << mSocket.port() << std::endl;
@@ -218,20 +222,23 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                           }
                         }
                       }
-                    } else if (bytes != SIZE_MAX && bytes != 0) {
-                      std::cerr << "ERROR unexpected command size" << bytes
-                                << std::endl;
+                      bytes = client->recv(
+                          (char *)(commandMessage + bufferSize), 4096);
+                    }
+                    if (bytes != SIZE_MAX && bytes != 0) {
+                      std::cerr << __FILE__ << "ERROR unexpected command size"
+                                << bytes << std::endl;
                       mRunning = false;
                     }
                   }
 
                   if (mVerbose) {
-                    std::cout << "Client stopped " << std::endl;
+                    std::cout << __FILE__ << "Client stopped " << std::endl;
                   }
                 },
                 incomingConnectionSocket));
           } else {
-            std::cerr << "ERROR: Unrecognized server message "
+            std::cerr << __FILE__ << "ERROR: Unrecognized server message "
                       << (int)message[0] << std::endl;
           }
         }
@@ -240,7 +247,7 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
     //    incomingConnectionSocket->close();
 
     if (mVerbose) {
-      std::cout << "Server quit" << std::endl;
+      std::cout << __FILE__ << "Server quit" << std::endl;
     }
   });
 
