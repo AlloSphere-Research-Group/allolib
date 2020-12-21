@@ -154,6 +154,17 @@ public:
   virtual void stop();
 
   virtual bool processIncomingMessage(Message &message, Socket *src) {
+    auto command = message.getByte();
+    if (command == PONG) {
+      if (mVerbose) {
+        std::cout << __FILE__ << "Got pong for " << src->address() << ":"
+                  << src->port() << std::endl;
+      }
+    } else if (command == GOODBYE) {
+      std::cerr << __FILE__ << "Goodbye not implemented" << std::endl;
+    } else if (command == HANDSHAKE) {
+      std::cerr << __FILE__ << "Unexpected handshake received" << std::endl;
+    }
     return false;
   };
 

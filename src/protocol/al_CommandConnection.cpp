@@ -185,41 +185,26 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                         (char *)(commandMessage + bufferSize), 4096);
 
                     while (bytes > 0 && bytes < 4095) {
-                      if (commandMessage[0] == PONG) {
-                        if (mVerbose) {
-                          std::cout << __FILE__ << "Got pong for "
-                                    << client->address() << ":"
-                                    << client->port() << std::endl;
-                        }
-                      } else if (commandMessage[0] == GOODBYE) {
-                        std::cerr << __FILE__ << "Goodbye not implemented"
+                      Message message(commandMessage, bytes);
+                      if (mVerbose) {
+                        std::cout << __FILE__ << "Server recieved message from "
+                                  << client->address() << ":" << client->port()
                                   << std::endl;
-                      } else if (commandMessage[0] == HANDSHAKE) {
-                        std::cerr << __FILE__ << "Unexpected handshake received"
+                      }
+                      if (!processIncomingMessage(message, client.get())) {
+                        std::cerr << __FILE__
+                                  << "ERROR: Unrecognized client message "
+                                  << (int)commandMessage[0] << " at "
+                                  << mSocket.address() << ":" << mSocket.port()
                                   << std::endl;
-                      } else {
-                        Message message(commandMessage, bytes);
-                        if (mVerbose) {
-                          std::cout
-                              << __FILE__ << "Server recieved message from "
-                              << client->address() << ":" << client->port()
-                              << std::endl;
-                        }
-                        if (!processIncomingMessage(message, client.get())) {
-                          std::cerr << __FILE__
-                                    << "ERROR: Unrecognized client message "
-                                    << (int)commandMessage[0] << " at "
-                                    << mSocket.address() << ":"
-                                    << mSocket.port() << std::endl;
 
+                      } else {
+                        if (message.remainingBytes() > 0) {
+                          memcpy(commandMessage, message.data(),
+                                 message.remainingBytes());
+                          bufferSize = message.remainingBytes();
                         } else {
-                          if (message.remainingBytes() > 0) {
-                            memcpy(commandMessage, message.data(),
-                                   message.remainingBytes());
-                            bufferSize = message.remainingBytes();
-                          } else {
-                            bufferSize = 0;
-                          }
+                          bufferSize = 0;
                         }
                       }
                       bytes = client->recv(
