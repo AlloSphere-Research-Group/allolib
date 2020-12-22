@@ -197,7 +197,6 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                                   << (int)commandMessage[0] << " at "
                                   << mSocket.address() << ":" << mSocket.port()
                                   << std::endl;
-
                       } else {
                         if (message.remainingBytes() > 0) {
                           memcpy(commandMessage, message.data(),
@@ -382,7 +381,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
         } else {
           Message message(commandMessage, bytes);
           if (mVerbose) {
-            std::cout << "Client recieved message from " << mSocket.address()
+            std::cout << "Client received message from " << mSocket.address()
                       << ":" << mSocket.port() << std::endl;
           }
           if (!processIncomingMessage(message, &mSocket)) {
