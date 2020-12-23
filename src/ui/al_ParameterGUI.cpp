@@ -111,7 +111,7 @@ void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix,
     return;
   assert(index < (int)params.size());
   auto &param = params[index];
-  if (param->getHint("hide") == 1.0)
+  if (param->getHint("hide") == 1.0 || (param->min() > param->max()))
     return;
   float value = param->get();
   bool changed;
@@ -153,7 +153,7 @@ void ParameterGUI::drawParameterInt(std::vector<ParameterInt *> params,
     return;
   assert(index < (int)params.size());
   auto &param = params[index];
-  if (param->getHint("hide") == 1.0)
+  if (param->getHint("hide") == 1.0 || (param->min() > param->max()))
     return;
   int value = param->get();
   bool changed = ImGui::SliderInt((param->displayName() + suffix).c_str(),
@@ -683,7 +683,8 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
           file.close();
           state.newMap = false;
 
-          stateMap[presetHandler].mapList = presetHandler->availablePresetMaps();
+          stateMap[presetHandler].mapList =
+              presetHandler->availablePresetMaps();
         }
         ImGui::SameLine();
         if (ImGui::Button("Cancel")) {
