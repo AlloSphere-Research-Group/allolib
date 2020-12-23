@@ -185,11 +185,15 @@ public:
   void setVerbose(bool verbose) { mVerbose = verbose; }
 
 protected:
-  typedef enum { SERVER, CLIENT, NONE } BarrierState;
+  virtual void onConnection(Socket *newConnection){};
+
   uint16_t mVersion = 0,
            mRevision = 0; // Subclasses must set these to ensure compatibility
+
+  typedef enum { SERVER, CLIENT, NONE } BarrierState;
   BarrierState mState{BarrierState::NONE};
   std::mutex mConnectionsLock;
+
   bool mRunning{false};
   std::vector<std::unique_ptr<std::thread>> mConnectionThreads;
   std::vector<std::unique_ptr<std::thread>> mDataThreads;
