@@ -187,15 +187,15 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                     while (bytes > 0 && bytes < 4095) {
                       Message message(commandMessage, bytes);
                       if (mVerbose) {
-                        std::cout << __FILE__ << "Server recieved message from "
+                        std::cout << "Server received message from "
                                   << client->address() << ":" << client->port()
                                   << std::endl;
                       }
                       if (!processIncomingMessage(message, client.get())) {
                         std::cerr << __FILE__
-                                  << "ERROR: Unrecognized client message "
-                                  << (int)commandMessage[0] << " at "
-                                  << mSocket.address() << ":" << mSocket.port()
+                                  << " : Server unable to process message("
+                                  << (int)commandMessage[0] << ") from client "
+                                  << client->address() << ":" << client->port()
                                   << std::endl;
                       } else {
                         if (message.remainingBytes() > 0) {
@@ -210,19 +210,19 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                           (char *)(commandMessage + bufferSize), 4096);
                     }
                     if (bytes != SIZE_MAX && bytes != 0) {
-                      std::cerr << __FILE__ << "ERROR unexpected command size"
+                      std::cerr << __FILE__ << " : Unexpected command size"
                                 << bytes << std::endl;
                       mRunning = false;
                     }
                   }
 
                   if (mVerbose) {
-                    std::cout << __FILE__ << "Client stopped " << std::endl;
+                    std::cout << "Client stopped" << std::endl;
                   }
                 },
                 incomingConnectionSocket));
           } else {
-            std::cerr << __FILE__ << "ERROR: Unrecognized server message "
+            std::cerr << __FILE__ << ": Server unable to recognize message "
                       << (int)message[0] << std::endl;
           }
         }
@@ -231,7 +231,7 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
     //    incomingConnectionSocket->close();
 
     if (mVerbose) {
-      std::cout << __FILE__ << "Server quit" << std::endl;
+      std::cout << "Server stopped" << std::endl;
     }
   });
 
@@ -356,7 +356,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
     if (bytesSent != 8) {
       std::cerr << "ERROR sending handshake" << std::endl;
     }
-    size_t bytesRecv = mSocket.recv((char *)message, 8);
+    size_t bytesRecv = mSocket.recv((char *)message, 2);
     if (bytesRecv == 2 && message[0] == HANDSHAKE_ACK) {
       if (mVerbose) {
         std::cout << "Client got handshake ack from " << mSocket.address()
@@ -376,7 +376,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
     onConnection(&mSocket);
     while (mRunning) {
       if (!mSocket.opened()) {
-        std::cerr << __FUNCTION__ << " ERROR socket not open" << std::endl;
+        std::cerr << "ERROR: Socket not open" << std::endl;
       }
 
       size_t bytes = mSocket.recv((char *)(commandMessage + bufferSize), 1024);
@@ -387,14 +387,14 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
         } else {
           Message message(commandMessage, bytes);
           if (mVerbose) {
-            std::cout << __FUNCTION__ << " Client recieved message from "
-                      << mSocket.address() << ":" << mSocket.port()
-                      << std::endl;
+            std::cout << "Client received message from " << mSocket.address()
+                      << ":" << mSocket.port() << std::endl;
           }
           if (!processIncomingMessage(message, &mSocket)) {
-            std::cerr << __FUNCTION__ << " ERROR: Unrecognized client message "
-                      << (int)commandMessage[0] << " at " << mSocket.address()
-                      << ":" << mSocket.port() << std::endl;
+            std::cerr << __FILE__ << " : Client unable to process message("
+                      << (int)commandMessage[0] << ") from "
+                      << mSocket.address() << ":" << mSocket.port()
+                      << std::endl;
 
           } else {
             if (message.remainingBytes() > 0) {
@@ -406,13 +406,12 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
           }
         }
       } else if (bytes != SIZE_MAX && bytes != 0) {
-        std::cerr << __FUNCTION__ << " ERROR network buffer overrun." << bytes
-                  << std::endl;
+        std::cerr << "ERROR: Network buffer overrun. " << bytes << std::endl;
       }
     }
     //        connectionSocket.close();
     if (mVerbose) {
-      std::cout << __FUNCTION__ << " Client stopped " << std::endl;
+      std::cout << "Client stopped " << std::endl;
     }
   }));
 
@@ -422,7 +421,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
 
 void CommandClient::clientHandlePing(Socket &client) {
   if (mVerbose) {
-    std::cout << "client got ping request" << std::endl;
+    std::cout << "Client got ping request" << std::endl;
   }
   char buffer[2] = {0, 0};
   buffer[0] = PONG;
