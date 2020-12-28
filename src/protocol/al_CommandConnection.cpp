@@ -59,7 +59,7 @@ void CommandConnection::stop() {
 std::vector<float> CommandServer::ping(double timeoutSecs) {
   std::vector<float> pingTimes;
 
-  mConnectionsLock.lock();
+  std::unique_lock<std::mutex> lk(mConnectionsLock);
   for (auto listener : mServerConnections) {
     if (mVerbose) {
       std::cout << "pinging " << listener->address() << ":" << listener->port()
@@ -86,15 +86,12 @@ std::vector<float> CommandServer::ping(double timeoutSecs) {
     //    }
   }
 
-  mConnectionsLock.unlock();
-
   return pingTimes;
 }
 
 size_t CommandServer::connectionCount() {
-  mConnectionsLock.lock();
+  std::unique_lock<std::mutex> lk(mConnectionsLock);
   size_t numConnections = mServerConnections.size();
-  mConnectionsLock.unlock();
   return numConnections;
 }
 
@@ -170,11 +167,13 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
             if (bytesSent != 2) {
               std::cerr << "ERROR sending handshake ack" << std::endl;
             }
-            mConnectionsLock.lock();
-            mServerConnections.emplace_back(incomingConnectionSocket);
-            mConnectionVersions.emplace_back(
-                std::pair<uint16_t, uint16_t>{version, revision});
-            mConnectionsLock.unlock();
+            {
+              std::unique_lock<std::mutex> lk(mConnectionsLock);
+              mServerConnections.emplace_back(incomingConnectionSocket);
+              mConnectionVersions.emplace_back(
+                  std::pair<uint16_t, uint16_t>{version, revision});
+            }
+
             onConnection(incomingConnectionSocket.get());
 
             mConnectionThreads.emplace_back(std::make_unique<std::thread>(
@@ -247,11 +246,12 @@ void CommandServer::stop() {
   if (mBootstrapServerThread) {
     mBootstrapServerThread->join();
   }
-  mConnectionsLock.lock();
-  for (auto connectionSocket : mServerConnections) {
-    connectionSocket->close();
+  {
+    std::unique_lock<std::mutex> lk(mConnectionsLock);
+    for (auto connectionSocket : mServerConnections) {
+      connectionSocket->close();
+    }
   }
-  mConnectionsLock.unlock();
 
   for (auto &connection : mConnectionThreads) {
     connection->join();
@@ -271,11 +271,12 @@ uint16_t CommandServer::waitForConnections(uint16_t connectionCount,
     size_t totalConnections = mServerConnections.size();
     mConnectionsLock.unlock();
     while (targetTime >= currentTime) {
-      mConnectionsLock.lock();
       // TODO what should happen if there are disconnections instead of
       // connections while this runs?
-      totalConnections = mServerConnections.size();
-      mConnectionsLock.unlock();
+      {
+        std::unique_lock<std::mutex> lk(mConnectionsLock);
+        totalConnections = mServerConnections.size();
+      }
       // FIXME this could allow more connections through than requested.
       // Should
       // the number be treated as a maximum?
@@ -301,6 +302,8 @@ bool CommandServer::sendMessage(uint8_t *message, size_t length,
   }
 
   if (!dst) {
+
+    std::unique_lock<std::mutex> lk(mConnectionsLock);
     for (auto connection : mServerConnections) {
       if (!src || connection->address() != src->ipAddr ||
           connection->port() != src->port) {
