@@ -404,6 +404,7 @@ public:
   virtual void set(ParameterType value, ValueSource *src = nullptr) {
     //        if (value > mMax) value = mMax;
     //        if (value < mMin) value = mMin;
+    mValueCache = get();
     if (mProcessCallback) {
       value = (*mProcessCallback)(value); //, mProcessUdata);
     }
@@ -431,10 +432,10 @@ public:
   virtual void setNoCalls(ParameterType value, void *blockReceiver = nullptr) {
     //        if (value > mMax) value = mMax;
     //        if (value < mMin) value = mMin;
+    mValueCache = get();
     if (mProcessCallback) {
       value = (*mProcessCallback)(value); //, mProcessUdata);
     }
-
     if (blockReceiver) {
       for (auto cb : mCallbacks) {
         (*cb)(value);
@@ -460,6 +461,15 @@ public:
    * @return the parameter value
    */
   virtual ParameterType get();
+
+  /**
+   * @brief Get previous value
+   * @return
+   *
+   * This function is only useful when queried from a value callback. It will
+   * represent the previous value of the parameter in that case.
+   */
+  virtual ParameterType getPrevious();
 
   /**
    * @brief set the minimum value for the parameter
@@ -1432,10 +1442,16 @@ ParameterWrapper<ParameterType>::ParameterWrapper(
 
 template <class ParameterType>
 ParameterType ParameterWrapper<ParameterType>::get() {
+  ParameterType current = mValueCache;
   if (mMutex->try_lock()) {
-    mValueCache = mValue;
+    current = mValue;
     mMutex->unlock();
   }
+  return current;
+}
+
+template <class ParameterType>
+ParameterType ParameterWrapper<ParameterType>::getPrevious() {
   return mValueCache;
 }
 
