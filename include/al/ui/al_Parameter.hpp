@@ -152,8 +152,8 @@ public:
   }
 
   // Move constructor
-  ParameterField(ParameterField &&that) noexcept : mType(NULLDATA),
-                                                   mData(nullptr) {
+  ParameterField(ParameterField &&that) noexcept
+      : mType(NULLDATA), mData(nullptr) {
     swap(*this, that);
   }
 

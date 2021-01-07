@@ -393,15 +393,15 @@ public:
                                     p->ai_protocol)) == SOCKET_ERROR) {
           continue;
         }
-        bool r = true;
-        // SO_REUSEADDR: "The rules used in validating addresses supplied to
-        // bind should allow reuse of local addresses."
-        //        if (SOCKET_ERROR ==
-        //            ::setsockopt(mSocketHandle, SOL_SOCKET, 0, (char *)&r,
-        //            sizeof(r))) {
-        //          AL_WARN("unable to set SO_REUSEADDR on socket at %s:%i: %s",
-        //                  mAddress.c_str(), mPort, errorString());
-        //        }
+        // int enable = 1;
+        // // SO_REUSEADDR: "The rules used in validating addresses supplied to
+        // // bind should allow reuse of local addresses."
+        // if (SOCKET_ERROR == ::setsockopt(mSocketHandle, SOL_SOCKET,
+        //                                  SO_REUSEADDR, &enable, sizeof(int)))
+        //                                  {
+        //   AL_WARN("unable to set SO_REUSEADDR on socket at %s:%i: %s",
+        //           mAddress.c_str(), mPort, errorString());
+        // }
 
         if (::bind(mSocketHandle, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
           shutdown(mSocketHandle, SHUT_RDWR);
