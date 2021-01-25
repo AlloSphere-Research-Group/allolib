@@ -152,8 +152,8 @@ public:
   }
 
   // Move constructor
-  ParameterField(ParameterField &&that) noexcept
-      : mType(NULLDATA), mData(nullptr) {
+  ParameterField(ParameterField &&that) noexcept : mType(NULLDATA),
+                                                   mData(nullptr) {
     swap(*this, that);
   }
 
@@ -446,6 +446,8 @@ public:
 
   /**
    * @brief set the parameter's value forcing a lock
+   *
+   * No callbacks are called.
    */
   inline void setLocking(ParameterType value) {
     mMutex->lock();
