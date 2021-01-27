@@ -35,6 +35,12 @@ public:
   void sort();
   void clear();
 
+  template <typename SpaceDataType>
+  void append(std::vector<SpaceDataType> &values, std::string idprefix = "") {
+    // TODO validate data type
+    append(values.data(), values.size(), idprefix);
+  }
+
   void append(void *values, size_t count, std::string idprefix = "");
 
   // Set limits from internal data
