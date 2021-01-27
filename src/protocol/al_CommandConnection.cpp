@@ -143,28 +143,27 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
           if (message[0] == HANDSHAKE) {
             uint16_t version = 0;
             uint16_t revision = 0;
-            if (bytesRecv >= 9) {
+            if (bytesRecv >= 4) {
               Convert::from_bytes((const uint8_t *)&message[1], version);
-              Convert::from_bytes((const uint8_t *)&message[5], revision);
+              Convert::from_bytes((const uint8_t *)&message[3], revision);
             }
 
             if (mVerbose) {
               std::cout << "Handshake for "
                         << incomingConnectionSocket->address() << ":"
                         << incomingConnectionSocket->port() << std::endl;
-              std::cout << "Protocol version " << version << " revision "
-                        << revision << std::endl;
+              std::cout << "Client reports protocol version " << version
+                        << " revision " << revision << std::endl;
             }
 
             message[0] = HANDSHAKE_ACK;
-            message[1] = '\0';
-            memcpy(message + 2, &mVersion, sizeof(uint16_t));
-            memcpy(message + 2 + sizeof(uint16_t), &mRevision,
+            memcpy(message + 1, &mVersion, sizeof(uint16_t));
+            memcpy(message + 1 + sizeof(uint16_t), &mRevision,
                    sizeof(uint16_t));
 
             auto bytesSent =
-                incomingConnectionSocket->send((const char *)message, 2);
-            if (bytesSent != 2) {
+                incomingConnectionSocket->send((const char *)message, 5);
+            if (bytesSent != 5) {
               std::cerr << "ERROR sending handshake ack" << std::endl;
             }
             {
@@ -349,18 +348,28 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
     unsigned char message[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     message[0] = HANDSHAKE;
     auto b = Convert::to_bytes(mSocket.port());
-    message[1] = b[0];
-    message[2] = b[1];
 
-    auto bytesSent = mSocket.send((const char *)message, 8);
-    if (bytesSent != 8) {
+    memcpy(message + 1, &mVersion, sizeof(uint16_t));
+    memcpy(message + 1 + sizeof(uint16_t), &mRevision, sizeof(uint16_t));
+
+    // TODO provide functionality to validat connection versions
+    auto bytesSent = mSocket.send((const char *)message, 5);
+    if (bytesSent != 5) {
       std::cerr << "ERROR sending handshake" << std::endl;
     }
-    size_t bytesRecv = mSocket.recv((char *)message, 2);
-    if (bytesRecv == 2 && message[0] == HANDSHAKE_ACK) {
+    size_t bytesRecv = mSocket.recv((char *)message, 5);
+    if (bytesRecv == 5 && message[0] == HANDSHAKE_ACK) {
+      uint16_t version = 0;
+      uint16_t revision = 0;
+      if (bytesRecv >= 4) {
+        Convert::from_bytes((const uint8_t *)&message[1], version);
+        Convert::from_bytes((const uint8_t *)&message[3], revision);
+      }
       if (mVerbose) {
         std::cout << "Client got handshake ack from " << mSocket.address()
                   << ":" << mSocket.port() << std::endl;
+        std::cout << "Server reports protocol version " << version
+                  << " revision " << revision << std::endl;
       }
       mRunning = true;
     } else {
