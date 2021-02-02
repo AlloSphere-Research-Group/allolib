@@ -203,12 +203,23 @@ size_t DiscreteParameterValues::getIndexForValue(float value) {
   for (size_t it = 0; it < size() - 1; it++) {
     auto v0 = valueToFloat(&(mValues[it * mDataSize]));
     auto v1 = valueToFloat(&(mValues[(it + 1) * mDataSize]));
-    if (value >= v0 && value <= ((v0 + v1) * 0.5)) {
-      paramIndex = it;
-      break;
-    } else if (value > ((v0 + v1) * 0.5) && value <= v1) {
-      paramIndex = it + 1;
-      break;
+    if (v0 < v1) {
+      if (value >= v0 && value <= ((v0 + v1) * 0.5)) {
+        paramIndex = it;
+        break;
+      } else if (value > ((v0 + v1) * 0.5) && value <= v1) {
+        paramIndex = it + 1;
+        break;
+      }
+    } else {
+      // descending space
+      if (value <= v0 && value >= ((v0 + v1) * 0.5)) {
+        paramIndex = it;
+        break;
+      } else if (value < ((v0 + v1) * 0.5) && value >= v1) {
+        paramIndex = it + 1;
+        break;
+      }
     }
   }
   return paramIndex;

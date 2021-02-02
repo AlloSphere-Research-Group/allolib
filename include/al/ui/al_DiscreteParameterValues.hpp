@@ -44,7 +44,7 @@ public:
   void append(void *values, size_t count, std::string idprefix = "");
 
   // Set limits from internal data
-  void conform();
+  //  void conform();
 
   // Query ----
 
