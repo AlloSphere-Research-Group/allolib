@@ -34,8 +34,9 @@ struct BoundingBoxData {
    * This allows building the bounding box incremementally using includePoint()
    */
   inline void resetInv() {
-    max = {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
-           std::numeric_limits<float>::min()};
+    max = {std::numeric_limits<float>::lowest(),
+           std::numeric_limits<float>::lowest(),
+           std::numeric_limits<float>::lowest()};
     min = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
            std::numeric_limits<float>::max()};
   }
