@@ -136,7 +136,7 @@ ParameterMeta::ParameterMeta(std::string parameterName, std::string group)
   using namespace std;
 
   // remove leading and trailing shashes
-  regex re(R"((\w(?:[\w./]*\w)?))");
+  regex re(R"(([^\s](?:[^\s./]*[^\s])?))");
   auto _parameterName =
       sregex_iterator(parameterName.begin(), parameterName.end(), re);
   auto _group = sregex_iterator(group.begin(), group.end(), re);
