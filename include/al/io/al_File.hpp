@@ -289,10 +289,14 @@ public:
   /// Convert relative paths to absolute paths
   static std::string absolutePath(const std::string &path);
 
+  static bool isRelativePath(const std::string &path);
+
   /// Returns current path in filesystem
   /// This function should be replaced when moved to C++17 to
   /// std::filesystem::current_path()
   static std::string currentPath();
+
+  static bool isSamePath(const std::string &path1, const std::string &path2);
 
   /// Returns the base name of path.
 

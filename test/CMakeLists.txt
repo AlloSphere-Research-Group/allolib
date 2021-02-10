@@ -1,5 +1,6 @@
 set (test_src
     src/main.cpp
+    src/test_file.cpp
     src/test_audio.cpp
     src/test_midi.cpp
     src/test_math.cpp

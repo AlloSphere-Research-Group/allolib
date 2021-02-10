@@ -209,10 +209,14 @@ bool File::copy(const std::string &srcPath, const std::string &dstPath,
 
 std::string File::conformDirectory(const std::string &path) {
   if (path[0]) {
-    if (AL_FILE_DELIMITER != path[path.size() - 1]) {
-      return path + AL_FILE_DELIMITER;
+    std::string newpath = path;
+    if (!al::File::isRelativePath(path)) {
+      newpath = absolutePath(path);
     }
-    return path;
+    if (AL_FILE_DELIMITER != newpath[newpath.size() - 1]) {
+      return newpath + AL_FILE_DELIMITER;
+    }
+    return newpath;
   }
   return "." AL_FILE_DELIMITER_STR;
 }
@@ -274,12 +278,33 @@ std::string File::absolutePath(const std::string &path) {
 #endif
 }
 
+bool File::isRelativePath(const std::string &path) {
+  if (path.size() > 0) {
+    if (path[0] == '/') {
+      return false;
+    }
+    if (path.size() > 3 && ((path[0] >= 'a' && path[0] <= 'z') ||
+                            (path[0] >= 'A' && path[0] <= 'Z'))) {
+      if (path[1] == ':' && ((path[2] == '/' || path[2] == '\\'))) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 std::string File::currentPath() {
   // Can be removed once moved to C++17 std::file_system::current_path()
   char buf[FILENAME_MAX];
   platform_getcwd(buf, FILENAME_MAX);
   std::string currentDir(buf);
   return File::conformPathToOS(currentDir);
+}
+
+bool File::isSamePath(const std::string &path1, const std::string &path2) {
+  std::string newpath1 = conformPathToOS(path1);
+  std::string newpath2 = conformPathToOS(path1);
+  return newpath1 == newpath2;
 }
 
 std::string File::baseName(const std::string &path, const std::string &suffix) {
