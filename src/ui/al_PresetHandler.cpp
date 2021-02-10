@@ -497,6 +497,8 @@ float PresetHandler::getMorphTime() { return mMorphTime.get(); }
 
 void PresetHandler::setMorphTime(float time) { mMorphTime.set(time); }
 
+void PresetHandler::setMaxMorphTime(float time) { mMorphTime.max(time); }
+
 void PresetHandler::stepMorphing(double stepTime) {
   double drift = mMorphInterval - stepTime;
   if (drift > 0.01) {

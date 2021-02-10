@@ -192,6 +192,7 @@ public:
 
   float getMorphTime();
   void setMorphTime(float time);
+  void setMaxMorphTime(float time);
   void stopMorphing() { mTotalSteps.store(0); }
   void morphTo(ParameterStates &parameterStates, float morphTime);
   void morphTo(std::string presetName, float morphTime);
