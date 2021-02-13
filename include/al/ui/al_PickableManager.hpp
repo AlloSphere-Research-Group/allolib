@@ -15,90 +15,33 @@ namespace al {
 /// PickableManager
 /// @ingroup UI
 class PickableManager {
- public:
+public:
   PickableManager() {}
 
-  PickableManager &registerPickable(Pickable &p) {
-    mPickables.push_back(&p);
-    return *this;
-  }
+  PickableManager &registerPickable(Pickable &p);
   PickableManager &operator<<(Pickable &p) { return registerPickable(p); }
   PickableManager &operator<<(Pickable *p) { return registerPickable(*p); }
 
   std::vector<Pickable *> pickables() { return mPickables; }
 
-  Hit intersect(Rayd r) {
-    Hit hmin = Hit(false, r, 1e10, NULL);
-    for (Pickable *p : mPickables) {
-      Hit h = p->intersect(r);
-      if (h.hit && h.t < hmin.t) {
-        hmin = h;
-      }
-    }
-    return hmin;
-  }
+  Hit intersect(Rayd r);
 
-  void event(PickEvent e) {
-    Hit h = intersect(e.ray);
-    for (Pickable *p : mPickables) {
-      if (p == h.p || p->selected.get() || e.type == Unpick ||
-          e.type == Point) {
-        p->event(e);
+  void event(PickEvent e);
 
-        if (e.type == Point) mLastPoint = h;
-        if (e.type == Pick) mLastPick = h;
-      }  // else p->clearSelection(); //unpick?
-    }
-  }
+  void unhighlightAll();
 
-  void unhighlightAll() {
-    for (Pickable *p : mPickables) {
-      if (p->hover.get()) p->hover = false;
-    }
-  }
+  void onMouseMove(Graphics &g, const Mouse &m, int w, int h);
+  void onMouseDown(Graphics &g, const Mouse &m, int w, int h);
+  void onMouseDrag(Graphics &g, const Mouse &m, int w, int h);
+  void onMouseUp(Graphics &g, const Mouse &m, int w, int h);
 
-  void onMouseMove(Graphics &g, const Mouse &m, int w, int h) {
-    Rayd r = getPickRay(g, m.x(), m.y(), w, h);
-    event(PickEvent(Point, r));
-  }
-  void onMouseDown(Graphics &g, const Mouse &m, int w, int h) {
-    x = m.x(); y = m.y();
-    Rayd r = getPickRay(g, m.x(), m.y(), w, h);
-    event(PickEvent(Pick, r));
-  }
-  void onMouseDrag(Graphics &g, const Mouse &m, int w, int h) {
-    int dx = m.x() - x;
-    int dy = m.y() - y;
-    Rayd r = getPickRay(g, m.x(), m.y(), w, h);
-    if (m.right())
-      event(PickEvent(RotateTurntable, r, Pose(Vec3f(), g.viewMatrix().toQuat()), Vec3f(dx,dy,0)));
-    else if (m.middle())
-      event(PickEvent(Scale, r, -m.dy()));
-    else
-      event(PickEvent(TranslateRay, r));
-  }
-  void onMouseUp(Graphics &g, const Mouse &m, int w, int h) {
-    Rayd r = getPickRay(g, m.x(), m.y(), w, h);
-    event(PickEvent(Unpick, r));
-  }
-
-  void onKeyDown(const Keyboard &k) {
-    switch (k.key()) {
-      default:
-        break;
-    }
-  }
-  void onKeyUp(const Keyboard &k) {
-    switch (k.key()) {
-      default:
-        break;
-    }
-  }
+  void onKeyDown(const Keyboard &k);
+  void onKeyUp(const Keyboard &k);
 
   Hit lastPoint() { return mLastPoint; }
   Hit lastPick() { return mLastPick; }
 
- protected:
+protected:
   std::vector<Pickable *> mPickables;
   // std::map<int, Hit> mHover;
   // std::map<int, Hit> mSelect;
@@ -106,11 +49,14 @@ class PickableManager {
   Hit mLastPoint;
   Hit mLastPick;
   Vec3d selectOffset;
-  int x,y;
+  int x, y;
+
+  bool ctrlKey{false}; // true if control key
 
   Vec3d unproject(Graphics &g, Vec3d screenPos, bool view = true) {
     auto v = Matrix4d::identity();
-    if (view) v = g.viewMatrix();
+    if (view)
+      v = g.viewMatrix();
     auto mvp = g.projMatrix() * v * g.modelMatrix();
     Matrix4d invprojview = Matrix4d::inverse(mvp);
     Vec4d worldPos4 = invprojview.transform(screenPos);
@@ -136,6 +82,6 @@ class PickableManager {
   }
 };
 
-}  // namespace al
+} // namespace al
 
 #endif
