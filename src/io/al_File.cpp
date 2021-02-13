@@ -22,6 +22,15 @@
 #define platform_getcwd getcwd
 #endif
 
+// For PushDirectory
+#if defined(AL_WINDOWS)
+#define chdir _chdir
+#define getcwd _getcwd
+#define popen _popen
+#define pclose _pclose
+#include <fileapi.h>
+#endif
+
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -399,6 +408,35 @@ FilePath::FilePath(const std::string &fullpath) {
     mPath = AL_FILE_DELIMITER_STR;
     mFile = fullpath;
   }
+}
+
+std::mutex PushDirectory::mDirectoryLock;
+
+PushDirectory::PushDirectory(std::string directory, bool verbose)
+    : mVerbose(verbose) {
+  mDirectoryLock.lock();
+  getcwd(previousDirectory, sizeof(previousDirectory));
+  if (directory.size() == 0) {
+    return;
+  }
+  chdir(directory.c_str());
+  if (mVerbose) {
+    std::cout << "Pushing directory: " << directory << std::endl;
+    char curDir[4096];
+    getcwd(curDir, sizeof(curDir));
+    std::cout << "now at: " << curDir << std::endl;
+  }
+}
+
+PushDirectory::~PushDirectory() {
+  if (strlen(previousDirectory) > 0) {
+    chdir(previousDirectory);
+    if (mVerbose) {
+      std::cout << "Setting directory back to: " << previousDirectory
+                << std::endl;
+    }
+  }
+  mDirectoryLock.unlock();
 }
 
 // bool Dir::make(const std::string& path, bool recursive)

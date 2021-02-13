@@ -54,6 +54,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <mutex>
 
 #ifndef AL_FILE_DELIMITER_STR
 #ifdef AL_WINDOWS
@@ -374,6 +375,19 @@ protected:
   void getSize();
 
   friend class Dir;
+};
+
+class PushDirectory {
+public:
+  PushDirectory(std::string directory, bool verbose = false);
+
+  ~PushDirectory();
+
+private:
+  char previousDirectory[4096];
+  bool mVerbose;
+
+  static std::mutex mDirectoryLock; // Protects all instances of PushDirectory
 };
 
 /// Filesystem directory
