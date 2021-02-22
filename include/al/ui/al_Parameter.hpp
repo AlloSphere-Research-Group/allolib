@@ -952,7 +952,10 @@ public:
 class Trigger : public ParameterWrapper<bool> {
 public:
   Trigger(std::string parameterName, std::string Group = "")
-      : ParameterWrapper<bool>(parameterName, Group, false) {}
+      : ParameterWrapper<bool>(parameterName, Group, false) {
+    mValue = false;
+    mValueCache = false;
+  }
 
   virtual float toFloat() override { return get() ? 1.0f : 0.0f; }
 
