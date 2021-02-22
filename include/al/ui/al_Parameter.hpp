@@ -152,8 +152,8 @@ public:
   }
 
   // Move constructor
-  ParameterField(ParameterField &&that) noexcept : mType(NULLDATA),
-                                                   mData(nullptr) {
+  ParameterField(ParameterField &&that) noexcept
+      : mType(NULLDATA), mData(nullptr) {
     swap(*this, that);
   }
 
@@ -479,7 +479,12 @@ public:
    * The value returned by the get() function will be clamped and will not go
    * under the value set by this function.
    */
-  void min(ParameterType minValue) { mMin = minValue; }
+  void min(ParameterType minValue, ValueSource *src = nullptr) {
+    mMin = minValue;
+    for (auto cb : mMetaCallbacksSrc) {
+      (*cb)(src);
+    }
+  }
   ParameterType min() const { return mMin; }
 
   /**
@@ -488,7 +493,12 @@ public:
    * The value returned by the get() function will be clamped and will not go
    * over the value set by this function.
    */
-  void max(ParameterType maxValue) { mMax = maxValue; }
+  void max(ParameterType maxValue, ValueSource *src = nullptr) {
+    mMax = maxValue;
+    for (auto cb : mMetaCallbacksSrc) {
+      (*cb)(src);
+    }
+  }
   ParameterType max() const { return mMax; }
 
   void setDefault(const ParameterType &defaultValue) {
@@ -503,9 +513,11 @@ public:
   typedef const std::function<ParameterType(ParameterType)>
       ParameterProcessCallback;
   typedef const std::function<void(ParameterType)> ParameterChangeCallback;
-
   typedef const std::function<void(ParameterType, ValueSource *)>
       ParameterChangeCallbackSrc;
+
+  typedef const std::function<void(ValueSource *)>
+      ParameterMetaChangeCallbackSrc;
 
   /**
    * @brief setProcessingCallback sets a callback to be called whenever the
@@ -536,6 +548,8 @@ public:
   void registerChangeCallback(ParameterChangeCallback cb);
 
   void registerChangeCallback(ParameterChangeCallbackSrc cb);
+
+  void registerMetaChangeCallback(ParameterMetaChangeCallbackSrc cb);
 
   /**
    * @brief Determines whether value change callbacks are called synchronously
@@ -629,6 +643,9 @@ private:
 private:
   std::vector<std::shared_ptr<ParameterChangeCallback>> mCallbacks;
   std::vector<std::shared_ptr<ParameterChangeCallbackSrc>> mCallbacksSrc;
+
+  std::vector<std::shared_ptr<ParameterMetaChangeCallbackSrc>>
+      mMetaCallbacksSrc;
 };
 
 /**
@@ -1476,6 +1493,13 @@ void ParameterWrapper<ParameterType>::registerChangeCallback(
     ParameterChangeCallbackSrc cb) {
   mCallbacksSrc.push_back(std::make_shared<ParameterChangeCallbackSrc>(cb));
   // mCallbackUdata.push_back(userData);
+}
+
+template <class ParameterType>
+void ParameterWrapper<ParameterType>::registerMetaChangeCallback(
+    ParameterMetaChangeCallbackSrc cb) {
+  mMetaCallbacksSrc.push_back(
+      std::make_shared<ParameterMetaChangeCallbackSrc>(cb));
 }
 
 template <class ParameterType>
