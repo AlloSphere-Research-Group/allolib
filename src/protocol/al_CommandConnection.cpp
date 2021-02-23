@@ -183,7 +183,7 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                     size_t bytes = client->recv(
                         (char *)(commandMessage + bufferSize), 4096);
 
-                    while (bytes > 0 && bytes < 4095) {
+                    while (bytes > 0 && bytes < 4097) {
                       Message message(commandMessage, bytes);
                       if (mVerbose) {
                         std::cout << "Server received message from "
@@ -209,9 +209,10 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                           (char *)(commandMessage + bufferSize), 4096);
                     }
                     if (bytes != SIZE_MAX && bytes != 0) {
-                      std::cerr << __FILE__ << " : Unexpected command size"
-                                << bytes << std::endl;
-                      mRunning = false;
+                      std::cerr
+                          << __FILE__
+                          << " : Unexpected command size. Flushing buffer."
+                          << bytes << std::endl;
                     }
                   }
 
