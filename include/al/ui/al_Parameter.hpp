@@ -806,7 +806,7 @@ public:
 
   ParameterInt(const al::ParameterInt &param)
       : ParameterWrapper<int32_t>(param) {
-    mIntValue = param.mIntValue;
+    mValue = param.mValue;
     setDefault(param.getDefault());
   }
 
@@ -829,16 +829,17 @@ public:
   virtual void setNoCalls(int32_t value,
                           void *blockReceiver = nullptr) override;
 
-  /**
-   * @brief get the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   *
-   * @return the parameter value
-   */
-  virtual int32_t get() override;
+  //  /**
+  //   * @brief get the parameter's value
+  //   *
+  //   * This function is thread-safe and can be called from any number of
+  //   threads
+  //   *
+  //   * @return the parameter value
+  //   */
+  //  virtual int32_t get() override;
 
-  virtual float toFloat() override { return float(mIntValue); }
+  virtual float toFloat() override { return float(mValue); }
 
   virtual void fromFloat(float value) override { set(int32_t(value)); }
 
@@ -877,7 +878,6 @@ public:
   }
 
 private:
-  int32_t mIntValue;
 };
 
 /// ParamaterBool

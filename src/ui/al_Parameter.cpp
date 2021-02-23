@@ -68,7 +68,7 @@ void Parameter::set(float value, ValueSource *src) {
 ParameterInt::ParameterInt(std::string parameterName, std::string Group,
                            int32_t defaultValue, int32_t min, int32_t max)
     : ParameterWrapper<int32_t>(parameterName, Group, defaultValue, min, max) {
-  mIntValue = defaultValue;
+  mValue = defaultValue;
   setDefault(defaultValue);
 }
 
@@ -76,11 +76,11 @@ ParameterInt::ParameterInt(std::string parameterName, std::string Group,
                            int32_t defaultValue, std::string /*prefix*/,
                            int32_t min, int32_t max)
     : ParameterWrapper<int32_t>(parameterName, Group, defaultValue, min, max) {
-  mIntValue = defaultValue;
+  mValue = defaultValue;
   setDefault(defaultValue);
 }
 
-int32_t ParameterInt::get() { return mIntValue; }
+// int32_t ParameterInt::get() { return mValue; }
 
 void ParameterInt::setNoCalls(int32_t value, void *blockReceiver) {
   if (value > mMax)
@@ -94,7 +94,7 @@ void ParameterInt::setNoCalls(int32_t value, void *blockReceiver) {
     runChangeCallbacksSynchronous(value, nullptr);
   }
 
-  mIntValue = value;
+  mValue = value;
 }
 
 void ParameterInt::set(int32_t value, ValueSource *src) {
@@ -107,7 +107,7 @@ void ParameterInt::set(int32_t value, ValueSource *src) {
   }
 
   runChangeCallbacksSynchronous(value, src);
-  mIntValue = value;
+  mValue = value;
 }
 
 // ParameterBool
