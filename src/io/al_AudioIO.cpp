@@ -29,6 +29,7 @@ static void warn(const char *msg, const char *src) {
 
 struct AudioBackendData {
   int numOutChans, numInChans;
+  std::string streamName;
 };
 
 AudioBackend::AudioBackend() {
@@ -83,7 +84,7 @@ void AudioBackend::setOutDeviceChans(int num) {
 
 double AudioBackend::time() { return 0.0; }
 
-bool AudioBackend::open(int framesPerSecond, int framesPerBuffer,
+bool AudioBackend::open(int framesPerSecond, unsigned int framesPerBuffer,
                         void *userdata) {
   mOpen = true;
   return true;
@@ -119,6 +120,11 @@ int AudioBackend::deviceMaxOutputChannels(int num) { return 2; }
 
 double AudioBackend::devicePreferredSamplingRate(int num) { return 44100; }
 
+void AudioBackend::setStreamName(std::string name) {
+  AudioBackendData *data = static_cast<AudioBackendData *>(mBackendData.get());
+  data->streamName = name;
+}
+
 std::string AudioBackend::deviceName(int num) { return "dummy_device"; }
 
 #endif
@@ -143,6 +149,7 @@ struct AudioBackendData {
       mOutParams;          // Input and output stream parameters
   PaStream *mStream;       // i/o stream
   mutable PaError mErrNum; // Most recent error number
+  std::string streamName;
 };
 
 AudioBackend::AudioBackend() {
@@ -287,7 +294,7 @@ static int paCallback(const void *input, void *output, unsigned long frameCount,
                       const PaStreamCallbackTimeInfo *timeInfo,
                       PaStreamCallbackFlags statusFlags, void *userData);
 
-bool AudioBackend::open(int framesPerSecond, int framesPerBuffer,
+bool AudioBackend::open(int framesPerSecond, unsinged int framesPerBuffer,
                         void *userdata) {
   assert(framesPerBuffer != 0 && framesPerSecond != 0 && userdata != NULL);
   AudioBackendData *data = static_cast<AudioBackendData *>(mBackendData.get());
@@ -392,6 +399,17 @@ double AudioBackend::devicePreferredSamplingRate(int num) {
   return info->defaultSampleRate;
 }
 
+void AudioBackend::setStreamName(std::string name) {
+  AudioBackendData *data = static_cast<AudioBackendData *>(mBackendData.get());
+  data->streamName = name;
+  //  if (isRunning()) {
+  //    std::cout
+  //        << __FUNCTION__
+  //        << ": Audio stream is already running. Name will be set on next
+  //        start."
+  //        << std::endl;
+  //  }
+}
 std::string AudioBackend::deviceName(int num) {
   const PaDeviceInfo *info = Pa_GetDeviceInfo(num);
   char name[128];
@@ -994,7 +1012,7 @@ void AudioIO::init(void (*callbackA)(AudioIOData &), void *userData,
 void AudioIO::initWithDefaults(void (*callback)(AudioIOData &), void *userData,
                                bool use_out, bool use_in,
                                int framesPerBuffer // default 256
-                               ) {
+) {
   bool use_both = use_out & use_in;
   bool use_either = use_out | use_in;
 
