@@ -334,7 +334,7 @@ void ParameterGUI::drawChoice(std::vector<ParameterChoice *> params,
   auto &param = params[index];
   if (param->getHint("hide") == 1.0)
     return;
-  uint16_t value = param->get();
+  uint64_t value = param->get();
   auto elements = param->getElements();
   if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader |
@@ -342,8 +342,11 @@ void ParameterGUI::drawChoice(std::vector<ParameterChoice *> params,
     for (unsigned int i = 0; i < elements.size(); i++) {
       bool state = value & (1 << i);
       ImGui::PushID((const void *)param);
-      if (ImGui::Checkbox((elements[i] + suffix).c_str(), &state)) {
-        value ^= ((!state) ^ value) & (1UL << i); // Set an individual bit
+      if (ImGui::Checkbox(
+              (elements[i] + suffix + "_" + std::to_string(i)).c_str(),
+              &state)) {
+        value ^=
+            ((state ? -1 : 0) ^ value) & (1UL << i); // Set an individual bit
         for (auto *p : params) {
           p->set(value);
         }
