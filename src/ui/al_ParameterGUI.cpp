@@ -291,7 +291,7 @@ void ParameterGUI::drawParameterColor(std::vector<ParameterColor *> params,
            ? ImGuiColorEditFlags_AlphaPreviewHalf
            : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) |
       (options_menu ? 0 : ImGuiColorEditFlags_NoOptions) |
-      (!showHsv ? 0 : ImGuiColorEditFlags_HSV);
+      (!showHsv ? 0 : ImGuiColorEditFlags_PickerHueWheel);
 
   //    ImGui::Text("Color widget HSV with Alpha:");
   if (ImGui::ColorEdit4((param->displayName() + suffix).c_str(),
