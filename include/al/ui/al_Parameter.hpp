@@ -297,11 +297,12 @@ public:
    * @brief Generic function to set the parameter from a single float value
    *
    * Will only have effect on parameters that have a single internal value and
-   * have implemented this function
+   * have implemented this function. Returns true if paramter is able to set
+   * value from float
    */
-  virtual void fromFloat(float value) {
+  virtual bool fromFloat(float value) {
     (void)value;
-    return;
+    return false;
   }
 
   void setHint(std::string hintName, float hintValue) {
@@ -739,7 +740,10 @@ public:
 
   virtual float toFloat() override { return mValue; }
 
-  virtual void fromFloat(float value) override { set(value); }
+  virtual bool fromFloat(float value) override {
+    set(value);
+    return true;
+  }
 
   float operator=(const float value) {
     this->set(value);
@@ -841,7 +845,10 @@ public:
 
   virtual float toFloat() override { return float(mValue); }
 
-  virtual void fromFloat(float value) override { set(int32_t(value)); }
+  virtual bool fromFloat(float value) override {
+    set(int32_t(value));
+    return true;
+  }
 
   float operator=(const int32_t value) {
     this->set(value);
@@ -915,7 +922,10 @@ public:
 
   virtual float toFloat() override { return get(); }
 
-  virtual void fromFloat(float value) override { set(value); }
+  virtual bool fromFloat(float value) override {
+    set(value);
+    return true;
+  }
 
   virtual void getFields(std::vector<ParameterField> &fields) override {
     fields.emplace_back(ParameterField(get() == 1.0f ? 1 : 0));
@@ -959,7 +969,10 @@ public:
 
   virtual float toFloat() override { return get() ? 1.0f : 0.0f; }
 
-  virtual void fromFloat(float value) override { set(value != 0.0f); }
+  virtual bool fromFloat(float value) override {
+    set(value != 0.0f);
+    return true;
+  }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
     sender.send(prefix + getFullAddress());
@@ -1000,7 +1013,10 @@ public:
     return value;
   }
 
-  virtual void fromFloat(float value) override { set(std::to_string(value)); }
+  virtual bool fromFloat(float value) override {
+    set(std::to_string(value));
+    return true;
+  }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
     sender.send(prefix + getFullAddress(), get());
@@ -1236,7 +1252,10 @@ public:
     // return std::stof(getCurrent());
   }
 
-  virtual void fromFloat(float value) override { set((int32_t)value); }
+  virtual bool fromFloat(float value) override {
+    set((int32_t)value);
+    return true;
+  }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
     sender.send(prefix + getFullAddress(), get());
@@ -1344,7 +1363,10 @@ public:
     // return std::stof(getCurrent());
   }
 
-  virtual void fromFloat(float value) override { set((uint64_t)value); }
+  virtual bool fromFloat(float value) override {
+    set((uint64_t)value);
+    return true;
+  }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
     sender.send(prefix + getFullAddress(), (int32_t)get());
