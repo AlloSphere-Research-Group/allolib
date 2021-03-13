@@ -46,7 +46,7 @@ void al::AppRecorder::startRecordingOffline(double totalTime) {
   float *interleavedBuf = (float *)calloc(
       audioIO.channelsOut() * audioIO.framesPerBuffer(), sizeof(float));
   float **outbuf = (float **)malloc(audioIO.channelsOut() * sizeof(float *));
-  for (auto i = 0; i < audioIO.channelsOut(); i++) {
+  for (unsigned int i = 0; i < audioIO.channelsOut(); i++) {
     outbuf[i] = audioIO.outBuffer(i);
   }
   // Prepare audio thread

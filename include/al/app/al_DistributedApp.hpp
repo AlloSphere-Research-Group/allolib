@@ -27,7 +27,7 @@ public:
 
   void update(AudioIO &io) { gain = io.mGain; }
 
-  Parameter gain{"gain", "sound", 1.0, "alloapp", 0.0, 2.0};
+  Parameter gain{"gain", "sound", 1.0, 0.0, 2.0};
 };
 
 /**
