@@ -394,6 +394,16 @@ bool File::searchBack(std::string &path, int maxDepth) {
   return r;
 }
 
+al_sec al::File::modificationTime(const char *path) {
+  struct stat s;
+  if (::stat(path, &s) == 0) {
+    // const auto& t = s.st_mtim;
+    // return t.tv_sec + t.tv_usec/1e9;
+    return s.st_mtime;
+  }
+  return 0.;
+}
+
 FilePath::FilePath(const std::string &file, const std::string &path)
     : mPath(path), mFile(file) {
   mPath = File::conformPathToOS(mPath);

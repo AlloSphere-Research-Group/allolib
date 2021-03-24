@@ -352,15 +352,7 @@ public:
   /// \returns whether the file or directory was found
   static bool searchBack(std::string &path, int maxDepth = 6);
 
-  static al_sec modificationTime(const char *path) {
-    struct stat s;
-    if (::stat(path, &s) == 0) {
-      // const auto& t = s.st_mtim;
-      // return t.tv_sec + t.tv_usec/1e9;
-      return s.st_mtime;
-    }
-    return 0.;
-  }
+  static al_sec modificationTime(const char *path);
   // TODO: Implement these.
   // static al_sec modified(const std::string& path){ return
   // File(path).modified(); } static al_sec accessed(const std::string& path){
