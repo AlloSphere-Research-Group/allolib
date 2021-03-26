@@ -17,7 +17,7 @@ MACRO_ENSURE_OUT_OF_SOURCE_BUILD(
 )
 
 option(AL_VERBOSE_OUTPUT "" OFF)
-option(BUILD_EXAMPLES "" OFF)
+option(ALLOLIB_BUILD_EXAMPLES "" OFF)
 option(TRAVIS_BUILD "" OFF)
 option(APPVEYOR_BUILD "" OFF)
 option(ALLOLIB_BUILD_TESTS "" OFF)
@@ -348,7 +348,7 @@ if (ALLOLIB_BUILD_TESTS)
   add_subdirectory(test)
 endif()
 
-if (BUILD_EXAMPLES)
+if (ALLOLIB_BUILD_EXAMPLES)
   message("including allolib examples")
   add_subdirectory(examples)
 endif()
