@@ -461,7 +461,11 @@ std::map<int, std::string> PresetHandler::availablePresets() {
 }
 
 std::string PresetHandler::getPresetName(int index) {
-  return mPresetsMap[index];
+  if (mPresetsMap.find(index) != mPresetsMap.end()) {
+    return mPresetsMap[index];
+  } else {
+    return std::string();
+  }
 }
 
 void PresetHandler::skipParameter(std::string parameterAddr, bool skip) {

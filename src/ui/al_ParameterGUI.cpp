@@ -558,11 +558,23 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
               ImGuiTreeNodeFlags_DefaultOpen)) {
     int selection = presetHandler->getCurrentPresetIndex();
     std::string currentPresetName = presetHandler->getCurrentPresetName();
-    ImGui::Text("%s", currentPresetName.c_str());
+    size_t delim_index = 0;
+    if (currentPresetName.length() == 0)
+      currentPresetName = "none";
+    else
+      delim_index = (state.currentBank + "-").size();
+
+    if (currentPresetName.size() > delim_index &&
+        currentPresetName.substr(0, delim_index) == state.currentBank + "-")
+      ImGui::Text("Current Preset: %s",
+                  currentPresetName.substr(delim_index).c_str());
+    else
+      ImGui::Text("Current Preset: %s", currentPresetName.c_str());
     int counter = state.presetHandlerBank * (presetColumns * presetRows);
     if (state.storeButtonState) {
       ImGui::PushStyleColor(ImGuiCol_Text, 0xff0000ff);
     }
+    float presetWidth = (ImGui::GetContentRegionAvail().x / 12.0f) - 8.0f;
     for (int row = 0; row < presetRows; row++) {
       for (int column = 0; column < presetColumns; column++) {
         std::string name = std::to_string(counter);
@@ -573,8 +585,12 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
           ImGui::PushStyleColor(ImGuiCol_Border,
                                 ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         }
-        if (ImGui::Selectable(name.c_str(), is_selected, 0,
-                              ImVec2(fontSize * 1.4, fontSize * 1.2))) {
+
+        const bool selectableClicked =
+            ImGui::Selectable(name.c_str(), is_selected, 0,
+                              ImVec2(presetWidth, ImGui::GetFontSize() * 1.2f));
+        if (selectableClicked) {
+
           if (state.storeButtonState) {
             std::string saveName = state.enteredText;
             if (saveName.size() == 0) {
@@ -592,12 +608,17 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
             }
           }
         }
+
+        if (ImGui::IsItemHovered()) { // tooltip showing preset name
+          const std::string currentlyhoveringPresetName =
+              presetHandler->getPresetName(counter);
+          if (currentlyhoveringPresetName.size() > 0) {
+            ImGui::SetTooltip("%s", currentlyhoveringPresetName.c_str());
+          }
+        }
         if (is_selected) {
           ImGui::PopStyleColor(1);
         }
-        //                if (ImGui::IsItemHovered()) {
-        //                    ImGui::SetTooltip("I am a tooltip");
-        //                }
         if (column < presetColumns - 1)
           ImGui::SameLine();
         counter++;
