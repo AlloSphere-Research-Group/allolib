@@ -15,10 +15,10 @@ using namespace al;
 struct MyApp : App {
   Reverb<float> reverb;
 
-  void onInit() {
-    reverb.bandwidth(0.6);  // Low-pass amount on input, in [0,1]
-    reverb.damping(0.5);    // High-frequency damping, in [0,1]
-    reverb.decay(0.6);      // Tail decay factor, in [0,1]
+  void onInit() override {
+    reverb.bandwidth(0.6); // Low-pass amount on input, in [0,1]
+    reverb.damping(0.5);   // High-frequency damping, in [0,1]
+    reverb.decay(0.6);     // Tail decay factor, in [0,1]
 
     // Diffusion amounts
     // Values near 0.7 are recommended. Moving further away from 0.7 will lead
@@ -26,7 +26,7 @@ struct MyApp : App {
     reverb.diffusion(0.76, 0.666, 0.707, 0.571);
   }
 
-  void onSound(AudioIOData& io) override {
+  void onSound(AudioIOData &io) override {
     while (io()) {
       float dry = io.in(0);
 

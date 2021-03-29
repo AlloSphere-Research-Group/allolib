@@ -32,8 +32,8 @@ class MyAudioApp {
   // This start function starts the audio domain, waits for 3 seconds and
   // then exits
   void start() {
-    audioDomain.initialize();
-    consoleDomain.initialize();
+    audioDomain.init();
+    consoleDomain.init();
     // Set audio callback through a lambda
     audioDomain.onSound = [this](AudioIOData &io) {
       while (io()) {

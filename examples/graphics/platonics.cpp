@@ -91,11 +91,11 @@ class MyApp : public App {
       g.rotate(angle1, 0, 1, 0);
       g.rotate(angle2, 1, 0, 0);
       g.color(0.5, 0.5, 0.5);
-      g.polygonMode(Graphics::FILL);
+      g.polygonFill();
       g.draw(solids[i]);
       g.scale(1.01);
       g.color(0);
-      g.polygonMode(Graphics::LINE);
+      g.polygonLine();
       g.draw(solids[i]);
       g.popMatrix();
     }

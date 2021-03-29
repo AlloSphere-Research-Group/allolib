@@ -124,10 +124,10 @@ class MyApp : public App {
   void onDraw(Graphics& g) {
     g.clear(0.1);
 
-    g.cullFace(true);
+    g.culling(true);
     g.depthTesting(true);
     g.lighting(true);
-    // g.polygonMode(Graphics::LINE);
+    // g.polygonLine();
 
     light1.dir(1, 1, 1);
     g.light(light1);

@@ -70,7 +70,7 @@ struct MyApp : al::App {
 
     al::gl::clearColor(1.0f, 1.0f, 1.0f, 1.0f);
     al::gl::clearDepth(1.0f);
-    al::gl::depthTest(true);
+    al::gl::depthTesting(true);
 
     // uniform color, no lighting
     al::Mat4f md0 = al::Mat4f::translation(1.0f, 0.0f, 0.0f) *

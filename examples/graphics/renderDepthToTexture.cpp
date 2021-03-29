@@ -42,7 +42,7 @@ struct MyApp : App {
   void onResize(int w, int h) { updateFBO(w, h); }
 
   void onDraw(Graphics& g) {
-    g.depthTesting(
+    gl::depthTesting(
         true);  // the depth buffer is not updated if the depth test is disabled
 
     // To render our scene to the FBO, we must first bind it

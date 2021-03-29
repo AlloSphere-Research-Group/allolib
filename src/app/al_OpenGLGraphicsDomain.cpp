@@ -1,15 +1,18 @@
+#include "al/app/al_OpenGLGraphicsDomain.hpp"
+
 #include <cstring>
 #include <iostream>
 
-#include "al/app/al_OpenGLGraphicsDomain.hpp"
 #include "al/io/al_Window.hpp"
 
 using namespace al;
 
-bool OpenGLGraphicsDomain::initialize(ComputationDomain *parent) {
+bool OpenGLGraphicsDomain::init(ComputationDomain *parent) {
   bool ret = true;
+  ret &= initializeSubdomains(true);
   initializeWindowManager();
   callInitializeCallbacks();
+  ret &= initializeSubdomains(false);
   return ret;
 }
 
@@ -18,7 +21,7 @@ bool OpenGLGraphicsDomain::start() {
     mRunning = true;
     bool ret = true;
     ret &= initializeSubdomains(true);
-    startFPS();  // WindowApp (FPS)
+    startFPS(); // WindowApp (FPS)
     ret &= initializeSubdomains(false);
 
     preOnCreate();
@@ -47,7 +50,7 @@ bool OpenGLGraphicsDomain::stop() {
 
   ret &= cleanupSubdomains(true);
 
-  onExit();  // user defined
+  onExit(); // user defined
   postOnExit();
 
   ret &= cleanupSubdomains(false);
@@ -63,6 +66,7 @@ bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
 
 std::shared_ptr<GLFWOpenGLWindowDomain> OpenGLGraphicsDomain::newWindow() {
   auto newWindowDomain = newSubDomain<GLFWOpenGLWindowDomain>();
+  newWindowDomain->init(this);
   newWindowDomain->window().decorated(nextWindowProperties.decorated);
   newWindowDomain->window().cursor(nextWindowProperties.cursor);
   newWindowDomain->window().cursorHide(!nextWindowProperties.cursorVisible);
@@ -75,6 +79,11 @@ std::shared_ptr<GLFWOpenGLWindowDomain> OpenGLGraphicsDomain::newWindow() {
   return newWindowDomain;
 }
 
+void OpenGLGraphicsDomain::closeWindow(
+    std::shared_ptr<GLFWOpenGLWindowDomain> windowDomain) {
+  removeSubDomain(std::static_pointer_cast<SynchronousDomain>(windowDomain));
+}
+
 /// Window Domain ----------------------
 
 GLFWOpenGLWindowDomain::GLFWOpenGLWindowDomain() {
@@ -82,7 +91,7 @@ GLFWOpenGLWindowDomain::GLFWOpenGLWindowDomain() {
   mGraphics = std::make_unique<Graphics>();
 }
 
-bool GLFWOpenGLWindowDomain::initialize(ComputationDomain *parent) {
+bool GLFWOpenGLWindowDomain::init(ComputationDomain *parent) {
   //  if (strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
   //  0) {
   //    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();

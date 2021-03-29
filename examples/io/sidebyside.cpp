@@ -25,12 +25,12 @@ struct MyApp : App {
   void onDraw(Graphics& g) override {
     /*  Left
      */
-    glViewport(0, 0, fbWidth() / 2, fbHeight());
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(0, 0, fbWidth() / 2, fbHeight());
+    g.viewport(0, 0, fbWidth() / 2, fbHeight());
+    g.scissorTest(true);
+    g.scissorArea(0, 0, fbWidth() / 2, fbHeight());
 
     g.clear(1, 0, 0);
-    g.polygonMode(Graphics::LINE);
+    g.polygonLine();
     g.pushMatrix();
     g.rotate(phase * 360, 0, 1, 0);
     g.color(1);
@@ -39,12 +39,12 @@ struct MyApp : App {
 
     /*  Right
      */
-    glViewport(fbWidth() / 2, 0, fbWidth() / 2, fbHeight());
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(fbWidth() / 2, 0, fbWidth() / 2, fbHeight());
+    g.viewport(fbWidth() / 2, 0, fbWidth() / 2, fbHeight());
+    g.scissorTest(true);
+    g.scissorArea(fbWidth() / 2, 0, fbWidth() / 2, fbHeight());
 
     g.clear(0, 0, 1);
-    g.polygonMode(Graphics::LINE);
+    g.polygonLine();
     g.pushMatrix();
     g.rotate(phase * 360, 0, 1, 0);
     g.color(1);
@@ -53,8 +53,8 @@ struct MyApp : App {
 
     /*  Reset settings
      */
-    glViewport(0, 0, fbWidth(), fbHeight());
-    glDisable(GL_SCISSOR_TEST);
+    g.viewport(0, 0, fbWidth(), fbHeight());
+    g.scissorTest(false);
   }
 };
 

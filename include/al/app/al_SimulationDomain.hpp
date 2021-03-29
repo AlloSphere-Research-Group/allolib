@@ -10,56 +10,42 @@
 #include <vector>
 
 #include "al/app/al_ComputationDomain.hpp"
-#include "al/app/al_StateDistributionDomain.hpp"
 
 namespace al {
 
 /**
- * @brief SimulationDomain class
+ * @brief Basic simulation domain providing a simulationFunction
  * @ingroup App
+ *
  */
 class SimulationDomain : public SynchronousDomain {
- public:
+public:
   virtual bool tick() override;
 
   void disableProcessingCallback();
   std::function<void(double dt)> simulationFunction = [](double) {
-  };  // function to be called in onAnimate()
+  }; // function to be called in onAnimate()
 
- private:
+private:
   bool mUseCallback{true};
 };
 
 // -------------
 
+/**
+ * Simulation domain with state
+ */
 template <class TSharedState>
 class StateSimulationDomain : public SimulationDomain {
- public:
+public:
   TSharedState &state() { return *mState; }
 
   std::shared_ptr<TSharedState> statePtr() { return mState; }
 
-  //  virtual std::shared_ptr<StateSendDomain<TSharedState>> addStateSender(
-  //      std::string id = "") {
-  //    auto newDomain = newSubDomain<StateSendDomain<TSharedState>>(false);
-  //    newDomain->setId(id);
-  //    newDomain->setStatePointer(statePtr());
-  //    return newDomain;
-  //  }
-
-  //  virtual std::shared_ptr<StateReceiveDomain<TSharedState>>
-  //  addStateReceiver(
-  //      std::string id = "") {
-  //    auto newDomain = newSubDomain<StateReceiveDomain<TSharedState>>(true);
-  //    newDomain->setId(id);
-  //    newDomain->setStatePointer(statePtr());
-  //    return newDomain;
-  //  }
-
- protected:
+protected:
   std::shared_ptr<TSharedState> mState{new TSharedState};
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // SIMULATIONDOMAIN
+#endif // SIMULATIONDOMAIN

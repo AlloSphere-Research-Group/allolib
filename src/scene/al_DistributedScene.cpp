@@ -84,7 +84,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize,
     if (!this->mNotifier) {
       return;
     }
-    for (auto *param : voice->triggerParameters()) {
+    for (ParameterMeta *param : voice->triggerParameters()) {
       if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
         dynamic_cast<Parameter *>(param)->registerChangeCallback(
             [this, param, voice](float value) {
@@ -96,7 +96,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize,
                 this->mNotifier->notifyListeners(
                     prefix + "/" + std::to_string(voice->id()) +
                         param->getFullAddress(),
-                    param);
+                    param, nullptr);
               }
               //                                std::cout << voice->id() << "
               //                                parameter " << param->getName()
@@ -107,7 +107,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize,
     // register callbacks for internal parameters
     for (auto *param : voice->parameters()) {
       if (strcmp(typeid(*param).name(), typeid(Parameter).name()) ==
-          0) {  // Parameter
+          0) { // Parameter
         Parameter *p = dynamic_cast<Parameter *>(param);
         p->registerChangeCallback([&, p, voice](float value) {
           if (this->mNotifier) {
@@ -118,12 +118,12 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize,
             this->mNotifier->notifyListeners(prefix + "/" +
                                                  std::to_string(voice->id()) +
                                                  p->getFullAddress(),
-                                             p);
+                                             p, nullptr);
           }
         });
       }
       if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) ==
-          0) {  // Parameter
+          0) { // Parameter
         ParameterPose *p = dynamic_cast<ParameterPose *>(param);
         p->registerChangeCallback([&, p, voice](Pose value) {
           if (this->mNotifier) {
@@ -134,7 +134,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize,
             this->mNotifier->notifyListeners(prefix + "/" +
                                                  std::to_string(voice->id()) +
                                                  p->getFullAddress(),
-                                             p);
+                                             p, nullptr);
           }
         });
       }

@@ -9,9 +9,10 @@
 
 using namespace al;
 
-DistributedApp::DistributedApp() : App() {}
-
-void DistributedApp::initialize() {
+void DistributedApp::prepare() {
+  if (initialized) {
+    return;
+  }
 #ifdef AL_WINDOWS
   // Required to make sure gethostname() works....
   WORD wVersionRequested;
@@ -23,10 +24,37 @@ void DistributedApp::initialize() {
     std::cerr << "WSAStartup failed with error: " << err << std::endl;
   }
 #endif
+
+  if (!File::exists("distributed_app.toml")) {
+    if (al::sphere::isSphereMachine()) {
+      // If on sphere, create default config file
+      std::ofstream configfile;
+      configfile.open("distributed_app.toml");
+      configfile << "broadcastAddress = \"192.168.10.255\"" << std::endl;
+
+      configfile << "[[node]]" << std::endl;
+      configfile << "host = \"ar01.1g\"\n";
+      configfile << "rank = 0\n";
+      configfile << "group = 0\n";
+      configfile << "role = \"desktop\"\n\n";
+      for (uint16_t i = 1; i <= 14; i++) {
+        configfile << "[[node]]" << std::endl;
+        char str[3];
+        snprintf(str, 3, "%02d", i);
+        configfile << "host = \"gr" + std::string(str) + "\"\n";
+        configfile << "rank = " + std::to_string(i) + "\n";
+        configfile << "group = 0\n";
+        configfile << "role = \"renderer\"\n\n";
+      }
+      configfile.close();
+    }
+  }
+
   TomlLoader appConfig("distributed_app.toml");
   auto nodesTable = appConfig.root->get_table_array("node");
   std::vector<std::string> mListeners;
   // First get role from config file
+  mFoundHost = false;
   if (nodesTable) {
     for (const auto &table : *nodesTable) {
       std::string host = *table->get_as<std::string>("host");
@@ -35,10 +63,11 @@ void DistributedApp::initialize() {
       if (name() == host) {
         // Now set capabilities from role
         setRole(role);
+        mFoundHost = true;
       }
       mRoleMap[host] = role;
       if (table->contains("dataRoot")) {
-        if (name() == host) {  // Set configuration for this node when found
+        if (name() == host) { // Set configuration for this node when found
           std::string dataRootValue = *table->get_as<std::string>("dataRoot");
           dataRoot = File::conformPathToOS(dataRootValue);
         }
@@ -48,7 +77,7 @@ void DistributedApp::initialize() {
       }
 
       if (table->contains("rank")) {
-        if (name() == host) {  // Set configuration for this node when found
+        if (name() == host) { // Set configuration for this node when found
           rank = *table->get_as<int>("rank");
         }
       } else {
@@ -56,7 +85,7 @@ void DistributedApp::initialize() {
                   << std::endl;
       }
       if (table->contains("group")) {
-        if (name() == host) {  // Set configuration for this node when found
+        if (name() == host) { // Set configuration for this node when found
           group = *table->get_as<int>("group");
         }
       } else {
@@ -64,16 +93,25 @@ void DistributedApp::initialize() {
                   << std::endl;
       }
     }
-  } else {  // No nodes table in config file. Use desktop role
-
+    if (!mFoundHost) { // if host name isn't found, use default settings
+                       // and warn
+      std::cout
+          << "WARNING: node " << name()
+          << " not found in node table!\n\t*Using default desktop setting!*"
+          << std::endl;
+      setRole("desktop");
+      rank = 0;
+      group = 0;
+    }
+  } else { // No nodes table in config file. Use desktop role
     auto defaultCapabilities = al::sphere::getSphereNodes();
     if (defaultCapabilities.find(name()) != defaultCapabilities.end()) {
       mCapabilites = defaultCapabilities[name()].mCapabilites;
       group = defaultCapabilities[name()].group;
       rank = defaultCapabilities[name()].rank;
     } else {
-      mCapabilites =
-          (Capability)(CAP_SIMULATOR | CAP_RENDERING | CAP_AUDIO_IO | CAP_OSC);
+      setRole("desktop");
+      rank = 0;
       group = 0;
     }
   }
@@ -86,7 +124,13 @@ void DistributedApp::initialize() {
     }
   }
   if (appConfig.hasKey<std::string>("broadcastAddress")) {
-    additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
+    if (mFoundHost) {
+      additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
+    } else {
+      additionalConfig["broadcastAddress"] = "127.0.0.1";
+    }
+  } else {
+    additionalConfig["broadcastAddress"] = "127.0.0.1";
   }
 
   osc::Recv testServer;
@@ -112,17 +156,19 @@ void DistributedApp::initialize() {
         std::find(mDomainList.begin(), mDomainList.end(), mAudioDomain));
   }
   parameterServer() << mAudioControl.gain;
+
+  initializeDomains();
+  initialized = true;
 }
 
 void DistributedApp::start() {
-  initialize();
-  initializeDomains();
+  prepare();
   stdControls.app = this;
 
   if (hasCapability(CAP_OMNIRENDERING)) {
     omniRendering =
         graphicsDomain()->newSubDomain<GLFWOpenGLOmniRendererDomain>();
-    omniRendering->initialize(graphicsDomain().get());
+    omniRendering->init(graphicsDomain().get());
     omniRendering->window().append(stdControls);
 
     omniRendering->window().append(omniRendering->navControl());
@@ -146,13 +192,11 @@ void DistributedApp::start() {
     omniRendering->window().onMouseScroll =
         std::bind(&App::onMouseScroll, this, std::placeholders::_1);
     if (!isPrimary()) {
-      std::cout << "Running REPLICA" << std::endl;
       omniRendering->drawOmni = true;
     }
   } else if (hasCapability(CAP_RENDERING)) {
-    std::cout << "Running Primary" << std::endl;
     mDefaultWindowDomain = graphicsDomain()->newWindow();
-    mDefaultWindowDomain->initialize(graphicsDomain().get());
+    mDefaultWindowDomain->init(graphicsDomain().get());
     mDefaultWindowDomain->window().append(stdControls);
     stdControls.app = this;
     stdControls.mWindow = &mDefaultWindowDomain->window();
@@ -178,11 +222,20 @@ void DistributedApp::start() {
   }
 
   if (isPrimary()) {
-    for (auto hostRole : mRoleMap) {
-      if (hostRole.first != name()) {
-        parameterServer().addListener(hostRole.first, oscDomain()->port);
+    std::cout << "Running Primary" << std::endl;
+    if (!mFoundHost) {
+      std::cout << "WARNING: not adding extra listeners due to missing node "
+                   "table in distributed_app.toml"
+                << std::endl;
+    } else {
+      std::cout << "Running REPLICA" << std::endl;
+      for (auto hostRole : mRoleMap) {
+        if (hostRole.first != name()) {
+          parameterServer().addListener(hostRole.first, oscDomain()->port);
+        }
       }
     }
+    parameterServer().notifyAll();
   }
 
   onInit();
@@ -266,5 +319,13 @@ Nav &DistributedApp::nav() {
     return omniRendering->nav();
   } else {
     return mDefaultWindowDomain->nav();
+  }
+}
+
+NavInputControl &DistributedApp::navControl() {
+  if (hasCapability(CAP_OMNIRENDERING)) {
+    return omniRendering->navControl();
+  } else {
+    return mDefaultWindowDomain->navControl();
   }
 }

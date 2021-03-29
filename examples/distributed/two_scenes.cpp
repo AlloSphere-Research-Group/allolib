@@ -10,7 +10,6 @@
 #define GAMMA_H_NO_IO    // define this to avoid bringing AudioIO from Gamma
 
 #include "Gamma/Gamma.h"
-
 #include "al/app/al_DistributedApp.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include "al/io/al_AudioIO.hpp"

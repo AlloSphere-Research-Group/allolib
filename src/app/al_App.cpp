@@ -21,7 +21,14 @@ bool App::shouldQuit() {
 
 void App::fps(double f) { graphicsDomain()->fps(f); }
 
-Window &App::defaultWindow() { return mDefaultWindowDomain->window(); }
+Window &App::defaultWindow() {
+  if (!mDefaultWindowDomain) {
+    std::cerr
+        << "ERROR: calling function for Window before window is available!"
+        << std::endl;
+  }
+  return mDefaultWindowDomain->window();
+}
 
 Graphics &App::graphics() { return mDefaultWindowDomain->graphics(); }
 
@@ -187,6 +194,9 @@ void App::configureAudio(double audioRate, int audioBlockSize, int audioOutputs,
 
 void App::configureAudio(AudioDevice &dev, double audioRate, int audioBlockSize,
                          int audioOutputs, int audioInputs) {
+  if (audioRate < 0) {
+    audioRate = AudioBackend::devicePreferredSamplingRate(dev.id());
+  }
   audioDomain()->configure(dev, audioRate, audioBlockSize, audioOutputs,
                            audioInputs);
 }
@@ -198,7 +208,6 @@ ParameterServer &App::parameterServer() {
 void App::start() {
   initializeDomains();
   mDefaultWindowDomain = graphicsDomain()->newWindow();
-  mDefaultWindowDomain->initialize(graphicsDomain().get());
 
   mDefaultWindowDomain->onDraw =
       std::bind(&App::onDraw, this, std::placeholders::_1);
@@ -273,8 +282,39 @@ void App::initializeDomains() {
     } else {
       std::cout << "WARNING: Domain unknown for auto connection" << std::endl;
     }
-    if (!domain->initialize()) {
+    if (!domain->init()) {
       std::cerr << "ERROR initializing domain " << std::endl;
     }
   }
+}
+
+bool App::StandardWindowAppKeyControls::keyDown(const Keyboard &k) {
+  if (k.ctrl()) {
+    switch (k.key()) {
+    case 'q':
+      app->quit();
+      return false;
+      //          case 'h':
+      //            window().hide();
+      //            return false;
+      //          case 'm':
+      //            window().iconify();
+      //            return false;
+    case 'u':
+      window().cursorHideToggle();
+      return false;
+      //          case 'w':
+      //            app->graphicsDomain()->closeWindow(app->mDefaultWindowDomain);
+      //            return false;
+    default:;
+    }
+  } else {
+    switch (k.key()) {
+    case Keyboard::ESCAPE:
+      window().fullScreenToggle();
+      return false;
+    default:;
+    }
+  }
+  return true;
 }

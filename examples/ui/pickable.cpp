@@ -30,7 +30,7 @@ struct MyApp : public App {
   PickableBB child2;
   PickableBB child3;
 
-  void onCreate() {
+  void onCreate() override {
     // position camera, disable mouse to look
     nav().pos(0, 0, 10);
     navControl().useMouse(false);
@@ -64,16 +64,16 @@ struct MyApp : public App {
     child2.addChild(child3);
   }
 
-  void onAnimate(double dt) {
+  void onAnimate(double dt) override {
     // move light in a circle
     t += dt;
     light.pos(10 * cos(t), 0, 10 * sin(t));
   }
 
-  void onDraw(Graphics &g) {
+  void onDraw(Graphics &g) override {
     // draw lit mesh
     g.clear(0);
-    g.depthTesting(true);
+    gl::depthTesting(true);
     g.lighting(true);
     g.light(light);
 
@@ -156,4 +156,7 @@ struct MyApp : public App {
   }
 };
 
-int main() { MyApp().start(); }
+int main() {
+  MyApp().start();
+  return 0;
+}

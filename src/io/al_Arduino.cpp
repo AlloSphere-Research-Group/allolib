@@ -9,7 +9,7 @@
 
 using namespace al;
 
-bool Arduino::initialize(std::string port, unsigned long baud,
+bool Arduino::init(std::string port, unsigned long baud,
                          uint32_t granularity) {
   mGranularity = granularity;
   try {

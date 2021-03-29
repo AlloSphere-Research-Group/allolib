@@ -19,16 +19,22 @@ class SynchronousDomain;
  * @ingroup App
  */
 class ComputationDomain {
- public:
+public:
+  virtual ~ComputationDomain() {}
   /**
    * @brief initialize
    * @param parent
-   * @return
+   * @return true if init succeeded
    *
-   * Multiple calls to initialize() should be allowed.
+   * Multiple calls to init() should be allowed.
    */
-  virtual bool initialize(ComputationDomain *parent = nullptr);
+  virtual bool init(ComputationDomain *parent = nullptr);
 
+  /**
+   * @brief cleanup
+   * @param parent
+   * @return true if cleanup succesfull
+   */
   virtual bool cleanup(ComputationDomain *parent = nullptr);
 
   template <class DomainType>
@@ -56,9 +62,6 @@ class ComputationDomain {
    */
   void removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain);
 
-  //  void lock() { mSubdomainLock.lock();}
-  //  void unlock() { mSubdomainLock.unlock(); }
-
   /**
    * @brief Return time delta with respect to previous processing pass for this
    * domain
@@ -71,15 +74,21 @@ class ComputationDomain {
    */
   double timeDelta() { return mTimeDrift; }
 
-  void registerInitializeCallback(
-      std::function<void(ComputationDomain *)> callback) {
-    mInitializeCallbacks.push_back(callback);
-  }
+  void setTimeDelta(double delta) { mTimeDrift = delta; }
 
-  void registerCleanupCallback(
-      std::function<void(ComputationDomain *)> callback) {
-    mCleanupCallbacks.push_back(callback);
-  }
+  /**
+   * @brief register callbacks to be called in the init() function
+   * @param callback
+   */
+  void
+  registerInitializeCallback(std::function<void(ComputationDomain *)> callback);
+
+  /**
+   * @brief register callbacks to be called in the cleanup() function
+   * @param callback
+   */
+  void
+  registerCleanupCallback(std::function<void(ComputationDomain *)> callback);
 
   /**
    * @brief Return a list of parameters that control this domain
@@ -94,7 +103,7 @@ class ComputationDomain {
    */
   std::vector<ParameterMeta *> parameters() { return mParameters; }
 
- protected:
+protected:
   /**
    * @brief initializeSubdomains should be called within the domain's
    * initialization function
@@ -131,24 +140,16 @@ class ComputationDomain {
    * @brief callInitializeCallbacks should be called by children of this class
    * after the domain has been initialized
    */
-  void callInitializeCallbacks() {
-    for (auto callback : mInitializeCallbacks) {
-      callback(this);
-    }
-  }
+  void callInitializeCallbacks();
 
   /**
    * @brief callInitializeCallbacks should be called by children of this class
    * before the domain has been cleaned up
    */
-  void callCleanupCallbacks() {
-    for (auto callback : mCleanupCallbacks) {
-      callback(this);
-    }
-  }
+  void callCleanupCallbacks();
 
-  std::mutex mSubdomainLock;  // It is the domain's responsibility to lock and
-                              // unlock while processing.
+  std::mutex mSubdomainLock; // It is the domain's responsibility to lock and
+                             // unlock while processing.
   double mTimeDrift{0.0};
   std::vector<std::pair<std::shared_ptr<SynchronousDomain>, bool>>
       mSubDomainList;
@@ -156,7 +157,7 @@ class ComputationDomain {
   // Add parameters for domain control here
   std::vector<ParameterMeta *> mParameters;
 
- private:
+private:
   std::vector<std::function<void(ComputationDomain *)>> mInitializeCallbacks;
   std::vector<std::function<void(ComputationDomain *)>> mCleanupCallbacks;
 };
@@ -164,7 +165,7 @@ class ComputationDomain {
 class SynchronousDomain : public ComputationDomain {
   friend class ComputationDomain;
 
- public:
+public:
   /**
    * @brief Execute a pass of the domain.
    * @return true if execution of the domain succeeded
@@ -173,12 +174,12 @@ class SynchronousDomain : public ComputationDomain {
 };
 
 class AsynchronousDomain : public ComputationDomain {
- public:
+public:
   /**
    * @brief start the asyncrhonous execution of the domain
    * @return true if start was successful
    *
-   * Assumes that initialize() has already been called.
+   * Assumes that init() has already been called.
    */
   virtual bool start() = 0;
 
@@ -191,16 +192,12 @@ class AsynchronousDomain : public ComputationDomain {
    */
   virtual bool stop() = 0;
 
- protected:
+protected:
   /**
    * @brief callStartCallbacks should be called by children of this class after
    * the domain has been set up to start, before going into the blocking loop
    */
-  void callStartCallbacks() {
-    for (auto callback : mStartCallbacks) {
-      callback(this);
-    }
-  }
+  void callStartCallbacks();
 
   /**
    * @brief callStopCallbacks should be called by children of this class on the
@@ -212,7 +209,7 @@ class AsynchronousDomain : public ComputationDomain {
     }
   }
 
- private:
+private:
   std::vector<std::function<void(ComputationDomain *)>> mStartCallbacks;
   std::vector<std::function<void(ComputationDomain *)>> mStopCallbacks;
 };
@@ -225,7 +222,7 @@ std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
   assert(dynamic_cast<SynchronousDomain *>(newDomain.get()));
   if (newDomain) {
     mSubDomainList.push_back({newDomain, prepend});
-    //    if (newDomain->initialize(this)) {
+    //    if (newDomain->init(this)) {
     //    } else {
     //      newDomain = nullptr;
     //    }
@@ -233,6 +230,6 @@ std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
   return newDomain;
 }
 
-}  // namespace al
+} // namespace al
 
-#endif  // COMPUTATIONDOMAIN_H
+#endif // COMPUTATIONDOMAIN_H

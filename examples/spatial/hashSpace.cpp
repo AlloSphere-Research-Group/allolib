@@ -9,33 +9,32 @@ Author:
 Graham Wakefield 2012
 */
 
+#include <stdio.h>
+
+#include <map>
+
 #include "al/app/al_App.hpp"
 #include "al/math/al_Functions.hpp"
 #include "al/math/al_Random.hpp"
 #include "al/spatial/al_HashSpace.hpp"
 
-#include <stdio.h>
-#include <map>
-
 using namespace al;
 
-rnd::Random<> rng;
+struct World : public App {
+  rnd::Random<> rng;
 
-// the space has 2^6 (64) voxels per side
-// (i.e., for each of the 3 sides) and up to 10000 objects:
-HashSpace space(6, 10000);
-unsigned maxradius = space.maxRadius();
+  // the space has 2^6 (64) voxels per side
+  // (i.e., for each of the 3 sides) and up to 10000 objects:
+  HashSpace space{6, 10000};
+  unsigned maxradius{space.maxRadius()};
 
-// a query object to be re-used for finding neighbors
-// it will match up to 500 neighbors within a radius.
-HashSpace::Query qmany(500);
+  // a query object to be re-used for finding neighbors
+  // it will match up to 500 neighbors within a radius.
+  HashSpace::Query qmany{500};
 
-// this is used for finding the nearest neighbor.
-// it will consider 6 matches and return the best.
-HashSpace::Query qnearest(6);
-
-class World : public App {
- public:
+  // this is used for finding the nearest neighbor.
+  // it will consider 6 matches and return the best.
+  HashSpace::Query qnearest{6};
   double radius;
 
   void onCreate() override {
@@ -50,6 +49,7 @@ class World : public App {
   }
 
   bool onMouseDrag(const Mouse& m) override {
+    // drag to the right to increase radius, to the left to decrease
     double dx = m.dx() / (double)width();
     radius += dx * maxradius;
     return true;
@@ -62,7 +62,7 @@ class World : public App {
     double my = space.dim() * mouse().y() / (double)height();
 
     g.projMatrix(Matrix4f::ortho(0, space.dim(), space.dim(), 0, -1, 1));
-    g.depthTesting(false);
+    gl::depthTesting(false);
 
     // draw space grid:
     {

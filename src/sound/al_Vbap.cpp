@@ -1,5 +1,5 @@
 #include <list>
-#include <utility>  // move
+#include <utility> // move
 #include <vector>
 
 #include "al/sound/al_Vbap.hpp"
@@ -15,14 +15,14 @@ bool SpeakerTriple::loadVectors(const std::vector<Speaker> &spkrs) {
   s1Chan = spkrs[s1].deviceChannel;
   s2Chan = spkrs[s2].deviceChannel;
 
-  if (s3 != -1) {  // 3d Speaker layout
+  if (s3 != -1) { // 3d Speaker layout
     s3Vec = spkrs[s3].vec();
     s3Chan = spkrs[s3].deviceChannel;
     mat.set(s1Vec[0], s1Vec[1], s1Vec[2], s2Vec[0], s2Vec[1], s2Vec[2],
             s3Vec[0], s3Vec[1], s3Vec[2]);
     hasInverse = invert(mat);
 
-  } else {  // 2d Speaker layout
+  } else { // 2d Speaker layout
     Mat<2, double> tempMat;
     tempMat.set(s1Vec[0], s1Vec[1], s2Vec[0], s2Vec[1]);
     hasInverse = invert(tempMat);
@@ -67,11 +67,11 @@ Vec3d Vbap::computeGains(const Vec3d &vecA, const SpeakerTriple &speak) {
 
 // 2D VBAP, find pairs of speakers.
 void Vbap::findSpeakerPairs(const std::vector<Speaker> &spkrs) {
-  unsigned numSpeakers = spkrs.size();
-  unsigned j, index;
-  std::vector<unsigned> speakerMapping;  // [numSpeakers]; // To map unordered
-                                         // speakers into an ordered set.
-  std::vector<float> speakerAngles;      // [numSpeakers];
+  size_t numSpeakers = spkrs.size();
+  size_t j, index;
+  std::vector<unsigned> speakerMapping; // [numSpeakers]; // To map unordered
+                                        // speakers into an ordered set.
+  std::vector<float> speakerAngles;     // [numSpeakers];
   float indexAngle;
 
   speakerMapping.resize(numSpeakers);
@@ -86,7 +86,7 @@ void Vbap::findSpeakerPairs(const std::vector<Speaker> &spkrs) {
   }
 
   // Sort speakers into the map
-  for (unsigned i = 1; i < numSpeakers; i++) {
+  for (size_t i = 1; i < numSpeakers; i++) {
     // Only sort speakers that have elevation == 0. Ignore all other.
     //		if (spkrs[i].elevation == 0) {
 
@@ -136,7 +136,6 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker> &spkrs) {
   std::list<SpeakerTriple> triplets;
 
   unsigned numSpeakers = spkrs.size();
-  int numSpeakersSigned = (int)numSpeakers;
 
   // form all possible triples
   for (unsigned i = 0; i < numSpeakers; i++) {
@@ -342,7 +341,7 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker> &spkrs) {
   // Remove triplet if contains another speaker
   double thresh = 0.f;
   int spkInTri = 0;
-  for (int i = 0; i < numSpeakersSigned; ++i) {
+  for (size_t i = 0; i < numSpeakers; ++i) {
     Speaker s = spkrs[i];
     Vec3d vec = s.vec().normalized();
     unsigned int devChan = s.deviceChannel;
@@ -378,7 +377,7 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker> &spkrs) {
 }
 
 void Vbap::makePhantomChannel(int channelIndex,
-                              std::vector<int> assignedOutputs) {
+                              std::vector<unsigned int> assignedOutputs) {
   mPhantomChannels[channelIndex] = std::move(assignedOutputs);
   // mPhantomChannels[channelIndex] = assignedOutputs;
 }
@@ -400,7 +399,7 @@ void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
   // Rotate vector according to listener-rotation
   Quatd srcRot = listeningPose.quat();
   vec = srcRot.rotate(vec);
-  vec = Vec4d(-vec.z, -vec.x, vec.y);
+  vec = Vec4d(-vec.z, vec.x, vec.y);
 
   // Silent by default
   Vec3d gains;
@@ -427,19 +426,19 @@ void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
       auto it2 = mPhantomChannels.find(triple.s2Chan);
       auto it3 = mPhantomChannels.find(triple.s3Chan);
 
-      for (int i = 0; i < numFrames; ++i) {
+      for (size_t i = 0; i < numFrames; ++i) {
         float sample = samples[i];
-        if (it1 != mPhantomChannels.end()) {  // vertex 1 is phantom
+        if (it1 != mPhantomChannels.end()) { // vertex 1 is phantom
           float splitGain = gains[0] / mPhantomChannels.size();
           float splitGainSQ = splitGain * splitGain;
           for (auto const &element :
-               it1->second) {  // iterate across all assigned speakers
+               it1->second) { // iterate across all assigned speakers
             io.out(element, i) += sample * splitGainSQ;
           }
         } else {
           outBuff1[i] += sample * gains[0];
         }
-        if (it2 != mPhantomChannels.end()) {  // vertex 2 is phantom
+        if (it2 != mPhantomChannels.end()) { // vertex 2 is phantom
           float splitGain = gains[1] / mPhantomChannels.size();
           float splitGainSQ = splitGain * splitGain;
           for (auto const &element : it2->second) {
@@ -494,7 +493,7 @@ void Vbap::renderSample(AudioIOData &io, const Pose &listeningPose,
 
   // Search thru the triplets array in search of a match for the source
   // position.
-  for (unsigned count = 0; count < mTriplets.size(); ++count) {
+  for (size_t count = 0; count < mTriplets.size(); ++count) {
     gains = computeGains(vec, mTriplets[currentTripletIndex]);
     if ((gains[0] >= 0) && (gains[1] >= 0) && (!mIs3D || (gains[2] >= 0))) {
       gains.normalize();
@@ -519,7 +518,7 @@ void Vbap::renderSample(AudioIOData &io, const Pose &listeningPose,
   auto it2 = mPhantomChannels.find(triple.s2Chan);
   // auto it3 = mPhantomChannels.find(triple.s3Chan);
 
-  if (it1 != mPhantomChannels.end()) {  // vertex 1 is phantom
+  if (it1 != mPhantomChannels.end()) { // vertex 1 is phantom
     float splitGain = gains[0] * gains[0] / 2.0;
     io.out(triple.s1Chan, frameIndex) = 0.0;
     io.out(triple.s2Chan, frameIndex) += sample * splitGain;
@@ -527,7 +526,7 @@ void Vbap::renderSample(AudioIOData &io, const Pose &listeningPose,
   } else {
     io.out(triple.s1Chan, frameIndex) += sample * gains[0];
   }
-  if (it2 != mPhantomChannels.end()) {  // vertex 2 is phantom
+  if (it2 != mPhantomChannels.end()) { // vertex 2 is phantom
     float splitGain = gains[1] * gains[1] / 2.0;
     io.out(triple.s1Chan, frameIndex) += sample * splitGain;
     io.out(triple.s2Chan, frameIndex) = 0.0;
@@ -587,4 +586,4 @@ void Vbap::compile() {
 
 std::vector<SpeakerTriple> Vbap::triplets() const { return mTriplets; }
 
-}  // namespace al
+} // namespace al

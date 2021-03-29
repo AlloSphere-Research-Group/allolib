@@ -62,7 +62,7 @@ class AudioDevice;
 ///
 /// @ingroup IO
 class AudioBackend {
- public:
+public:
   AudioBackend();
 
   ~AudioBackend() {}
@@ -80,6 +80,7 @@ class AudioBackend {
   void outDevice(int index);
 
   void channels(int num, bool forOutput);
+  void setStreamName(std::string name);
 
   int inDeviceChans();
   int outDeviceChans();
@@ -105,7 +106,7 @@ class AudioBackend {
   static std::string deviceName(int num);
   static int numDevices();
 
- protected:
+protected:
   bool mRunning{false};
   bool mOpen{false};
   std::shared_ptr<void> mBackendData;
@@ -115,7 +116,7 @@ class AudioBackend {
 ///
 /// @ingroup IO
 class AudioDevice : public AudioDeviceInfo {
- public:
+public:
   /// Stream mode
   enum StreamMode {
     INPUT = 1, /**< Input stream */
@@ -134,21 +135,21 @@ class AudioDevice : public AudioDeviceInfo {
   virtual bool valid() const { return mValid; }
   virtual bool hasInput() const {
     return channelsInMax() > 0;
-  }  ///< Returns whether device has input
+  } ///< Returns whether device has input
   virtual bool hasOutput() const {
     return channelsOutMax() > 0;
-  }  ///< Returns whether device has output
+  } ///< Returns whether device has output
 
-  virtual void print()
-      const;  ///< Prints info about specific i/o device to stdout
+  virtual void
+  print() const; ///< Prints info about specific i/o device to stdout
 
-  static AudioDevice defaultInput();   ///< Get system's default input device
-  static AudioDevice defaultOutput();  ///< Get system's default output device
-  static int numDevices();  ///< Returns number of audio i/o devices available
+  static AudioDevice defaultInput();  ///< Get system's default input device
+  static AudioDevice defaultOutput(); ///< Get system's default output device
+  static int numDevices(); ///< Returns number of audio i/o devices available
   static void
-  printAll();  ///< Prints info about all available i/o devices to stdout
+  printAll(); ///< Prints info about all available i/o devices to stdout
 
- protected:
+protected:
   void setImpl(int deviceNum);
   static void initDevices();
 };
@@ -162,7 +163,7 @@ inline AudioDevice::StreamMode operator|(const AudioDevice::StreamMode &a,
 ///
 /// @ingroup IO
 class AudioIO : public AudioIOData {
- public:
+public:
   /// Creates AudioIO using default I/O devices.
   AudioIO();
   virtual ~AudioIO();
@@ -193,26 +194,26 @@ class AudioIO : public AudioIOData {
   void initWithDefaults(void (*callback)(AudioIOData &), void *userData,
                         bool use_out, bool use_in, int framesPerBuffer = 256);
 
-  bool open();   ///< Opens audio device.
-  bool close();  ///< Closes audio device. Will stop active IO.
-  bool start();  ///< Starts the audio IO.  Will open audio device if necessary.
-  bool stop();   ///< Stops the audio IO.
-  void processAudio();  ///< Call callback manually
+  bool open();  ///< Opens audio device.
+  bool close(); ///< Closes audio device. Will stop active IO.
+  bool start(); ///< Starts the audio IO.  Will open audio device if necessary.
+  bool stop();  ///< Stops the audio IO.
+  void processAudio(); ///< Call callback manually
 
-  bool isOpen();     ///< Returns true if device has been opened
-  bool isRunning();  ///< Returns true if audio is running
+  bool isOpen();    ///< Returns true if device has been opened
+  bool isRunning(); ///< Returns true if audio is running
 
   bool autoZeroOut() const { return mAutoZeroOut; }
   int channelsInDevice()
-      const;  ///< Get number of channels opened on input device
+      const; ///< Get number of channels opened on input device
   int channelsOutDevice()
-      const;  ///< Get number of channels opened on output device
-  bool clipOut() const { return mClipOut; }  ///< Returns clipOut setting
-  double cpu() const;  ///< Returns current CPU usage of audio thread
-  bool supportsFPS(
-      double fps);  ///< Return true if fps supported, otherwise false
+      const; ///< Get number of channels opened on output device
+  bool clipOut() const { return mClipOut; } ///< Returns clipOut setting
+  double cpu() const; ///< Returns current CPU usage of audio thread
+  bool
+  supportsFPS(double fps); ///< Return true if fps supported, otherwise false
   bool zeroNANs()
-      const;  ///< Returns whether to zero NANs in output buffer going to DAC
+      const; ///< Returns whether to zero NANs in output buffer going to DAC
 
   /// Sets number of effective channels on input or output device depending on
   /// 'forOutput' flag.
@@ -220,27 +221,29 @@ class AudioIO : public AudioIOData {
   /// depending on how many channels the device supports. Passing in -1 for
   /// the number of channels opens all available channels.
   void channels(int num, bool forOutput) override;
-  void channelsBus(int num) override;  ///< Set number of bus channels
+  void channelsBus(int num) override; ///< Set number of bus channels
 
-  void clipOut(bool v);  ///< Set whether to clip output between -1 and 1
-  void device(
-      const AudioDevice &v);  ///< Set input/output device (must be duplex)
-  void deviceIn(const AudioDevice &v);   ///< Set input device
-  void deviceOut(const AudioDevice &v);  ///< Set output device
-  virtual void framesPerSecond(
-      double v) override;  ///< Set number of frames per second
+  /// Set name of this stream. Currently only has an effect when using jack
+  void setStreamName(std::string name);
+
+  void clipOut(bool v); ///< Set whether to clip output between -1 and 1
+  void
+  device(const AudioDevice &v); ///< Set input/output device (must be duplex)
+  void deviceIn(const AudioDevice &v);  ///< Set input device
+  void deviceOut(const AudioDevice &v); ///< Set output device
+  virtual void
+  framesPerSecond(double v) override; ///< Set number of frames per second
   virtual void framesPerBuffer(
-      unsigned int n) override;  ///< Set number of frames per processing buffer
+      unsigned int n) override; ///< Set number of frames per processing buffer
   void zeroNANs(bool v) {
     mZeroNANs = v;
-  }  ///< Set whether to zero NANs in output buffer going to DAC
+  } ///< Set whether to zero NANs in output buffer going to DAC
 
-  void print() const;  ///< Prints info about current i/o devices to stdout.
-  static const char *errorText(int errNum);  ///< Returns error string.
+  void print() const; ///< Prints info about current i/o devices to stdout.
+  static const char *errorText(int errNum); ///< Returns error string.
 
-  double time() const;  ///< Get current stream time in seconds
-  double time(
-      int frame) const;  ///< Get current stream time in seconds of frame
+  double time() const;          ///< Get current stream time in seconds
+  double time(int frame) const; ///< Get current stream time in seconds of frame
 
   /// Add an AudioCallback handler (internal callback is always called first)
   AudioIO &append(AudioCallback &v);
@@ -257,23 +260,22 @@ class AudioIO : public AudioIOData {
   using AudioIOData::framesPerBuffer;
   using AudioIOData::framesPerSecond;
 
-  audioCallback callback;  ///< User specified callback function.
+  audioCallback callback; ///< User specified callback function.
 
- private:
+private:
   AudioDevice mInDevice, mOutDevice;
-  bool mZeroNANs;     // whether to zero NANs
-  bool mClipOut;      // whether to clip output between -1 and 1
-  bool mAutoZeroOut;  // whether to automatically zero output buffers each block
+  bool mZeroNANs;    // whether to zero NANs
+  bool mClipOut;     // whether to clip output between -1 and 1
+  bool mAutoZeroOut; // whether to automatically zero output buffers each block
   std::vector<AudioCallback *> mAudioCallbacks;
 
-  //	void init(int outChannels, int inChannels);			//
-  void reopen();  // reopen stream (restarts stream if needed)
+  void reopen(); // reopen stream (restarts stream if needed)
   void resizeBuffer(bool forOutput);
-  void operator=(const AudioIO &) = delete;  // Disallow copy
+  void operator=(const AudioIO &) = delete; // Disallow copy
 
   std::unique_ptr<AudioBackend> mBackend;
 };
 
-}  // namespace al
+} // namespace al
 
 #endif

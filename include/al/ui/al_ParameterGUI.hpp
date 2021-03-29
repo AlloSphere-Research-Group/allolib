@@ -63,8 +63,8 @@ class BundleGUIManager;
 /// ParameterGUI
 /// @ingroup UI
 class ParameterGUI {
- public:
-  //    static void initialize() { imguiInit(); }
+public:
+  //    static void init() { imguiInit(); }
   //    static void cleanup() { imguiShutdown(); }
 
   static inline void draw(ParameterMeta *param) { drawParameterMeta(param); }
@@ -134,8 +134,8 @@ class ParameterGUI {
   };
 
   static PresetHandlerState &drawPresetHandler(PresetHandler *presetHandler,
-                                               int presetColumns,
-                                               int presetRows);
+                                               int presetColumns = 10,
+                                               int presetRows = 4);
   static void drawPresetSequencer(PresetSequencer *presetSequencer,
                                   int &currentPresetSequencerItem);
   static void drawSequenceRecorder(SequenceRecorder *sequenceRecorder);
@@ -196,7 +196,7 @@ class ParameterGUI {
 /// BundleGUIManager
 /// @ingroup UI
 class BundleGUIManager {
- public:
+public:
   void drawBundleGUI() {
     std::unique_lock<std::mutex> lk(mBundleLock);
     std::string suffix = "##_bundle_" + mName;
@@ -233,7 +233,7 @@ class BundleGUIManager {
   bool &bundleGlobal() { return mBundleGlobal; }
   std::vector<ParameterBundle *> bundles() { return mBundles; }
 
- private:
+private:
   std::mutex mBundleLock;
   std::vector<ParameterBundle *> mBundles;
   std::string mName;
@@ -243,9 +243,8 @@ class BundleGUIManager {
 
 /// SynthGUIManager
 /// @ingroup UI
-template <class VoiceType>
-class SynthGUIManager {
- public:
+template <class VoiceType> class SynthGUIManager {
+public:
   SynthGUIManager(std::string name = "") {
     mControlVoice.init();
     for (auto *param : mControlVoice.triggerParameters()) {
@@ -314,6 +313,9 @@ class SynthGUIManager {
     }
   }
 
+  /**
+   * @brief Draws a panel with all the synth controls.
+   */
   void drawSynthControlPanel() {
     ParameterGUI::beginPanel(demangle(typeid(mControlVoice).name()).c_str());
     drawSynthWidgets();
@@ -441,7 +443,7 @@ class SynthGUIManager {
   SynthSequencer &synthSequencer() { return mSequencer; }
   SynthRecorder &synthRecorder() { return mRecorder; }
 
- private:
+private:
   std::string mName;
   VoiceType mControlVoice;
 
@@ -462,6 +464,6 @@ class SynthGUIManager {
   int mCurrentTab = 1;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_PARAMETERGUI_H
+#endif // AL_PARAMETERGUI_H

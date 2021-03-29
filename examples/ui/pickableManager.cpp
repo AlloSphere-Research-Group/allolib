@@ -28,12 +28,14 @@ struct MyApp : public App {
       p->set(mSphere);
       p->pose = Pose(Vec3f(i * 0.25f - 1, 0, 0), Quatf());
       p->containChildren = true;
+      mPickableManager << p;
 
-      PickableBB *child = new PickableBB;
-      child->set(mBox);
-      child->pose = Pose(Vec3f(0, 0, 0), Quatf());
-      p->addChild(child);
-      mPickableManager += p;
+      if(i % 2 == 0){
+        PickableBB *child = new PickableBB;
+        child->set(mBox);
+        child->pose = Pose(Vec3f(0, 0, 0), Quatf());
+        p->addChild(child);
+      }
     }
   }
 
@@ -41,7 +43,7 @@ struct MyApp : public App {
 
   void onDraw(Graphics &g) override {
     g.clear();
-    g.depthTesting(true);
+    gl::depthTesting(true);
 
     for (auto pickable : mPickableManager.pickables()) {
       g.color(1, 1, 1);

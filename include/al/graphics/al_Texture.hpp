@@ -184,6 +184,9 @@ class Texture : public GPUObject {
                 unsigned int type = GL_UNSIGNED_BYTE  // or GL_FLOAT is used
   );
 
+  void create2DArray(unsigned int width, unsigned int height, unsigned int depth,  
+                int internal = GL_RGBA8, unsigned int format = GL_RGBA, 
+                unsigned int type = GL_UNSIGNED_BYTE);
   // TODO
   // void create3D();
 

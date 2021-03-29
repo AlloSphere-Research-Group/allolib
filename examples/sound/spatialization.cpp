@@ -103,7 +103,7 @@ struct MyApp : public App {
     g.clear(0);
 
     g.blending(true);
-    g.blendModeTrans();
+    g.blendTrans();
     // Draw the speakers
     for (size_t i = 0; i < speakerLayout.size(); ++i) {
       g.pushMatrix();

@@ -60,12 +60,14 @@
 #include "al/protocol/al_OSC.hpp"
 #include "al/spatial/al_Pose.hpp"
 #include "al/types/al_Color.hpp"
+#include "al/types/al_ValueSource.hpp"
 
 namespace al {
 
 enum class TimeMasterMode {
   TIME_MASTER_AUDIO,
   TIME_MASTER_GRAPHICS,
+  TIME_MASTER_UPDATE,
   TIME_MASTER_FREE,
   TIME_MASTER_CPU
 };
@@ -73,7 +75,7 @@ enum class TimeMasterMode {
 // ParameterField
 // @ingroup UI
 class ParameterField {
- public:
+public:
   typedef enum { FLOAT, INT32, STRING, NULLDATA } ParameterDataType;
 
   ParameterField() {
@@ -113,39 +115,39 @@ class ParameterField {
 
   virtual ~ParameterField() {
     switch (mType) {
-      case FLOAT:
-        delete static_cast<float *>(mData);
-        break;
-      case STRING:
-        delete static_cast<std::string *>(mData);
-        break;
-      case INT32:
-        delete static_cast<int32_t *>(mData);
-        break;
-      case NULLDATA:
-        break;
+    case FLOAT:
+      delete static_cast<float *>(mData);
+      break;
+    case STRING:
+      delete static_cast<std::string *>(mData);
+      break;
+    case INT32:
+      delete static_cast<int32_t *>(mData);
+      break;
+    case NULLDATA:
+      break;
     }
   }
 
   // Copy constructor
   ParameterField(const ParameterField &paramField) : mType(paramField.mType) {
     switch (mType) {
-      case FLOAT:
-        mData = new float;
-        *static_cast<float *>(mData) = *static_cast<float *>(paramField.mData);
-        break;
-      case STRING:
-        mData = new std::string;
-        *static_cast<std::string *>(mData) =
-            *static_cast<std::string *>(paramField.mData);
-        break;
-      case INT32:
-        mData = new int32_t;
-        *static_cast<int32_t *>(mData) =
-            *static_cast<int32_t *>(paramField.mData);
-        break;
-      case NULLDATA:
-        break;
+    case FLOAT:
+      mData = new float;
+      *static_cast<float *>(mData) = *static_cast<float *>(paramField.mData);
+      break;
+    case STRING:
+      mData = new std::string;
+      *static_cast<std::string *>(mData) =
+          *static_cast<std::string *>(paramField.mData);
+      break;
+    case INT32:
+      mData = new int32_t;
+      *static_cast<int32_t *>(mData) =
+          *static_cast<int32_t *>(paramField.mData);
+      break;
+    case NULLDATA:
+      break;
     }
   }
 
@@ -175,13 +177,9 @@ class ParameterField {
 
   ParameterDataType type() { return mType; }
 
-  template <typename type>
-  type get() {
-    return *static_cast<type *>(mData);
-  }
+  template <typename type> type get() { return *static_cast<type *>(mData); }
 
-  template <typename type>
-  void set(type value) {
+  template <typename type> void set(type value) {
     if (std::is_same<type, float>::value) {
       if (mType == FLOAT) {
         *static_cast<type *>(mData) = value;
@@ -233,7 +231,7 @@ class ParameterField {
     }
   }
 
- private:
+private:
   ParameterDataType mType;
   void *mData;
 };
@@ -246,17 +244,19 @@ class Parameter;
  * @ingroup UI
  */
 class ParameterMeta {
- public:
+public:
   /**
    * @brief ParameterMeta
    * @param parameterName
    * @param group
    * @param prefix
    */
-  ParameterMeta(std::string parameterName, std::string group = "",
-                std::string prefix = "");
+  ParameterMeta(std::string parameterName, std::string group = "");
 
   virtual ~ParameterMeta() {}
+
+  // Don't allow copy
+  ParameterMeta(const ParameterMeta &) = delete;
 
   /**
    * @brief return the full OSC address for the parameter
@@ -297,11 +297,12 @@ class ParameterMeta {
    * @brief Generic function to set the parameter from a single float value
    *
    * Will only have effect on parameters that have a single internal value and
-   * have implemented this function
+   * have implemented this function. Returns true if paramter is able to set
+   * value from float
    */
-  virtual void fromFloat(float value) {
+  virtual bool fromFloat(float value) {
     (void)value;
-    return;
+    return false;
   }
 
   void setHint(std::string hintName, float hintValue) {
@@ -324,34 +325,40 @@ class ParameterMeta {
     return value;
   }
 
-  virtual void get(std::vector<ParameterField> & /*fields*/) {
+  virtual void getFields(std::vector<ParameterField> & /*fields*/) {
     std::cout
         << "get(std::vector<ParameteterField> &fields) not implemented for "
         << typeid(*this).name() << std::endl;
   }
 
-  virtual void set(std::vector<ParameterField> & /*fields*/) {
+  virtual void setFields(std::vector<ParameterField> & /*fields*/) {
     std::cout
         << "set(std::vector<ParameteterField> &fields) not implemented for "
         << typeid(*this).name() << std::endl;
   }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") {
-    (void)prefix;  // Remove compiler warning
+    (void)prefix; // Remove compiler warning
     std::cout << "sendValue function not implemented for "
+              << typeid(*this).name() << std::endl;
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") {
+    (void)bundleName; // Remove compiler warning
+    std::cout << "sendMeta function not implemented for "
               << typeid(*this).name() << std::endl;
   }
 
   void set(ParameterMeta *p);
 
- protected:
+protected:
   std::string mFullAddress;
   std::string mParameterName;
   std::string mDisplayName;
   std::string mGroup;
-  std::string mPrefix;
 
-  std::map<std::string, float> mHints;  // Provide hints for behavior
+  std::map<std::string, float> mHints; // Provide hints for behavior
 };
 
 /**
@@ -359,9 +366,8 @@ class ParameterMeta {
  * class from the ParameterType template parameter
  * @ingroup UI
  */
-template <class ParameterType>
-class ParameterWrapper : public ParameterMeta {
- public:
+template <class ParameterType> class ParameterWrapper : public ParameterMeta {
+public:
   /**
    * @brief ParameterWrapper
    *
@@ -379,12 +385,11 @@ class ParameterWrapper : public ParameterMeta {
    * the value.
    */
   ParameterWrapper(std::string parameterName, std::string group = "",
-                   ParameterType defaultValue = ParameterType(),
-                   std::string prefix = "");
+                   ParameterType defaultValue = ParameterType());
 
   ParameterWrapper(std::string parameterName, std::string Group,
-                   ParameterType defaultValue, std::string prefix,
-                   ParameterType min, ParameterType max);
+                   ParameterType defaultValue, ParameterType min,
+                   ParameterType max);
 
   ParameterWrapper(const ParameterWrapper &param);
 
@@ -397,17 +402,22 @@ class ParameterWrapper : public ParameterMeta {
    * It blocks to lock a mutex so its use in critical contexts should be
    * avoided.
    */
-  virtual void set(ParameterType value) {
+  virtual void set(ParameterType value, ValueSource *src = nullptr) {
     //        if (value > mMax) value = mMax;
     //        if (value < mMin) value = mMin;
+    mValueCache = get();
     if (mProcessCallback) {
-      value = (*mProcessCallback)(value);  //, mProcessUdata);
+      value = (*mProcessCallback)(value); //, mProcessUdata);
     }
-    for (auto cb : mCallbacks) {
-      (*cb)(value);
-    }
+
+    runChangeCallbacksSynchronous(value, src);
     setLocking(value);
   }
+
+  /**
+   * @brief reset value to default value
+   */
+  virtual void reset() { set(mDefault); }
 
   /**
    * @brief set the parameter's value without calling callbacks
@@ -419,13 +429,14 @@ class ParameterWrapper : public ParameterMeta {
    * infinite recursion when a widget sets the parameter that then sets the
    * widget.
    */
-  virtual void setNoCalls(ParameterType value, void *blockReceiver = NULL) {
+
+  virtual void setNoCalls(ParameterType value, void *blockReceiver = nullptr) {
     //        if (value > mMax) value = mMax;
     //        if (value < mMin) value = mMin;
+    mValueCache = get();
     if (mProcessCallback) {
-      value = (*mProcessCallback)(value);  //, mProcessUdata);
+      value = (*mProcessCallback)(value); //, mProcessUdata);
     }
-
     if (blockReceiver) {
       for (auto cb : mCallbacks) {
         (*cb)(value);
@@ -436,6 +447,8 @@ class ParameterWrapper : public ParameterMeta {
 
   /**
    * @brief set the parameter's value forcing a lock
+   *
+   * No callbacks are called.
    */
   inline void setLocking(ParameterType value) {
     mMutex->lock();
@@ -453,13 +466,27 @@ class ParameterWrapper : public ParameterMeta {
   virtual ParameterType get();
 
   /**
+   * @brief Get previous value
+   * @return
+   *
+   * This function is only useful when queried from a value callback. It will
+   * represent the previous value of the parameter in that case.
+   */
+  virtual ParameterType getPrevious();
+
+  /**
    * @brief set the minimum value for the parameter
    *
    * The value returned by the get() function will be clamped and will not go
    * under the value set by this function.
    */
-  void min(ParameterType minValue) { mMin = minValue; }
-  ParameterType min() { return mMin; }
+  void min(ParameterType minValue, ValueSource *src = nullptr) {
+    mMin = minValue;
+    for (auto cb : mMetaCallbacksSrc) {
+      (*cb)(src);
+    }
+  }
+  ParameterType min() const { return mMin; }
 
   /**
    * @brief set the maximum value for the parameter
@@ -467,8 +494,18 @@ class ParameterWrapper : public ParameterMeta {
    * The value returned by the get() function will be clamped and will not go
    * over the value set by this function.
    */
-  void max(ParameterType maxValue) { mMax = maxValue; }
-  ParameterType max() { return mMax; }
+  void max(ParameterType maxValue, ValueSource *src = nullptr) {
+    mMax = maxValue;
+    for (auto cb : mMetaCallbacksSrc) {
+      (*cb)(src);
+    }
+  }
+  ParameterType max() const { return mMax; }
+
+  void setDefault(const ParameterType &defaultValue) {
+    mDefault = defaultValue;
+  }
+  ParameterType getDefault() const { return mDefault; }
 
   // typedef ParameterType (*ParameterProcessCallback)(ParameterType value, void
   // *userData); typedef void (*ParameterChangeCallback)(ParameterType value,
@@ -477,6 +514,11 @@ class ParameterWrapper : public ParameterMeta {
   typedef const std::function<ParameterType(ParameterType)>
       ParameterProcessCallback;
   typedef const std::function<void(ParameterType)> ParameterChangeCallback;
+  typedef const std::function<void(ParameterType, ValueSource *)>
+      ParameterChangeCallbackSrc;
+
+  typedef const std::function<void(ValueSource *)>
+      ParameterMetaChangeCallbackSrc;
 
   /**
    * @brief setProcessingCallback sets a callback to be called whenever the
@@ -506,6 +548,10 @@ class ParameterWrapper : public ParameterMeta {
    */
   void registerChangeCallback(ParameterChangeCallback cb);
 
+  void registerChangeCallback(ParameterChangeCallbackSrc cb);
+
+  void registerMetaChangeCallback(ParameterMetaChangeCallbackSrc cb);
+
   /**
    * @brief Determines whether value change callbacks are called synchronously
    * @param synchronous
@@ -521,18 +567,13 @@ class ParameterWrapper : public ParameterMeta {
    * context.
    */
   void setSynchronousCallbacks(bool synchronous = true) {
-    mSynchronous = synchronous;
-    if (mCallbacks.size() > 0 && mCallbacks[0] == mAsyncCallback) {
+    if (mCallbacks.size() > 0 && mCallbacks[0] == nullptr) {
       if (synchronous) {
         mCallbacks.erase(mCallbacks.begin());
-      } else {
-        std::cout << "WARNING: setSynchronousCallbacks() already set to false"
-                  << std::endl;
       }
-    } else {
-      if (!synchronous) {
-        mCallbacks.insert(mCallbacks.begin(), mAsyncCallback);
-      }
+    }
+    if (!synchronous) {
+      mCallbacks.insert(mCallbacks.begin(), nullptr);
     }
   }
 
@@ -541,8 +582,11 @@ class ParameterWrapper : public ParameterMeta {
   /**
    * @brief call change callbacks if value has changed since last call
    */
-  void processChange() {
-    if (mChanged && mCallbacks.size() > 0 && mCallbacks[0] == mAsyncCallback) {
+  bool processChange() {
+    if (!mChanged) {
+      return false;
+    }
+    if (mChanged && mCallbacks.size() > 0 && mCallbacks[0] == nullptr) {
       auto callbackIt = mCallbacks.begin() + 1;
       ParameterType value = get();
       mChanged = false;
@@ -551,17 +595,18 @@ class ParameterWrapper : public ParameterMeta {
         callbackIt++;
       }
     }
+    return true;
   }
 
-  std::vector<ParameterWrapper<ParameterType> *> operator<<(
-      ParameterWrapper<ParameterType> &newParam) {
+  std::vector<ParameterWrapper<ParameterType> *>
+  operator<<(ParameterWrapper<ParameterType> &newParam) {
     std::vector<ParameterWrapper<ParameterType> *> paramList;
     paramList.push_back(&newParam);
     return paramList;
   }
 
-  std::vector<ParameterWrapper<ParameterType> *> &operator<<(
-      std::vector<ParameterWrapper<ParameterType> *> &paramVector) {
+  std::vector<ParameterWrapper<ParameterType> *> &
+  operator<<(std::vector<ParameterWrapper<ParameterType> *> &paramVector) {
     paramVector.push_back(this);
     return paramVector;
   }
@@ -575,28 +620,33 @@ class ParameterWrapper : public ParameterMeta {
     return *this;
   }
 
- protected:
+protected:
   ParameterType mMin;
   ParameterType mMax;
 
-  void runChangeCallbacksSynchronous(ParameterType &value);
+  ParameterType mValue;
+  ParameterType mValueCache;
+
+  ParameterType mDefault;
+
+  void runChangeCallbacksSynchronous(ParameterType &value, ValueSource *src);
 
   std::shared_ptr<ParameterProcessCallback> mProcessCallback;
   // void * mProcessUdata;
   // std::vector<void *> mCallbackUdata;
 
- private:
+private:
   // pointer to avoid having to explicitly declare copy/move
-  std::mutex *mMutex;
-  ParameterType mValue;
-  ParameterType mValueCache;
+  std::unique_ptr<std::mutex> mMutex;
 
-  bool mSynchronous{true};
-  std::shared_ptr<ParameterChangeCallback> mAsyncCallback;
   bool mChanged{false};
 
- private:
+private:
   std::vector<std::shared_ptr<ParameterChangeCallback>> mCallbacks;
+  std::vector<std::shared_ptr<ParameterChangeCallbackSrc>> mCallbacksSrc;
+
+  std::vector<std::shared_ptr<ParameterMetaChangeCallbackSrc>>
+      mMetaCallbacksSrc;
 };
 
 /**
@@ -632,15 +682,13 @@ class ParameterWrapper : public ParameterMeta {
  */
 
 class Parameter : public ParameterWrapper<float> {
- public:
+public:
   /**
    * @brief Parameter
    *
    * @param parameterName The name of the parameter
    * @param Group The group the parameter belongs to
    * @param defaultValue The initial value for the parameter
-   * @param prefix An address prefix that is prepended to the parameter's OSC
-   * address
    * @param min Minimum value for the parameter
    * @param max Maximum value for the parameter
    *
@@ -648,15 +696,19 @@ class Parameter : public ParameterWrapper<float> {
    * single float. It realies on float being atomic on the platform so there
    * is no locking. This is a safe assumption for most platforms today.
    */
-  Parameter(std::string parameterName, std::string Group,
-            float defaultValue = 0, std::string prefix = "",
-            float min = -99999.0, float max = 99999.0);
+  Parameter(std::string parameterName, std::string group = "",
+            float defaultValue = 0, float min = -99999.0, float max = 99999.0);
 
-  Parameter(std::string parameterName, float defaultValue = 0,
-            float min = -99999.0, float max = 99999.0);
+  Parameter(std::string parameterName, float defaultValue, float min = -99999.0,
+            float max = 99999.0);
+
+  [[deprecated("Prefix is ignored")]] Parameter(
+      std::string parameterName, std::string Group, float defaultValue,
+      std::string prefix, float min = -99999.0, float max = 99999.0);
 
   Parameter(const al::Parameter &param) : ParameterWrapper<float>(param) {
-    mFloatValue = param.mFloatValue;
+    mValue = param.mValue;
+    setDefault(param.getDefault());
   }
 
   /**
@@ -665,7 +717,7 @@ class Parameter : public ParameterWrapper<float> {
    * This function is thread-safe and can be called from any number of threads
    * It does not block and relies on the atomicity of float.
    */
-  virtual void set(float value) override;
+  virtual void set(float value, ValueSource *src = nullptr) override;
 
   /**
    * @brief set the parameter's value without calling callbacks
@@ -686,20 +738,23 @@ class Parameter : public ParameterWrapper<float> {
    */
   virtual float get() override;
 
-  virtual float toFloat() override { return mFloatValue; }
+  virtual float toFloat() override { return mValue; }
 
-  virtual void fromFloat(float value) override { set(value); }
+  virtual bool fromFloat(float value) override {
+    set(value);
+    return true;
+  }
 
   float operator=(const float value) {
     this->set(value);
     return value;
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     fields.emplace_back(ParameterField(get()));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     assert(fields.size() == 1);
     if (fields.size() == 1) {
       assert(fields[0].type() == ParameterField::FLOAT);
@@ -714,22 +769,30 @@ class Parameter : public ParameterWrapper<float> {
     sender.send(prefix + getFullAddress(), get());
   }
 
- private:
-  float mFloatValue;
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
+
+private:
 };
 
 /// ParamaterInt
 /// @ingroup UI
 class ParameterInt : public ParameterWrapper<int32_t> {
- public:
+public:
   /**
    * @brief ParameterInt
    *
    * @param parameterName The name of the parameter
    * @param Group The group the parameter belongs to
    * @param defaultValue The initial value for the parameter
-   * @param prefix An address prefix that is prepended to the parameter's OSC
-   * address
    * @param min Minimum value for the parameter
    * @param max Maximum value for the parameter
    *
@@ -739,12 +802,16 @@ class ParameterInt : public ParameterWrapper<int32_t> {
    * desktop platforms today.
    */
   ParameterInt(std::string parameterName, std::string Group = "",
-               int32_t defaultValue = 0, std::string prefix = "",
-               int32_t min = 0, int32_t max = 127);
+               int32_t defaultValue = 0, int32_t min = 0, int32_t max = 127);
+
+  [[deprecated("Prefix is ignored")]] ParameterInt(
+      std::string parameterName, std::string Group, int32_t defaultValue,
+      std::string prefix, int32_t min = 0, int32_t max = 127);
 
   ParameterInt(const al::ParameterInt &param)
       : ParameterWrapper<int32_t>(param) {
-    mIntValue = param.mIntValue;
+    mValue = param.mValue;
+    setDefault(param.getDefault());
   }
 
   /**
@@ -753,7 +820,7 @@ class ParameterInt : public ParameterWrapper<int32_t> {
    * This function is thread-safe and can be called from any number of threads
    * It does not block and relies on the atomicity of float.
    */
-  virtual void set(int32_t value) override;
+  virtual void set(int32_t value, ValueSource *src = nullptr) override;
 
   /**
    * @brief set the parameter's value without calling callbacks
@@ -763,20 +830,25 @@ class ParameterInt : public ParameterWrapper<int32_t> {
    * registerChangeCallback() are not called. This is useful to avoid infinite
    * recursion when a widget sets the parameter that then sets the widget.
    */
-  virtual void setNoCalls(int32_t value, void *blockReceiver = NULL) override;
+  virtual void setNoCalls(int32_t value,
+                          void *blockReceiver = nullptr) override;
 
-  /**
-   * @brief get the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   *
-   * @return the parameter value
-   */
-  virtual int32_t get() override;
+  //  /**
+  //   * @brief get the parameter's value
+  //   *
+  //   * This function is thread-safe and can be called from any number of
+  //   threads
+  //   *
+  //   * @return the parameter value
+  //   */
+  //  virtual int32_t get() override;
 
-  virtual float toFloat() override { return float(mIntValue); }
+  virtual float toFloat() override { return float(mValue); }
 
-  virtual void fromFloat(float value) override { set(int32_t(value)); }
+  virtual bool fromFloat(float value) override {
+    set(int32_t(value));
+    return true;
+  }
 
   float operator=(const int32_t value) {
     this->set(value);
@@ -787,12 +859,13 @@ class ParameterInt : public ParameterWrapper<int32_t> {
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     fields.emplace_back(ParameterField(get()));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
+      assert(fields[0].type() == ParameterField::INT32);
       set(fields[0].get<int32_t>());
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
@@ -800,16 +873,26 @@ class ParameterInt : public ParameterWrapper<int32_t> {
     }
   }
 
- private:
-  int32_t mIntValue;
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
+
+private:
 };
 
 /// ParamaterBool
 /// @ingroup UI
 class ParameterBool : public Parameter {
- public:
+public:
   using Parameter::get;
-  using Parameter::set;
+  using Parameter::setFields;
   /**
    * @brief ParameterBool
    *
@@ -826,8 +909,11 @@ class ParameterBool : public Parameter {
    * the platform.
    */
   ParameterBool(std::string parameterName, std::string Group = "",
-                float defaultValue = 0, std::string prefix = "", float min = 0,
-                float max = 1.0);
+                float defaultValue = 0, float min = 0, float max = 1.0);
+
+  [[deprecated("Prefix is ignored")]] ParameterBool(
+      std::string parameterName, std::string Group, float defaultValue,
+      std::string prefix, float min = 0, float max = 1.0);
 
   bool operator=(bool value) {
     this->set(value ? 1.0f : 0.0f);
@@ -836,18 +922,37 @@ class ParameterBool : public Parameter {
 
   virtual float toFloat() override { return get(); }
 
-  virtual void fromFloat(float value) override { set(value); }
-
-  virtual void get(std::vector<ParameterField> &fields) override {
-    fields.emplace_back(ParameterField(get() == 1.0 ? 1 : 0));
+  virtual bool fromFloat(float value) override {
+    set(value);
+    return true;
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
+    fields.emplace_back(ParameterField(get() == 1.0f ? 1 : 0));
+  }
+
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
-      set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
+      if (fields[0].type() == ParameterField::INT32) {
+        set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
+      } else if (fields[0].type() == ParameterField::FLOAT) {
+        set(fields[0].get<float>());
+      }
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
+    }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
     }
   }
 };
@@ -855,14 +960,19 @@ class ParameterBool : public Parameter {
 // Symbolizes a distributed action that
 // has no value per se, but that can be used to trigger actions
 class Trigger : public ParameterWrapper<bool> {
- public:
-  Trigger(std::string parameterName, std::string Group = "",
-          std::string prefix = "")
-      : ParameterWrapper<bool>(parameterName, Group, false, prefix) {}
+public:
+  Trigger(std::string parameterName, std::string Group = "")
+      : ParameterWrapper<bool>(parameterName, Group, false) {
+    mValue = false;
+    mValueCache = false;
+  }
 
   virtual float toFloat() override { return get() ? 1.0f : 0.0f; }
 
-  virtual void fromFloat(float value) override { set(value != 0.0f); }
+  virtual bool fromFloat(float value) override {
+    set(value != 0.0f);
+    return true;
+  }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
     sender.send(prefix + getFullAddress());
@@ -871,22 +981,27 @@ class Trigger : public ParameterWrapper<bool> {
   void trigger() { set(true); }
 };
 
-// These three types are blocking, should not be used in time-critical contexts
-// like the audio callback. The classes were explicitly defined to overcome
-// the issues related to the > and < operators needed when validating minumum
-// and maximum values for the parameter
+// These three types are blocking, should not be used in time-critical
+// contexts like the audio callback. The classes were explicitly defined to
+// overcome the issues related to the > and < operators needed when validating
+// minumum and maximum values for the parameter
 
 /// ParameterString
 /// @ingroup UI
 class ParameterString : public ParameterWrapper<std::string> {
- public:
+public:
   using ParameterWrapper<std::string>::get;
   using ParameterWrapper<std::string>::set;
 
   ParameterString(std::string parameterName, std::string Group = "",
-                  std::string defaultValue = "", std::string prefix = "")
-      : ParameterWrapper<std::string>(parameterName, Group, defaultValue,
-                                      prefix) {}
+                  std::string defaultValue = "")
+      : ParameterWrapper<std::string>(parameterName, Group, defaultValue) {}
+
+  [[deprecated("Prefix is ignored")]] ParameterString(std::string parameterName,
+                                                      std::string Group,
+                                                      std::string defaultValue,
+                                                      std::string /*prefix*/)
+      : ParameterWrapper<std::string>(parameterName, Group, defaultValue) {}
 
   virtual float toFloat() override {
     float value = 0.0;
@@ -898,17 +1013,20 @@ class ParameterString : public ParameterWrapper<std::string> {
     return value;
   }
 
-  virtual void fromFloat(float value) override { set(std::to_string(value)); }
+  virtual bool fromFloat(float value) override {
+    set(std::to_string(value));
+    return true;
+  }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     fields.emplace_back(ParameterField(get()));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 1) {
       set(fields[0].get<std::string>());
     } else {
@@ -916,17 +1034,27 @@ class ParameterString : public ParameterWrapper<std::string> {
                 << std::endl;
     }
   }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
 };
 
 class ParameterVec3 : public ParameterWrapper<al::Vec3f> {
- public:
+public:
   using ParameterWrapper<al::Vec3f>::get;
   using ParameterWrapper<al::Vec3f>::set;
 
   ParameterVec3(std::string parameterName, std::string Group = "",
-                al::Vec3f defaultValue = al::Vec3f(), std::string prefix = "")
-      : ParameterWrapper<al::Vec3f>(parameterName, Group, defaultValue,
-                                    prefix) {}
+                al::Vec3f defaultValue = al::Vec3f())
+      : ParameterWrapper<al::Vec3f>(parameterName, Group, defaultValue) {}
 
   ParameterVec3 operator=(const Vec3f vec) {
     this->set(vec);
@@ -934,9 +1062,9 @@ class ParameterVec3 : public ParameterWrapper<al::Vec3f> {
   }
 
   float operator[](size_t index) {
-    assert(index < INT_MAX);  // Hack to remove
+    assert(index < INT_MAX); // Hack to remove
     Vec3f vec = this->get();
-    return vec[int(index)];
+    return vec[index];
   }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
@@ -944,14 +1072,14 @@ class ParameterVec3 : public ParameterWrapper<al::Vec3f> {
     sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z);
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     Vec3f vec = this->get();
     fields.emplace_back(ParameterField(vec.x));
     fields.emplace_back(ParameterField(vec.y));
     fields.emplace_back(ParameterField(vec.z));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 3) {
       Vec3f vec(fields[0].get<float>(), fields[1].get<float>(),
                 fields[2].get<float>());
@@ -966,14 +1094,13 @@ class ParameterVec3 : public ParameterWrapper<al::Vec3f> {
 /// ParameterVec4
 /// @ingroup UI
 class ParameterVec4 : public ParameterWrapper<al::Vec4f> {
- public:
+public:
   using ParameterWrapper<al::Vec4f>::get;
   using ParameterWrapper<al::Vec4f>::set;
 
   ParameterVec4(std::string parameterName, std::string Group = "",
-                al::Vec4f defaultValue = al::Vec4f(), std::string prefix = "")
-      : ParameterWrapper<al::Vec4f>(parameterName, Group, defaultValue,
-                                    prefix) {}
+                al::Vec4f defaultValue = al::Vec4f())
+      : ParameterWrapper<al::Vec4f>(parameterName, Group, defaultValue) {}
 
   ParameterVec4 operator=(const Vec4f vec) {
     this->set(vec);
@@ -990,7 +1117,7 @@ class ParameterVec4 : public ParameterWrapper<al::Vec4f> {
     sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z, vec.w);
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     Vec4f vec = this->get();
     fields.emplace_back(ParameterField(vec.x));
     fields.emplace_back(ParameterField(vec.y));
@@ -998,7 +1125,7 @@ class ParameterVec4 : public ParameterWrapper<al::Vec4f> {
     fields.emplace_back(ParameterField(vec.w));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 4) {
       Vec4f vec(fields[0].get<float>(), fields[1].get<float>(),
                 fields[2].get<float>(), fields[3].get<float>());
@@ -1013,14 +1140,13 @@ class ParameterVec4 : public ParameterWrapper<al::Vec4f> {
 /// ParameterPose
 /// @ingroup UI
 class ParameterPose : public ParameterWrapper<al::Pose> {
- public:
+public:
   using ParameterWrapper<al::Pose>::get;
   using ParameterWrapper<al::Pose>::set;
 
   ParameterPose(std::string parameterName, std::string Group = "",
-                al::Pose defaultValue = al::Pose(), std::string prefix = "")
-      : ParameterWrapper<al::Pose>(parameterName, Group, defaultValue, prefix) {
-  }
+                al::Pose defaultValue = al::Pose())
+      : ParameterWrapper<al::Pose>(parameterName, Group, defaultValue) {}
 
   al::Pose operator=(const al::Pose vec) {
     this->set(vec);
@@ -1040,19 +1166,20 @@ class ParameterPose : public ParameterWrapper<al::Pose> {
   //    float operator[](size_t index) { Pose vec = this->get(); return
   //    vec[index];}
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     Quatf quat = get().quat();
     Vec4f pos = get().pos();
+    fields.reserve(7);
     fields.emplace_back(ParameterField(pos.x));
     fields.emplace_back(ParameterField(pos.y));
     fields.emplace_back(ParameterField(pos.z));
+    fields.emplace_back(ParameterField(quat.w));
     fields.emplace_back(ParameterField(quat.x));
     fields.emplace_back(ParameterField(quat.y));
     fields.emplace_back(ParameterField(quat.z));
-    fields.emplace_back(ParameterField(quat.w));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 7) {
       Pose vec(Vec3f(fields[0].get<float>(), fields[1].get<float>(),
                      fields[2].get<float>()),
@@ -1068,16 +1195,16 @@ class ParameterPose : public ParameterWrapper<al::Pose> {
 
 /// ParameterMenu
 /// @ingroup UI
-class ParameterMenu : public ParameterWrapper<int> {
- public:
-  using ParameterWrapper<int>::set;
-  using ParameterWrapper<int>::get;
+class ParameterMenu : public ParameterWrapper<int32_t> {
+public:
+  using ParameterWrapper<int32_t>::set;
+  using ParameterWrapper<int32_t>::get;
 
   ParameterMenu(std::string parameterName, std::string Group = "",
-                int defaultValue = 0, std::string prefix = "")
-      : ParameterWrapper<int>(parameterName, Group, defaultValue, prefix) {}
+                int defaultValue = 0)
+      : ParameterWrapper<int>(parameterName, Group, defaultValue) {}
 
-  int operator=(const int value) {
+  int operator=(const int32_t value) {
     this->set(value);
     return *this;
   }
@@ -1096,7 +1223,7 @@ class ParameterMenu : public ParameterWrapper<int> {
     int current = get();
     std::lock_guard<std::mutex> lk(mElementsLock);
     if (mElements.size() > 0 && current >= 0 &&
-        current < int(mElements.size())) {
+        current < int32_t(mElements.size())) {
       return mElements[current];
     } else {
       return "";
@@ -1107,7 +1234,7 @@ class ParameterMenu : public ParameterWrapper<int> {
     mElementsLock.lock();
     auto position = std::find(mElements.begin(), mElements.end(), element);
     bool found = position != mElements.end();
-    int foundPosition = (int)std::distance(mElements.begin(), position);
+    int foundPosition = (int32_t)std::distance(mElements.begin(), position);
     mElementsLock.unlock();
     if (found) {
       if (noCalls) {
@@ -1125,17 +1252,20 @@ class ParameterMenu : public ParameterWrapper<int> {
     // return std::stof(getCurrent());
   }
 
-  virtual void fromFloat(float value) override { set((int)value); }
+  virtual bool fromFloat(float value) override {
+    set((int32_t)value);
+    return true;
+  }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     fields.emplace_back(ParameterField(getCurrent()));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     // TODO an option should be added to allow storing the current element as
     // index instead of text.
     if (fields.size() == 1) {
@@ -1146,7 +1276,7 @@ class ParameterMenu : public ParameterWrapper<int> {
     }
   }
 
- private:
+private:
   std::mutex mElementsLock;
   std::vector<std::string> mElements;
 };
@@ -1159,18 +1289,16 @@ class ParameterMenu : public ParameterWrapper<int> {
  * whether an element is selected or not.
  *
  */
-class ParameterChoice : public ParameterWrapper<uint16_t> {
- public:
-  using ParameterWrapper<uint16_t>::get;
-  using ParameterWrapper<uint16_t>::set;
+class ParameterChoice : public ParameterWrapper<uint64_t> {
+public:
+  using ParameterWrapper<uint64_t>::get;
+  using ParameterWrapper<uint64_t>::set;
 
   ParameterChoice(std::string parameterName, std::string Group = "",
-                  uint16_t defaultValue = 0, std::string prefix = "")
-      : ParameterWrapper<uint16_t>(parameterName, Group, defaultValue, prefix) {
-    set(0);
-  }
+                  uint64_t defaultValue = 0)
+      : ParameterWrapper<uint64_t>(parameterName, Group, defaultValue) {}
 
-  uint16_t operator=(const uint16_t value) {
+  ParameterChoice &operator=(const uint64_t value) {
     this->set(value);
     return *this;
   }
@@ -1178,8 +1306,8 @@ class ParameterChoice : public ParameterWrapper<uint16_t> {
   void setElements(std::vector<std::string> &elements, bool allOn = false) {
     mElements = elements;
     min(0);
-    assert((1 << (elements.size() - 1)) < UINT16_MAX);
-    max(1 << (elements.size() - 1));
+    assert(((uint64_t)1 << (elements.size() - 1)) < UINT64_MAX);
+    max((uint64_t)1 << (elements.size() - 1));
     if (allOn) {
       uint16_t value = 0;
       for (unsigned int i = 0; i < elements.size(); i++) {
@@ -1190,13 +1318,13 @@ class ParameterChoice : public ParameterWrapper<uint16_t> {
   }
 
   void setElementSelected(std::string name, bool selected = true) {
-    for (unsigned int i = 0; i < mElements.size(); i++) {
+    for (size_t i = 0; i < mElements.size(); i++) {
       if (mElements[i] == name) {
-        uint16_t value = get();
+        uint64_t value = get();
         if (selected) {
-          value |= 1 << i;
+          value |= UINT64_C(1) << i;
         } else {
-          value ^= value | 1 << i;
+          value ^= value | UINT64_C(1) << i;
         }
         set(value);
       }
@@ -1207,8 +1335,8 @@ class ParameterChoice : public ParameterWrapper<uint16_t> {
 
   std::vector<std::string> getSelectedElements() {
     std::vector<std::string> selected;
-    for (unsigned int i = 0; i < mElements.size(); i++) {
-      if (get() & (1 << i)) {
+    for (uint64_t i = 0; i < mElements.size(); i++) {
+      if (get() & ((uint64_t)1 << i)) {
         if (mElements.size() > i) {
           selected.push_back(mElements[i]);
         }
@@ -1217,22 +1345,41 @@ class ParameterChoice : public ParameterWrapper<uint16_t> {
     return selected;
   }
 
+  void set(std::vector<int8_t> on) {
+    uint64_t value = 0;
+    for (auto onBit : on) {
+      if (onBit < 64) {
+        value |= UINT64_C(1) << onBit;
+      } else {
+        std::cerr << __FILE__ << " " << __FUNCTION__
+                  << " bit index too high. Ignoring" << std::endl;
+      }
+    }
+    set(value);
+  }
+
   virtual float toFloat() override {
     return (float)get();
     // return std::stof(getCurrent());
   }
 
-  virtual void fromFloat(float value) override { set((int)value); }
+  virtual bool fromFloat(float value) override {
+    set((uint64_t)value);
+    return true;
+  }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
+    sender.send(prefix + getFullAddress(), (int32_t)get());
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
-    fields.emplace_back(ParameterField(get()));
+  virtual void getFields(std::vector<ParameterField> &fields) override {
+    if (get() > INT32_MAX) {
+      std::cerr << "WARNING: Can't fit choice value." << std::endl;
+    }
+    fields.emplace_back(ParameterField((int32_t)get()));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     // TODO an option should be added to allow storing the current element as
     // index instead of text.
     if (fields.size() == 1) {
@@ -1243,21 +1390,20 @@ class ParameterChoice : public ParameterWrapper<uint16_t> {
     }
   }
 
- private:
+private:
   std::vector<std::string> mElements;
 };
 
 /// ParameterColor
 /// @ingroup UI
 class ParameterColor : public ParameterWrapper<al::Color> {
- public:
-  using ParameterWrapper<al::Color>::set;
+public:
+  using ParameterWrapper<al::Color>::setFields;
   using ParameterWrapper<al::Color>::get;
 
   ParameterColor(std::string parameterName, std::string Group = "",
-                 al::Color defaultValue = al::Color(), std::string prefix = "")
-      : ParameterWrapper<al::Color>(parameterName, Group, defaultValue,
-                                    prefix) {}
+                 al::Color defaultValue = al::Color())
+      : ParameterWrapper<al::Color>(parameterName, Group, defaultValue) {}
 
   ParameterColor operator=(const al::Color vec) {
     this->set(vec);
@@ -1269,7 +1415,7 @@ class ParameterColor : public ParameterWrapper<al::Color> {
     sender.send(prefix + getFullAddress(), c.r, c.g, c.b, c.a);
   }
 
-  virtual void get(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<ParameterField> &fields) override {
     Color vec = this->get();
     fields.emplace_back(ParameterField(vec.r));
     fields.emplace_back(ParameterField(vec.g));
@@ -1277,7 +1423,7 @@ class ParameterColor : public ParameterWrapper<al::Color> {
     fields.emplace_back(ParameterField(vec.a));
   }
 
-  virtual void set(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<ParameterField> &fields) override {
     if (fields.size() == 4) {
       Color vec(fields[0].get<float>(), fields[1].get<float>(),
                 fields[2].get<float>(), fields[3].get<float>());
@@ -1293,53 +1439,63 @@ class ParameterColor : public ParameterWrapper<al::Color> {
 
 template <class ParameterType>
 ParameterWrapper<ParameterType>::~ParameterWrapper() {
-  delete mMutex;
+  //  delete mMutex;
 }
 
 template <class ParameterType>
 ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName,
                                                   std::string group,
-                                                  ParameterType defaultValue,
-                                                  std::string prefix)
-    : ParameterMeta(parameterName, group, prefix), mProcessCallback(nullptr) {
+                                                  ParameterType defaultValue)
+    : ParameterMeta(parameterName, group), mProcessCallback(nullptr) {
   mValue = defaultValue;
   mValueCache = defaultValue;
-  mMutex = new std::mutex;
+  mMutex = std::make_unique<std::mutex>();
+  setDefault(defaultValue);
   std::shared_ptr<ParameterChangeCallback> mAsyncCallback =
       std::make_shared<ParameterChangeCallback>(
           [&](ParameterType value) { mChanged = true; });
 }
 
 template <class ParameterType>
-ParameterWrapper<ParameterType>::ParameterWrapper(
-    std::string parameterName, std::string group, ParameterType defaultValue,
-    std::string prefix, ParameterType min, ParameterType max)
+ParameterWrapper<ParameterType>::ParameterWrapper(std::string parameterName,
+                                                  std::string group,
+                                                  ParameterType defaultValue,
+                                                  ParameterType min,
+                                                  ParameterType max)
     : ParameterWrapper<ParameterType>::ParameterWrapper(parameterName, group,
-                                                        defaultValue, prefix) {
+                                                        defaultValue) {
   mMin = min;
   mMax = max;
-  mMutex = new std::mutex;
+  mMutex = std::make_unique<std::mutex>();
+  setDefault(defaultValue);
 }
 
 template <class ParameterType>
 ParameterWrapper<ParameterType>::ParameterWrapper(
     const ParameterWrapper<ParameterType> &param)
-    : ParameterMeta(param.mParameterName, param.mGroup, param.mPrefix) {
+    : ParameterMeta(param.mParameterName, param.mGroup) {
   mMin = param.mMin;
   mMax = param.mMax;
   mProcessCallback = param.mProcessCallback;
   // mProcessUdata = param.mProcessUdata;
   mCallbacks = param.mCallbacks;
-  mMutex = new std::mutex;
+  mMutex = std::make_unique<std::mutex>();
+  setDefault(param.getDefault());
   // mCallbackUdata = param.mCallbackUdata;
 }
 
 template <class ParameterType>
 ParameterType ParameterWrapper<ParameterType>::get() {
+  ParameterType current = mValueCache;
   if (mMutex->try_lock()) {
-    mValueCache = mValue;
+    current = mValue;
     mMutex->unlock();
   }
+  return current;
+}
+
+template <class ParameterType>
+ParameterType ParameterWrapper<ParameterType>::getPrevious() {
   return mValueCache;
 }
 
@@ -1352,30 +1508,42 @@ void ParameterWrapper<ParameterType>::setProcessingCallback(
 
 template <class ParameterType>
 void ParameterWrapper<ParameterType>::registerChangeCallback(
-    typename ParameterWrapper::ParameterChangeCallback cb) {
+    ParameterChangeCallback cb) {
   mCallbacks.push_back(std::make_shared<ParameterChangeCallback>(cb));
   // mCallbackUdata.push_back(userData);
 }
 
 template <class ParameterType>
+void ParameterWrapper<ParameterType>::registerChangeCallback(
+    ParameterChangeCallbackSrc cb) {
+  mCallbacksSrc.push_back(std::make_shared<ParameterChangeCallbackSrc>(cb));
+  // mCallbackUdata.push_back(userData);
+}
+
+template <class ParameterType>
+void ParameterWrapper<ParameterType>::registerMetaChangeCallback(
+    ParameterMetaChangeCallbackSrc cb) {
+  mMetaCallbacksSrc.push_back(
+      std::make_shared<ParameterMetaChangeCallbackSrc>(cb));
+}
+
+template <class ParameterType>
 void ParameterWrapper<ParameterType>::runChangeCallbacksSynchronous(
-    ParameterType &value) {
+    ParameterType &value, ValueSource *src) {
   for (auto cb : mCallbacks) {
-    if (cb == mAsyncCallback) {
-      // Async callback is just a marker and should be the first callback
-      // in the vector
+    if (cb == nullptr) {
+      // If first callback if nullptr, callbacks must be processed async
       mChanged = true;
       return;
     } else {
       (*cb)(value);
     }
   }
+  for (auto cb : mCallbacksSrc) {
+    (*cb)(value, src);
+  }
 }
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_PARAMETER_H
-
-// For backward compatibility, as ParameterServer was included in this file.
-// Should be removed at some point.
-//#include "al/ui/al_ParameterServer.hpp"
+#endif // AL_PARAMETER_H

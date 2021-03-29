@@ -55,28 +55,28 @@ struct ObjectTransformHandler : WindowEventHandler {
         vel[2] = 1;
         return false;
       case Keyboard::UP:
-        spin[1] = -0.1;
+        spin[1] = -0.1f;
         return false;
       case Keyboard::DOWN:
-        spin[1] = 0.1;
+        spin[1] = 0.1f;
         return false;
       case Keyboard::RIGHT:
-        spin[0] = 0.1;
+        spin[0] = 0.1f;
         return false;
       case Keyboard::LEFT:
-        spin[0] = -0.1;
+        spin[0] = -0.1f;
         return false;
       case 'q':
-        spin[2] = 0.1;
+        spin[2] = 0.1f;
         return false;
       case 'z':
-        spin[2] = -0.1;
+        spin[2] = -0.1f;
         return false;
       case '[':
-        scale_multiplier = 0.99;
+        scale_multiplier = 0.99f;
         return false;
       case ']':
-        scale_multiplier = 1.01;
+        scale_multiplier = 1.01f;
         return false;
       case 's':
         reset();
@@ -125,18 +125,18 @@ struct MyApp : App {
   Mesh m;
 
   void onCreate() override {
-    // remove App's default camera control
-    remove(navControl());
+    // remove windows's default camera control
+    defaultWindow().remove(navControl());
     // use object control for model matrix
-    append(object_transform);
+    defaultWindow().append(object_transform);
 
     addCube(m, false, 50);
-    for (int i = 0; i < m.vertices().size(); i += 1) {
+    for (size_t i = 0; i < m.vertices().size(); i += 1) {
       m.color(rnd::uniform(), rnd::uniform(), rnd::uniform());
     }
   }
 
-  void onAnimate(double dt) override { object_transform.step(); }
+  void onAnimate(double /*dt*/) override { object_transform.step(); }
 
   void onDraw(Graphics& g) override {
     // interactive model transform
@@ -152,7 +152,7 @@ struct MyApp : App {
                                  height() / 2, 1, 1000));
 
     g.clear(0);
-    g.polygonMode(Graphics::FILL);
+    g.polygonFill();
     g.depthTesting(true);
     g.meshColor();
 

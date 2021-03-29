@@ -6,7 +6,7 @@ static al::TomlLoader& global_toml_loader() {
     // try loading default config filename
     try {
       l.setFile("data/al.toml");
-    } catch (cpptoml::parse_exception) {
+    } catch (cpptoml::parse_exception&) {
     }
     return l;
   }();

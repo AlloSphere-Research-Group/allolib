@@ -35,7 +35,7 @@ struct MyOmniRendererApp : DistributedApp {
     if (DO_BLENDING) {
       g.depthTesting(false);
       g.blending(true);
-      g.blendModeAdd();
+      g.blendAdd();
     } else {
       g.depthTesting(true);
       g.depthMask(true);

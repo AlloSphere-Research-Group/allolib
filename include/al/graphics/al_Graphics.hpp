@@ -62,54 +62,6 @@ namespace al {
 */
 class Graphics : public RenderManager {
  public:
-  enum[[deprecated(
-      "use GL_* enums with al::gl::* functions")]] BlendFunc : unsigned int{
-      SRC_ALPHA = GL_SRC_ALPHA,                     /**< */
-      ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA, /**< */
-      SRC_COLOR = GL_SRC_COLOR,                     /**< */
-      ONE_MINUS_SRC_COLOR = GL_ONE_MINUS_SRC_COLOR, /**< */
-      DST_ALPHA = GL_DST_ALPHA,                     /**< */
-      ONE_MINUS_DST_ALPHA = GL_ONE_MINUS_DST_ALPHA, /**< */
-      DST_COLOR = GL_DST_COLOR,                     /**< */
-      ONE_MINUS_DST_COLOR = GL_ONE_MINUS_DST_COLOR, /**< */
-      ZERO = GL_ZERO,                               /**< */
-      ONE = GL_ONE,                                 /**< */
-      SRC_ALPHA_SATURATE = GL_SRC_ALPHA_SATURATE    /**< */
-  };
-
-  enum[[deprecated(
-      "use GL_* enums with al::gl::* functions")]] BlendEq : unsigned int{
-      FUNC_ADD = GL_FUNC_ADD,           /**< Source + destination */
-      FUNC_SUBTRACT = GL_FUNC_SUBTRACT, /**< Source - destination */
-      FUNC_REVERSE_SUBTRACT =
-          GL_FUNC_REVERSE_SUBTRACT, /**< Destination - source */
-      MIN = GL_MIN, /**< Minimum value of source and destination */
-      MAX = GL_MAX  /**< Maximum value of source and destination */
-  };
-
-  enum[[deprecated(
-      "use GL_* enums with al::gl::* functions")]] Capability : unsigned int{
-      BLEND = GL_BLEND, /**< Blend rather than replacing with new color */
-      DEPTH_TEST = GL_DEPTH_TEST, /**< Test depth of incoming fragments */
-      SCISSOR_TEST =
-          GL_SCISSOR_TEST, /**< Crop fragments according to scissor region */
-      CULL_FACE = GL_CULL_FACE /**< Cull faces */
-  };
-
-  enum[[deprecated(
-      "use GL_* enums with al::gl::* functions")]] Face : unsigned int{
-      FRONT = GL_FRONT,                  /**< Front face */
-      BACK = GL_BACK,                    /**< Back face */
-      FRONT_AND_BACK = GL_FRONT_AND_BACK /**< Front and back face */
-  };
-
-  enum[[deprecated(
-      "use GL_* enums with al::gl::* functions")]] PolygonMode : unsigned int{
-      POINT = GL_POINT, /**< Render only points at each vertex */
-      LINE = GL_LINE,   /**< Render only lines along vertex path */
-      FILL = GL_FILL    /**< Render vertices normally according to primitive */
-  };
-
   enum class ColoringMode : unsigned int {
     UNIFORM,
     MESH,
@@ -118,148 +70,128 @@ class Graphics : public RenderManager {
     CUSTOM
   };
 
-  /// Enable a capability
-  void enable(Capability v) { glEnable(v); }
+  virtual ~Graphics() {}
 
-  /// Disable a capability
-  void disable(Capability v) { glDisable(v); }
-
-  /// Set a capability
-  void capability(Capability cap, bool value);
+  /// buffer=[GL_NONE, GL_FRONT_LEFT, GL_FRONT_RIGHT, GL_BACK_LEFT,
+  ///         GL_BACK_RIGHT, GL_FRONT, GL_BACK, GL_LEFT, GL_RIGHT,
+  ///         GL_FRONT_AND_BACK]
+  inline void bufferToDraw(unsigned int buffer) { gl::bufferToDraw(buffer); }
 
   /// Turn blending on/off
-  void blending(bool b);
-
-  /// Turn color mask RGBA components on/off
-  void colorMask(bool r, bool g, bool b, bool a);
-
-  /// Turn color mask on/off (all RGBA components)
-  void colorMask(bool b);
-
-  /// Turn the depth mask on/off
-  void depthMask(bool b);
+  inline void blending(bool doBlend) { gl::blending(doBlend); }
+  /// Set blend mode
+  /// src,dst=[GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR,
+  ///          GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA,
+  ///          GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+  ///          GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR,
+  ///          GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA]
+  /// eq=[GL_FUNC_ADD, GL_FUNC_SUBTRACT, GL_FUNC_REVERSE_SUBTRACT,
+  ///     GL_MIN, GL_MAX]
+  inline void blendMode(unsigned int src, unsigned int dst, unsigned int eq) {
+    gl::blendMode(src, dst, eq);
+  }
+  /// Set blend mode to additive (symmetric additive lighten)
+  inline void blendAdd() { gl::blendMode(GL_SRC_ALPHA, GL_ONE, GL_FUNC_ADD); }
+  /// Set blend mode to subtractive (symmetric additive darken)
+  inline void blendSub() {
+    gl::blendMode(GL_SRC_ALPHA, GL_ONE, GL_FUNC_REVERSE_SUBTRACT);
+  }
+  /// Set blend mode to screen (symmetric multiplicative lighten)
+  inline void blendScreen() {
+    gl::blendMode(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_FUNC_ADD);
+  }
+  /// Set blend mode to multiplicative (symmetric multiplicative darken)
+  inline void blendMult() { gl::blendMode(GL_DST_COLOR, GL_ZERO, GL_FUNC_ADD); }
+  /// Set blend mode to transparent (asymmetric)
+  inline void blendTrans() {
+    gl::blendMode(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_FUNC_ADD);
+  }
 
   /// Turn depth testing on/off
-  void depthTesting(bool b);
+  inline void depthTesting(bool testDepth) { gl::depthTesting(testDepth); }
+  /// Turn the depth mask on/off
+  inline void depthMask(bool maskDepth) { gl::depthMask(maskDepth); }
 
   /// Turn scissor testing on/off
-  void scissorTest(bool b);
+  inline void scissorTest(bool testScissor) { gl::scissorTest(testScissor); }
+  inline void scissorArea(int left, int bottom, int width, int height) {
+    gl::scissorArea(left, bottom, width, height);
+  }
 
   /// Turn face culling on/off
-  void cullFace(bool b);
-
-  /// Turn face culling on/off and set the culled face
-  void cullFace(bool b, Face face);
-
-  /// Set both line width and point diameter
-  // void stroke(float v){ lineWidth(v); pointSize(v); }
-
-  /// Set width, in pixels, of lines
-  // void lineWidth(float v);
-
-  /// Set diameter, in pixels, of points
-  void pointSize(float v);
+  inline void culling(bool doCulling) { gl::culling(doCulling); }
+  /// face=[GL_FRONT, GL_BACK, GL_FRONT_AND_BACK], initial: GL_BACK
+  inline void cullFace(unsigned int face) { gl::cullFace(face); }
+  inline void cullFaceBack() { gl::cullFace(GL_BACK); }
+  inline void cullFaceFront() { gl::cullFace(GL_FRONT); }
+  inline void cullFaceBoth() { gl::cullFace(GL_FRONT_AND_BACK); }
 
   /// Set polygon drawing mode
-  void polygonMode(PolygonMode m, Face f = FRONT_AND_BACK);
-
+  /// mode=[GL_POINT, GL_LINE, GL_FILL]
+  /// GL_FRONT and GL_BACK is deprecated in 3.2 core profile
+  inline void polygonMode(unsigned int mode) { gl::polygonMode(mode); }
+  /// Draw only points of vertices
+  inline void polygonPoint() { gl::polygonMode(GL_POINT); }
   /// Draw only edges of polygons with lines
-  void polygonLine(Face f = FRONT_AND_BACK) { polygonMode(LINE, f); }
-
+  inline void polygonLine() { gl::polygonMode(GL_LINE); }
   /// Draw filled polygons
-  void polygonFill(Face f = FRONT_AND_BACK) { polygonMode(FILL, f); }
+  inline void polygonFill() { gl::polygonMode(GL_FILL); }
 
-  /// Set blend mode
-  void blendMode(BlendFunc src, BlendFunc dst, BlendEq eq = FUNC_ADD);
-
-  /// Set blend mode to additive (symmetric additive lighten)
-  void blendModeAdd() { blendMode(SRC_ALPHA, ONE, FUNC_ADD); }
-
-  /// Set blend mode to subtractive (symmetric additive darken)
-  void blendModeSub() { blendMode(SRC_ALPHA, ONE, FUNC_REVERSE_SUBTRACT); }
-
-  /// Set blend mode to screen (symmetric multiplicative lighten)
-  void blendModeScreen() { blendMode(ONE, ONE_MINUS_SRC_COLOR, FUNC_ADD); }
-
-  /// Set blend mode to multiplicative (symmetric multiplicative darken)
-  void blendModeMul() { blendMode(DST_COLOR, ZERO, FUNC_ADD); }
-
-  /// Set blend mode to transparent (asymmetric)
-  void blendModeTrans() { blendMode(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, FUNC_ADD); }
-
-  void scissor(int left, int bottom, int width, int height);
-
-  void setClearColor(float r, float g, float b, float a = 1);
-  void setClearColor(Color const& c);
-
-  void clearColorBuffer(int drawbuffer);
-  void clearColorBuffer(float r, float g, float b, float a, int drawbuffer);
-  void clearColorBuffer(float k, float a, int drawbuffer) {
-    clearColorBuffer(k, k, k, a, drawbuffer);
+  /// Turn color mask RGBA components on/off
+  inline void colorMask(bool r, bool g, bool b, bool a) {
+    gl::colorMask(r, g, b, a);
   }
-  void clearColorBuffer(Color const& c, int drawbuffer) {
-    clearColorBuffer(c.r, c.g, c.b, c.a, drawbuffer);
+  /// Turn color mask on/off (all RGBA components)
+  inline void colorMask(bool b) { gl::colorMask(b); }
+
+  inline void pointSize(float size) { gl::pointSize(size); }
+  inline void lineWidth(float size) { gl::lineWidth(size); }
+
+  // clears the default color buffer(buffer 0) with the provided color
+  inline void clearColor(float r, float g, float b, float a = 1.f) {
+    gl::clearColor(r, g, b, a);
+  }
+  // clears color buffer using al::Color class
+  inline void clearColor(Color const &c) { gl::clearColor(c.r, c.g, c.b, c.a); }
+
+  // clears the depth buffer with the provided depth value
+  inline void clearDepth(float d = 1.f) { gl::clearDepth(d); }
+
+  // clears the specified color buffer with the provided color
+  inline void clearBuffer(int buffer, float r, float g, float b,
+                          float a = 1.f) {
+    gl::clearBuffer(buffer, r, g, b, a);
   }
 
-  void clearColor() { clearColorBuffer(0); }
-  void clearColor(float r, float g, float b, float a = 1) {
-    clearColorBuffer(r, g, b, a, 0);
+  // clears color & depth buffer with the provided color, and depth 1
+  inline void clear(float r, float g, float b, float a = 1.f) {
+    gl::clearColor(r, g, b, a);
+    gl::clearDepth(1.f);
   }
-  void clearColor(float k, float a = 1) { clearColorBuffer(k, k, k, a, 0); }
-  void clearColor(Color const& c) { clearColorBuffer(c.r, c.g, c.b, c.a, 0); }
-
-  void setClearDepth(float d);
-  void clearDepth();
-  void clearDepth(float d);
-
-  void clearBuffer(int drawbuffer);
-  void clearBuffer(float r, float g, float b, float a, float d, int drawbuffer);
-  void clearBuffer(float k, float a, float d, int drawbuffer) {
-    clearBuffer(k, k, k, a, d, drawbuffer);
+  // clears color & depth buffer with grayscale values, and depth 1
+  inline void clear(float grayscale = 0.f, float a = 1.f) {
+    gl::clearColor(grayscale, grayscale, grayscale, a);
+    gl::clearDepth(1.f);
   }
-  void clearBuffer(Color const& c, float d, int drawbuffer) {
-    clearBuffer(c.r, c.g, c.b, c.a, d, drawbuffer);
-  }
-
-  void clear() { clearBuffer(0); }
-  void clear(float r, float g, float b, float a = 1) {
-    clearBuffer(r, g, b, a, 1, 0);
-  }
-  void clear(float k, float a = 1) { clearBuffer(k, k, k, a, 1, 0); }
-  void clear(Color const& c) { clearBuffer(c.r, c.g, c.b, c.a, 1, 0); }
-
-  // GL_NONE       /  GL_COLOR_ATTACHMENTn
-  // GL_FRONT_LEFT /  GL_FRONT_RIGHT
-  // GL_BACK_LEFT  /  GL_BACK_RIGHT
-  void drawBuffer(unsigned int mode) {
-    // glDrawBuffers(GLsizei n, GLenum const* bufs);
-    glDrawBuffers(1, &mode);
-  }
+  // clears color & depth buffer using al::Color class, and depth 1
+  inline void clear(Color const &c) { clear(c.r, c.g, c.b, c.a); }
 
   // extended, predefined render managing --------------------------------------
   void init();
 
   // set overall tint, regardless of rendering mode
-  void tint(Color const& c) {
-    mTint = c;
-    mUniformChanged = true;
-  }
-  void tint(float r, float g, float b, float a = 1.0f) {
-    mTint.set(r, g, b, a);
-    mUniformChanged = true;
-  }
-  void tint(float grayscale, float a = 1.0f) {
-    tint(grayscale, grayscale, grayscale, a);
-  }
+  void tint(Color const &c);
+  void tint(float r, float g, float b, float a = 1.f);
+  void tint(float grayscale, float a = 1.f);
 
   // set to uniform color mode, using previously set uniform color
   void color();
   // set to uniform color mode, using provided color
-  void color(float r, float g, float b, float a = 1.0f);
+  void color(float r, float g, float b, float a = 1.f);
   // set to uniform color mode, using provided color
-  void color(Color const& c);
+  void color(Color const &c);
   // set to uniform color mode, using provided color
-  void color(float k, float a = 1.0f) { color(k, k, k, a); }
+  void color(float grayscale, float a = 1.f);
 
   // set to mesh color mode, using mesh's color array
   void meshColor();
@@ -272,7 +204,7 @@ class Graphics : public RenderManager {
   void material();
 
   // set to material mode, using provied material
-  void material(Material const& m);
+  void material(Material const &m);
 
   // enable/disable lighting
   void lighting(bool b);
@@ -289,32 +221,25 @@ class Graphics : public RenderManager {
   void toggleLight(int idx);
 
   // does not enable lighting, call lighting(true) to enable lighting
-  void light(Light const& l, int idx = 0);
+  void light(Light const &l, int idx = 0);
 
-  void quad(Texture& tex, float x, float y, float w, float h);
-  void quadViewport(Texture& tex, float x = -1, float y = -1, float w = 2,
+  void quad(Texture &tex, float x, float y, float w, float h);
+  void quadViewport(Texture &tex, float x = -1, float y = -1, float w = 2,
                     float h = 2);
 
   // use user made non-default shader. with this call user should set uniforms
   // manually (but stiil use allolib interface for mesh and model/view/proj
   // matrices)
-  void shader(ShaderProgram& s) {
-    mColoringMode = ColoringMode::CUSTOM;
-    RenderManager::shader(s);
-  }
-  ShaderProgram& shader() { return RenderManager::shader(); }
-  ShaderProgram* shaderPtr() { return RenderManager::shaderPtr(); }
+  void shader(ShaderProgram &s);
+  ShaderProgram &shader();
+  ShaderProgram *shaderPtr();
 
   using RenderManager::camera;  // makes camera(Viewpoint::SpecialType v)
                                 // accessible
-  void camera(Viewpoint const& v) override {
-    mLens = v.lens();
-    mUniformChanged = true;
-    RenderManager::camera(v);
-  }
+  void camera(Viewpoint const &v) override;
 
-  void send_lighting_uniforms(ShaderProgram& s,
-                              lighting_shader_uniforms const& u);
+  void send_lighting_uniforms(ShaderProgram &s,
+                              lighting_shader_uniforms const &u);
   void update() override;
 
   // to pass to the shader, combined with mLens.eyeSep(),
@@ -322,54 +247,20 @@ class Graphics : public RenderManager {
   static const float LEFT_EYE;
   static const float RIGHT_EYE;
   static const float MONO_EYE;
-  void eye(float e) {
-    mEye = e;
-    mUniformChanged = true;
-  }
 
+  void eye(float e);
   float eye() { return mEye; }
 
-  Lens const& lens() const { return mLens; }
+  Lens const &lens() const { return mLens; }
+  Lens &lens();
+  void lens(Lens const &l);
 
-  Lens& lens() {
-    mUniformChanged = true;
-    return mLens;
-  }
+  void omni(bool b);
+  bool omni();
 
-  void lens(Lens const& l) {
-    mUniformChanged = true;
-    mLens = l;
-  }
+ private:
+  bool initialized = false;
 
-  void omni(bool b) {
-    is_omni = b;
-    mRenderModeChanged = true;
-  }
-
-  bool omni() { return is_omni; }
-
-  // deprecated
-  [[deprecated]] void blendOn() {
-    blending(true);
-  }[[deprecated]] void blendAdd() {
-    blendModeAdd();
-  }
-  [[deprecated]] void blendSub() {
-    blendModeSub();
-  }[[deprecated]] void blendScreen() {
-    blendModeScreen();
-  }
-  [[deprecated]] void blendMul() {
-    blendModeMul();
-  }[[deprecated]] void blendTrans() {
-    blendModeTrans();
-  }
-  [[deprecated]] void blendOff() { blending(false); }
-
-  private : bool initialized = false;
-
-  Color mClearColor{0, 0, 0, 1};
-  float mClearDepth = 1;
   Color mColor{1, 1, 1, 1};
   Color mTint{1, 1, 1, 1};
 

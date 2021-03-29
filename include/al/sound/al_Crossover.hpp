@@ -4,29 +4,29 @@
 /*	Allocore --
         Multimedia / virtual environment application class library
 
-        Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
-   UCSB. Copyright (C) 2012. The Regents of the University of California. All
+   Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology, UCSB.
+   Copyright (C) 2012. The Regents of the University of California. All
    rights reserved.
 
-        Redistribution and use in source and binary forms, with or without
-        modification, are permitted provided that the following conditions are
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
    met:
 
-                Redistributions of source code must retain the above copyright
+   Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
 
-                Redistributions in binary form must reproduce the above
+   Redistributions in binary form must reproduce the above
    copyright notice, this list of conditions and the following disclaimer in the
-                documentation and/or other materials provided with the
+   documentation and/or other materials provided with the
    distribution.
 
-                Neither the name of the University of California nor the names
+   Neither the name of the University of California nor the names
    of its contributors may be used to endorse or promote products derived from
-                this software without specific prior written permission.
+   this software without specific prior written permission.
 
-        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
    IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
@@ -45,22 +45,21 @@
         Graham Wakefield, 2010, grrrwaaa@gmail.com
 */
 
-/*
-
-*/
 #include <float.h>
 #include <stdio.h>
+
 #include "al/math/al_Constants.hpp"
 
 namespace al {
 
-///
-///
-///
-/// @ingroup Sound
-template <typename T = double>
-class Crossover {
- public:
+/**
+ * cross-over shelf filter that sums to an allpass (Useful for mixing different
+ * Ambisonic encoding flavors)
+ *
+ * @ingroup Sound
+ */
+template <typename T = double> class Crossover {
+public:
   /// set the cross-over middle frequency
   void freq(T f, T fs);
 
@@ -70,7 +69,7 @@ class Crossover {
   }
 
   /// process one sample and return hi/lo shelf
-  void next(const T in, T* lo, T* hi);
+  void next(const T in, T *lo, T *hi);
 
   void clear() {
     mZ0 = (T)0;
@@ -78,13 +77,12 @@ class Crossover {
     mZ2 = (T)0;
   }
 
- protected:
+protected:
   // coefficients and history
   T mC0, mC1, mZ0, mZ1, mZ2;
 };
 
-template <>
-void Crossover<double>::freq(double f, double fs) {
+template <> void Crossover<double>::freq(double f, double fs) {
   double rad = M_PI * 2. * f / fs;
   double cosine = cos(rad);
   double sine = sin(rad);
@@ -97,7 +95,7 @@ void Crossover<double>::freq(double f, double fs) {
 }
 
 template <>
-inline void Crossover<double>::next(const double in, double* lo, double* hi) {
+inline void Crossover<double>::next(const double in, double *lo, double *hi) {
   static const double denorm_offset = DBL_EPSILON * 2.;
 
   const double v0 = in - mC0 * mZ0;
@@ -117,8 +115,7 @@ inline void Crossover<double>::next(const double in, double* lo, double* hi) {
   *hi = x0 - x2;
 }
 
-template <>
-void Crossover<float>::freq(float f, float fs) {
+template <> void Crossover<float>::freq(float f, float fs) {
   float rad = M_PI * 2.f * f / fs;
   float cosine = cosf(rad);
   float sine = sinf(rad);
@@ -127,11 +124,11 @@ void Crossover<float>::freq(float f, float fs) {
   } else {
     mC0 = cosine * 0.5f;
   }
-  mC1 = (1f + mC0) * 0.5f;
+  mC1 = (1.f + mC0) * 0.5f;
 }
 
 template <>
-inline void Crossover<float>::next(const float in, float* lo, float* hi) {
+inline void Crossover<float>::next(const float in, float *lo, float *hi) {
   static const float denorm_offset = FLT_EPSILON * 2.;
 
   const float v0 = in - mC0 * mZ0;
@@ -151,5 +148,5 @@ inline void Crossover<float>::next(const float in, float* lo, float* hi) {
   *hi = x0 - x2;
 }
 
-}  // namespace al
+} // namespace al
 #endif

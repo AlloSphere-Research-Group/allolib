@@ -4,208 +4,174 @@
 
 using namespace al;
 
-#ifdef __GNUG__
-#include <cxxabi.h>
-
-#include <cstdlib>
-#include <memory>
-
-std::string al::demangle(const char *name) {
-  int status = -4;  // some arbitrary value to eliminate the compiler warning
-
-  // enable c++11 by passing the flag -std=c++11 to g++
-  std::unique_ptr<char, void (*)(void *)> res{
-      abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
-
-  return (status == 0) ? res.get() : name;
-}
-
-#else
-
-#if AL_WINDOWS
-
-// does nothing if not g++
-std::string al::demangle(const char *name) {
-  // Windows prepends "struct " or "class " here, so remove it
-  auto demangled = std::string(name);
-  return demangled.substr(demangled.find(' ') + 1);
-}
-
-#else
-// does nothing if not g++
-std::string al::demangle(const char *name) { return name; }
-#endif
-
-#endif
-
 int al::asciiToIndex(int asciiKey, int offset) {
   switch (asciiKey) {
-    case '1':
-      return offset + 0;
-    case '2':
-      return offset + 1;
-    case '3':
-      return offset + 2;
-    case '4':
-      return offset + 3;
-    case '5':
-      return offset + 4;
-    case '6':
-      return offset + 5;
-    case '7':
-      return offset + 6;
-    case '8':
-      return offset + 7;
-    case '9':
-      return offset + 8;
-    case '0':
-      return offset + 9;
+  case '1':
+    return offset + 0;
+  case '2':
+    return offset + 1;
+  case '3':
+    return offset + 2;
+  case '4':
+    return offset + 3;
+  case '5':
+    return offset + 4;
+  case '6':
+    return offset + 5;
+  case '7':
+    return offset + 6;
+  case '8':
+    return offset + 7;
+  case '9':
+    return offset + 8;
+  case '0':
+    return offset + 9;
 
-    case 'q':
-      return offset + 10;
-    case 'w':
-      return offset + 11;
-    case 'e':
-      return offset + 12;
-    case 'r':
-      return offset + 13;
-    case 't':
-      return offset + 14;
-    case 'y':
-      return offset + 15;
-    case 'u':
-      return offset + 16;
-    case 'i':
-      return offset + 17;
-    case 'o':
-      return offset + 18;
-    case 'p':
-      return offset + 19;
-    case 'a':
-      return offset + 20;
+  case 'q':
+    return offset + 10;
+  case 'w':
+    return offset + 11;
+  case 'e':
+    return offset + 12;
+  case 'r':
+    return offset + 13;
+  case 't':
+    return offset + 14;
+  case 'y':
+    return offset + 15;
+  case 'u':
+    return offset + 16;
+  case 'i':
+    return offset + 17;
+  case 'o':
+    return offset + 18;
+  case 'p':
+    return offset + 19;
+  case 'a':
+    return offset + 20;
 
-    case 's':
-      return offset + 21;
-    case 'd':
-      return offset + 22;
-    case 'f':
-      return offset + 23;
-    case 'g':
-      return offset + 24;
-    case 'h':
-      return offset + 25;
-    case 'j':
-      return offset + 26;
-    case 'k':
-      return offset + 27;
-    case 'l':
-      return offset + 28;
-    case ';':
-      return offset + 29;
+  case 's':
+    return offset + 21;
+  case 'd':
+    return offset + 22;
+  case 'f':
+    return offset + 23;
+  case 'g':
+    return offset + 24;
+  case 'h':
+    return offset + 25;
+  case 'j':
+    return offset + 26;
+  case 'k':
+    return offset + 27;
+  case 'l':
+    return offset + 28;
+  case ';':
+    return offset + 29;
 
-    case 'z':
-      return offset + 30;
-    case 'x':
-      return offset + 31;
-    case 'c':
-      return offset + 32;
-    case 'v':
-      return offset + 33;
-    case 'b':
-      return offset + 34;
-    case 'n':
-      return offset + 35;
-    case 'm':
-      return offset + 36;
-    case ',':
-      return offset + 37;
-    case '.':
-      return offset + 38;
-    case '/':
-      return offset + 39;
+  case 'z':
+    return offset + 30;
+  case 'x':
+    return offset + 31;
+  case 'c':
+    return offset + 32;
+  case 'v':
+    return offset + 33;
+  case 'b':
+    return offset + 34;
+  case 'n':
+    return offset + 35;
+  case 'm':
+    return offset + 36;
+  case ',':
+    return offset + 37;
+  case '.':
+    return offset + 38;
+  case '/':
+    return offset + 39;
   }
   return 0;
 }
 
 int al::asciiToMIDI(int asciiKey, int offset) {
   switch (asciiKey) {
-    //	case '1': return offset + 0;
-    case '2':
-      return offset + 73;
-    case '3':
-      return offset + 75;
-      //	case '4': return offset + 3;
-    case '5':
-      return offset + 78;
-    case '6':
-      return offset + 80;
-    case '7':
-      return offset + 82;
-      //	case '8': return offset + 7;
-    case '9':
-      return offset + 85;
-    case '0':
-      return offset + 87;
+  //	case '1': return offset + 0;
+  case '2':
+    return offset + 73;
+  case '3':
+    return offset + 75;
+  //	case '4': return offset + 3;
+  case '5':
+    return offset + 78;
+  case '6':
+    return offset + 80;
+  case '7':
+    return offset + 82;
+  //	case '8': return offset + 7;
+  case '9':
+    return offset + 85;
+  case '0':
+    return offset + 87;
 
-    case 'q':
-      return offset + 72;
-    case 'w':
-      return offset + 74;
-    case 'e':
-      return offset + 76;
-    case 'r':
-      return offset + 77;
-    case 't':
-      return offset + 79;
-    case 'y':
-      return offset + 81;
-    case 'u':
-      return offset + 83;
-    case 'i':
-      return offset + 84;
-    case 'o':
-      return offset + 86;
-    case 'p':
-      return offset + 88;
+  case 'q':
+    return offset + 72;
+  case 'w':
+    return offset + 74;
+  case 'e':
+    return offset + 76;
+  case 'r':
+    return offset + 77;
+  case 't':
+    return offset + 79;
+  case 'y':
+    return offset + 81;
+  case 'u':
+    return offset + 83;
+  case 'i':
+    return offset + 84;
+  case 'o':
+    return offset + 86;
+  case 'p':
+    return offset + 88;
 
-      //	case 'a': return offset + 20;
-    case 's':
-      return offset + 61;
-    case 'd':
-      return offset + 63;
-      //	case 'f': return offset + 23;
-    case 'g':
-      return offset + 66;
-    case 'h':
-      return offset + 68;
-    case 'j':
-      return offset + 70;
-      //	case 'k': return offset + 27;
-    case 'l':
-      return offset + 73;
-    case ';':
-      return offset + 75;
+  //	case 'a': return offset + 20;
+  case 's':
+    return offset + 61;
+  case 'd':
+    return offset + 63;
+  //	case 'f': return offset + 23;
+  case 'g':
+    return offset + 66;
+  case 'h':
+    return offset + 68;
+  case 'j':
+    return offset + 70;
+  //	case 'k': return offset + 27;
+  case 'l':
+    return offset + 73;
+  case ';':
+    return offset + 75;
 
-    case 'z':
-      return offset + 60;
-    case 'x':
-      return offset + 62;
-    case 'c':
-      return offset + 64;
-    case 'v':
-      return offset + 65;
-    case 'b':
-      return offset + 67;
-    case 'n':
-      return offset + 69;
-    case 'm':
-      return offset + 71;
-    case ',':
-      return offset + 72;
-    case '.':
-      return offset + 74;
-    case '/':
-      return offset + 76;
+  case 'z':
+    return offset + 60;
+  case 'x':
+    return offset + 62;
+  case 'c':
+    return offset + 64;
+  case 'v':
+    return offset + 65;
+  case 'b':
+    return offset + 67;
+  case 'n':
+    return offset + 69;
+  case 'm':
+    return offset + 71;
+  case ',':
+    return offset + 72;
+  case '.':
+    return offset + 74;
+  case '/':
+    return offset + 76;
   }
   return 0;
 }
@@ -236,8 +202,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterMenu *>(param)->setNoCalls(it->get<float>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterString).name()) == 0) {
-          static_cast<ParameterString *>(param)->setNoCalls(
-              std::to_string(it->get<float>()));
+          static_cast<ParameterString *>(param)
+              ->setNoCalls(std::to_string(it->get<float>()));
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -246,12 +212,12 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
       } else if (it->type() == ParameterField::STRING) {
         if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
             0) {
-          static_cast<ParameterString *>(param)->setNoCalls(
-              it->get<std::string>());
+          static_cast<ParameterString *>(param)
+              ->setNoCalls(it->get<std::string>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterMenu).name()) == 0) {
-          static_cast<ParameterMenu *>(param)->setCurrent(
-              it->get<std::string>(), noCalls);
+          static_cast<ParameterMenu *>(param)
+              ->setCurrent(it->get<std::string>(), noCalls);
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -273,8 +239,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterMenu *>(param)->set(it->get<float>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterString).name()) == 0) {
-          static_cast<ParameterString *>(param)->set(
-              std::to_string(it->get<float>()));
+          static_cast<ParameterString *>(param)
+              ->set(std::to_string(it->get<float>()));
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -286,8 +252,8 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
           static_cast<ParameterString *>(param)->set(it->get<std::string>());
         } else if (strcmp(typeid(*param).name(),
                           typeid(ParameterMenu).name()) == 0) {
-          static_cast<ParameterMenu *>(param)->setCurrent(
-              it->get<std::string>(), noCalls);
+          static_cast<ParameterMenu *>(param)
+              ->setCurrent(it->get<std::string>(), noCalls);
         } else {
           std::cerr << "ERROR: p-field string not setting parameter. Invalid "
                        "parameter type for parameter "
@@ -314,7 +280,7 @@ int SynthVoice::getTriggerParams(float *pFields, int maxParams) {
     if (param.type() == ParameterField::FLOAT) {
       *pFields++ = param.get<float>();
     } else {
-      *pFields++ = 0.0f;  // Ignore strings...
+      *pFields++ = 0.0f; // Ignore strings...
     }
     count++;
   }
@@ -347,7 +313,7 @@ void SynthVoice::triggerOn(int offsetFrames) {
 
 void SynthVoice::triggerOff(int offsetFrames) {
   mOffOffsetFrames =
-      offsetFrames;  // TODO implement offset frames for trigger off.
+      offsetFrames; // TODO implement offset frames for trigger off.
   // Currently ignoring and turning off at start of buffer
   onTriggerOff();
 }
@@ -370,8 +336,9 @@ int SynthVoice::getEndOffsetFrames(unsigned int framesPerBuffer) {
   return frames;
 }
 
-std::shared_ptr<Parameter> SynthVoice::createInternalTriggerParameter(
-    std::string name, float defaultValue, float minValue, float maxValue) {
+std::shared_ptr<Parameter>
+SynthVoice::createInternalTriggerParameter(std::string name, float defaultValue,
+                                           float minValue, float maxValue) {
   mInternalParameters.push_back(
       std::make_shared<Parameter>(name, defaultValue, minValue, maxValue));
   registerTriggerParameter(*mInternalParameters.back().get());
@@ -380,8 +347,9 @@ std::shared_ptr<Parameter> SynthVoice::createInternalTriggerParameter(
 
 Parameter &SynthVoice::getInternalParameter(std::string name) {
   for (auto param : mInternalParameters) {
+    auto &p = *param;
     if (param->getName() == name &&
-        strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
+        strcmp(typeid(p).name(), typeid(Parameter).name()) == 0) {
       return *param;
     }
   }
@@ -428,7 +396,13 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id,
   if (verbose()) {
     std::cout << "Trigger on ";
     for (auto *param : voice->triggerParameters()) {
-      std::cout << param->getName() << ":" << param->toFloat() << " ";
+      if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) == 0) {
+        std::cout << param->getName() << ":"
+                  << static_cast<ParameterString *>(param)->get() << " ";
+
+      } else {
+        std::cout << param->getName() << ":" << param->toFloat() << " ";
+      }
     }
     std::cout << std::endl;
   }
@@ -454,9 +428,9 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id,
       std::unique_lock<std::mutex> lk(mVoiceToInsertLock);
       voice->next = mVoicesToInsert;
       voice->mActive =
-          true;  // We need to mark this here to avoid race conditions if
-                 // active() is checked on separate thread, and the voice
-                 // removed before it has been triggered.
+          true; // We need to mark this here to avoid race conditions if
+                // active() is checked on separate thread, and the voice
+                // removed before it has been triggered.
       mVoicesToInsert = voice;
     }
     return thisId;
@@ -479,7 +453,7 @@ void PolySynth::allNotesOff() { mAllNotesOff = true; }
 
 SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc) {
   std::unique_lock<std::mutex> lk(
-      mFreeVoiceLock);  // Only one getVoice() call at a time
+      mFreeVoiceLock); // Only one getVoice() call at a time
   SynthVoice *freeVoice = mFreeVoices;
   SynthVoice *previousVoice = nullptr;
   while (freeVoice) {
@@ -499,8 +473,8 @@ SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc) {
     previousVoice = freeVoice;
     freeVoice = freeVoice->next;
   }
-  if (!freeVoice) {  // No free voice in list, so we need to allocate it
-                     //  But only allocate if allocation has not been disabled
+  if (!freeVoice) { // No free voice in list, so we need to allocate it
+                    //  But only allocate if allocation has not been disabled
     if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) ==
         mNoAllocationList.end()) {
       // TODO report current polyphony for more informed allocation of polyphony
@@ -515,7 +489,7 @@ SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc) {
 
 SynthVoice *PolySynth::getFreeVoice() {
   std::unique_lock<std::mutex> lk(
-      mFreeVoiceLock);  // Only one getVoice() call at a time
+      mFreeVoiceLock); // Only one getVoice() call at a time
   SynthVoice *freeVoice = mFreeVoices;
   if (freeVoice) {
     mFreeVoices = freeVoice->next;
@@ -561,7 +535,11 @@ void PolySynth::render(AudioIOData &io) {
           internalAudioIO.frame(offset);
           while (io() && internalAudioIO()) {
             for (int i = 0; i < mVoiceMaxOutputChannels; i++) {
-              io.out(i) += internalAudioIO.out(i);
+              if (mChannelMap.size() > i) {
+                io.out(mChannelMap[i]) += internalAudioIO.out(i);
+              } else {
+                io.out(i) += internalAudioIO.out(i);
+              }
             }
             for (int i = 0; i < mVoiceBusChannels; i++) {
               io.bus(i) += internalAudioIO.bus(i);
@@ -607,7 +585,7 @@ void PolySynth::render(Graphics &g) {
 }
 
 void PolySynth::update(double dt) {
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_UPDATE) {
     processVoices();
     // Turn off voices
     processVoiceTurnOff();
@@ -620,7 +598,7 @@ void PolySynth::update(double dt) {
     }
     voice = voice->next;
   }
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_FREE) {
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_UPDATE) {
     processInactiveVoices();
   }
 }
@@ -801,6 +779,26 @@ SynthVoice *PolySynth::allocateVoice(std::string name) {
     }
   }
   return nullptr;
+}
+
+void PolySynth::setVoiceMaxOutputChannels(uint16_t channels) {
+  mVoiceMaxOutputChannels = channels;
+  for (size_t i = 0; i < channels; i++) {
+    mChannelMap[i] = i;
+  }
+}
+
+void PolySynth::setBusRoutingCallback(PolySynth::BusRoutingCallback cb) {
+  mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
+}
+
+void PolySynth::setChannelMap(std::vector<size_t> channelMap) {
+  if (channelMap.size() != mVoiceMaxOutputChannels) {
+    std::cerr << "ERROR setting channel map. " << __FUNCTION__
+              << " in " __FILE__ << ":" << __LINE__ << std::endl;
+    return;
+  }
+  mChannelMap = channelMap;
 }
 
 void PolySynth::startCpuClockThread() {

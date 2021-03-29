@@ -9,74 +9,6 @@ const float Graphics::LEFT_EYE = -1.0f;
 const float Graphics::RIGHT_EYE = 1.0f;
 const float Graphics::MONO_EYE = 0.0f;
 
-void Graphics::blendMode(BlendFunc src, BlendFunc dst, BlendEq eq) {
-  glBlendEquation(eq);
-  glBlendFunc(src, dst);
-}
-
-void Graphics::capability(Capability cap, bool v) {
-  v ? enable(cap) : disable(cap);
-}
-
-void Graphics::blending(bool b) { capability(BLEND, b); }
-void Graphics::colorMask(bool r, bool g, bool b, bool a) {
-  glColorMask(r ? GL_TRUE : GL_FALSE, g ? GL_TRUE : GL_FALSE,
-              b ? GL_TRUE : GL_FALSE, a ? GL_TRUE : GL_FALSE);
-}
-void Graphics::colorMask(bool b) { colorMask(b, b, b, b); }
-void Graphics::depthMask(bool b) { glDepthMask(b ? GL_TRUE : GL_FALSE); }
-void Graphics::depthTesting(bool b) { capability(DEPTH_TEST, b); }
-void Graphics::scissorTest(bool b) { capability(SCISSOR_TEST, b); }
-void Graphics::cullFace(bool b) { capability(CULL_FACE, b); }
-void Graphics::cullFace(bool b, Face face) {
-  capability(CULL_FACE, b);
-  glCullFace(face);
-}
-
-// void Graphics::lineWidth(float v) { glLineWidth(v); }
-void Graphics::pointSize(float v) { glPointSize(v); }
-void Graphics::polygonMode(PolygonMode m, Face f) { glPolygonMode(f, m); }
-
-void Graphics::scissor(int left, int bottom, int width, int height) {
-  glScissor(left, bottom, width, height);
-}
-
-void Graphics::setClearColor(float r, float g, float b, float a) {
-  mClearColor.set(r, g, b, a);
-}
-
-void Graphics::setClearColor(Color const& c) { mClearColor = c; }
-
-void Graphics::clearColorBuffer(int drawbuffer) {
-  glClearBufferfv(GL_COLOR, drawbuffer, mClearColor.components);
-}
-
-void Graphics::clearColorBuffer(float r, float g, float b, float a,
-                                int drawbuffer) {
-  setClearColor(r, g, b, a);
-  clearColorBuffer(drawbuffer);
-}
-
-void Graphics::setClearDepth(float d) { mClearDepth = d; }
-
-void Graphics::clearDepth() { glClearBufferfv(GL_DEPTH, 0, &mClearDepth); }
-
-void Graphics::clearDepth(float d) {
-  setClearDepth(d);
-  clearDepth();
-}
-
-void Graphics::clearBuffer(int drawbuffer) {
-  clearColorBuffer(drawbuffer);
-  clearDepth();
-}
-
-void Graphics::clearBuffer(float r, float g, float b, float a, float d,
-                           int drawbuffer) {
-  clearColorBuffer(r, g, b, a, drawbuffer);
-  clearDepth(d);
-}
-
 void Graphics::init() {
   if (initialized) return;
 
@@ -183,6 +115,20 @@ void Graphics::init() {
   initialized = true;
 }
 
+void Graphics::tint(const Color& c) {
+  mTint = c;
+  mUniformChanged = true;
+}
+
+void Graphics::tint(float r, float g, float b, float a) {
+  mTint.set(r, g, b, a);
+  mUniformChanged = true;
+}
+
+void Graphics::tint(float grayscale, float a) {
+  tint(grayscale, grayscale, grayscale, a);
+}
+
 void Graphics::color() {
   if (mColoringMode != ColoringMode::UNIFORM) {
     mColoringMode = ColoringMode::UNIFORM;
@@ -200,6 +146,10 @@ void Graphics::color(Color const& c) {
   mColor = c;
   mUniformChanged = true;
   color();
+}
+
+void Graphics::color(float grayscale, float a) {
+  color(grayscale, grayscale, grayscale, a);
 }
 
 void Graphics::meshColor() {
@@ -292,6 +242,21 @@ void Graphics::quadViewport(Texture& tex, float x, float y, float w, float h) {
   quad(tex, x, y, w, h);
   lighting(prev_lighting);  // put back previous lighting mode
   popCamera();
+}
+
+void Graphics::shader(ShaderProgram& s) {
+  mColoringMode = ColoringMode::CUSTOM;
+  RenderManager::shader(s);
+}
+
+ShaderProgram& Graphics::shader() { return RenderManager::shader(); }
+
+ShaderProgram* Graphics::shaderPtr() { return RenderManager::shaderPtr(); }
+
+void Graphics::camera(const Viewpoint& v) {
+  mLens = v.lens();
+  mUniformChanged = true;
+  RenderManager::camera(v);
 }
 
 void Graphics::send_lighting_uniforms(ShaderProgram& s,
@@ -487,5 +452,27 @@ void Graphics::update() {
   // also call base class's update
   RenderManager::update();
 }
+
+void Graphics::eye(float e) {
+  mEye = e;
+  mUniformChanged = true;
+}
+
+Lens& Graphics::lens() {
+  mUniformChanged = true;
+  return mLens;
+}
+
+void Graphics::lens(const Lens& l) {
+  mUniformChanged = true;
+  mLens = l;
+}
+
+void Graphics::omni(bool b) {
+  is_omni = b;
+  mRenderModeChanged = true;
+}
+
+bool Graphics::omni() { return is_omni; }
 
 }  // namespace al

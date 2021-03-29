@@ -38,6 +38,8 @@ namespace al {
 /// @ingroup IO
 double noteToHz(double noteNumber);
 
+int getMIDIDeviceIndex(std::string deviceName);;
+
 /// Utilities for parsing MIDI bytes
 ///
 /// @ingroup IO

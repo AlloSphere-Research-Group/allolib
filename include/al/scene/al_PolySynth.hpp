@@ -50,12 +50,11 @@
 
 #include "al/graphics/al_Graphics.hpp"
 #include "al/io/al_AudioIOData.hpp"
+#include "al/io/al_File.hpp"
 #include "al/types/al_SingleRWRingBuffer.hpp"
 #include "al/ui/al_Parameter.hpp"
 
 namespace al {
-
-std::string demangle(const char *name);  // Utility function.
 
 int asciiToIndex(int asciiKey, int offset = 0);
 
@@ -65,13 +64,15 @@ int asciiToMIDI(int asciiKey, int offset = 0);
  * @brief The SynthVoice class
  * @ingroup Scene
  *
+ * To create new voices for a PolySynth, inherit from this class and override
+ * the onProcess() functions.
  * When inheriting this class you must provide a default construct that takes no
- * arguments
+ * arguments.
  */
 class SynthVoice {
-  friend class PolySynth;  // PolySynth needs to access private members like
-                           // "next".
- public:
+  friend class PolySynth; // PolySynth needs to access private members like
+                          // "next".
+public:
   SynthVoice() {}
 
   virtual ~SynthVoice() {}
@@ -147,7 +148,7 @@ the other
    * Copy the values from the internal parameters that have been
    * registered using registerParameterAsField or the << operator.
    */
-  int getTriggerParams(float *pFields, int maxParams = -1);
+  virtual int getTriggerParams(float *pFields, int maxParams = -1);
 
   /**
    * @brief Get this instance's parameter fields
@@ -285,9 +286,10 @@ the other
    * SynthSequencer.
    *
    */
-  std::shared_ptr<Parameter> createInternalTriggerParameter(
-      std::string name, float defaultValue = 0.0, float minValue = -9999.0,
-      float maxValue = 9999.0);
+  std::shared_ptr<Parameter>
+  createInternalTriggerParameter(std::string name, float defaultValue = 0.0,
+                                 float minValue = -9999.0,
+                                 float maxValue = 9999.0);
 
   /**
    * @brief Get reference to internal Parameter
@@ -392,11 +394,11 @@ the other
    * It can also be used to force removal of a voice from the rendering chain
    * without going through the release phase.
    */
-  void free() { mActive = false; }  // Mark this voice as done.
+  void free() { mActive = false; } // Mark this voice as done.
 
-  SynthVoice *next{nullptr};  // To support SynthVoices as linked lists
+  SynthVoice *next{nullptr}; // To support SynthVoices as linked lists
 
- protected:
+protected:
   /**
    * @brief Set the number of outputs this SynthVoice generates
    * @param numOutputs
@@ -415,7 +417,7 @@ the other
 
   std::vector<std::shared_ptr<Parameter>> mInternalParameters;
 
- private:
+private:
   int mId{-1};
   bool mActive{false};
   int mOnOffsetFrames{0};
@@ -425,11 +427,12 @@ the other
 };
 
 /**
-@brief PolySynth class
-@ingroup Scene
-*/
+ * @brief A PolySynth manages polyphony and rendering of SynthVoice instances.
+ * @ingroup Scene
+ *
+ */
 class PolySynth {
- public:
+public:
   friend class SynthSequencer;
 
   PolySynth(TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_AUDIO);
@@ -466,8 +469,7 @@ class PolySynth {
    * You must call triggerVoice to put the voice back in the rendering
    * chain after setting its properties, otherwise it will be lost.
    */
-  template <class TSynthVoice>
-  TSynthVoice *getVoice(bool forceAlloc = false);
+  template <class TSynthVoice> TSynthVoice *getVoice(bool forceAlloc = false);
 
   /**
    * @brief Get a reference to a free voice by voice type name
@@ -512,11 +514,9 @@ class PolySynth {
    * Preallocate a number of voices of a particular TSynthVoice to avoid doing
    * realtime allocation.
    */
-  template <class TSynthVoice>
-  void allocatePolyphony(int number);
+  template <class TSynthVoice> void allocatePolyphony(int number);
 
-  template <class TSynthVoice>
-  void disableAllocation();
+  template <class TSynthVoice> void disableAllocation();
 
   void disableAllocation(std::string name);
 
@@ -664,8 +664,9 @@ class PolySynth {
   /**
    * @brief register a callback to be notified of a trigger off event
    */
-  void registerTriggerOffCallback(
-      std::function<bool(int id, void *userData)> cb, void *userData = nullptr);
+  void
+  registerTriggerOffCallback(std::function<bool(int id, void *userData)> cb,
+                             void *userData = nullptr);
   /**
    * @brief register a callback to be notified of a note is moved to the free
    * pool from the active list
@@ -676,9 +677,9 @@ class PolySynth {
   /**
    * @brief register a callback to be notified of allocation of a voice.
    */
-  void registerAllocateCallback(
-      std::function<void(SynthVoice *voice, void *)> cb,
-      void *userData = nullptr);
+  void
+  registerAllocateCallback(std::function<void(SynthVoice *voice, void *)> cb,
+                           void *userData = nullptr);
 
   /**
    * Register a SynthVoice class to allow instantiating it by name
@@ -711,8 +712,7 @@ class PolySynth {
 
   SynthVoice *allocateVoice(std::string name);
 
-  template <class TSynthVoice>
-  TSynthVoice *allocateVoice() {
+  template <class TSynthVoice> TSynthVoice *allocateVoice() {
     TSynthVoice *voice = new TSynthVoice;
     voice->next = nullptr;
     if (mDefaultUserData) {
@@ -749,9 +749,7 @@ class PolySynth {
    * Always call prepare() after calling this function. The changes are only
    * applied by prepare().
    */
-  void setVoiceMaxOutputChannels(uint16_t channels) {
-    mVoiceMaxOutputChannels = channels;
-  }
+  void setVoiceMaxOutputChannels(uint16_t channels);
 
   /**
    * @brief Determines the number of buses for the internal AudioIOData objects
@@ -774,9 +772,18 @@ class PolySynth {
    * and prior to the function call to process spatialization. Can be used to
    * route signals to buses.
    */
-  void setBusRoutingCallback(BusRoutingCallback cb) {
-    mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
-  }
+  void setBusRoutingCallback(BusRoutingCallback cb);
+
+  /**
+   * @brief Set channel map for output.
+   * @param channelMap
+   *
+   * The index into the vector refers to the output channel in the voice buffer,
+   * the value is the channel index to write for audio output. This operation
+   * should be performed only when audio is not running. Channel mapping is
+   * ignored in DynamicScene and DistributedScene.
+   */
+  void setChannelMap(std::vector<size_t> channelMap);
 
   /**
    * @brief Set the time in seconds to wait between sequencer updates when time
@@ -788,21 +795,24 @@ class PolySynth {
     mCpuGranularitySec = timeSecs;
   }
 
- protected:
-  void startCpuClockThread();
-
+  /**
+   * @brief Add new voices to the chain.
+   *
+   * You need to call this function only if you are in TIME_MASTER_FREE mode.
+   * In other modes it is called in the render() function for the domain.
+   */
   inline void processVoices() {
     if (mVoiceToInsertLock.try_lock()) {
       if (mVoicesToInsert) {
         // If lock acquired insert queued voices
         if (mActiveVoices) {
           auto voice = mVoicesToInsert;
-          while (voice->next) {  // Find last voice to insert
+          while (voice->next) { // Find last voice to insert
             voice = voice->next;
           }
           voice->next =
-              mActiveVoices;  // Connect last inserted to previously active
-          mActiveVoices = mVoicesToInsert;  // Put new voices in head
+              mActiveVoices; // Connect last inserted to previously active
+          mActiveVoices = mVoicesToInsert; // Put new voices in head
         } else {
           mActiveVoices = mVoicesToInsert;
         }
@@ -827,15 +837,21 @@ class PolySynth {
             voice = voice->next;
           }
           previousVoice->next =
-              mFreeVoices;  // Connect last active voice to first free voice
-          mFreeVoices = mActiveVoices;  // Move all voices to free voices
-          mActiveVoices = nullptr;      // No active voices left
+              mFreeVoices; // Connect last active voice to first free voice
+          mFreeVoices = mActiveVoices; // Move all voices to free voices
+          mActiveVoices = nullptr;     // No active voices left
         }
         mFreeVoiceLock.unlock();
       }
     }
   }
 
+  /**
+   * @brief Check for voices that need trigger off and execute
+   *
+   * You need to call this function only if you are in TIME_MASTER_FREE mode.
+   * In other modes it is called in the render() function for the domain.
+   */
   inline void processVoiceTurnOff() {
     int voicesToTurnOff[16];
     size_t numVoicesToTurnOff;
@@ -848,7 +864,7 @@ class PolySynth {
             if (mVerbose) {
               std::cout << "Voice trigger off " << voice->id() << std::endl;
             }
-            voice->triggerOff();  // TODO use offset for turn off
+            voice->triggerOff(); // TODO use offset for turn off
           }
           voice = voice->next;
         }
@@ -873,10 +889,16 @@ class PolySynth {
     }
   }
 
+  /**
+   * @brief Check for voices marked as free and move them to the free voice pool
+   *
+   * You need to call this function only if you are in TIME_MASTER_FREE mode.
+   * In other modes it is called in the render() function for the domain.
+   */
   inline void processInactiveVoices() {
     // Move inactive voices to free queue
-    if (mFreeVoiceLock.try_lock()) {  // Attempt to remove inactive voices
-                                      // without waiting.
+    if (mFreeVoiceLock.try_lock()) { // Attempt to remove inactive voices
+      // without waiting.
       auto *voice = mActiveVoices;
       SynthVoice *previousVoice = nullptr;
       while (voice) {
@@ -885,20 +907,20 @@ class PolySynth {
           //          std::cout << " ****((((())))) **** Remove inactive voice:
           //          " << voice << std::endl;
           if (previousVoice) {
-            previousVoice->next = voice->next;  // Remove from active list
+            previousVoice->next = voice->next; // Remove from active list
             voice->next = mFreeVoices;
-            mFreeVoices = voice;  // Insert as head in free voices
-            voice->id(-1);        // Reset voice id
+            mFreeVoices = voice; // Insert as head in free voices
+            voice->id(-1);       // Reset voice id
             voice->onFree();
-            voice = previousVoice;  // prepare next iteration
-          } else {                  // Inactive is head of the list
+            voice = previousVoice; // prepare next iteration
+          } else {                 // Inactive is head of the list
             auto *nextVoice = voice->next;
-            mActiveVoices = nextVoice;  // Remove voice from list
+            mActiveVoices = nextVoice; // Remove voice from list
             voice->next = mFreeVoices;
-            mFreeVoices = voice;  // Insert as head in free voices
-            voice->id(-1);        // Reset voice id
+            mFreeVoices = voice; // Insert as head in free voices
+            voice->id(-1);       // Reset voice id
             voice->onFree();
-            voice = voice->next;  // prepare next iteration
+            voice = voice->next; // prepare next iteration
           }
           for (auto cbNode : mFreeCallbacks) {
             cbNode.first(id, cbNode.second);
@@ -912,6 +934,9 @@ class PolySynth {
       mFreeVoiceLock.unlock();
     }
   }
+
+protected:
+  void startCpuClockThread();
 
   inline void processGain(AudioIOData &io) {
     io.frame(0);
@@ -938,7 +963,7 @@ class PolySynth {
   SynthVoice *mActiveVoices{nullptr};
   std::mutex mVoiceToInsertLock;
   std::mutex mFreeVoiceLock;
-  std::mutex mGraphicsLock;
+  std::mutex mGraphicsLock; // TODO: remove this lock?
 
   bool m_useInternalAudioIO = true;
   bool m_internalAudioConfigured = false;
@@ -988,24 +1013,23 @@ class PolySynth {
   Creators mCreators;
   // Disallow auto allocation for class name. Set in allocateVoice()
   std::vector<std::string> mNoAllocationList;
+  std::vector<size_t> mChannelMap; // Maps synth output to audio channels
 
   bool mRunCPUClock{true};
-  double mCpuGranularitySec = 0.001;  // 1ms
+  double mCpuGranularitySec = 0.001; // 1ms
   std::unique_ptr<std::thread> mCpuClockThread;
 
   bool mVerbose{false};
 };
 
-template <class TSynthVoice>
-void PolySynth::disableAllocation() {
+template <class TSynthVoice> void PolySynth::disableAllocation() {
   std::string name = demangle(typeid(TSynthVoice).name());
   disableAllocation(name);
 }
 
-template <class TSynthVoice>
-TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
+template <class TSynthVoice> TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
   std::unique_lock<std::mutex> lk(
-      mFreeVoiceLock);  // Only one getVoice() call at a time
+      mFreeVoiceLock); // Only one getVoice() call at a time
   SynthVoice *freeVoice = mFreeVoices;
   SynthVoice *previousVoice = nullptr;
   if (forceAlloc) {
@@ -1025,7 +1049,7 @@ TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
       freeVoice = freeVoice->next;
     }
   }
-  if (!freeVoice) {  // No free voice in list, so we need to allocate it
+  if (!freeVoice) { // No free voice in list, so we need to allocate it
     // TODO report current polyphony for more informed allocation of polyphony
     // TODO check if allocation allowed
     //  But only allocate if allocation has not been disabled
@@ -1046,8 +1070,7 @@ TSynthVoice *PolySynth::getVoice(bool forceAlloc) {
   return static_cast<TSynthVoice *>(freeVoice);
 }
 
-template <class TSynthVoice>
-void PolySynth::allocatePolyphony(int number) {
+template <class TSynthVoice> void PolySynth::allocatePolyphony(int number) {
   std::unique_lock<std::mutex> lk(mFreeVoiceLock);
   SynthVoice *lastVoice = mFreeVoices;
   if (lastVoice) {
@@ -1064,6 +1087,6 @@ void PolySynth::allocatePolyphony(int number) {
   }
 }
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_POLYSYNTH_HPP
+#endif // AL_POLYSYNTH_HPP

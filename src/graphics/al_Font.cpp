@@ -1,12 +1,14 @@
 #include "al/graphics/al_Font.hpp"
-#include "al_stb_font.hpp"
 
+#include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+
+#include "al_stb_font.hpp"
 
 namespace al {
 
@@ -28,7 +30,7 @@ Font::Font(Font&& other) noexcept {
 Font& Font::operator=(Font&& other) noexcept {
   Impl* temp = impl;
   impl = other.impl;
-  other.impl = impl;
+  other.impl = temp;
   return *this;
 }
 
@@ -52,6 +54,7 @@ bool Font::load(const char* filename, int fontSize, int bitmapSize) {
 }
 
 void Font::write(Mesh& mesh, const char* text, float worldHeight) {
+  assert(impl->fontData.charData.size() > 0 && "Error - font not loaded.");
   mesh.reset();
 
   float xpos = 0;
@@ -100,6 +103,21 @@ void Font::write(Mesh& mesh, const char* text, float worldHeight) {
   for (auto& v : mesh.vertices()) {
     v.x = v.x + xOffset;
   }
+}
+
+std::string Font::defaultFont() {
+#ifdef AL_WINDOWS
+  std::string fontDir = "C:/Windows/Fonts";
+  std::string fontPath = fontDir + "/" + "Arial.ttf";
+#elif defined(AL_OSX)
+  std::string fontDir = "/Library/Fonts";
+  std::string fontPath = fontDir + "/" + "Arial Unicode.ttf";
+#else
+  std::string fontDir = "/usr/share/fonts/truetype";
+  std::string fontPath = fontDir + "/dejavu/DejaVuSansMono.ttf";
+#endif
+
+  return fontPath;
 }
 
 #if 0

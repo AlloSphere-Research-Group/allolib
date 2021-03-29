@@ -72,9 +72,9 @@ struct CieColor : public App {
         << endl;
   }
 
-  void onCreate() { printInstructions(); }
+  void onCreate() override { printInstructions(); }
 
-  bool onKeyDown(const Keyboard& k) override {
+  bool onKeyDown(const Keyboard &k) override {
     // cout << "KEY PRESSED: " << k.key() << endl;
     updateScene = true;
     // change gradient type
@@ -85,15 +85,19 @@ struct CieColor : public App {
     else if (k.key() == '-' || k.key() == '_' || k.key() == '+' ||
              k.key() == '=') {
       numRows += (k.key() == '-' || k.key() == '_') ? -1 : 1;
-      if (numRows < 1) numRows = 1;
-      if (numRows > 10) numRows = 10;
+      if (numRows < 1)
+        numRows = 1;
+      if (numRows > 10)
+        numRows = 10;
     }
     // change number of columns
     else if (k.key() == '<' || k.key() == ',' || k.key() == '>' ||
              k.key() == '.') {
       numCols += (k.key() == '<' || k.key() == ',') ? -1 : 1;
-      if (numCols < 1) numCols = 1;
-      if (numCols > 10) numCols = 10;
+      if (numCols < 1)
+        numCols = 1;
+      if (numCols > 10)
+        numCols = 10;
     }
     // change color space
     else if (k.key() == 'b' || k.key() == 'v') {
@@ -104,7 +108,7 @@ struct CieColor : public App {
     return true;
   }
 
-  void onDraw(Graphics& g) override {
+  void onDraw(Graphics &g) override {
     if (updateScene) {
       // pick new swatches
 
@@ -147,65 +151,62 @@ struct CieColor : public App {
 
           // choose gradient type based on current mode
           switch (MODE) {
-            case VARYING_HUE:
-              swatch = (TYPE == HCLAB)
-                           ? RGB(HCLab(variedParam1, fixedParam1, fixedParam2))
-                           : RGB(HCLuv(variedParam1, fixedParam1, fixedParam2));
-              break;
-            case VARYING_CHROMA:
-              swatch = (TYPE == HCLAB)
-                           ? RGB(HCLab(fixedParam1, variedParam1, fixedParam2))
-                           : RGB(HCLuv(fixedParam1, variedParam1, fixedParam2));
-              break;
-            case VARYING_LUMINANCE:
-              swatch = (TYPE == HCLAB)
-                           ? RGB(HCLab(fixedParam1, fixedParam2, variedParam1))
-                           : RGB(HCLuv(fixedParam1, fixedParam2, variedParam1));
-              break;
-            case FIXED_HUE:
-              swatch =
-                  (TYPE == HCLAB)
-                      ? RGB(HCLab(fixedParam1, variedParam2, variedParam1))
-                      : RGB(HCLuv(fixedParam1, variedParam2, variedParam1));
-              break;
-            case FIXED_CHROMA:
-              swatch =
-                  (TYPE == HCLAB)
-                      ? RGB(HCLab(variedParam2, fixedParam1, variedParam1))
-                      : RGB(HCLuv(variedParam2, fixedParam1, variedParam1));
-              break;
-            case FIXED_LUMINANCE:
-              swatch =
-                  (TYPE == HCLAB)
-                      ? RGB(HCLab(variedParam2, variedParam1, fixedParam1))
-                      : RGB(HCLuv(variedParam2, variedParam1, fixedParam1));
-              break;
-            default:
-              break;
+          case VARYING_HUE:
+            swatch = (TYPE == HCLAB)
+                         ? RGB(HCLab(variedParam1, fixedParam1, fixedParam2))
+                         : RGB(HCLuv(variedParam1, fixedParam1, fixedParam2));
+            break;
+          case VARYING_CHROMA:
+            swatch = (TYPE == HCLAB)
+                         ? RGB(HCLab(fixedParam1, variedParam1, fixedParam2))
+                         : RGB(HCLuv(fixedParam1, variedParam1, fixedParam2));
+            break;
+          case VARYING_LUMINANCE:
+            swatch = (TYPE == HCLAB)
+                         ? RGB(HCLab(fixedParam1, fixedParam2, variedParam1))
+                         : RGB(HCLuv(fixedParam1, fixedParam2, variedParam1));
+            break;
+          case FIXED_HUE:
+            swatch = (TYPE == HCLAB)
+                         ? RGB(HCLab(fixedParam1, variedParam2, variedParam1))
+                         : RGB(HCLuv(fixedParam1, variedParam2, variedParam1));
+            break;
+          case FIXED_CHROMA:
+            swatch = (TYPE == HCLAB)
+                         ? RGB(HCLab(variedParam2, fixedParam1, variedParam1))
+                         : RGB(HCLuv(variedParam2, fixedParam1, variedParam1));
+            break;
+          case FIXED_LUMINANCE:
+            swatch = (TYPE == HCLAB)
+                         ? RGB(HCLab(variedParam2, variedParam1, fixedParam1))
+                         : RGB(HCLuv(variedParam2, variedParam1, fixedParam1));
+            break;
+          default:
+            break;
           }
 
           // draw rectangles
 
           // triangle 1
           verts.vertex(i * width - widthOffset,
-                       j * height - heightOffset);  // bottom left
+                       j * height - heightOffset); // bottom left
           verts.color(swatch);
           verts.vertex(i * width + width - widthOffset,
-                       j * height - heightOffset);  // bottom right
+                       j * height - heightOffset); // bottom right
           verts.color(swatch);
           verts.vertex(i * width - widthOffset,
-                       j * height + height - heightOffset);  // top left
+                       j * height + height - heightOffset); // top left
           verts.color(swatch);
 
           // triangle 2
           verts.vertex(i * width + width - widthOffset,
-                       j * height - heightOffset);  // bottom right
+                       j * height - heightOffset); // bottom right
           verts.color(swatch);
           verts.vertex(i * width - widthOffset,
-                       j * height + height - heightOffset);  // top left
+                       j * height + height - heightOffset); // top left
           verts.color(swatch);
           verts.vertex(i * width + width - widthOffset,
-                       j * height + height - heightOffset);  // top right
+                       j * height + height - heightOffset); // top right
           verts.color(swatch);
 
           // print RGB values [0, 255] for each swatch
@@ -223,13 +224,16 @@ struct CieColor : public App {
     g.clear(0);
 
     // Set up 2D orthographic projection coordinates
-    g.projMatrix(Matrix4f::ortho2D(0, 1, 0, 1));  // left, right, bottom, top
+    g.projMatrix(Matrix4f::ortho2D(0, 1, 0, 1)); // left, right, bottom, top
     g.viewMatrix(Matrix4f::identity());
-    g.loadIdentity();  // model matrix
+    g.loadIdentity(); // model matrix
 
-    g.meshColor();  // use mesh's color array
+    g.meshColor(); // use mesh's color array
     g.draw(verts);
   }
 };
 
-int main() { CieColor().start(); }
+int main() {
+  CieColor().start();
+  return 0;
+}

@@ -81,6 +81,13 @@ void RenderManager::rotate(const Quatf& q) {
   mMatChanged = true;
 }
 
+void RenderManager::rotate(const Quatd& q) {
+  Matrix4f m;
+  q.toMatrix(m.elems());
+  mModelStack.mult(m);
+  mMatChanged = true;
+}
+
 void RenderManager::scale(float x, float y, float z) {
   mModelStack.mult(Matrix4f::scaling(x, y, z));
   mMatChanged = true;

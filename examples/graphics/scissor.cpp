@@ -103,7 +103,7 @@ struct MyApp : App {
     auto draw_mesh = [this, &g]() {
       g.lighting(false);
       g.meshColor();
-      g.polygonMode(Graphics::FILL);
+      g.polygonFill();
       g.draw(axis);
 
       g.rotate(angle1, 0, 1, 0);
@@ -111,12 +111,12 @@ struct MyApp : App {
 
       g.lighting(true);
       g.meshColor();
-      g.polygonMode(Graphics::FILL);
+      g.polygonFill();
       g.draw(mesh);
 
       g.scale(1.01);
       g.color(0);
-      g.polygonMode(Graphics::LINE);
+      g.polygonLine();
       g.draw(mesh);
     };
 
@@ -126,7 +126,7 @@ struct MyApp : App {
 
     {
       g.viewport(0, 0, w, h);
-      g.scissor(0, 0, w, h);
+      g.scissorArea(0, 0, w, h);
       g.clear(0.9, 0.9, 0.5);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -138,7 +138,7 @@ struct MyApp : App {
 
     {
       g.viewport(w, 0, w, h);
-      g.scissor(w, 0, w, h);
+      g.scissorArea(w, 0, w, h);
       g.clear(0.5, 0.9, 0.5);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -150,7 +150,7 @@ struct MyApp : App {
 
     {
       g.viewport(0, h, w, h);
-      g.scissor(0, h, w, h);
+      g.scissorArea(0, h, w, h);
       g.clear(0.5, 0.9, 0.9);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -162,7 +162,7 @@ struct MyApp : App {
 
     {
       g.viewport(w, h, w, h);
-      g.scissor(w, h, w, h);
+      g.scissorArea(w, h, w, h);
       g.clear(0.9, 0.5, 0.9);
       g.pushMatrix();
       g.pushViewMatrix();

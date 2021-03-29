@@ -1,5 +1,6 @@
 
 #include "al/ui/al_ParameterServer.hpp"
+#include "al/io/al_Socket.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -17,121 +18,184 @@ OSCNotifier::~OSCNotifier() {
   }
 }
 
-void OSCNotifier::notifyListeners(std::string OSCaddress, float value) {
+void OSCNotifier::notifyListeners(std::string OSCaddress, float value,
+                                  ValueSource *src) {
   mListenerLock.lock();
   for (osc::Send *sender : mOSCSenders) {
-    sender->send(OSCaddress, value);
+    auto ip = Socket::nameToIp(sender->address());
+
+    if (!src || (src->port == 0 && src->ipAddr != ip) ||
+        (src->port != sender->port() && src->ipAddr != ip)) {
+      sender->send(OSCaddress, value);
+    }
     //		std::cout << "Notifying " << sender->address() << ":" <<
     // sender->port() << " -- " << OSCaddress << std::endl;
   }
   mListenerLock.unlock();
 }
 
-void OSCNotifier::notifyListeners(std::string OSCaddress, int value) {
+void OSCNotifier::notifyListeners(std::string OSCaddress, int value,
+                                  ValueSource *src) {
   mListenerLock.lock();
   for (osc::Send *sender : mOSCSenders) {
-    sender->send(OSCaddress, value);
+    auto ip = Socket::nameToIp(sender->address());
+
+    if (!src || (src->port == 0 && src->ipAddr != ip) ||
+        (src->port != sender->port() && src->ipAddr != ip)) {
+      sender->send(OSCaddress, value);
+    }
     //        std::cout << "Notifying " << sender->address() << ":" <<
     //        sender->port() << " -- " << OSCaddress << std::endl;
   }
   mListenerLock.unlock();
 }
 
-void OSCNotifier::notifyListeners(std::string OSCaddress, std::string value) {
+void OSCNotifier::notifyListeners(std::string OSCaddress, std::string value,
+                                  ValueSource *src) {
   mListenerLock.lock();
   for (osc::Send *sender : mOSCSenders) {
-    sender->send(OSCaddress, value);
-    std::cout << "Notifying " << sender->address() << ":" << sender->port()
-              << " -- " << OSCaddress << std::endl;
+    auto ip = Socket::nameToIp(sender->address());
+
+    if (!src || (src->port == 0 && src->ipAddr != ip) ||
+        (src->port != sender->port() && src->ipAddr != ip)) {
+      sender->send(OSCaddress, value);
+    }
+    //    std::cout << "Notifying " << sender->address() << ":" <<
+    //    sender->port()
+    //              << " -- " << OSCaddress << std::endl;
   }
   mListenerLock.unlock();
 }
 
-void OSCNotifier::notifyListeners(std::string OSCaddress, Vec3f value) {
+void OSCNotifier::notifyListeners(std::string OSCaddress, Vec3f value,
+                                  ValueSource *src) {
   mListenerLock.lock();
   for (osc::Send *sender : mOSCSenders) {
-    sender->send(OSCaddress, value[0], value[1], value[2]);
+    auto ip = Socket::nameToIp(sender->address());
+
+    if (!src || (src->port == 0 && src->ipAddr != ip) ||
+        (src->port != sender->port() && src->ipAddr != ip)) {
+      sender->send(OSCaddress, value[0], value[1], value[2]);
+    }
     //		std::cout << "Notifying " << sender->address() << ":" <<
     // sender->port() << " -- " << OSCaddress << std::endl;
   }
   mListenerLock.unlock();
 }
 
-void OSCNotifier::notifyListeners(std::string OSCaddress, Vec4f value) {
+void OSCNotifier::notifyListeners(std::string OSCaddress, Vec4f value,
+                                  ValueSource *src) {
   mListenerLock.lock();
   for (osc::Send *sender : mOSCSenders) {
-    sender->send(OSCaddress, value[0], value[1], value[2], value[3]);
+    auto ip = Socket::nameToIp(sender->address());
+
+    if (!src || (src->port == 0 && src->ipAddr != ip) ||
+        (src->port != sender->port() && src->ipAddr != ip)) {
+      sender->send(OSCaddress, value[0], value[1], value[2], value[3]);
+    }
     //		std::cout << "Notifying " << sender->address() << ":" <<
     // sender->port() << " -- " << OSCaddress << std::endl;
   }
   mListenerLock.unlock();
 }
 
-void OSCNotifier::notifyListeners(std::string OSCaddress, Pose value) {
+void OSCNotifier::notifyListeners(std::string OSCaddress, Pose value,
+                                  ValueSource *src) {
   mListenerLock.lock();
   for (osc::Send *sender : mOSCSenders) {
-    sender->send(OSCaddress, (float)value.pos()[0], (float)value.pos()[1],
-                 (float)value.pos()[2], (float)value.quat().w,
-                 (float)value.quat().x, (float)value.quat().y,
-                 (float)value.quat().z);
+    auto ip = Socket::nameToIp(sender->address());
+
+    if (!src || (src->port == 0 && src->ipAddr != ip) ||
+        (src->port != sender->port() && src->ipAddr != ip)) {
+      sender->send(OSCaddress, (float)value.pos()[0], (float)value.pos()[1],
+                   (float)value.pos()[2], (float)value.quat().w,
+                   (float)value.quat().x, (float)value.quat().y,
+                   (float)value.quat().z);
+    }
     //		std::cout << "Notifying " << sender->address() << ":" <<
     // sender->port() << " -- " << OSCaddress << std::endl;
   }
   mListenerLock.unlock();
 }
 
-void OSCNotifier::notifyListeners(std::string OSCaddress, Color value) {
+void OSCNotifier::notifyListeners(std::string OSCaddress, Color value,
+                                  ValueSource *src) {
   mListenerLock.lock();
   for (osc::Send *sender : mOSCSenders) {
-    sender->send(OSCaddress, float(value.r), float(value.g), float(value.b));
+    auto ip = Socket::nameToIp(sender->address());
+
+    if (!src || (src->port == 0 && src->ipAddr != ip) ||
+        (src->port != sender->port() && src->ipAddr != ip)) {
+      sender->send(OSCaddress, float(value.r), float(value.g), float(value.b));
+    }
     //		std::cout << "Notifying " << sender->address() << ":" <<
     // sender->port() << " -- " << OSCaddress << std::endl;
   }
   mListenerLock.unlock();
 }
 
-void OSCNotifier::notifyListeners(std::string OSCaddress,
-                                  ParameterMeta *param) {
+void OSCNotifier::notifyListeners(std::string OSCaddress, ParameterMeta *param,
+                                  ValueSource *src) {
   if (strcmp(typeid(*param).name(), typeid(ParameterBool).name()) ==
-      0) {  // ParameterBool
+      0) { // ParameterBool
     ParameterBool *p = dynamic_cast<ParameterBool *>(param);
-    notifyListeners(OSCaddress, p->get());
+    notifyListeners(OSCaddress, p->get(), src);
   } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) ==
-             0) {  // Parameter
+             0) { // Parameter
     Parameter *p = dynamic_cast<Parameter *>(param);
-    notifyListeners(OSCaddress, p->get());
+    notifyListeners(OSCaddress, p->get(), src);
   } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
-             0) {  // ParameterString
+             0) { // ParameterString
     ParameterString *p = dynamic_cast<ParameterString *>(param);
-    notifyListeners(OSCaddress, p->get());
+    notifyListeners(OSCaddress, p->get(), src);
   } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) ==
-             0) {  // ParameterPose
+             0) { // ParameterPose
     ParameterPose *p = dynamic_cast<ParameterPose *>(param);
-    notifyListeners(OSCaddress, p->get());
+    notifyListeners(OSCaddress, p->get(), src);
   } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) ==
-             0) {  // ParameterMenu
+             0) { // ParameterMenu
     ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
-    notifyListeners(OSCaddress, p->get());
+    notifyListeners(OSCaddress, p->get(), src);
   } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) ==
-             0) {  // ParameterChoice
+             0) { // ParameterChoice
     ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
-    notifyListeners(OSCaddress, p->get());
+    notifyListeners(OSCaddress, (int32_t)p->get(), src);
   } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) ==
-             0) {  // ParameterVec3
+             0) { // ParameterVec3
     ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
-    notifyListeners(OSCaddress, p->get());
+    notifyListeners(OSCaddress, p->get(), src);
   } else if (strcmp(typeid(*param).name(), typeid(ParameterVec4).name()) ==
-             0) {  // ParameterVec4
+             0) { // ParameterVec4
     ParameterVec4 *p = dynamic_cast<ParameterVec4 *>(param);
-    notifyListeners(OSCaddress, p->get());
+    notifyListeners(OSCaddress, p->get(), src);
   } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) ==
-             0) {  // ParameterColor
+             0) { // ParameterColor
     ParameterColor *p = dynamic_cast<ParameterColor *>(param);
-    notifyListeners(OSCaddress, p->get());
+    notifyListeners(OSCaddress, p->get(), src);
+  } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) ==
+             0) { // Trigger
+    Trigger *p = dynamic_cast<Trigger *>(param);
+    notifyListeners(OSCaddress, p->get(), src);
   } else {
     std::cout << "OSCNotifier::notifyListeners Unsupported Parameter type for "
                  "notification"
               << std::endl;
+  }
+}
+
+void OSCNotifier::startHandshakeServer(std::string address) {
+  if (mHandshakeServer.open(handshakeServerPort, address.c_str())) {
+    mHandshakeServer.handler(mHandshakeHandler);
+    mHandshakeServer.start();
+    std::cout << "Parameter OSC Handshake server running on " << address << ":"
+              << handshakeServerPort << std::endl;
+  } else {
+    std::cout << "failed to start handshake server" << std::endl;
+  }
+  for (int i = 0; i < 100;
+       i++) { // Check to see if there are any listeners already running
+    osc::Send handshake(listenerFirstPort + i, "127.0.0.1");
+    handshake.send("/requestHandshake", handshakeServerPort);
   }
 }
 
@@ -142,6 +206,8 @@ ParameterServer::ParameterServer(std::string oscAddress, int oscPort,
     : mServer(nullptr) {
   mOscAddress = oscAddress;
   mOscPort = oscPort;
+  OSCNotifier::mHandshakeHandler.mParameterServer = this;
+
   if (autoStart) {
     listen(oscPort, oscAddress);
   }
@@ -153,6 +219,7 @@ ParameterServer::~ParameterServer() {
     mServer->stop();
     delete mServer;
     mServer = nullptr;
+    notifyListeners("/quit", 0.0f, nullptr);
   }
 }
 
@@ -196,69 +263,76 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param) {
   mParameterLock.unlock();
   mListenerLock.lock();
   if (strcmp(typeid(param).name(), typeid(ParameterBool).name()) ==
-      0) {  // ParameterBool
+      0) { // ParameterBool
     ParameterBool *p = dynamic_cast<ParameterBool *>(&param);
-    p->registerChangeCallback([this, p](float value) {
-      notifyListeners(p->getFullAddress(), value);
+    p->registerChangeCallback([this, p](float value, ValueSource *src) {
+      notifyListeners(p->getFullAddress(), value, src);
     });
   } else if (strcmp(typeid(param).name(), typeid(Parameter).name()) ==
-             0) {  // Parameter
+             0) { // Parameter
     //        std::cout << "Register parameter " << param.getName() <<
     //        std::endl;
     Parameter *p = dynamic_cast<Parameter *>(&param);
-    p->registerChangeCallback([this, p](float value) {
-      notifyListeners(p->getFullAddress(), value);
+    p->registerChangeCallback([this, p](float value, ValueSource *src) {
+      notifyListeners(p->getFullAddress(), value, src);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterInt).name()) ==
-             0) {  // ParameterInt
+             0) { // ParameterInt
     //        std::cout << "Register parameter " << param.getName() <<
     //        std::endl;
     ParameterInt *p = dynamic_cast<ParameterInt *>(&param);
-    p->registerChangeCallback([this, p](int32_t value) {
-      notifyListeners(p->getFullAddress(), value);
+    p->registerChangeCallback([this, p](int32_t value, ValueSource *src) {
+      notifyListeners(p->getFullAddress(), value, src);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterPose).name()) ==
-             0) {  // ParameterPose
+             0) { // ParameterPose
     ParameterPose *p = dynamic_cast<ParameterPose *>(&param);
-    p->registerChangeCallback([this, p](al::Pose value) {
-      notifyListeners(p->getFullAddress(), value);
+    p->registerChangeCallback([this, p](al::Pose value, ValueSource *src) {
+      notifyListeners(p->getFullAddress(), value, src);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterMenu).name()) ==
-             0) {  // ParameterMenu
+             0) { // ParameterMenu
     ParameterMenu *p = dynamic_cast<ParameterMenu *>(&param);
-    p->registerChangeCallback(
-        [this, p](int value) { notifyListeners(p->getFullAddress(), value); });
+    p->registerChangeCallback([this, p](int value, ValueSource *src) {
+      notifyListeners(p->getFullAddress(), value, src);
+    });
   } else if (strcmp(typeid(param).name(), typeid(ParameterChoice).name()) ==
-             0) {  // ParameterChoice
+             0) { // ParameterChoice
     ParameterChoice *p = dynamic_cast<ParameterChoice *>(&param);
-    p->registerChangeCallback([this, p](uint16_t value) {
-      notifyListeners(p->getFullAddress(), (int)value);
+    p->registerChangeCallback([this, p](uint16_t value, ValueSource *src) {
+      notifyListeners(p->getFullAddress(), (int)value, src);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterVec3).name()) ==
-             0) {  // ParameterVec3
+             0) { // ParameterVec3
     ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(&param);
 
-    p->registerChangeCallback([this, p](al::Vec3f value) {
-      notifyListeners(p->getFullAddress(), value);
+    p->registerChangeCallback([this, p](al::Vec3f value, ValueSource *src) {
+      notifyListeners(p->getFullAddress(), value, src);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterVec4).name()) ==
-             0) {  // ParameterVec4
+             0) { // ParameterVec4
     ParameterVec4 *p = dynamic_cast<ParameterVec4 *>(&param);
-    p->registerChangeCallback([this, p](al::Vec4f value) {
-      notifyListeners(p->getFullAddress(), value);
+    p->registerChangeCallback([this, p](al::Vec4f value, ValueSource *src) {
+      notifyListeners(p->getFullAddress(), value, src);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterColor).name()) ==
-             0) {  // ParameterColor
+             0) { // ParameterColor
     ParameterColor *p = dynamic_cast<ParameterColor *>(&param);
 
-    p->registerChangeCallback([this, p](Color value) {
+    p->registerChangeCallback([this, p](Color value, ValueSource *src) {
       Vec4f valueVec(value.r, value.g, value.b, value.a);
-      notifyListeners(p->getFullAddress(), valueVec);
+      notifyListeners(p->getFullAddress(), valueVec, src);
     });
   } else if (strcmp(typeid(param).name(), typeid(ParameterString).name()) ==
-             0) {  // ParameterColor
+             0) { // ParameterColor
     ParameterString *p = dynamic_cast<ParameterString *>(&param);
-    p->registerChangeCallback([this, p](std::string value) {
+    p->registerChangeCallback([this, p](std::string value, ValueSource *src) {
+      notifyListeners(p->getFullAddress(), value, src);
+    });
+  } else if (strcmp(typeid(param).name(), typeid(Trigger).name()) ==
+             0) { // Trigger
+    Trigger *p = dynamic_cast<Trigger *>(&param);
+    p->registerChangeCallback([this, p](float value, ValueSource *src) {
       notifyListeners(p->getFullAddress(), value);
     });
   } else {
@@ -270,8 +344,8 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param) {
   return *this;
 }
 
-ParameterServer &ParameterServer::registerParameterBundle(
-    ParameterBundle &bundle) {
+ParameterServer &
+ParameterServer::registerParameterBundle(ParameterBundle &bundle) {
   if (mCurrentActiveBundle.find(bundle.name()) == mCurrentActiveBundle.end()) {
     mParameterBundles[bundle.name()] = std::vector<ParameterBundle *>();
     mCurrentActiveBundle[bundle.name()] = 0;
@@ -293,26 +367,9 @@ void ParameterServer::unregisterParameter(ParameterMeta &param) {
 }
 
 void ParameterServer::onMessage(osc::Message &m) {
-  m.resetStream();  // Needs to be moved to caller...
+  m.resetStream(); // Needs to be moved to caller...
   if (mVerbose) {
     m.print();
-  }
-  std::string requestAddress = "/sendAllParameters";
-  if (m.addressPattern() == requestAddress) {
-    if (m.typeTags() == "si") {
-      std::string address;
-      int port;
-      m >> address >> port;
-      if (address == "0.0.0.0") {
-        address = m.senderAddress();
-      }
-      sendAllParameters(address, port);
-    } else if (m.typeTags() == "i") {
-      int port;
-      m >> port;
-      sendAllParameters(m.senderAddress(), port);
-    }
-    return;
   }
   mParameterLock.lock();
   for (ParameterMeta *param : mParameters) {
@@ -324,6 +381,9 @@ void ParameterServer::onMessage(osc::Message &m) {
     auto oscAddress = m.addressPattern();
     setValuesForBundleGroup(m, bundleGroup.second, oscAddress);
   }
+
+  // FIXME these handlers should not be kept by ParameterServer, but should be
+  // set for the Recv object.
   for (osc::PacketHandler *handler : mPacketHandlers) {
     m.resetStream();
     handler->onMessage(m);
@@ -446,13 +506,13 @@ void ParameterServer::registerOSCConsumer(osc::MessageConsumer *consumer,
 
 void ParameterServer::notifyAll() {
   for (ParameterMeta *param : mParameters) {
-    notifyListeners(param->getFullAddress(), param);
+    notifyListeners(param->getFullAddress(), param, nullptr);
   }
   for (auto bundleGroup : mParameterBundles) {
     for (ParameterBundle *bundle : bundleGroup.second) {
       std::string prefix = bundle->bundlePrefix();
       for (ParameterMeta *param : bundle->parameters()) {
-        notifyListeners(prefix + param->getFullAddress(), param);
+        notifyListeners(prefix + param->getFullAddress(), param, nullptr);
       }
     }
   }
@@ -469,6 +529,22 @@ void ParameterServer::sendAllParameters(std::string IPaddress, int oscPort) {
   }
   for (ParameterMeta *param : mParameters) {
     param->sendValue(sender);
+  }
+}
+
+void ParameterServer::sendParameterDetails(std::string IPaddress, int oscPort) {
+  osc::Send sender(oscPort, IPaddress.c_str());
+  for (ParameterMeta *param : mParameters) {
+    param->sendMeta(sender);
+  }
+
+  for (auto bundleGroup : mParameterBundles) {
+    for (auto bundle : bundleGroup.second) {
+      for (ParameterMeta *param : bundle->parameters()) {
+        param->sendMeta(sender, bundle->name(),
+                        std::to_string(bundle->bundleIndex()));
+      }
+    }
   }
 }
 
@@ -515,61 +591,63 @@ void ParameterServer::changePoseCallback(Pose value, void *sender,
 bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
                                                    std::string address,
                                                    osc::Message &m) {
+
+  ValueSource s{m.senderAddress(), 0};
   if (strcmp(typeid(*param).name(), typeid(ParameterBool).name()) ==
-      0) {  // ParameterBool
+      0) { // ParameterBool
     ParameterBool *p = dynamic_cast<ParameterBool *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "f") {
       float val;
       m >> val;
       // Extract the data out of the packet
-      p->set(val);
+      p->set(val, &s);
       // std::cout << "ParameterServer::onMessage" << val << std::endl;
       return true;
     }
     // notifyListeners(p->getFullAddress(), p->get());
   } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) ==
-             0) {  // Parameter
+             0) { // Parameter
     Parameter *p = dynamic_cast<Parameter *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "f") {
       float val;
       m >> val;
       // Extract the data out of the packet
-      p->set(val);
+      p->set(val, &s);
       // std::cout << "ParameterServer::onMessage" << val << std::endl;
       return true;
     }
     // notifyListeners(p->getFullAddress(), p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name()) ==
-             0) {  // ParameterInt
+             0) { // ParameterInt
     ParameterInt *p = dynamic_cast<ParameterInt *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "i") {
       int32_t val;
       m >> val;
       // Extract the data out of the packet
-      p->set(val);
+      p->set(val, &s);
       // std::cout << "ParameterServer::onMessage" << val << std::endl;
       return true;
     }
     // notifyListeners(p->getFullAddress(), p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
-             0) {  // Parameter
+             0) { // Parameter
     ParameterString *p = dynamic_cast<ParameterString *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "s") {
       std::string val;
       m >> val;
       // Extract the data out of the packet
-      p->set(val);
+      p->set(val, &s);
       // std::cout << "ParameterServer::onMessage" << val << std::endl;
       return true;
     }
     // notifyListeners(p->getFullAddress(), p->get());
   } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) ==
-             0) {  // ParameterPose
+             0) { // ParameterPose
     ParameterPose *p = dynamic_cast<ParameterPose *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "fffffff") {
       float x, y, z, w, qx, qy, qz;
       m >> x >> y >> z >> w >> qx >> qy >> qz;
-      p->set(Pose(Vec3d(x, y, z), Quatd(w, qx, qy, qz)));
+      p->set(Pose(Vec3d(x, y, z), Quatd(w, qx, qy, qz)), &s);
       return true;
     } else if (address == p->getFullAddress() + "/pos" &&
                m.typeTags() == "fff") {
@@ -577,7 +655,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       m >> x >> y >> z;
       Pose currentPose = p->get();
       currentPose.pos() = Vec3d(x, y, z);
-      p->set(currentPose);
+      p->set(currentPose, &s);
       return true;
     } else if (address == p->getFullAddress() + "/pos/x" &&
                m.typeTags() == "f") {
@@ -585,7 +663,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       m >> x;
       Pose currentPose = p->get();
       currentPose.pos().x = x;
-      p->set(currentPose);
+      p->set(currentPose, &s);
       return true;
     } else if (address == p->getFullAddress() + "/pos/y" &&
                m.typeTags() == "f") {
@@ -593,7 +671,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       m >> y;
       Pose currentPose = p->get();
       currentPose.pos().y = y;
-      p->set(currentPose);
+      p->set(currentPose, &s);
       return true;
     } else if (address == p->getFullAddress() + "/pos/z" &&
                m.typeTags() == "f") {
@@ -601,56 +679,56 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       m >> z;
       Pose currentPose = p->get();
       currentPose.pos().z = z;
-      p->set(currentPose);
+      p->set(currentPose, &s);
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) ==
-             0) {  // ParameterMenu
+             0) { // ParameterMenu
     ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "i") {
       int value;
       m >> value;
-      p->set(value);
+      p->set(value, &s);
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) ==
-             0) {  // ParameterChoice
+             0) { // ParameterChoice
     ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "i") {
       int value;
       m >> value;
-      p->set(value);
+      p->set(value, &s);
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) ==
-             0) {  // ParameterVec3
+             0) { // ParameterVec3
     ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "fff") {
       float x, y, z;
       m >> x >> y >> z;
-      p->set(Vec3f(x, y, z));
+      p->set(Vec3f(x, y, z), &s);
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(ParameterVec4).name()) ==
-             0) {  // ParameterVec4
+             0) { // ParameterVec4
     ParameterVec4 *p = dynamic_cast<ParameterVec4 *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "ffff") {
       float a, b, c, d;
       m >> a >> b >> c >> d;
-      p->set(Vec4f(a, b, c, d));
+      p->set(Vec4f(a, b, c, d), &s);
     }
     return true;
   } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) ==
-             0) {  // ParameterColor
+             0) { // ParameterColor
     ParameterColor *p = dynamic_cast<ParameterColor *>(param);
     if (address == p->getFullAddress() && m.typeTags() == "ffff") {
       float a, b, c, d;
       m >> a >> b >> c >> d;
-      p->set(Color(a, b, c, d));
+      p->set(Color(a, b, c, d), &s);
       return true;
     }
   } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) ==
-             0) {  // ParameterColor
+             0) { // Trigger
     Trigger *p = dynamic_cast<Trigger *>(param);
     if (address == p->getFullAddress()) {
       if (m.typeTags().size() == 0) {
@@ -673,6 +751,60 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
   return false;
 }
 
+void ParameterServer::runCommand(osc::Message &m) {
+  // These are commands that are common to primary and secondary instances.
+
+  if (m.addressPattern() == "/requestListenerInfo") {
+    if (m.typeTags() == "si") {
+      std::string addr;
+      m >> addr;
+      int port;
+      m >> port;
+      //        mNotifiers.push_back({addr, port});
+      std::cout << "Sending listener info to: " << addr << ":" << port
+                << std::endl;
+      std::string serverAddress = mServer->address();
+      if (serverAddress == "0.0.0.0" || serverAddress.size() == 0) {
+        // FIXME this should be solved on the other end
+        serverAddress = "127.0.0.1";
+      }
+      osc::Send listenerRequest(port, m.senderAddress().c_str());
+      listenerRequest.send("/registerListener", serverAddress, mServer->port());
+    } else {
+      std::cerr << "ERROR: Unexpected typetags for /requestListenerInfo"
+                << std::endl;
+    }
+  } else if (m.addressPattern() == "/sendAllParameters") {
+    std::cout << "/sendAllParameters" << std::endl;
+    if (m.typeTags() == "si") {
+      std::string address;
+      int port;
+      m >> address >> port;
+      if (address == "0.0.0.0") {
+        address = m.senderAddress();
+      }
+      sendAllParameters(address, port);
+    } else if (m.typeTags() == "i") {
+      int port;
+      m >> port;
+      sendAllParameters(m.senderAddress(), port);
+    }
+    return;
+  } else if (m.addressPattern() == "/sendParametersMeta") {
+    std::cout << "/sendParametersMeta" << std::endl;
+    if (m.typeTags() == "si") {
+      std::string address;
+      int port;
+      m >> address >> port;
+      sendParameterDetails(m.senderAddress(), port);
+    }
+    return;
+  } else {
+    std::cout << "Unhandled command" << std::endl;
+    m.print();
+  }
+}
+
 void ParameterServer::printParameterInfo(ParameterMeta *p) {
   std::cout << "Parameter " << p->getName() << "(" << p->displayName() << ")"
             << "[" << typeid(*p).name() << "] : " << p->getFullAddress()
@@ -681,13 +813,15 @@ void ParameterServer::printParameterInfo(ParameterMeta *p) {
 
 void ParameterServer::printBundleInfo(ParameterBundle *bundle, std::string id,
                                       int depth) {
-  for (int i = 0; i < depth; i++) std::cout << "  ";
+  for (int i = 0; i < depth; i++)
+    std::cout << "  ";
   std::cout << "--- Bundle: " << bundle->name() << " id: " << id << " index "
             << bundle->bundleIndex() << " prefix " << bundle->bundlePrefix()
             << std::endl;
   depth++;
   for (auto *p : bundle->parameters()) {
-    for (int i = 0; i < depth; i++) std::cout << "  ";
+    for (int i = 0; i < depth; i++)
+      std::cout << "  ";
     printParameterInfo(p);
   }
   for (auto bundleGroup : bundle->bundles()) {
@@ -696,7 +830,8 @@ void ParameterServer::printBundleInfo(ParameterBundle *bundle, std::string id,
       printBundleInfo(bundle, bundleGroup.first, depth);
     }
   }
-  for (int i = 0; i < depth - 1; i++) std::cout << "  ";
+  for (int i = 0; i < depth - 1; i++)
+    std::cout << "  ";
   std::cout << "--- End Bundle: " << bundle->name() << " id: " << id
             << std::endl;
 }
@@ -721,4 +856,81 @@ void ParameterServer::setValuesForBundleGroup(
       }
     }
   }
+}
+
+void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
+  // These are the commands processed by the primary instance
+  if (m.addressPattern() == "/handshake" && m.typeTags() == "i") {
+    std::unique_lock<std::mutex> lk(notifier->mNodeLock);
+    int commandPort;
+    m >> commandPort;
+    for (auto node : notifier->mNodes) {
+      if (node.first == m.senderAddress() && node.second == commandPort) {
+        std::cout << "Received unnecessary handshake from " << m.senderAddress()
+                  << ":" << commandPort << std::endl;
+        return;
+      }
+    }
+    notifier->mNodes.push_back({m.senderAddress(), commandPort});
+    std::cout << "ParameterServer handshake from " << m.senderAddress() << ":"
+              << commandPort << std::endl;
+
+    osc::Send listenerRequest(commandPort, m.senderAddress().c_str());
+    listenerRequest.send("/requestListenerInfo",
+                         notifier->mHandshakeServer.address(),
+                         notifier->mHandshakeServer.port());
+  } else if (m.addressPattern() == "/registerListener" &&
+             m.typeTags() == "si") {
+    std::string addr;
+    m >> addr;
+    int listenerPort;
+    m >> listenerPort;
+    notifier->addListener(addr, listenerPort);
+    std::cout << "Registered listener " << m.senderAddress() << ":"
+              << listenerPort << std::endl;
+  } else if (m.addressPattern() == "/goodbye" && m.typeTags() == "si") {
+    std::string addr;
+    m >> addr;
+    int port;
+    m >> port;
+
+    std::unique_lock<std::mutex> lk(notifier->mNodeLock);
+    for (auto node = notifier->mNodes.begin(); node != notifier->mNodes.end();
+         node++) {
+      if (node->first == addr && node->second == port) {
+        std::cout << "Parameter server said goodbye " << m.senderAddress()
+                  << ":" << port << std::endl;
+        notifier->mNodes.erase(node);
+        break;
+      }
+    }
+  } else {
+    std::cout << "Running parameter server command" << std::endl;
+    // TODO do we need to verify command should be forwarded to ParameterServer?
+    mParameterServer->runCommand(m);
+  }
+}
+
+void OSCNode::startCommandListener(std::string address) {
+  int offset = 0;
+  while (!mNetworkListener.open(listenerFirstPort + offset, address.c_str()) &&
+         (offset < 128)) {
+    offset++;
+  }
+  if (offset < 128) {
+    mNetworkListener.start();
+    std::cout << " OSCNotifier listening on " << address << ":"
+              << listenerFirstPort + offset << std::endl;
+  } else {
+    std::cerr << "Could not start listener on address " << address << std::endl;
+  }
+
+  // Broadcast handshake
+  // FIXME broadcast on all network interfaces
+  osc::Send handshake(handshakeServerPort, "127.0.0.1");
+  handshake.send("/handshake", listenerFirstPort + offset);
+}
+
+void OSCNode::registerServerHandler(osc::PacketHandler *handler) {
+  mNetworkListener.appendHandler(*handler);
 }

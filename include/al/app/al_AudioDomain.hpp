@@ -19,12 +19,12 @@ namespace al {
  * @ingroup App
  */
 class AudioDomain : public AsynchronousDomain {
- public:
+public:
   AudioDomain();
   virtual ~AudioDomain() {}
 
   // Domain management functions
-  bool initialize(ComputationDomain *parent = nullptr) override;
+  bool init(ComputationDomain *parent = nullptr) override;
   bool start() override;
   bool stop() override;
   bool cleanup(ComputationDomain *parent = nullptr) override;
@@ -40,23 +40,19 @@ class AudioDomain : public AsynchronousDomain {
 
   std::function<void(AudioIOData &io)> onSound = [](AudioIOData &) {};
 
- protected:
-  static void AppAudioCB(AudioIOData &io) {
-    AudioDomain &app = io.user<AudioDomain>();
-    io.frame(0);
-    app.onSound(app.audioIO());
-  }
+protected:
+  static void AppAudioCB(AudioIOData &io);
 
- private:
-  Parameter mGainParameter{"gain", "", 1.0, "", 0.0, 2.0};
+private:
+  Parameter mGainParameter{"gain", "", 1.0, 0.0, 2.0};
   AudioIO mAudioIO;
 };
 
 class GammaAudioDomain : public AudioDomain, public gam::Domain {
- public:
+public:
   bool start() override;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AUDIODOMAIN_H
+#endif // AUDIODOMAIN_H

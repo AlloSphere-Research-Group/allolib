@@ -64,7 +64,7 @@ namespace al {
  * Presets are saved by name with the ".preset" suffix.
  */
 class PresetHandler {
- public:
+public:
   typedef std::map<std::string, std::vector<ParameterField>> ParameterStates;
   /**
    * @brief PresetHandler contructor
@@ -192,6 +192,7 @@ class PresetHandler {
 
   float getMorphTime();
   void setMorphTime(float time);
+  void setMaxMorphTime(float time);
   void stopMorphing() { mTotalSteps.store(0); }
   void morphTo(ParameterStates &parameterStates, float morphTime);
   void morphTo(std::string presetName, float morphTime);
@@ -333,7 +334,7 @@ class PresetHandler {
   void startCpuThread();
   void stopCpuThread();
 
- private:
+private:
   //  std::vector<float> getParameterValue(ParameterMeta *p);
   //  void setParametersInBundle(ParameterBundle *bundle, std::string
   //  bundlePrefix,
@@ -345,7 +346,7 @@ class PresetHandler {
   bool mVerbose{false};
   bool mUseCallbacks{true};
   std::string mRootDir;
-  std::string mSubDir;  // Optional sub directory, e.g. for preset map archives
+  std::string mSubDir; // Optional sub directory, e.g. for preset map archives
 
   std::string mCurrentMapName;
   std::string mCurrentPresetName;
@@ -366,15 +367,15 @@ class PresetHandler {
 
   TimeMasterMode mTimeMasterMode{TimeMasterMode::TIME_MASTER_CPU};
 
-  Parameter mMorphTime{"morphTime", "", 0.0, "", 0.0, 20.0};
+  Parameter mMorphTime{"morphTime", "", 0.0, 0.0, 20.0};
 
   std::atomic<uint64_t> mMorphStepCount{0};
   std::atomic<uint64_t> mTotalSteps{0};
   //  std::atomic<float> mCurrentMorphIndex;
-  bool mCpuThreadRunning{false};  // To keep the morphing thread alive
+  bool mCpuThreadRunning{false}; // To keep the morphing thread alive
   std::unique_ptr<std::thread> mMorphingThread;
   //  std::condition_variable mMorphConditionVar;
-  double mMorphInterval{0.05};
+  double mMorphInterval{0.02};
   //  std::atomic<bool> mMorphing;
 
   std::vector<std::function<void(int index, void *sender, void *userData)>>
@@ -388,6 +389,6 @@ class PresetHandler {
   std::map<int, std::string> mPresetsMap;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_PRESETHANDLER_H
+#endif // AL_PRESETHANDLER_H

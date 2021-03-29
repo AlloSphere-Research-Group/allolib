@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
   reader.clearTypes();
 
   reader.addType(CSVReader::STRING);
-  reader.addType(CSVReader::INTEGER);
+  reader.addType(CSVReader::INT64);
   reader.addType(CSVReader::REAL);
   reader.addType(CSVReader::REAL);
   reader.addType(CSVReader::REAL);

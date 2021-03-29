@@ -9,7 +9,7 @@ AudioDomain::AudioDomain() {
       [&](float value) { mAudioIO.gain(value); });
 }
 
-bool AudioDomain::initialize(ComputationDomain *parent) {
+bool AudioDomain::init(ComputationDomain *parent) {
   (void)parent;
   bool ret = true;
   callInitializeCallbacks();
@@ -51,6 +51,12 @@ void AudioDomain::configure(AudioDevice &dev, double audioRate,
   // mAudioIO.device() resets the channels to the device default number
   audioIO().channelsIn(audioInputs);
   audioIO().channelsOut(audioOutputs);
+}
+
+void AudioDomain::AppAudioCB(AudioIOData &io) {
+  AudioDomain &app = io.user<AudioDomain>();
+  io.frame(0);
+  app.onSound(app.audioIO());
 }
 
 // -----

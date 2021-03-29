@@ -18,6 +18,7 @@ Keehong Youn, 2017
 */
 
 #include <iostream>
+
 #include "al/app/al_App.hpp"
 
 using namespace al;

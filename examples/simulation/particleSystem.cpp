@@ -88,7 +88,7 @@ struct MyApp : public App {
   void onDraw(Graphics& g) {
     g.clear(0);
     g.blending(true);
-    g.blendModeAdd();
+    g.blendAdd();
     g.pointSize(6);
     g.meshColor();
     g.draw(mesh);

@@ -146,14 +146,14 @@ struct MyApp : public App {
   void onDraw(Graphics &g) override {
     g.clear(0);
 
-    g.blendOn();
-    g.blendModeTrans();
+    g.blending(true);
+    g.blendTrans();
     // Draw the speakers
     for (int i = 0; i < (int)speakerLayout.size(); ++i) {
       g.pushMatrix();
       float xyz[3];
       speakerLayout[i].posCart(xyz);
-      g.translate(-xyz[1], xyz[2], -xyz[0]);
+      g.translate(xyz[1], xyz[2], xyz[0]);
       float peak = mPeaks[i].load();
       g.scale(0.02 + fabs(peak) * 5);
       g.color(HSV(0.5 + (peak * 4)));

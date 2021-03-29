@@ -5,29 +5,29 @@
 /*	Allolib --
         Multimedia / virtual environment application class library
 
-        Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
-   UCSB. Copyright (C) 2012-2018. The Regents of the University of California.
-        All rights reserved.
+   Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology, UCSB.
+   Copyright (C) 2012-2018. The Regents of the University of California.
+   All rights reserved.
 
-        Redistribution and use in source and binary forms, with or without
-        modification, are permitted provided that the following conditions are
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
    met:
 
-                Redistributions of source code must retain the above copyright
+   Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
 
-                Redistributions in binary form must reproduce the above
+   Redistributions in binary form must reproduce the above
    copyright notice, this list of conditions and the following disclaimer in the
-                documentation and/or other materials provided with the
+   documentation and/or other materials provided with the
    distribution.
 
-                Neither the name of the University of California nor the names
+   Neither the name of the University of California nor the names
    of its contributors may be used to endorse or promote products derived from
-                this software without specific prior written permission.
+   this software without specific prior written permission.
 
-        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
    IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
@@ -60,8 +60,6 @@
 #include "al/scene/al_PolySynth.hpp"
 #include "al/ui/al_Parameter.hpp"
 
-//#include "Gamma/Domain.h"
-
 namespace al {
 
 /**
@@ -69,7 +67,7 @@ namespace al {
 @ingroup Scene
 */
 class SynthSequencerEvent {
- public:
+public:
   SynthSequencerEvent() {}
 
   ~SynthSequencerEvent() {}
@@ -78,12 +76,12 @@ class SynthSequencerEvent {
 
   double startTime{0};
   double duration{-1};
-  int offsetCounter{0};  // To offset event within audio buffer
+  int offsetCounter{0}; // To offset event within audio buffer
 
   EventType type{EVENT_VOICE};
 
   typedef struct {
-    std::string name;  // instrument name
+    std::string name; // instrument name
     std::vector<ParameterField> pFields;
   } ParamFields;
 
@@ -122,7 +120,8 @@ struct SynthEvent {
  * the audio callback (e.g. onSound() ) or the graphics callback (e.g. onDraw())
  *
  * A time master can be selected in the constructor to define where the
- * sequencer runs. TimeMasterMode::TIME_MASTER_AUDIO is more precise in time, but you might want
+ * sequencer runs. TimeMasterMode::TIME_MASTER_AUDIO is more precise in time,
+ but you might want
  * to use TIME_MASTER_GRAPHICS if your "note" produces no audio.
  *
  * Sequences can also be read from text files with the extension
@@ -145,13 +144,20 @@ struct SynthEvent {
  * Turnoff
  * - absTime eventId
  *
+ * When using Turnon and Turnoff events, be careful not to use ids set
+ * automatically for @ events.
+ *
  * eventId looks of the oldest id match adn turns it off
  * e.g. - 1.3 25
  *
  * Tempo
- * t absTime tempoBpm
+ * t tempoBpm
  *
- * e.g. t 4.5 120
+ * e.g. t 120
+ *
+ * Only the last tempo statement present in a file will have effect, overriding
+ any
+ * previous ones.
  *
  * Insert another sequence
  * = absTime sequenceName timeScale
@@ -164,17 +170,25 @@ struct SynthEvent {
  * All events following will have this offset added to their start time.
  Negative numbers are allowed.
  *
+ *
  */
 
 class SynthSequencer {
- public:
-  SynthSequencer(
-    TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_CPU) {
+public:
+  SynthSequencer(TimeMasterMode masterMode = TimeMasterMode::TIME_MASTER_CPU) {
+    mMasterMode = masterMode;
     mInternalSynth = std::make_unique<PolySynth>(masterMode);
     registerSynth(*mInternalSynth.get());
   }
 
   SynthSequencer(PolySynth &synth) { registerSynth(synth); }
+
+  ~SynthSequencer() {
+    stopSequence();
+    if (mCpuThread) {
+      mCpuThread->join();
+    }
+  }
 
   /// Insert this function within the audio callback
   void render(AudioIOData &io);
@@ -182,11 +196,11 @@ class SynthSequencer {
   /// Insert this function within the graphics callback
   void render(Graphics &g);
 
+  void update(double dt);
+
   /// Set the frame rate at which the graphics run (i.e. how often
   /// render(Graphics &g) will be called
-  void setGraphicsFrameRate(float fps) {
-    mFps = fps;
-  }  // TODO this should be handled through Gamma Domains
+  void setGraphicsFrameRate(float fps) { mFps = fps; }
 
   /**
    * @brief insert an event in the sequencer
@@ -194,10 +208,10 @@ class SynthSequencer {
    * @param duration
    * @return a reference to the voice instance inserted
    *
-   * The voice will be inserted into the sequencer immediately, so you may want
-   * to add all your notes before starting the sequencer. If you need to insert
-   * events on the fly, use addVoice() or use triggerOn() directly on the
-   * PolySynth
+   * The voice will be inserted into the sequencer immediately, so you may
+   * want to add all your notes before starting the sequencer. If you need to
+   * insert events on the fly, use addVoice() or use triggerOn() directly on
+   * the PolySynth
    *
    * The TSynthVoice template must be a class inherited from SynthVoice.
    */
@@ -211,7 +225,8 @@ class SynthSequencer {
   void addVoice(TSynthVoice *voice, double startTime, double duration = -1);
 
   /**
-   * Insert configured voice into sequencer using time offset from current time
+   * Insert configured voice into sequencer using time offset from current
+   * time
    */
   template <class TSynthVoice>
   void addVoiceFromNow(TSynthVoice *voice, double startTime,
@@ -236,9 +251,9 @@ class SynthSequencer {
   bool verbose() { return mVerbose; }
   void verbose(bool verbose) { mVerbose = verbose; }
 
-  void setTempo(float tempo) { mNormalizedTempo = tempo / 60.f; }
+  void setTempo(float tempo) { mNormalizedTempo = tempo / 60.; }
 
-  bool playSequence(std::string sequenceName, float startTime = 0.0f);
+  bool playSequence(std::string sequenceName = "", float startTime = 0.0f);
 
   void stopSequence();
   void setTime(float newTime);
@@ -250,6 +265,12 @@ class SynthSequencer {
   std::list<SynthSequencerEvent> loadSequence(std::string sequenceName,
                                               double timeOffset = 0,
                                               double timeScale = 1.0);
+
+  /**
+   * @brief play the event list provided all other events in list are discarded
+   */
+  void playEvents(std::list<SynthSequencerEvent> events,
+                  double timeOffset = 0.1);
 
   std::vector<std::string> getSequenceList();
 
@@ -268,9 +289,9 @@ class SynthSequencer {
    *
    * Note that this callback is called whenever the event list empties, so it
    * will be triggered after events added dynamically through addVoice() and
-   * addVoiceFromNow() are consumed. The callback will be called after the last
-   * trigger off time, which means there might still be voices being processed
-   * while if the have release envelopes, for example
+   * addVoiceFromNow() are consumed. The callback will be called after the
+   * last trigger off time, which means there might still be voices being
+   * processed while if the have release envelopes, for example
    */
   void registerSequenceEndCallback(std::function<void(std::string)> func);
 
@@ -278,7 +299,7 @@ class SynthSequencer {
 
   void operator<<(PolySynth &synth) { return registerSynth(synth); }
 
- private:
+private:
   PolySynth *mPolySynth;
   std::unique_ptr<PolySynth> mInternalSynth;
 
@@ -286,11 +307,11 @@ class SynthSequencer {
   bool mVerbose{false};
   std::string mLastSequencePlayed;
 
-  double mFps{30};  // graphics frames per second
+  double mFps{0}; // graphics frames per second
 
   unsigned int mNextEvent{0};
   std::list<SynthSequencerEvent>
-      mEvents;  // List of events sorted by start time.
+      mEvents; // List of events sorted by start time.
   std::mutex mEventLock;
   std::mutex mLoadingLock;
   bool mPlaying{false};
@@ -299,15 +320,15 @@ class SynthSequencer {
   double mMasterTime{0.0};
   double mPlaybackStartTime{0.0};
 
-  float mNormalizedTempo{1.0f};  // Linearly normalized inverted around 60 bpm
-                                 // (1.0 = 60bpm, 0.5 = 120 bpm)
+  double mNormalizedTempo{1.0}; // Linearly normalized inverted around 60 bpm
+                                // (1.0 = 60bpm, 0.5 = 120 bpm)
 
   // Time change callback
   std::vector<std::pair<std::function<void(float)>, float>>
       mTimeChangeCallbacks;
   //    float mTimeChangeMinTimeDelta = 0;
-  std::vector<double>
-      mTimeAccumCallbackNs;  // Accumulator for tirggering time change callback.
+  std::vector<double> mTimeAccumCallbackNs; // Accumulator for tirggering
+                                            // time change callback.
 
   std::vector<std::function<void(std::string sequenceName)>>
       mSequenceBeginCallbacks;
@@ -354,6 +375,6 @@ void SynthSequencer::addVoiceFromNow(TSynthVoice *voice, double startTime,
   addVoice(voice, mMasterTime + startTime + triggerOffset, duration);
 }
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_SYNTHSEQUENCER_HPP
+#endif // AL_SYNTHSEQUENCER_HPP

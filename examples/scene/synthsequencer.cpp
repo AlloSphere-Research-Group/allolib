@@ -49,7 +49,7 @@ class SineEnv : public SynthVoice {
   void onProcess(Graphics &g) override {
     g.pushMatrix();
     //        g.blending(true);
-    //        g.blendModeTrans();
+    //        g.blendTrans();
     g.translate(mOsc.freq() / 500 - 3, pow(mAmp, 0.3), -8);
     g.scale(1 - mDur, mDur, 1);
     g.color(1, mOsc.freq() / 1000, 1.0);
@@ -65,11 +65,11 @@ class SineEnv : public SynthVoice {
 // graphics in the corresponding callback
 class MyApp : public App {
  public:
-  virtual void onSound(AudioIOData &io) override {
+  void onSound(AudioIOData &io) override {
     s.render(io);  // Render audio
   }
 
-  virtual void onDraw(Graphics &g) override {
+  void onDraw(Graphics &g) override {
     s.print();  // Prints information on active and free voices
     g.clear(0.4);
     s.render(g);  // Render graphics

@@ -8,9 +8,8 @@
 #include <string>
 #include <vector>
 
-#include "cpptoml.h"
-
 #include "al/io/al_File.hpp"
+#include "cpptoml.h"
 
 namespace al {
 
@@ -89,11 +88,13 @@ struct TomlLoader {
 
   template <typename T>
   bool hasKey(const std::string& keyName) {
-    auto val = root->get_as<T>(keyName);
-    if (!val) {
-      return false;
+    if (root) {
+      auto val = root->get_as<T>(keyName);
+      if (val) {
+        return true;
+      }
     }
-    return true;
+    return false;
   }
 
   template <typename T>

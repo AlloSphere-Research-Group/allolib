@@ -1,6 +1,8 @@
 #ifndef INCLUDE_AL_RENDER_MANAGER_HPP
 #define INCLUDE_AL_RENDER_MANAGER_HPP
 
+#include <unordered_map>
+
 #include "al/graphics/al_EasyFBO.hpp"
 #include "al/graphics/al_EasyVAO.hpp"
 #include "al/graphics/al_FBO.hpp"
@@ -11,8 +13,6 @@
 #include "al/math/al_Quat.hpp"
 #include "al/math/al_Vec.hpp"
 
-#include <unordered_map>
-
 namespace al {
 
 /**
@@ -20,17 +20,17 @@ namespace al {
 @ingroup Graphics
 */
 class MatrixStack {
- public:
+public:
   MatrixStack();
   void push();
   void pop();
-  void mult(Matrix4f const& m);
-  void set(const Matrix4f& m);
+  void mult(Matrix4f const &m);
+  void set(const Matrix4f &m);
   void setIdentity();
   void pop_all();
   Matrix4f get() const;
 
- private:
+private:
   std::vector<Matrix4f> stack;
 };
 
@@ -39,86 +39,74 @@ class MatrixStack {
 @ingroup Graphics
 */
 class ViewportStack {
- public:
+public:
   ViewportStack();
   void push();
   void pop();
   Viewport get() const;
-  void set(const Viewport& m);
+  void set(const Viewport &m);
   void set(int left, int bottom, int width, int height);
 
- private:
+private:
   std::vector<Viewport> stack;
 };
 
 class FBOStack {
- public:
+public:
   FBOStack();
   void push();
   void pop();
   unsigned int get() const;
   void set(unsigned int id);
 
- private:
+private:
   std::vector<unsigned int> stack;
 };
 
 /**
-@brief RenderManager class
-@ingroup Graphics
-
-                Render manager handles basic rendering states
-                1. model / view / projection matrix
-                                - model matrix can be directly set
-                                - or can be set with translate / rotate / scale
-functions
-                                - view and projection matrix can be directly set
-                                - or can be set using Viewpoint class and
-RenderManager::camera function
-                                - matrices can be push / pop'ed
-                                - pushing and popping camera will push/pop both
-view/proj mat
-                2. viewport and framebuffer
-                                - keeps track of current state
-                                - also provides push / pop functionality
-                3. shaders
-                                - keeps track of current shader
-                                - get & cache location and set values of
-uniforms for model, view, projection matrix
-                4. drawing mesh
-                                - sending vertex position/color/normal/texcoord
-to bound shader
-                                - mesh can be regular cpu-side al::Mesh
-                                - or gpu-stored al::VAOMesh
-
-                !. writing shader for al::RenderManager
-                                - modelview matrix:  uniform mat4
-al_ModelViewMatrix;
-                                - projection matrix: uniform mat4
-al_ProjectionMatrix;
-                                - vertex position    layout (location = 0) in
-vec3 position;
-                                - vertex color:      layout (location = 1) in
-vec4 color;
-                                - vertex texcoord:   layout (location = 2) in
-vec2 texcoord;
-                                - vertex normal:     layout (location = 3) in
-vec3 normal;
-
+ * @brief RenderManager class
+ * @ingroup Graphics
+ *
+ * Render manager handles basic rendering states
+ * 1. model / view / projection matrix
+ *  - model matrix can be directly set
+ *  - or can be set with translate / rotate / scale functions
+ *  - view and projection matrix can be directly set
+ *  - or can be set using Viewpoint class and RenderManager::camera function
+ *  - matrices can be push / pop'ed
+ *  - pushing and popping camera will push/pop both iew/proj mat
+ * 2. viewport and framebuffer
+ *  - keeps track of current state
+ *  - also provides push / pop functionality
+ * 3. shaders
+ *  - keeps track of current shader
+ *  - get & cache location and set values of uniforms for model, view,
+projection matrix
+ * 4. drawing mesh
+ *  - sending vertex position/color/normal/texcoord to bound shader
+ *  - mesh can be regular cpu-side al::Mesh
+ *  - or gpu-stored al::VAOMesh
+ *
+ * !. writing shader for al::RenderManager
+ *  - modelview matrix:  uniform mat4 l_ModelViewMatrix;
+ *  - projection matrix: uniform mat4 al_ProjectionMatrix;
+ *  - vertex position    layout (location = 0) in vec3 position;
+ *  - vertex color:      layout (location = 1) in vec4 color;
+ *  - vertex texcoord:   layout (location = 2) in vec2 texcoord;
+ *  - vertex normal:     layout (location = 3) in vec3 normal;
 */
-
 class RenderManager {
- public:
+public:
   /// Multiply current matrix
-  void multModelMatrix(const Matrix4f& m) {
+  void multModelMatrix(const Matrix4f &m) {
     mModelStack.mult(m);
     mMatChanged = true;
   }
-  void multViewMatrix(const Matrix4f& m) {
+  void multViewMatrix(const Matrix4f &m) {
     mViewStack.mult(m);
     mMatChanged = true;
   }
-  void multProjMatrix(const Matrix4f& m) {
+  void multProjMatrix(const Matrix4f &m) {
     mProjStack.mult(m);
     mMatChanged = true;
   }
@@ -127,15 +115,15 @@ class RenderManager {
   Matrix4f viewMatrix() const { return mViewStack.get(); }
   Matrix4f projMatrix() const { return mProjStack.get(); }
 
-  void modelMatrix(const Matrix4f& m) {
+  void modelMatrix(const Matrix4f &m) {
     mModelStack.set(m);
     mMatChanged = true;
   }
-  void viewMatrix(const Matrix4f& m) {
+  void viewMatrix(const Matrix4f &m) {
     mViewStack.set(m);
     mMatChanged = true;
   }
-  void projMatrix(const Matrix4f& m) {
+  void projMatrix(const Matrix4f &m) {
     mProjStack.set(m);
     mMatChanged = true;
   }
@@ -144,15 +132,15 @@ class RenderManager {
   void pushViewMatrix() { mViewStack.push(); }
   void pushProjMatrix() { mProjStack.push(); }
 
-  void pushModelMatrix(const Matrix4f& m) {
+  void pushModelMatrix(const Matrix4f &m) {
     mModelStack.push();
     modelMatrix(m);
   }
-  void pushViewMatrix(const Matrix4f& m) {
+  void pushViewMatrix(const Matrix4f &m) {
     mViewStack.push();
     viewMatrix(m);
   }
-  void pushProjMatrix(const Matrix4f& m) {
+  void pushProjMatrix(const Matrix4f &m) {
     mProjStack.push();
     projMatrix(m);
   }
@@ -190,7 +178,7 @@ class RenderManager {
 
   /// Push current matrix stack
   void pushMatrix() { pushModelMatrix(); }
-  void pushMatrix(const Matrix4f& m) { pushModelMatrix(m); }
+  void pushMatrix(const Matrix4f &m) { pushModelMatrix(m); }
 
   /// Pop current matrix stack
   void popMatrix() { popModelMatrix(); }
@@ -201,13 +189,11 @@ class RenderManager {
   /// Translate current matrix
   void translate(float x, float y, float z = 0.);
   /// Translate current matrix
-  template <class T>
-  void translate(const Vec<3, T>& v) {
+  template <class T> void translate(const Vec<3, T> &v) {
     translate(float(v[0]), float(v[1]), float(v[2]));
   }
   /// Translate current matrix
-  template <class T>
-  void translate(const Vec<2, T>& v) {
+  template <class T> void translate(const Vec<2, T> &v) {
     translate(v[0], v[1]);
   }
 
@@ -218,12 +204,13 @@ class RenderManager {
   /// \param[in] z    z component of rotation axis
   void rotate(float angle, float x = 0., float y = 0., float z = 1.);
   /// Rotate current matrix
-  void rotate(const Quatf& q);
+  void rotate(const Quatf &q);
+  /// Rotate current matrix
+  void rotate(const Quatd &q);
   /// Rotate current matrix
   /// \param[in] angle  angle, in degrees
   /// \param[in] axis   rotation axis
-  template <class T>
-  void rotate(float angle, const Vec<3, T>& axis) {
+  template <class T> void rotate(float angle, const Vec<3, T> &axis) {
     rotate(angle, axis[0], axis[1], axis[2]);
   }
 
@@ -232,19 +219,13 @@ class RenderManager {
   /// Scale current matrix uniformly
   void scale(float s) { scale(s, s, s); }
   /// Scale current matrix along each dimension
-  template <class T>
-  void scale(const Vec<3, T>& v) {
-    scale(v[0], v[1], v[2]);
-  }
+  template <class T> void scale(const Vec<3, T> &v) { scale(v[0], v[1], v[2]); }
   /// Scale current matrix along each dimension
-  template <class T>
-  void scale(const Vec<2, T>& v) {
-    scale(v[0], v[1]);
-  }
+  template <class T> void scale(const Vec<2, T> &v) { scale(v[0], v[1]); }
 
   /// Set viewport
   void viewport(int left, int bottom, int width, int height);
-  void viewport(const Viewport& v) { viewport(v.l, v.b, v.w, v.h); }
+  void viewport(const Viewport &v) { viewport(v.l, v.b, v.w, v.h); }
   Viewport viewport() { return mViewportStack.get(); }
   void pushViewport();
   void popViewport();
@@ -252,7 +233,7 @@ class RenderManager {
     pushViewport();
     viewport(l, b, w, h);
   }
-  void pushViewport(const Viewport& v) {
+  void pushViewport(const Viewport &v) {
     pushViewport();
     viewport(v);
   }
@@ -261,18 +242,18 @@ class RenderManager {
     viewport(0, 0, w, h);
   }
 
-  void framebuffer(EasyFBO& easyFBO) { framebuffer(easyFBO.fbo().id()); }
-  void framebuffer(FBO& fbo) { framebuffer(fbo.id()); }
+  void framebuffer(EasyFBO &easyFBO) { framebuffer(easyFBO.fbo().id()); }
+  void framebuffer(FBO &fbo) { framebuffer(fbo.id()); }
   void framebuffer(unsigned int id);
   // static unsigned int framebuffer() { return mFBOID; }
   unsigned int framebuffer() { return mFBOStack.get(); }
   void pushFramebuffer();
   void popFramebuffer();
-  void pushFramebuffer(EasyFBO& f) {
+  void pushFramebuffer(EasyFBO &f) {
     pushFramebuffer();
     framebuffer(f);
   }
-  void pushFramebuffer(FBO& f) {
+  void pushFramebuffer(FBO &f) {
     pushFramebuffer();
     framebuffer(f);
   }
@@ -281,15 +262,15 @@ class RenderManager {
     framebuffer(f);
   }
 
-  void shader(ShaderProgram& s);
-  ShaderProgram& shader() { return *mShaderPtr; }
-  ShaderProgram* shaderPtr() { return mShaderPtr; }
+  void shader(ShaderProgram &s);
+  ShaderProgram &shader() { return *mShaderPtr; }
+  ShaderProgram *shaderPtr() { return mShaderPtr; }
 
-  virtual void camera(Viewpoint const& v);
+  virtual void camera(Viewpoint const &v);
   virtual void camera(Viewpoint::SpecialType v);
   void pushCamera();
   void popCamera();
-  void pushCamera(Viewpoint const& v) {
+  void pushCamera(Viewpoint const &v) {
     pushCamera();
     camera(v);
   }
@@ -299,13 +280,13 @@ class RenderManager {
   }
 
   virtual void update();
-  void draw(VAOMesh& mesh);
-  void draw(EasyVAO& vao);
-  void draw(const Mesh& mesh);
-  void draw(Mesh&& mesh);
+  void draw(VAOMesh &mesh);
+  void draw(EasyVAO &vao);
+  void draw(const Mesh &mesh);
+  void draw(Mesh &&mesh);
 
- protected:
-  ShaderProgram* mShaderPtr = nullptr;
+protected:
+  ShaderProgram *mShaderPtr = nullptr;
   std::unordered_map<unsigned int, int> modelviewLocs;
   std::unordered_map<unsigned int, int> projLocs;
   bool mShaderChanged = false;
@@ -322,5 +303,5 @@ class RenderManager {
   FBOStack mFBOStack;
 };
 
-}  // namespace al
+} // namespace al
 #endif

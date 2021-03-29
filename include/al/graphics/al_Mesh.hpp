@@ -46,11 +46,11 @@
 
 */
 
-#include <vector>
 #include "al/graphics/al_OpenGL.hpp"
 #include "al/math/al_Mat.hpp"
 #include "al/math/al_Vec.hpp"
 #include "al/types/al_Color.hpp"
+#include <vector>
 
 namespace al {
 
@@ -60,7 +60,7 @@ namespace al {
 /// that define the geometry and coloring/shading of a graphical object.
 /// @ingroup Graphics
 class Mesh {
- public:
+public:
   enum Primitive : unsigned int {
     POINTS = GL_POINTS,
     LINES = GL_LINES,
@@ -93,15 +93,15 @@ class Mesh {
   /// @param[in] primitive  renderer-dependent primitive number
   Mesh(Primitive p = TRIANGLES);
 
-  Mesh(const Mesh& cpy);
+  Mesh(const Mesh &cpy);
 
-  void copy(Mesh const& m);
+  void copy(Mesh const &m);
 
   /// Get corners of bounding box of vertices
 
   /// @param[out] min    minimum corner of bounding box
   /// @param[out] max    maximum corner of bounding box
-  void getBounds(Vec3f& min, Vec3f& max) const;
+  void getBounds(Vec3f &min, Vec3f &max) const;
 
   /// Get center of vertices
   Vec3f getCenter() const;
@@ -121,38 +121,33 @@ class Mesh {
   void equalizeBuffers();
 
   /// Append buffers from another mesh:
-  void merge(const Mesh& src);
+  void merge(const Mesh &src);
 
   /// Convert triangle strip to triangles
   void toTriangles();
 
   /// Reset all buffers
-  Mesh& reset();
+  Mesh &reset();
 
   /// Scale all vertices to lie in [-1,1]
   void unitize(bool proportional = true);
 
   /// Scale all vertices
-  Mesh& scale(float x, float y, float z);
-  Mesh& scale(float s) { return scale(s, s, s); }
+  Mesh &scale(float x, float y, float z);
+  Mesh &scale(float s) { return scale(s, s, s); }
 
-  template <class T>
-  Mesh& scale(const Vec<3, T>& v) {
+  template <class T> Mesh &scale(const Vec<3, T> &v) {
     return scale(v[0], v[1], v[2]);
   }
 
   /// Translate all vertices
-  Mesh& translate(float x, float y, float z);
+  Mesh &translate(float x, float y, float z);
 
-  template <class T>
-  Mesh& translate(const Vec<3, T>& v) {
+  template <class T> Mesh &translate(const Vec<3, T> &v) {
     return translate(v[0], v[1], v[2]);
   }
 
-  template <class T>
-  Mesh& translate(const T& v) {
-    return translate(v, v, v);
-  }
+  template <class T> Mesh &translate(const T &v) { return translate(v, v, v); }
 
   /// Transform vertices by projective transform matrix
 
@@ -161,7 +156,7 @@ class Mesh {
   /// @param[in] end    ending index of vertices, negative amounts specify
   ///            distance from one past last element
   template <class T>
-  Mesh& transform(const Mat<4, T>& m, int begin = 0, int end = -1);
+  Mesh &transform(const Mat<4, T> &m, int begin = 0, int end = -1);
 
   /// Generates normals for a set of vertices
 
@@ -186,7 +181,7 @@ class Mesh {
   /// @param[in]  length    length of normals
   /// @param[in]  perFace    whether normals line should be generated per
   ///              face rather than per vertex
-  void createNormalsMesh(Mesh& mesh, float length = 0.1, bool perFace = false);
+  void createNormalsMesh(Mesh &mesh, float length = 0.1, bool perFace = false);
 
   /// Ribbonize curve
 
@@ -210,7 +205,7 @@ class Mesh {
   /// @param[in] faceBinormal    If true, surface faces binormal vector of
   /// curve.
   ///                If false, surface faces normal vector of curve.
-  void ribbonize(float* widths, int widthsStride = 1,
+  void ribbonize(float *widths, int widthsStride = 1,
                  bool faceBinormal = false);
 
   /// Smooths a triangle mesh
@@ -224,47 +219,47 @@ class Mesh {
   void smooth(float amount = 1, int weighting = 0);
 
   Primitive primitive() const { return mPrimitive; }
-  const std::vector<Vertex>& vertices() const { return mVertices; }
-  const std::vector<Normal>& normals() const { return mNormals; }
-  const std::vector<Color>& colors() const { return mColors; }
-  const std::vector<TexCoord1>& texCoord1s() const { return mTexCoord1s; }
-  const std::vector<TexCoord2>& texCoord2s() const { return mTexCoord2s; }
-  const std::vector<TexCoord3>& texCoord3s() const { return mTexCoord3s; }
-  const std::vector<Index>& indices() const { return mIndices; }
+  const std::vector<Vertex> &vertices() const { return mVertices; }
+  const std::vector<Normal> &normals() const { return mNormals; }
+  const std::vector<Color> &colors() const { return mColors; }
+  const std::vector<TexCoord1> &texCoord1s() const { return mTexCoord1s; }
+  const std::vector<TexCoord2> &texCoord2s() const { return mTexCoord2s; }
+  const std::vector<TexCoord3> &texCoord3s() const { return mTexCoord3s; }
+  const std::vector<Index> &indices() const { return mIndices; }
 
   /// Set geometric primitive
   // virtual for graphics lib implementations
-  Mesh& primitive(Primitive p) {
+  Mesh &primitive(Primitive p) {
     mPrimitive = p;
     return *this;
   }
 
   /// Repeat last vertex element(s)
-  Mesh& repeatLast();
+  Mesh &repeatLast();
 
   /// Append index to index buffer
   void index(unsigned int i) { indices().push_back(i); }
 
   /// Append indices to index buffer
   template <class Tindex>
-  void index(const Tindex* buf, int size, Tindex indexOffset = 0) {
-    for (int i = 0; i < size; ++i) index((Index)(buf[i] + indexOffset));
+  void index(const Tindex *buf, int size, Tindex indexOffset = 0) {
+    for (int i = 0; i < size; ++i)
+      index((Index)(buf[i] + indexOffset));
   }
 
-  template <class... Indices>
-  void index(unsigned i, Indices... indices) {
+  template <class... Indices> void index(unsigned i, Indices... indices) {
     index(i);
     index(indices...);
   }
 
   /// Append color to color buffer
-  void color(const Color& v) { colors().push_back(v); }
+  void color(const Color &v) { colors().push_back(v); }
 
   /// Append color to color buffer
-  void color(const HSV& v) { colors().push_back(v); }
+  void color(const HSV &v) { colors().push_back(v); }
 
   /// Append color to color buffer
-  void color(const RGB& v) { colors().push_back(v); }
+  void color(const RGB &v) { colors().push_back(v); }
 
   /// Append color to color buffer
   void color(float r, float g, float b, float a = 1) {
@@ -272,14 +267,12 @@ class Mesh {
   }
 
   /// Append color to color buffer
-  template <class T>
-  void color(const Vec<4, T>& v) {
+  template <class T> void color(const Vec<4, T> &v) {
     color(v[0], v[1], v[2], v[3]);
   }
 
   /// Append colors from flat array
-  template <class T>
-  void color(const T* src, int numColors) {
+  template <class T> void color(const T *src, int numColors) {
     for (int i = 0; i < numColors; ++i)
       color(src[4 * i + 0], src[4 * i + 1], src[4 * i + 2], src[4 * i + 3]);
   }
@@ -288,17 +281,15 @@ class Mesh {
   void normal(float x, float y, float z = 0) { normal(Normal(x, y, z)); }
 
   /// Append normal to normal buffer
-  void normal(const Normal& v) { normals().push_back(v); }
+  void normal(const Normal &v) { normals().push_back(v); }
 
   /// Append normal to normal buffer
-  template <class T>
-  void normal(const Vec<2, T>& v, float z = 0) {
+  template <class T> void normal(const Vec<2, T> &v, float z = 0) {
     normal(v[0], v[1], z);
   }
 
   /// Append normals from flat array
-  template <class T>
-  void normal(const T* src, int numNormals) {
+  template <class T> void normal(const T *src, int numNormals) {
     for (int i = 0; i < numNormals; ++i)
       normal(src[3 * i + 0], src[3 * i + 1], src[3 * i + 2]);
   }
@@ -310,10 +301,7 @@ class Mesh {
   void texCoord(float u, float v) { texCoord2s().push_back(TexCoord2(u, v)); }
 
   /// Append texture coordinate to 2D texture coordinate buffer
-  template <class T>
-  void texCoord(const Vec<2, T>& v) {
-    texCoord(v[0], v[1]);
-  }
+  template <class T> void texCoord(const Vec<2, T> &v) { texCoord(v[0], v[1]); }
 
   /// Append texture coordinate to 3D texture coordinate buffer
   void texCoord(float u, float v, float w) {
@@ -321,8 +309,7 @@ class Mesh {
   }
 
   /// Append texture coordinate to 3D texture coordinate buffer
-  template <class T>
-  void texCoord(const Vec<3, T>& v) {
+  template <class T> void texCoord(const Vec<3, T> &v) {
     texCoord(v[0], v[1], v[2]);
   }
 
@@ -330,34 +317,32 @@ class Mesh {
   void vertex(float x, float y, float z = 0) { vertex(Vertex(x, y, z)); }
 
   /// Append vertex to vertex buffer
-  void vertex(const Vertex& v) { vertices().push_back(v); }
+  void vertex(const Vertex &v) { vertices().push_back(v); }
 
   /// Append vertex to vertex buffer
-  template <class T>
-  void vertex(const Vec<2, T>& v, float z = 0) {
+  template <class T> void vertex(const Vec<2, T> &v, float z = 0) {
     vertex(v[0], v[1], z);
   }
 
   /// Append vertices from flat array
-  template <class T>
-  void vertex(const T* src, int numVerts) {
+  template <class T> void vertex(const T *src, int numVerts) {
     for (int i = 0; i < numVerts; ++i)
       vertex(src[3 * i + 0], src[3 * i + 1], src[3 * i + 2]);
   }
 
   /// Append vertices to vertex buffer
-  template <class T>
-  void vertex(const Vec<3, T>* src, int numVerts) {
-    for (int i = 0; i < numVerts; ++i) vertex(src[i][0], src[i][1], src[i][2]);
+  template <class T> void vertex(const Vec<3, T> *src, int numVerts) {
+    for (int i = 0; i < numVerts; ++i)
+      vertex(src[i][0], src[i][1], src[i][2]);
   }
 
-  Vertices& vertices() { return mVertices; }
-  Normals& normals() { return mNormals; }
-  Colors& colors() { return mColors; }
-  TexCoord1s& texCoord1s() { return mTexCoord1s; }
-  TexCoord2s& texCoord2s() { return mTexCoord2s; }
-  TexCoord3s& texCoord3s() { return mTexCoord3s; }
-  Indices& indices() { return mIndices; }
+  Vertices &vertices() { return mVertices; }
+  Normals &normals() { return mNormals; }
+  Colors &colors() { return mColors; }
+  TexCoord1s &texCoord1s() { return mTexCoord1s; }
+  TexCoord2s &texCoord2s() { return mTexCoord2s; }
+  TexCoord3s &texCoord3s() { return mTexCoord3s; }
+  Indices &indices() { return mIndices; }
 
   /// Save mesh to file
 
@@ -367,7 +352,7 @@ class Mesh {
   /// @param[in] solidName  solid name defined within the file (optional)
   /// @param[in] binary    write data in binary form as opposed to ASCII
   /// \returns true on successful save, otherwise false
-  bool save(const char* filePath, const char* solidName = "",
+  bool save(const char *filePath, const char *solidName = "",
             bool binary = true) const;
 
   /// Save mesh to an STL file
@@ -380,7 +365,7 @@ class Mesh {
   /// @param[in] filePath    path of file to save to
   /// @param[in] solidName  solid name defined within the file (optional)
   /// \returns true on successful save, otherwise false
-  bool saveSTL(const char* filePath, const char* solidName = "") const;
+  bool saveSTL(const char *filePath, const char *solidName = "") const;
 
   /// Save mesh to a PLY file
 
@@ -390,13 +375,13 @@ class Mesh {
   /// @param[in] solidName  solid name defined within the file (optional)
   /// @param[in] binary    write data in binary form as opposed to ASCII
   /// \returns true on successful save, otherwise false
-  bool savePLY(const char* filePath, const char* solidName = "",
+  bool savePLY(const char *filePath, const char *solidName = "",
                bool binary = true) const;
 
   /// Print information about Mesh
-  void print(FILE* dst = stderr) const;
+  void print(FILE *dst = stderr) const;
 
- protected:
+protected:
   // Only populated (size>0) buffers will be used
   Vertices mVertices;
   Normals mNormals;
@@ -410,16 +395,16 @@ class Mesh {
 };
 
 template <class T>
-Mesh& Mesh::transform(const Mat<4, T>& m, int begin, int end) {
+Mesh &Mesh::transform(const Mat<4, T> &m, int begin, int end) {
   if (end < 0)
-    end += vertices().size() + 1;  // negative index wraps to end of array
+    end += vertices().size() + 1; // negative index wraps to end of array
   for (int i = begin; i < end; ++i) {
-    Vertex& v = vertices()[i];
+    Vertex &v = vertices()[i];
     v.set(m * Vec<4, T>(v, 1));
   }
   return *this;
 }
 
-}  // namespace al
+} // namespace al
 
 #endif

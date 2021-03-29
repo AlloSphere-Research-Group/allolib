@@ -28,7 +28,9 @@ MinGW	\\\\.\\COM3
 #include <string>
 
 #include "al/app/al_App.hpp"
-#include "al/io/al_Serial.hpp"
+
+// The serial library is included in the externals folder
+#include "serial/serial.h"
 
 using namespace std;
 

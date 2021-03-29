@@ -47,7 +47,7 @@ struct MyApp : public App {
 
   void onDraw(Graphics& g) override {
     g.clear(0);
-    g.depthTesting(true);
+    gl::depthTesting(true);
     g.lighting(true);
     g.meshColor();  // with lighting, use mesh's color array
     g.draw(shapes);

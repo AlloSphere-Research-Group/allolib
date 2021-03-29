@@ -47,13 +47,16 @@
 
 #include <string>
 
+#include "al/system/al_Time.hpp"
+#include "al/types/al_ValueSource.hpp"
+
 namespace al {
 
 /// A network socket
 ///
 /// @ingroup IO
 class Socket {
- public:
+public:
   /// Bit masks for specifying a transmission protocol
   enum {
     // IPv4/v6 protocols
@@ -77,10 +80,10 @@ class Socket {
 
   /// @param[in] port		Port number (valid range is 0-65535)
   /// @param[in] address	IP address
-  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is block
-  /// with timeout
+  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is
+  /// block with timeout
   /// @param[in] type		Protocol type
-  Socket(uint16_t port, const char* address, al_sec timeout, int type);
+  Socket(uint16_t port, const char *address, al_sec timeout, int type);
 
   virtual ~Socket();
 
@@ -90,11 +93,13 @@ class Socket {
   /// IP address of current host
   static std::string hostIP();
 
+  static std::string nameToIp(std::string name);
+
   /// Returns whether socket is open
   bool opened() const;
 
   /// Get IP address string
-  const std::string& address() const;
+  const std::string &address() const;
 
   /// Get port number
   uint16_t port() const;
@@ -103,7 +108,7 @@ class Socket {
   al_sec timeout() const;
 
   /// Open socket (reopening if currently open)
-  bool open(uint16_t port, const char* address, al_sec timeout, int type);
+  bool open(uint16_t port, const char *address, al_sec timeout, int type);
 
   /// Close the socket
   void close();
@@ -123,8 +128,9 @@ class Socket {
   ///
   /// @param[in] t	Timeout in seconds.
   ///					If t > 0, the socket blocks with timeout
-  ///t. 					If t = 0, the socket never blocks. 					If t < 0, the socket blocks forever.
-  /// Note that setting the timeout will close and re-open the socket.
+  /// t. 					If t = 0, the socket never
+  /// blocks. If t < 0, the socket blocks forever. Note that setting the timeout
+  /// will close and re-open the socket.
   void timeout(al_sec t);
 
   /// Read data from a network
@@ -138,14 +144,14 @@ class Socket {
   /// while(recv()){}
   ///
   /// The from pointer should be at least the size of Message::mSenderAddr
-  size_t recv(char* buffer, size_t maxlen, char* from = nullptr);
+  size_t recv(char *buffer, size_t maxlen, char *from = nullptr);
 
   /// Send data over a network
 
   /// @param[in] buffer	The buffer of data to send
   /// @param[in] len		The length, in bytes, of the buffer
   /// \returns bytes sent
-  size_t send(const char* buffer, size_t len);
+  size_t send(const char *buffer, size_t len);
 
   /// Listen for incoming connections from remote clients
 
@@ -159,15 +165,18 @@ class Socket {
   /// Accepts a received incoming attempt to create a new TCP connection
   /// from the remote client, and creates a new socket associated with the
   /// socket address pair of this connection.
-  bool accept(Socket& sock);
+  bool accept(Socket &sock);
 
- protected:
+  ValueSource *valueSource();
+
+protected:
   // Called after a successful call to open
   virtual bool onOpen() { return true; }
 
- private:
+private:
   struct Impl;
-  Impl* mImpl;
+  Impl *mImpl;
+  ValueSource mValueSource;
 };
 
 /// Client socket
@@ -178,21 +187,21 @@ class Socket {
 ///
 /// @ingroup IO
 class SocketClient : public Socket {
- public:
+public:
   SocketClient() {}
 
   /// @param[in] port		Remote port number (valid range is 0-65535)
   /// @param[in] address	Remote IP address
-  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is block
-  /// with timeout
+  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is
+  /// block with timeout
   /// @param[in] type		Protocol type
-  SocketClient(uint16_t port, const char* address = "localhost",
+  SocketClient(uint16_t port, const char *address = "localhost",
                al_sec timeout = 0, int type = UDP | DGRAM)
       : Socket(port, address, timeout, type) {
     SocketClient::onOpen();
   }
 
- protected:
+protected:
   virtual bool onOpen();
 };
 
@@ -204,31 +213,31 @@ class SocketClient : public Socket {
 ///
 /// @ingroup IO
 class SocketServer : public Socket {
- public:
+public:
   SocketServer() {}
 
   /// @param[in] port		Local port number (valid range is 0-65535)
-  /// @param[in] address	Local IP address. If empty, will bind all network
-  /// interfaces to socket.
-  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is block
-  /// with timeout
+  /// @param[in] address	Local IP address. If empty, will bind all
+  /// network interfaces to socket.
+  /// @param[in] timeout	< 0 is block forever, 0 is no blocking, > 0 is
+  /// block with timeout
   /// @param[in] type		Protocol type
-  SocketServer(uint16_t port, const char* address = "", al_sec timeout = 0,
+  SocketServer(uint16_t port, const char *address = "", al_sec timeout = 0,
                int type = UDP | DGRAM)
       : Socket(port, address, timeout, type) {
     SocketServer::onOpen();
   }
 
- protected:
+protected:
   virtual bool onOpen();
 };
 
-/// \deprecated Use SocketClient
-typedef SocketClient SocketSend;
+///// \deprecated Use SocketClient
+// typedef SocketClient SocketSend;
 
-/// \deprecated Use SocketServer
-typedef SocketServer SocketRecv;
+///// \deprecated Use SocketServer
+// typedef SocketServer SocketRecv;
 
-}  // namespace al
+} // namespace al
 
 #endif /* include guard */

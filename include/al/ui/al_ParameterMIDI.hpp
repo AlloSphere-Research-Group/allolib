@@ -71,60 +71,34 @@ class ParameterMIDI : public MIDIMessageHandler {
  public:
   ParameterMIDI() {}
 
-  ParameterMIDI(unsigned int deviceIndex, bool verbose = false) {
-    MIDIMessageHandler::bindTo(mRtMidiIn);
-    mVerbose = verbose;
-    try {
-      mRtMidiIn.openPort(deviceIndex);
-      printf("ParameterMIDI: Opened port to %s\n",
-             mRtMidiIn.getPortName(deviceIndex).c_str());
-    } catch (RtMidiError &error) {
-      std::cout << "ParameterMIDI Warning opening MIDI port:"
-                << error.getMessage() << deviceIndex << std::endl;
-    }
-  }
+  ParameterMIDI(unsigned int deviceIndex, bool verbose = false);
 
-  // Deprecated. Use open()
-  void init(int deviceIndex = 0, bool verbose = false) {
-    open(deviceIndex, verbose);
-  }
+  void open(unsigned int deviceIndex = 0);
 
-  void open(unsigned int deviceIndex = 0) {
-    MIDIMessageHandler::bindTo(mRtMidiIn);
-    try {
-      mRtMidiIn.openPort(deviceIndex);
-      printf("ParameterMIDI: Opened port to %s\n",
-             mRtMidiIn.getPortName(deviceIndex).c_str());
-    } catch (RtMidiError &error) {
-      std::cout << "ParameterMIDI Warning opening MIDI port:"
-                << error.getMessage() << deviceIndex << std::endl;
-    }
-  }
+  void open(int deviceIndex, bool verbose);
 
-  void open(int deviceIndex, bool verbose) {
-    open(deviceIndex);
-    mVerbose = verbose;
-  }
+  [[deprecated("Use open()")]] void init(int deviceIndex = 0,
+                                         bool verbose = false);
 
-  void close() {
-    mRtMidiIn.closePort();
-    MIDIMessageHandler::clearBindings();
-  }
+  void close();
 
   void connectControl(Parameter &param, int controlNumber, int channel) {
     connectControl(param, controlNumber, channel, param.min(), param.max());
   }
 
   void connectControl(Parameter &param, int controlNumber, int channel,
-                      float min, float max) {
-    ControlBinding newBinding;
-    newBinding.controlNumber = controlNumber;
-    newBinding.channel = channel - 1;
-    newBinding.param = &param;
-    newBinding.min = min;
-    newBinding.max = max;
-    mControlBindings.push_back(newBinding);
-  }
+                      float min, float max);
+
+  /**
+   * Connect multiple MIDI controls to multivalue parameter.
+   *
+   * This allows connecting 3 different MIDI controls to the R,G,B values
+   * of ParameterColor or to the x,y,z values of ParameterPose
+   */
+
+  void connectControls(ParameterMeta &param, std::vector<int> controlNumbers,
+                       int channel = 1, std::vector<float> min = {},
+                       std::vector<float> max = {});
 
   /**
    * @brief connectNoteToValue
@@ -136,97 +110,16 @@ class ParameterMIDI : public MIDIMessageHandler {
    * @param high The highest MIDI note number to map
    */
   void connectNoteToValue(Parameter &param, int channel, float min, int low,
-                          float max = -1, int high = -1) {
-    if (high == -1) {
-      max = min;
-      high = low;
-    }
-    for (int num = low; num <= high; ++num) {
-      NoteBinding newBinding;
-      newBinding.noteNumber = num;
-      if (num != high) {
-        newBinding.value = min + (max - min) * (num - low) / (high - low);
-      } else {
-        newBinding.value = max;
-      }
-      newBinding.channel = channel - 1;
-      newBinding.param = &param;
-      mNoteBindings.push_back(newBinding);
-    }
-  }
+                          float max = -1, int high = -1);
 
-  void connectNoteToToggle(ParameterBool &param, int channel, int note) {
-    ToggleBinding newBinding;
-    newBinding.noteNumber = note;
-    newBinding.toggle = true;
-    newBinding.channel = channel - 1;
-    newBinding.param = &param;
-    mToggleBindings.push_back(newBinding);
-  }
+  void connectNoteToToggle(ParameterBool &param, int channel, int note);
 
   void connectNoteToIncrement(Parameter &param, int channel, int note,
-                              float increment) {
-    IncrementBinding newBinding;
-    newBinding.channel = channel - 1;
-    newBinding.noteNumber = note;
-    newBinding.increment = increment;
-    newBinding.param = &param;
-    mIncrementBindings.push_back(newBinding);
-  }
+                              float increment);
 
   bool isOpen() { return mRtMidiIn.isPortOpen(); }
 
-  virtual void onMIDIMessage(const MIDIMessage &m) override {
-    if (m.type() & MIDIByte::CONTROL_CHANGE) {
-      for (ControlBinding binding : mControlBindings) {
-        if (m.channel() == binding.channel &&
-            m.controlNumber() == binding.controlNumber) {
-          float newValue =
-              binding.min + (m.controlValue() * (binding.max - binding.min));
-          binding.param->set(newValue);
-        }
-      }
-    }
-    if (m.type() & MIDIByte::NOTE_ON && m.velocity() > 0) {
-      for (NoteBinding binding : mNoteBindings) {
-        if (m.channel() == binding.channel &&
-            m.noteNumber() == binding.noteNumber) {
-          binding.param->set(binding.value);
-        }
-      }
-      for (IncrementBinding binding : mIncrementBindings) {
-        if (m.channel() == binding.channel &&
-            m.noteNumber() == binding.noteNumber) {
-          binding.param->set(binding.param->get() + binding.increment);
-        }
-      }
-      for (ToggleBinding binding : mToggleBindings) {
-        if (m.channel() == binding.channel &&
-            m.noteNumber() == binding.noteNumber) {
-          if (binding.toggle == true) {
-            binding.param->set(binding.param->get() == binding.param->max()
-                                   ? binding.param->min()
-                                   : binding.param->max());
-          } else {
-            binding.param->set(binding.param->max());
-          }
-        }
-      }
-    } else if (m.type() & MIDIByte::NOTE_OFF ||
-               (m.type() & MIDIByte::NOTE_ON && m.velocity() == 0)) {
-      for (ToggleBinding binding : mToggleBindings) {
-        if (m.channel() == binding.channel &&
-            m.noteNumber() == binding.noteNumber) {
-          if (binding.toggle != true) {
-            binding.param->set(binding.param->min());
-          }
-        }
-      }
-    }
-    if (mVerbose) {
-      m.print();
-    }
-  }
+  virtual void onMIDIMessage(const MIDIMessage &m) override;
 
   void verbose(bool v) { mVerbose = v; }
 
@@ -235,6 +128,14 @@ class ParameterMIDI : public MIDIMessageHandler {
     int channel;
     Parameter *param;
     float min, max;
+  };
+
+  struct AbstractBinding {
+    std::vector<int> controlNumbers;
+    int channel;
+    ParameterMeta *param;
+    std::vector<float> min;
+    std::vector<float> max;
   };
 
   struct NoteBinding {
@@ -270,6 +171,7 @@ class ParameterMIDI : public MIDIMessageHandler {
   std::vector<NoteBinding> mNoteBindings;
   std::vector<ToggleBinding> mToggleBindings;
   std::vector<IncrementBinding> mIncrementBindings;
+  std::vector<AbstractBinding> mAbstractBindings;
 };
 
 }  // namespace al

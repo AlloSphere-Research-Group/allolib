@@ -72,7 +72,7 @@ struct MyApp : public App {
     // Here we activate transparent blending. This mixes source and
     // destination colors according to the source's alpha value.
     g.blending(true);
-    g.blendModeTrans();
+    g.blendTrans();
 
     // Render texture on a rectangle in world space ...
     g.quad(tex, -1, -1, 2, 2);

@@ -12,7 +12,7 @@ bool ComputationDomain::initializeSubdomains(bool pre) {
       auto syncSubDomain =
           std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
       if (syncSubDomain) {
-        ret &= syncSubDomain->initialize(this);
+        ret &= syncSubDomain->init(this);
       }
     }
   }
@@ -48,7 +48,19 @@ bool ComputationDomain::cleanupSubdomains(bool pre) {
   return ret;
 }
 
-bool ComputationDomain::initialize(ComputationDomain *parent) {
+void ComputationDomain::callInitializeCallbacks() {
+  for (auto callback : mInitializeCallbacks) {
+    callback(this);
+  }
+}
+
+void ComputationDomain::callCleanupCallbacks() {
+  for (auto callback : mCleanupCallbacks) {
+    callback(this);
+  }
+}
+
+bool ComputationDomain::init(ComputationDomain *parent) {
   bool ret = initializeSubdomains(true);
   ret &= initializeSubdomains(false);
   return ret;
@@ -73,8 +85,24 @@ void ComputationDomain::removeSubDomain(
   }
 }
 
+void ComputationDomain::registerInitializeCallback(
+    std::function<void(ComputationDomain *)> callback) {
+  mInitializeCallbacks.push_back(callback);
+}
+
+void ComputationDomain::registerCleanupCallback(
+    std::function<void(ComputationDomain *)> callback) {
+  mCleanupCallbacks.push_back(callback);
+}
+
 bool SynchronousDomain::tick() {
   bool ret = tickSubdomains(true);
   ret &= tickSubdomains(false);
   return ret;
+}
+
+void AsynchronousDomain::callStartCallbacks() {
+  for (auto callback : mStartCallbacks) {
+    callback(this);
+  }
 }

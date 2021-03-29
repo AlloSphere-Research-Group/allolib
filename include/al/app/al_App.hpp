@@ -27,16 +27,15 @@ namespace al {
  * @ingroup App
  */
 class App {
- public:
+public:
   App();
 
   virtual ~App() {}
 
-  template <class DomainType>
-  std::shared_ptr<DomainType> newDomain() {
+  template <class DomainType> std::shared_ptr<DomainType> newDomain() {
     auto newDomain = std::make_shared<DomainType>();
     mDomainList.push_back(newDomain);
-    //    if (!newDomain->initialize()) {
+    //    if (!newDomain->init()) {
     //      std::cerr << "ERROR initializing domain " << std::endl;
     //    }
     return newDomain;
@@ -60,7 +59,7 @@ class App {
   virtual void onResize(int /*w*/, int /*h*/) {}
   //  virtual void onVisibility(bool v) {}
 
-  void quit();  ///< Requests domain to quit.
+  void quit(); ///< Requests domain to quit.
   bool shouldQuit();
 
   // Access to graphics domain properties
@@ -71,35 +70,34 @@ class App {
   virtual Pose &pose();
   virtual Lens &lens();
   virtual Nav &nav();
-  NavInputControl &navControl();
+  virtual NavInputControl &navControl();
   void fps(double f);
 
   // Access to default window domain
   // These functions are only valid after start() has been called.
-  Keyboard &keyboard();  ///< Get current keyboard state
-  Mouse &mouse();        ///< Get current mouse state
+  Keyboard &keyboard(); ///< Get current keyboard state
+  Mouse &mouse();       ///< Get current mouse state
 
-  double aspect();  ///< Get aspect ratio (width divided by height)
-  bool created();   ///< Whether window has been created providing a valid
-                    ///< graphics context
-  Window::Cursor cursor();            ///< Get current cursor type
-  bool cursorHide();                  ///< Whether the cursor is hidden
-  Window::Dim dimensions();           ///< Get current dimensions of window
-  Window::DisplayMode displayMode();  ///< Get current display mode
-  bool enabled(
-      Window::DisplayMode v);  ///< Get whether display mode flag is set
-  bool fullScreen();           ///< Get whether window is in fullscreen
-  const std::string &title();  ///< Get title of window
-  bool visible();              ///< Get whether window is visible
-  bool vsync();                ///< Get whether v-sync is enabled
+  double aspect(); ///< Get aspect ratio (width divided by height)
+  bool created();  ///< Whether window has been created providing a valid
+                   ///< graphics context
+  Window::Cursor cursor();             ///< Get current cursor type
+  bool cursorHide();                   ///< Whether the cursor is hidden
+  Window::Dim dimensions();            ///< Get current dimensions of window
+  Window::DisplayMode displayMode();   ///< Get current display mode
+  bool enabled(Window::DisplayMode v); ///< Get whether display mode flag is set
+  bool fullScreen();                   ///< Get whether window is in fullscreen
+  const std::string &title();          ///< Get title of window
+  bool visible();                      ///< Get whether window is visible
+  bool vsync();                        ///< Get whether v-sync is enabled
 
-  void fullScreenToggle();  ///< Toggle fullscreen
-  void hide();              ///< Hide window (if showing)
-  void iconify();           ///< Iconify window
+  void fullScreenToggle(); ///< Toggle fullscreen
+  void hide();             ///< Hide window (if showing)
+  void iconify();          ///< Iconify window
   // void show(); ///< Show window (if hidden)
 
-  int height();  ///< Get window height, in pixels
-  int width();   ///< Get window width, in pixels
+  int height(); ///< Get window height, in pixels
+  int width();  ///< Get window width, in pixels
 
   // get frambuffer size
   // it will be different from window widht and height
@@ -110,31 +108,30 @@ class App {
   float highresFactor();
 
   bool decorated();
-  void cursor(Window::Cursor v);                ///< Set cursor type
-  void cursorHide(bool v);                      ///< Set cursor hiding
-  void cursorHideToggle();                      ///< Toggle cursor hiding
-  void dimensions(const Window::Dim &v);        ///< Set dimensions
-  void dimensions(int w, int h);                ///< Set dimensions
-  void dimensions(int x, int y, int w, int h);  ///< Set dimensions
-  void displayMode(
-      Window::DisplayMode v);  ///< Set display mode; will recreate
-                               ///< window if different from current
+  void cursor(Window::Cursor v);               ///< Set cursor type
+  void cursorHide(bool v);                     ///< Set cursor hiding
+  void cursorHideToggle();                     ///< Toggle cursor hiding
+  void dimensions(const Window::Dim &v);       ///< Set dimensions
+  void dimensions(int w, int h);               ///< Set dimensions
+  void dimensions(int x, int y, int w, int h); ///< Set dimensions
+  void displayMode(Window::DisplayMode v); ///< Set display mode; will recreate
+                                           ///< window if different from current
 
   /// This will make the window go fullscreen without borders and,
   /// if posssible, without changing the display resolution.
   void fullScreen(bool on);
-  void title(const std::string &v);  ///< Set title
-  void vsync(bool v);  ///< Set whether to sync the frame rate to the monitor's
-                       ///< refresh rate
+  void title(const std::string &v); ///< Set title
+  void vsync(bool v); ///< Set whether to sync the frame rate to the monitor's
+                      ///< refresh rate
   void decorated(bool b);
 
   // Event handlers
-  [[deprecated("Call through graphicsDomain()")]] void append(
-      WindowEventHandler &handler);
-  [[deprecated("Call through graphicsDomain()")]] void prepend(
-      WindowEventHandler &handler);
-  [[deprecated("Call through graphicsDomain()")]] void remove(
-      WindowEventHandler &handler);
+  [[deprecated("Call through defaultWindow()")]] void
+  append(WindowEventHandler &handler);
+  [[deprecated("Call through defaultWindow()")]] void
+  prepend(WindowEventHandler &handler);
+  [[deprecated("Call through defaultWindow()")]] void
+  remove(WindowEventHandler &handler);
 
   // Access to audio domain
   AudioIO &audioIO();
@@ -142,8 +139,9 @@ class App {
   void configureAudio(double audioRate = 44100, int audioBlockSize = 512,
                       int audioOutputs = -1, int audioInputs = -1);
 
-  void configureAudio(AudioDevice &dev, double audioRate, int audioBlockSize,
-                      int audioOutputs, int audioInputs);
+  void configureAudio(AudioDevice &dev, double audioRate = -1,
+                      int audioBlockSize = 512, int audioOutputs = -1,
+                      int audioInputs = -1);
 
   // Access to OSC domain
   ParameterServer &parameterServer();
@@ -160,37 +158,11 @@ class App {
     return mSimulationDomain;
   }
 
+  std::shared_ptr<GLFWOpenGLWindowDomain> defaultWindowDomain() {
+    return mDefaultWindowDomain;
+  }
   struct StandardWindowAppKeyControls : WindowEventHandler {
-    bool keyDown(const Keyboard &k) {
-      if (k.ctrl()) {
-        switch (k.key()) {
-          case 'q':
-            app->quit();
-            return false;
-            //          case 'h':
-            //            window().hide();
-            //            return false;
-            //          case 'm':
-            //            window().iconify();
-            //            return false;
-          case 'u':
-            window().cursorHideToggle();
-            return false;
-            //          case 'w':
-            //            app->graphicsDomain()->closeWindow(app->mDefaultWindowDomain);
-            //            return false;
-          default:;
-        }
-      } else {
-        switch (k.key()) {
-          case Keyboard::ESCAPE:
-            window().fullScreenToggle();
-            return false;
-          default:;
-        }
-      }
-      return true;
-    }
+    bool keyDown(const Keyboard &k);
     App *app;
   };
   StandardWindowAppKeyControls stdControls;
@@ -203,13 +175,13 @@ class App {
   std::shared_ptr<OpenGLGraphicsDomain> mOpenGLGraphicsDomain;
   std::shared_ptr<SimulationDomain> mSimulationDomain;
 
- protected:
+protected:
   void initializeDomains();
 
   std::vector<std::shared_ptr<AsynchronousDomain>> mDomainList;
   std::stack<std::shared_ptr<AsynchronousDomain>> mRunningDomains;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_APP_H
+#endif // AL_APP_H

@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
  */
 class CSVReader {
  public:
-  typedef enum { STRING, REAL, INTEGER, BOOLEAN, IGNORE_COLUMN } DataType;
+  typedef enum { STRING, REAL, INT64, BOOLEAN, IGNORE_COLUMN } DataType;
 
   CSVReader() {
     // TODO We could automatically add types by trying to parse the file
@@ -143,6 +143,8 @@ class CSVReader {
   std::vector<DataStruct> copyToStruct() {
     std::vector<DataStruct> output;
     if (sizeof(DataStruct) < calculateRowLength()) {
+      std::cout << "WARNING: DataStruct size is too small for CSV file!"
+                << std::endl;
       return output;
     }
     for (auto row : mData) {
@@ -172,7 +174,7 @@ class CSVReader {
 
   void setBasePath(std::string basePath) { mBasePath = basePath; }
 
- private:
+ protected:
   size_t calculateRowLength();
 
   const size_t maxStringSize = 32;

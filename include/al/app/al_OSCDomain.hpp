@@ -8,7 +8,6 @@
 
 #include "al/protocol/al_OSC.hpp"
 #include "al/ui/al_ParameterServer.hpp"
-//#include "al/util/al_FlowAppParameters.hpp"
 
 namespace al {
 
@@ -17,9 +16,10 @@ namespace al {
  * @ingroup App
  */
 class OSCDomain : public AsynchronousDomain {
- public:
+public:
+  virtual ~OSCDomain() {}
   // Domain management functions
-  bool initialize(ComputationDomain *parent = nullptr) override;
+  bool init(ComputationDomain *parent = nullptr) override;
   bool start() override;
   bool stop() override;
   bool cleanup(ComputationDomain *parent = nullptr) override;
@@ -43,15 +43,15 @@ class OSCDomain : public AsynchronousDomain {
   std::string interfaceIP = "0.0.0.0";
   uint16_t port = 9010;
 
- private:
+private:
   class Handler : public osc::PacketHandler {
-   public:
+  public:
     OSCDomain *mOscDomain;
     void onMessage(osc::Message &m) { mOscDomain->onMessage(m); }
   } mHandler;
   ParameterServer mParameterServer{"0.0.0.0", 9010, false};
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // OSCDOMAIN_H
+#endif // OSCDOMAIN_H

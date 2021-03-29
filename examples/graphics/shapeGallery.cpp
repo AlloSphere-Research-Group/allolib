@@ -23,9 +23,9 @@ struct MyApp : public App {
   bool wireframe = false;
   bool vertexLight = false;
 
-  void onCreate() { nav().pullBack(5.5); }
+  void onCreate() override { nav().pullBack(5.5); }
 
-  void onAnimate(double dt) {
+  void onAnimate(double dt) override {
     angle += 2 * dt;
     if (angle > 360) angle -= 360;
 
@@ -93,9 +93,9 @@ struct MyApp : public App {
                3 + mx * 32   // number of points along y
     );
     {
-      Mesh& m = meshes[S - 1];
+      Mesh &m = meshes[S - 1];
       for (int i = 0; i < m.vertices().size(); ++i) {
-        Mesh::Vertex& v = m.vertices()[i];
+        Mesh::Vertex &v = m.vertices()[i];
         float r = ::hypot(v.x, v.y);
         v.z = ::exp(-8 * r * r);
       }
@@ -125,14 +125,14 @@ struct MyApp : public App {
     }
   }
 
-  void onDraw(Graphics& g) {
+  void onDraw(Graphics &g) override {
     static Light light;
 
     g.clear(0);
-    g.polygonMode(wireframe ? Graphics::LINE : Graphics::FILL);
+    g.polygonMode(wireframe ? GL_LINE : GL_FILL);
     light.pos(1, 4, 1);
 
-    g.depthTesting(true);
+    gl::depthTesting(true);
     g.lighting(true);
     g.light(light);
     g.meshColor();
@@ -149,7 +149,7 @@ struct MyApp : public App {
     }
   }
 
-  bool onKeyDown(const Keyboard& k) override {
+  bool onKeyDown(const Keyboard &k) override {
     switch (k.key()) {
       case 'f':
         wireframe ^= true;
@@ -161,7 +161,7 @@ struct MyApp : public App {
     return true;
   }
 
-  bool onMouseMove(const Mouse& m) override {
+  bool onMouseMove(const Mouse &m) override {
     mx = float(m.x()) / defaultWindow().width();
     my = float(m.y()) / defaultWindow().height();
     return true;
@@ -173,4 +173,5 @@ int main() {
   app.dimensions(600, 600);
   app.title("shape gallery");
   app.start();
+  return 0;
 }
