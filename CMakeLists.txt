@@ -21,6 +21,8 @@ option(ALLOLIB_BUILD_EXAMPLES "" OFF)
 option(TRAVIS_BUILD "" OFF)
 option(APPVEYOR_BUILD "" OFF)
 option(ALLOLIB_BUILD_TESTS "" OFF)
+option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF)
+option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(AL_MACOS 1 CACHE BOOL "Building on OS X")
@@ -297,7 +299,22 @@ else()
     target_compile_options(al PRIVATE "-Wall")
 endif (AL_WINDOWS)
 
-target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
+if (ALLOLIB_USE_PORTAUDIO)
+    # TODO needs more work on Windows
+    if(ALLOLIB_USE_DUMMY_AUDIO)
+        message("ALLOLIB_USE_DUMMY_AUDIO ignored. Using PortAudio")
+    endif(ALLOLIB_USE_DUMMY_AUDIO)
+    target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_PORTAUDIO)
+    target_link_libraries(al PUBLIC portaudio)
+else ()
+    if (ALLOLIB_USE_DUMMY_AUDIO)
+        target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_DUMMY)
+    else()
+        target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
+
+        target_link_libraries(al PUBLIC rtaudio)
+    endif(ALLOLIB_USE_DUMMY_AUDIO)
+endif()
 
 if(SNDFILE_LIBRARY)
   target_compile_definitions(al PUBLIC AL_LIBSNDFILE)
@@ -326,7 +343,7 @@ target_include_directories(al PUBLIC
 
 target_link_libraries(al PUBLIC
   ${OPENGL_gl_LIBRARY}
-  Gamma glfw glad rtaudio rtmidi cpptoml dr_libs
+  Gamma glfw glad rtmidi cpptoml dr_libs
   nlohmann_json::nlohmann_json imgui oscpack stb serial)
 
 macro(Copy_dlls dest_path target DLLS_TO_COPY)
