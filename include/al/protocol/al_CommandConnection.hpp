@@ -180,7 +180,9 @@ public:
   virtual bool sendMessage(uint8_t *message, size_t length,
                            Socket *dst = nullptr, ValueSource *src = nullptr) {
     return true;
-  };
+  }
+
+  virtual void onReceiveError() {}
 
   void setVerbose(bool verbose) { mVerbose = verbose; }
 

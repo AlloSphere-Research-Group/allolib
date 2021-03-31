@@ -136,10 +136,10 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                     << incomingConnectionSocket->address() << ":"
                     << incomingConnectionSocket->port() << std::endl;
         }
-        uint8_t message[8192];
+        uint8_t message[16384];
 
-        int bytesRecv = incomingConnectionSocket->recv((char *)message, 8192);
-        if (bytesRecv > 0 && bytesRecv <= 8192) {
+        int bytesRecv = incomingConnectionSocket->recv((char *)message, 16384);
+        if (bytesRecv > 0 && bytesRecv <= 16384) {
           if (message[0] == HANDSHAKE) {
             uint16_t version = 0;
             uint16_t revision = 0;
@@ -181,9 +181,9 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                   size_t bufferSize = 0;
                   while (mRunning) {
                     size_t bytes = client->recv(
-                        (char *)(commandMessage + bufferSize), 4096);
+                        (char *)(commandMessage + bufferSize), 16384);
 
-                    while (bytes > 0 && bytes < 4097) {
+                    while (bytes > 0 && bytes < 16385) {
                       Message message(commandMessage, bytes);
                       if (mVerbose) {
                         std::cout << "Server received message from "
@@ -205,8 +205,15 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                           bufferSize = 0;
                         }
                       }
-                      bytes = client->recv(
-                          (char *)(commandMessage + bufferSize), 4096);
+                      bytes =
+                          client->recv((char *)(commandMessage + bufferSize),
+                                       16384 - bufferSize);
+                      if (bufferSize >= 16384 && bytes == 0) {
+                        std::cerr << "ERROR: Network buffer overrun. Flushing "
+                                     "buffers "
+                                  << bytes << std::endl;
+                        bufferSize = 0;
+                      }
                     }
                     if (bytes != SIZE_MAX && bytes != 0) {
                       std::cerr
@@ -380,7 +387,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
       std::unique_lock<std::mutex> lk(mutex);
       cv.notify_one();
     }
-    uint8_t commandMessage[2048];
+    uint8_t commandMessage[16384];
     size_t bufferSize = 0;
 
     onConnection(&mSocket);
@@ -389,8 +396,15 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
         std::cerr << "ERROR: Socket not open" << std::endl;
       }
 
-      size_t bytes = mSocket.recv((char *)(commandMessage + bufferSize), 1024);
-      if (bytes > 0 && bytes < 1025) {
+      size_t bytes = mSocket.recv((char *)(commandMessage + bufferSize),
+                                  16384 - bufferSize);
+
+      if (bufferSize >= 16384 && bytes == 0) {
+        std::cerr << "ERROR: Network buffer overrun. Flushing buffers " << bytes
+                  << std::endl;
+        bufferSize = 0;
+      }
+      if (bytes > 0 && bytes < 16385) {
         bufferSize += bytes;
         if (commandMessage[0] == PING) {
           clientHandlePing(mSocket);
