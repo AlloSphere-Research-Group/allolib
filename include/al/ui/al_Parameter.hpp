@@ -428,6 +428,9 @@ public:
    * with registerChangeCallback() are not called. This is useful to avoid
    * infinite recursion when a widget sets the parameter that then sets the
    * widget.
+   *
+   * This function marks the parameter as changed, so you can process callbacks
+   * by calling processChange()
    */
 
   virtual void setNoCalls(ParameterType value, void *blockReceiver = nullptr) {
@@ -443,6 +446,7 @@ public:
       }
     }
     setLocking(value);
+    mChanged = true;
   }
 
   /**
@@ -586,13 +590,21 @@ public:
     if (!mChanged) {
       return false;
     }
-    if (mChanged && mCallbacks.size() > 0 && mCallbacks[0] == nullptr) {
-      auto callbackIt = mCallbacks.begin() + 1;
-      ParameterType value = get();
-      mChanged = false;
-      while (callbackIt != mCallbacks.end()) {
+    ParameterType value = get();
+    mChanged = false;
+
+    auto callbackIt = mCallbacks.begin();
+    while (callbackIt != mCallbacks.end()) {
+      if (*callbackIt) {
         (*(*callbackIt))(value);
         callbackIt++;
+      }
+    }
+    auto callbackSrcIt = mCallbacksSrc.begin();
+    while (callbackSrcIt != mCallbacksSrc.end()) {
+      if (*callbackSrcIt) {
+        (*(*callbackSrcIt))(value, nullptr);
+        callbackSrcIt++;
       }
     }
     return true;
@@ -635,11 +647,11 @@ protected:
   // void * mProcessUdata;
   // std::vector<void *> mCallbackUdata;
 
+  bool mChanged{false};
+
 private:
   // pointer to avoid having to explicitly declare copy/move
   std::unique_ptr<std::mutex> mMutex;
-
-  bool mChanged{false};
 
 private:
   std::vector<std::shared_ptr<ParameterChangeCallback>> mCallbacks;

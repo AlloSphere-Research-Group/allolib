@@ -48,6 +48,7 @@ void Parameter::setNoCalls(float value, void *blockReceiver) {
   }
 
   mValue = value;
+  mChanged = true;
 }
 
 void Parameter::set(float value, ValueSource *src) {
@@ -95,6 +96,7 @@ void ParameterInt::setNoCalls(int32_t value, void *blockReceiver) {
   }
 
   mValue = value;
+  mChanged = true;
 }
 
 void ParameterInt::set(int32_t value, ValueSource *src) {
