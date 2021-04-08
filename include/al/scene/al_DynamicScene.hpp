@@ -144,6 +144,12 @@ public:
     return pFields;
   }
 
+  /**
+   * @brief Apply translation, rotation and scaling for this PositionedVoice
+   * @param g
+   */
+  virtual void applyTransformations(Graphics &g);
+
 protected:
   /**
    * @brief Set voice as part of a replica distributed scene

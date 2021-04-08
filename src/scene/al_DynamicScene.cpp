@@ -156,10 +156,7 @@ void DynamicScene::render(Graphics &g) {
       if (dynamic_cast<PositionedVoice *>(voice)) {
         PositionedVoice *posVoice = static_cast<PositionedVoice *>(voice);
         posVoice->preProcess(g);
-        Pose pose = posVoice->pose();
-        g.translate(pose.x(), pose.y(), pose.z());
-        g.rotate(pose.quat());
-        g.scale(posVoice->size());
+        posVoice->applyTransformations(g);
       }
       voice->onProcess(g);
       g.popMatrix();
@@ -528,4 +525,11 @@ bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields,
     ok = false;
   }
   return ok;
+}
+
+void PositionedVoice::applyTransformations(Graphics &g) {
+  auto pose = mPose.get();
+  g.translate(pose.x(), pose.y(), pose.z());
+  g.rotate(pose.quat());
+  g.scale(size());
 }
