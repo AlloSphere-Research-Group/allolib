@@ -1,6 +1,7 @@
 #include "al/graphics/al_Image.hpp"
 
 #include <cstring>
+#include <iostream>
 
 #include "al_stb_image.hpp"
 
@@ -43,6 +44,7 @@ bool Image::load(const std::string &filename) {
 
 bool Image::save(const std::string &filename) {
   // TODO
+  std::cerr << "WARNING Image::save() not implemented" << std::endl;
   if (mLoaded)
     mFilename = filename;
   return mLoaded; // why?
