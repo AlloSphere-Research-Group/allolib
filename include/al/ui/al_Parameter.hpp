@@ -597,15 +597,15 @@ public:
     while (callbackIt != mCallbacks.end()) {
       if (*callbackIt) {
         (*(*callbackIt))(value);
-        callbackIt++;
       }
+      callbackIt++;
     }
     auto callbackSrcIt = mCallbacksSrc.begin();
     while (callbackSrcIt != mCallbacksSrc.end()) {
       if (*callbackSrcIt) {
         (*(*callbackSrcIt))(value, nullptr);
-        callbackSrcIt++;
       }
+      callbackSrcIt++;
     }
     return true;
   }
