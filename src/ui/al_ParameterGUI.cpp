@@ -192,6 +192,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
     return;
   if (ImGui::CollapsingHeader(("Pose:" + pose->displayName()).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader)) {
+    ImGui::Indent();
     Vec3d currentPos = pose->get().pos();
     Quatd currQuat = pose->get().quat();
     float x = currentPos.x;
@@ -258,8 +259,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
         p->set(Pose(currentPos, currQuat));
       }
     }
-
-    ImGui::Spacing();
+    ImGui::Unindent();
   }
 }
 
@@ -339,6 +339,7 @@ void ParameterGUI::drawChoice(std::vector<ParameterChoice *> params,
   if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Indent();
     for (unsigned int i = 0; i < elements.size(); i++) {
       bool state = value & (1 << i);
       ImGui::PushID((const void *)param);
@@ -353,6 +354,7 @@ void ParameterGUI::drawChoice(std::vector<ParameterChoice *> params,
       }
       ImGui::PopID();
     }
+    ImGui::Unindent();
   }
 }
 
@@ -367,6 +369,7 @@ void ParameterGUI::drawVec3(std::vector<ParameterVec3 *> params, string suffix,
   if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Indent();
     Vec3f currentValue = param->get();
     float x = currentValue.elems()[0];
     bool updated = false;
@@ -427,6 +430,7 @@ void ParameterGUI::drawVec3(std::vector<ParameterVec3 *> params, string suffix,
         p->set(currentValue);
       }
     }
+    ImGui::Unindent();
   }
 }
 
@@ -441,6 +445,7 @@ void ParameterGUI::drawVec4(std::vector<ParameterVec4 *> params, string suffix,
   if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Indent();
     Vec4f currentValue = param->get();
     float x = currentValue.elems()[0];
     bool updated = false;
@@ -479,6 +484,7 @@ void ParameterGUI::drawVec4(std::vector<ParameterVec4 *> params, string suffix,
         p->set(currentValue);
       }
     }
+    ImGui::Unindent();
   }
 }
 
@@ -503,6 +509,7 @@ void ParameterGUI::drawNav(Nav *mNav, std::string suffix) {
   if (ImGui::CollapsingHeader(("Navigation##nav" + suffix).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Indent();
     Vec3d &currentPos = mNav->pos();
     float x = currentPos.elems()[0];
 
@@ -521,7 +528,7 @@ void ParameterGUI::drawNav(Nav *mNav, std::string suffix) {
     if (changed) {
       currentPos.elems()[2] = z;
     }
-    ImGui::Spacing();
+    ImGui::Unindent();
   }
 }
 
