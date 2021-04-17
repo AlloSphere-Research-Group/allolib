@@ -560,9 +560,15 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
   ImGui::PushID(suffix.c_str());
 
   if (ImGui::CollapsingHeader(
-          ("Presets " + presetHandler->getCurrentPath()).c_str(),
+          ("Presets " + presetHandler->getSubDirectory()).c_str(),
           ImGuiTreeNodeFlags_CollapsingHeader |
               ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::IsItemHovered()) { // tooltip showing root path for presets
+      const std::string currentRootPath = presetHandler->getRootPath();
+      if (currentRootPath.size() > 0) {
+        ImGui::SetTooltip("%s", currentRootPath.c_str());
+      }
+    }
     int selection = presetHandler->getCurrentPresetIndex();
     std::string currentPresetName = presetHandler->getCurrentPresetName();
     size_t delim_index = 0;
