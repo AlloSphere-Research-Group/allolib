@@ -74,7 +74,7 @@ public:
    * @param verbose if true, print diagnostic messages
    *
    */
-  PresetHandler(std::string rootDirectory, bool verbose = false);
+  PresetHandler(std::string rootDirectory = "presets", bool verbose = false);
 
   /**
    * @brief Constructor with option to set time master mode
@@ -85,7 +85,7 @@ public:
    * thread that handles morphing and setting values, the second does not
    * start the thread, so user must manually call tick()
    */
-  PresetHandler(TimeMasterMode timeMasterMode = TimeMasterMode::TIME_MASTER_CPU,
+  PresetHandler(TimeMasterMode timeMasterMode,
                 std::string rootDirectory = "presets", bool verbose = false);
 
   ~PresetHandler();

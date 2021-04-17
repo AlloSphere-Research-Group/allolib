@@ -560,15 +560,15 @@ public:
    * @brief Determines whether value change callbacks are called synchronously
    * @param synchronous
    *
-   * If set to true, parameter change callbacks are called directly from the
-   * setter function, i.e. as soon as the parameter value changes. This behavior
-   * might be problematic in some cases, for example when an OSC message
-   * triggers a change in the opengl state. This will cause a crash as the
-   * opengl functions need to be called from the opengl context instead of from
-   * a thread in the network context. By setting this to false and then calling
-   * runChangeCallbacks within the opengl thread will call the callbacks
-   * whenever the value has changed, but at the right time, in the right
-   * context.
+   * If set to true, the default behavior, parameter change callbacks are called
+   * directly from the setter function, i.e. as soon as the parameter value
+   * changes. This behavior might be problematic in some cases, for example when
+   * an OSC message triggers a change in the opengl state. This will cause a
+   * crash as the opengl functions need to be called from the opengl context
+   * instead of from a thread in the network context. By setting this to false
+   * and then calling processChange() within the opengl thread will call the
+   * callbacks whenever the value has changed, but at the right time, in the
+   * right context.
    */
   void setSynchronousCallbacks(bool synchronous = true) {
     if (mCallbacks.size() > 0 && mCallbacks[0] == nullptr) {
