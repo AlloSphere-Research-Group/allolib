@@ -50,7 +50,8 @@ void PresetHandler::setSubDirectory(std::string directory) {
   std::string path = getRootPath();
   if (!File::exists(path + directory)) {
     if (!Dir::make(path + directory)) {
-      std::cout << "Error creating directory: " << mRootDir << std::endl;
+      std::cout << "Error creating directory: " << path + directory
+                << std::endl;
       return;
     }
   }
@@ -517,8 +518,9 @@ std::string PresetHandler::getCurrentPath() {
 }
 
 void PresetHandler::setRootPath(std::string path) {
-  assert(path.size() > 0);
-  if (!File::exists(path)) {
+  if (path.size() == 0) {
+    mRootDir = "";
+  } else if (!File::exists(path)) {
     if (!Dir::make(path)) {
       std::cerr << "Error creating directory: " << path << std::endl;
     } else {
