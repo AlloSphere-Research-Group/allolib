@@ -1,9 +1,9 @@
 #ifndef AL_DISCRETEPARAMETERVALUES_HPP
 #define AL_DISCRETEPARAMETERVALUES_HPP
 
-#include <vector>
-#include <string>
 #include <mutex>
+#include <string>
+#include <vector>
 
 namespace al {
 
@@ -58,6 +58,9 @@ public:
    */
   size_t getFirstIndexForId(std::string id, bool reverse = false);
 
+  template <typename SpaceDataType>
+  std::vector<std::string> getIdsForValue(SpaceDataType value);
+
   float at(size_t x);
 
   std::string idAt(size_t x);
@@ -70,7 +73,11 @@ public:
    * Approximates to the closest extant value, except beyond minimum and maximum
    * values. Returns SIZE_MAX if value outside the range.
    */
+  // TODO add generic size_t getIndexForValue(SpaceDataType value)
   size_t getIndexForValue(float value);
+
+  template <typename SpaceDataType>
+  std::vector<size_t> getIndecesForValue(SpaceDataType value);
 
   // Access to complete sets
   template <typename VecDataType> std::vector<VecDataType> getValues() {
@@ -108,6 +115,34 @@ private:
 
   std::mutex mLock;
 };
+
+template <typename SpaceDataType>
+std::vector<size_t>
+DiscreteParameterValues::getIndecesForValue(SpaceDataType value) {
+  std::vector<size_t> indeces;
+  SpaceDataType *castValues = (SpaceDataType *)mValues;
+  for (size_t i = 0; i < mSize; i++) {
+    if (castValues[i] == value) {
+      indeces.push_back(i);
+    }
+  }
+  return indeces;
+}
+
+template <typename SpaceDataType>
+std::vector<std::string>
+DiscreteParameterValues::getIdsForValue(SpaceDataType value) {
+  std::vector<std::string> ids;
+  auto indeces = getIndecesForValue(value);
+  for (auto index : indeces) {
+    if (index < mIds.size()) {
+      ids.push_back(mIds[index]);
+    } else {
+      std::cerr << __FUNCTION__ << " Invalid index to id" << std::endl;
+    }
+  }
+  return ids;
+}
 
 } // namespace al
 

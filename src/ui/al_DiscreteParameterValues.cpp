@@ -1,8 +1,8 @@
 #include "al/ui/al_DiscreteParameterValues.hpp"
 
-#include <iostream>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 #include <cstring>
 
@@ -191,7 +191,6 @@ std::string DiscreteParameterValues::idAt(size_t x) {
 }
 
 size_t DiscreteParameterValues::getIndexForValue(float value) {
-
   size_t paramIndex = SIZE_MAX;
   if (size() == 0) {
     return SIZE_MAX;
