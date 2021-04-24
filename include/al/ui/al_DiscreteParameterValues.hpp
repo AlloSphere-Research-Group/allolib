@@ -1,6 +1,7 @@
 #ifndef AL_DISCRETEPARAMETERVALUES_HPP
 #define AL_DISCRETEPARAMETERVALUES_HPP
 
+#include <iostream>
 #include <mutex>
 #include <string>
 #include <vector>
