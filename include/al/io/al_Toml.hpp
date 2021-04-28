@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <iostream>
 #include <sstream>
-#include <stdexcept>  // std::runtime_error
+#include <stdexcept> // std::runtime_error
 #include <string>
 #include <vector>
 
@@ -23,9 +23,9 @@ struct TomlLoader {
 
   TomlLoader() {}
 
-  TomlLoader(const std::string& filename) { setFile(filename); }
+  TomlLoader(const std::string &filename) { setFile(filename); }
 
-  void setFile(const std::string& filename) {
+  void setFile(const std::string &filename) {
     if (!al::File::exists(filename)) {
       std::cout << "TomlLoader creating config file: " << filename << std::endl;
       al::File configFile(filename);
@@ -59,7 +59,7 @@ struct TomlLoader {
   }
 
   template <typename T>
-  void setDefaultValue(const std::string& keyName, const T& value) {
+  void setDefaultValue(const std::string &keyName, const T &value) {
     if (!root) {
       throw std::runtime_error(
           "al::TomlLoader::setDefaultValue, toml file not set");
@@ -70,8 +70,8 @@ struct TomlLoader {
     }
   }
   template <typename T>
-  void setDefaultValueVector(const std::string& keyName,
-                             const std::vector<T>& value) {
+  void setDefaultValueVector(const std::string &keyName,
+                             const std::vector<T> &value) {
     if (!root) {
       throw std::runtime_error(
           "al::TomlLoader::setDefaultValue, toml file not set");
@@ -79,16 +79,15 @@ struct TomlLoader {
     auto val = root->get_array_of<T>(keyName);
     if (!val) {
       auto array = cpptoml::make_array();
-      for (auto& elem : value) {
+      for (auto &elem : value) {
         array->push_back(elem);
       }
       root->insert(keyName, array);
     }
   }
 
-  template <typename T>
-  bool hasKey(const std::string& keyName) {
-    if (root) {
+  template <typename T> bool hasKey(const std::string &keyName) {
+    if (root && root->contains(keyName)) {
       auto val = root->get_as<T>(keyName);
       if (val) {
         return true;
@@ -97,8 +96,7 @@ struct TomlLoader {
     return false;
   }
 
-  template <typename T>
-  void set(const std::string& key, const T& value) {
+  template <typename T> void set(const std::string &key, const T &value) {
     if (!root) {
       throw std::runtime_error("al::TomlLoader::get, toml file not set");
     }
@@ -109,8 +107,7 @@ struct TomlLoader {
   // std::string, int64_t, double, bool,
   // cpptoml::local_date, cpptoml::local_time, cpptoml::local_datetime,
   // cpptoml::offset_datetime
-  template <typename T>
-  T get(const std::string& key) {
+  template <typename T> T get(const std::string &key) {
     if (!root) {
       throw std::runtime_error("al::TomlLoader::get, toml file not set");
     }
@@ -125,7 +122,7 @@ struct TomlLoader {
   // get second level (one table below) key's value.
   // give table name and key name
   template <typename T>
-  T get(const std::string& table_key, const std::string& key) {
+  T get(const std::string &table_key, const std::string &key) {
     if (!root) {
       throw std::runtime_error("al::TomlLoader::get, toml file not set");
     }
@@ -142,50 +139,49 @@ struct TomlLoader {
     return *val;
   }
 
-  double getd(const std::string& key) { return get<double>(key); }
+  double getd(const std::string &key) { return get<double>(key); }
 
-  int64_t geti(const std::string& key) { return get<int64_t>(key); }
+  int64_t geti(const std::string &key) { return get<int64_t>(key); }
 
-  std::string gets(const std::string& key) { return get<std::string>(key); }
+  std::string gets(const std::string &key) { return get<std::string>(key); }
 
-  bool getb(const std::string& key) { return get<bool>(key); }
+  bool getb(const std::string &key) { return get<bool>(key); }
 
-  double getd(const std::string& table, const std::string& key) {
+  double getd(const std::string &table, const std::string &key) {
     return get<double>(table, key);
   }
 
-  int64_t geti(const std::string& table, const std::string& key) {
+  int64_t geti(const std::string &table, const std::string &key) {
     return get<int64_t>(table, key);
   }
 
-  std::string gets(const std::string& table, const std::string& key) {
+  std::string gets(const std::string &table, const std::string &key) {
     return get<std::string>(table, key);
   }
 
-  bool getb(const std::string& table, const std::string& key) {
+  bool getb(const std::string &table, const std::string &key) {
     return get<bool>(table, key);
   }
 
-  template <typename T>
-  std::vector<T> getVector(const std::string& key) {
+  template <typename T> std::vector<T> getVector(const std::string &key) {
     if (!root) {
       throw std::runtime_error("al::TomlLoader::get, toml file not set");
     }
     auto vals = root->get_array_of<T>(key);
     std::vector<T> outVector;
-    for (const T& val : *vals) {
+    for (const T &val : *vals) {
       outVector.push_back(val);
     }
     return outVector;
   }
 
   template <typename T>
-  void setVector(const std::string& key, const std::vector<T>& vec) {
+  void setVector(const std::string &key, const std::vector<T> &vec) {
     if (!root) {
       throw std::runtime_error("al::TomlLoader::get, toml file not set");
     }
     auto array = cpptoml::make_array();
-    for (auto& elem : vec) {
+    for (auto &elem : vec) {
       array->push_back(elem);
     }
     root->insert(key, array);
@@ -193,17 +189,17 @@ struct TomlLoader {
 };
 
 namespace TOML {
-void setFile(const std::string& file);
-double getd(const std::string& key);
-int64_t geti(const std::string& key);
-std::string gets(const std::string& key);
-bool getb(const std::string& key);
-double getd(const std::string& table, const std::string& key);
-int64_t geti(const std::string& table, const std::string& key);
-std::string gets(const std::string& table, const std::string& key);
-bool getb(const std::string& table, const std::string& key);
-}  // namespace TOML
+void setFile(const std::string &file);
+double getd(const std::string &key);
+int64_t geti(const std::string &key);
+std::string gets(const std::string &key);
+bool getb(const std::string &key);
+double getd(const std::string &table, const std::string &key);
+int64_t geti(const std::string &table, const std::string &key);
+std::string gets(const std::string &table, const std::string &key);
+bool getb(const std::string &table, const std::string &key);
+} // namespace TOML
 
-}  // namespace al
+} // namespace al
 
 #endif
