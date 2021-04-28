@@ -91,6 +91,8 @@ public:
   void setIds(std::vector<std::string> newIds) { mIds = newIds; }
   std::vector<std::string> getIds();
 
+  size_t stride();
+
   // Protect parameter space (to avoid access during modification)
   // TODO all readers above need to use this lock
   void lock() { mLock.lock(); }

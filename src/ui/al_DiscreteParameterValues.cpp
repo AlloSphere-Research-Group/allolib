@@ -226,6 +226,25 @@ size_t DiscreteParameterValues::getIndexForValue(float value) {
 
 std::vector<std::string> DiscreteParameterValues::getIds() { return mIds; }
 
+size_t DiscreteParameterValues::stride() {
+  if (size() < 2) {
+    return 0;
+  }
+  size_t s = 1;
+  size_t curIndex = 0;
+  float temp = at(0);
+  float nextTemp = at(1);
+  while (nextTemp == temp) {
+    s++;
+    if ((curIndex + s) >= size()) {
+      //            we are at the last index
+      return s;
+    }
+    nextTemp = at(curIndex + s);
+  }
+  return s;
+}
+
 std::string DiscreteParameterValues::valueToString(void *value) {
   std::string valueStr;
   switch (mDatatype) {
