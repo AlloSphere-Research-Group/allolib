@@ -176,6 +176,7 @@ public:
   std::shared_ptr<SimulationDomain> mSimulationDomain;
 
 protected:
+  void createDomains();
   void initializeDomains();
 
   std::vector<std::shared_ptr<AsynchronousDomain>> mDomainList;

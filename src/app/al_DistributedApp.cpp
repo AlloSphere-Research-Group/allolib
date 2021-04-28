@@ -262,6 +262,7 @@ void DistributedApp::start() {
       std::cerr << "ERROR cleaning up domain " << std::endl;
     }
   }
+  mDomainList.clear();
 }
 
 std::string DistributedApp::name() { return al_get_hostname(); }

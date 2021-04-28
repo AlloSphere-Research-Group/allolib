@@ -2,16 +2,7 @@
 
 using namespace al;
 
-App::App() {
-  mOSCDomain = newDomain<OSCDomain>();
-
-  mAudioDomain = newDomain<GammaAudioDomain>();
-  mAudioDomain->configure();
-
-  mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
-  mSimulationDomain =
-      mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
-}
+App::App() { createDomains(); }
 
 void App::quit() { graphicsDomain()->quit(); }
 
@@ -255,6 +246,17 @@ void App::start() {
       std::cerr << "ERROR cleaning up domain " << std::endl;
     }
   }
+}
+
+void App::createDomains() {
+  mOSCDomain = newDomain<OSCDomain>();
+
+  mAudioDomain = newDomain<GammaAudioDomain>();
+  mAudioDomain->configure();
+
+  mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
+  mSimulationDomain =
+      mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
 }
 
 void App::initializeDomains() {
