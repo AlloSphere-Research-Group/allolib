@@ -66,7 +66,7 @@ On a bash shell on Windows, Linux and OS X do:
     mkdir build
     cd build
     cmake .. -DALLOLIB_BUILD_EXAMPLES=1
-    cmake . --build
+    cmake --build .
 
 The library will be built in build/lib.
 
