@@ -69,7 +69,7 @@ On a bash shell on Windows, Linux and OS X do:
     git submodule update --recursive --init
     mkdir build
     cd build
-    cmake .. -DBUILD_EXAMPLES=1
+    cmake .. -DALLOLIB_BUILD_EXAMPLES=1
     cmake . --build
 
 The library will be built in build/lib.
