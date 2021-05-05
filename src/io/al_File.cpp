@@ -272,7 +272,7 @@ std::string File::conformPathToOS(const std::string &path) {
 
 std::string File::absolutePath(const std::string &path) {
 #ifdef AL_WINDOWS
-  TCHAR dirPart[4096];
+  TCHAR dirPart[PATH_MAX];
   TCHAR **filePart = {NULL};
   GetFullPathName((LPCTSTR)path.c_str(), sizeof(dirPart), dirPart, filePart);
   std::string result = (char *)dirPart;

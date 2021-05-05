@@ -18,6 +18,10 @@ void FileSelector::start(std::string currentDir) {
   if (currentDir.size() == 0) {
     currentDir = File::currentPath();
   }
+  while (currentDir.size() > 2 &&
+         (currentDir.back() == '/' || currentDir.back() == '\\')) {
+    currentDir.resize(currentDir.size() - 1);
+  }
   mCurrentDir = currentDir;
   mSelectedItem = "";
   auto boundFunc = std::bind(&FileSelector::filteringFunctionWrapper, this,
@@ -34,7 +38,7 @@ bool FileSelector::drawFileSelector() {
   std::string rootButtonText = mGlobalRoot;
 
   ImGui::PushID((void *)this);
-  if (rootButtonText.size() != 0) {  // Global root set.
+  if (rootButtonText.size() != 0) { // Global root set.
     ImGui::Text("Global root:%s", rootButtonText.c_str());
   }
   ImGui::Text("Current Dir: %s", mCurrentDir.c_str());
