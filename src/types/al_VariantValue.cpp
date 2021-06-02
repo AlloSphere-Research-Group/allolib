@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include <stdexcept>
 
 #include "al/types/al_VariantValue.hpp"
