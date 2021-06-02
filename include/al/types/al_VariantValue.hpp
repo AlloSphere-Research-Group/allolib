@@ -138,7 +138,7 @@ struct VariantValue {
     case VARIANT_NONE:
       break;
     default:
-      throw std::exception("Data type not supported");
+      throw std::invalid_argument("Data type not supported");
     }
   }
 
