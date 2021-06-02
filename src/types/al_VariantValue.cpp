@@ -1,3 +1,6 @@
+
+#include <stdexcept>
+
 #include "al/types/al_VariantValue.hpp"
 
 using namespace al;
@@ -65,4 +68,71 @@ VariantValue::VariantValue(const float value) {
   mType = VARIANT_FLOAT;
   mData = new float;
   *static_cast<float *>(mData) = value;
+}
+
+VariantValue::~VariantValue() {
+  // TODO ML implement all types
+  switch (mType) {
+  case VARIANT_FLOAT:
+    delete static_cast<float *>(mData);
+    break;
+  case VARIANT_DOUBLE:
+    delete static_cast<double *>(mData);
+    break;
+  case VARIANT_STRING:
+    delete static_cast<std::string *>(mData);
+    break;
+  case VARIANT_INT32:
+    delete static_cast<int32_t *>(mData);
+    break;
+  case VARIANT_UINT32:
+    delete static_cast<uint32_t *>(mData);
+    break;
+  case VARIANT_INT64:
+    delete static_cast<int64_t *>(mData);
+    break;
+  case VARIANT_UINT64:
+    delete static_cast<uint64_t *>(mData);
+    break;
+  case VARIANT_NONE:
+    break;
+  }
+}
+
+VariantValue::VariantValue(const VariantValue &paramField)
+    : mType(paramField.mType) {
+  // TODO ML complete all types
+  switch (mType) {
+  case VARIANT_FLOAT:
+    mData = new float;
+    *static_cast<float *>(mData) = *static_cast<float *>(paramField.mData);
+    break;
+  case VARIANT_STRING:
+    mData = new std::string;
+    *static_cast<std::string *>(mData) =
+        *static_cast<std::string *>(paramField.mData);
+    break;
+  case VARIANT_INT32:
+    mData = new int32_t;
+    *static_cast<int32_t *>(mData) = *static_cast<int32_t *>(paramField.mData);
+    break;
+  case VARIANT_UINT32:
+    mData = new uint32_t;
+    *static_cast<uint32_t *>(mData) =
+        *static_cast<uint32_t *>(paramField.mData);
+    break;
+  case VARIANT_INT64:
+    mData = new int64_t;
+    *static_cast<int64_t *>(mData) = *static_cast<int64_t *>(paramField.mData);
+    break;
+  case VARIANT_UINT64:
+    mData = new uint64_t;
+    *static_cast<uint64_t *>(mData) =
+        *static_cast<uint64_t *>(paramField.mData);
+    break;
+  case VARIANT_NONE:
+    break;
+  default:
+    throw std::invalid_argument("Data type not supported");
+  }
 }
