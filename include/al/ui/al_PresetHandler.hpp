@@ -65,7 +65,7 @@ namespace al {
  */
 class PresetHandler {
 public:
-  typedef std::map<std::string, std::vector<ParameterField>> ParameterStates;
+  typedef std::map<std::string, std::vector<VariantValue>> ParameterStates;
   /**
    * @brief PresetHandler contructor
    *
@@ -165,7 +165,7 @@ public:
                              double factor);
 
   //  static void setParameterValues(ParameterMeta *param,
-  //                                 std::vector<ParameterField> &values);
+  //                                 std::vector<VariantValue> &values);
   /**
    * @brief Interpolate between start and end values according to
    * factor

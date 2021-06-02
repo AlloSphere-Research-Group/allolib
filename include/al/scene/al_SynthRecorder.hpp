@@ -153,7 +153,7 @@ class SynthRecorder {
         rec->mStartOnEvent = false;
       }
       std::chrono::duration<double> diff = now - rec->mSequenceStart;
-      std::vector<ParameterField> pFields = voice->getTriggerParams();
+      std::vector<VariantValue> pFields = voice->getTriggerParams();
 
       SynthEvent event;
       event.type = SynthEventType::TRIGGER_ON;

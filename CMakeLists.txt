@@ -142,6 +142,7 @@ set(headers
   include/al/system/al_Time.hpp
 
   include/al/types/al_Color.hpp
+  include/al/types/al_VariantValue.hpp
 
   include/al/ui/al_BoundingBox.hpp
   include/al/ui/al_Composition.hpp
@@ -259,6 +260,7 @@ set(sources
   src/system/al_Time.cpp
 
   src/types/al_Color.cpp
+  src/types/al_VariantValue.cpp
 
   src/ui/al_BoundingBox.cpp
   src/ui/al_Composition.cpp

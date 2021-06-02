@@ -195,6 +195,8 @@ public:
 
   Packet &operator<<(int v);                ///< Add integer to message
   Packet &operator<<(unsigned v);           ///< Add integer to message
+  Packet &operator<<(int64_t v);            ///< Add integer to message
+  Packet &operator<<(uint64_t v);           ///< Add integer to message
   Packet &operator<<(float v);              ///< Add float to message
   Packet &operator<<(double v);             ///< Add double to message
   Packet &operator<<(char v);               ///< Add char to message

@@ -499,7 +499,7 @@ bool PositionedVoice::setTriggerParams(std::vector<float> &pFields,
   //  return setTriggerParams(pFields.data(), pFields.size(), noCalls);
 }
 
-bool PositionedVoice::setTriggerParams(std::vector<ParameterField> pFields,
+bool PositionedVoice::setTriggerParams(std::vector<VariantValue> pFields,
                                        bool noCalls) {
   bool ok = SynthVoice::setTriggerParams(pFields);
   if (pFields.size() ==

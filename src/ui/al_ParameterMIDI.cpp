@@ -62,7 +62,7 @@ void ParameterMIDI::connectControls(ParameterMeta &param,
   newBinding.controlNumbers = controlNumbers;
   newBinding.channel = channel - 1;
   newBinding.param = &param;
-  std::vector<ParameterField> fields;
+  std::vector<VariantValue> fields;
   param.getFields(fields);
   if (fields.size() < controlNumbers.size()) {
     controlNumbers.resize(fields.size());
@@ -141,7 +141,7 @@ void ParameterMIDI::onMIDIMessage(const MIDIMessage &m) {
             std::find(binding.controlNumbers.begin(),
                       binding.controlNumbers.end(), m.controlNumber());
         if (foundControl != binding.controlNumbers.end()) {
-          std::vector<ParameterField> currentFields;
+          std::vector<VariantValue> currentFields;
           binding.param->getFields(currentFields);
           size_t index =
               std::distance(binding.controlNumbers.begin(), foundControl);

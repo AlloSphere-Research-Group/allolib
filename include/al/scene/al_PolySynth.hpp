@@ -133,7 +133,7 @@ the other
    * @param pFields std::vector<float> containing the values
    * @return true if able to set the fields
    */
-  virtual bool setTriggerParams(std::vector<ParameterField> pFields,
+  virtual bool setTriggerParams(std::vector<VariantValue> pFields,
                                 bool noCalls = false);
 
   /**
@@ -160,7 +160,7 @@ the other
    * operator. Override this function in your voice if you need a different
    * behavior.
    */
-  virtual std::vector<ParameterField> getTriggerParams();
+  virtual std::vector<VariantValue> getTriggerParams();
 
   /**
    * @brief Override this function to define audio processing.

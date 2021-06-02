@@ -210,7 +210,7 @@ SynthSequencer::loadSequence(std::string sequenceName, double timeOffset,
       double duration = std::stod(durationText) * timeScale * tempoFactor;
 
       // const int maxPFields = 64;
-      std::vector<ParameterField> pFields;
+      std::vector<VariantValue> pFields;
 
       // int numFields = 0;
       std::string fieldsString;

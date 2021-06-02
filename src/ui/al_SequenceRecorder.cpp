@@ -186,11 +186,11 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder,
       fileText += step.name + ":" + std::to_string(step.morphTime) + ":" +
                   std::to_string(step.waitTime) + "\n";
     } else if (step.type == PresetSequencer::PARAMETER) {
-      if (step.params[0].type() == ParameterField::FLOAT) {
+      if (step.params[0].type() == VariantType::VARIANT_FLOAT) {
         fileText += "+" + std::to_string(step.waitTime) + ":" +
                     step.name + ":" +
                     std::to_string(step.params[0].get<float>()) + "\n";
-      } else if (step.params[0].type() == ParameterField::STRING) {
+      } else if (step.params[0].type() == VariantType::VARIANT_STRING) {
         fileText += "+" + std::to_string(step.waitTime) + ":" +
                     step.name + ":" + step.params[0].get<std::string>() +
                     "\n";

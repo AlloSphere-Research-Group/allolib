@@ -6,29 +6,31 @@
 #include <string>
 #include <vector>
 
+#include "al/types/al_VariantValue.hpp"
+
 namespace al {
 
 class DiscreteParameterValues {
 public:
-  // TODO add support for in16 and uint16
-  typedef enum {
-    BOOL,
-    FLOAT,
-    DOUBLE,
-    INT8,
-    UINT8,
-    INT32,
-    UINT32,
-    INT64,
-    UINT64,
-    STRING
-  } Datatype;
+  //  // TODO add support for in16 and uint16
+  //  typedef enum {
+  //    BOOL,
+  //    FLOAT,
+  //    DOUBLE,
+  //    INT8,
+  //    UINT8,
+  //    INT32,
+  //    UINT32,
+  //    INT64,
+  //    UINT64,
+  //    STRING
+  //  } Datatype;
 
-  DiscreteParameterValues(Datatype datatype = FLOAT);
+  DiscreteParameterValues(VariantType datatype = VariantType::VARIANT_FLOAT);
 
   ~DiscreteParameterValues();
 
-  Datatype getDataType() { return mDatatype; }
+  VariantType getDataType() { return mDatatype; }
 
   size_t size();
   //  void reserve(size_t totalSize);
@@ -110,7 +112,7 @@ protected:
   int64_t valueToInt64(void *value);
 
 private:
-  Datatype mDatatype{FLOAT};
+  VariantType mDatatype{VARIANT_FLOAT};
   size_t mSize{0};
   uint8_t mDataSize;
   unsigned char *mValues{nullptr};

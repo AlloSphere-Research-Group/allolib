@@ -98,6 +98,14 @@ Packet &Packet::operator<<(unsigned v) {
   OSCTRY("Packet::<<unsigned", (*mImpl) << (::osc::int32)v;)
   return *this;
 }
+Packet &Packet::operator<<(int64_t v) {
+  OSCTRY("Packet::<<unsigned", (*mImpl) << (::osc::int64)v;)
+  return *this;
+}
+Packet &Packet::operator<<(uint64_t v) {
+  OSCTRY("Packet::<<signed", (*mImpl) << (::osc::int64)v;)
+  return *this;
+}
 Packet &Packet::operator<<(float v) {
   OSCTRY("Packet::<<float", (*mImpl) << v;)
   return *this;

@@ -112,6 +112,44 @@ void ParameterInt::set(int32_t value, ValueSource *src) {
   mValue = value;
 }
 
+// ParameterInt64
+// ------------------------------------------------------------------
+ParameterInt64::ParameterInt64(std::string parameterName, std::string Group,
+                               int64_t defaultValue, int64_t min, int64_t max)
+    : ParameterWrapper<int64_t>(parameterName, Group, defaultValue, min, max) {
+  mValue = defaultValue;
+  setDefault(defaultValue);
+}
+
+void ParameterInt64::setNoCalls(int64_t value, void *blockReceiver) {
+  if (value > mMax)
+    value = mMax;
+  if (value < mMin)
+    value = mMin;
+  if (mProcessCallback) {
+    value = (*mProcessCallback)(value); //, mProcessUdata);
+  }
+  if (blockReceiver) {
+    runChangeCallbacksSynchronous(value, nullptr);
+  }
+
+  mValue = value;
+  mChanged = true;
+}
+
+void ParameterInt64::set(int64_t value, ValueSource *src) {
+  if (value > mMax)
+    value = mMax;
+  if (value < mMin)
+    value = mMin;
+  if (mProcessCallback) {
+    value = (*mProcessCallback)(value); //, mProcessUdata);
+  }
+
+  runChangeCallbacksSynchronous(value, src);
+  mValue = value;
+}
+
 // ParameterBool
 // ------------------------------------------------------------------
 ParameterBool::ParameterBool(std::string parameterName, std::string Group,

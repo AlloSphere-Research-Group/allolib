@@ -82,7 +82,7 @@ public:
 
   typedef struct {
     std::string name; // instrument name
-    std::vector<ParameterField> pFields;
+    std::vector<VariantValue> pFields;
   } ParamFields;
 
   SynthVoice *voice{nullptr};
@@ -98,7 +98,7 @@ struct SynthEvent {
   double time;
   int id;
   double duration = -1;
-  std::vector<ParameterField> pFields;
+  std::vector<VariantValue> pFields;
   SynthEventType type;
 };
 

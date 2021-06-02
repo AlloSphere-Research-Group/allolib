@@ -8,27 +8,34 @@
 
 using namespace al;
 
-DiscreteParameterValues::DiscreteParameterValues(
-    DiscreteParameterValues::Datatype datatype)
+DiscreteParameterValues::DiscreteParameterValues(VariantType datatype)
     : mDatatype(datatype) {
   switch (datatype) {
-  case FLOAT:
+  case VariantType::VARIANT_FLOAT:
     mDataSize = 4;
     break;
-  case DOUBLE:
+  case VariantType::VARIANT_DOUBLE:
     mDataSize = 8;
     break;
-  case INT8:
-  case UINT8:
+  case VariantType::VARIANT_INT8:
+  case VariantType::VARIANT_UINT8:
     mDataSize = 1;
     break;
-  case INT32:
-  case UINT32:
+  case VariantType::VARIANT_INT16:
+  case VariantType::VARIANT_UINT16:
+    mDataSize = 2;
+    break;
+  case VariantType::VARIANT_INT32:
+  case VariantType::VARIANT_UINT32:
     mDataSize = 4;
     break;
-  case INT64:
-  case UINT64:
+  case VariantType::VARIANT_INT64:
+  case VariantType::VARIANT_UINT64:
     mDataSize = 8;
+    break;
+  case VariantType::VARIANT_STRING:
+  case VariantType::VARIANT_NONE:
+    mDataSize = 0;
     break;
   }
 }
@@ -248,39 +255,39 @@ size_t DiscreteParameterValues::stride() {
 std::string DiscreteParameterValues::valueToString(void *value) {
   std::string valueStr;
   switch (mDatatype) {
-  case FLOAT: {
+  case VariantType::VARIANT_FLOAT: {
     float val = *(static_cast<float *>(value));
     valueStr = std::to_string(val);
   } break;
-  case DOUBLE: {
+  case VariantType::VARIANT_DOUBLE: {
     double val = *(static_cast<double *>(value));
     valueStr = std::to_string(val);
   } break;
-  case INT8: {
+  case VariantType::VARIANT_INT8: {
     int8_t val = *(static_cast<int8_t *>(value));
     valueStr = std::to_string(val);
   } break;
-  case UINT8: {
+  case VariantType::VARIANT_UINT8: {
     uint8_t val = *(static_cast<uint8_t *>(value));
     valueStr = std::to_string(val);
   } break;
-  case INT32: {
+  case VariantType::VARIANT_INT32: {
     int32_t val = *(static_cast<int32_t *>(value));
     valueStr = std::to_string(val);
   } break;
-  case UINT32: {
+  case VariantType::VARIANT_UINT32: {
     uint32_t val = *(static_cast<uint32_t *>(value));
     valueStr = std::to_string(val);
   } break;
-  case INT64: {
+  case VariantType::VARIANT_INT64: {
     int64_t val = *(static_cast<int64_t *>(value));
     valueStr = std::to_string(val);
   } break;
-  case UINT64: {
+  case VariantType::VARIANT_UINT64: {
     uint64_t val = *(static_cast<uint64_t *>(value));
     valueStr = std::to_string(val);
   } break;
-    //  case STRING: {
+    //  case VariantType::VARIANT_STRING: {
     //    std::string val = (static_cast<char *>(value));
     //    valueStr = val;
     //  } break;
@@ -289,63 +296,65 @@ std::string DiscreteParameterValues::valueToString(void *value) {
 }
 
 double DiscreteParameterValues::valueToFloat(void *value) {
-  double valueDbl;
+  double valueDbl = 0.0;
   switch (mDatatype) {
-  case FLOAT: {
+  case VariantType::VARIANT_FLOAT: {
     valueDbl = *(static_cast<float *>(value));
   } break;
-  case DOUBLE: {
+  case VariantType::VARIANT_DOUBLE: {
     valueDbl = *(static_cast<double *>(value));
   } break;
-  case INT8: {
+  case VariantType::VARIANT_INT8: {
     valueDbl = *(static_cast<int8_t *>(value));
   } break;
-  case UINT8: {
+  case VariantType::VARIANT_UINT8: {
     valueDbl = *(static_cast<uint8_t *>(value));
   } break;
-  case INT32: {
+  case VariantType::VARIANT_INT32: {
     valueDbl = *(static_cast<int32_t *>(value));
   } break;
-  case UINT32: {
+  case VariantType::VARIANT_UINT32: {
     valueDbl = *(static_cast<uint32_t *>(value));
   } break;
-  case INT64: {
+  case VariantType::VARIANT_INT64: {
     valueDbl = *(static_cast<int64_t *>(value));
   } break;
-  case UINT64: {
+  case VariantType::VARIANT_UINT64: {
     valueDbl = *(static_cast<uint64_t *>(value));
   } break;
   }
+  // TODO ML complete for other types
   return valueDbl;
 }
 
 int64_t DiscreteParameterValues::valueToInt64(void *value) {
   int64_t valueInt;
   switch (mDatatype) {
-  case FLOAT: {
+  case VariantType::VARIANT_FLOAT: {
     valueInt = *(static_cast<float *>(value));
   } break;
-  case DOUBLE: {
+  case VariantType::VARIANT_DOUBLE: {
     valueInt = *(static_cast<double *>(value));
   } break;
-  case INT8: {
+  case VariantType::VARIANT_INT8: {
     valueInt = *(static_cast<int8_t *>(value));
   } break;
-  case UINT8: {
+  case VariantType::VARIANT_UINT8: {
     valueInt = *(static_cast<uint8_t *>(value));
   } break;
-  case INT32: {
+  case VariantType::VARIANT_INT32: {
     valueInt = *(static_cast<int32_t *>(value));
   } break;
-  case UINT32: {
+  case VariantType::VARIANT_UINT32: {
     valueInt = *(static_cast<uint32_t *>(value));
   } break;
-  case INT64: {
+  case VariantType::VARIANT_INT64: {
     valueInt = *(static_cast<int64_t *>(value));
   } break;
-  case UINT64: {
+  case VariantType::VARIANT_UINT64: {
     valueInt = *(static_cast<uint64_t *>(value));
   } break;
   }
+  // TODO ML complete for other types
   return valueInt;
 }

@@ -22,7 +22,7 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize,
           p << voiceName;
           auto fields = voice->getTriggerParams();
           for (auto field : fields) {
-            if (field.type() == ParameterField::FLOAT) {
+            if (field.type() == VariantType::VARIANT_FLOAT) {
               p << field.get<float>();
             } else {
               p << field.get<std::string>();
@@ -182,7 +182,7 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
       m >> offset >> id >> voiceName;
       auto *voice = getVoice(voiceName);
       if (voice) {
-        std::vector<ParameterField> params;
+        std::vector<VariantValue> params;
         for (unsigned int i = 3; i < m.typeTags().size(); i++) {
           if (m.typeTags()[i] == 'f') {
             float value;

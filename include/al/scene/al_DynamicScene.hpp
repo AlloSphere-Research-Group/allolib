@@ -119,15 +119,15 @@ public:
    * @param pFields std::vector<float> containing the values
    * @return true if able to set the fields
    */
-  virtual bool setTriggerParams(std::vector<ParameterField> pFields,
+  virtual bool setTriggerParams(std::vector<VariantValue> pFields,
                                 bool noCalls = false) override;
 
   /**
    * @brief For PositionedVoice, the pose (7 floats) and the size are appended
    * to the pfields
    */
-  virtual std::vector<ParameterField> getTriggerParams() override {
-    std::vector<ParameterField> pFields = SynthVoice::getTriggerParams();
+  virtual std::vector<VariantValue> getTriggerParams() override {
+    std::vector<VariantValue> pFields = SynthVoice::getTriggerParams();
     pFields.reserve(pFields.size() + 8);
     Pose currentPose = pose();
     pFields.insert(pFields.end(), currentPose.vec().begin(),

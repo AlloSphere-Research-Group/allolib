@@ -61,6 +61,7 @@
 #include "al/spatial/al_Pose.hpp"
 #include "al/types/al_Color.hpp"
 #include "al/types/al_ValueSource.hpp"
+#include "al/types/al_VariantValue.hpp"
 
 namespace al {
 
@@ -70,170 +71,6 @@ enum class TimeMasterMode {
   TIME_MASTER_UPDATE,
   TIME_MASTER_FREE,
   TIME_MASTER_CPU
-};
-
-// ParameterField
-// @ingroup UI
-class ParameterField {
-public:
-  typedef enum { FLOAT, INT32, STRING, NULLDATA } ParameterDataType;
-
-  ParameterField() {
-    mData = nullptr;
-    mType = NULLDATA;
-  }
-
-  ParameterField(const float value) {
-    mType = FLOAT;
-    mData = new float;
-    *static_cast<float *>(mData) = value;
-  }
-
-  ParameterField(const double value) {
-    mType = FLOAT;
-    mData = new float;
-    *static_cast<float *>(mData) = float(value);
-  }
-
-  ParameterField(const int32_t value) {
-    mType = INT32;
-    mData = new int32_t;
-    *static_cast<int32_t *>(mData) = value;
-  }
-
-  ParameterField(const std::string value) {
-    mType = STRING;
-    mData = new std::string;
-    *static_cast<std::string *>(mData) = value;
-  }
-
-  ParameterField(const char *value) {
-    mType = STRING;
-    mData = new std::string;
-    *static_cast<std::string *>(mData) = value;
-  }
-
-  virtual ~ParameterField() {
-    switch (mType) {
-    case FLOAT:
-      delete static_cast<float *>(mData);
-      break;
-    case STRING:
-      delete static_cast<std::string *>(mData);
-      break;
-    case INT32:
-      delete static_cast<int32_t *>(mData);
-      break;
-    case NULLDATA:
-      break;
-    }
-  }
-
-  // Copy constructor
-  ParameterField(const ParameterField &paramField) : mType(paramField.mType) {
-    switch (mType) {
-    case FLOAT:
-      mData = new float;
-      *static_cast<float *>(mData) = *static_cast<float *>(paramField.mData);
-      break;
-    case STRING:
-      mData = new std::string;
-      *static_cast<std::string *>(mData) =
-          *static_cast<std::string *>(paramField.mData);
-      break;
-    case INT32:
-      mData = new int32_t;
-      *static_cast<int32_t *>(mData) =
-          *static_cast<int32_t *>(paramField.mData);
-      break;
-    case NULLDATA:
-      break;
-    }
-  }
-
-  // Move constructor
-  ParameterField(ParameterField &&that) noexcept
-      : mType(NULLDATA), mData(nullptr) {
-    swap(*this, that);
-  }
-
-  // Copy assignment operator
-  ParameterField &operator=(const ParameterField &other) {
-    ParameterField copy(other);
-    swap(*this, copy);
-    return *this;
-  }
-
-  // Move assignment operator
-  ParameterField &operator=(ParameterField &&that) {
-    swap(*this, that);
-    return *this;
-  }
-
-  friend void swap(ParameterField &lhs, ParameterField &rhs) noexcept {
-    std::swap(lhs.mData, rhs.mData);
-    std::swap(lhs.mType, rhs.mType);
-  }
-
-  ParameterDataType type() { return mType; }
-
-  template <typename type> type get() { return *static_cast<type *>(mData); }
-
-  template <typename type> void set(type value) {
-    if (std::is_same<type, float>::value) {
-      if (mType == FLOAT) {
-        *static_cast<type *>(mData) = value;
-      } else {
-        std::cerr
-            << "ERROR: Unexpected type for parameter field set(). Ignoring."
-            << std::endl;
-      }
-    } else if (std::is_same<type, double>::value) {
-      if (mType == FLOAT) {
-        *static_cast<float *>(mData) = value;
-      } else {
-        std::cerr
-            << "ERROR: Unexpected type for parameter field set(). Ignoring."
-            << std::endl;
-      }
-    } else if (std::is_same<type, std::string>::value) {
-      if (mType == STRING) {
-        *static_cast<type *>(mData) = value;
-      } else {
-        std::cerr
-            << "ERROR: Unexpected type for parameter field set(). Ignoring."
-            << std::endl;
-      }
-    } else if (std::is_same<type, char *>::value) {
-      if (mType == STRING) {
-        *static_cast<std::string *>(mData) = value;
-      } else {
-        std::cerr
-            << "ERROR: Unexpected type for parameter field set(). Ignoring."
-            << std::endl;
-      }
-    } else if (std::is_same<type, int32_t>::value) {
-      if (mType == INT32) {
-        *static_cast<type *>(mData) = value;
-      } else {
-        std::cerr
-            << "ERROR: Unexpected type for parameter field set(). Ignoring."
-            << std::endl;
-      }
-    } else if (std::is_same<type, int>::value) {
-      if (mType == INT32) {
-        *static_cast<int32_t *>(mData) = value;
-      } else {
-        std::cerr
-            << "ERROR: Unexpected type for parameter field set(). Ignoring."
-            << std::endl;
-      }
-    }
-  }
-
-private:
-  ParameterDataType mType;
-  void *mData;
 };
 
 class Parameter;
@@ -325,13 +162,13 @@ public:
     return value;
   }
 
-  virtual void getFields(std::vector<ParameterField> & /*fields*/) {
+  virtual void getFields(std::vector<VariantValue> & /*fields*/) {
     std::cout
         << "get(std::vector<ParameteterField> &fields) not implemented for "
         << typeid(*this).name() << std::endl;
   }
 
-  virtual void setFields(std::vector<ParameterField> & /*fields*/) {
+  virtual void setFields(std::vector<VariantValue> & /*fields*/) {
     std::cout
         << "set(std::vector<ParameteterField> &fields) not implemented for "
         << typeid(*this).name() << std::endl;
@@ -762,14 +599,14 @@ public:
     return value;
   }
 
-  virtual void getFields(std::vector<ParameterField> &fields) override {
-    fields.emplace_back(ParameterField(get()));
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
   }
 
-  virtual void setFields(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<VariantValue> &fields) override {
     assert(fields.size() == 1);
     if (fields.size() == 1) {
-      assert(fields[0].type() == ParameterField::FLOAT);
+      assert(fields[0].type() == VariantType::VARIANT_FLOAT);
       set(fields[0].get<float>());
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
@@ -871,14 +708,112 @@ public:
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void getFields(std::vector<ParameterField> &fields) override {
-    fields.emplace_back(ParameterField(get()));
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
   }
 
-  virtual void setFields(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 1) {
-      assert(fields[0].type() == ParameterField::INT32);
+      assert(fields[0].type() == VariantType::VARIANT_INT32);
       set(fields[0].get<int32_t>());
+    } else {
+      std::cout << "Wrong number of parameters for " << getFullAddress()
+                << std::endl;
+    }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
+
+private:
+};
+
+/// ParamaterInt
+/// @ingroup UI
+class ParameterInt64 : public ParameterWrapper<int64_t> {
+public:
+  /**
+   * @brief ParameterInt64
+   *
+   * @param parameterName The name of the parameter
+   * @param Group The group the parameter belongs to
+   * @param defaultValue The initial value for the parameter
+   * @param min Minimum value for the parameter
+   * @param max Maximum value for the parameter
+   *
+   * This Parameter class is designed for parameters that can be expressed as a
+   * single 64 bit integer number.
+   */
+  ParameterInt64(std::string parameterName, std::string Group = "",
+                 int64_t defaultValue = 0, int64_t min = 0, int64_t max = 127);
+
+  ParameterInt64(const al::ParameterInt64 &param)
+      : ParameterWrapper<int64_t>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  /**
+   * @brief set the parameter's value
+   *
+   * This function is thread-safe and can be called from any number of threads
+   * It does not block and relies on the atomicity of float.
+   */
+  virtual void set(int64_t value, ValueSource *src = nullptr) override;
+
+  /**
+   * @brief set the parameter's value without calling callbacks
+   *
+   * This function is thread-safe and can be called from any number of threads.
+   * The processing callback is called, but the callbacks registered with
+   * registerChangeCallback() are not called. This is useful to avoid infinite
+   * recursion when a widget sets the parameter that then sets the widget.
+   */
+  virtual void setNoCalls(int64_t value,
+                          void *blockReceiver = nullptr) override;
+
+  //  /**
+  //   * @brief get the parameter's value
+  //   *
+  //   * This function is thread-safe and can be called from any number of
+  //   threads
+  //   *
+  //   * @return the parameter value
+  //   */
+  //  virtual int32_t get() override;
+
+  virtual float toFloat() override { return float(mValue); }
+
+  virtual bool fromFloat(float value) override {
+    set(int64_t(value));
+    return true;
+  }
+
+  float operator=(const int64_t value) {
+    this->set(value);
+    return float(value);
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    sender.send(prefix + getFullAddress(), get());
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    if (fields.size() == 1) {
+      assert(fields[0].type() == VariantType::VARIANT_INT64);
+      set(fields[0].get<int64_t>());
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
@@ -939,15 +874,15 @@ public:
     return true;
   }
 
-  virtual void getFields(std::vector<ParameterField> &fields) override {
-    fields.emplace_back(ParameterField(get() == 1.0f ? 1 : 0));
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get() == 1.0f ? 1 : 0));
   }
 
-  virtual void setFields(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 1) {
-      if (fields[0].type() == ParameterField::INT32) {
+      if (fields[0].type() == VariantType::VARIANT_INT32) {
         set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
-      } else if (fields[0].type() == ParameterField::FLOAT) {
+      } else if (fields[0].type() == VariantType::VARIANT_FLOAT) {
         set(fields[0].get<float>());
       }
     } else {
@@ -1034,11 +969,11 @@ public:
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void getFields(std::vector<ParameterField> &fields) override {
-    fields.emplace_back(ParameterField(get()));
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
   }
 
-  virtual void setFields(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 1) {
       set(fields[0].get<std::string>());
     } else {
@@ -1084,14 +1019,14 @@ public:
     sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z);
   }
 
-  virtual void getFields(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<VariantValue> &fields) override {
     Vec3f vec = this->get();
-    fields.emplace_back(ParameterField(vec.x));
-    fields.emplace_back(ParameterField(vec.y));
-    fields.emplace_back(ParameterField(vec.z));
+    fields.emplace_back(VariantValue(vec.x));
+    fields.emplace_back(VariantValue(vec.y));
+    fields.emplace_back(VariantValue(vec.z));
   }
 
-  virtual void setFields(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 3) {
       Vec3f vec(fields[0].get<float>(), fields[1].get<float>(),
                 fields[2].get<float>());
@@ -1129,15 +1064,15 @@ public:
     sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z, vec.w);
   }
 
-  virtual void getFields(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<VariantValue> &fields) override {
     Vec4f vec = this->get();
-    fields.emplace_back(ParameterField(vec.x));
-    fields.emplace_back(ParameterField(vec.y));
-    fields.emplace_back(ParameterField(vec.z));
-    fields.emplace_back(ParameterField(vec.w));
+    fields.emplace_back(VariantValue(vec.x));
+    fields.emplace_back(VariantValue(vec.y));
+    fields.emplace_back(VariantValue(vec.z));
+    fields.emplace_back(VariantValue(vec.w));
   }
 
-  virtual void setFields(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 4) {
       Vec4f vec(fields[0].get<float>(), fields[1].get<float>(),
                 fields[2].get<float>(), fields[3].get<float>());
@@ -1178,20 +1113,20 @@ public:
   //    float operator[](size_t index) { Pose vec = this->get(); return
   //    vec[index];}
 
-  virtual void getFields(std::vector<ParameterField> &fields) override {
-    Quatf quat = get().quat();
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    Quatd quat = get().quat();
     Vec4f pos = get().pos();
     fields.reserve(7);
-    fields.emplace_back(ParameterField(pos.x));
-    fields.emplace_back(ParameterField(pos.y));
-    fields.emplace_back(ParameterField(pos.z));
-    fields.emplace_back(ParameterField(quat.w));
-    fields.emplace_back(ParameterField(quat.x));
-    fields.emplace_back(ParameterField(quat.y));
-    fields.emplace_back(ParameterField(quat.z));
+    fields.emplace_back(VariantValue(pos.x));
+    fields.emplace_back(VariantValue(pos.y));
+    fields.emplace_back(VariantValue(pos.z));
+    fields.emplace_back(VariantValue((float)quat.w));
+    fields.emplace_back(VariantValue((float)quat.x));
+    fields.emplace_back(VariantValue((float)quat.y));
+    fields.emplace_back(VariantValue((float)quat.z));
   }
 
-  virtual void setFields(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 7) {
       Pose vec(Vec3f(fields[0].get<float>(), fields[1].get<float>(),
                      fields[2].get<float>()),
@@ -1273,11 +1208,11 @@ public:
     sender.send(prefix + getFullAddress(), get());
   }
 
-  virtual void getFields(std::vector<ParameterField> &fields) override {
-    fields.emplace_back(ParameterField(getCurrent()));
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(getCurrent()));
   }
 
-  virtual void setFields(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<VariantValue> &fields) override {
     // TODO an option should be added to allow storing the current element as
     // index instead of text.
     if (fields.size() == 1) {
@@ -1384,14 +1319,14 @@ public:
     sender.send(prefix + getFullAddress(), (int32_t)get());
   }
 
-  virtual void getFields(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<VariantValue> &fields) override {
     if (get() > INT32_MAX) {
       std::cerr << "WARNING: Can't fit choice value." << std::endl;
     }
-    fields.emplace_back(ParameterField((int32_t)get()));
+    fields.emplace_back(VariantValue((int32_t)get()));
   }
 
-  virtual void setFields(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<VariantValue> &fields) override {
     // TODO an option should be added to allow storing the current element as
     // index instead of text.
     if (fields.size() == 1) {
@@ -1427,15 +1362,15 @@ public:
     sender.send(prefix + getFullAddress(), c.r, c.g, c.b, c.a);
   }
 
-  virtual void getFields(std::vector<ParameterField> &fields) override {
+  virtual void getFields(std::vector<VariantValue> &fields) override {
     Color vec = this->get();
-    fields.emplace_back(ParameterField(vec.r));
-    fields.emplace_back(ParameterField(vec.g));
-    fields.emplace_back(ParameterField(vec.b));
-    fields.emplace_back(ParameterField(vec.a));
+    fields.emplace_back(VariantValue(vec.r));
+    fields.emplace_back(VariantValue(vec.g));
+    fields.emplace_back(VariantValue(vec.b));
+    fields.emplace_back(VariantValue(vec.a));
   }
 
-  virtual void setFields(std::vector<ParameterField> &fields) override {
+  virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 4) {
       Color vec(fields[0].get<float>(), fields[1].get<float>(),
                 fields[2].get<float>(), fields[3].get<float>());

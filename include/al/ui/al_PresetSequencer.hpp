@@ -130,12 +130,12 @@ class PresetSequencer : public osc::MessageConsumer {
     std::string name;
     float morphTime;  // The time to get to the preset
     float waitTime;   // The time to stay in the preset before the next step
-    std::vector<ParameterField> params;
+    std::vector<VariantValue> params;
   };
 
   typedef struct {
     std::string eventName;
-    std::function<void(void *data, std::vector<ParameterField> &params)>
+    std::function<void(void *data, std::vector<VariantValue> &params)>
         callback;
     void *callbackData;
   } EventCallback;
@@ -251,7 +251,7 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   void registerEventCommand(
       std::string eventName,
-      std::function<void(void *data, std::vector<ParameterField> &params)>
+      std::function<void(void *data, std::vector<VariantValue> &params)>
           callback,
       void *data);
 
