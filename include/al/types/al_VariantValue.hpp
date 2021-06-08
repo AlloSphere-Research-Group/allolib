@@ -60,7 +60,7 @@ enum VariantType {
 
 // VariantValue
 
-// FIXME ML complete support for all types
+// FIXME ML complete support for all types. done.
 struct VariantValue {
   VariantValue();
 
@@ -68,12 +68,15 @@ struct VariantValue {
   VariantValue(const char *value);
   VariantValue(const int64_t value);
   VariantValue(const int32_t value);
+  VariantValue(const int16_t value);
   VariantValue(const int8_t value);
   VariantValue(const uint64_t value);
   VariantValue(const uint32_t value);
+  VariantValue(const uint16_t value);
   VariantValue(const uint8_t value);
   VariantValue(const double value);
   VariantValue(const float value);
+  VariantValue(const bool value);
 
   virtual ~VariantValue();
 

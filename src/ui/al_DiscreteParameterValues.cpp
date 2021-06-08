@@ -310,6 +310,12 @@ double DiscreteParameterValues::valueToFloat(void *value) {
   case VariantType::VARIANT_UINT8: {
     valueDbl = *(static_cast<uint8_t *>(value));
   } break;
+  case VariantType::VARIANT_INT16: {
+    valueDbl = *(static_cast<int16_t *>(value));
+  } break;
+  case VariantType::VARIANT_UINT16: {
+    valueDbl = *(static_cast<uint16_t *>(value));
+  } break;
   case VariantType::VARIANT_INT32: {
     valueDbl = *(static_cast<int32_t *>(value));
   } break;
@@ -323,7 +329,7 @@ double DiscreteParameterValues::valueToFloat(void *value) {
     valueDbl = *(static_cast<uint64_t *>(value));
   } break;
   }
-  // TODO ML complete for other types
+  // TODO ML complete for other types. Done.
   return valueDbl;
 }
 
@@ -342,6 +348,12 @@ int64_t DiscreteParameterValues::valueToInt64(void *value) {
   case VariantType::VARIANT_UINT8: {
     valueInt = *(static_cast<uint8_t *>(value));
   } break;
+  case VariantType::VARIANT_INT16: {
+    valueInt = *(static_cast<int16_t *>(value));
+  } break;
+  case VariantType::VARIANT_UINT16: {
+    valueInt = *(static_cast<uint16_t *>(value));
+  } break;
   case VariantType::VARIANT_INT32: {
     valueInt = *(static_cast<int32_t *>(value));
   } break;
@@ -355,6 +367,6 @@ int64_t DiscreteParameterValues::valueToInt64(void *value) {
     valueInt = *(static_cast<uint64_t *>(value));
   } break;
   }
-  // TODO ML complete for other types
+  // TODO ML complete for other types. Done.
   return valueInt;
 }
