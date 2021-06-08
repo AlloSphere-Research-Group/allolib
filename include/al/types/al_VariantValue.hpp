@@ -172,8 +172,16 @@ struct VariantValue {
             << "ERROR: Unexpected type for parameter field set(). Ignoring."
             << std::endl;
       }
+    } else if (std::is_same<type, bool>::value) {
+      if (mType == VARIANT_BOOL) {
+        *static_cast<bool *>(mData) = value;
+      } else {
+        std::cerr
+            << "ERROR: Unexpected type for parameter field set(). Ignoring."
+            << std::endl;
+      }
     }
-    // TODO add remaining types
+    // TODO ML add remaining types
   }
 
 protected:
