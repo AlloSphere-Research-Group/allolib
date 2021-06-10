@@ -122,11 +122,8 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, double>::value) {
-      if (mType == VARIANT_FLOAT) {
-        *static_cast<float *>(mData) = value;
-      }
       if (mType == VARIANT_DOUBLE) {
-        *static_cast<double *>(mData) = value;
+        *static_cast<type *>(mData) = value;
       } else {
         std::cerr
             << "ERROR: Unexpected type for parameter field set(). Ignoring."
@@ -135,14 +132,32 @@ struct VariantValue {
     } else if (std::is_same<type, std::string>::value) {
       if (mType == VARIANT_STRING) {
         *static_cast<type *>(mData) = value;
+      } else if (mType == VARIANT_MAX_ATOMIC_TYPE) {
+        *static_cast<type *>(mData) = value;
       } else {
         std::cerr
             << "ERROR: Unexpected type for parameter field set(). Ignoring."
             << std::endl;
       }
     } else if (std::is_same<type, char *>::value) {
-      if (mType == VARIANT_STRING) {
-        *static_cast<std::string *>(mData) = value;
+      if (mType == VARIANT_CHAR) {
+        *static_cast<type *>(mData) = value;
+      } else {
+        std::cerr
+            << "ERROR: Unexpected type for parameter field set(). Ignoring."
+            << std::endl;
+      }
+    } else if (std::is_same<type, int8_t>::value) {
+      if (mType == VARIANT_INT8) {
+        *static_cast<type *>(mData) = value;
+      } else {
+        std::cerr
+            << "ERROR: Unexpected type for parameter field set(). Ignoring."
+            << std::endl;
+      }
+    } else if (std::is_same<type, int16_t>::value) {
+      if (mType == VARIANT_INT16) {
+        *static_cast<type *>(mData) = value;
       } else {
         std::cerr
             << "ERROR: Unexpected type for parameter field set(). Ignoring."
@@ -156,9 +171,25 @@ struct VariantValue {
             << "ERROR: Unexpected type for parameter field set(). Ignoring."
             << std::endl;
       }
-    } else if (std::is_same<type, int>::value) {
-      if (mType == VARIANT_INT32) {
-        *static_cast<int32_t *>(mData) = value;
+    } else if (std::is_same<type, int64_t>::value) {
+      if (mType == VARIANT_INT64) {
+        *static_cast<type *>(mData) = value;
+      } else {
+        std::cerr
+            << "ERROR: Unexpected type for parameter field set(). Ignoring."
+            << std::endl;
+      }
+    } else if (std::is_same<type, uint8_t>::value) {
+      if (mType == VARIANT_UINT8) {
+        *static_cast<type *>(mData) = value;
+      } else { 
+        std::cerr
+            << "ERROR: Unexpected type for parameter field set(). Ignoring."
+            << std::endl;
+      }
+    } else if (std::is_same<type, uint16_t>::value) {
+      if (mType == VARIANT_UINT16) {
+        *static_cast<type *>(mData) = value;
       } else {
         std::cerr
             << "ERROR: Unexpected type for parameter field set(). Ignoring."
@@ -166,7 +197,15 @@ struct VariantValue {
       }
     } else if (std::is_same<type, uint32_t>::value) {
       if (mType == VARIANT_UINT32) {
-        *static_cast<uint32_t *>(mData) = value;
+        *static_cast<type *>(mData) = value;
+      } else {
+        std::cerr
+            << "ERROR: Unexpected type for parameter field set(). Ignoring."
+            << std::endl;
+      }
+    } else if (std::is_same<type, uint64_t>::value) {
+      if (mType == VARIANT_UINT64) {
+        *static_cast<type *>(mData) = value;
       } else {
         std::cerr
             << "ERROR: Unexpected type for parameter field set(). Ignoring."

@@ -736,7 +736,7 @@ public:
 private:
 };
 
-/// ParamaterInt
+/// ParamaterInt64
 /// @ingroup UI
 class ParameterInt64 : public ParameterWrapper<int64_t> {
 public:
@@ -753,7 +753,7 @@ public:
    * single 64 bit integer number.
    */
   ParameterInt64(std::string parameterName, std::string Group = "",
-                 int64_t defaultValue = 0, int64_t min = 0, int64_t max = 127);
+                 int64_t defaultValue = 0, int64_t min = 0, int64_t max = 9223372036854775807);
 
   ParameterInt64(const al::ParameterInt64 &param)
       : ParameterWrapper<int64_t>(param) {
@@ -833,6 +833,627 @@ public:
 
 private:
 };
+
+/// ParamaterInt16
+/// @ingroup UI
+class ParameterInt16 : public ParameterWrapper<int16_t> {
+public:
+  /**
+   * @brief ParameterInt16
+   *
+   * @param parameterName The name of the parameter
+   * @param Group The group the parameter belongs to
+   * @param defaultValue The initial value for the parameter
+   * @param min Minimum value for the parameter
+   * @param max Maximum value for the parameter
+   *
+   * This Parameter class is designed for parameters that can be expressed as a
+   * single 16 bit integer number.
+   */
+  ParameterInt16(std::string parameterName, std::string Group = "",
+                 int16_t defaultValue = 0, int16_t min = 0, int16_t max = 32767);
+
+  ParameterInt16(const al::ParameterInt16 &param)
+      : ParameterWrapper<int16_t>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  /**
+   * @brief set the parameter's value
+   *
+   * This function is thread-safe and can be called from any number of threads
+   * It does not block and relies on the atomicity of float.
+   */
+  virtual void set(int16_t value, ValueSource *src = nullptr) override;
+
+  /**
+   * @brief set the parameter's value without calling callbacks
+   *
+   * This function is thread-safe and can be called from any number of threads.
+   * The processing callback is called, but the callbacks registered with
+   * registerChangeCallback() are not called. This is useful to avoid infinite
+   * recursion when a widget sets the parameter that then sets the widget.
+   */
+  virtual void setNoCalls(int16_t value,
+                          void *blockReceiver = nullptr) override;
+
+  virtual float toFloat() override { return float(mValue); }
+
+  virtual bool fromFloat(float value) override {
+    set(int16_t(value));
+    return true;
+  }
+
+  float operator=(const int16_t value) {
+    this->set(value);
+    return float(value);
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    sender.send(prefix + getFullAddress(), get());
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    if (fields.size() == 1) {
+      assert(fields[0].type() == VariantType::VARIANT_INT16);
+      set(fields[0].get<int16_t>());
+    } else {
+      std::cout << "Wrong number of parameters for " << getFullAddress()
+                << std::endl;
+    }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
+
+private:
+};
+
+
+/// ParameterInt8
+/// @ingroup UI
+class ParameterInt8 : public ParameterWrapper<int8_t> {
+public:
+  /**
+   * @brief ParameterInt8
+   *
+   * @param parameterName The name of the parameter
+   * @param Group The group the parameter belongs to
+   * @param defaultValue The initial value for the parameter
+   * @param min Minimum value for the parameter
+   * @param max Maximum value for the parameter
+   *
+   * This Parameter class is designed for parameters that can be expressed as a
+   * single 8 bit integer number.
+   */
+  ParameterInt8(std::string parameterName, std::string Group = "",
+                 int8_t defaultValue = 0, int8_t min = 0, int8_t max = 127);
+
+  ParameterInt8(const al::ParameterInt8 &param)
+      : ParameterWrapper<int8_t>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  /**
+   * @brief set the parameter's value
+   *
+   * This function is thread-safe and can be called from any number of threads
+   * It does not block and relies on the atomicity of float.
+   */
+  virtual void set(int8_t value, ValueSource *src = nullptr) override;
+
+  /**
+   * @brief set the parameter's value without calling callbacks
+   *
+   * This function is thread-safe and can be called from any number of threads.
+   * The processing callback is called, but the callbacks registered with
+   * registerChangeCallback() are not called. This is useful to avoid infinite
+   * recursion when a widget sets the parameter that then sets the widget.
+   */
+  virtual void setNoCalls(int8_t value,
+                          void *blockReceiver = nullptr) override;
+
+  virtual float toFloat() override { return float(mValue); }
+
+  virtual bool fromFloat(float value) override {
+    set(int8_t(value));
+    return true;
+  }
+
+  float operator=(const int8_t value) {
+    this->set(value);
+    return float(value);
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    sender.send(prefix + getFullAddress(), get());
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    if (fields.size() == 1) {
+      assert(fields[0].type() == VariantType::VARIANT_INT8);
+      set(fields[0].get<int8_t>());
+    } else {
+      std::cout << "Wrong number of parameters for " << getFullAddress()
+                << std::endl;
+    }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
+
+private:
+};
+
+/// ParameterUInt8
+/// @ingroup UI
+class ParameterUInt8 : public ParameterWrapper<uint8_t> {
+public:
+  /**
+   * @brief ParameterUInt8
+   *
+   * @param parameterName The name of the parameter
+   * @param Group The group the parameter belongs to
+   * @param defaultValue The initial value for the parameter
+   * @param min Minimum value for the parameter
+   * @param max Maximum value for the parameter
+   *
+   * This Parameter class is designed for parameters that can be expressed as a
+   * single 8 bit unsigned integer number.
+   */
+  ParameterUInt8(std::string parameterName, std::string Group = "",
+                 uint8_t defaultValue = 0, uint8_t min = 0, uint8_t max = 255);
+
+  ParameterUInt8(const al::ParameterUInt8 &param)
+      : ParameterWrapper<uint8_t>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  /**
+   * @brief set the parameter's value
+   *
+   * This function is thread-safe and can be called from any number of threads
+   * It does not block and relies on the atomicity of float.
+   */
+  virtual void set(uint8_t value, ValueSource *src = nullptr) override;
+
+  /**
+   * @brief set the parameter's value without calling callbacks
+   *
+   * This function is thread-safe and can be called from any number of threads.
+   * The processing callback is called, but the callbacks registered with
+   * registerChangeCallback() are not called. This is useful to avoid infinite
+   * recursion when a widget sets the parameter that then sets the widget.
+   */
+  virtual void setNoCalls(uint8_t value,
+                          void *blockReceiver = nullptr) override;
+
+  virtual float toFloat() override { return float(mValue); }
+
+  virtual bool fromFloat(float value) override {
+    set(uint8_t(value));
+    return true;
+  }
+
+  float operator=(const uint8_t value) {
+    this->set(value);
+    return float(value);
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    sender.send(prefix + getFullAddress(), get());
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    if (fields.size() == 1) {
+      assert(fields[0].type() == VariantType::VARIANT_UINT8);
+      set(fields[0].get<uint8_t>());
+    } else {
+      std::cout << "Wrong number of parameters for " << getFullAddress()
+                << std::endl;
+    }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
+
+private:
+};
+
+
+/// ParameterUInt16
+/// @ingroup UI
+class ParameterUInt16 : public ParameterWrapper<uint16_t> {
+public:
+  /**
+   * @brief ParameterUint16
+   *
+   * @param parameterName The name of the parameter
+   * @param Group The group the parameter belongs to
+   * @param defaultValue The initial value for the parameter
+   * @param min Minimum value for the parameter
+   * @param max Maximum value for the parameter
+   *
+   * This Parameter class is designed for parameters that can be expressed as a
+   * single 16 bit unsigned integer number.
+   */
+  ParameterUInt16(std::string parameterName, std::string Group = "",
+                 uint16_t defaultValue = 0, uint16_t min = 0, uint16_t max = 65535);
+
+  ParameterUInt16(const al::ParameterUInt16 &param)
+      : ParameterWrapper<uint16_t>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  /**
+   * @brief set the parameter's value
+   *
+   * This function is thread-safe and can be called from any number of threads
+   * It does not block and relies on the atomicity of float.
+   */
+  virtual void set(uint16_t value, ValueSource *src = nullptr) override;
+
+  /**
+   * @brief set the parameter's value without calling callbacks
+   *
+   * This function is thread-safe and can be called from any number of threads.
+   * The processing callback is called, but the callbacks registered with
+   * registerChangeCallback() are not called. This is useful to avoid infinite
+   * recursion when a widget sets the parameter that then sets the widget.
+   */
+  virtual void setNoCalls(uint16_t value,
+                          void *blockReceiver = nullptr) override;
+
+  virtual float toFloat() override { return float(mValue); }
+
+  virtual bool fromFloat(float value) override {
+    set(uint16_t(value));
+    return true;
+  }
+
+  float operator=(const uint16_t value) {
+    this->set(value);
+    return float(value);
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    sender.send(prefix + getFullAddress(), get());
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    if (fields.size() == 1) {
+      assert(fields[0].type() == VariantType::VARIANT_UINT16);
+      set(fields[0].get<uint16_t>());
+    } else {
+      std::cout << "Wrong number of parameters for " << getFullAddress()
+                << std::endl;
+    }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
+
+private:
+};
+
+
+/// ParamaterUInt32
+/// @ingroup UI
+class ParameterUInt32 : public ParameterWrapper<uint32_t> {
+public:
+  /**
+   * @brief ParameterUint32
+   *
+   * @param parameterName The name of the parameter
+   * @param Group The group the parameter belongs to
+   * @param defaultValue The initial value for the parameter
+   * @param min Minimum value for the parameter
+   * @param max Maximum value for the parameter
+   *
+   * This Parameter class is designed for parameters that can be expressed as a
+   * single 32 bit unsigned integer number.
+   */
+  ParameterUInt32(std::string parameterName, std::string Group = "",
+                 uint32_t defaultValue = 0, uint32_t min = 0, uint32_t max = 4294967295);
+
+  ParameterUInt32(const al::ParameterUInt32 &param)
+      : ParameterWrapper<uint32_t>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  /**
+   * @brief set the parameter's value
+   *
+   * This function is thread-safe and can be called from any number of threads
+   * It does not block and relies on the atomicity of float.
+   */
+  virtual void set(uint32_t value, ValueSource *src = nullptr) override;
+
+  /**
+   * @brief set the parameter's value without calling callbacks
+   *
+   * This function is thread-safe and can be called from any number of threads.
+   * The processing callback is called, but the callbacks registered with
+   * registerChangeCallback() are not called. This is useful to avoid infinite
+   * recursion when a widget sets the parameter that then sets the widget.
+   */
+  virtual void setNoCalls(uint32_t value,
+                          void *blockReceiver = nullptr) override;
+
+  virtual float toFloat() override { return float(mValue); }
+
+  virtual bool fromFloat(float value) override {
+    set(uint32_t(value));
+    return true;
+  }
+
+  float operator=(const uint32_t value) {
+    this->set(value);
+    return float(value);
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    sender.send(prefix + getFullAddress(), get());
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    if (fields.size() == 1) {
+      assert(fields[0].type() == VariantType::VARIANT_UINT32);
+      set(fields[0].get<uint32_t>());
+    } else {
+      std::cout << "Wrong number of parameters for " << getFullAddress()
+                << std::endl;
+    }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
+
+private:
+};
+
+
+/// ParamaterUInt64
+/// @ingroup UI
+class ParameterUInt64 : public ParameterWrapper<uint64_t> {
+public:
+  /**
+   * @brief ParameterUint64
+   *
+   * @param parameterName The name of the parameter
+   * @param Group The group the parameter belongs to
+   * @param defaultValue The initial value for the parameter
+   * @param min Minimum value for the parameter
+   * @param max Maximum value for the parameter
+   *
+   * This Parameter class is designed for parameters that can be expressed as a
+   * single 64 bit unsigned integer number.
+   */
+  ParameterUInt64(std::string parameterName, std::string Group = "",
+                 uint64_t defaultValue = 0, uint64_t min = 0, uint64_t max = 8589934590);
+
+  ParameterUInt64(const al::ParameterUInt64 &param)
+      : ParameterWrapper<uint64_t>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  /**
+   * @brief set the parameter's value
+   *
+   * This function is thread-safe and can be called from any number of threads
+   * It does not block and relies on the atomicity of float.
+   */
+  virtual void set(uint64_t value, ValueSource *src = nullptr) override;
+
+  /**
+   * @brief set the parameter's value without calling callbacks
+   *
+   * This function is thread-safe and can be called from any number of threads.
+   * The processing callback is called, but the callbacks registered with
+   * registerChangeCallback() are not called. This is useful to avoid infinite
+   * recursion when a widget sets the parameter that then sets the widget.
+   */
+  virtual void setNoCalls(uint64_t value,
+                          void *blockReceiver = nullptr) override;
+
+  virtual float toFloat() override { return float(mValue); }
+
+  virtual bool fromFloat(float value) override {
+    set(uint64_t(value));
+    return true;
+  }
+
+  float operator=(const uint64_t value) {
+    this->set(value);
+    return float(value);
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    sender.send(prefix + getFullAddress(), get());
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    if (fields.size() == 1) {
+      assert(fields[0].type() == VariantType::VARIANT_UINT64);
+      set(fields[0].get<uint64_t>());
+    } else {
+      std::cout << "Wrong number of parameters for " << getFullAddress()
+                << std::endl;
+    }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
+
+private:
+};
+
+/// ParamaterDouble
+/// @ingroup UI
+class ParameterDouble : public ParameterWrapper<double> {
+public:
+  /**
+   * @brief ParameterDouble
+   *
+   * @param parameterName The name of the parameter
+   * @param Group The group the parameter belongs to
+   * @param defaultValue The initial value for the parameter
+   * @param min Minimum value for the parameter
+   * @param max Maximum value for the parameter
+   *
+   * This Parameter class is designed for parameters that can be expressed as a
+   * single double number.
+   */
+  ParameterDouble(std::string parameterName, std::string Group = "",
+                 double defaultValue = 0, double min = 0, double max = 256);
+
+  ParameterDouble(const al::ParameterDouble &param)
+      : ParameterWrapper<double>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  /**
+   * @brief set the parameter's value
+   *
+   * This function is thread-safe and can be called from any number of threads
+   * It does not block and relies on the atomicity of double.
+   */
+  virtual void set(double value, ValueSource *src = nullptr) override;
+
+  /**
+   * @brief set the parameter's value without calling callbacks
+   *
+   * This function is thread-safe and can be called from any number of threads.
+   * The processing callback is called, but the callbacks registered with
+   * registerChangeCallback() are not called. This is useful to avoid infinite
+   * recursion when a widget sets the parameter that then sets the widget.
+   */
+  virtual void setNoCalls(double value,
+                          void *blockReceiver = nullptr) override;
+
+  virtual float toFloat() override { return float(mValue); }
+
+  virtual bool fromFloat(float value) override {
+    set(double(value));
+    return true;
+  }
+
+  double operator=(const double value) {
+    this->set(value);
+    return double(value);
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    sender.send(prefix + getFullAddress(), get());
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.emplace_back(VariantValue(get()));
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    if (fields.size() == 1) {
+      assert(fields[0].type() == VariantType::VARIANT_DOUBLE);
+      set(fields[0].get<double>());
+    } else {
+      std::cout << "Wrong number of parameters for " << getFullAddress()
+                << std::endl;
+    }
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
+                  std::string(), min(), max());
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), getDefault(), std::string(), min(), max());
+    }
+  }
+
+private:
+};
+
 
 /// ParamaterBool
 /// @ingroup UI

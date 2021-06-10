@@ -227,8 +227,8 @@ bool SynthVoice::setTriggerParams(std::vector<VariantValue> pFields,
         }
       } break;
       case (VariantType::VARIANT_UINT32): {
-        ParameterInt64 *p = nullptr;
-        if ((p = dynamic_cast<ParameterInt64 *>(param))) {
+        ParameterUInt32 *p = nullptr;
+        if ((p = dynamic_cast<ParameterUInt32 *>(param))) {
           p->setNoCalls(it->get<uint32_t>());
         } else {
           std::cout << __FILE__ << ":" << __LINE__
@@ -237,8 +237,8 @@ bool SynthVoice::setTriggerParams(std::vector<VariantValue> pFields,
         }
       } break;
       case (VariantType::VARIANT_INT16): {
-        ParameterInt *p = nullptr;
-        if ((p = dynamic_cast<ParameterInt *>(param))) {
+        ParameterInt16 *p = nullptr;
+        if ((p = dynamic_cast<ParameterInt16 *>(param))) {
           p->setNoCalls(it->get<int16_t>());
         } else {
           std::cout << __FILE__ << ":" << __LINE__
@@ -247,8 +247,8 @@ bool SynthVoice::setTriggerParams(std::vector<VariantValue> pFields,
         }
       } break;
       case (VariantType::VARIANT_UINT16): {
-        ParameterInt *p = nullptr;
-        if ((p = dynamic_cast<ParameterInt *>(param))) {
+        ParameterUInt16 *p = nullptr;
+        if ((p = dynamic_cast<ParameterUInt16 *>(param))) {
           p->setNoCalls(it->get<uint16_t>());
         } else {
           std::cout << __FILE__ << ":" << __LINE__
@@ -257,8 +257,8 @@ bool SynthVoice::setTriggerParams(std::vector<VariantValue> pFields,
         }
       } break;
       case (VariantType::VARIANT_INT8): {
-        ParameterInt *p = nullptr;
-        if ((p = dynamic_cast<ParameterInt *>(param))) {
+        ParameterInt8 *p = nullptr;
+        if ((p = dynamic_cast<ParameterInt8 *>(param))) {
           p->setNoCalls(it->get<int8_t>());
         } else {
           std::cout << __FILE__ << ":" << __LINE__
@@ -267,8 +267,8 @@ bool SynthVoice::setTriggerParams(std::vector<VariantValue> pFields,
         }
       } break;
       case (VariantType::VARIANT_UINT8): {
-        ParameterInt *p = nullptr;
-        if ((p = dynamic_cast<ParameterInt *>(param))) {
+        ParameterUInt8 *p = nullptr;
+        if ((p = dynamic_cast<ParameterUInt8 *>(param))) {
           p->setNoCalls(it->get<uint8_t>());
         } else {
           std::cout << __FILE__ << ":" << __LINE__
@@ -287,9 +287,9 @@ bool SynthVoice::setTriggerParams(std::vector<VariantValue> pFields,
         }
       } break;
       case (VariantType::VARIANT_UINT64): {
-        ParameterInt64 *p = nullptr;
-        if ((p = dynamic_cast<ParameterInt64 *>(param))) {
-          static_cast<ParameterInt64 *>(param)->setNoCalls(it->get<uint64_t>());
+        ParameterUInt64 *p = nullptr;
+        if ((p = dynamic_cast<ParameterUInt64 *>(param))) {
+          static_cast<ParameterUInt64 *>(param)->setNoCalls(it->get<uint64_t>());
         } else {
           std::cout << __FILE__ << ":" << __LINE__
                     << " ERROR field data type and parameter type mismatch"
