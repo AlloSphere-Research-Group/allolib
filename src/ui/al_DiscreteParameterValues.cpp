@@ -12,6 +12,7 @@ DiscreteParameterValues::DiscreteParameterValues(VariantType datatype)
     : mDatatype(datatype) {
   switch (datatype) {
   case VariantType::VARIANT_FLOAT:
+  case VariantType::VARIANT_BOOL:
     mDataSize = 4;
     break;
   case VariantType::VARIANT_DOUBLE:
@@ -19,6 +20,7 @@ DiscreteParameterValues::DiscreteParameterValues(VariantType datatype)
     break;
   case VariantType::VARIANT_INT8:
   case VariantType::VARIANT_UINT8:
+  case VariantType::VARIANT_CHAR:
     mDataSize = 1;
     break;
   case VariantType::VARIANT_INT16:
@@ -271,6 +273,14 @@ std::string DiscreteParameterValues::valueToString(void *value) {
     uint8_t val = *(static_cast<uint8_t *>(value));
     valueStr = std::to_string(val);
   } break;
+  case VariantType::VARIANT_INT16: {
+    int16_t val = *(static_cast<int16_t *>(value));
+    valueStr = std::to_string(val);
+  } break;
+  case VariantType::VARIANT_UINT16: {
+    uint16_t val = *(static_cast<uint16_t *>(value));
+    valueStr = std::to_string(val);
+  } break;
   case VariantType::VARIANT_INT32: {
     int32_t val = *(static_cast<int32_t *>(value));
     valueStr = std::to_string(val);
@@ -287,10 +297,17 @@ std::string DiscreteParameterValues::valueToString(void *value) {
     uint64_t val = *(static_cast<uint64_t *>(value));
     valueStr = std::to_string(val);
   } break;
-    //  case VariantType::VARIANT_STRING: {
-    //    std::string val = (static_cast<char *>(value));
-    //    valueStr = val;
-    //  } break;
+  case VariantType::VARIANT_CHAR: {
+    char val = *(static_cast<char *>(value));
+    valueStr = std::to_string(val);
+  } break;
+  case VariantType::VARIANT_BOOL: {
+    bool val = *(static_cast<float *>(value));
+    valueStr = std::to_string(val);
+  } break;
+  default: {
+    valueStr = "";
+  } break;
   }
   return valueStr;
 }
@@ -328,13 +345,19 @@ double DiscreteParameterValues::valueToFloat(void *value) {
   case VariantType::VARIANT_UINT64: {
     valueDbl = *(static_cast<uint64_t *>(value));
   } break;
+  case VariantType::VARIANT_BOOL: {
+    valueDbl = *(static_cast<float *>(value));
+  } break;
+  default: {
+    valueDbl = 0;
+  } break;
   }
-  // TODO ML complete for other types. Done.
+  // TODO ML complete for other types. Non-value(string, none, MAX_ATOMIC_TYPE) skipped.
   return valueDbl;
 }
 
 int64_t DiscreteParameterValues::valueToInt64(void *value) {
-  int64_t valueInt;
+  int64_t valueInt = 0;
   switch (mDatatype) {
   case VariantType::VARIANT_FLOAT: {
     valueInt = *(static_cast<float *>(value));
@@ -366,7 +389,10 @@ int64_t DiscreteParameterValues::valueToInt64(void *value) {
   case VariantType::VARIANT_UINT64: {
     valueInt = *(static_cast<uint64_t *>(value));
   } break;
+  default: {
+    valueInt = 0;
+  } break;  
   }
-  // TODO ML complete for other types. Done.
+  // TODO ML complete for other types. Non-value(string, none, MAX_ATOMIC_TYPE) skipped.
   return valueInt;
 }
