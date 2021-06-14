@@ -55,7 +55,9 @@ enum VariantType {
   VARIANT_STRING = 12,
   VARIANT_CHAR = 2, // Avoid using VARIANT_CHAR use VARIANT_UINT8
   VARIANT_MAX_ATOMIC_TYPE = VARIANT_STRING,
-  VARIANT_BOOL = 99 // Use with care, not an NC type
+  VARIANT_BOOL = 99,           // Use with care, not an NC type
+  VARIANT_VECTOR_OFFSET = 100, // Vectors will have this value added to the type
+  VARIANT_VARIANT_VECTOR = 200 // Defines a vector of variants
 };
 
 // VariantValue
