@@ -11,6 +11,8 @@ University of California, Santa Barbara
 [![Build Status](https://travis-ci.org/AlloSphere-Research-Group/allolib.svg?branch=master)](https://travis-ci.org/AlloSphere-Research-Group/allolib)
 [![Build status](https://ci.appveyor.com/api/projects/status/c311nw14jmwq9lv1?svg=true)](https://ci.appveyor.com/project/mantaraya36/allolib)
 
+Find us at #allolib on libera.chat. Try the [libera.chat web interface](https://web.libera.chat/) interface if you don't have an IRC client
+
 # Documentation
 
 The API documentation can be found at: https://allosphere-research-group.github.io/allolib-doc/
