@@ -23,7 +23,7 @@ struct MyApp : public App {
     nav().pullBack(4);
   }
 
-  void onDraw(Graphics& g) {
+  void onDraw(Graphics &g) {
     g.clear();
 
     // The modelview matrix transforms each vertex before it is rendered.
@@ -36,10 +36,10 @@ struct MyApp : public App {
     // the transformations in the reverse order!
     g.translate(0, -0.5, 0);
     g.rotate(-45, 1, 0, 0);
-    g.scale(0.5, 0.3, 0.1);
+    g.scale(0.5f, 0.3f, 0.1f);
 
     // Finally, draw mesh
-    g.color(HSV(0.6, 0.5, 1));
+    g.color(HSV(0.6f, 0.5f, 1));
     g.draw(mesh);
 
     // Pop the modified matrix off the stack to restore the original matrix.
@@ -53,8 +53,8 @@ struct MyApp : public App {
       g.pushMatrix();
 
       g.translate(0, ds * (16 - i), 0);
-      g.scale(ds * i, ds * 0.5, ds * i);
-      g.color(HSV(0.1, 0.7, 1));
+      g.scale(ds * i, ds * 0.5f, ds * i);
+      g.color(HSV(0.1f, 0.7f, 1));
       g.draw(mesh);
 
       g.popMatrix();

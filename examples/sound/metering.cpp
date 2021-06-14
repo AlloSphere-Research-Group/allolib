@@ -18,7 +18,7 @@ struct MyApp : public App {
 
   void onSound(AudioIOData &io) override {
     while (io()) {
-      for (auto i = 0; i < io.channelsOut(); i++) {
+      for (size_t i = 0; i < io.channelsOut(); i++) {
         // Write meter values. This is only safe because float is atomic on
         // desktops.
         if (meterValues[i] < fabs(io.in(0))) {

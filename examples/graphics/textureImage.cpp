@@ -19,13 +19,13 @@ using namespace al;
 using namespace std;
 
 class MyApp : public App {
- public:
+public:
   Texture texture;
 
   void onCreate() {
     // Load a .jpg file
     //
-    const char* filename = "data/hubble.jpg";
+    const char *filename = "data/hubble.jpg";
 
     auto imageData = Image(filename);
 
@@ -41,8 +41,8 @@ class MyApp : public App {
     texture.filter(Texture::LINEAR);
   }
 
-  void onDraw(Graphics& g) {
-    g.clear(0.2);
+  void onDraw(Graphics &g) {
+    g.clear(0.2f);
 
     g.pushMatrix();
 

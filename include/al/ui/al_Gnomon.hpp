@@ -57,10 +57,10 @@ struct Gnomon {
 
       g.translate(xform);
       g.rotate(rot);
-      g.scale(scale);
+      g.scale((float)scale);
 
       g.color(colors[i]);
-      fontrender.write(labels[i], 0.1);
+      fontrender.write(labels[i], 0.1f);
       fontrender.render(g);
       g.popMatrix();
     }
@@ -69,7 +69,7 @@ struct Gnomon {
   }
 };
 
-}  // namespace al
+} // namespace al
 // Gnomon Gnomon::gnomon;
 
 #endif

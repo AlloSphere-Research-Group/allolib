@@ -19,7 +19,7 @@ int main() {
   */
   {
     unsigned short port = 11111;
-    const char* addr = "127.0.0.1";
+    const char *addr = "127.0.0.1";
     char data[] = {'H', 'e', 'l', 'l', 'o', ' ', 'N',
                    'e', 't', 'w', 'o', 'r', 'k', '!'};
 
@@ -44,8 +44,8 @@ int main() {
     Here we send our data out over the client socket. The return value of
     send is the number of bytes sent.
     */
-    int bytesSent = client.send(data, sizeof data);
-    printf("UDP client sent %d bytes.\n", bytesSent);
+    size_t bytesSent = client.send(data, sizeof data);
+    printf("UDP client sent %llu bytes.\n", bytesSent);
 
     // Receive data
     char buf[128];
@@ -57,11 +57,12 @@ int main() {
       block until a packet comes in. The return value is the number of
       bytes received.
       */
-      int bytesRecv = server.recv(buf, sizeof buf);
+      size_t bytesRecv = server.recv(buf, sizeof buf);
 
       if (bytesRecv > 0) {
-        printf("UDP server received %d bytes:\n", bytesRecv);
-        for (int i = 0; i < bytesRecv; ++i) printf("%c", buf[i]);
+        printf("UDP server received %llu bytes:\n", bytesRecv);
+        for (size_t i = 0; i < bytesRecv; ++i)
+          printf("%c", buf[i]);
         printf("\n\n");
         break;
       }
@@ -84,18 +85,20 @@ int main() {
       // std::string req = "GET / HTTP/1.0\r\n\r\n";
 
       // Here we send the request out
-      int bytesSent = client.send(req.c_str(), req.size());
-      printf("TCP client sent %d bytes:\n%s", bytesSent, req.c_str());
+      size_t bytesSent = client.send(req.c_str(), req.size());
+      printf("TCP client sent %llu bytes:\n%s", bytesSent, req.c_str());
 
       // Now, we go into a busy loop checking for a response from the server
       while (1) {
         char buf[512];
-        int n = client.recv(buf, sizeof buf);
+        size_t n = client.recv(buf, sizeof buf);
 
-        if (n <= 0) break;
+        if (n <= 0)
+          break;
 
-        printf("TCP client received %d bytes:\n", n);
-        for (int i = 0; i < n; ++i) printf("%c", buf[i]);
+        printf("TCP client received %llu bytes:\n", n);
+        for (size_t i = 0; i < n; ++i)
+          printf("%c", buf[i]);
         printf("\n\n");
       }
     }

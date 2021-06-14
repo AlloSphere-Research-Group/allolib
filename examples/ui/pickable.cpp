@@ -41,8 +41,8 @@ struct MyApp : public App {
 
     // Initialize pickableBB with mesh
     pickable.set(mesh);
-    pickable.testChildren = false;  // disable event propagation, we only enable
-                                    // when shift key is down
+    pickable.testChildren = false; // disable event propagation, we only enable
+                                   // when shift key is down
 
     // initialize child pickables
     child1.set(mesh);
@@ -55,8 +55,8 @@ struct MyApp : public App {
 
     child3.set(mesh);
     child3.scale.set(0.25);
-    child3.containedChild = true;  // drag events will not allow this child to
-                                   // leave its parent's bounding box
+    child3.containedChild = true; // drag events will not allow this child to
+                                  // leave its parent's bounding box
 
     // create pickable heirarchy
     pickable.addChild(child1);
@@ -67,7 +67,7 @@ struct MyApp : public App {
   void onAnimate(double dt) override {
     // move light in a circle
     t += dt;
-    light.pos(10 * cos(t), 0, 10 * sin(t));
+    light.pos(10 * cos((float)t), 0, 10 * sin((float)t));
   }
 
   void onDraw(Graphics &g) override {
@@ -77,12 +77,12 @@ struct MyApp : public App {
     g.lighting(true);
     g.light(light);
 
-    g.polygonLine();  // as lines
+    g.polygonLine(); // as lines
 
     // pass function to draw pickable and child meshes
     pickable.draw(g, [&](Pickable &p) {
       auto &b = dynamic_cast<PickableBB &>(p);
-      if (p.depth == 3) {  // change rendering based on pickable depth
+      if (p.depth == 3) { // change rendering based on pickable depth
         g.polygonFill();
         g.color(1, 0, 0);
       }

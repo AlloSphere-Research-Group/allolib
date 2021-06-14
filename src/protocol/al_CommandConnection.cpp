@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <iostream>
 
 namespace Convert {
@@ -138,7 +139,8 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
         }
         uint8_t message[16384];
 
-        int bytesRecv = incomingConnectionSocket->recv((char *)message, 16384);
+        size_t bytesRecv =
+            incomingConnectionSocket->recv((char *)message, 16384);
         if (bytesRecv > 0 && bytesRecv <= 16384) {
           if (message[0] == HANDSHAKE) {
             uint16_t version = 0;
@@ -290,7 +292,8 @@ uint16_t CommandServer::waitForConnections(uint16_t connectionCount,
       if (totalConnections - existingConnections < connectionCount) {
         al_sleep(0.3);
       } else {
-        return totalConnections - existingConnections;
+        assert(totalConnections - existingConnections < UINT16_MAX);
+        return (uint16_t)totalConnections - existingConnections;
       }
       currentTime = al_steady_time();
     }

@@ -48,16 +48,16 @@ struct MyApp : public App {
     // Use keyboard to control position of element
     switch (k.key()) {
     case 'w':
-      Y = Y + 0.1;
+      Y = Y + 0.1f;
       break;
     case 'x':
-      Y = Y - 0.1;
+      Y = Y - 0.1f;
       break;
     case 'a':
-      X = X - 0.1;
+      X = X - 0.1f;
       break;
     case 'd':
-      X = X + 0.1;
+      X = X + 0.1f;
       break;
     default:
       break;

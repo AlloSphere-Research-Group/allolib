@@ -119,7 +119,7 @@ public:
   /**
    * Set this function to determine what is drawn
    */
-  std::function<void(Graphics &)> onDraw = [](Graphics &g) { g.clear(0.3); };
+  std::function<void(Graphics &)> onDraw = [](Graphics &g) { g.clear(0.3f); };
 
   /**
    * Called once after every draw call, when view and context has been
