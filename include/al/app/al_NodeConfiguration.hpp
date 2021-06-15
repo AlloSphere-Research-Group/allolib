@@ -36,7 +36,16 @@ struct NodeConfiguration {
   bool hasCapability(Capability cap) { return cap & mCapabilites; }
   bool isPrimary() { return rank == 0; }
 
+  /**
+   * @brief setRole
+   * @param role
+   *
+   * Needs to be called before domains are initialized. If you call it at any
+   * other time, it will have no effect.
+   */
   void setRole(std::string role) {
+
+    // FIXME These capabilities should be enabled by domains...
     if (role == "desktop") {
       mCapabilites =
           (Capability)(CAP_SIMULATOR | CAP_STATE_SEND | CAP_RENDERING |
