@@ -549,8 +549,16 @@ void ParameterServer::sendParameterDetails(std::string IPaddress, int oscPort) {
 }
 
 void ParameterServer::requestAllParameters(std::string IPaddress, int oscPort) {
-  osc::Send sender(oscPort, IPaddress.c_str());
-  sender.send("/sendAllParameters", mServer->address(), mServer->port());
+  try {
+    osc::Send sender;
+    if (sender.open(oscPort, IPaddress.c_str())) {
+      sender.send("/sendAllParameters", mServer->address(), mServer->port());
+    }
+  } catch (std::exception &e) {
+    std::cerr << __FILE__ << ":" << __LINE__
+              << "ERROR requesting all parameters" << std::endl;
+    std::cerr << e.what() << std::endl;
+  }
 }
 
 void ParameterServer::changeCallback(float value, void *sender, void *userData,

@@ -6,14 +6,15 @@ using namespace al;
 // PresetServer ----------------------------------------------------------------
 
 PresetServer::PresetServer(std::string oscAddress, int oscPort)
-    : mServer(nullptr),
-      mOSCpath("/preset"),
-      mAllowStore(true),
-      mStoreMode(false),
-      mNotifyPresetChange(true),
-      mParameterServer(nullptr) {
-  mServer = new osc::Recv(oscPort, oscAddress.c_str(),
-                          0.001);  // Is this 1ms wait OK?
+    : mServer(nullptr), mOSCpath("/preset"), mAllowStore(true),
+      mStoreMode(false), mNotifyPresetChange(true), mParameterServer(nullptr) {
+  try {
+    mServer = new osc::Recv(oscPort, oscAddress.c_str(),
+                            0.001); // Is this 1ms wait OK?
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
+  }
+
   if (mServer) {
     mServer->handler(*this);
     mServer->start();
@@ -23,11 +24,8 @@ PresetServer::PresetServer(std::string oscAddress, int oscPort)
 }
 
 PresetServer::PresetServer(ParameterServer &paramServer)
-    : mServer(nullptr),
-      mOSCpath("/preset"),
-      mAllowStore(true),
-      mStoreMode(false),
-      mNotifyPresetChange(true) {
+    : mServer(nullptr), mOSCpath("/preset"), mAllowStore(true),
+      mStoreMode(false), mNotifyPresetChange(true) {
   paramServer.registerOSCListener(this);
   mParameterServer = &paramServer;
 }
@@ -42,7 +40,7 @@ PresetServer::~PresetServer() {
 }
 
 void PresetServer::onMessage(osc::Message &m) {
-  m.resetStream();  // Should be moved to the caller...
+  m.resetStream(); // Should be moved to the caller...
   //	std::cout << "PresetServer::onMessage " << std::endl;
   mPresetChangeLock.lock();
   mPresetChangeSenderAddr = m.senderAddress();
@@ -185,7 +183,7 @@ void PresetServer::attachPacketHandler(osc::PacketHandler *handler) {
 }
 
 void PresetServer::changeCallback(int value, void *sender, void *userData) {
-  (void)sender;  // remove compiler warnings
+  (void)sender; // remove compiler warnings
   PresetServer *server = static_cast<PresetServer *>(userData);
   //	Parameter *parameter = static_cast<Parameter *>(sender);
 
