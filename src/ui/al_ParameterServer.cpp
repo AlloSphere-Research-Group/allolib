@@ -592,7 +592,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
                                                    std::string address,
                                                    osc::Message &m) {
 
-  ValueSource s{m.senderAddress(), 0};
+  ValueSource s{m.senderAddress(), m.senderPort()};
   if (strcmp(typeid(*param).name(), typeid(ParameterBool).name()) ==
       0) { // ParameterBool
     ParameterBool *p = dynamic_cast<ParameterBool *>(param);

@@ -224,7 +224,7 @@ public:
   /// bundle)
   /// @param[in] senderAddr	IP address of sender
   Message(const char *message, int size, const TimeTag &timeTag = 1,
-          const char *senderAddr = nullptr);
+          const char *senderAddr = nullptr, uint16_t senderPort = 0);
   ~Message();
 
   /// Pretty-print message information
@@ -240,6 +240,7 @@ public:
   const std::string &addressPattern() const { return mAddressPattern; }
 
   const std::string senderAddress() const { return std::string(mSenderAddr); }
+  const uint16_t senderPort() const { return mSenderPort; }
 
   /// Get type tags
   const std::string &typeTags() const { return mTypeTags; }
@@ -264,6 +265,7 @@ protected:
   std::string mTypeTags;
   TimeTag mTimeTag;
   char mSenderAddr[32];
+  uint16_t mSenderPort;
 };
 
 /// Interface for classes that can be registered as handlers with a osc::Recv
@@ -456,14 +458,15 @@ public:
   /// Stop the background polling
   void stop();
 
-  void parse(const char *packet, int size, const char *senderAddr);
+  void parse(const char *packet, int size, const char *senderAddr,
+             uint16_t senderPort = 0);
   void loop();
 
   static bool portAvailable(uint16_t port, const char *address = "");
 
   static std::vector<std::shared_ptr<Message>>
   parse(const char *packet, int size, TimeTag timeTag = 1,
-        const char *senderAddr = nullptr);
+        const char *senderAddr = nullptr, uint16_t senderPort = 0);
 
 protected:
   std::vector<PacketHandler *> mHandlers;

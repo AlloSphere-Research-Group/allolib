@@ -190,7 +190,7 @@ public:
 };
 
 Message::Message(const char *message, int size, const TimeTag &timeTag,
-                 const char *senderAddr)
+                 const char *senderAddr, uint16_t senderPort)
     : mImpl(new Impl(message, size)), mTimeTag(timeTag) {
   OSCTRY("Message()", mAddressPattern = mImpl->AddressPattern();
          mTypeTags = mImpl->ArgumentCount() ? mImpl->TypeTags() : "";
@@ -207,8 +207,8 @@ Message::~Message() { OSCTRY("~Message()", delete mImpl;) }
 void Message::print() const {
   OSCTRY(
       "Message::print",
-      printf("%s, %s %" AL_PRINTF_LL "d from %s\n", addressPattern().c_str(),
-             typeTags().c_str(), timeTag(), mSenderAddr);
+      printf("%s, %s %" AL_PRINTF_LL "d from %s:%i\n", addressPattern().c_str(),
+             typeTags().c_str(), timeTag(), mSenderAddr, mSenderPort);
 
       ::osc::ReceivedMessageArgumentIterator it = mImpl->ArgumentsBegin();
 
@@ -367,7 +367,7 @@ public:
                              const IpEndpointName &remoteEndpoint) override {
     char addr[IpEndpointName::ADDRESS_STRING_LENGTH];
     remoteEndpoint.AddressAsString(addr);
-    recv->parse(data, size, addr);
+    recv->parse(data, size, addr, remoteEndpoint.port);
   }
 
   void loop() { /*receiveSocket.RunUntilSigInt();*/
@@ -425,9 +425,10 @@ void Recv::stop() {
   }
 }
 
-void Recv::parse(const char *packet, int size, const char *senderAddr) {
+void Recv::parse(const char *packet, int size, const char *senderAddr,
+                 uint16_t senderPort) {
   std::memcpy(&mBuffer[0], packet, size);
-  auto messages = parse(&mBuffer[0], size, 1, senderAddr);
+  auto messages = parse(&mBuffer[0], size, 1, senderAddr, senderPort);
   for (auto *handler : mHandlers) {
     for (auto m : messages) {
       handler->onMessage(*m);
@@ -458,7 +459,8 @@ bool Recv::portAvailable(uint16_t port, const char *address) {
 
 std::vector<std::shared_ptr<Message>> Recv::parse(const char *packet, int size,
                                                   TimeTag timeTag,
-                                                  const char *senderAddr) {
+                                                  const char *senderAddr,
+                                                  uint16_t senderPort) {
 #ifdef VERBOSE
   int i = 1;
 #endif
@@ -505,14 +507,14 @@ std::vector<std::shared_ptr<Message>> Recv::parse(const char *packet, int size,
         DPRINTF("\tLet's try to parse it...\n");
 
         auto innerMessages =
-            parse(e.Contents(), e.Size(), r.TimeTag(), senderAddr);
+            parse(e.Contents(), e.Size(), r.TimeTag(), senderAddr, senderPort);
         messages.insert(messages.end(), innerMessages.begin(),
                         innerMessages.end());
       }
     } else if (p.IsMessage()) {
       DPRINTF("Parsing a message\n");
-      messages.push_back(
-          std::make_shared<Message>(packet, size, timeTag, senderAddr));
+      messages.push_back(std::make_shared<Message>(packet, size, timeTag,
+                                                   senderAddr, senderPort));
     }
   } catch (::osc::Exception &e) {
     AL_WARN("OSC error: %s", e.what());
