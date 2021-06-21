@@ -102,6 +102,7 @@ void DistributedApp::prepare() {
       setRole("desktop");
       rank = 0;
       group = 0;
+      oscDomain()->interfaceIP = "127.0.0.1";
     }
   } else { // No nodes table in config file. Use desktop role
     auto defaultCapabilities = al::sphere::getSphereNodes();
@@ -113,6 +114,8 @@ void DistributedApp::prepare() {
       setRole("desktop");
       rank = 0;
       group = 0;
+
+      oscDomain()->interfaceIP = "127.0.0.1";
     }
   }
 
@@ -141,9 +144,11 @@ void DistributedApp::prepare() {
     mCapabilites = (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC);
     rank = 99;
     std::cout << "Replica: " << name() << ":Running distributed" << std::endl;
+    // For some reason, if we leave it at 0.0.0.0 messages are blocked on
+    // windows
   } else if (rank == 0) {
     testServer.stop();
-    std::cout << "Primary: " << name() << ":Running distributed" << std::endl;
+    std::cout << "Primary: " << name() << ": Running distributed" << std::endl;
   } else {
     testServer.stop();
     std::cout << "Secondary: rank " << rank << std::endl;
