@@ -83,6 +83,8 @@ public:
    */
   virtual void prepare();
 
+  std::string getPrimaryHost();
+
   void registerDynamicScene(DynamicScene &scene);
 
   Graphics &graphics() override;

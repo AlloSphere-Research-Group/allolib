@@ -166,6 +166,15 @@ void DistributedApp::prepare() {
   initialized = true;
 }
 
+std::string DistributedApp::getPrimaryHost() {
+  for (auto node : mRoleMap) {
+    if (node.second == "simulator" || node.second == "desktop") {
+      return node.first;
+    }
+  }
+  return std::string();
+}
+
 void DistributedApp::start() {
   prepare();
   stdControls.app = this;
