@@ -44,8 +44,9 @@
         Graham Wakefield, 2010, grrrwaaa@gmail.com
 */
 
-#include <inttypes.h>
 #include <cstring>
+#include <inttypes.h>
+#include <vector>
 
 //#include "allocore/system/pstdint.h"
 
@@ -60,7 +61,7 @@ namespace al {
 
 /// @ingroup allocore
 class SingleRWRingBuffer {
- public:
+public:
   /** Allocate ringbuffer.
       Actual size rounded up to next power of 2. */
   SingleRWRingBuffer(size_t sz = 256);
@@ -78,26 +79,26 @@ class SingleRWRingBuffer {
   /** Copy sz bytes from src into the ringbuffer.
       Returns bytes actually copied.
       */
-  size_t write(const char* src, size_t sz);
+  size_t write(const char *src, size_t sz);
 
   /** Read sz bytes of data from the ring buffer and advance the read pointer.
               Returns bytes actually copied
       */
-  size_t read(char* dst, size_t sz);
+  size_t read(char *dst, size_t sz);
 
   /** Read data without advancing the read pointer
       Returns bytes actually copied
       */
-  size_t peek(char* dst, size_t sz);
+  size_t peek(char *dst, size_t sz);
 
   /** Clear any data in the ringbuffer
    */
   void clear() { mRead = mWrite; }
 
- protected:
+protected:
   size_t mSize, mWrap;
   size_t mRead, mWrite;
-  char* mData;
+  std::vector<char> mData;
 };
 
 inline uint32_t next_power_of_two(uint32_t v) {
@@ -111,19 +112,18 @@ inline uint32_t next_power_of_two(uint32_t v) {
 }
 
 inline SingleRWRingBuffer ::SingleRWRingBuffer(size_t sz)
-    : mSize(size_t(next_power_of_two(uint32_t(sz)))),
-      mWrap(mSize - 1),
-      mRead(0),
-      mWrite(0) {
-  mData = new char[mSize];
+    : mSize(size_t(next_power_of_two(uint32_t(sz)))), mWrap(mSize - 1),
+      mRead(0), mWrite(0) {
+  mData.resize(mSize);
 }
 
-inline SingleRWRingBuffer ::~SingleRWRingBuffer() { delete[] mData; }
+inline SingleRWRingBuffer ::~SingleRWRingBuffer() {}
 
 inline size_t SingleRWRingBuffer ::writeSpace() const {
   const size_t r = mRead;
   const size_t w = mWrite;
-  if (r == w) return mWrap;
+  if (r == w)
+    return mWrap;
   return ((mSize + (r - w)) & mWrap) - 1;
 }
 
@@ -133,67 +133,70 @@ inline size_t SingleRWRingBuffer ::readSpace() const {
   return (mSize + (w - r)) & mWrap;
 }
 
-inline size_t SingleRWRingBuffer ::write(const char* src, size_t sz) {
+inline size_t SingleRWRingBuffer ::write(const char *src, size_t sz) {
   size_t space = writeSpace();
   sz = sz > space ? space : sz;
-  if (sz == 0) return 0;
+  if (sz == 0)
+    return 0;
 
   size_t w = mWrite;
   size_t end = w + sz;
 
   if (end < mSize) {
-    memcpy(mData + w, src, sz);
+    memcpy(mData.data() + w, src, sz);
   } else {
     size_t split = mSize - w;
     end &= mWrap;
-    memcpy(mData + w, src, split);
-    memcpy(mData, src + split, end);
+    memcpy(mData.data() + w, src, split);
+    memcpy(mData.data(), src + split, end);
   }
 
   mWrite = end;
   return sz;
 }
 
-inline size_t SingleRWRingBuffer ::read(char* dst, size_t sz) {
+inline size_t SingleRWRingBuffer ::read(char *dst, size_t sz) {
   size_t space = readSpace();
   sz = sz > space ? space : sz;
-  if (sz == 0) return 0;
+  if (sz == 0)
+    return 0;
 
   size_t r = mRead;
   size_t end = r + sz;
 
   if (end < mSize) {
-    memcpy(dst, mData + r, sz);
+    memcpy(dst, mData.data() + r, sz);
   } else {
     size_t split = mSize - r;
     end &= mWrap;
-    memcpy(dst, mData + r, split);
-    memcpy(dst + split, mData, end);
+    memcpy(dst, mData.data() + r, split);
+    memcpy(dst + split, mData.data(), end);
   }
 
   mRead = end;
   return sz;
 }
 
-inline size_t SingleRWRingBuffer ::peek(char* dst, size_t sz) {
+inline size_t SingleRWRingBuffer ::peek(char *dst, size_t sz) {
   size_t space = readSpace();
   sz = sz > space ? space : sz;
-  if (sz == 0) return 0;
+  if (sz == 0)
+    return 0;
 
   size_t r = mRead;
   size_t end = r + sz;
 
   if (end < mSize) {
-    memcpy(dst, mData + r, sz);
+    memcpy(dst, mData.data() + r, sz);
   } else {
     size_t split = mSize - r;
     end &= mWrap;
-    memcpy(dst, mData + r, split);
-    memcpy(dst + split, mData, end);
+    memcpy(dst, mData.data() + r, split);
+    memcpy(dst + split, mData.data(), end);
   }
   return sz;
 }
 
-}  // namespace al
+} // namespace al
 
 #endif /* include guard */
