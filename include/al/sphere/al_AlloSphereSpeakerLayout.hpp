@@ -7,6 +7,12 @@ namespace al {
 
 /// Current arrangement of speakers in AlloSphere
 Speakers AlloSphereSpeakerLayout();
+Speakers AlloSphereSpeakerLayoutThin();
+Speakers AlloSphereSpeakerLayoutExtraThin();
 
-}  // namespace al
+Speakers AlloSphereSpeakerLayoutHorizontal();
+Speakers AlloSphereSpeakerLayoutHorizontalThin();
+Speakers AlloSphereSpeakerLayoutHorizontalExtraThin();
+
+} // namespace al
 #endif

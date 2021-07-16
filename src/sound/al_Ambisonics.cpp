@@ -69,58 +69,57 @@ int AmbiBase::channelsToUniformOrder(int channels) {
   return (int)(sqrt((double)channels) - 1);
 }
 
-void AmbiBase::encodeWeightsFuMa(float* ws, int dim, int order, float x,
+void AmbiBase::encodeWeightsFuMa(float *ws, int dim, int order, float x,
                                  float y, float z) {
   // float *weights = ws;
-  *ws++ = c1_sqrt2;  // W = 1/sqrt(2)
+  *ws++ = c1_sqrt2; // W = 1/sqrt(2)
 
   if (order > 0) {
     float x2 = x * x;
     float y2 = y * y;
 
-    *ws++ = x;  // X = cos(A)cos(E)
-    *ws++ = y;  // Y = sin(A)cos(E)
+    *ws++ = x; // X = cos(A)cos(E)
+    *ws++ = y; // Y = sin(A)cos(E)
 
     if (order > 1) {
       x2 = x * x;
       y2 = y * y;
 
-      *ws++ = x2 - y2;      // U = cos(2A)cos2(E) = xx-yy
-      *ws++ = 2.f * x * y;  // V = sin(2A)cos2(E) = 2xy
+      *ws++ = x2 - y2;     // U = cos(2A)cos2(E) = xx-yy
+      *ws++ = 2.f * x * y; // V = sin(2A)cos2(E) = 2xy
 
       if (order > 2) {
-        *ws++ = x * (x2 - 3.f * y2);  // P = cos(3A)cos3(E) = X(X2-3Y2)
-        *ws++ = y * (y2 - 3.f * x2);  // Q = sin(3A)cos3(E) = Y(3X2-Y2)
+        *ws++ = x * (x2 - 3.f * y2); // P = cos(3A)cos3(E) = X(X2-3Y2)
+        *ws++ = y * (y2 - 3.f * x2); // Q = sin(3A)cos3(E) = Y(3X2-Y2)
       }
     }
 
     if (dim == 3) {
-      *ws++ = z;  // Z = sin(E)
+      *ws++ = z; // Z = sin(E)
 
       if (order > 1) {
         float z2 = z * z;
 
-        *ws++ = 2.f * z * x;         // S = cos(A)sin(2E) = 2zx
-        *ws++ = 2.f * z * y;         // T = sin(A)sin(2E) = 2yz
-        *ws++ = (1.5f * z2) - 0.5f;  // R = 1.5sin2(E)-0.5 = 1.5zz-0.5
+        *ws++ = 2.f * z * x;        // S = cos(A)sin(2E) = 2zx
+        *ws++ = 2.f * z * y;        // T = sin(A)sin(2E) = 2yz
+        *ws++ = (1.5f * z2) - 0.5f; // R = 1.5sin2(E)-0.5 = 1.5zz-0.5
 
         if (order > 2) {
           float pre = c40_11 * z2 - c8_11;
 
-          *ws++ =
-              z * (x2 - y2) * 0.5f;  // N = cos(2A)sin(E)cos2(E) = Z(X2-Y2)/2
-          *ws++ = x * y * z;         // O = sin(2A)sin(E)cos2(E) = XYZ
-          *ws++ = pre * x;  // L = 8cos(A)cos(E)(5sin2(E) - 1)/11 = 8X(5Z2-1)/11
-          *ws++ = pre * y;  // M = 8sin(A)cos(E)(5sin2(E) - 1)/11 = 8Y(5Z2-1)/11
-          *ws = z *
-                (2.5f * z2 - 1.5f);  // K = sin(E)(5sin2(E) - 3)/2 = Z(5Z2-3)/2
+          *ws++ = z * (x2 - y2) * 0.5f; // N = cos(2A)sin(E)cos2(E) = Z(X2-Y2)/2
+          *ws++ = x * y * z;            // O = sin(2A)sin(E)cos2(E) = XYZ
+          *ws++ = pre * x; // L = 8cos(A)cos(E)(5sin2(E) - 1)/11 = 8X(5Z2-1)/11
+          *ws++ = pre * y; // M = 8sin(A)cos(E)(5sin2(E) - 1)/11 = 8Y(5Z2-1)/11
+          *ws =
+              z * (2.5f * z2 - 1.5f); // K = sin(E)(5sin2(E) - 3)/2 = Z(5Z2-3)/2
         }
       }
     }
   }
 }
 
-void AmbiBase::encodeWeightsFuMa(float* ws, int dim, int order, float az,
+void AmbiBase::encodeWeightsFuMa(float *ws, int dim, int order, float az,
                                  float el) {
   WRAP(az);
   WRAP(el);
@@ -132,31 +131,31 @@ void AmbiBase::encodeWeightsFuMa(float* ws, int dim, int order, float az,
 }
 
 // [x, y, z] is the direction unit vector
-void AmbiBase::encodeWeightsFuMa16(float* ws, float x, float y, float z) {
+void AmbiBase::encodeWeightsFuMa16(float *ws, float x, float y, float z) {
   float x2 = x * x;
   float y2 = y * y;
   float z2 = z * z;
   float pre = c40_11 * z2 - c8_11;
 
-  ws[0] = c1_sqrt2;               // W channel, shouldn't it be already defined?
-  ws[1] = x;                      // X = cos(A)cos(E)
-  ws[2] = y;                      // Y = sin(A)cos(E)
-  ws[3] = z;                      // Z = sin(E)
-  ws[4] = x2 - y2;                // U = cos(2A)cos2(E) = xx-yy
-  ws[5] = 2.f * x * y;            // V = sin(2A)cos2(E) = 2xy
-  ws[6] = 2.f * z * x;            // S = cos(A)sin(2E) = 2zx
-  ws[7] = 2.f * z * y;            // T = sin(A)sin(2E) = 2yz
-  ws[8] = 1.5f * z2 - 0.5f;       // R = 1.5sin2(E)-0.5 = 1.5zz-0.5
-  ws[9] = x * (x2 - 3.f * y2);    // P = cos(3A)cos3(E) = X(X2-3Y2)
-  ws[10] = y * (y2 - 3.f * x2);   // Q = sin(3A)cos3(E) = Y(3X2-Y2)
-  ws[11] = z * (x2 - y2) * 0.5f;  // N = cos(2A)sin(E)cos2(E) = Z(X2-Y2)/2
-  ws[12] = x * y * z;             // O = sin(2A)sin(E)cos2(E) = XYZ
-  ws[13] = pre * x;  // L = 8cos(A)cos(E)(5sin2(E) - 1)/11 = 8X(5Z2-1)/11
-  ws[14] = pre * y;  // M = 8sin(A)cos(E)(5sin2(E) - 1)/11 = 8Y(5Z2-1)/11
-  ws[15] = z * (2.5f * z2 - 1.5f);  // K = sin(E)(5sin2(E) - 3)/2 = Z(5Z2-3)/2
+  ws[0] = c1_sqrt2;              // W channel, shouldn't it be already defined?
+  ws[1] = x;                     // X = cos(A)cos(E)
+  ws[2] = y;                     // Y = sin(A)cos(E)
+  ws[3] = z;                     // Z = sin(E)
+  ws[4] = x2 - y2;               // U = cos(2A)cos2(E) = xx-yy
+  ws[5] = 2.f * x * y;           // V = sin(2A)cos2(E) = 2xy
+  ws[6] = 2.f * z * x;           // S = cos(A)sin(2E) = 2zx
+  ws[7] = 2.f * z * y;           // T = sin(A)sin(2E) = 2yz
+  ws[8] = 1.5f * z2 - 0.5f;      // R = 1.5sin2(E)-0.5 = 1.5zz-0.5
+  ws[9] = x * (x2 - 3.f * y2);   // P = cos(3A)cos3(E) = X(X2-3Y2)
+  ws[10] = y * (y2 - 3.f * x2);  // Q = sin(3A)cos3(E) = Y(3X2-Y2)
+  ws[11] = z * (x2 - y2) * 0.5f; // N = cos(2A)sin(E)cos2(E) = Z(X2-Y2)/2
+  ws[12] = x * y * z;            // O = sin(2A)sin(E)cos2(E) = XYZ
+  ws[13] = pre * x; // L = 8cos(A)cos(E)(5sin2(E) - 1)/11 = 8X(5Z2-1)/11
+  ws[14] = pre * y; // M = 8sin(A)cos(E)(5sin2(E) - 1)/11 = 8Y(5Z2-1)/11
+  ws[15] = z * (2.5f * z2 - 1.5f); // K = sin(E)(5sin2(E) - 3)/2 = Z(5Z2-3)/2
 }
 
-void AmbiBase::encodeWeightsFuMa16(float* ws, float az, float el) {
+void AmbiBase::encodeWeightsFuMa16(float *ws, float az, float el) {
   WRAP(az);
   WRAP(el);
   float cosel = COS(el);
@@ -171,35 +170,35 @@ void AmbiBase::encodeWeightsFuMa16(float* ws, float az, float el) {
 float AmbiDecode::flavorWeights[4][5][5] = {
     {
         // none:
-        {1, 1, 1, 1, 1},  // n = 0, M = 0, 1, 2, 3, 4
-        {0, 1, 1, 1, 1},  // n = 1, M = 0, 1, 2, 3, 4
-        {0, 0, 1, 1, 1},  // n = 2, M = 0, 1, 2, 3, 4
-        {0, 0, 0, 1, 1},  // n = 3, M = 0, 1, 2, 3, 4
-        {0, 0, 0, 0, 1}   // n = 4, M = 0, 1, 2, 3, 4
+        {1, 1, 1, 1, 1}, // n = 0, M = 0, 1, 2, 3, 4
+        {0, 1, 1, 1, 1}, // n = 1, M = 0, 1, 2, 3, 4
+        {0, 0, 1, 1, 1}, // n = 2, M = 0, 1, 2, 3, 4
+        {0, 0, 0, 1, 1}, // n = 3, M = 0, 1, 2, 3, 4
+        {0, 0, 0, 0, 1}  // n = 4, M = 0, 1, 2, 3, 4
     },
     {
         // default:
-        {1, 0.707, 0.707, 0.707, 0.707},  // n = 0, M = 0, 1, 2, 3, 4
-        {0, 1, 0.75, 0.75, 0.75},         // n = 1, M = 0, 1, 2, 3, 4
-        {0, 0, 0.5, 0.5, 0.5},            // n = 2, M = 0, 1, 2, 3, 4
-        {0, 0, 0, 0.3, 0.3},              // n = 3, M = 0, 1, 2, 3, 4
-        {0, 0, 0, 0, 0.1}                 // n = 4, M = 0, 1, 2, 3, 4
+        {1, 0.707, 0.707, 0.707, 0.707}, // n = 0, M = 0, 1, 2, 3, 4
+        {0, 1, 0.75, 0.75, 0.75},        // n = 1, M = 0, 1, 2, 3, 4
+        {0, 0, 0.5, 0.5, 0.5},           // n = 2, M = 0, 1, 2, 3, 4
+        {0, 0, 0, 0.3, 0.3},             // n = 3, M = 0, 1, 2, 3, 4
+        {0, 0, 0, 0, 0.1}                // n = 4, M = 0, 1, 2, 3, 4
     },
     {
         // in phase
-        {1, 1, 1, 1, 1},              // n = 0, M = 0, 1, 2, 3, 4
-        {0, 0.333, 0.5, 0.6, 0.667},  // n = 1, M = 0, 1, 2, 3, 4
-        {0, 0, 0.1, 0.2, 0.286},      // n = 2, M = 0, 1, 2, 3, 4
-        {0, 0, 0, 0.029, 0.071},      // n = 3, M = 0, 1, 2, 3, 4
-        {0, 0, 0, 0, 0.008}           // n = 4, M = 0, 1, 2, 3, 4
+        {1, 1, 1, 1, 1},             // n = 0, M = 0, 1, 2, 3, 4
+        {0, 0.333, 0.5, 0.6, 0.667}, // n = 1, M = 0, 1, 2, 3, 4
+        {0, 0, 0.1, 0.2, 0.286},     // n = 2, M = 0, 1, 2, 3, 4
+        {0, 0, 0, 0.029, 0.071},     // n = 3, M = 0, 1, 2, 3, 4
+        {0, 0, 0, 0, 0.008}          // n = 4, M = 0, 1, 2, 3, 4
     },
     {
         // max-rE
-        {1, 1, 1, 1, 1},                  // n = 0, M = 0, 1, 2, 3, 4
-        {0, 0.577, 0.775, 0.861, 0.906},  // n = 1, M = 0, 1, 2, 3, 4
-        {0, 0, 0.4, 0.612, 0.732},        // n = 2, M = 0, 1, 2, 3, 4
-        {0, 0, 0, 0.305, 0.501},          // n = 3, M = 0, 1, 2, 3, 4
-        {0, 0, 0, 0, 0.246}               // n = 4, M = 0, 1, 2, 3, 4
+        {1, 1, 1, 1, 1},                 // n = 0, M = 0, 1, 2, 3, 4
+        {0, 0.577, 0.775, 0.861, 0.906}, // n = 1, M = 0, 1, 2, 3, 4
+        {0, 0, 0.4, 0.612, 0.732},       // n = 2, M = 0, 1, 2, 3, 4
+        {0, 0, 0, 0.305, 0.501},         // n = 3, M = 0, 1, 2, 3, 4
+        {0, 0, 0, 0, 0.246}              // n = 4, M = 0, 1, 2, 3, 4
     }};
 
 AmbiDecode::AmbiDecode(int dim, int order, int numSpeakers, int flav)
@@ -213,18 +212,38 @@ AmbiDecode::~AmbiDecode() {
   // delete[] mSpeakers; // listener now owns speakers and will delete them
 }
 
-void AmbiDecode::decode(float* dec, const float* ambi, int numDecFrames) const {
+void AmbiDecode::decode(float *dec, const float *ambi, int numDecFrames) const {
   // iterate speakers
   for (int s = 0; s < numSpeakers(); ++s) {
     // skip zero-amp speakers:
     if (mSpeakers[s].gain != 0.) {
-      float* out = dec + mSpeakers[s].deviceChannel * numDecFrames;
+      float *out = dec + mSpeakers[s].deviceChannel * numDecFrames;
 
       // iterate ambi channels
       for (int c = 0; c < channels(); ++c) {
-        const float* in = ambi + c * numDecFrames;
+        const float *in = ambi + c * numDecFrames;
         float w = decodeWeight(s, c);
-        for (int i = 0; i < numDecFrames; ++i) out[i] += in[i] * w;
+        for (int i = 0; i < numDecFrames; ++i)
+          out[i] += in[i] * w;
+      }
+    }
+  }
+}
+
+void AmbiDecode::decode(float **dec, const float **ambi,
+                        int numDecFrames) const {
+  // iterate speakers
+  for (int s = 0; s < numSpeakers(); ++s) {
+    // skip zero-amp speakers:
+    if (mSpeakers[s].gain != 0.) {
+      float *out = dec[mSpeakers[s].deviceChannel];
+
+      // iterate ambi channels
+      for (int c = 0; c < channels(); ++c) {
+        const float *in = ambi[c];
+        float w = decodeWeight(s, c);
+        for (int i = 0; i < numDecFrames; ++i)
+          out[i] += in[i] * w;
       }
     }
   }
@@ -267,10 +286,10 @@ void AmbiDecode::setSpeakerRadians(int index, int deviceChannel, float az,
 void AmbiDecode::setSpeaker(int index, int deviceChannel, float az, float el,
                             float amp) {
   setSpeakerRadians(index, deviceChannel, az * float(0.01745329252),
-                    el* float(0.01745329252), amp);
+                    el *float(0.01745329252), amp);
 }
 
-void AmbiDecode::setSpeakers(Speakers* spkrs) {
+void AmbiDecode::setSpeakers(Speakers *spkrs) {
   //	mSpeakers.resize(spkrs->size());
   //	for (unsigned i = 0; i < mSpeakers.size(); i++) {
   //		Speaker &spkr = spkrs->at(i);
@@ -280,36 +299,49 @@ void AmbiDecode::setSpeakers(Speakers* spkrs) {
   setSpeakers(*spkrs);
 }
 
-void AmbiDecode::setSpeakers(Speakers& spkrs) { mSpeakers = spkrs; }
+void AmbiDecode::setSpeakers(Speakers &spkrs) {
+  mSpeakers = spkrs;
+  resizeArrays(channels(), mSpeakers.size());
+  // update encoding weights
+  for (int i = 0; i < mSpeakers.size(); i++) {
+    for (int index = 0; index < channels(); index++) {
+      encodeWeightsFuMa(mDecodeMatrix + index * channels(), mDim, mOrder,
+                        mSpeakers[i].azimuth, mSpeakers[i].elevation);
+      for (int i = 0; i < channels(); i++) {
+        mDecodeMatrix[index * channels() + i] *= mSpeakers[i].gain;
+      }
+    }
+  }
+}
 
 void AmbiDecode::updateChanWeights() {
-  float* wc = mWeights;
+  float *wc = mWeights;
   *wc++ = mWOrder[0];
 
   if (mOrder > 0) {
-    *wc++ = mWOrder[1];  // X
-    *wc++ = mWOrder[1];  // Y
+    *wc++ = mWOrder[1]; // X
+    *wc++ = mWOrder[1]; // Y
     if (mOrder > 1) {
-      *wc++ = mWOrder[2];  // U
-      *wc++ = mWOrder[2];  // V
+      *wc++ = mWOrder[2]; // U
+      *wc++ = mWOrder[2]; // V
       if (mOrder > 2) {
-        *wc++ = mWOrder[3];  // P
-        *wc++ = mWOrder[3];  // Q
+        *wc++ = mWOrder[3]; // P
+        *wc++ = mWOrder[3]; // Q
       }
     }
 
     if (3 == mDim) {
-      *wc++ = mWOrder[1];  // Z
+      *wc++ = mWOrder[1]; // Z
       if (mOrder > 1) {
-        *wc++ = mWOrder[2];  // S
-        *wc++ = mWOrder[2];  // T
-        *wc++ = mWOrder[2];  // R
+        *wc++ = mWOrder[2]; // S
+        *wc++ = mWOrder[2]; // T
+        *wc++ = mWOrder[2]; // R
         if (mOrder > 2) {
-          *wc++ = mWOrder[3];  // N
-          *wc++ = mWOrder[3];  // O
-          *wc++ = mWOrder[3];  // L
-          *wc++ = mWOrder[3];  // M
-          *wc = mWOrder[3];    // K
+          *wc++ = mWOrder[3]; // N
+          *wc++ = mWOrder[3]; // O
+          *wc++ = mWOrder[3]; // L
+          *wc++ = mWOrder[3]; // M
+          *wc = mWOrder[3];   // K
         }
       }
     }
@@ -344,7 +376,7 @@ void AmbiDecode::resizeArrays(int numChannels, int numSpeakers) {
 
 void AmbiDecode::onChannelsChange() { resizeArrays(channels(), mNumSpeakers); }
 
-void AmbiDecode::print(std::ostream& stream) const {
+void AmbiDecode::print(std::ostream &stream) const {
   //	AmbiBase::print(stdout, ", ");
   //	fprintf(fp, "s:%3d%s", mNumSpeakers, append);
 
@@ -367,7 +399,7 @@ void AmbiDecode::print(std::ostream& stream) const {
 }
 
 // ---- AmbiEncode
-void AmbiEncode::print(std::ostream& stream) {
+void AmbiEncode::print(std::ostream &stream) {
   stream << "Encode weights:" << std::endl;
   int numHarm = orderToChannels(mDim, mOrder);
   for (int i = 0; i < numHarm; i++) {
@@ -381,10 +413,9 @@ void AmbiEncode::print(std::ostream& stream) {
 AmbisonicsSpatializer::AmbisonicsSpatializer()
     : Spatializer({}), mDecoder(3, 1, 8, 1), mEncoder(3, 1) {}
 
-AmbisonicsSpatializer::AmbisonicsSpatializer(Speakers& sl, int dim, int order,
+AmbisonicsSpatializer::AmbisonicsSpatializer(Speakers &sl, int dim, int order,
                                              int flavor)
-    : Spatializer(sl),
-      mDecoder(dim, order, sl.size(), flavor),
+    : Spatializer(sl), mDecoder(dim, order, sl.size(), flavor),
       mEncoder(dim, order){};
 
 void AmbisonicsSpatializer::zeroAmbi() {
@@ -422,23 +453,23 @@ void AmbisonicsSpatializer::numFrames(unsigned int v) {
 
 void AmbisonicsSpatializer::numSpeakers(int num) { mDecoder.numSpeakers(num); }
 
-void AmbisonicsSpatializer::setSpeakerLayout(const Speakers& speakers) {
+void AmbisonicsSpatializer::setSpeakerLayout(const Speakers &speakers) {
   mSpeakers = speakers;
   compile();
 }
 
-void AmbisonicsSpatializer::prepare(AudioIOData& io) {
+void AmbisonicsSpatializer::prepare(AudioIOData &io) {
   if (mNumFrames ==
-      0) {  // Allocate buffers once. Assumes buffer size doesn't change
+      0) { // Allocate buffers once. Assumes buffer size doesn't change
     numFrames(io.framesPerBuffer());
   }
   zeroAmbi();
 }
 
-void AmbisonicsSpatializer::renderBuffer(AudioIOData& io,
-                                         const Pose& listeningPose,
-                                         const float* samples,
-                                         const unsigned int& numFrames) {
+void AmbisonicsSpatializer::renderBuffer(AudioIOData &io,
+                                         const Pose &listeningPose,
+                                         const float *samples,
+                                         const unsigned int &numFrames) {
   //	// compute azimuth & elevation of relative position in current
   // listener's coordinate frame: 	Vec3d urel(relpos); urel.normalize();
   // // unit vector in axis listener->source
@@ -472,10 +503,10 @@ void AmbisonicsSpatializer::renderBuffer(AudioIOData& io,
   mEncoder.encode(ambiChans(), samples, numFrames);
 }
 
-void AmbisonicsSpatializer::renderSample(AudioIOData& io,
-                                         const Pose& listeningPose,
-                                         const float& sample,
-                                         const unsigned int& frameIndex) {
+void AmbisonicsSpatializer::renderSample(AudioIOData &io,
+                                         const Pose &listeningPose,
+                                         const float &sample,
+                                         const unsigned int &frameIndex) {
   // compute azimuth & elevation of relative position in current listener's
   // coordinate frame:
   //    Vec3d urel(relpos);
@@ -513,21 +544,21 @@ void AmbisonicsSpatializer::renderSample(AudioIOData& io,
   mEncoder.encode(ambiChans(), io.framesPerBuffer(), frameIndex, sample);
 }
 
-void AmbisonicsSpatializer::finalize(AudioIOData& io) {
+void AmbisonicsSpatializer::finalize(AudioIOData &io) {
   // previously done in render method of audioscene
 
-  float* outs = &io.out(0, 0);  // io.outBuffer();
+  float *outs = &io.out(0, 0); // io.outBuffer();
   int numFrames = io.framesPerBuffer();
 
   mDecoder.decode(outs, ambiChans(), numFrames);
 }
 
-void AmbisonicsSpatializer::print(std::ostream& stream) {
+void AmbisonicsSpatializer::print(std::ostream &stream) {
   mEncoder.print(stream);
   mDecoder.print(stream);
 }
 
-}  // namespace al
+} // namespace al
 
 #undef WRAP
 #undef COS
