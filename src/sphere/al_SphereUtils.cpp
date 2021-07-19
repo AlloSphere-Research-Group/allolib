@@ -24,7 +24,7 @@ std::string al_get_hostname() {
 using namespace al;
 
 bool sphere::isSimulatorMachine(const std::string &host) {
-  return (host.substr(0, 5) == "audio");
+  return (host.substr(0, 5) == "audio") || (host.substr(0, 2) == "ar");
 }
 
 bool sphere::isSimulatorMachine() {
@@ -75,13 +75,15 @@ void sphere::getFullscreenDimension(int *width, int *height) {
     const GLFWvidmode *vm = glfwGetVideoMode(monitors[i]);
     int xmax = x + vm->width;
     int ymax = y + vm->height;
-    if (*width < xmax) *width = xmax;
-    if (*height < ymax) *height = ymax;
+    if (*width < xmax)
+      *width = xmax;
+    if (*height < ymax)
+      *height = ymax;
   }
 }
 
-std::string sphere::getCalibrationDirectory(
-    const std::string &dir_if_not_renderer) {
+std::string
+sphere::getCalibrationDirectory(const std::string &dir_if_not_renderer) {
   if (isRendererMachine())
     return "/home/sphere/calibration-current/";
   else
@@ -96,8 +98,8 @@ std::string sphere::getRendererCalibrationFilepath() {
   return getRendererCalibrationFilepath(al_get_hostname());
 }
 
-std::string sphere::getCalibrationFilepath(
-    const std::string &path_if_not_renderer) {
+std::string
+sphere::getCalibrationFilepath(const std::string &path_if_not_renderer) {
   auto const host = al_get_hostname();
   if (isRendererMachine(host))
     return getRendererCalibrationFilepath(host);
