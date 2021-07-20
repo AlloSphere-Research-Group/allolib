@@ -142,9 +142,15 @@ public:
         ->state();
   }
 
-  //  void init() override {
-  //    DistributedApp::init();
-  //  }
+  void setPort(uint16_t port) {
+    if (this->mRunningDomains.size() == 0) {
+      std::cerr << __FUNCTION__
+                << " ERROR can't set port while application"
+                   "is running. Port will be applied on next call to start()."
+                << std::endl;
+    }
+    mPortToSet = port;
+  }
 
   void start() override {
     prepare();
@@ -153,23 +159,26 @@ public:
             mSimulationDomain);
     if (isPrimary()) {
       if (hasCapability(CAP_STATE_SEND)) {
-        std::cout << "Running primary with state send" << std::endl;
         auto sender =
             distDomain->addStateSender("state", distDomain->statePtr());
-        sender->configure(10101, "state", additionalConfig["broadcastAddress"]);
+        sender->configure(mPortToSet, "state",
+                          additionalConfig["broadcastAddress"]);
       } else {
         std::cout << "Not enabling state sending for primary." << std::endl;
       }
     } else {
-      std::cout << "Running REPLICA" << std::endl;
-      auto receiver =
-          distDomain->addStateReceiver("state", distDomain->statePtr());
-      receiver->configure(10101);
+      std::cout << "StateDistributionDomain: state RECV" << std::endl;
+      if (hasCapability(CAP_STATE_RECEIVE)) {
+        auto receiver =
+            distDomain->addStateReceiver("state", distDomain->statePtr());
+        receiver->configure(mPortToSet);
+      }
     }
     DistributedApp::start();
   }
 
 private:
+  uint16_t mPortToSet{10101};
 };
 
 } // namespace al

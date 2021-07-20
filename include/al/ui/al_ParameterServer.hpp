@@ -74,8 +74,8 @@ private:
   public:
     OSCNode *node;
     virtual void onMessage(osc::Message &m) override {
-      std::cout << "command handler got" << std::endl;
-      m.print();
+      //      std::cout << "command handler got" << std::endl;
+      //      m.print();
       node->runCommand(m);
     }
   } mCommandHandler;

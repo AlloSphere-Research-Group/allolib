@@ -169,7 +169,9 @@ bool StateReceiveDomain<TSharedState>::init(ComputationDomain *parent) {
     return false;
   }
 
-  std::cout << "Opened " << mAddress << ":" << mPort << std::endl;
+  std::cout << "StateReceiveDomain: Using OSC for shared state " << mAddress
+            << ":" << mPort << std::endl;
+
   initializeSubdomains(false);
   return true;
 }
@@ -181,6 +183,9 @@ public:
     initializeSubdomains(true);
 
     initializeSubdomains(false);
+
+    std::cout << "StateSendDomain: Using OSC for shared state " << mAddress
+              << ":" << mPort << std::endl;
     return true;
   }
 
@@ -250,8 +255,6 @@ protected:
   uint16_t mPacketSize = 1400;
 
 private:
-  std::unique_ptr<osc::Send> mSend;
-
   std::string mId = "";
 };
 

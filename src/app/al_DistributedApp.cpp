@@ -141,14 +141,16 @@ void DistributedApp::prepare() {
   // application is the primary or the replica
   if (!testServer.open(mOSCDomain->port, mOSCDomain->interfaceIP.c_str())) {
     // If port taken, run this instance as a renderer
-    mCapabilites = (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC);
+    // TODO these capabilities should be provided by the domains
+    mCapabilites = (Capability)(CAP_SIMULATOR | CAP_STATE_RECEIVE |
+                                CAP_OMNIRENDERING | CAP_OSC);
     rank = 99;
-    std::cout << "Replica: " << name() << ":Running distributed" << std::endl;
+    std::cout << "Primary port BUSY: " << name() << std::endl;
     // For some reason, if we leave it at 0.0.0.0 messages are blocked on
     // windows
   } else if (rank == 0) {
     testServer.stop();
-    std::cout << "Primary: " << name() << ": Running distributed" << std::endl;
+    std::cout << "Primary port ACQUIRED: " << name() << std::endl;
   } else {
     testServer.stop();
     std::cout << "Secondary: rank " << rank << std::endl;
@@ -236,13 +238,12 @@ void DistributedApp::start() {
   }
 
   if (isPrimary()) {
-    std::cout << "Running Primary" << std::endl;
+    //    std::cout << "Running Primary" << std::endl;
     if (!mFoundHost) {
-      std::cout << "WARNING: not adding extra listeners due to missing node "
-                   "table in distributed_app.toml"
+      std::cout << "Using default configuration (no distributed_app.toml)"
                 << std::endl;
     } else {
-      std::cout << "Running REPLICA" << std::endl;
+      //      std::cout << "Running REPLICA" << std::endl;
       for (auto hostRole : mRoleMap) {
         if (hostRole.first != name()) {
           parameterServer().addListener(hostRole.first, oscDomain()->port);
