@@ -121,7 +121,7 @@ void DistributedApp::prepare() {
 
   if (appConfig.hasKey<std::string>("broadcastAddress")) {
     additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
-  } else if (hasCapability(CAP_SIMULATOR)) {
+  } else if (hasCapability(CAP_STATE_RECEIVE) | hasCapability(CAP_STATE_SEND)) {
     if (al::sphere::isSphereMachine()) {
       additionalConfig["broadcastAddress"] = "192.168.10.255";
     } else {
