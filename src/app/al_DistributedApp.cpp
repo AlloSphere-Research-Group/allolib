@@ -119,16 +119,15 @@ void DistributedApp::prepare() {
     }
   }
 
-  if (hasCapability(CAP_SIMULATOR)) {
-    if (al::sphere::isSphereMachine()) {
-      appConfig.setDefaultValue("broadcastAddress",
-                                std::string("192.168.10.255"));
-      appConfig.writeFile();
-    }
-  }
   if (appConfig.hasKey<std::string>("broadcastAddress")) {
     if (mFoundHost) {
       additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
+    } else {
+      additionalConfig["broadcastAddress"] = "127.0.0.1";
+    }
+  } else if (hasCapability(CAP_SIMULATOR)) {
+    if (al::sphere::isSphereMachine()) {
+      additionalConfig["broadcastAddress"] = "192.168.10.255";
     } else {
       additionalConfig["broadcastAddress"] = "127.0.0.1";
     }
