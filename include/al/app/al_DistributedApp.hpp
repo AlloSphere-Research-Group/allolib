@@ -171,10 +171,11 @@ public:
       }
     } else {
       if (hasCapability(CAP_STATE_RECEIVE)) {
-        std::cout << "DistributedApp: state RECV " << mPortToSet << std::endl;
+        std::cout << "DistributedApp: state RECV " << additionalConfig["broadcastAddress"] << mPortToSet << std::endl;
         auto receiver =
             distDomain->addStateReceiver("state", distDomain->statePtr());
-        receiver->configure(mPortToSet);
+        receiver->configure(mPortToSet, "state",
+			    additionalConfig["broadcastAddress"]);
       }
     }
     DistributedApp::start();
