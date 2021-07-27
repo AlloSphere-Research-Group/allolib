@@ -175,8 +175,6 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                   std::pair<uint16_t, uint16_t>{version, revision});
             }
 
-            onConnection(incomingConnectionSocket.get());
-
             mConnectionThreads.emplace_back(std::make_unique<std::thread>(
                 [&](std::shared_ptr<Socket> client) {
                   uint8_t commandMessage[8192];
@@ -230,6 +228,8 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                   }
                 },
                 incomingConnectionSocket));
+
+            onConnection(incomingConnectionSocket.get());
           } else {
             std::cerr << __FILE__ << ": Server unable to recognize message "
                       << (int)message[0] << std::endl;

@@ -237,7 +237,7 @@ std::vector<std::string> DiscreteParameterValues::getIds() { return mIds; }
 
 size_t DiscreteParameterValues::stride() {
   if (size() < 2) {
-    return 0;
+    return 1;
   }
   size_t s = 1;
   size_t curIndex = 0;
@@ -352,7 +352,8 @@ double DiscreteParameterValues::valueToFloat(void *value) {
     valueDbl = 0;
   } break;
   }
-  // TODO ML complete for other types. Non-value(string, none, MAX_ATOMIC_TYPE) skipped.
+  // TODO ML complete for other types. Non-value(string, none, MAX_ATOMIC_TYPE)
+  // skipped.
   return valueDbl;
 }
 
@@ -391,8 +392,9 @@ int64_t DiscreteParameterValues::valueToInt64(void *value) {
   } break;
   default: {
     valueInt = 0;
-  } break;  
+  } break;
   }
-  // TODO ML complete for other types. Non-value(string, none, MAX_ATOMIC_TYPE) skipped.
+  // TODO ML complete for other types. Non-value(string, none, MAX_ATOMIC_TYPE)
+  // skipped.
   return valueInt;
 }
