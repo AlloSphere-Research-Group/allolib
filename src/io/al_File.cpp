@@ -155,6 +155,8 @@ const char *File::readAll() {
   return mContent;
 }
 
+al_sec File::modified() const { return modificationTime(mPath.c_str()); }
+
 std::string File::read(const std::string &path) {
   File f(path, "rb");
   f.open();
@@ -397,7 +399,7 @@ bool File::searchBack(std::string &path, int maxDepth) {
 al_sec al::File::modificationTime(const char *path) {
   struct stat s;
   if (::stat(path, &s) == 0) {
-    // const auto& t = s.st_mtim;
+    //     const auto& t = s.st_mtime;
     // return t.tv_sec + t.tv_usec/1e9;
     return s.st_mtime;
   }
