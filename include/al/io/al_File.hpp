@@ -436,7 +436,7 @@ public:
   /// Go back to first entry in directory
   // bool rewind();
 
-  /// Make a directory
+  /// Make a directory (recursively create directories if possible)
   // static bool make(const std::string& path, bool recursive=true);
   static bool make(const std::string &path);
 
