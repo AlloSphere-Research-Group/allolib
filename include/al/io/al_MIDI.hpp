@@ -142,7 +142,7 @@ public:
 
   MIDIMessage(double timeStamp, unsigned port, unsigned char b1,
               unsigned char b2 = 0, unsigned char b3 = 0,
-              unsigned char *data = nullptr);
+              unsigned char *data = nullptr, size_t dataSize = 0);
 
   /// Get the MIDI device port
   unsigned port() const { return mPort; }
@@ -183,6 +183,7 @@ public:
 
   /// Get sysex message data
   unsigned char *data() const { return mData; }
+  size_t dataSize() const { return mDataSize; }
 
   /// Print general information about message
   void print(std::ostream &stream = std::cout) const;
@@ -191,6 +192,7 @@ protected:
   double mTimeStamp;
   unsigned mPort;
   unsigned char *mData;
+  size_t mDataSize{0};
 };
 
 /// Handles receipt of MIDI messages

@@ -1134,6 +1134,65 @@ void ParameterGUI::drawPresetMIDI(PresetMIDI *presetMidi) {
   ImGui::PopID();
 }
 
+void ParameterGUI::drawMIDIIn(RtMidiIn *midiIn) {
+  struct MIDIInState {
+    std::vector<std::string> devices;
+    int currentDevice;
+  };
+  auto updateDevices = [](MIDIInState &state) {
+    RtMidiIn in;
+    state.devices.clear();
+    unsigned int numDevices = in.getPortCount();
+    for (unsigned int i = 0; i < numDevices; i++) {
+      state.devices.push_back(in.getPortName(i));
+    }
+  };
+  static std::map<RtMidiIn *, MIDIInState> stateMap;
+  if (stateMap.find(midiIn) == stateMap.end()) {
+    stateMap[midiIn] = MIDIInState();
+    updateDevices(stateMap[midiIn]);
+  }
+  MIDIInState &state = stateMap[midiIn];
+  ImGui::PushID(midiIn);
+  if (midiIn->isPortOpen()) {
+    // TODO adjust valid number of channels.
+    ImGui::Text("MIDI In Device: %s",
+                midiIn->getPortName(state.currentDevice).c_str());
+    if (ImGui::Button("Stop")) {
+      if (midiIn->isPortOpen()) {
+        midiIn->closePort();
+      }
+    }
+  } else {
+    ImGui::Combo("MIDI In Device", &state.currentDevice,
+                 ParameterGUI::vector_getter,
+                 static_cast<void *>(&state.devices), state.devices.size());
+
+    if (ImGui::Button("Start")) {
+
+      if (midiIn->isPortOpen()) {
+        midiIn->closePort();
+      }
+      try {
+        if (state.currentDevice >= 0 &&
+            state.currentDevice < (int)midiIn->getPortCount()) {
+          midiIn->openPort(state.currentDevice);
+          std::cout << "RtMidi: Opened port to "
+                    << midiIn->getPortName(state.currentDevice) << std::endl;
+        } else {
+          std::cerr << "RtMidi Warning: MIDI port unavailable: "
+                    << state.currentDevice << std::endl;
+        }
+      } catch (RtMidiError &error) {
+        std::cerr << error.getMessage() << std::endl;
+        std::cerr << "RtMidi Error: Could not open MIDI port "
+                  << state.currentDevice << std::endl;
+      }
+    }
+  }
+  ImGui::PopID();
+}
+
 void ParameterGUI::drawAudioIO(AudioIO *io) {
   struct AudioIOState {
     int currentSr = 0;
