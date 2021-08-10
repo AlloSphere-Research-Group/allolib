@@ -314,7 +314,7 @@ std::string File::currentPath() {
 
 bool File::isSamePath(const std::string &path1, const std::string &path2) {
   std::string newpath1 = conformPathToOS(path1);
-  std::string newpath2 = conformPathToOS(path1);
+  std::string newpath2 = conformPathToOS(path2);
   return newpath1 == newpath2;
 }
 
