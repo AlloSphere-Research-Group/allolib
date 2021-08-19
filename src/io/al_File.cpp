@@ -219,9 +219,9 @@ bool File::copy(const std::string &srcPath, const std::string &dstPath,
 }
 
 std::string File::conformDirectory(const std::string &path) {
-  if (path[0]) {
+  if (path.size() > 0) {
     std::string newpath = path;
-    if (!al::File::isRelativePath(path)) {
+    if (!al::File::isRelativePath(path) && path[0] != '/') {
       newpath = absolutePath(path);
     }
     if (AL_FILE_DELIMITER != newpath[newpath.size() - 1]) {
