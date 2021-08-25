@@ -70,7 +70,7 @@ namespace minFileSys {
 
 inline std::string addPath(std::string parent, std::string const &child) {
 #ifdef ITS_WINDOWS
-  if (parent[parent.size() - 1] != '\\')
+  if (parent[parent.size() - 1] != '\\' || parent[parent.size() - 1] != '\\')
     parent += "\\";
   parent += child;
   return parent;
@@ -248,7 +248,7 @@ inline bool createDir(std::string const &path) {
 #ifdef ITS_WINDOWS
   // Create all intermediate dirs up to last one
   for (unsigned i = 0; i < path.size() - 1; ++i) {
-    if (path[i] == '/') {
+    if (path[i] == '/' || path[i] == '\\') {
       if (CreateDirectory(path.substr(0, i + 1).c_str(), NULL) != 0) {
         if (GetLastError() != ERROR_ALREADY_EXISTS) {
           std::cout << "[!] [createDir] Error creating directory " << path

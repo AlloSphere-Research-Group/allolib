@@ -238,15 +238,15 @@ public:
 
   /// Return modification time of file (or 0 on failure) as number of seconds
   /// since 00:00:00 January 1, 1970 UTC
-  // al_sec modified() const;
+  al_sec modified() const;
 
   /// Return last access time of file (or 0 on failure) as number of seconds
   /// since 00:00:00 January 1, 1970 UTC
-  // al_sec accessed() const;
+  al_sec accessed() const;
 
   /// Return creation time of file (or 0 on failure) as number of seconds since
   /// 00:00:00 January 1, 1970 UTC
-  // al_sec created() const;
+  al_sec created() const;
 
   /// Return size file (or 0 on failure)
   // size_t sizeFile() const;
@@ -353,13 +353,21 @@ public:
   static bool searchBack(std::string &path, int maxDepth = 6);
 
   static al_sec modificationTime(const char *path);
+
+  static al_sec modified(const std::string &path) {
+    return modificationTime(path.c_str());
+  }
   // TODO: Implement these.
-  // static al_sec modified(const std::string& path){ return
-  // File(path).modified(); } static al_sec accessed(const std::string& path){
-  // return File(path).accessed(); } static al_sec created (const std::string&
-  // path){ return File(path).created(); } static size_t sizeFile(const
-  // std::string& path){ return File(path).sizeFile(); } static size_t storage
-  // (const std::string& path){ return File(path).storage(); }
+  //  static al_sec accessed(const std::string &path) {
+  //    return File(path).accessed();
+  //  }
+  //  static al_sec created(const std::string &path) {
+  //    return File(path).created();
+  //  }
+  static size_t sizeFile(const std::string &path) { return File(path).size(); }
+  //  static size_t storage(const std::string &path) {
+  //    return File(path).storage();
+  //  }
 
 protected:
   // class Impl; Impl * mImpl;
@@ -428,7 +436,7 @@ public:
   /// Go back to first entry in directory
   // bool rewind();
 
-  /// Make a directory
+  /// Make a directory (recursively create directories if possible)
   // static bool make(const std::string& path, bool recursive=true);
   static bool make(const std::string &path);
 

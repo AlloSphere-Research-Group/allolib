@@ -155,6 +155,8 @@ const char *File::readAll() {
   return mContent;
 }
 
+al_sec File::modified() const { return modificationTime(mPath.c_str()); }
+
 std::string File::read(const std::string &path) {
   File f(path, "rb");
   f.open();
@@ -217,9 +219,9 @@ bool File::copy(const std::string &srcPath, const std::string &dstPath,
 }
 
 std::string File::conformDirectory(const std::string &path) {
-  if (path[0]) {
+  if (path.size() > 0) {
     std::string newpath = path;
-    if (!al::File::isRelativePath(path)) {
+    if (!al::File::isRelativePath(path) && path[0] != '/') {
       newpath = absolutePath(path);
     }
     if (AL_FILE_DELIMITER != newpath[newpath.size() - 1]) {
@@ -312,7 +314,7 @@ std::string File::currentPath() {
 
 bool File::isSamePath(const std::string &path1, const std::string &path2) {
   std::string newpath1 = conformPathToOS(path1);
-  std::string newpath2 = conformPathToOS(path1);
+  std::string newpath2 = conformPathToOS(path2);
   return newpath1 == newpath2;
 }
 
@@ -397,7 +399,7 @@ bool File::searchBack(std::string &path, int maxDepth) {
 al_sec al::File::modificationTime(const char *path) {
   struct stat s;
   if (::stat(path, &s) == 0) {
-    // const auto& t = s.st_mtim;
+    //     const auto& t = s.st_mtime;
     // return t.tv_sec + t.tv_usec/1e9;
     return s.st_mtime;
   }

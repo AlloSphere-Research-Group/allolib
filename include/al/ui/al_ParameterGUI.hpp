@@ -147,8 +147,10 @@ public:
   static void drawParameterMIDI(ParameterMIDI &midi) {
     drawParameterMIDI(&midi);
   }
+
   static void drawParameterMIDI(ParameterMIDI *midi);
   static void drawPresetMIDI(PresetMIDI *presetMidi);
+  static void drawMIDIIn(RtMidiIn *midiIn);
 
   static void drawBundleGroup(std::vector<ParameterBundle *> bundles,
                               std::string suffix, int &currentBundle,
