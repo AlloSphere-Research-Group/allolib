@@ -599,6 +599,10 @@ public:
     return value;
   }
 
+  /**
+   * @brief Use this function to get value as VariantValue
+   * @param fields
+   */
   virtual void getFields(std::vector<VariantValue> &fields) override {
     fields.emplace_back(VariantValue(get()));
   }
@@ -753,7 +757,8 @@ public:
    * single 64 bit integer number.
    */
   ParameterInt64(std::string parameterName, std::string Group = "",
-                 int64_t defaultValue = 0, int64_t min = 0, int64_t max = 9223372036854775807);
+                 int64_t defaultValue = 0, int64_t min = 0,
+                 int64_t max = INT64_MAX);
 
   ParameterInt64(const al::ParameterInt64 &param)
       : ParameterWrapper<int64_t>(param) {
@@ -851,7 +856,8 @@ public:
    * single 16 bit integer number.
    */
   ParameterInt16(std::string parameterName, std::string Group = "",
-                 int16_t defaultValue = 0, int16_t min = 0, int16_t max = 32767);
+                 int16_t defaultValue = 0, int16_t min = 0,
+                 int16_t max = INT16_MAX);
 
   ParameterInt16(const al::ParameterInt16 &param)
       : ParameterWrapper<int16_t>(param) {
@@ -922,7 +928,6 @@ public:
 private:
 };
 
-
 /// ParameterInt8
 /// @ingroup UI
 class ParameterInt8 : public ParameterWrapper<int8_t> {
@@ -940,7 +945,7 @@ public:
    * single 8 bit integer number.
    */
   ParameterInt8(std::string parameterName, std::string Group = "",
-                 int8_t defaultValue = 0, int8_t min = 0, int8_t max = 127);
+                int8_t defaultValue = 0, int8_t min = 0, int8_t max = INT8_MAX);
 
   ParameterInt8(const al::ParameterInt8 &param)
       : ParameterWrapper<int8_t>(param) {
@@ -964,8 +969,7 @@ public:
    * registerChangeCallback() are not called. This is useful to avoid infinite
    * recursion when a widget sets the parameter that then sets the widget.
    */
-  virtual void setNoCalls(int8_t value,
-                          void *blockReceiver = nullptr) override;
+  virtual void setNoCalls(int8_t value, void *blockReceiver = nullptr) override;
 
   virtual float toFloat() override { return float(mValue); }
 
@@ -1028,7 +1032,8 @@ public:
    * single 8 bit unsigned integer number.
    */
   ParameterUInt8(std::string parameterName, std::string Group = "",
-                 uint8_t defaultValue = 0, uint8_t min = 0, uint8_t max = 255);
+                 uint8_t defaultValue = 0, uint8_t min = 0,
+                 uint8_t max = UINT8_MAX);
 
   ParameterUInt8(const al::ParameterUInt8 &param)
       : ParameterWrapper<uint8_t>(param) {
@@ -1099,7 +1104,6 @@ public:
 private:
 };
 
-
 /// ParameterUInt16
 /// @ingroup UI
 class ParameterUInt16 : public ParameterWrapper<uint16_t> {
@@ -1117,7 +1121,8 @@ public:
    * single 16 bit unsigned integer number.
    */
   ParameterUInt16(std::string parameterName, std::string Group = "",
-                 uint16_t defaultValue = 0, uint16_t min = 0, uint16_t max = 65535);
+                  uint16_t defaultValue = 0, uint16_t min = 0,
+                  uint16_t max = UINT16_MAX);
 
   ParameterUInt16(const al::ParameterUInt16 &param)
       : ParameterWrapper<uint16_t>(param) {
@@ -1188,7 +1193,6 @@ public:
 private:
 };
 
-
 /// ParamaterUInt32
 /// @ingroup UI
 class ParameterUInt32 : public ParameterWrapper<uint32_t> {
@@ -1206,7 +1210,8 @@ public:
    * single 32 bit unsigned integer number.
    */
   ParameterUInt32(std::string parameterName, std::string Group = "",
-                 uint32_t defaultValue = 0, uint32_t min = 0, uint32_t max = 4294967295);
+                  uint32_t defaultValue = 0, uint32_t min = 0,
+                  uint32_t max = UINT32_MAX);
 
   ParameterUInt32(const al::ParameterUInt32 &param)
       : ParameterWrapper<uint32_t>(param) {
@@ -1277,7 +1282,6 @@ public:
 private:
 };
 
-
 /// ParamaterUInt64
 /// @ingroup UI
 class ParameterUInt64 : public ParameterWrapper<uint64_t> {
@@ -1295,7 +1299,8 @@ public:
    * single 64 bit unsigned integer number.
    */
   ParameterUInt64(std::string parameterName, std::string Group = "",
-                 uint64_t defaultValue = 0, uint64_t min = 0, uint64_t max = 8589934590);
+                  uint64_t defaultValue = 0, uint64_t min = 0,
+                  uint64_t max = UINT64_MAX);
 
   ParameterUInt64(const al::ParameterUInt64 &param)
       : ParameterWrapper<uint64_t>(param) {
@@ -1383,7 +1388,8 @@ public:
    * single double number.
    */
   ParameterDouble(std::string parameterName, std::string Group = "",
-                 double defaultValue = 0, double min = 0, double max = 256);
+                  double defaultValue = 0, double min = -99999.0,
+                  double max = 99999.0);
 
   ParameterDouble(const al::ParameterDouble &param)
       : ParameterWrapper<double>(param) {
@@ -1407,8 +1413,7 @@ public:
    * registerChangeCallback() are not called. This is useful to avoid infinite
    * recursion when a widget sets the parameter that then sets the widget.
    */
-  virtual void setNoCalls(double value,
-                          void *blockReceiver = nullptr) override;
+  virtual void setNoCalls(double value, void *blockReceiver = nullptr) override;
 
   virtual float toFloat() override { return float(mValue); }
 
@@ -1453,7 +1458,6 @@ public:
 
 private:
 };
-
 
 /// ParamaterBool
 /// @ingroup UI
