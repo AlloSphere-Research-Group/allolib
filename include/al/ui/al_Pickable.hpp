@@ -35,7 +35,8 @@ struct PickEvent {
   PickEvent(PickEventType t, Rayd r) : type(t), ray(r) {}
   PickEvent(PickEventType t, Rayd r, Pose p) : type(t), ray(r), pose(p) {}
   PickEvent(PickEventType t, Rayd r, Vec3f v) : type(t), ray(r), vec(v) {}
-  PickEvent(PickEventType t, Rayd r, Pose p, Vec3f v) : type(t), ray(r), pose(p), vec(v) {}
+  PickEvent(PickEventType t, Rayd r, Pose p, Vec3f v)
+      : type(t), ray(r), pose(p), vec(v) {}
   PickEvent(PickEventType t, Rayd r, float v) : type(t), ray(r), amount(v) {}
   PickEvent(PickEventType t, Pose p) : type(t), pose(p) {}
   PickEvent(PickEventType t, float v) : type(t), amount(v) {}
@@ -62,7 +63,7 @@ struct Pickable {
   ParameterBool hover{"hover", name}, selected{"selected", name};
   ParameterPose pose{"pose", name};
   ParameterVec3 scaleVec{"scaleVec", name};
-  Parameter scale{"scale", name, 1.0f, "", 0.0f, 10.0f};
+  Parameter scale{"scale", name, 1.0f, 0.0f, 10.0f};
   ParameterBundle bundle{"pickable"};
 
   Pickable *parent = nullptr;
@@ -110,14 +111,15 @@ struct Pickable {
   /// pop matrix.
   inline void popMatrix(Graphics &g) { g.popMatrix(); }
 
-  void draw(Graphics &g,
-            std::function<void(Pickable &p)> f = [](Pickable &p) {});
+  void draw(
+      Graphics &g, std::function<void(Pickable &p)> f = [](Pickable &p) {});
 
-  void foreach (std::function<void(Pickable &p)> pre,
-                std::function<void(Pickable &p)> post = [](Pickable & /*p*/) {
-                }) {
+  void foreach (
+      std::function<void(Pickable &p)> pre,
+      std::function<void(Pickable &p)> post = [](Pickable & /*p*/) {}) {
     pre(*this);
-    for (auto *c : children) c->foreach (pre, post);
+    for (auto *c : children)
+      c->foreach (pre, post);
     post(*this);
   }
 
@@ -132,9 +134,9 @@ struct Pickable {
 /// Bounding Box PickableMesh
 /// @ingroup UI
 struct PickableBB : Pickable {
-  Mesh *mesh{nullptr};  // pointer to mesh that is wrapped
-  BoundingBox bb;       // original bounding box
-  BoundingBox aabb;  // axis aligned bounding box (after pose/scale transforms)
+  Mesh *mesh{nullptr}; // pointer to mesh that is wrapped
+  BoundingBox bb;      // original bounding box
+  BoundingBox aabb; // axis aligned bounding box (after pose/scale transforms)
 
   // used for moving pickable naturally
   Vec3f selectPos;
@@ -182,6 +184,6 @@ struct PickableBB : Pickable {
   void updateAABB();
 };
 
-}  // namespace al
+} // namespace al
 
 #endif
