@@ -256,7 +256,22 @@ std::string File::conformPathToOS(const std::string &path) {
       }
     } else {
       if (c == '.' && i > 0) { // Don't remove first dot
-        previousIsDot = true;
+        if (previousIsDot) {   // Found '..'
+          auto pos = res.find('/');
+          if (pos == std::string::npos) {
+            pos = res.find('\\');
+          }
+          if (pos != std::string::npos) {
+            while ((res[pos] == '/' || res[pos] == '\\') && pos > 0) {
+              pos--;
+            }
+            res.resize(pos + 1);
+          }
+          // TODO not robust enough. Fails with triple dots
+          previousIsDot = false;
+        } else {
+          previousIsDot = true;
+        }
       } else {
         previousIsDot = false;
       }
