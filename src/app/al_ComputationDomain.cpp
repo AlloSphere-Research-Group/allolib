@@ -21,6 +21,7 @@ bool ComputationDomain::initializeSubdomains(bool pre) {
 
 bool ComputationDomain::tickSubdomains(bool pre) {
   bool ret = true;
+  std::unique_lock<std::mutex> lk(mSubdomainLock);
   for (auto subDomain : mSubDomainList) {
     if (subDomain.second == pre) {
       auto syncSubDomain =
@@ -63,10 +64,12 @@ void ComputationDomain::callCleanupCallbacks() {
 bool ComputationDomain::init(ComputationDomain *parent) {
   bool ret = initializeSubdomains(true);
   ret &= initializeSubdomains(false);
+  mInitialized = true;
   return ret;
 }
 
 bool ComputationDomain::cleanup(ComputationDomain *parent) {
+  mInitialized = false;
   bool ret = cleanupSubdomains(true);
   ret &= cleanupSubdomains(false);
   return ret;

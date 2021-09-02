@@ -29,12 +29,10 @@ bool OpenGLGraphicsDomain::start() {
     callStartCallbacks();
     bool subdomainsOk = true;
     while (!shouldQuit() && subdomainsOk) {
-      mSubdomainLock.lock();
       subdomainsOk &= tickSubdomains(true);
       tickFPS();
       mTimeDrift = dt_sec();
       subdomainsOk &= tickSubdomains(false);
-      mSubdomainLock.unlock();
     }
 
     ret &= stop();
