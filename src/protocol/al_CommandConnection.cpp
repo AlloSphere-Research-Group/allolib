@@ -48,10 +48,10 @@ using namespace al;
 
 void CommandConnection::stop() {
   mRunning = false;
-  mSocket.close();
   for (auto &connection : mConnectionThreads) {
     connection->join();
   }
+  mSocket.close();
   mState = BarrierState::NONE;
 }
 
@@ -386,14 +386,14 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
     } else {
       return;
     }
+
+    onConnection(&mSocket);
     {
       std::unique_lock<std::mutex> lk(mutex);
       cv.notify_one();
     }
     uint8_t commandMessage[16384];
     size_t bufferSize = 0;
-
-    onConnection(&mSocket);
     while (mRunning) {
       if (!mSocket.opened()) {
         std::cerr << "ERROR: Socket not open" << std::endl;
