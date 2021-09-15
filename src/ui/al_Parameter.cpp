@@ -115,7 +115,7 @@ void ParameterInt::set(int32_t value, ValueSource *src) {
 // ParameterInt8
 // ------------------------------------------------------------------
 ParameterInt8::ParameterInt8(std::string parameterName, std::string Group,
-                               int8_t defaultValue, int8_t min, int8_t max)
+                             int8_t defaultValue, int8_t min, int8_t max)
     : ParameterWrapper<int8_t>(parameterName, Group, defaultValue, min, max) {
   mValue = defaultValue;
   setDefault(defaultValue);
@@ -188,7 +188,6 @@ void ParameterInt16::set(int16_t value, ValueSource *src) {
   mValue = value;
 }
 
-
 // ParameterInt64
 // ------------------------------------------------------------------
 ParameterInt64::ParameterInt64(std::string parameterName, std::string Group,
@@ -226,7 +225,6 @@ void ParameterInt64::set(int64_t value, ValueSource *src) {
   runChangeCallbacksSynchronous(value, src);
   mValue = value;
 }
-
 
 // ParameterUInt8
 // ------------------------------------------------------------------
@@ -269,7 +267,8 @@ void ParameterUInt8::set(uint8_t value, ValueSource *src) {
 // ParameterUInt16
 // ------------------------------------------------------------------
 ParameterUInt16::ParameterUInt16(std::string parameterName, std::string Group,
-                               uint16_t defaultValue, uint16_t min, uint16_t max)
+                                 uint16_t defaultValue, uint16_t min,
+                                 uint16_t max)
     : ParameterWrapper<uint16_t>(parameterName, Group, defaultValue, min, max) {
   mValue = defaultValue;
   setDefault(defaultValue);
@@ -307,7 +306,8 @@ void ParameterUInt16::set(uint16_t value, ValueSource *src) {
 // ParameterUInt32
 // ------------------------------------------------------------------
 ParameterUInt32::ParameterUInt32(std::string parameterName, std::string Group,
-                               uint32_t defaultValue, uint32_t min, uint32_t max)
+                                 uint32_t defaultValue, uint32_t min,
+                                 uint32_t max)
     : ParameterWrapper<uint32_t>(parameterName, Group, defaultValue, min, max) {
   mValue = defaultValue;
   setDefault(defaultValue);
@@ -342,11 +342,11 @@ void ParameterUInt32::set(uint32_t value, ValueSource *src) {
   mValue = value;
 }
 
-
 // ParameterUInt64
 // ------------------------------------------------------------------
 ParameterUInt64::ParameterUInt64(std::string parameterName, std::string Group,
-                               uint64_t defaultValue, uint64_t min, uint64_t max)
+                                 uint64_t defaultValue, uint64_t min,
+                                 uint64_t max)
     : ParameterWrapper<uint64_t>(parameterName, Group, defaultValue, min, max) {
   mValue = defaultValue;
   setDefault(defaultValue);
@@ -384,7 +384,7 @@ void ParameterUInt64::set(uint64_t value, ValueSource *src) {
 // ParameterDouble
 // ------------------------------------------------------------------
 ParameterDouble::ParameterDouble(std::string parameterName, std::string Group,
-                               double defaultValue, double min, double max)
+                                 double defaultValue, double min, double max)
     : ParameterWrapper<double>(parameterName, Group, defaultValue, min, max) {
   mValue = defaultValue;
   setDefault(defaultValue);
@@ -428,13 +428,13 @@ ParameterBool::ParameterBool(std::string parameterName, std::string Group,
   setDefault(defaultValue);
 }
 
-ParameterBool::ParameterBool(std::string parameterName, std::string Group,
-                             float defaultValue, std::string prefix, float min,
-                             float max)
-    : Parameter(parameterName, Group, defaultValue, prefix, min, max) {
-  mValue = defaultValue;
-  setDefault(defaultValue);
-}
+// ParameterBool::ParameterBool(std::string parameterName, std::string Group,
+//                             float defaultValue, std::string prefix, float
+//                             min, float max)
+//    : Parameter(parameterName, Group, defaultValue, prefix, min, max) {
+//  mValue = defaultValue;
+//  setDefault(defaultValue);
+//}
 
 // --------------------- ParameterMeta ------------
 

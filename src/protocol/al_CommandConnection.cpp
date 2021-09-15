@@ -66,12 +66,12 @@ std::vector<float> CommandServer::ping(double timeoutSecs) {
       std::cout << "pinging " << listener->address() << ":" << listener->port()
                 << std::endl;
     }
-    auto startTime = al_steady_time();
+    //    auto startTime = al_steady_time();
     unsigned char message[2] = {0, 0};
 
     message[0] = PING;
     listener->send((const char *)message, 2);
-    size_t bytes = 0;
+    //    size_t bytes = 0;
     // FIXME need to check responses
 
     //    auto endTime = al_steady_time();
@@ -358,7 +358,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
     mRunning = true;
     unsigned char message[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     message[0] = HANDSHAKE;
-    auto b = Convert::to_bytes(mSocket.port());
+    //    auto b = Convert::to_bytes(mSocket.port());
 
     memcpy(message + 1, &mVersion, sizeof(uint16_t));
     memcpy(message + 1 + sizeof(uint16_t), &mRevision, sizeof(uint16_t));

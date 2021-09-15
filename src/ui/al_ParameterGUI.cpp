@@ -340,14 +340,14 @@ void ParameterGUI::drawChoice(std::vector<ParameterChoice *> params,
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
     ImGui::Indent();
-    for (unsigned int i = 0; i < elements.size(); i++) {
-      bool state = value & (1 << i);
+    for (size_t i = 0; i < elements.size(); i++) {
+      bool state = value & (1ULL << i);
       ImGui::PushID((const void *)param);
       if (ImGui::Checkbox(
               (elements[i] + suffix + "_" + std::to_string(i)).c_str(),
               &state)) {
         value ^=
-            ((state ? -1 : 0) ^ value) & (1UL << i); // Set an individual bit
+            ((state ? -1 : 0) ^ value) & (1ULL << i); // Set an individual bit
         for (auto *p : params) {
           p->set(value);
         }
@@ -553,7 +553,7 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
     });
   }
   PresetHandlerState &state = stateMap[presetHandler];
-  float fontSize = ImGui::GetFontSize();
+  //  float fontSize = ImGui::GetFontSize();
 
   std::string id = std::to_string((uint64_t)presetHandler);
   std::string suffix = "##PresetHandler" + id;
