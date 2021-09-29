@@ -47,7 +47,9 @@ For installation through Chocolatey (not currently recommended, but let us know 
 
  * Install Xcode: Open the App Store app. Search for "xcode". Install the first result. Wait for this to finish before moving on.
  * Install Homebrew: Open the Terminal app. Aim your browser at https://brew.sh. Copy and paste the text of the install command into the Terminal app.
- * Use the brew command to install some software. In the Terminal app, run this command: brew install git git-lfs cmake libsndfile
+ * Use the brew command to install some software. In the Terminal app, run this command:
+
+       brew install git git-lfs cmake libsndfile
 
 ### Ubuntu/Debian
 
