@@ -5,7 +5,8 @@
 namespace al {
 
 Keyboard::Keyboard() : mKeycode(-1), mDown(false) {
-  for (int i = 0; i < 5; ++i) mModifiers[i] = false;
+  for (int i = 0; i < 5; ++i)
+    mModifiers[i] = false;
 }
 int Keyboard::key() const { return mKeycode; }
 int Keyboard::keyAsNumber() const { return key() - 48; }
@@ -26,7 +27,7 @@ void Keyboard::setKey(int k, bool v) {
   mKeycode = k;
   mDown = v;
 }
-void Keyboard::print(std::ostream& stream) const {
+void Keyboard::print(std::ostream &stream) const {
   stream << "key= " << key() << "(" << char(key()) << "), alt=" << alt()
          << ", ctrl=" << ctrl() << ", meta=" << meta() << ", shift=" << shift()
          << ", caps=" << caps() << std::endl;
@@ -100,7 +101,8 @@ void Window::destroy() {
 }
 
 void Window::close() {
-  if (created()) implClose();
+  if (created())
+    implClose();
 }
 
 bool Window::shouldClose() {
@@ -121,7 +123,7 @@ Window::Dim Window::dimensions() const {
 double Window::aspect() const { return dimensions().aspect(); }
 bool Window::cursorHide() const { return mCursorHide; }
 bool Window::fullScreen() const { return mFullScreen; }
-const std::string& Window::title() const { return mTitle; }
+const std::string &Window::title() const { return mTitle; }
 bool Window::visible() const { return mVisible; }
 bool Window::vsync() const { return mVSync; }
 bool Window::enabled(DisplayMode v) const { return mDisplayMode & v; }
@@ -136,17 +138,20 @@ void Window::cursorHideToggle() { cursorHide(!cursorHide()); }
 
 void Window::cursor(Cursor v) {
   mCursor = v;
-  if (created()) implSetCursor();
+  if (created())
+    implSetCursor();
 }
 
 void Window::cursorHide(bool v) {
   mCursorHide = v;
-  if (created()) implSetCursorHide();
+  if (created())
+    implSetCursorHide();
 }
 
-void Window::dimensions(const Dim& v) {
+void Window::dimensions(const Dim &v) {
   mDim = v;
-  if (created()) implSetDimensions();
+  if (created())
+    implSetDimensions();
 }
 
 void Window::dimensions(int w, int h) {
@@ -166,7 +171,7 @@ void Window::displayMode(DisplayMode v) {
       const bool cursorHide_ = cursorHide();
       const Dim dim_ = dimensions();
       const bool fullScreen_ = fullScreen();
-      const std::string& title_ = title();
+      const std::string &title_ = title();
 
       destroy();
       mDisplayMode = v;
@@ -185,28 +190,33 @@ void Window::displayMode(DisplayMode v) {
 void Window::fullScreen(bool v, int monitorIndex) {
   if (v != mFullScreen) {
     mFullScreen = v;
-    if (created()) implSetFullScreen(monitorIndex);
+    if (created())
+      implSetFullScreen(monitorIndex);
   }
 }
 
 void Window::fullScreenToggle() { fullScreen(!fullScreen()); }
 
-void Window::title(const std::string& v) {
+void Window::title(const std::string &v) {
   mTitle = v;
-  if (created()) implSetTitle();
+  if (created())
+    implSetTitle();
 }
 
 void Window::vsync(bool v) {
   mVSync = v;
-  if (created()) implSetVSync();
+  if (created())
+    implSetVSync();
 }
 
 void Window::hide() {
-  if (created()) implHide();
+  if (created())
+    implHide();
 }
 
 void Window::iconify() {
-  if (created()) implIconify();
+  if (created())
+    implIconify();
 }
 
 void Window::decorated(bool b) {
@@ -216,8 +226,8 @@ void Window::decorated(bool b) {
   }
 }
 
-Window& Window::insert(WindowEventHandler& v, int i) {
-  WindowEventHandlers& H = mWindowEventHandlers;
+Window &Window::insert(WindowEventHandler &v, int i) {
+  WindowEventHandlers &H = mWindowEventHandlers;
   if (std::find(H.begin(), H.end(), &v) == H.end()) {
     v.removeFromWindow();
     H.insert(H.begin() + i, &(v.window(this)));
@@ -231,14 +241,14 @@ Window& Window::insert(WindowEventHandler& v, int i) {
   return *this;
 }
 
-Window& Window::append(WindowEventHandler& v) {
+Window &Window::append(WindowEventHandler &v) {
   return insert(v, (int)mWindowEventHandlers.size());
 }
 
-Window& Window::prepend(WindowEventHandler& v) { return insert(v, 0); }
+Window &Window::prepend(WindowEventHandler &v) { return insert(v, 0); }
 
-Window& Window::remove(WindowEventHandler& v) {
-  WindowEventHandlers& H = mWindowEventHandlers;
+Window &Window::remove(WindowEventHandler &v) {
+  WindowEventHandlers &H = mWindowEventHandlers;
   WindowEventHandlers::iterator it = std::find(H.begin(), H.end(), &v);
   if (it != H.end()) {
     H.erase(it);
@@ -257,4 +267,6 @@ Window& Window::remove(WindowEventHandler& v) {
   return *this;
 }
 
-}  // namespace al
+void *Window::windowHandle() { return implWindowHandle(); }
+
+} // namespace al

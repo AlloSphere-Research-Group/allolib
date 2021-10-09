@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <cmath>
-#include <cstdlib>  // exit, EXIT_FAILURE
+#include <cstdlib> // exit, EXIT_FAILURE
 #include <iostream>
 #include <map>
 #include <string>
@@ -13,7 +13,7 @@
 
 using namespace std;
 
-static void cbError(int code, const char* description) {
+static void cbError(int code, const char *description) {
   std::string err_msg = "glfw error [";
   err_msg += std::to_string(code);
   err_msg += "]: ";
@@ -37,21 +37,21 @@ void terminateWindowManager() { glfwTerminate(); }
 float getCurrentWindowPixelDensity() {
   int fbw, fbh;
   int winw, winh;
-  GLFWwindow* current_window = glfwGetCurrentContext();
+  GLFWwindow *current_window = glfwGetCurrentContext();
   glfwGetFramebufferSize(current_window, &fbw, &fbh);
   glfwGetWindowSize(current_window, &winw, &winh);
-  float rpd = float(winw) / fbw;  // reciprocal of pixel density
+  float rpd = float(winw) / fbw; // reciprocal of pixel density
   return rpd;
 }
 
 class WindowImpl {
- public:
-  typedef std::map<GLFWwindow*, WindowImpl*> WindowsMap;
+public:
+  typedef std::map<GLFWwindow *, WindowImpl *> WindowsMap;
   typedef std::unordered_map<int, int> KeyMap;
 
-  WindowImpl(Window* w) : mWindow(w) {}
+  WindowImpl(Window *w) : mWindow(w) {}
   ~WindowImpl() { destroy(); }
-  GLFWwindow* glfwWindow() { return mGLFWwindow; }
+  GLFWwindow *glfwWindow() { return mGLFWwindow; }
   bool created() const { return mGLFWwindow != nullptr; }
 
   void makeCurrent() {
@@ -69,17 +69,17 @@ class WindowImpl {
     }
   }
 
-  static WindowsMap& windows() {
-    static WindowsMap* v = new WindowsMap;
+  static WindowsMap &windows() {
+    static WindowsMap *v = new WindowsMap;
     return *v;
   }
 
-  static Window* getWindow(GLFWwindow* w) {
-    WindowImpl* impl = getWindowImpl(w);
+  static Window *getWindow(GLFWwindow *w) {
+    WindowImpl *impl = getWindowImpl(w);
     return impl ? impl->mWindow : nullptr;
   }
 
-  static WindowImpl* getWindowImpl(GLFWwindow* w) {
+  static WindowImpl *getWindowImpl(GLFWwindow *w) {
     WindowsMap::iterator it = windows().find(w);
     if (windows().end() != it) {
       return it->second;
@@ -87,10 +87,11 @@ class WindowImpl {
     return nullptr;
   }
 
-  static void cbKeyboard(GLFWwindow* window, int key, int scancode, int action,
+  static void cbKeyboard(GLFWwindow *window, int key, int scancode, int action,
                          int mods) {
-    auto* w = getWindow(window);
-    if (!w) return;
+    auto *w = getWindow(window);
+    if (!w)
+      return;
 
     // loop through raw callbacks user registered
     // auto& handler_list = glfw::get_keycallback_handler_list();
@@ -101,49 +102,50 @@ class WindowImpl {
     // }
 
     // first set modifiers
-    Keyboard& k = w->mKeyboard;
+    Keyboard &k = w->mKeyboard;
     k.alt(mods & GLFW_MOD_ALT);
     k.ctrl(mods & GLFW_MOD_CONTROL);
     k.shift(mods & GLFW_MOD_SHIFT);
 
     switch (action) {
-      case GLFW_PRESS:
-        k.setKey(remapKey(key), true);
-        w->callHandlersKeyDown();
-        break;
-      case GLFW_REPEAT:
-        break;
-      case GLFW_RELEASE:
-        k.setKey(remapKey(key), false);
-        w->callHandlersKeyUp();
-        break;
+    case GLFW_PRESS:
+      k.setKey(remapKey(key), true);
+      w->callHandlersKeyDown();
+      break;
+    case GLFW_REPEAT:
+      break;
+    case GLFW_RELEASE:
+      k.setKey(remapKey(key), false);
+      w->callHandlersKeyUp();
+      break;
     }
   }
 
-  static void cbMouse(GLFWwindow* window, int button, int action, int mods) {
-    auto* w = getWindow(window);
-    if (!w) return;
+  static void cbMouse(GLFWwindow *window, int button, int action, int mods) {
+    auto *w = getWindow(window);
+    if (!w)
+      return;
 
     switch (button) {
-      case GLFW_MOUSE_BUTTON_LEFT:
-        button = Mouse::LEFT;
-        break;
-      case GLFW_MOUSE_BUTTON_RIGHT:
-        button = Mouse::RIGHT;
-        break;
-      case GLFW_MOUSE_BUTTON_MIDDLE:
-        button = Mouse::MIDDLE;
-        break;
-      default:
-        button = Mouse::EXTRA;  // unrecognized button
+    case GLFW_MOUSE_BUTTON_LEFT:
+      button = Mouse::LEFT;
+      break;
+    case GLFW_MOUSE_BUTTON_RIGHT:
+      button = Mouse::RIGHT;
+      break;
+    case GLFW_MOUSE_BUTTON_MIDDLE:
+      button = Mouse::MIDDLE;
+      break;
+    default:
+      button = Mouse::EXTRA; // unrecognized button
     }
 
-    Keyboard& k = w->mKeyboard;
+    Keyboard &k = w->mKeyboard;
     k.alt(mods & GLFW_MOD_ALT);
     k.ctrl(mods & GLFW_MOD_CONTROL);
     k.shift(mods & GLFW_MOD_SHIFT);
 
-    Mouse& m = w->mMouse;
+    Mouse &m = w->mMouse;
 
     if (GLFW_PRESS == action) {
       double xpos, ypos;
@@ -161,18 +163,20 @@ class WindowImpl {
     }
   }
 
-  static void cbScroll(GLFWwindow* window, double xoffset, double yoffset) {
-    auto* w = getWindow(window);
-    if (!w) return;
+  static void cbScroll(GLFWwindow *window, double xoffset, double yoffset) {
+    auto *w = getWindow(window);
+    if (!w)
+      return;
 
-    Mouse& m = w->mMouse;
+    Mouse &m = w->mMouse;
     m.scroll(xoffset, yoffset);
     w->callHandlersMouseScroll();
   }
 
-  static void cbMotion(GLFWwindow* window, double mx, double my) {
-    auto* w = getWindow(window);
-    if (!w) return;
+  static void cbMotion(GLFWwindow *window, double mx, double my) {
+    auto *w = getWindow(window);
+    if (!w)
+      return;
 
     w->mMouse.position((int)round(mx), (int)round(my));
 
@@ -186,12 +190,13 @@ class WindowImpl {
     w->callHandlersMouseMove();
   }
 
-  static void cbReshape(GLFWwindow* window, int w, int h) {
-    auto* win = getWindow(window);
-    if (!win) return;
+  static void cbReshape(GLFWwindow *window, int w, int h) {
+    auto *win = getWindow(window);
+    if (!win)
+      return;
 
     // update window size
-    Window::Dim& dimCurr = win->mFullScreen ? win->mFullScreenDim : win->mDim;
+    Window::Dim &dimCurr = win->mFullScreen ? win->mFullScreenDim : win->mDim;
     dimCurr.w = w;
     dimCurr.h = h;
 
@@ -201,16 +206,17 @@ class WindowImpl {
     win->callHandlersResize(w, h);
   }
 
-  static void cbReshapeFb(GLFWwindow* window, int fbw, int fbh) {
-    auto* win = getWindow(window);
-    if (!win) return;
+  static void cbReshapeFb(GLFWwindow *window, int fbw, int fbh) {
+    auto *win = getWindow(window);
+    if (!win)
+      return;
 
     // update framebuffer size
     win->mFramebufferWidth = fbw;
     win->mFramebufferHeight = fbh;
 
     // update pixel density
-    Window::Dim& dimCurr = win->mFullScreen ? win->mFullScreenDim : win->mDim;
+    Window::Dim &dimCurr = win->mFullScreen ? win->mFullScreenDim : win->mDim;
     win->mHighresFactor = win->mFramebufferWidth / float(dimCurr.w);
 
     win->callHandlersResize(dimCurr.w, dimCurr.h);
@@ -233,7 +239,7 @@ class WindowImpl {
     // glfwSetWindowFocusCallback(window, cb_windowfocus);
   }
 
-  static KeyMap& keymap() {
+  static KeyMap &keymap() {
     static KeyMap k = make_glfw_keymap();
     return k;
   }
@@ -242,25 +248,26 @@ class WindowImpl {
 
   static int remapKey(int key) {
     auto search = keymap().find(key);
-    if (search != keymap().end()) return search->second;
+    if (search != keymap().end())
+      return search->second;
     return 0;
   }
 
- private:
+private:
   friend class Window;
-  Window* mWindow = nullptr;
-  GLFWwindow* mGLFWwindow = nullptr;
-  static GLFWwindow* mCurrentGLFWwindow;
+  Window *mWindow = nullptr;
+  GLFWwindow *mGLFWwindow = nullptr;
+  static GLFWwindow *mCurrentGLFWwindow;
 };
 
-GLFWwindow* WindowImpl::mCurrentGLFWwindow = nullptr;
+GLFWwindow *WindowImpl::mCurrentGLFWwindow = nullptr;
 
 // ---------------------------------------------------------
 
 Window::Window() { mImpl = make_unique<WindowImpl>(this); }
 
 Window::~Window() {
-  for (auto* handler : mWindowEventHandlers) {
+  for (auto *handler : mWindowEventHandlers) {
     if (&handler->window() == this) {
       handler->removeFromWindow();
     }
@@ -273,13 +280,13 @@ bool Window::implCreate(bool is_verbose) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   //  glfwWindowHint(GLFW_DECORATED, mDecorated);
   glfwWindowHint(GLFW_OPENGL_PROFILE,
-                 GLFW_OPENGL_CORE_PROFILE);          // Ignored when creating ES
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);  // if OSX, this is a must
+                 GLFW_OPENGL_CORE_PROFILE);         // Ignored when creating ES
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true); // if OSX, this is a must
   // GLFW_AUTO_ICONIFY (available after 3.2) specifies whether the full screen
   // window will automatically iconify and restore the previous video mode on
   // input focus loss. This hint is ignored for windowed mode windows.
 #if 10 * GLFW_VERSION_MAJOR + GLFW_VERSION_MINOR > 31
-  glfwWindowHint(GLFW_AUTO_ICONIFY, false);  // so fullcreen does not iconify
+  glfwWindowHint(GLFW_AUTO_ICONIFY, false); // so fullcreen does not iconify
 #endif
   // TODO
   // GLFW_STEREO: GLFW_TRUE GLFW_FALSE
@@ -311,7 +318,8 @@ bool Window::implCreate(bool is_verbose) {
                   << std::endl;
       }
     } else {
-      if (is_verbose) std::cout << "failed to create window" << std::endl;
+      if (is_verbose)
+        std::cout << "failed to create window" << std::endl;
       return false;
     }
   }
@@ -326,7 +334,8 @@ bool Window::implCreate(bool is_verbose) {
   glfwGetWindowPos(mImpl->mGLFWwindow, &actual_left, &actual_top);
   if (actual_width != mDim.w || actual_height != mDim.h ||
       actual_left != mDim.l || actual_top != mDim.t) {
-    if (is_verbose) cout << "screen dimension different from requested" << endl;
+    if (is_verbose)
+      cout << "screen dimension different from requested" << endl;
     mDim.w = actual_width;
     mDim.h = actual_height;
     mDim.l = actual_left;
@@ -339,14 +348,14 @@ bool Window::implCreate(bool is_verbose) {
   al::gl::load();
 
   if (is_verbose) {
-    const GLubyte* renderer = glGetString(GL_RENDERER);
+    const GLubyte *renderer = glGetString(GL_RENDERER);
     std::cout << "renderer: " << renderer << std::endl;
     int mj =
         glfwGetWindowAttrib(mImpl->mGLFWwindow, GLFW_CONTEXT_VERSION_MAJOR);
     int mn =
         glfwGetWindowAttrib(mImpl->mGLFWwindow, GLFW_CONTEXT_VERSION_MINOR);
     std::cout << "opengl window version: " << mj << "." << mn << std::endl;
-    char* glsl_version = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    char *glsl_version = (char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
     std::cout << "glsl version: " << glsl_version << std::endl;
   }
 
@@ -385,6 +394,8 @@ void Window::implClose() { /*glfwSetWindowShouldClose(mImpl->mGLFWwindow,
                               true);*/
 }
 
+void *Window::implWindowHandle() { return mImpl->glfwWindow(); }
+
 bool Window::implShouldClose() {
   if (glfwWindowShouldClose(mImpl->mGLFWwindow)) {
     return true;
@@ -413,14 +424,14 @@ void Window::implSetFullScreen(int monitorIndex) {
   if (mFullScreen) {
     // TODO: selection for multi-monitor
     int monitorCount;
-    GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
-    GLFWmonitor* monitor;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+    GLFWmonitor *monitor;
     if (monitorCount > monitorIndex && monitorIndex >= 0) {
       monitor = monitors[monitorIndex];
     } else {
       monitor = glfwGetPrimaryMonitor();
     }
-    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
     glfwSetWindowMonitor(mImpl->mGLFWwindow, monitor, 0, 0, mode->width,
                          mode->height, mode->refreshRate);
     vsync(mVSync);
@@ -541,4 +552,4 @@ WindowImpl::KeyMap WindowImpl::make_glfw_keymap() {
   return km;
 }
 
-}  // namespace al
+} // namespace al

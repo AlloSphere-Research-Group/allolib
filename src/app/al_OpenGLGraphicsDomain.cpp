@@ -119,9 +119,11 @@ bool GLFWOpenGLWindowDomain::tick() {
   onNewFrame();
   /* Make the window's context current */
   mWindow->makeCurrent();
+  tickSubdomains(true);
   preOnDraw();
   onDraw(*mGraphics);
   postOnDraw();
+  tickSubdomains(false);
   mWindow->refresh();
   return true;
 }
