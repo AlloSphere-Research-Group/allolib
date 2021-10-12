@@ -94,8 +94,11 @@ bool GLFWOpenGLWindowDomain::init(ComputationDomain *parent) {
   //  0) {
   //    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
   //  }
+  bool ret = true;
   assert(strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
          0);
+
+  ret &= initializeSubdomains(true);
   mParent = static_cast<OpenGLGraphicsDomain *>(parent);
   if (!mWindow) {
     mWindow = std::make_unique<Window>();
@@ -108,8 +111,9 @@ bool GLFWOpenGLWindowDomain::init(ComputationDomain *parent) {
     mGraphics->init();
     return ret;
   }
-
-  return true;
+  ret &= initializeSubdomains(false);
+  mInitialized = true;
+  return ret;
 }
 
 bool GLFWOpenGLWindowDomain::tick() {
@@ -129,6 +133,8 @@ bool GLFWOpenGLWindowDomain::tick() {
 }
 
 bool GLFWOpenGLWindowDomain::cleanup(ComputationDomain *parent) {
+  bool ret = true;
+  ret &= cleanupSubdomains(true);
   if (mWindow) {
     mWindow->destroy();
     mWindow = nullptr;
@@ -136,5 +142,8 @@ bool GLFWOpenGLWindowDomain::cleanup(ComputationDomain *parent) {
   if (mGraphics) {
     mGraphics = nullptr;
   }
-  return true;
+  mInitialized = false;
+
+  ret &= cleanupSubdomains(false);
+  return ret;
 }

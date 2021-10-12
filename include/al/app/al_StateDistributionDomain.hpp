@@ -110,6 +110,8 @@ public:
 
   void setId(const std::string &id) { mId = id; }
 
+  void setAddress(std::string address) { mAddress = address; };
+
 protected:
   std::shared_ptr<TSharedState> mState;
   int mQueuedStates{1};

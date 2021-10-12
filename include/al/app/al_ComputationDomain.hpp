@@ -9,6 +9,7 @@
 #include <stack>
 #include <vector>
 
+#include "al/app/al_NodeConfiguration.hpp"
 #include "al/ui/al_Parameter.hpp"
 
 namespace al {
@@ -107,6 +108,8 @@ public:
 
   void setTimeDelta(double delta) { mTimeDrift = delta; }
 
+  Capability getCapabilities() { return mCapabilities; }
+
   /**
    * @brief register callbacks to be called in the init() function
    * @param callback
@@ -186,12 +189,16 @@ protected:
   // Add parameters for domain control here
   std::vector<ParameterMeta *> mParameters;
 
+protected:
+  bool mInitialized{false};
+
 private:
   std::vector<std::function<void(ComputationDomain *)>> mInitializeCallbacks;
   std::vector<std::function<void(ComputationDomain *)>> mCleanupCallbacks;
 
   std::mutex mSubdomainLock;
-  bool mInitialized{false};
+
+  Capability mCapabilities;
 };
 
 class SynchronousDomain : public ComputationDomain {
