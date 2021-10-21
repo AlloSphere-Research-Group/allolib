@@ -121,11 +121,11 @@ DWORD secToTimeout(float t) {
 
 #include <arpa/inet.h> // inet_ntoa
 #include <errno.h>
-#include <netdb.h>  // gethostbyname
+#include <netdb.h> // gethostbyname
 #include <string.h> // memset, strerror
 #include <sys/socket.h>
 #include <sys/time.h> // timeval
-#include <unistd.h>   // close, gethostname
+#include <unistd.h> // close, gethostname
 
 #include <sstream>
 

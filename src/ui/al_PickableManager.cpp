@@ -73,18 +73,18 @@ void PickableManager::onMouseUp(Graphics &g, const Mouse &m, int w, int h) {
 }
 
 void PickableManager::onKeyDown(const Keyboard &k) {
-  switch (k.key()) {
-  default:
-    break;
-  }
+  //  switch (k.key()) {
+  //  default:
+  //    break;
+  //  }
   ctrlKey = k.ctrl();
 }
 
 void PickableManager::onKeyUp(const Keyboard &k) {
-  switch (k.key()) {
-  default:
-    break;
-  }
+  //  switch (k.key()) {
+  //  default:
+  //    break;
+  //  }
   if (k.key() == 0) {
     // Assumes 0 means a control key...
     // There seems to be no better way...
