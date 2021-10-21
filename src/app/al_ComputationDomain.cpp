@@ -75,6 +75,12 @@ bool ComputationDomain::cleanup(ComputationDomain *parent) {
   return ret;
 }
 
+void ComputationDomain::addSubDomain(
+    std::shared_ptr<SynchronousDomain> subDomain, bool prepend) {
+  std::lock_guard<std::mutex> lk(mSubdomainLock);
+  mSubDomainList.push_back({subDomain, prepend});
+}
+
 void ComputationDomain::removeSubDomain(
     std::shared_ptr<SynchronousDomain> subDomain) {
   // Only Synchronous domains are allowed as subdomains

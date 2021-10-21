@@ -65,7 +65,6 @@ public:
    */
   std::shared_ptr<DomainType> newSubDomain(bool prepend = false);
 
-  template <class DomainType>
   /**
    * @brief Inserts subDomain as a subdomain of this class
    * @param subDomain sub domain to insert
@@ -81,7 +80,7 @@ public:
    * It may block indefinitely if the parent domain does not release the
    * sub domain locks.
    */
-  void addSubDomain(std::shared_ptr<DomainType> subDomain,
+  void addSubDomain(std::shared_ptr<SynchronousDomain> subDomain,
                     bool prepend = false);
 
   /**
@@ -273,12 +272,8 @@ std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
   return newDomain;
 }
 
-template <class DomainType>
-void ComputationDomain::addSubDomain(std::shared_ptr<DomainType> subDomain,
-                                     bool prepend) {
-  std::lock_guard<std::mutex> lk(mSubdomainLock);
-  mSubDomainList.push_back({subDomain, prepend});
-}
+void ComputationDomain::addSubDomain(
+    std::shared_ptr<SynchronousDomain> subDomain, bool prepend);
 
 } // namespace al
 
