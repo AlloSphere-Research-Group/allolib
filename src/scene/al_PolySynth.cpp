@@ -289,7 +289,8 @@ bool SynthVoice::setTriggerParams(std::vector<VariantValue> pFields,
       case (VariantType::VARIANT_UINT64): {
         ParameterUInt64 *p = nullptr;
         if ((p = dynamic_cast<ParameterUInt64 *>(param))) {
-          static_cast<ParameterUInt64 *>(param)->setNoCalls(it->get<uint64_t>());
+          static_cast<ParameterUInt64 *>(param)->setNoCalls(
+              it->get<uint64_t>());
         } else {
           std::cout << __FILE__ << ":" << __LINE__
                     << " ERROR field data type and parameter type mismatch"

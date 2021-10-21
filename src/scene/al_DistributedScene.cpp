@@ -7,37 +7,47 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize,
     : DynamicScene(threadPoolSize, masterMode) {
   mName = name;
 
-  PolySynth::registerTriggerOnCallback(
-      [this](SynthVoice *voice, int offsetFrames, int id, void *userData) {
-        if (this->mNotifier) {
-          osc::Packet p;
-          std::string prefix = "/" + this->name();
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          p.beginMessage(prefix + "/triggerOn");
-          offsetFrames = 0;
-          p << offsetFrames << id;
-          std::string voiceName = demangle(typeid(*voice).name());
-          p << voiceName;
-          auto fields = voice->getTriggerParams();
-          for (auto field : fields) {
-            if (field.type() == VariantType::VARIANT_FLOAT) {
-              p << field.get<float>();
-            } else {
-              p << field.get<std::string>();
-            }
-          }
-          p.endMessage();
-
-          if (verbose()) {
-            std::cout << "Sending trigger on message for voice " << id
-                      << std::endl;
-          }
-          this->mNotifier->send(p);
+  PolySynth::registerTriggerOnCallback([this](SynthVoice *voice,
+                                              int offsetFrames, int id,
+                                              void *userData) {
+    if (this->mNotifier) {
+      osc::Packet p;
+      std::string prefix = "/" + this->name();
+      if (prefix.size() == 1) {
+        prefix = "";
+      }
+      p.beginMessage(prefix + "/triggerOn");
+      offsetFrames = 0;
+      p << offsetFrames << id;
+      std::string voiceName = demangle(typeid(*voice).name());
+      p << voiceName;
+      auto fields = voice->getTriggerParams();
+      for (const auto &field : fields) {
+        if (field.type() == VariantType::VARIANT_FLOAT) {
+          p << field.get<float>();
+        } else if (field.type() == VariantType::VARIANT_DOUBLE) {
+          p << field.get<double>();
+        } else if (field.type() == VariantType::VARIANT_INT32) {
+          p << field.get<int32_t>();
+        } else if (field.type() == VariantType::VARIANT_UINT64) {
+          p << field.get<uint64_t>();
+        } else if (field.type() == VariantType::VARIANT_STRING) {
+          p << field.get<std::string>();
+        } else {
+          assert(1 == 0);
+          std::cerr << "ERROR type not implemented for distributed scene sync"
+                    << std::endl;
         }
-        return true;
-      });
+      }
+      p.endMessage();
+
+      if (verbose()) {
+        std::cout << "Sending trigger on message for voice " << id << std::endl;
+      }
+      this->mNotifier->send(p);
+    }
+    return true;
+  });
 
   PolySynth::registerTriggerOffCallback([this](int id, void *userData) {
     if (this->mNotifier) {
