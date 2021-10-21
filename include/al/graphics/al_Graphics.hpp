@@ -61,7 +61,7 @@ namespace al {
 @ingroup Graphics
 */
 class Graphics : public RenderManager {
- public:
+public:
   enum class ColoringMode : unsigned int {
     UNIFORM,
     MESH,
@@ -223,7 +223,8 @@ class Graphics : public RenderManager {
   // does not enable lighting, call lighting(true) to enable lighting
   void light(Light const &l, int idx = 0);
 
-  void quad(Texture &tex, float x, float y, float w, float h);
+  void quad(Texture &tex, float x, float y, float w, float h,
+            bool flip = false);
   void quadViewport(Texture &tex, float x = -1, float y = -1, float w = 2,
                     float h = 2);
 
@@ -234,8 +235,8 @@ class Graphics : public RenderManager {
   ShaderProgram &shader();
   ShaderProgram *shaderPtr();
 
-  using RenderManager::camera;  // makes camera(Viewpoint::SpecialType v)
-                                // accessible
+  using RenderManager::camera; // makes camera(Viewpoint::SpecialType v)
+                               // accessible
   void camera(Viewpoint const &v) override;
 
   void send_lighting_uniforms(ShaderProgram &s,
@@ -258,7 +259,7 @@ class Graphics : public RenderManager {
   void omni(bool b);
   bool omni();
 
- private:
+private:
   bool initialized = false;
 
   Color mColor{1, 1, 1, 1};
@@ -330,5 +331,5 @@ class Graphics : public RenderManager {
   float mEye = 0.0f;
 };
 
-}  // namespace al
+} // namespace al
 #endif
