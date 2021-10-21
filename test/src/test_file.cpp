@@ -68,7 +68,7 @@ TEST_CASE("Conform path to OS") {
   REQUIRE(File::isSamePath(conformed, "c:/test/otherpath/to/file"));
 
   // spaces
-  path = "c:\\test\\pa th/..\\other path\\to\\";
+  path = "c:\\test\\pa th/..\\other path\\to\\file";
   conformed = File::conformPathToOS(path);
 
   REQUIRE(File::isSamePath(conformed, "c:/test/other path/to/file"));
