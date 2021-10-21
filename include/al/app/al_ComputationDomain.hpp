@@ -272,9 +272,6 @@ std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
   return newDomain;
 }
 
-void ComputationDomain::addSubDomain(
-    std::shared_ptr<SynchronousDomain> subDomain, bool prepend);
-
 } // namespace al
 
 #endif // COMPUTATIONDOMAIN_H
