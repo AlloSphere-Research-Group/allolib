@@ -153,21 +153,6 @@ public:
   virtual bool start(uint16_t port, const char *addr) = 0;
   virtual void stop();
 
-  virtual bool processIncomingMessage(Message &message, Socket *src) {
-    auto command = message.getByte();
-    if (command == PONG) {
-      if (mVerbose) {
-        std::cout << __FILE__ << "Got pong for " << src->address() << ":"
-                  << src->port() << std::endl;
-      }
-    } else if (command == GOODBYE) {
-      std::cerr << __FILE__ << "Goodbye not implemented" << std::endl;
-    } else if (command == HANDSHAKE) {
-      std::cerr << __FILE__ << "Unexpected handshake received" << std::endl;
-    }
-    return false;
-  };
-
   /**
    * @brief sendMessage
    * @param message
@@ -187,6 +172,21 @@ public:
   void setVerbose(bool verbose) { mVerbose = verbose; }
 
 protected:
+  virtual bool processIncomingMessage(Message &message, Socket *src) {
+    auto command = message.getByte();
+    if (command == PONG) {
+      if (mVerbose) {
+        std::cout << __FILE__ << "Got pong for " << src->address() << ":"
+                  << src->port() << std::endl;
+      }
+    } else if (command == GOODBYE) {
+      std::cerr << __FILE__ << "Goodbye not implemented" << std::endl;
+    } else if (command == HANDSHAKE) {
+      std::cerr << __FILE__ << "Unexpected handshake received" << std::endl;
+    }
+    return false;
+  };
+
   virtual void onConnection(Socket *newConnection){};
 
   uint16_t mVersion = 0,
