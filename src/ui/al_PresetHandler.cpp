@@ -363,10 +363,10 @@ void PresetHandler::recallPresetSynchronous(std::string name) {
               if (currentFields[i].type() == VariantType::VARIANT_FLOAT &&
                   mTargetValues[param->getFullAddress()][i].type() ==
                       VariantType::VARIANT_INT32) {
-                mTargetValues[param->getFullAddress()][i] = VariantValue(
-                    float(mTargetValues[param->getFullAddress()][i]
-                              .get<int32_t>()));
-              } else if (currentFields[i].type() == VariantType::VARIANT_INT32 &&
+                mTargetValues[param->getFullAddress()][i] = VariantValue(float(
+                    mTargetValues[param->getFullAddress()][i].get<int32_t>()));
+              } else if (currentFields[i].type() ==
+                             VariantType::VARIANT_INT32 &&
                          mTargetValues[param->getFullAddress()][i].type() ==
                              VariantType::VARIANT_FLOAT) {
                 mTargetValues[param->getFullAddress()][i] = VariantValue(
@@ -835,8 +835,10 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
                   endValue.second[i].type() == VariantType::VARIANT_INT32) {
                 endValue.second[i] =
                     VariantValue(float(endValue.second[i].get<int32_t>()));
-              } else if (endValue.second[i].type() == VariantType::VARIANT_FLOAT &&
-                         startValue.second[i].type() == VariantType::VARIANT_INT32) {
+              } else if (endValue.second[i].type() ==
+                             VariantType::VARIANT_FLOAT &&
+                         startValue.second[i].type() ==
+                             VariantType::VARIANT_INT32) {
                 startValue.second[i] =
                     VariantValue(float(startValue.second[i].get<int32_t>()));
               } else {
@@ -848,15 +850,17 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
             if (startValue.second[i].type() == VariantType::VARIANT_FLOAT) {
               interpValues.push_back(VariantValue(
                   startValue.second[i].get<float>() +
-                  (factor * (endValue.second[i].get<float>() -
-                             startValue.second[i].get<float>()))));
-            } else if (startValue.second[i].type() == VariantType::VARIANT_INT32) {
-              float value =
-                  startValue.second[i].get<int32_t>() +
-                  (factor * (endValue.second[i].get<int32_t>() -
-                             (float)startValue.second[i].get<int32_t>()));
+                  ((float)factor * (endValue.second[i].get<float>() -
+                                    startValue.second[i].get<float>()))));
+            } else if (startValue.second[i].type() ==
+                       VariantType::VARIANT_INT32) {
+              float value = startValue.second[i].get<int32_t>() +
+                            ((float)factor *
+                             (endValue.second[i].get<int32_t>() -
+                              (float)startValue.second[i].get<int32_t>()));
               interpValues.push_back(VariantValue((int32_t)value));
-            } else if (startValue.second[i].type() == VariantType::VARIANT_STRING) {
+            } else if (startValue.second[i].type() ==
+                       VariantType::VARIANT_STRING) {
               interpValues.push_back(endValue.second[i]);
             }
           }
@@ -867,8 +871,10 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
                 endValue.second[i].type() == VariantType::VARIANT_INT32) {
               endValue.second[i] =
                   VariantValue(float(endValue.second[i].get<int32_t>()));
-            } else if (endValue.second[i].type() == VariantType::VARIANT_FLOAT &&
-                       startValue.second[i].type() == VariantType::VARIANT_INT32) {
+            } else if (endValue.second[i].type() ==
+                           VariantType::VARIANT_FLOAT &&
+                       startValue.second[i].type() ==
+                           VariantType::VARIANT_INT32) {
               endValue.second[i] =
                   VariantValue(int32_t(endValue.second[i].get<float>()));
             }

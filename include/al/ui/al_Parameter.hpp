@@ -610,8 +610,34 @@ public:
   virtual void setFields(std::vector<VariantValue> &fields) override {
     assert(fields.size() == 1);
     if (fields.size() == 1) {
+      if (fields[0].type() == VariantType::VARIANT_FLOAT) {
+        set(fields[0].get<float>());
+
+      } else if (fields[0].type() == VariantType::VARIANT_DOUBLE) {
+        set(float(fields[0].get<double>()));
+
+      } else if (fields[0].type() == VariantType::VARIANT_INT8) {
+        set(float(fields[0].get<int8_t>()));
+
+      } else if (fields[0].type() == VariantType::VARIANT_INT16) {
+        set(float(fields[0].get<int16_t>()));
+
+      } else if (fields[0].type() == VariantType::VARIANT_INT32) {
+        set(float(fields[0].get<int32_t>()));
+
+      } else if (fields[0].type() == VariantType::VARIANT_UINT8) {
+        set(float(fields[0].get<uint8_t>()));
+
+      } else if (fields[0].type() == VariantType::VARIANT_UINT16) {
+        set(float(fields[0].get<uint16_t>()));
+
+      } else if (fields[0].type() == VariantType::VARIANT_UINT32) {
+        set(float(fields[0].get<uint32_t>()));
+
+      } else {
+        std::cerr << __FUNCTION__ << "Unexpected variant type" << std::endl;
+      }
       assert(fields[0].type() == VariantType::VARIANT_FLOAT);
-      set(fields[0].get<float>());
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
