@@ -188,9 +188,13 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
     for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
       std::string bundlePrefix = bundleName + std::to_string(i);
       for (ParameterMeta *p : bundleGroup.second.at(i)->parameters()) {
-        std::vector<VariantValue> fields;
-        p->getFields(fields);
-        values[bundlePrefix + p->getFullAddress()] = fields;
+
+        if (std::find(mSkipParameters.begin(), mSkipParameters.end(),
+                      p->getFullAddress()) == mSkipParameters.end()) {
+          std::vector<VariantValue> fields;
+          p->getFields(fields);
+          values[bundlePrefix + p->getFullAddress()] = fields;
+        }
       }
       // FIXME enable recursive nesting for bundles
       for (auto subBundleGroup : bundleGroup.second.at(i)->bundles()) {
@@ -280,12 +284,17 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
           for (unsigned int i = 0; i < bundles.size(); i++) {
             std::string bundlePrefix = prefix + std::to_string(i);
             for (auto *param : bundles.at(i)->parameters()) {
-              if (mTargetValues.find(bundlePrefix + param->getFullAddress()) !=
-                  mTargetValues.end()) {
-                mStartValues[bundlePrefix + param->getFullAddress()] =
-                    std::vector<VariantValue>();
-                param->getFields(
-                    mStartValues[bundlePrefix + param->getFullAddress()]);
+
+              if (std::find(mSkipParameters.begin(), mSkipParameters.end(),
+                            param->getFullAddress()) == mSkipParameters.end()) {
+                if (mTargetValues.find(bundlePrefix +
+                                       param->getFullAddress()) !=
+                    mTargetValues.end()) {
+                  mStartValues[bundlePrefix + param->getFullAddress()] =
+                      std::vector<VariantValue>();
+                  param->getFields(
+                      mStartValues[bundlePrefix + param->getFullAddress()]);
+                }
               }
             }
             for (auto bundleGroup : bundles.at(i)->bundles()) {
