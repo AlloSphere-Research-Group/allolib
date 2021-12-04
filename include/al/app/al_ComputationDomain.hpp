@@ -80,8 +80,8 @@ public:
    * It may block indefinitely if the parent domain does not release the
    * sub domain locks.
    */
-  void addSubDomain(std::shared_ptr<SynchronousDomain> subDomain,
-                    bool prepend = false);
+  virtual void addSubDomain(std::shared_ptr<SynchronousDomain> subDomain,
+                            bool prepend = false);
 
   /**
    * @brief Remove a subdomain
@@ -91,7 +91,7 @@ public:
    * deadlines for the parent domain. If this is a problem, the domain should be
    * stopped prior to adding/removeing sub-domains.
    */
-  void removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain);
+  virtual void removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain);
 
   /**
    * @brief Return time delta with respect to previous processing pass for this
