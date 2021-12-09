@@ -202,6 +202,14 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
             std::string value;
             m >> value;
             params.emplace_back(value);
+          } else if (m.typeTags()[i] == 'd') {
+            double value;
+            m >> value;
+            params.emplace_back(value);
+          } else if (m.typeTags()[i] == 'i') {
+            int32_t value;
+            m >> value;
+            params.emplace_back(value);
           } else {
             std::cerr << "ERROR: Unsupported parameter type for scene trigger"
                       << std::endl;
