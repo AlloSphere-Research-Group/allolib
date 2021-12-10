@@ -135,6 +135,8 @@ bool GLFWOpenGLWindowDomain::tick() {
 bool GLFWOpenGLWindowDomain::cleanup(ComputationDomain *parent) {
   bool ret = true;
   ret &= cleanupSubdomains(true);
+  ret &= cleanupSubdomains(false);
+
   if (mWindow) {
     mWindow->destroy();
     mWindow = nullptr;
@@ -143,7 +145,5 @@ bool GLFWOpenGLWindowDomain::cleanup(ComputationDomain *parent) {
     mGraphics = nullptr;
   }
   mInitialized = false;
-
-  ret &= cleanupSubdomains(false);
   return ret;
 }

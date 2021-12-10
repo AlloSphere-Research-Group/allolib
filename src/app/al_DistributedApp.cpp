@@ -239,7 +239,7 @@ void DistributedApp::start() {
                 << std::endl;
     } else {
       //      std::cout << "Running REPLICA" << std::endl;
-      for (auto hostRole : mRoleMap) {
+      for (const auto &hostRole : mRoleMap) {
         if (hostRole.first != name()) {
           parameterServer().addListener(hostRole.first, oscDomain()->port);
         }

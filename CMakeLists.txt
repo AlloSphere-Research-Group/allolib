@@ -57,6 +57,7 @@ set(headers
   include/al/app/al_AudioDomain.hpp
   include/al/app/al_ComputationDomain.hpp
   include/al/app/al_ConsoleDomain.hpp
+  include/al/app/al_GUIDomain.hpp
   include/al/app/al_OpenGLGraphicsDomain.hpp
   include/al/app/al_OSCDomain.hpp
   include/al/app/al_SimulationDomain.hpp
@@ -176,6 +177,7 @@ set(sources
 
   src/app/al_AudioDomain.cpp
   src/app/al_ComputationDomain.cpp
+  src/app/al_GUIDomain.cpp
   src/app/al_OmniRendererDomain.cpp
   src/app/al_OpenGLGraphicsDomain.cpp
   src/app/al_OSCDomain.cpp

@@ -7,10 +7,6 @@ using namespace al;
 using namespace std;
 
 void ControlGUI::draw(Graphics & /*g*/) {
-  auto separatorAnchor = mSeparatorAnchors.begin();
-  auto groupBeginAnchor = mGroupBeginAnchors.begin();
-  auto groupNamesIt = mGroupNames.begin();
-  auto groupEndAnchor = mGroupEndAnchors.begin();
 
   if (mManageIMGUI) {
     begin();
@@ -21,6 +17,20 @@ void ControlGUI::draw(Graphics & /*g*/) {
     ImGui::SetNextWindowBgAlpha(mGUIBackgroundAlpha);
     ParameterGUI::beginPanel(mName, mX, mY);
   }
+  drawWidgets();
+  if (mManageIMGUI) {
+    end();
+  } else {
+    ParameterGUI::endPanel();
+  }
+}
+
+void ControlGUI::drawWidgets() {
+
+  auto separatorAnchor = mSeparatorAnchors.begin();
+  auto groupBeginAnchor = mGroupBeginAnchors.begin();
+  auto groupNamesIt = mGroupNames.begin();
+  auto groupEndAnchor = mGroupEndAnchors.begin();
   ImGui::PushID(mName.c_str());
   if (mNav) {
     ParameterGUI::drawNav(mNav, mName);
@@ -62,7 +72,7 @@ void ControlGUI::draw(Graphics & /*g*/) {
         ImGui::CollapsingHeader(
             elem.first.c_str(),
             ImGuiTreeNodeFlags_CollapsingHeader |
-                ImGuiTreeNodeFlags_DefaultOpen)) {  // ! to force open by
+                ImGuiTreeNodeFlags_DefaultOpen)) { // ! to force open by
       string suffix;
       if (elem.first.size() > 0) {
         suffix = "##" + elem.first;
@@ -110,11 +120,6 @@ void ControlGUI::draw(Graphics & /*g*/) {
     }
   }
   ImGui::PopID();
-  if (mManageIMGUI) {
-    end();
-  } else {
-    ParameterGUI::endPanel();
-  }
 }
 
 void ControlGUI::init(int x, int y, bool manageImgui) {
@@ -203,8 +208,8 @@ ControlGUI &ControlGUI::registerPresetHandler(PresetHandler &presetHandler,
   return *this;
 }
 
-ControlGUI &ControlGUI::registerPresetSequencer(
-    PresetSequencer &presetSequencer) {
+ControlGUI &
+ControlGUI::registerPresetSequencer(PresetSequencer &presetSequencer) {
   mPresetSequencer = &presetSequencer;
   return *this;
 }
@@ -232,16 +237,16 @@ ControlGUI &ControlGUI::registerDynamicScene(DynamicScene &scene) {
 
 ControlGUI &ControlGUI::registerMarker(GUIMarker &marker) {
   switch (marker.getType()) {
-    case GUIMarker::MarkerType::GROUP_BEGIN:
-      mGroupBeginAnchors.push_back(mLatestElement);
-      mGroupNames.push_back(marker.getName());
-      break;
-    case GUIMarker::MarkerType::GROUP_END:
-      mGroupEndAnchors.push_back(mLatestElement);
-      break;
-    case GUIMarker::MarkerType::SEPARATOR:
-      mSeparatorAnchors.push_back(mLatestElement);
-      break;
+  case GUIMarker::MarkerType::GROUP_BEGIN:
+    mGroupBeginAnchors.push_back(mLatestElement);
+    mGroupNames.push_back(marker.getName());
+    break;
+  case GUIMarker::MarkerType::GROUP_END:
+    mGroupEndAnchors.push_back(mLatestElement);
+    break;
+  case GUIMarker::MarkerType::SEPARATOR:
+    mSeparatorAnchors.push_back(mLatestElement);
+    break;
   }
   return *this;
 }

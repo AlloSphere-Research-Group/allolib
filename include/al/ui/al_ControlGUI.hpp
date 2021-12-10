@@ -61,7 +61,7 @@
 namespace al {
 
 class GUIMarker {
- public:
+public:
   enum class MarkerType { GROUP_BEGIN, GROUP_END, SEPARATOR };
   GUIMarker(MarkerType type, const char *name = nullptr) {
     mMarkerType = type;
@@ -71,7 +71,7 @@ class GUIMarker {
   MarkerType getType() { return mMarkerType; }
   const char *getName() { return mName; }
 
- private:
+private:
   MarkerType mMarkerType;
   const char *mName;
 };
@@ -83,7 +83,9 @@ class GUIMarker {
  * @ingroup UI
  */
 class ControlGUI {
- public:
+  friend class GUIPanelDomain;
+
+public:
   ControlGUI &registerParameterMeta(ParameterMeta &param);
 
   /// Register parameter using the streaming operator.
@@ -207,6 +209,11 @@ class ControlGUI {
   void draw(Graphics &g);
 
   /**
+   * @brief widget draw code without configuration
+   */
+  void drawWidgets();
+
+  /**
    * @brief Call to set if this GUI manages ImGUI
    *
    * Set to false if you want to have additional ImGUI windows.
@@ -297,8 +304,8 @@ class ControlGUI {
     return GUIMarker(GUIMarker::MarkerType::SEPARATOR);
   }
 
- protected:
- private:
+protected:
+private:
   // std::map<std::string, std::vector<Parameter *>> mParameters;
   // std::map<std::string, std::vector<ParameterBool *>> mParameterBools;
   std::map<std::string, std::vector<ParameterVec3 *>> mParameterVec3s;
@@ -307,15 +314,15 @@ class ControlGUI {
   std::map<std::string, std::vector<ParameterMeta *>> mElements;
   ParameterMeta *mLatestElement{nullptr};
   std::vector<ParameterMeta *>
-      mGroupBeginAnchors;  // refs to the parameters marking beginning and
-                           // ending of groups
+      mGroupBeginAnchors; // refs to the parameters marking beginning and
+                          // ending of groups
   std::vector<std::string> mGroupNames;
   std::vector<ParameterMeta *>
-      mGroupEndAnchors;  // refs to the parameters marking beginning and ending
-                         // of groups
+      mGroupEndAnchors; // refs to the parameters marking beginning and ending
+                        // of groups
   std::vector<ParameterMeta *> mSeparatorAnchors;
 
-//  ParameterGUI mParameterGUI;
+  //  ParameterGUI mParameterGUI;
 
   PresetHandler *mPresetHandler{nullptr};
   int mPresetColumns, mPresetRows;
@@ -332,13 +339,13 @@ class ControlGUI {
   bool mFixed{true};
   int mX, mY;
 
-  float mGUIBackgroundAlpha = 0;
+  float mGUIBackgroundAlpha = 0.3;
 
   bool mManageIMGUI{true};
 
-//  int mCurrentSequencerItem{0};
+  //  int mCurrentSequencerItem{0};
   int mCurrentPresetSequencerItem{0};
-//  bool mRecordButtonValue{false};
+  //  bool mRecordButtonValue{false};
   char **mSequencerItems;
 
   std::map<std::string, int> mCurrentBundle;
@@ -348,6 +355,6 @@ class ControlGUI {
   void end();
 };
 
-}  // namespace al
+} // namespace al
 
 #endif
