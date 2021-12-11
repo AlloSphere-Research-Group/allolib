@@ -334,7 +334,7 @@ the other
    * Allows registering any number of trigger parameters on a single line
    */
   template <class... Args>
-  SynthVoice &registerTriggerParameters(Args &... paramsArgs) {
+  SynthVoice &registerTriggerParameters(Args &...paramsArgs) {
     std::vector<ParameterMeta *> params{&paramsArgs...};
     for (auto *param : params) {
       registerTriggerParameter(*param);
@@ -368,8 +368,7 @@ the other
   /**
    * Allows registering any number of parameters on a single line
    */
-  template <class... Args>
-  SynthVoice &registerParameters(Args &... paramsArgs) {
+  template <class... Args> SynthVoice &registerParameters(Args &...paramsArgs) {
     std::vector<ParameterMeta *> params{&paramsArgs...};
     for (auto *param : params) {
       registerParameter(*param);
@@ -396,6 +395,11 @@ the other
    */
   void free() { mActive = false; } // Mark this voice as done.
 
+  /**
+   * @brief Set voice as part of a replica distributed scene
+   */
+  void markAsReplica() { mIsReplica = true; }
+
   SynthVoice *next{nullptr}; // To support SynthVoices as linked lists
 
 protected:
@@ -416,6 +420,9 @@ protected:
   std::vector<ParameterMeta *> mContinuousParameters;
 
   std::vector<std::shared_ptr<Parameter>> mInternalParameters;
+
+  bool mIsReplica{false}; // If voice is replica, it should not send its
+                          // internal state but listen for changes.
 
 private:
   int mId{-1};
@@ -922,7 +929,7 @@ public:
             voice->onFree();
             voice = voice->next; // prepare next iteration
           }
-          for (auto cbNode : mFreeCallbacks) {
+          for (const auto &cbNode : mFreeCallbacks) {
             cbNode.first(id, cbNode.second);
           }
         }
@@ -981,21 +988,20 @@ protected:
 
   std::vector<AudioCallback *> mPostProcessing;
 
-  typedef std::pair<
+  using TriggerOnCallback = std::pair<
       std::function<bool(SynthVoice *voice, int offsetFrames, int id, void *)>,
-      void *>
-      TriggerOnCallback;
+      void *>;
   std::vector<TriggerOnCallback> mTriggerOnCallbacks;
 
-  typedef std::pair<std::function<bool(int id, void *)>, void *>
-      TriggerOffCallback;
+  using TriggerOffCallback =
+      std::pair<std::function<bool(int id, void *)>, void *>;
   std::vector<TriggerOffCallback> mTriggerOffCallbacks;
 
-  typedef std::pair<std::function<bool(int id, void *)>, void *> FreeCallback;
+  using FreeCallback = std::pair<std::function<bool(int id, void *)>, void *>;
   std::vector<FreeCallback> mFreeCallbacks;
 
-  typedef std::pair<std::function<void(SynthVoice *voice, void *)>, void *>
-      AllocationCallback;
+  using AllocationCallback =
+      std::pair<std::function<void(SynthVoice *voice, void *)>, void *>;
   std::vector<AllocationCallback> mAllocationCallbacks;
 
   float mAudioGain{1.0f};

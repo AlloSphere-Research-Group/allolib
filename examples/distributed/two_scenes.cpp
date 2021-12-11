@@ -5,9 +5,9 @@
     Description:
 */
 
-#include <cstdio>        // for printing to stdout
-#define GAMMA_H_INC_ALL  // define this to include all header files
-#define GAMMA_H_NO_IO    // define this to avoid bringing AudioIO from Gamma
+#include <cstdio>       // for printing to stdout
+#define GAMMA_H_INC_ALL // define this to include all header files
+#define GAMMA_H_NO_IO   // define this to avoid bringing AudioIO from Gamma
 
 #include "Gamma/Gamma.h"
 #include "al/app/al_DistributedApp.hpp"
@@ -32,73 +32,75 @@ using namespace al;
 
 // The Scene will contain "SimpleVoice" agents
 class SimpleVoice : public PositionedVoice {
- public:
+public:
   virtual void init() override {
-    // Pose and size are not transmitted by default
+    // Pose and size are not transmitted by default, so they must be explicitly
+    // shared
     registerParameter(parameterPose());
     registerParameter(parameterSize());
   }
 
   virtual void update(double dt) override {
-    Pose p = pose();
-    p.vec().x = p.vec().x * 0.993;
-    setPose(p);
-    setSize(size() * 0.997);
+    if (!mIsReplica) {
+      Pose p = pose();
+      p.vec().x = p.vec().x * 0.993;
+      setPose(p);
+      setSize(size() * 0.997);
+      if (fabs(pose().vec().x) < 0.01) {
+        free();
+      }
+    }
   }
 
   virtual void onProcess(Graphics &g) override {
     auto *mesh = (Mesh *)userData();
     g.color(fabs(pose().vec().x));
     g.draw(*mesh);
-    if (fabs(pose().vec().x) < 0.1) {
-      free();
-    }
   }
 };
 
 class MyApp : public DistributedApp {
- public:
+public:
   ParameterPose navParameter{"nav"};
 
   virtual void onCreate() override {
     scene1.registerSynthClass<SimpleVoice>();
     scene2.registerSynthClass<SimpleVoice>();
-    //    scene1.verbose(true);
 
-    registerDynamicScene(scene1);  // scene1 is broadcast from primary
+    registerDynamicScene(scene1); // scene1 is shared from primary node
 
-    // Now connect scene2 so that it is broadcast from replica
-    // If distributed scene, connect according to this app's role
-    if (isPrimary()) {
-      //      parameterServer().registerOSCConsumer(
-      //            &scene2, scene2.name());
-      scene1.allNotesOff();  // To turn off any events that might remain in a
-                             // replica scene
-    } else {
-      scene2.registerNotifier(parameterServer());
-      //      parameterServer().addListener("localhost", 9010);
-      scene2.allNotesOff();  // To turn off any events that might remain in a
-                             // replica scene
+    {
+      // Now connect scene2 so that it is shared from replica.
+      // This is what registerDynamicScene does behind the scenes,
+      // But we do it in reverse for scene2
+      if (isPrimary()) {
+        parameterServer().registerOSCConsumer(&scene2, scene2.name());
+        scene1.allNotesOff(); // To turn off any events that might remain in a
+                              // replica scene
+      } else {
+        scene2.registerNotifier(parameterServer());
+        parameterServer().addListener("localhost", 9010);
+        scene2.allNotesOff(); // To turn off any events that might remain in a
+                              // replica scene
+      }
     }
 
+    // Scene 1 will display a disc
     addDisc(mMesh1, 0.5);
     mMesh1.primitive(Mesh::LINE_STRIP);
     mMesh1.update();
-    scene1.setDefaultUserData(&mMesh1);
+    scene1.setDefaultUserData(&mMesh1); // Share the mesh between all voices
 
+    // Scene 2 displays a tetrahedron
     addTetrahedron(mMesh2);
     mMesh2.primitive(Mesh::LINE_STRIP);
     mMesh2.update();
-    scene2.setDefaultUserData(&mMesh2);
+    scene2.setDefaultUserData(&mMesh2); // Share the mesh between all voices
 
-    if (isPrimary()) {
-      title("Primary");
-    } else {
-      title("Replica");
-    }
-    parameterServer() << navParameter;
+    title("Two Scenes");
+    parameterServer() << navParameter; // Synchronize nav
     parameterServer().print();
-    parameterServer().verbose(true);
+    //    parameterServer().verbose(true);
   }
 
   virtual void onAnimate(double dt) override {
@@ -122,37 +124,33 @@ class MyApp : public DistributedApp {
         scene2.triggerOn(voice);
       }
     }
+    scene1.update(dt);
+    scene2.update(dt);
     if (isPrimary()) {
       navParameter.set(nav());
-      scene1.update(dt);
     } else {
-      scene2.update(dt);
-      view().pose() = navParameter.get();
-      ;
-      //      if (nav().pos() != navParameter.get().pos()) {
-      //        nav() =
-      //      }
+      pose() = navParameter.get();
     }
   }
 
   virtual void onDraw(Graphics &g) override {
     g.clear(0);
-    scene1.render(g);  // Render graphics
-    scene2.render(g);  // Render graphics
+    scene1.render(g); // Render graphics
+    scene2.render(g); // Render graphics
   }
 
   virtual void onExit() override {
     if (isPrimary()) {
-      scene1.allNotesOff();  // To turn off any events that might remain in a
-                             // replica scene
+      scene1.allNotesOff(); // To turn off any events that might remain in a
+                            // replica scene
     } else {
-      scene2.allNotesOff();  // To turn off any events that might remain in a
-                             // replica scene
+      scene2.allNotesOff(); // To turn off any events that might remain in a
+                            // replica scene
     }
   }
 
-  DistributedScene scene1{"scene1"};
-  DistributedScene scene2{"scene2"};
+  DistributedScene scene1{"scene1", 0, TimeMasterMode::TIME_MASTER_GRAPHICS};
+  DistributedScene scene2{"scene2", 0, TimeMasterMode::TIME_MASTER_GRAPHICS};
 
   VAOMesh mMesh1;
   VAOMesh mMesh2;
@@ -161,7 +159,6 @@ class MyApp : public DistributedApp {
 };
 
 int main() {
-  // Create app instance
   MyApp app;
   app.fps(30);
   app.start();

@@ -217,6 +217,7 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
           }
         }
         voice->setTriggerParams(params);
+        voice->markAsReplica();
         if (verbose()) {
           std::cout << "trigger on received " << std::endl;
         }

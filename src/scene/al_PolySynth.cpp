@@ -510,7 +510,7 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id,
     voice->userData(userData);
   }
   bool allCallbacksOk = true;
-  for (auto cbNode : mTriggerOnCallbacks) {
+  for (const auto &cbNode : mTriggerOnCallbacks) {
     allCallbacksOk &= cbNode.first(voice, offsetFrames, thisId, cbNode.second);
   }
   if (allCallbacksOk) {

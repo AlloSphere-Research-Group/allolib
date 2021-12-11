@@ -151,11 +151,6 @@ public:
   virtual void applyTransformations(Graphics &g);
 
 protected:
-  /**
-   * @brief Set voice as part of a replica distributed scene
-   */
-  void markAsReplica() { mIsReplica = true; }
-
   ParameterPose mPose{"_pose"};
   Parameter mSize{"_size", "", 1.0};
   //    ParameterPose mPose {"_pose"};
@@ -166,8 +161,6 @@ protected:
                                 // audio out
 
   bool mUseDistAtten{true};
-  bool mIsReplica{false}; // If voice is replica, it should not send its
-                          // internal state but listen for changes.
 };
 
 struct UpdateThreadFuncData {
