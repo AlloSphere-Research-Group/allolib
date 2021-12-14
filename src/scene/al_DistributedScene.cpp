@@ -219,7 +219,8 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
         voice->setTriggerParams(params);
         voice->markAsReplica();
         if (verbose()) {
-          std::cout << "trigger on received " << std::endl;
+          std::cout << "trigger on replica: " << id << "  ";
+          std::cout << std::endl;
         }
         triggerOn(voice, offset, id);
         return true;
@@ -259,6 +260,33 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
           addr.substr(start, addr.find('/', start + 1) - start);
       std::string subAddr = addr.substr(start + number.size());
       SynthVoice *voice = dynamic_cast<DistributedScene *>(this)->mActiveVoices;
+      while (voice) {
+        if (voice->id() == std::stoi(number)) {
+          for (auto *param : voice->triggerParameters()) {
+            if (ParameterServer::setParameterValueFromMessage(param, subAddr,
+                                                              m)) {
+              // We assume no two parameters have the same address, so we can
+              // break the loop. Perhaps this should be checked by
+              // ParameterServer on registration?
+              return true;
+            }
+          }
+          for (auto *param : voice->parameters()) {
+            if (ParameterServer::setParameterValueFromMessage(param, subAddr,
+                                                              m)) {
+              // We assume no two parameters have the same address, so we can
+              // break the loop. Perhaps this should be checked by
+              // ParameterServer on registration?
+              return true;
+            }
+          }
+        }
+        voice = voice->next;
+      }
+      // If message comes before voice is triggered but not yet put in the
+      // active cue, the message will be missed
+      // To avoid this, we check the voices to insert list.
+      voice = dynamic_cast<DistributedScene *>(this)->mVoicesToInsert;
       while (voice) {
         if (voice->id() == std::stoi(number)) {
           for (auto *param : voice->triggerParameters()) {

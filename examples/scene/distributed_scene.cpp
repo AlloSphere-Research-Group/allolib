@@ -17,13 +17,12 @@
 // See the examples for DynamicScene (dynamic_scene.cpp and
 // avSequencer.cpp) for information on how it works.
 
-#include <cstdio>        // for printing to stdout
-#define GAMMA_H_INC_ALL  // define this to include all header files
-#define GAMMA_H_NO_IO    // define this to avoid bringing AudioIO from Gamma
-
-#include "Gamma/Gamma.h"
+#include "Gamma/Envelope.h"
+#include "Gamma/Oscillator.h"
 
 #include "al/app/al_DistributedApp.hpp"
+#include "al/math/al_Random.hpp"
+
 #include "al/graphics/al_Shapes.hpp"
 #include "al/io/al_AudioIO.hpp"
 #include "al/scene/al_DistributedScene.hpp"
@@ -33,47 +32,49 @@ using namespace al;
 
 // The Scene will contain "SimpleVoice" agents
 class SimpleVoice : public PositionedVoice {
- public:
+public:
   SimpleVoice() {
     mAmpEnv.levels(0, 1, 1, 0);
     mAmpEnv.lengths(2, 0.5, 2);
     addTorus(mMesh);
     mMesh.primitive(Mesh::LINE_STRIP);
 
-    // Register mFreq as the only parameter of the voice
-    *this << mFreq;
+    // Register mFreq and mAmp as continuous parameters of the voice
+    registerParameters(mFreq, mAmp);
 
     // Change the oscillator's frequency whenever the parameter value changes
     mFreq.registerChangeCallback([this](float value) { mOsc.freq(value); });
   }
 
   virtual void update(double dt) override {
-    auto newPose = pose();
-    newPose.vec().y = mAmpEnv.value();
-    newPose.vec().x = mFreq / 440.0;
-    setPose(newPose);
+    if (!mIsReplica) {
+      mFreq = mFreq * 0.992;
+      mAmp = mAmpEnv.value();
+    }
   }
 
   virtual void onProcess(AudioIOData &io) override {
     while (io()) {
       io.out(0) += mOsc() * mAmpEnv() * 0.1;
     }
-    if (mAmpEnv.done()) free();
+    if (mAmpEnv.done())
+      free();
   }
 
   virtual void onProcess(Graphics &g) override {
-    g.color(mAmpEnv.value());
+    g.color(mAmp);
     g.draw(mMesh);
   }
 
-  virtual void onTriggerOn() override { mAmpEnv.reset(); }
+  virtual void onTriggerOn() override {
+    mAmpEnv.reset();
+    mFreq = 440;
+    mAmp = 0;
+  }
 
-  void updateFreq() { mFreq = mFreq * 0.992; }
-
- protected:
+protected:
   Parameter mAmp{"Amp"};
   Parameter mFreq{"Freq"};
-  Parameter mDur{"Dur"};
 
   Sine<> mOsc;
   Env<3> mAmpEnv;
@@ -86,60 +87,29 @@ class SimpleVoice : public PositionedVoice {
 // graphics in the corresponding callback
 struct MyApp : public DistributedApp {
   void onCreate() {
-    if (isPrimary()) {
-      title("Primary");
+    //    parameterServer().print();
 
-      // Trigger one voice manually
-      auto *freeVoice = scene.getVoice<SimpleVoice>();
-      std::vector<float> params{440.0f};
-      freeVoice->setTriggerParams(params);
-      auto pose = freeVoice->pose();
-      pose.vec().z = -10.0;
-      freeVoice->setPose(pose);
-      scene.triggerOn(freeVoice);
-    } else {
-      title("Replica");
-    }
-
-    parameterServer().print();
-    scene.showWorldMarker(false);
     scene.registerSynthClass<SimpleVoice>();
-
     registerDynamicScene(scene);
+    scene.verbose(true);
   }
 
-  void onAnimate(double dt) {
-    if (isPrimary()) {
-      // Only primary node updates frequency. The replicas get notified
-      auto *voice = scene.getActiveVoices();
-      while (voice) {
-        static_cast<SimpleVoice *>(voice)->updateFreq();
-        voice = voice->next;
-      }
-    }
-    scene.update(dt);
-  }
+  void onAnimate(double dt) { scene.update(dt); }
 
-  void onSound(AudioIOData &io) {
-    scene.render(io);  // Render audio
-  }
+  void onSound(AudioIOData &io) { scene.render(io); }
 
   void onDraw(Graphics &g) {
     g.clear();
-    scene.render(g);  // Render graphics
+    scene.render(g); // Render graphics
   }
 
-  //    virtual void onMessage(osc::Message &m) override {
-  //        scene.consumeMessage(m);
-  //    }
-
   bool onKeyDown(Keyboard const &k) {
-    if (k.key() == ' ') {
+    if (isPrimary() && k.key() == ' ') { // Start a new voice on space bar
       auto *freeVoice = scene.getVoice<SimpleVoice>();
-      std::vector<float> params{440.0f};
-      freeVoice->setTriggerParams(params);
-      auto pose = freeVoice->pose();
-      pose.vec().z = -10.0;
+      Pose pose;
+      pose.vec().x = al::rnd::uniform(2);
+      pose.vec().y = al::rnd::uniform(2);
+      pose.vec().z = -10.0 + al::rnd::uniform(6);
       freeVoice->setPose(pose);
       scene.triggerOn(freeVoice);
     }
@@ -151,7 +121,6 @@ struct MyApp : public DistributedApp {
 
 int main() {
   // Create app instance
-
   MyApp app;
 
   // Start everything

@@ -12,7 +12,7 @@ namespace al {
  *
  * This scene can be registered with a ParameterServer to replicate the scene
  * across the network. All events and internal parameters will be forwarded
- * to scene copies
+ * to scene replicas.
  */
 class DistributedScene : public DynamicScene, public osc::MessageConsumer {
 public:

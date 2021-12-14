@@ -504,15 +504,15 @@ bool PositionedVoice::setTriggerParams(std::vector<VariantValue> pFields,
   bool ok = SynthVoice::setTriggerParams(pFields);
   if (pFields.size() ==
       mTriggerParams.size() +
-          8) { // If seven extra, it means pose and size are there too
+          8) { // If eight extra, it means pose and size are there too
     size_t index = mTriggerParams.size();
-    double x = pFields[index++].get<float>();
-    double y = pFields[index++].get<float>();
-    double z = pFields[index++].get<float>();
-    double qw = pFields[index++].get<float>();
-    double qx = pFields[index++].get<float>();
-    double qy = pFields[index++].get<float>();
-    double qz = pFields[index++].get<float>();
+    double x = pFields[index++].get<double>();
+    double y = pFields[index++].get<double>();
+    double z = pFields[index++].get<double>();
+    double qw = pFields[index++].get<double>();
+    double qx = pFields[index++].get<double>();
+    double qy = pFields[index++].get<double>();
+    double qz = pFields[index++].get<double>();
     if (noCalls) {
       mPose.setNoCalls({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
       mSize.setNoCalls(pFields[index++].get<float>());
