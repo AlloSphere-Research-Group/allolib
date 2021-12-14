@@ -388,7 +388,7 @@ void ParameterServer::onMessage(osc::Message &m) {
     m.resetStream();
     handler->onMessage(m);
   }
-  for (auto consumer : mMessageConsumers) {
+  for (const auto &consumer : mMessageConsumers) {
     m.resetStream();
     if (consumer.first->consumeMessage(m, consumer.second)) {
       break;
@@ -408,15 +408,15 @@ void ParameterServer::print(std::ostream &stream) {
   for (ParameterMeta *p : mParameters) {
     printParameterInfo(p);
   }
-  for (auto bundleGroup : mParameterBundles) {
+  for (const auto &bundleGroup : mParameterBundles) {
     stream << " --- Bundle " << bundleGroup.first << std::endl;
-    for (auto bundle : bundleGroup.second) {
+    for (const auto &bundle : bundleGroup.second) {
       printBundleInfo(bundle, bundleGroup.first);
     }
   }
   if (mOSCSenders.size() > 0) {
     stream << "Registered listeners: " << std::endl;
-    for (auto sender : mOSCSenders) {
+    for (const auto &sender : mOSCSenders) {
       stream << sender->address() << ":" << sender->port() << std::endl;
     }
   }
