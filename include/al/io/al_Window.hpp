@@ -71,7 +71,7 @@ class Window;
 ///
 /// @ingroup IO
 class Keyboard {
- public:
+public:
   /// Non-printable keys
   enum Key {
 
@@ -109,32 +109,31 @@ class Keyboard {
 
   Keyboard();
 
-  int key() const;          ///< Returns character or code of last key event
-  int keyAsNumber() const;  ///< Returns decimal number correlating to key code
-  bool alt() const;         ///< Whether an alt key is down
-  bool caps() const;        ///< Whether capslock is down
-  bool ctrl() const;        ///< Whether a control key is down
-  bool meta() const;      ///< Whether a meta (e.g. windows, apple) key is down
-  bool shift() const;     ///< Whether a shift key is down
-  bool down() const;      ///< Whether last event was button down
-  bool isNumber() const;  ///< Whether key is a number key
-  bool key(int k) const;  ///< Whether the last key was 'k'
+  int key() const;         ///< Returns character or code of last key event
+  int keyAsNumber() const; ///< Returns decimal number correlating to key code
+  bool alt() const;        ///< Whether an alt key is down
+  bool caps() const;       ///< Whether capslock is down
+  bool ctrl() const;       ///< Whether a control key is down
+  bool meta() const;       ///< Whether a meta (e.g. windows, apple) key is down
+  bool shift() const;      ///< Whether a shift key is down
+  bool down() const;       ///< Whether last event was button down
+  bool isNumber() const;   ///< Whether key is a number key
+  bool key(int k) const;   ///< Whether the last key was 'k'
 
-  void alt(bool state);    ///< Set alt key state
-  void caps(bool state);   ///< Set alt key state
-  void ctrl(bool state);   ///< Set ctrl key state
-  void meta(bool state);   ///< Set meta key state
-  void shift(bool state);  ///< Set shift key state
+  void alt(bool state);   ///< Set alt key state
+  void caps(bool state);  ///< Set alt key state
+  void ctrl(bool state);  ///< Set ctrl key state
+  void meta(bool state);  ///< Set meta key state
+  void shift(bool state); ///< Set shift key state
 
-  void print(std::ostream &stream) const;  ///< Print keyboard state
+  void print(std::ostream &stream) const; ///< Print keyboard state
 
- protected:
+protected:
   friend class WindowImpl;
 
-  int mKeycode;  // last key event key number
-  bool mDown;    // last key event state (pressed or released)
-  bool
-      mModifiers[5];  // Modifier key state array (shift, alt, ctrl, caps, meta)
+  int mKeycode;       // last key event key number
+  bool mDown;         // last key event state (pressed or released)
+  bool mModifiers[5]; // Modifier key state array (shift, alt, ctrl, caps, meta)
 
   void setKey(int k, bool v);
 };
@@ -143,7 +142,7 @@ class Keyboard {
 ///
 /// @ingroup IO
 class Mouse {
- public:
+public:
   enum {
     LEFT = 0,   /**< Left button */
     MIDDLE = 1, /**< Middle button */
@@ -153,32 +152,32 @@ class Mouse {
 
   Mouse();
 
-  int x() const;   ///< Get x position relative to top-left corner of window, in
-                   ///< pixels
-  int y() const;   ///< Get x position relative to top-left corner of window, in
-                   ///< pixels
-  int dx() const;  ///< Get change in x position, in pixels
-  int dy() const;  ///< Get change in y position, in pixels
-  double scrollX() const;  ///< Get x scroll amount
-  double scrollY() const;  ///< Get y scroll amount
+  int x() const;  ///< Get x position relative to top-left corner of window, in
+                  ///< pixels
+  int y() const;  ///< Get x position relative to top-left corner of window, in
+                  ///< pixels
+  int dx() const; ///< Get change in x position, in pixels
+  int dy() const; ///< Get change in y position, in pixels
+  double scrollX() const; ///< Get x scroll amount
+  double scrollY() const; ///< Get y scroll amount
 
-  int button() const;           ///< Get last clicked button
-  bool down() const;            ///< Get state of last clicked button
-  bool down(int button) const;  ///< Get state of a button
-  bool left() const;            ///< Get whether left button is down
-  bool middle() const;          ///< Get whether middle button is down
-  bool right() const;           ///< Get whether right button is down
+  int button() const;          ///< Get last clicked button
+  bool down() const;           ///< Get state of last clicked button
+  bool down(int button) const; ///< Get state of a button
+  bool left() const;           ///< Get whether left button is down
+  bool middle() const;         ///< Get whether middle button is down
+  bool right() const;          ///< Get whether right button is down
 
- protected:
+protected:
   friend class WindowImpl;
 
-  int mX, mY;                     // x,y positions
-  int mDX, mDY;                   // change in x,y positions
-  double mScrollX, mScrollY;      // scroll motion
-  int mButton;                    // most recent button changed
-  int mBX[AL_MOUSE_MAX_BUTTONS];  // button down xs
-  int mBY[AL_MOUSE_MAX_BUTTONS];  // button down ys
-  bool mB[AL_MOUSE_MAX_BUTTONS];  // button states
+  int mX, mY;                    // x,y positions
+  int mDX, mDY;                  // change in x,y positions
+  double mScrollX, mScrollY;     // scroll motion
+  int mButton;                   // most recent button changed
+  int mBX[AL_MOUSE_MAX_BUTTONS]; // button down xs
+  int mBY[AL_MOUSE_MAX_BUTTONS]; // button down ys
+  bool mB[AL_MOUSE_MAX_BUTTONS]; // button states
 
   void button(int b, bool v);
   void position(int x, int y);
@@ -192,7 +191,7 @@ class Mouse {
 ///
 /// @ingroup IO
 class WindowEventHandler {
- public:
+public:
   WindowEventHandler();
   virtual ~WindowEventHandler();
 
@@ -232,7 +231,7 @@ class WindowEventHandler {
 
   Window *mWindow;
 
- private:
+private:
   friend class Window;
   WindowEventHandler &window(Window *v) {
     mWindow = v;
@@ -249,7 +248,7 @@ class WindowEventHandler {
 /// @ingroup IO
 // class Window : public InputEventHandler, public WindowEventHandler {
 class Window {
- public:
+public:
   typedef std::vector<WindowEventHandler *> WindowEventHandlers;
 
   /// Window display mode bit flags
@@ -311,24 +310,24 @@ class Window {
 
   const Keyboard &keyboard() const {
     return mKeyboard;
-  }                                              ///< Get current keyboard state
-  const Mouse &mouse() const { return mMouse; }  ///< Get current mouse state
+  }                                             ///< Get current keyboard state
+  const Mouse &mouse() const { return mMouse; } ///< Get current mouse state
 
-  double aspect() const;  ///< Get aspect ratio (width divided by height)
-  bool created() const;   ///< Whether window has been created providing a valid
-                          ///< graphics context
-  Cursor cursor() const;  ///< Get current cursor type
-  bool cursorHide() const;            ///< Whether the cursor is hidden
-  Dim dimensions() const;             ///< Get current dimensions of window
-  DisplayMode displayMode() const;    ///< Get current display mode
-  bool enabled(DisplayMode v) const;  ///< Get whether display mode flag is set
-  bool fullScreen() const;            ///< Get whether window is in fullscreen
-  const std::string &title() const;   ///< Get title of window
-  bool visible() const;               ///< Get whether window is visible
-  bool vsync() const;                 ///< Get whether v-sync is enabled
+  double aspect() const; ///< Get aspect ratio (width divided by height)
+  bool created() const;  ///< Whether window has been created providing a valid
+                         ///< graphics context
+  Cursor cursor() const; ///< Get current cursor type
+  bool cursorHide() const;           ///< Whether the cursor is hidden
+  Dim dimensions() const;            ///< Get current dimensions of window
+  DisplayMode displayMode() const;   ///< Get current display mode
+  bool enabled(DisplayMode v) const; ///< Get whether display mode flag is set
+  bool fullScreen() const;           ///< Get whether window is in fullscreen
+  const std::string &title() const;  ///< Get title of window
+  bool visible() const;              ///< Get whether window is visible
+  bool vsync() const;                ///< Get whether v-sync is enabled
 
-  int height() const;  ///< Get window height, in pixels
-  int width() const;   ///< Get window width, in pixels
+  int height() const; ///< Get window height, in pixels
+  int width() const;  ///< Get window width, in pixels
 
   // get frambuffer size
   // it will be different from window widht and height
@@ -340,25 +339,25 @@ class Window {
 
   bool decorated() const;
 
-  void cursor(Cursor v);                        ///< Set cursor type
-  void cursorHide(bool v);                      ///< Set cursor hiding
-  void cursorHideToggle();                      ///< Toggle cursor hiding
-  void dimensions(const Dim &v);                ///< Set dimensions
-  void dimensions(int w, int h);                ///< Set dimensions
-  void dimensions(int x, int y, int w, int h);  ///< Set dimensions
-  void displayMode(DisplayMode v);  ///< Set display mode; will recreate window
-                                    ///< if different from current
+  void cursor(Cursor v);                       ///< Set cursor type
+  void cursorHide(bool v);                     ///< Set cursor hiding
+  void cursorHideToggle();                     ///< Toggle cursor hiding
+  void dimensions(const Dim &v);               ///< Set dimensions
+  void dimensions(int w, int h);               ///< Set dimensions
+  void dimensions(int x, int y, int w, int h); ///< Set dimensions
+  void displayMode(DisplayMode v); ///< Set display mode; will recreate window
+                                   ///< if different from current
 
   /// This will make the window go fullscreen without borders and,
   /// if posssible, without changing the display resolution.
   void fullScreen(bool on, int monitorIndex = 0);
-  void fullScreenToggle();  ///< Toggle fullscreen
-  void hide();              ///< Hide window (if showing)
-  void iconify();           ///< Iconify window
+  void fullScreenToggle(); ///< Toggle fullscreen
+  void hide();             ///< Hide window (if showing)
+  void iconify();          ///< Iconify window
   // void show(); ///< Show window (if hidden)
-  void title(const std::string &v);  ///< Set title
-  void vsync(bool v);  ///< Set whether to sync the frame rate to the monitor's
-                       ///< refresh rate
+  void title(const std::string &v); ///< Set title
+  void vsync(bool v); ///< Set whether to sync the frame rate to the monitor's
+                      ///< refresh rate
   void decorated(bool b);
 
   // callbacks from window class, will call user event functions like `on***`
@@ -401,6 +400,8 @@ class Window {
   /// Remove all window event handlers matching argument
   Window &remove(WindowEventHandler &v);
 
+  void *windowHandle();
+
   /// Destroy all created windows
   static void destroyAll();
 
@@ -423,7 +424,7 @@ class Window {
   int mFramebufferWidth = 0;
   int mFramebufferHeight = 0;
 
- protected:
+protected:
   friend class WindowImpl;
 
   // class WindowImpl * mImpl;
@@ -446,14 +447,16 @@ class Window {
   void implSetDecorated(bool decorated);
   bool implShouldClose();
   void implClose();
+  void *implWindowHandle();
 
   Window &insert(WindowEventHandler &v, int i);
 
-#define CALL(e)                                                  \
-  {                                                              \
-    for (unsigned i = 0; i < mWindowEventHandlers.size(); ++i) { \
-      if (false == mWindowEventHandlers[i]->e) break;            \
-    }                                                            \
+#define CALL(e)                                                                \
+  {                                                                            \
+    for (unsigned i = 0; i < mWindowEventHandlers.size(); ++i) {               \
+      if (false == mWindowEventHandlers[i]->e)                                 \
+        break;                                                                 \
+    }                                                                          \
   }
   void callHandlersMouseDown() {
     CALL(mouseDown(mMouse));
@@ -490,7 +493,7 @@ class Window {
   void callHandlersVisibility(bool v) { CALL(visibility(v)); }
 #undef CALL
 
- public:
+public:
   //  [[deprecated]] Window& add(WindowEventHandler* v) { return append(*v); }
   //  [[deprecated]] Window& prepend(WindowEventHandler* v) { return
   //  prepend(*v); }
@@ -512,6 +515,6 @@ void initializeWindowManager();
 void terminateWindowManager();
 float getCurrentWindowPixelDensity();
 
-}  // namespace al
+} // namespace al
 
 #endif

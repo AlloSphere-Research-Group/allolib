@@ -7,37 +7,47 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize,
     : DynamicScene(threadPoolSize, masterMode) {
   mName = name;
 
-  PolySynth::registerTriggerOnCallback(
-      [this](SynthVoice *voice, int offsetFrames, int id, void *userData) {
-        if (this->mNotifier) {
-          osc::Packet p;
-          std::string prefix = "/" + this->name();
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          p.beginMessage(prefix + "/triggerOn");
-          offsetFrames = 0;
-          p << offsetFrames << id;
-          std::string voiceName = demangle(typeid(*voice).name());
-          p << voiceName;
-          auto fields = voice->getTriggerParams();
-          for (auto field : fields) {
-            if (field.type() == ParameterField::FLOAT) {
-              p << field.get<float>();
-            } else {
-              p << field.get<std::string>();
-            }
-          }
-          p.endMessage();
-
-          if (verbose()) {
-            std::cout << "Sending trigger on message for voice " << id
-                      << std::endl;
-          }
-          this->mNotifier->send(p);
+  PolySynth::registerTriggerOnCallback([this](SynthVoice *voice,
+                                              int offsetFrames, int id,
+                                              void *userData) {
+    if (this->mNotifier) {
+      osc::Packet p;
+      std::string prefix = "/" + this->name();
+      if (prefix.size() == 1) {
+        prefix = "";
+      }
+      p.beginMessage(prefix + "/triggerOn");
+      offsetFrames = 0;
+      p << offsetFrames << id;
+      std::string voiceName = demangle(typeid(*voice).name());
+      p << voiceName;
+      auto fields = voice->getTriggerParams();
+      for (const auto &field : fields) {
+        if (field.type() == VariantType::VARIANT_FLOAT) {
+          p << field.get<float>();
+        } else if (field.type() == VariantType::VARIANT_DOUBLE) {
+          p << field.get<double>();
+        } else if (field.type() == VariantType::VARIANT_INT32) {
+          p << field.get<int32_t>();
+        } else if (field.type() == VariantType::VARIANT_UINT64) {
+          p << field.get<uint64_t>();
+        } else if (field.type() == VariantType::VARIANT_STRING) {
+          p << field.get<std::string>();
+        } else {
+          assert(1 == 0);
+          std::cerr << "ERROR type not implemented for distributed scene sync"
+                    << std::endl;
         }
-        return true;
-      });
+      }
+      p.endMessage();
+
+      if (verbose()) {
+        std::cout << "Sending trigger on message for voice " << id << std::endl;
+      }
+      this->mNotifier->send(p);
+    }
+    return true;
+  });
 
   PolySynth::registerTriggerOffCallback([this](int id, void *userData) {
     if (this->mNotifier) {
@@ -182,7 +192,7 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
       m >> offset >> id >> voiceName;
       auto *voice = getVoice(voiceName);
       if (voice) {
-        std::vector<ParameterField> params;
+        std::vector<VariantValue> params;
         for (unsigned int i = 3; i < m.typeTags().size(); i++) {
           if (m.typeTags()[i] == 'f') {
             float value;
@@ -192,6 +202,14 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
             std::string value;
             m >> value;
             params.emplace_back(value);
+          } else if (m.typeTags()[i] == 'd') {
+            double value;
+            m >> value;
+            params.emplace_back(value);
+          } else if (m.typeTags()[i] == 'i') {
+            int32_t value;
+            m >> value;
+            params.emplace_back(value);
           } else {
             std::cerr << "ERROR: Unsupported parameter type for scene trigger"
                       << std::endl;
@@ -199,8 +217,10 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
           }
         }
         voice->setTriggerParams(params);
+        voice->markAsReplica();
         if (verbose()) {
-          std::cout << "trigger on received " << std::endl;
+          std::cout << "trigger on replica: " << id << "  ";
+          std::cout << std::endl;
         }
         triggerOn(voice, offset, id);
         return true;
@@ -240,6 +260,33 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
           addr.substr(start, addr.find('/', start + 1) - start);
       std::string subAddr = addr.substr(start + number.size());
       SynthVoice *voice = dynamic_cast<DistributedScene *>(this)->mActiveVoices;
+      while (voice) {
+        if (voice->id() == std::stoi(number)) {
+          for (auto *param : voice->triggerParameters()) {
+            if (ParameterServer::setParameterValueFromMessage(param, subAddr,
+                                                              m)) {
+              // We assume no two parameters have the same address, so we can
+              // break the loop. Perhaps this should be checked by
+              // ParameterServer on registration?
+              return true;
+            }
+          }
+          for (auto *param : voice->parameters()) {
+            if (ParameterServer::setParameterValueFromMessage(param, subAddr,
+                                                              m)) {
+              // We assume no two parameters have the same address, so we can
+              // break the loop. Perhaps this should be checked by
+              // ParameterServer on registration?
+              return true;
+            }
+          }
+        }
+        voice = voice->next;
+      }
+      // If message comes before voice is triggered but not yet put in the
+      // active cue, the message will be missed
+      // To avoid this, we check the voices to insert list.
+      voice = dynamic_cast<DistributedScene *>(this)->mVoicesToInsert;
       while (voice) {
         if (voice->id() == std::stoi(number)) {
           for (auto *param : voice->triggerParameters()) {

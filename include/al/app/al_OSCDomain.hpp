@@ -17,6 +17,7 @@ namespace al {
  */
 class OSCDomain : public AsynchronousDomain {
 public:
+  virtual ~OSCDomain() {}
   // Domain management functions
   bool init(ComputationDomain *parent = nullptr) override;
   bool start() override;

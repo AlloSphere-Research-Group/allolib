@@ -259,7 +259,7 @@ PresetSequencer::loadSequence(std::string sequenceName, double timeScale) {
 
 void PresetSequencer::registerEventCommand(
     std::string eventName,
-    std::function<void(void *, std::vector<ParameterField> &)> callback,
+    std::function<void(void *, std::vector<VariantValue> &)> callback,
     void *data) {
   EventCallback cb;
   cb.eventName = eventName;

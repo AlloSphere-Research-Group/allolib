@@ -13,7 +13,7 @@ Pickable::Pickable() {
   hover.setHint("hide", 1.0);
   selected.setHint("hide", 1.0);
   scaleVec.setHint("hide",
-                   1.0);  // We want to show the single value scale by default.
+                   1.0); // We want to show the single value scale by default.
 }
 
 bool Pickable::event(PickEvent e) {
@@ -36,8 +36,10 @@ bool Pickable::event(PickEvent e) {
 
 void Pickable::clearSelection() {
   this->foreach ([](Pickable &p) {
-    if (p.hover.get()) p.hover = false;
-    if (p.selected.get()) p.selected = false;
+    if (p.hover.get())
+      p.hover = false;
+    if (p.selected.get())
+      p.selected = false;
   });
 }
 
@@ -46,7 +48,8 @@ bool Pickable::intersectsChild(Rayd &r) {
   Rayd ray = transformRayLocal(r);
   for (unsigned int i = 0; i < children.size(); i++) {
     child |= children[i]->intersectsChild(ray);
-    if (child) return child;
+    if (child)
+      return child;
   }
   return child;
 }
@@ -72,7 +75,8 @@ void Pickable::addChild(Pickable &pickable) {
 void Pickable::draw(Graphics &g, std::function<void(Pickable &)> f) {
   f(*this);
   pushMatrix(g);
-  for (auto *c : children) c->draw(g, f);
+  for (auto *c : children)
+    c->draw(g, f);
   popMatrix(g);
 }
 
@@ -119,121 +123,165 @@ Hit PickableBB::intersect(Rayd r) {
 
 bool PickableBB::onEvent(PickEvent e, Hit h) {
   switch (e.type) {
-    case Point:
-      if (hover.get() != h.hit)
-        hover = h.hit;  // setting value propagates via OSC, so only set if
-      // there is a change
-      return h.hit;
+  case Point:
+    if ((hover.get() == 1.0) != h.hit)
+      hover = h.hit; // setting value propagates via OSC, so only set if
+    // there is a change
+    return h.hit;
 
-    case Pick:
-      if (h.hit) {
-        prevPose.set(pose.get());
-        selectDist = h.t;
-        selectPos = h();
-        selectOffset = pose.get().pos() - h();  // * scaleVec.get();
-      }
-      if (selected.get() != h.hit)
-        selected = h.hit;  // to avoid triggering change callback if no change
-
-      return h.hit;
-
-    case PickPose:
+  case Pick:
+    if (h.hit) {
       prevPose.set(pose.get());
-      selectQuat.set(e.pose.quat());
-      selectOffset.set(pose.get().pos() - e.pose.pos());
+      selectDist = h.t;
+      selectPos = h();
+      selectOffset = pose.get().pos() - h(); // * scaleVec.get();
+    }
+    if ((selected.get() == 1.0) != h.hit)
+      selected = h.hit; // to avoid triggering change callback if no change
 
-      if (selected.get() != true) selected = true;
+    return h.hit;
+
+  case PickPose:
+    prevPose.set(pose.get());
+    selectQuat.set(e.pose.quat());
+    selectOffset.set(pose.get().pos() - e.pose.pos());
+
+    if (selected.get() != 1.0) {
+      selected = 1.0;
+    }
+
+    return true;
+
+  case Drag:
+  case TranslateRay:
+    if (selected.get() == 1.0f) {
+      Vec3f newPos = h.ray(selectDist) + selectOffset;
+      if (parent && (parent->containChildren || containedChild)) {
+        auto *p = dynamic_cast<PickableBB *>(parent);
+        if (p) {
+          // std::cout << "pre: " << newPos << std::endl;
+
+          newPos = min(newPos, p->bb.max - bb.max);
+          // std::cout << "mid: " << newPos << std::endl;
+
+          newPos = max(newPos, p->bb.min - bb.min);
+
+          // std::cout << "post: " << newPos << std::endl;
+          // std::cout << "pmin: " << p->bb.min << " pmax: " << p->bb.max <<
+          // std::endl; std::cout << "min: " << bb.min << " max: " << bb.max <<
+          // std::endl;
+        }
+      }
+      pose = Pose(newPos, pose.get().quat());
+      return true;
+    } else
+      return false;
+
+  case RotateRayTrackball:
+    if (selected.get() == 1.0f) {
+      Vec3f p = pose.get().pos();
+      Vec3f v1 = (selectPos - p).normalize();
+      Vec3f v2 = (h.ray(selectDist) - p).normalize();
+      Vec3f n = v1.cross(v2); // axis of rotation
+      double angle = acos(v1.dot(v2));
+      Quatf qf = Quatf().fromAxisAngle(angle, n).normalize();
+
+      Vec3f p1 = transformVecWorld(bb.cen);
+      pose.setQuat(qf * prevPose.quat());
+      Vec3f p2 = transformVecWorld(bb.cen);
+      pose.setPos(pose.get().pos() + p1 - p2);
+      return true;
+    } else
+      return false;
+
+  case RotateRay:
+    if (selected.get() == 1.0f) {
+      float dist = (h.ray.o - pose.get().pos()).mag();
+      float amt = dist / 10 * (-10) + 10; // 0 - 10+ -> 10 - 0.1
+      if (amt < 0.1)
+        amt = 0.1;
+      Vec3f dir = h.ray(selectDist) - selectPos;
+      Quatf q = Quatf().fromEuler(amt * dir.x, amt * -dir.y, 0);
+      Vec3f p1 = transformVecWorld(bb.cen);
+      pose.setQuat(q * prevPose.quat());
+      Vec3f p2 = transformVecWorld(bb.cen);
+      pose.setPos(pose.get().pos() + p1 - p2);
+      return true;
+    } else
+      return false;
+
+  case RotateTurntable:
+    if (selected.get() == 1.0f) {
+      float amt = 0.005;
+
+      // Quatf qy = Quatf().fromAxisAngle(amt*e.vec.x,
+      // Vec3f(0,1,0)).normalize();
+      Quatf qy = Quatf()
+                     .fromAxisAngle(amt * e.vec.x, e.pose.quat().toVectorY())
+                     .normalize();
+      Quatf qx = Quatf()
+                     .fromAxisAngle(amt * e.vec.y, e.pose.quat().toVectorX())
+                     .normalize();
+      // Quatf q = Quatf().fromEuler(amt * e.vec.x, amt * e.vec.y, 0);
+
+      Vec3f p1 = transformVecWorld(bb.cen);
+      // pose.setQuat(q * prevPose.quat());
+      // pose.setQuat(qy * qx * prevPose.quat());
+      pose.setQuat(qx * prevPose.quat() * qy);
+      Vec3f p2 = transformVecWorld(bb.cen);
+      pose.setPos(pose.get().pos() + p1 - p2);
+      return true;
+    } else
+      return false;
+
+  case RotatePose:
+    if (selected.get() == 1.0f) {
+      Quatf diff =
+          e.pose.quat() *
+          selectQuat.inverse(); // diff * q0 = q1 --> diff = q1 * q0.inverse
+
+      Vec3f p1 = transformVecWorld(bb.cen);
+      pose.setQuat(diff * prevPose.quat());
+      Vec3f p2 = transformVecWorld(bb.cen);
+      // pose.setPos(e.pose.pos()+selectOffset + p1-p2);
+      pose.setPos(pose.get().pos() + p1 - p2);
+      return true;
+    } else
+      return false;
+
+  case Scale:
+    if (selected.get() == 1.0f) {
+      Vec3f p1 = transformVecWorld(bb.cen);
+      scale = scale + e.amount * 0.01 * scale;
+      if (scale < 0.0005f)
+        scale = 0.0005f;
+      // scaleVec.set(scale)
+      Vec3f p2 = transformVecWorld(bb.cen);
+      pose.setPos(pose.get().pos() + p1 - p2);
 
       return true;
-
-    case Drag:
-    case TranslateRay:
-      if (selected.get() == 1.0f) {
-        Vec3f newPos = h.ray(selectDist) + selectOffset;
-        if (parent && (parent->containChildren || containedChild)) {
-          auto *p = dynamic_cast<PickableBB *>(parent);
-          if (p) {
-            // std::cout << "pre: " << newPos << std::endl;
-
-            newPos = min(newPos, p->bb.max - scaleVec.get() * bb.dim / 2);
-            // std::cout << "mid: " << newPos << std::endl;
-
-            newPos = max(newPos, p->bb.min + scaleVec.get() * bb.dim / 2);
-
-            // std::cout << "post: " << newPos << std::endl;
-            // std::cout << "min: " << p->bb.min << " max: " << p->bb.max << "
-            // scale: " << scaleVec.get() << " hdim: " << bb.dim / 2  <<
-            // std::endl;
-            // newPos -= bb.dim / 2;
-          }
-        }
-        pose = Pose(newPos, pose.get().quat());
-        return true;
-      } else
-        return false;
-
-    case RotateRay:
-      if (selected.get() == 1.0f) {        
-        Vec3f p = pose.get().pos();
-        Vec3f v1 = (selectPos - p).normalize(); 
-        Vec3f v2 = (h.ray(selectDist) - p).normalize(); 
-        Vec3f n = v1.cross(v2); // axis of rotation
-        double angle = acos(v1.dot(v2));
-        Quatf qf = Quatf().fromAxisAngle(angle, n).normalize();
-          
-        Vec3f p1 = transformVecWorld(bb.cen);
-        pose.setQuat(qf * prevPose.quat());
-        Vec3f p2 = transformVecWorld(bb.cen);
-        pose.setPos(pose.get().pos() + p1 - p2);
-        return true;
-      } else
-        return false;
-
-
-    case RotatePose:
-      if (selected.get() == 1.0f) {
-        Quatf diff =
-            e.pose.quat() *
-            selectQuat.inverse();  // diff * q0 = q1 --> diff = q1 * q0.inverse
-
-        Vec3f p1 = transformVecWorld(bb.cen);
-        pose.setQuat(diff * prevPose.quat());
-        Vec3f p2 = transformVecWorld(bb.cen);
-        // pose.setPos(e.pose.pos()+selectOffset + p1-p2);
-        pose.setPos(pose.get().pos() + p1 - p2);
-        return true;
-      } else
-        return false;
-
-    case Scale:
-      if (selected.get() == 1.0f) {
-        Vec3f p1 = transformVecWorld(bb.cen);
-        scale = scale + e.amount * 0.01 * scale;
-        if (scale < 0.0005f) scale = 0.0005f;
-        // scaleVec.set(scale)
-        Vec3f p2 = transformVecWorld(bb.cen);
-        pose.setPos(pose.get().pos() + p1 - p2);
-
-        return true;
-      } else
-        return false;
-
-    case Unpick:
-      if (hover.get() != 1.0f && selected.get() == 1.0f) selected = false;
+    } else
       return false;
+
+  case Unpick:
+    if (hover.get() != 1.0f && selected.get() == 1.0f)
+      selected = false;
+    return false;
   }
   return false;
 }
 
 void PickableBB::drawMesh(Graphics &g) {
-  if (!mesh) return;
+  if (!mesh)
+    return;
   pushMatrix(g);
   g.draw(*mesh);
   popMatrix(g);
 }
 
 void PickableBB::drawBB(Graphics &g) {
-  if (!selected.get() && !hover.get()) return;
+  if (!selected.get() && !hover.get())
+    return;
   pushMatrix(g);
   if (selected.get())
     g.color(0, 1, 1);
@@ -278,7 +326,8 @@ void PickableBB::updateAABB() {
   Matrix4d model = t.translation(pose.get().pos()) *
                    r.fromQuat(pose.get().quat()) * s.scaling(scaleVec.get());
   Matrix4d absModel(model);
-  for (int i = 0; i < 16; i++) absModel[i] = std::abs(absModel[i]);
+  for (int i = 0; i < 16; i++)
+    absModel[i] = std::abs(absModel[i]);
   Vec4d cen = model.transform(Vec4d(bb.cen, 1));
   Vec4d dim = absModel.transform(Vec4d(bb.dim, 0));
   aabb.setCenterDim(cen.sub<3>(0), dim.sub<3>(0));

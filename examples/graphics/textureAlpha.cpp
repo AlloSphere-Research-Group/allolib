@@ -28,21 +28,20 @@ struct MyApp : public App {
     int Ny = tex.height();
 
     // prepare vector for pixel data
-    vector<Colori> pix;  // byte color: rgba, [0:255]
+    vector<Colori> pix; // byte color: rgba, [0:255]
     pix.resize(Nx * Ny);
 
     for (int j = 0; j < Ny; ++j) {
       float y = float(j) / (Ny - 1) * 2 - 1;
       for (int i = 0; i < Nx; ++i) {
         float x = float(i) / (Nx - 1) * 2 - 1;
-        float px = x * M_PI;
-        float py = y * M_PI;
+        float px = x * (float)M_PI;
+        float py = y * (float)M_PI;
         float z = cos(2 * px) * cos(5 * py) - cos(5 * px) * cos(2 * py);
         Color c = RGB(1);
         // Make alpha channel 1 where function is zero using Gaussian
         c.a = exp(-16 * z * z);
-        pix[j * Nx + i] =
-            c;  // assignment converts float color to integer color
+        pix[j * Nx + i] = c; // assignment converts float color to integer color
       }
     }
     tex.submit(pix.data());
@@ -62,17 +61,17 @@ struct MyApp : public App {
     nav().pos(0, 0, 4);
   }
 
-  void onDraw(Graphics& g) {
+  void onDraw(Graphics &g) {
     g.clear(0);
 
     // Draw all scene objects first
-    g.meshColor();  // use mesh's color
+    g.meshColor(); // use mesh's color
     g.draw(mesh);
 
     // Here we activate transparent blending. This mixes source and
     // destination colors according to the source's alpha value.
-    gl::blending(true);
-    gl::blendTrans();
+    g.blending(true);
+    g.blendTrans();
 
     // Render texture on a rectangle in world space ...
     g.quad(tex, -1, -1, 2, 2);
@@ -81,7 +80,7 @@ struct MyApp : public App {
     // g.quadViewport(tex);
 
     // Turn off blending
-    gl::blending(false);
+    g.blending(false);
   }
 };
 

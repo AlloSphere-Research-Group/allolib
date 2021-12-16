@@ -1,6 +1,7 @@
 #include "al/graphics/al_Image.hpp"
 
 #include <cstring>
+#include <iostream>
 
 #include "al_stb_image.hpp"
 
@@ -23,7 +24,8 @@ Image::Image(const std::string &filename) { load(filename); }
 
 bool Image::load(const std::string &filename) {
   al_stbImageData image_data = al_stbLoadImage(filename.c_str());
-  if (!image_data.data) return false;
+  if (!image_data.data)
+    return false;
 
   int arr_size = 4 * image_data.width * image_data.height;
   mWidth = image_data.width;
@@ -42,8 +44,18 @@ bool Image::load(const std::string &filename) {
 
 bool Image::save(const std::string &filename) {
   // TODO
-  if (mLoaded) mFilename = filename;
-  return mLoaded;  // why?
+  std::cerr << "WARNING Image::save() not implemented" << std::endl;
+  if (mLoaded)
+    mFilename = filename;
+  return mLoaded; // why?
 }
 
-}  // namespace al
+bool Image::saveImage(std::string fileName, unsigned char *pixs, int width,
+                      int height, bool flipVertically, int numComponents) {
+
+  al_stbSetFlipVertically(flipVertically);
+  return al_stbWriteImage(fileName.c_str(), pixs, width, height,
+                          numComponents) == 0;
+}
+
+} // namespace al

@@ -9,6 +9,7 @@
 #include <stack>
 #include <vector>
 
+#include "al/app/al_NodeConfiguration.hpp"
 #include "al/ui/al_Parameter.hpp"
 
 namespace al {
@@ -20,12 +21,15 @@ class SynchronousDomain;
  */
 class ComputationDomain {
 public:
+  virtual ~ComputationDomain() {}
   /**
    * @brief initialize
    * @param parent
    * @return true if init succeeded
    *
    * Multiple calls to init() should be allowed.
+   * You should always call this function within child classes to esnure
+   * internal state is correct
    */
   virtual bool init(ComputationDomain *parent = nullptr);
 
@@ -33,6 +37,9 @@ public:
    * @brief cleanup
    * @param parent
    * @return true if cleanup succesfull
+   *
+   * You should always call this function within child classes to esnure
+   * internal state is correct
    */
   virtual bool cleanup(ComputationDomain *parent = nullptr);
 
@@ -44,12 +51,37 @@ public:
    * @return the created domain.
    *
    * The domain specified by DomainType must inherit from SynchronousDomian.
-   * It will trigger an assertion if not (will have undefined behavior for
-   * Release builds) This operation is thread safe if the domain can pause
-   * itself, but it is blocking, so there are no guarantees that it will not
+   * It will trigger an std::runtime_error exception if it doesn't.
+   * This operation is thread safe if the domain can pause
+   * itself, but if it is blocking, so there are no guarantees that it will not
    * interefere with the timely running of the domain.
+   *
+   * The domain will be initialized if this domain has been initialized.
+   *
+   * Will return nullptr if this domain is running and the sub domain failed
+   * initialization.
+   *
+   * This function calls addSubDomain() once the domain has been created.
    */
   std::shared_ptr<DomainType> newSubDomain(bool prepend = false);
+
+  /**
+   * @brief Inserts subDomain as a subdomain of this class
+   * @param subDomain sub domain to insert
+   * @param prepend determines if subdomainshould run before or after this
+   * domain
+   *
+   * It is the caller's responsibility to ensure the domain is initialized and
+   * ready if this domain is already running.
+   *
+   * This function is thread safe, and will block until the domain has been
+   * added. The addtion takes place when the parent unlocks the subdomains, at
+   * the end of calls to tickSubdomains().
+   * It may block indefinitely if the parent domain does not release the
+   * sub domain locks.
+   */
+  virtual void addSubDomain(std::shared_ptr<SynchronousDomain> subDomain,
+                            bool prepend = false);
 
   /**
    * @brief Remove a subdomain
@@ -59,7 +91,7 @@ public:
    * deadlines for the parent domain. If this is a problem, the domain should be
    * stopped prior to adding/removeing sub-domains.
    */
-  void removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain);
+  virtual void removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain);
 
   /**
    * @brief Return time delta with respect to previous processing pass for this
@@ -72,6 +104,10 @@ public:
    * information is not necessary
    */
   double timeDelta() { return mTimeDrift; }
+
+  void setTimeDelta(double delta) { mTimeDrift = delta; }
+
+  Capability getCapabilities() { return mCapabilities; }
 
   /**
    * @brief register callbacks to be called in the init() function
@@ -145,8 +181,6 @@ protected:
    */
   void callCleanupCallbacks();
 
-  std::mutex mSubdomainLock; // It is the domain's responsibility to lock and
-                             // unlock while processing.
   double mTimeDrift{0.0};
   std::vector<std::pair<std::shared_ptr<SynchronousDomain>, bool>>
       mSubDomainList;
@@ -154,9 +188,16 @@ protected:
   // Add parameters for domain control here
   std::vector<ParameterMeta *> mParameters;
 
+protected:
+  bool mInitialized{false};
+
 private:
   std::vector<std::function<void(ComputationDomain *)>> mInitializeCallbacks;
   std::vector<std::function<void(ComputationDomain *)>> mCleanupCallbacks;
+
+  std::mutex mSubdomainLock;
+
+  Capability mCapabilities;
 };
 
 class SynchronousDomain : public ComputationDomain {
@@ -213,16 +254,20 @@ private:
 
 template <class DomainType>
 std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
-  //  std::lock_guard<std::mutex> lk(mSubdomainLock);
-  // Only Synchronous domains are allowed as subdomains
   auto newDomain = std::make_shared<DomainType>();
-  assert(dynamic_cast<SynchronousDomain *>(newDomain.get()));
-  if (newDomain) {
-    mSubDomainList.push_back({newDomain, prepend});
-    //    if (newDomain->init(this)) {
-    //    } else {
-    //      newDomain = nullptr;
-    //    }
+  if (!dynamic_cast<SynchronousDomain *>(newDomain.get())) {
+    // Only Synchronous domains are allowed as subdomains
+    throw std::runtime_error(
+        "Subdomain must be a subclass of SynchronousDomain");
+  }
+  if (mInitialized) {
+    if (newDomain->init(this)) {
+      addSubDomain(newDomain, prepend);
+    } else {
+      newDomain = nullptr;
+    }
+  } else {
+    addSubDomain(newDomain, prepend);
   }
   return newDomain;
 }

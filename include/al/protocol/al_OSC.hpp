@@ -182,8 +182,21 @@ public:
     return endMessage();
   }
 
+  /// Add eight argument message
+  template <class A, class B, class C, class D, class E, class F, class G,
+            class H>
+  Packet &addMessage(const std::string &addr, const A &a, const B &b,
+                     const C &c, const D &d, const E &e, const F &f, const G &g,
+                     const H &h) {
+    beginMessage(addr);
+    (*this) << a << b << c << d << e << f << g << h;
+    return endMessage();
+  }
+
   Packet &operator<<(int v);                ///< Add integer to message
   Packet &operator<<(unsigned v);           ///< Add integer to message
+  Packet &operator<<(int64_t v);            ///< Add integer to message
+  Packet &operator<<(uint64_t v);           ///< Add integer to message
   Packet &operator<<(float v);              ///< Add float to message
   Packet &operator<<(double v);             ///< Add double to message
   Packet &operator<<(char v);               ///< Add char to message
@@ -211,7 +224,7 @@ public:
   /// bundle)
   /// @param[in] senderAddr	IP address of sender
   Message(const char *message, int size, const TimeTag &timeTag = 1,
-          const char *senderAddr = nullptr);
+          const char *senderAddr = nullptr, uint16_t senderPort = 0);
   ~Message();
 
   /// Pretty-print message information
@@ -227,6 +240,7 @@ public:
   const std::string &addressPattern() const { return mAddressPattern; }
 
   const std::string senderAddress() const { return std::string(mSenderAddr); }
+  const uint16_t senderPort() const { return mSenderPort; }
 
   /// Get type tags
   const std::string &typeTags() const { return mTypeTags; }
@@ -251,6 +265,7 @@ protected:
   std::string mTypeTags;
   TimeTag mTimeTag;
   char mSenderAddr[32];
+  uint16_t mSenderPort;
 };
 
 /// Interface for classes that can be registered as handlers with a osc::Recv
@@ -263,9 +278,6 @@ public:
 
   /// Called for each message contained in packet
   virtual void onMessage(Message &m) = 0;
-
-  void parse(const char *packet, int size, TimeTag timeTag = 1,
-             const char *senderAddr = nullptr);
 };
 
 /// Interface for classes that can consume OSC messages
@@ -373,6 +385,14 @@ public:
     addMessage(addr, a, b, c, d, e, f, g);
     return send();
   }
+  /// Send eight argument message immediately
+  template <class A, class B, class C, class D, class E, class F, class G,
+            class H>
+  size_t send(const std::string &addr, const A &a, const B &b, const C &c,
+              const D &d, const E &e, const F &f, const G &g, const H &h) {
+    addMessage(addr, a, b, c, d, e, f, g, h);
+    return send();
+  }
 };
 
 /// Socket for receiving OSC packets
@@ -438,10 +458,15 @@ public:
   /// Stop the background polling
   void stop();
 
-  void parse(const char *packet, int size, const char *senderAddr);
+  void parse(const char *packet, int size, const char *senderAddr,
+             uint16_t senderPort = 0);
   void loop();
 
   static bool portAvailable(uint16_t port, const char *address = "");
+
+  static std::vector<std::shared_ptr<Message>>
+  parse(const char *packet, int size, TimeTag timeTag = 1,
+        const char *senderAddr = nullptr, uint16_t senderPort = 0);
 
 protected:
   std::vector<PacketHandler *> mHandlers;

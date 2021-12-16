@@ -159,7 +159,7 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, ParameterMeta *param,
   } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) ==
              0) { // ParameterChoice
     ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
-    notifyListeners(OSCaddress, p->get(), src);
+    notifyListeners(OSCaddress, (int32_t)p->get(), src);
   } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) ==
              0) { // ParameterVec3
     ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
@@ -187,7 +187,7 @@ void OSCNotifier::startHandshakeServer(std::string address) {
   if (mHandshakeServer.open(handshakeServerPort, address.c_str())) {
     mHandshakeServer.handler(mHandshakeHandler);
     mHandshakeServer.start();
-    std::cout << "Handshake server running on " << address << ":"
+    std::cout << "Parameter OSC Handshake server running on " << address << ":"
               << handshakeServerPort << std::endl;
   } else {
     std::cout << "failed to start handshake server" << std::endl;
@@ -219,6 +219,7 @@ ParameterServer::~ParameterServer() {
     mServer->stop();
     delete mServer;
     mServer = nullptr;
+    notifyListeners("/quit", 0.0f, nullptr);
   }
 }
 
@@ -370,23 +371,6 @@ void ParameterServer::onMessage(osc::Message &m) {
   if (mVerbose) {
     m.print();
   }
-  std::string requestAddress = "/sendAllParameters";
-  if (m.addressPattern() == requestAddress) {
-    if (m.typeTags() == "si") {
-      std::string address;
-      int port;
-      m >> address >> port;
-      if (address == "0.0.0.0") {
-        address = m.senderAddress();
-      }
-      sendAllParameters(address, port);
-    } else if (m.typeTags() == "i") {
-      int port;
-      m >> port;
-      sendAllParameters(m.senderAddress(), port);
-    }
-    return;
-  }
   mParameterLock.lock();
   for (ParameterMeta *param : mParameters) {
     if (setParameterValueFromMessage(param, m.addressPattern(), m)) {
@@ -397,11 +381,14 @@ void ParameterServer::onMessage(osc::Message &m) {
     auto oscAddress = m.addressPattern();
     setValuesForBundleGroup(m, bundleGroup.second, oscAddress);
   }
+
+  // FIXME these handlers should not be kept by ParameterServer, but should be
+  // set for the Recv object.
   for (osc::PacketHandler *handler : mPacketHandlers) {
     m.resetStream();
     handler->onMessage(m);
   }
-  for (auto consumer : mMessageConsumers) {
+  for (const auto &consumer : mMessageConsumers) {
     m.resetStream();
     if (consumer.first->consumeMessage(m, consumer.second)) {
       break;
@@ -421,15 +408,15 @@ void ParameterServer::print(std::ostream &stream) {
   for (ParameterMeta *p : mParameters) {
     printParameterInfo(p);
   }
-  for (auto bundleGroup : mParameterBundles) {
+  for (const auto &bundleGroup : mParameterBundles) {
     stream << " --- Bundle " << bundleGroup.first << std::endl;
-    for (auto bundle : bundleGroup.second) {
+    for (const auto &bundle : bundleGroup.second) {
       printBundleInfo(bundle, bundleGroup.first);
     }
   }
   if (mOSCSenders.size() > 0) {
     stream << "Registered listeners: " << std::endl;
-    for (auto sender : mOSCSenders) {
+    for (const auto &sender : mOSCSenders) {
       stream << sender->address() << ":" << sender->port() << std::endl;
     }
   }
@@ -545,9 +532,33 @@ void ParameterServer::sendAllParameters(std::string IPaddress, int oscPort) {
   }
 }
 
-void ParameterServer::requestAllParameters(std::string IPaddress, int oscPort) {
+void ParameterServer::sendParameterDetails(std::string IPaddress, int oscPort) {
   osc::Send sender(oscPort, IPaddress.c_str());
-  sender.send("/sendAllParameters", mServer->address(), mServer->port());
+  for (ParameterMeta *param : mParameters) {
+    param->sendMeta(sender);
+  }
+
+  for (auto bundleGroup : mParameterBundles) {
+    for (auto bundle : bundleGroup.second) {
+      for (ParameterMeta *param : bundle->parameters()) {
+        param->sendMeta(sender, bundle->name(),
+                        std::to_string(bundle->bundleIndex()));
+      }
+    }
+  }
+}
+
+void ParameterServer::requestAllParameters(std::string IPaddress, int oscPort) {
+  try {
+    osc::Send sender;
+    if (sender.open(oscPort, IPaddress.c_str())) {
+      sender.send("/sendAllParameters", mServer->address(), mServer->port());
+    }
+  } catch (std::exception &e) {
+    std::cerr << __FILE__ << ":" << __LINE__
+              << "ERROR requesting all parameters" << std::endl;
+    std::cerr << e.what() << std::endl;
+  }
 }
 
 void ParameterServer::changeCallback(float value, void *sender, void *userData,
@@ -589,7 +600,7 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
                                                    std::string address,
                                                    osc::Message &m) {
 
-  ValueSource s{m.senderAddress(), 0};
+  ValueSource s{m.senderAddress(), m.senderPort()};
   if (strcmp(typeid(*param).name(), typeid(ParameterBool).name()) ==
       0) { // ParameterBool
     ParameterBool *p = dynamic_cast<ParameterBool *>(param);
@@ -749,6 +760,8 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
 }
 
 void ParameterServer::runCommand(osc::Message &m) {
+  // These are commands that are common to primary and secondary instances.
+
   if (m.addressPattern() == "/requestListenerInfo") {
     if (m.typeTags() == "si") {
       std::string addr;
@@ -760,6 +773,7 @@ void ParameterServer::runCommand(osc::Message &m) {
                 << std::endl;
       std::string serverAddress = mServer->address();
       if (serverAddress == "0.0.0.0" || serverAddress.size() == 0) {
+        // FIXME this should be solved on the other end
         serverAddress = "127.0.0.1";
       }
       osc::Send listenerRequest(port, m.senderAddress().c_str());
@@ -768,6 +782,34 @@ void ParameterServer::runCommand(osc::Message &m) {
       std::cerr << "ERROR: Unexpected typetags for /requestListenerInfo"
                 << std::endl;
     }
+  } else if (m.addressPattern() == "/sendAllParameters") {
+    std::cout << "/sendAllParameters" << std::endl;
+    if (m.typeTags() == "si") {
+      std::string address;
+      int port;
+      m >> address >> port;
+      if (address == "0.0.0.0") {
+        address = m.senderAddress();
+      }
+      sendAllParameters(address, port);
+    } else if (m.typeTags() == "i") {
+      int port;
+      m >> port;
+      sendAllParameters(m.senderAddress(), port);
+    }
+    return;
+  } else if (m.addressPattern() == "/sendParametersMeta") {
+    std::cout << "/sendParametersMeta" << std::endl;
+    if (m.typeTags() == "si") {
+      std::string address;
+      int port;
+      m >> address >> port;
+      sendParameterDetails(m.senderAddress(), port);
+    }
+    return;
+  } else {
+    std::cout << "Unhandled command" << std::endl;
+    m.print();
   }
 }
 
@@ -825,10 +867,18 @@ void ParameterServer::setValuesForBundleGroup(
 }
 
 void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
+  // These are the commands processed by the primary instance
   if (m.addressPattern() == "/handshake" && m.typeTags() == "i") {
     std::unique_lock<std::mutex> lk(notifier->mNodeLock);
     int commandPort;
     m >> commandPort;
+    for (auto node : notifier->mNodes) {
+      if (node.first == m.senderAddress() && node.second == commandPort) {
+        std::cout << "Received unnecessary handshake from " << m.senderAddress()
+                  << ":" << commandPort << std::endl;
+        return;
+      }
+    }
     notifier->mNodes.push_back({m.senderAddress(), commandPort});
     std::cout << "ParameterServer handshake from " << m.senderAddress() << ":"
               << commandPort << std::endl;
@@ -846,12 +896,49 @@ void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
     notifier->addListener(addr, listenerPort);
     std::cout << "Registered listener " << m.senderAddress() << ":"
               << listenerPort << std::endl;
-  } else if (m.addressPattern() == "/requestListenerInfo") {
-    mParameterServer->runCommand(m);
+  } else if (m.addressPattern() == "/goodbye" && m.typeTags() == "si") {
+    std::string addr;
+    m >> addr;
+    int port;
+    m >> port;
 
+    std::unique_lock<std::mutex> lk(notifier->mNodeLock);
+    for (auto node = notifier->mNodes.begin(); node != notifier->mNodes.end();
+         node++) {
+      if (node->first == addr && node->second == port) {
+        std::cout << "Parameter server said goodbye " << m.senderAddress()
+                  << ":" << port << std::endl;
+        notifier->mNodes.erase(node);
+        break;
+      }
+    }
   } else {
-
-    std::cout << "Unhandled command" << std::endl;
-    m.print();
+    std::cout << "Running parameter server command" << std::endl;
+    // TODO do we need to verify command should be forwarded to ParameterServer?
+    mParameterServer->runCommand(m);
   }
+}
+
+void OSCNode::startCommandListener(std::string address) {
+  int offset = 0;
+  while (!mNetworkListener.open(listenerFirstPort + offset, address.c_str()) &&
+         (offset < 128)) {
+    offset++;
+  }
+  if (offset < 128) {
+    mNetworkListener.start();
+    std::cout << " OSCNotifier listening on " << address << ":"
+              << listenerFirstPort + offset << std::endl;
+  } else {
+    std::cerr << "Could not start listener on address " << address << std::endl;
+  }
+
+  // Broadcast handshake
+  // FIXME broadcast on all network interfaces
+  osc::Send handshake(handshakeServerPort, "127.0.0.1");
+  handshake.send("/handshake", listenerFirstPort + offset);
+}
+
+void OSCNode::registerServerHandler(osc::PacketHandler *handler) {
+  mNetworkListener.appendHandler(*handler);
 }

@@ -7,20 +7,20 @@
 using namespace al;
 using namespace std;
 
-Matrix4f getLookAt(const Vec3f& ux, const Vec3f& uy, const Vec3f& uz,
-                   const Vec3f& p) {
+Matrix4f getLookAt(const Vec3f &ux, const Vec3f &uy, const Vec3f &uz,
+                   const Vec3f &p) {
   return Matrix4f(ux[0], ux[1], ux[2], -(ux.dot(p)), uy[0], uy[1], uy[2],
                   -(uy.dot(p)), uz[0], uz[1], uz[2], -(uz.dot(p)), 0, 0, 0, 1);
 }
 
-Matrix4f getLookAt(const Vec3f& eyePos, const Vec3f& at, const Vec3f& up) {
+Matrix4f getLookAt(const Vec3f &eyePos, const Vec3f &at, const Vec3f &up) {
   Vec3f z = (eyePos - at).normalize();
   Vec3f x = cross(up, z).normalize();
   Vec3f y = cross(z, x).normalize();
   return getLookAt(x, y, z, eyePos);
 }
 
-string mat_to_string(const Matrix4f& m) {
+string mat_to_string(const Matrix4f &m) {
   stringstream s;
   s << to_string(m[0]) << to_string(m[4]) << to_string(m[8]) << to_string(m[12])
     << '\n'
@@ -55,7 +55,7 @@ struct MyApp : App {
     // x
     num_verts_added = addCube(axis);
     transform.setIdentity();
-    transform *= Matrix4f::rotation(M_PI / 2, 2, 0);  // rotate from z to x
+    transform *= Matrix4f::rotation(M_PI / 2, 2, 0); // rotate from z to x
     transform *= Matrix4f::translation(0, 0, 0.5);
     transform *= Matrix4f::scaling(0.1, 0.1, 3);
     axis.transform(transform, axis.vertices().size() - num_verts_added);
@@ -66,7 +66,7 @@ struct MyApp : App {
     // y
     num_verts_added = addCube(axis);
     transform.setIdentity();
-    transform *= Matrix4f::rotation(M_PI / 2, 2, 1);  // rotate from z to y
+    transform *= Matrix4f::rotation(M_PI / 2, 2, 1); // rotate from z to y
     transform *= Matrix4f::translation(0, 0, 0.5);
     transform *= Matrix4f::scaling(0.1, 0.1, 3);
     axis.transform(transform, axis.vertices().size() - num_verts_added);
@@ -89,21 +89,21 @@ struct MyApp : App {
     light.pos(0, 10, 0);
   }
 
-  void onAnimate(double dt) override {
+  void onAnimate(double /*dt*/) override {
     angle1 += 0.02;
     angle2 += 0.1;
   }
 
-  void onDraw(Graphics& g) override {
+  void onDraw(Graphics &g) override {
     g.clear(0, 0, 0);
 
-    gl::depthTesting(true);
+    g.depthTesting(true);
     g.light(light);
 
     auto draw_mesh = [this, &g]() {
       g.lighting(false);
       g.meshColor();
-      gl::polygonMode(GL_FILL);
+      g.polygonFill();
       g.draw(axis);
 
       g.rotate(angle1, 0, 1, 0);
@@ -111,22 +111,22 @@ struct MyApp : App {
 
       g.lighting(true);
       g.meshColor();
-      gl::polygonMode(GL_FILL);
+      g.polygonFill();
       g.draw(mesh);
 
       g.scale(1.01);
       g.color(0);
-      gl::polygonMode(GL_LINE);
+      g.polygonLine();
       g.draw(mesh);
     };
 
     int w = fbWidth() / 2;
     int h = fbHeight() / 2;
-    gl::scissorTest(true);
+    g.scissorTest(true);
 
     {
       g.viewport(0, 0, w, h);
-      gl::scissorArea(0, 0, w, h);
+      g.scissorArea(0, 0, w, h);
       g.clear(0.9, 0.9, 0.5);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -138,7 +138,7 @@ struct MyApp : App {
 
     {
       g.viewport(w, 0, w, h);
-      gl::scissorArea(w, 0, w, h);
+      g.scissorArea(w, 0, w, h);
       g.clear(0.5, 0.9, 0.5);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -150,7 +150,7 @@ struct MyApp : App {
 
     {
       g.viewport(0, h, w, h);
-      gl::scissorArea(0, h, w, h);
+      g.scissorArea(0, h, w, h);
       g.clear(0.5, 0.9, 0.9);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -162,7 +162,7 @@ struct MyApp : App {
 
     {
       g.viewport(w, h, w, h);
-      gl::scissorArea(w, h, w, h);
+      g.scissorArea(w, h, w, h);
       g.clear(0.9, 0.5, 0.9);
       g.pushMatrix();
       g.pushViewMatrix();
@@ -173,8 +173,8 @@ struct MyApp : App {
     }
 
     g.viewport(0, 0, fbWidth(), fbHeight());
-    gl::scissorTest(false);
-    gl::clearDepth(1);
+    g.scissorTest(false);
+    g.clearDepth(1);
 
     g.pushMatrix();
     draw_mesh();

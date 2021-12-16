@@ -16,9 +16,9 @@ struct MyApp : App {
   Reverb<float> reverb;
 
   void onInit() override {
-    reverb.bandwidth(0.6); // Low-pass amount on input, in [0,1]
-    reverb.damping(0.5);   // High-frequency damping, in [0,1]
-    reverb.decay(0.6);     // Tail decay factor, in [0,1]
+    reverb.bandwidth(0.6f); // Low-pass amount on input, in [0,1]
+    reverb.damping(0.5f);   // High-frequency damping, in [0,1]
+    reverb.decay(0.6f);     // Tail decay factor, in [0,1]
 
     // Diffusion amounts
     // Values near 0.7 are recommended. Moving further away from 0.7 will lead

@@ -47,95 +47,95 @@ int ParameterBundle::bundleIndex() const { return mBundleIndex; }
 void ParameterBundle::addParameter(ParameterMeta *parameter) {
   mParameters.push_back(parameter);
   if (strcmp(typeid(*parameter).name(), typeid(ParameterBool).name()) ==
-      0) {  // ParameterBool
+      0) { // ParameterBool
     ParameterBool *p = dynamic_cast<ParameterBool *>(parameter);
-    p->registerChangeCallback([this, p](float value) {
+    p->registerChangeCallback([this, p](float value, ValueSource *src) {
       for (OSCNotifier *n : mNotifiers) {
-        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
       }
     });
   } else if (strcmp(typeid(*parameter).name(), typeid(Parameter).name()) ==
-             0) {  // Parameter
+             0) { // Parameter
     //        std::cout << "Register parameter " << parameter->getName() <<
     //        std::endl;
     Parameter *p = dynamic_cast<Parameter *>(parameter);
-    p->registerChangeCallback([this, p](float value) {
+    p->registerChangeCallback([this, p](float value, ValueSource *src) {
       //            std::cout << "Changed  " << p->getName() << std::endl;
       for (OSCNotifier *n : mNotifiers) {
-        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
       }
     });
   } else if (strcmp(typeid(*parameter).name(),
-                    typeid(ParameterString).name()) == 0) {  // ParameterString
+                    typeid(ParameterString).name()) == 0) { // ParameterString
     //        std::cout << "Register parameter " << parameter->getName() <<
     //        std::endl;
     ParameterString *p = dynamic_cast<ParameterString *>(parameter);
-    p->registerChangeCallback([this, p](std::string value) {
+    p->registerChangeCallback([this, p](std::string value, ValueSource *src) {
       //            std::cout << "Changed  " << p->getName() << std::endl;
       for (OSCNotifier *n : mNotifiers) {
-        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
       }
     });
   } else if (strcmp(typeid(*parameter).name(), typeid(ParameterInt).name()) ==
-             0) {  // Parameter
+             0) { // Parameter
     //        std::cout << "Register parameter " << parameter->getName() <<
     //        std::endl;
     ParameterInt *p = dynamic_cast<ParameterInt *>(parameter);
-    p->registerChangeCallback([this, p](int32_t value) {
+    p->registerChangeCallback([this, p](int32_t value, ValueSource *src) {
       //            std::cout << "Changed  " << p->getName() << std::endl;
       for (OSCNotifier *n : mNotifiers) {
-        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
       }
     });
   } else if (strcmp(typeid(*parameter).name(), typeid(ParameterPose).name()) ==
-             0) {  // ParameterPose
+             0) { // ParameterPose
     ParameterPose *p = dynamic_cast<ParameterPose *>(parameter);
-    p->registerChangeCallback([this, p](al::Pose value) {
+    p->registerChangeCallback([this, p](al::Pose value, ValueSource *src) {
       for (OSCNotifier *n : mNotifiers) {
-        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
       }
     });
   } else if (strcmp(typeid(*parameter).name(), typeid(ParameterMenu).name()) ==
-             0) {  // ParameterMenu
+             0) { // ParameterMenu
     ParameterMenu *p = dynamic_cast<ParameterMenu *>(parameter);
-    p->registerChangeCallback([this, p](int value) {
+    p->registerChangeCallback([this, p](int value, ValueSource *src) {
       for (OSCNotifier *n : mNotifiers) {
-        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
       }
     });
   } else if (strcmp(typeid(*parameter).name(),
-                    typeid(ParameterChoice).name()) == 0) {  // ParameterChoice
+                    typeid(ParameterChoice).name()) == 0) { // ParameterChoice
     ParameterChoice *p = dynamic_cast<ParameterChoice *>(parameter);
-    p->registerChangeCallback([this, p](uint16_t value) {
+    p->registerChangeCallback([this, p](uint16_t value, ValueSource *src) {
       for (OSCNotifier *n : mNotifiers) {
-        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
       }
     });
   } else if (strcmp(typeid(*parameter).name(), typeid(ParameterVec3).name()) ==
-             0) {  // ParameterVec3
+             0) { // ParameterVec3
     ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(parameter);
 
-    p->registerChangeCallback([this, p](al::Vec3f value) {
+    p->registerChangeCallback([this, p](al::Vec3f value, ValueSource *src) {
       for (OSCNotifier *n : mNotifiers) {
-        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
       }
     });
   } else if (strcmp(typeid(*parameter).name(), typeid(ParameterVec4).name()) ==
-             0) {  // ParameterVec4
+             0) { // ParameterVec4
     ParameterVec4 *p = dynamic_cast<ParameterVec4 *>(parameter);
-    p->registerChangeCallback([this, p](al::Vec4f value) {
+    p->registerChangeCallback([this, p](al::Vec4f value, ValueSource *src) {
       for (OSCNotifier *n : mNotifiers) {
-        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value);
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
       }
     });
   } else if (strcmp(typeid(*parameter).name(), typeid(ParameterColor).name()) ==
-             0) {  // ParameterColor
+             0) { // ParameterColor
     ParameterColor *p = dynamic_cast<ParameterColor *>(parameter);
 
-    p->registerChangeCallback([this, p](Color value) {
+    p->registerChangeCallback([this, p](Color value, ValueSource *src) {
       Vec4f valueVec(value.r, value.g, value.b, value.a);
       for (OSCNotifier *n : mNotifiers) {
-        n->notifyListeners(bundlePrefix() + p->getFullAddress(), valueVec);
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), valueVec, src);
       }
     });
   } else {

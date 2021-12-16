@@ -18,9 +18,9 @@
 */
 /**********************************************************************/
 
-#define NOMINMAX
+//#define NOMINMAX
 #include "RtMidi.h"
-#undef NOMINMAX
+//#undef NOMINMAX
 
 namespace al {
 
@@ -38,82 +38,82 @@ namespace al {
 /// @ingroup IO
 double noteToHz(double noteNumber);
 
-int getMIDIDeviceIndex(std::string deviceName);;
+int getMIDIDeviceIndex(std::string deviceName);
+;
 
 /// Utilities for parsing MIDI bytes
 ///
 /// @ingroup IO
 class MIDIByte {
- public:
-#define BITS_(a, b, c, d, e, f, g, h) \
+public:
+#define BITS_(a, b, c, d, e, f, g, h)                                          \
   (a << 7 | b << 6 | c << 5 | d << 4 | e << 3 | f << 2 | g << 1 | h)
 
   // Constants for checking the first message byte
   // http://www.midi.org/techspecs/midimessages.php
   static const unsigned char
       CHANNEL_MASK = BITS_(0, 0, 0, 0, 1, 1, 1,
-                           1),  ///< Channel message status byte channel mask
+                           1), ///< Channel message status byte channel mask
       MESSAGE_MASK =
-          BITS_(1, 1, 1, 1, 0, 0, 0, 0),  ///< Message status byte type mask
+          BITS_(1, 1, 1, 1, 0, 0, 0, 0), ///< Message status byte type mask
 
       NOTE_OFF =
-          BITS_(1, 0, 0, 0, 0, 0, 0, 0),  ///< Note off channel message type
-      NOTE_ON =
-          BITS_(1, 0, 0, 1, 0, 0, 0, 0),  ///< Note on channel message type
+          BITS_(1, 0, 0, 0, 0, 0, 0, 0), ///< Note off channel message type
+      NOTE_ON = BITS_(1, 0, 0, 1, 0, 0, 0, 0), ///< Note on channel message type
       CONTROL_CHANGE = BITS_(1, 0, 1, 1, 0, 0, 0,
-                             0),  ///< Control change channel message type
-      BANK_SELECT = 0x00,         ///< Bank select control number
-      MODULATION = 0x01,          ///< Modulation wheel/stick control number
-      BREATH = 0x02,              ///< Breath controller control number
-      FOOT = 0x04,                ///< Foot controller control number
-      PORTAMENTO_TIME = 0x05,     ///< Portamento time control number
-      VOLUME = 0x07,              ///< Channel volume control number
-      BALANCE = 0x08,             ///< Balance control number
-      PAN = 0x0A,                 ///< Pan control number
-      EXPRESSION = 0x0B,          ///< Expression controller control number
-      DAMPER_PEDAL = 0x40,        ///< Damper pedal control number
-      PORTAMENTO_ON = 0x41,       ///< Portamento on/off control number
-      SOSTENUTO_ON = 0x42,        ///< Sostenuto on/off control number
-      SOFT_PEDAL = 0x43,          ///< Soft pedal control number
-      LEGATO_ON = 0x44,           ///< Legato on/off control number
+                             0), ///< Control change channel message type
+      BANK_SELECT = 0x00,        ///< Bank select control number
+      MODULATION = 0x01,         ///< Modulation wheel/stick control number
+      BREATH = 0x02,             ///< Breath controller control number
+      FOOT = 0x04,               ///< Foot controller control number
+      PORTAMENTO_TIME = 0x05,    ///< Portamento time control number
+      VOLUME = 0x07,             ///< Channel volume control number
+      BALANCE = 0x08,            ///< Balance control number
+      PAN = 0x0A,                ///< Pan control number
+      EXPRESSION = 0x0B,         ///< Expression controller control number
+      DAMPER_PEDAL = 0x40,       ///< Damper pedal control number
+      PORTAMENTO_ON = 0x41,      ///< Portamento on/off control number
+      SOSTENUTO_ON = 0x42,       ///< Sostenuto on/off control number
+      SOFT_PEDAL = 0x43,         ///< Soft pedal control number
+      LEGATO_ON = 0x44,          ///< Legato on/off control number
 
       PROGRAM_CHANGE = BITS_(1, 1, 0, 0, 0, 0, 0,
-                             0),  ///< Program change channel message type
+                             0), ///< Program change channel message type
       PRESSURE_POLY =
           BITS_(1, 0, 1, 0, 0, 0, 0,
-                0),  ///< Polyphonic pressure (aftertouch) channel message type
+                0), ///< Polyphonic pressure (aftertouch) channel message type
       PRESSURE_CHAN =
           BITS_(1, 1, 0, 1, 0, 0, 0,
-                0),  ///< Channel pressure (aftertouch) channel message type
+                0), ///< Channel pressure (aftertouch) channel message type
       PITCH_BEND =
-          BITS_(1, 1, 1, 0, 0, 0, 0, 0),  ///< Pitch bend channel message type
+          BITS_(1, 1, 1, 0, 0, 0, 0, 0), ///< Pitch bend channel message type
 
-      SYSTEM_MSG = BITS_(1, 1, 1, 1, 0, 0, 0, 0),  ///< System message type
+      SYSTEM_MSG = BITS_(1, 1, 1, 1, 0, 0, 0, 0), ///< System message type
 
       SYS_EX = BITS_(1, 1, 1, 1, 0, 0, 0,
-                     0),  ///< System exclusive system message type
+                     0), ///< System exclusive system message type
       SYS_EX_END = BITS_(1, 1, 1, 1, 0, 1, 1,
-                         1),  ///< End of system exclusive system message type
+                         1), ///< End of system exclusive system message type
       TIME_CODE =
-          BITS_(1, 1, 1, 1, 0, 0, 0, 1),  ///< Time code system message type
+          BITS_(1, 1, 1, 1, 0, 0, 0, 1), ///< Time code system message type
       SONG_POSITION =
-          BITS_(1, 1, 1, 1, 0, 0, 1, 0),  ///< Song position system message type
+          BITS_(1, 1, 1, 1, 0, 0, 1, 0), ///< Song position system message type
       SONG_SELECT =
-          BITS_(1, 1, 1, 1, 0, 0, 1, 1),  ///< Song select system message type
+          BITS_(1, 1, 1, 1, 0, 0, 1, 1), ///< Song select system message type
       TUNE_REQUEST =
-          BITS_(1, 1, 1, 1, 0, 1, 1, 0),  ///< Tune request system message type
+          BITS_(1, 1, 1, 1, 0, 1, 1, 0), ///< Tune request system message type
       TIMING_CLOCK =
-          BITS_(1, 1, 1, 1, 1, 0, 0, 0),  ///< Timing clock system message type
+          BITS_(1, 1, 1, 1, 1, 0, 0, 0), ///< Timing clock system message type
       SEQ_START = BITS_(1, 1, 1, 1, 1, 0, 1,
-                        0),  ///< Start sequence system message type
+                        0), ///< Start sequence system message type
       SEQ_CONTINUE = BITS_(1, 1, 1, 1, 1, 0, 1,
-                           1),  ///< Continue sequence system message type
+                           1), ///< Continue sequence system message type
       SEQ_STOP =
-          BITS_(1, 1, 1, 1, 1, 1, 0, 0),  ///< Stop sequence system message type
+          BITS_(1, 1, 1, 1, 1, 1, 0, 0), ///< Stop sequence system message type
       ACTIVE_SENSING = BITS_(1, 1, 1, 1, 1, 1, 1,
-                             0),  ///< Active sensing system message type
+                             0), ///< Active sensing system message type
       RESET = BITS_(1, 1, 1, 1, 1, 1, 1,
-                    1)  ///< Reset all receivers system message type
+                    1) ///< Reset all receivers system message type
       ;
 #undef BITS_
 
@@ -123,10 +123,10 @@ class MIDIByte {
   }
 
   /// Get string with message type from status byte
-  static const char* messageTypeString(unsigned char statusByte);
+  static const char *messageTypeString(unsigned char statusByte);
 
   /// Get string with control type from control number
-  static const char* controlNumberString(unsigned char controlNumber);
+  static const char *controlNumberString(unsigned char controlNumber);
 
   /// Convert pitch bend message bytes into a 14-bit value in [0, 16384)
   static unsigned short convertPitchBend(unsigned char byte2,
@@ -137,12 +137,12 @@ class MIDIByte {
 ///
 /// @ingroup IO
 class MIDIMessage {
- public:
+public:
   unsigned char bytes[3];
 
   MIDIMessage(double timeStamp, unsigned port, unsigned char b1,
               unsigned char b2 = 0, unsigned char b3 = 0,
-              unsigned char* data = nullptr);
+              unsigned char *data = nullptr, size_t dataSize = 0);
 
   /// Get the MIDI device port
   unsigned port() const { return mPort; }
@@ -171,7 +171,7 @@ class MIDIMessage {
   /// Get mapped pitch bend amount in [-1,1] (type must be PITCH_BEND)
   double pitchBend() const {
     int v = int(MIDIByte::convertPitchBend(bytes[1], bytes[2]));
-    v += 1 - bool(v);  // clip interval to [1, 16383]
+    v += 1 - bool(v); // clip interval to [1, 16383]
     return double(v - 8192) / 8191.;
   }
 
@@ -182,47 +182,49 @@ class MIDIMessage {
   double controlValue(double mul = 1. / 127.) const { return bytes[2] * mul; }
 
   /// Get sysex message data
-  unsigned char* data() const { return mData; }
+  unsigned char *data() const { return mData; }
+  size_t dataSize() const { return mDataSize; }
 
   /// Print general information about message
-  void print(std::ostream& stream = std::cout) const;
+  void print(std::ostream &stream = std::cout) const;
 
- protected:
+protected:
   double mTimeStamp;
   unsigned mPort;
-  unsigned char* mData;
+  unsigned char *mData;
+  size_t mDataSize{0};
 };
 
 /// Handles receipt of MIDI messages
 ///
 /// @ingroup IO
 class MIDIMessageHandler {
- public:
+public:
   virtual ~MIDIMessageHandler() {}
 
   /// Called when a MIDI message is received
-  virtual void onMIDIMessage(const MIDIMessage& m) = 0;
+  virtual void onMIDIMessage(const MIDIMessage &m) = 0;
 
   /// Bind handler to a MIDI input
-  void bindTo(RtMidiIn& RtMidiIn, unsigned port = 0);
+  void bindTo(RtMidiIn &RtMidiIn, unsigned port = 0);
 
   void clearBindings() {
-    for (auto& binding : mBindings) {
+    for (auto &binding : mBindings) {
       binding.midiIn->cancelCallback();
     }
     mBindings.clear();
   }
 
- protected:
+protected:
   struct Binding {
-    RtMidiIn* midiIn;
-    MIDIMessageHandler* handler;
+    RtMidiIn *midiIn;
+    MIDIMessageHandler *handler;
     unsigned port;
   };
 
   std::vector<Binding> mBindings;
 };
 
-}  // namespace al
+} // namespace al
 
 #endif

@@ -33,9 +33,31 @@ struct BoundingBoxData {
    *
    * This allows building the bounding box incremementally using includePoint()
    */
-  inline void resetInv();
+  inline void resetInv() {
+    max = {std::numeric_limits<float>::lowest(),
+           std::numeric_limits<float>::lowest(),
+           std::numeric_limits<float>::lowest()};
+    min = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+           std::numeric_limits<float>::max()};
+  }
 
-  inline void includePoint(al::Vec3f &pos);
+  inline void includePoint(al::Vec3f &pos) {
+    if (pos.x > max.x) {
+      max.x = pos.x;
+    } else if (pos.x < min.x) {
+      min.x = pos.x;
+    }
+    if (pos.y > max.y) {
+      max.y = pos.y;
+    } else if (pos.y < min.y) {
+      min.y = pos.y;
+    }
+    if (pos.z > max.z) {
+      max.z = pos.z;
+    } else if (pos.z < min.z) {
+      min.z = pos.z;
+    }
+  }
 };
 
 /// BoundingBox
@@ -64,6 +86,6 @@ struct BoundingBox : public BoundingBoxData {
   Mesh &getTics();
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_BOUNDINGBOX_HPP
+#endif // AL_BOUNDINGBOX_HPP

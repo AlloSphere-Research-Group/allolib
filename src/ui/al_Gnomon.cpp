@@ -11,7 +11,7 @@ Gnomon::Gnomon() {
   labels[0] = "x";
   labels[1] = "y";
   labels[2] = "z";
-  addPrism(arrowMesh, 0.0, 0.025, .1, 10, 0);
+  addPrism(arrowMesh, 0.0f, 0.025f, .1f, 10, 0);
   gnomonMesh.primitive(Mesh::LINES);
   // x line
   gnomonMesh.vertex(0, 0, 0);
@@ -37,14 +37,14 @@ void Gnomon::draw(Graphics &g) {
 
 void Gnomon::drawFloating(Graphics &g, Pose pose, double scale) {
   g.pushMatrix();
-  gl::polygonFill();
-  //  gl::polygonMode(GL_LINE);
-  Vec3d gnomZ = pose.pos() - (pose.uz() * 2);  // put in front of camera
-  gnomZ -= (pose.uy() * .4);                   // translate to the bottom
-  gnomZ -= (pose.ux() * .5);                   // translate to the left
+  g.polygonFill();
+  //  g.polygonLine();
+  Vec3d gnomZ = pose.pos() - (pose.uz() * 2); // put in front of camera
+  gnomZ -= (pose.uy() * .4);                  // translate to the bottom
+  gnomZ -= (pose.ux() * .5);                  // translate to the left
   g.meshColor();
   g.translate(gnomZ);
-  g.scale(scale);
+  g.scale((float)scale);
   g.draw(gnomonMesh);
   drawArrows(g);
   // drawLabels(g, pose, .005, gnomZ);
@@ -54,8 +54,8 @@ void Gnomon::drawFloating(Graphics &g, Pose pose, double scale) {
 void Gnomon::drawAtPos(Graphics &g, Vec3f pos, Pose cam_pose, double scale) {
   g.pushMatrix();
   g.translate(pos);
-  g.scale(scale);
-  // gl::lineWidth(2);
+  g.scale((float)scale);
+  // g.lineWidth(2);
 
   g.meshColor();
   g.draw(gnomonMesh);
@@ -72,8 +72,8 @@ void Gnomon::drawAtPose(Graphics &g, Pose pose, Pose cam_pose, double scale) {
   g.pushMatrix();
   g.translate(pose.pos());
   g.rotate(pose.quat());
-  g.scale(scale);
-  // gl::lineWidth(2);
+  g.scale((float)scale);
+  // g.lineWidth(2);
   g.draw(gnomonMesh);
   drawArrows(g);
   // drawLabels(g, cam_pose, .002);
@@ -84,21 +84,21 @@ void Gnomon::drawArrows(Graphics &g) {
   Quatf q;
   for (int i = 0; i < 3; i++) {
     //    glPushAttrib(GL_CURRENT_BIT);
-    gl::polygonFill();
+    g.polygonFill();
     g.meshColor();
     g.pushMatrix();
     g.color(colors[i]);
     g.translate(gnomonMesh.vertices()[(i * 2) + 1]);
     switch (i) {
-      case 0:
-        q.fromEuler(M_PI / 2, 0, 0);
-        break;
-      case 1:
-        q.fromEuler(0, -M_PI / 2, 0);
-        break;
-      case 2:
-        q.fromEuler(0, 0, 0);
-        break;
+    case 0:
+      q.fromEuler((float)M_PI * 0.5f, 0, 0);
+      break;
+    case 1:
+      q.fromEuler(0, (float)-M_PI * 0.5f, 0);
+      break;
+    case 2:
+      q.fromEuler(0, 0, 0);
+      break;
     }
     g.rotate(q);
     g.draw(arrowMesh);

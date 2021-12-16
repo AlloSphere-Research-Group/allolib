@@ -57,40 +57,25 @@ class ParameterServer;
 
 class OSCNode {
 public:
-  OSCNode() { mCommandHandler.node = this; }
+  OSCNode() {
+    mCommandHandler.node = this;
 
-  void startCommandListener(std::string address = "0.0.0.0") {
-    int offset = 0;
-    while (
-        !mNetworkListener.open(listenerFirstPort + offset, address.c_str()) &&
-        (offset < 128)) {
-      offset++;
-    }
-    if (offset < 128) {
-      mNetworkListener.start();
-      mNetworkListener.handler(mCommandHandler);
-      std::cout << " OSCNotifier listening on " << address << ":"
-                << listenerFirstPort + offset << std::endl;
-    } else {
-      std::cerr << "Could not start listener on address " << address
-                << std::endl;
-    }
-
-    // Broadcast handshake
-    // FIXME broadcast on all network interfaces
-    osc::Send handshake(handshakeServerPort, "127.0.0.1");
-    handshake.send("/handshake", listenerFirstPort + offset);
+    mNetworkListener.appendHandler(mCommandHandler);
   }
 
+  void startCommandListener(std::string address = "0.0.0.0");
+
   virtual void runCommand(osc::Message &m) = 0;
+
+  void registerServerHandler(osc::PacketHandler *handler);
 
 private:
   class CommandHandler : public osc::PacketHandler {
   public:
     OSCNode *node;
     virtual void onMessage(osc::Message &m) override {
-      std::cout << "command handler got" << std::endl;
-      m.print();
+      //      std::cout << "command handler got" << std::endl;
+      //      m.print();
       node->runCommand(m);
     }
   } mCommandHandler;
@@ -164,6 +149,10 @@ public:
     mListenerLock.unlock();
   }
   void startHandshakeServer(std::string address = "0.0.0.0");
+
+  void appendCommandHandler(osc::PacketHandler &handler) {
+    mHandshakeServer.appendHandler(handler);
+  }
 
 protected:
   std::mutex mListenerLock;
@@ -314,6 +303,8 @@ public:
    * This can throw an exception if IPAddress or port are not available.
    */
   void sendAllParameters(std::string IPaddress, int oscPort);
+
+  void sendParameterDetails(std::string IPaddress, int oscPort);
 
   void requestAllParameters(std::string IPaddress, int oscPort);
 

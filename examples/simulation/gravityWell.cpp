@@ -124,10 +124,10 @@ class MyApp : public App {
   void onDraw(Graphics& g) {
     g.clear(0.1);
 
-    gl::faceCulling(true);
-    gl::depthTesting(true);
+    g.culling(true);
+    g.depthTesting(true);
     g.lighting(true);
-    // gl::polygonMode(GL_LINE);
+    // g.polygonLine();
 
     light1.dir(1, 1, 1);
     g.light(light1);

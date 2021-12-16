@@ -46,8 +46,16 @@ public:
 
   bool isSender() { return mIsSender; }
 
+  void disconnect() {
+    for (auto sendrecv : mSendRecvDomains) {
+      this->removeSubDomain(sendrecv);
+    }
+  }
+
 protected:
   bool mIsSender{false};
+
+  std::vector<std::shared_ptr<SynchronousDomain>> mSendRecvDomains;
 
 private:
 };
@@ -101,6 +109,8 @@ public:
   std::string id() const { return mId; }
 
   void setId(const std::string &id) { mId = id; }
+
+  void setAddress(std::string address) { mAddress = address; };
 
 protected:
   std::shared_ptr<TSharedState> mState;
@@ -161,7 +171,9 @@ bool StateReceiveDomain<TSharedState>::init(ComputationDomain *parent) {
     return false;
   }
 
-  std::cout << "Opened " << mAddress << ":" << mPort << std::endl;
+  std::cout << "StateReceiveDomain: Using OSC for shared state " << mAddress
+            << ":" << mPort << std::endl;
+
   initializeSubdomains(false);
   return true;
 }
@@ -173,6 +185,9 @@ public:
     initializeSubdomains(true);
 
     initializeSubdomains(false);
+
+    std::cout << "StateSendDomain: Using OSC for shared state " << mAddress
+              << ":" << mPort << std::endl;
     return true;
   }
 
@@ -242,8 +257,6 @@ protected:
   uint16_t mPacketSize = 1400;
 
 private:
-  std::unique_ptr<osc::Send> mSend;
-
   std::string mId = "";
 };
 
@@ -255,6 +268,7 @@ StateDistributionDomain<TSharedState>::addStateSender(
       this->template newSubDomain<StateSendDomain<TSharedState>>(false);
   newDomain->setId(id);
   newDomain->setStatePointer(statePtr);
+  mSendRecvDomains.push_back(newDomain);
   return newDomain;
 }
 
@@ -265,8 +279,8 @@ StateDistributionDomain<TSharedState>::addStateReceiver(
   auto newDomain =
       this->template newSubDomain<StateReceiveDomain<TSharedState>>(true);
   newDomain->setId(id);
-
   newDomain->setStatePointer(statePtr);
+  mSendRecvDomains.push_back(newDomain);
   return newDomain;
 }
 

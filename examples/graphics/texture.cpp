@@ -8,10 +8,10 @@ Author:
 Lance Putnam, Nov. 2013
 */
 
-#include <iostream>
-#include <vector>
 #include "al/app/al_App.hpp"
 #include "al/math/al_Functions.hpp"
+#include <iostream>
+#include <vector>
 
 using namespace al;
 using namespace std;
@@ -46,7 +46,7 @@ struct MyApp : public App {
         float x = float(i) / (Nx - 1) * 2 - 1;
 
         float m = 1 - al::clip(hypot(x, y));
-        float a = al::wrap(atan2(y, x) / M_2PI);
+        float a = al::wrap((float)atan2(y, x) / M_2PI);
 
         Color col = HSV(a, 1, m);
 
@@ -81,12 +81,12 @@ struct MyApp : public App {
     // initWindow();
   }
 
-  void onDraw(Graphics& g) {
+  void onDraw(Graphics &g) {
     g.clear(0, 0, 0);
 
     // We must tell the GPU to use the texture when rendering primitives
     tex.bind();
-    g.texture();  // Use texture for mesh coloring
+    g.texture(); // Use texture for mesh coloring
     g.draw(mesh);
     tex.unbind();
   }

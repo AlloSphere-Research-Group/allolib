@@ -75,13 +75,15 @@ void sphere::getFullscreenDimension(int *width, int *height) {
     const GLFWvidmode *vm = glfwGetVideoMode(monitors[i]);
     int xmax = x + vm->width;
     int ymax = y + vm->height;
-    if (*width < xmax) *width = xmax;
-    if (*height < ymax) *height = ymax;
+    if (*width < xmax)
+      *width = xmax;
+    if (*height < ymax)
+      *height = ymax;
   }
 }
 
-std::string sphere::getCalibrationDirectory(
-    const std::string &dir_if_not_renderer) {
+std::string
+sphere::getCalibrationDirectory(const std::string &dir_if_not_renderer) {
   if (isRendererMachine())
     return "/home/sphere/calibration-current/";
   else
@@ -96,8 +98,8 @@ std::string sphere::getRendererCalibrationFilepath() {
   return getRendererCalibrationFilepath(al_get_hostname());
 }
 
-std::string sphere::getCalibrationFilepath(
-    const std::string &path_if_not_renderer) {
+std::string
+sphere::getCalibrationFilepath(const std::string &path_if_not_renderer) {
   auto const host = al_get_hostname();
   if (isRendererMachine(host))
     return getRendererCalibrationFilepath(host);
@@ -127,8 +129,9 @@ std::map<std::string, NodeConfiguration> sphere::getSphereNodes() {
       {"ar01.1g",
        NodeConfiguration{
            0, 0, "/Volumes/Data",
-           (Capability)(Capability::CAP_SIMULATOR | Capability::CAP_RENDERING |
-                        Capability::CAP_AUDIO_IO | Capability::CAP_OSC)}},
+           (Capability)(Capability::CAP_SIMULATOR | Capability::CAP_STATE_SEND |
+                        Capability::CAP_RENDERING | Capability::CAP_AUDIO_IO |
+                        Capability::CAP_OSC)}},
       {"atari.1g",
        NodeConfiguration{
            0, 0, "e:/",
@@ -141,9 +144,10 @@ std::map<std::string, NodeConfiguration> sphere::getSphereNodes() {
   for (uint16_t i = 1; i <= 14; i++) {
     snprintf(str, 3, "%02d", i);
     std::string name = "gr" + std::string(str);
-    nodes[name] = NodeConfiguration{
-        i, 0, "/alloshare",
-        (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC)};
+    nodes[name] =
+        NodeConfiguration{i, 0, "/alloshare",
+                          (Capability)(CAP_SIMULATOR | CAP_STATE_RECEIVE |
+                                       CAP_OMNIRENDERING | CAP_OSC)};
   }
   return nodes;
 }

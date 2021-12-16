@@ -19,16 +19,17 @@ struct Font::Impl {
 
 Font::Font() {
   impl = new Impl;
-  if (!impl) std::cerr << "Error allocating font implementation\n";
+  if (!impl)
+    std::cerr << "Error allocating font implementation\n";
 }
 
-Font::Font(Font&& other) noexcept {
+Font::Font(Font &&other) noexcept {
   impl = other.impl;
   other.impl = nullptr;
 }
 
-Font& Font::operator=(Font&& other) noexcept {
-  Impl* temp = impl;
+Font &Font::operator=(Font &&other) noexcept {
+  Impl *temp = impl;
   impl = other.impl;
   other.impl = temp;
   return *this;
@@ -36,7 +37,7 @@ Font& Font::operator=(Font&& other) noexcept {
 
 Font::~Font() { delete impl; }
 
-bool Font::load(const char* filename, int fontSize, int bitmapSize) {
+bool Font::load(const char *filename, int fontSize, int bitmapSize) {
   impl->fontData = al_stb::loadFont(filename, (float)fontSize, bitmapSize);
   if (impl->fontData.charData.size() == 0) {
     return false;
@@ -53,17 +54,17 @@ bool Font::load(const char* filename, int fontSize, int bitmapSize) {
   return true;
 }
 
-void Font::write(Mesh& mesh, const char* text, float worldHeight) {
+void Font::write(Mesh &mesh, const char *text, float worldHeight) {
   assert(impl->fontData.charData.size() > 0 && "Error - font not loaded.");
   mesh.reset();
 
   float xpos = 0;
   float scale = worldHeight / impl->fontData.pixelHeight;
 
-  auto* cache = &(impl->cachedData);
-  auto* fontData = &(impl->fontData);
+  auto *cache = &(impl->cachedData);
+  auto *fontData = &(impl->fontData);
 
-  auto cdata = [cache, fontData](int c) -> const al_stb::CharData& {
+  auto cdata = [cache, fontData](int c) -> const al_stb::CharData & {
     auto search = cache->find(c);
     if (search != cache->end())
       return search->second;
@@ -100,7 +101,7 @@ void Font::write(Mesh& mesh, const char* text, float worldHeight) {
   }
 
   float xOffset = xpos * alignFactorX;
-  for (auto& v : mesh.vertices()) {
+  for (auto &v : mesh.vertices()) {
     v.x = v.x + xOffset;
   }
 }
@@ -140,4 +141,4 @@ float Font::width(const char* text) const {
 }
 #endif
 
-}  // namespace al
+} // namespace al

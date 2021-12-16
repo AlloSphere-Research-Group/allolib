@@ -33,13 +33,13 @@ struct MyOmniRendererApp : DistributedApp {
     g.clear(0, 0, 1);
 
     if (DO_BLENDING) {
-      gl::depthTesting(false);
-      gl::blending(true);
-      gl::blendAdd();
+      g.depthTesting(false);
+      g.blending(true);
+      g.blendAdd();
     } else {
-      gl::depthTesting(true);
-      gl::depthMask(true);
-      gl::blending(false);
+      g.depthTesting(true);
+      g.depthMask(true);
+      g.blending(false);
     }
 
     for (int aa = -5; aa <= 5; aa++)

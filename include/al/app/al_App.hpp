@@ -158,6 +158,9 @@ public:
     return mSimulationDomain;
   }
 
+  std::shared_ptr<GLFWOpenGLWindowDomain> defaultWindowDomain() {
+    return mDefaultWindowDomain;
+  }
   struct StandardWindowAppKeyControls : WindowEventHandler {
     bool keyDown(const Keyboard &k);
     App *app;
@@ -173,6 +176,7 @@ public:
   std::shared_ptr<SimulationDomain> mSimulationDomain;
 
 protected:
+  void createDomains();
   void initializeDomains();
 
   std::vector<std::shared_ptr<AsynchronousDomain>> mDomainList;

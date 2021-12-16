@@ -64,8 +64,8 @@ namespace al {
  * Presets are saved by name with the ".preset" suffix.
  */
 class PresetHandler {
- public:
-  typedef std::map<std::string, std::vector<ParameterField>> ParameterStates;
+public:
+  typedef std::map<std::string, std::vector<VariantValue>> ParameterStates;
   /**
    * @brief PresetHandler contructor
    *
@@ -74,7 +74,7 @@ class PresetHandler {
    * @param verbose if true, print diagnostic messages
    *
    */
-  PresetHandler(std::string rootDirectory, bool verbose = false);
+  PresetHandler(std::string rootDirectory = "presets", bool verbose = false);
 
   /**
    * @brief Constructor with option to set time master mode
@@ -85,7 +85,7 @@ class PresetHandler {
    * thread that handles morphing and setting values, the second does not
    * start the thread, so user must manually call tick()
    */
-  PresetHandler(TimeMasterMode timeMasterMode = TimeMasterMode::TIME_MASTER_CPU,
+  PresetHandler(TimeMasterMode timeMasterMode,
                 std::string rootDirectory = "presets", bool verbose = false);
 
   ~PresetHandler();
@@ -165,7 +165,7 @@ class PresetHandler {
                              double factor);
 
   //  static void setParameterValues(ParameterMeta *param,
-  //                                 std::vector<ParameterField> &values);
+  //                                 std::vector<VariantValue> &values);
   /**
    * @brief Interpolate between start and end values according to
    * factor
@@ -192,6 +192,7 @@ class PresetHandler {
 
   float getMorphTime();
   void setMorphTime(float time);
+  void setMaxMorphTime(float time);
   void stopMorphing() { mTotalSteps.store(0); }
   void morphTo(ParameterStates &parameterStates, float morphTime);
   void morphTo(std::string presetName, float morphTime);
@@ -333,7 +334,7 @@ class PresetHandler {
   void startCpuThread();
   void stopCpuThread();
 
- private:
+private:
   //  std::vector<float> getParameterValue(ParameterMeta *p);
   //  void setParametersInBundle(ParameterBundle *bundle, std::string
   //  bundlePrefix,
@@ -345,7 +346,7 @@ class PresetHandler {
   bool mVerbose{false};
   bool mUseCallbacks{true};
   std::string mRootDir;
-  std::string mSubDir;  // Optional sub directory, e.g. for preset map archives
+  std::string mSubDir; // Optional sub directory, e.g. for preset map archives
 
   std::string mCurrentMapName;
   std::string mCurrentPresetName;
@@ -366,12 +367,12 @@ class PresetHandler {
 
   TimeMasterMode mTimeMasterMode{TimeMasterMode::TIME_MASTER_CPU};
 
-  Parameter mMorphTime{"morphTime", "", 0.0, "", 0.0, 20.0};
+  Parameter mMorphTime{"morphTime", "", 0.0, 0.0, 20.0};
 
   std::atomic<uint64_t> mMorphStepCount{0};
   std::atomic<uint64_t> mTotalSteps{0};
   //  std::atomic<float> mCurrentMorphIndex;
-  bool mCpuThreadRunning{false};  // To keep the morphing thread alive
+  bool mCpuThreadRunning{false}; // To keep the morphing thread alive
   std::unique_ptr<std::thread> mMorphingThread;
   //  std::condition_variable mMorphConditionVar;
   double mMorphInterval{0.02};
@@ -388,6 +389,6 @@ class PresetHandler {
   std::map<int, std::string> mPresetsMap;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_PRESETHANDLER_H
+#endif // AL_PRESETHANDLER_H

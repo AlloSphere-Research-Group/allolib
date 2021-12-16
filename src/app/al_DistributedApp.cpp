@@ -9,7 +9,10 @@
 
 using namespace al;
 
-void DistributedApp::init() {
+void DistributedApp::prepare() {
+  if (initialized) {
+    return;
+  }
 #ifdef AL_WINDOWS
   // Required to make sure gethostname() works....
   WORD wVersionRequested;
@@ -99,6 +102,7 @@ void DistributedApp::init() {
       setRole("desktop");
       rank = 0;
       group = 0;
+      oscDomain()->interfaceIP = "127.0.0.1";
     }
   } else { // No nodes table in config file. Use desktop role
     auto defaultCapabilities = al::sphere::getSphereNodes();
@@ -110,19 +114,16 @@ void DistributedApp::init() {
       setRole("desktop");
       rank = 0;
       group = 0;
+
+      oscDomain()->interfaceIP = "127.0.0.1";
     }
   }
 
-  if (hasCapability(CAP_SIMULATOR)) {
-    if (al::sphere::isSphereMachine()) {
-      appConfig.setDefaultValue("broadcastAddress",
-                                std::string("192.168.10.255"));
-      appConfig.writeFile();
-    }
-  }
   if (appConfig.hasKey<std::string>("broadcastAddress")) {
-    if (mFoundHost) {
-      additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
+    additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
+  } else if (hasCapability(CAP_STATE_RECEIVE) | hasCapability(CAP_STATE_SEND)) {
+    if (al::sphere::isSphereMachine()) {
+      additionalConfig["broadcastAddress"] = "192.168.10.255";
     } else {
       additionalConfig["broadcastAddress"] = "127.0.0.1";
     }
@@ -135,12 +136,16 @@ void DistributedApp::init() {
   // application is the primary or the replica
   if (!testServer.open(mOSCDomain->port, mOSCDomain->interfaceIP.c_str())) {
     // If port taken, run this instance as a renderer
-    mCapabilites = (Capability)(CAP_SIMULATOR | CAP_OMNIRENDERING | CAP_OSC);
+    // TODO these capabilities should be provided by the domains
+    mCapabilites = (Capability)(CAP_SIMULATOR | CAP_STATE_RECEIVE |
+                                CAP_OMNIRENDERING | CAP_OSC);
     rank = 99;
-    std::cout << "Replica: " << name() << ":Running distributed" << std::endl;
+    std::cout << "Primary port BUSY: " << name() << std::endl;
+    // For some reason, if we leave it at 0.0.0.0 messages are blocked on
+    // windows
   } else if (rank == 0) {
     testServer.stop();
-    std::cout << "Primary: " << name() << ":Running distributed" << std::endl;
+    std::cout << "Primary port ACQUIRED: " << name() << std::endl;
   } else {
     testServer.stop();
     std::cout << "Secondary: rank " << rank << std::endl;
@@ -153,11 +158,22 @@ void DistributedApp::init() {
         std::find(mDomainList.begin(), mDomainList.end(), mAudioDomain));
   }
   parameterServer() << mAudioControl.gain;
+
+  initializeDomains();
+  initialized = true;
+}
+
+std::string DistributedApp::getPrimaryHost() {
+  for (auto node : mRoleMap) {
+    if (node.second == "simulator" || node.second == "desktop") {
+      return node.first;
+    }
+  }
+  return std::string();
 }
 
 void DistributedApp::start() {
-  init();
-  initializeDomains();
+  prepare();
   stdControls.app = this;
 
   if (hasCapability(CAP_OMNIRENDERING)) {
@@ -217,14 +233,13 @@ void DistributedApp::start() {
   }
 
   if (isPrimary()) {
-    std::cout << "Running Primary" << std::endl;
+    //    std::cout << "Running Primary" << std::endl;
     if (!mFoundHost) {
-      std::cout << "WARNING: not adding extra listeners due to missing node "
-                   "table in distributed_app.toml"
+      std::cout << "Using default configuration (no distributed_app.toml)"
                 << std::endl;
     } else {
-      std::cout << "Running REPLICA" << std::endl;
-      for (auto hostRole : mRoleMap) {
+      //      std::cout << "Running REPLICA" << std::endl;
+      for (const auto &hostRole : mRoleMap) {
         if (hostRole.first != name()) {
           parameterServer().addListener(hostRole.first, oscDomain()->port);
         }
@@ -257,6 +272,7 @@ void DistributedApp::start() {
       std::cerr << "ERROR cleaning up domain " << std::endl;
     }
   }
+  mDomainList.clear();
 }
 
 std::string DistributedApp::name() { return al_get_hostname(); }

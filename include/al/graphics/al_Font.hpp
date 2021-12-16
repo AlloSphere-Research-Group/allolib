@@ -159,8 +159,8 @@ struct FontRenderer : public Font {
   }
 
   void render(Graphics &g) {
-    gl::blending(true);
-    gl::blendTrans();
+    g.blending(true);
+    g.blendTrans();
     g.texture();
     tex.bind();
     g.draw(fontMesh);
@@ -173,8 +173,8 @@ struct FontRenderer : public Font {
     render(g);
     g.popMatrix();
   }
-}; // namespace al
+};  // namespace al
 
-} // namespace al
+}  // namespace al
 
 #endif

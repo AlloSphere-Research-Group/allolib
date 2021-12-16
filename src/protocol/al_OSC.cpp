@@ -66,6 +66,7 @@ bundle etc.                        Addtional bundle elements
 //#define VERBOSE
 #ifdef VERBOSE
 #define DPRINTF(...) printf(__VA_ARGS__)
+#include <netinet/in.h> // for ntohl
 #else
 #define DPRINTF(...)
 #endif
@@ -95,6 +96,14 @@ Packet &Packet::operator<<(int v) {
 }
 Packet &Packet::operator<<(unsigned v) {
   OSCTRY("Packet::<<unsigned", (*mImpl) << (::osc::int32)v;)
+  return *this;
+}
+Packet &Packet::operator<<(int64_t v) {
+  OSCTRY("Packet::<<unsigned", (*mImpl) << (::osc::int64)v;)
+  return *this;
+}
+Packet &Packet::operator<<(uint64_t v) {
+  OSCTRY("Packet::<<signed", (*mImpl) << (::osc::int64)v;)
   return *this;
 }
 Packet &Packet::operator<<(float v) {
@@ -181,7 +190,7 @@ public:
 };
 
 Message::Message(const char *message, int size, const TimeTag &timeTag,
-                 const char *senderAddr)
+                 const char *senderAddr, uint16_t senderPort)
     : mImpl(new Impl(message, size)), mTimeTag(timeTag) {
   OSCTRY("Message()", mAddressPattern = mImpl->AddressPattern();
          mTypeTags = mImpl->ArgumentCount() ? mImpl->TypeTags() : "";
@@ -196,50 +205,50 @@ Message::Message(const char *message, int size, const TimeTag &timeTag,
 Message::~Message() { OSCTRY("~Message()", delete mImpl;) }
 
 void Message::print() const {
-  OSCTRY("Message::print",
-         printf("%s, %s %" AL_PRINTF_LL "d from %s\n", addressPattern().c_str(),
-                typeTags().c_str(), timeTag(), mSenderAddr);
+  OSCTRY(
+      "Message::print",
+      printf("%s, %s %" AL_PRINTF_LL "d from %s:%i\n", addressPattern().c_str(),
+             typeTags().c_str(), timeTag(), mSenderAddr, mSenderPort);
 
-         ::osc::ReceivedMessageArgumentIterator it = mImpl->ArgumentsBegin();
+      ::osc::ReceivedMessageArgumentIterator it = mImpl->ArgumentsBegin();
 
-         printf("\targs = (");
-         for (unsigned i = 0; i < typeTags().size(); ++i) {
-           char tag = typeTags()[i];
-           switch (tag) {
-           case 'f': {
-             float v = it->AsFloat();
-             printf("%g", v);
-           } break;
-           case 'i': {
-             long v = it->AsInt32();
-             printf("%ld", v);
-           } break;
-           case 'h': {
-             long long v = it->AsInt64();
-             printf("%" AL_PRINTF_LL "d", v);
-           } break;
-           case 'c': {
-             char v = it->AsChar();
-             printf("'%c' (=%3d)", isprint(v) ? v : ' ', v);
-           } break;
-           case 'd': {
-             double v = it->AsDouble();
-             printf("%g", v);
-           } break;
-           case 's': {
-             const char *v = it->AsString();
-             printf("%s", v);
-           } break;
-           case 'b':
-             printf("blob");
-             break;
-           default:
-             printf("?");
-           }
-           if (i < (typeTags().size() - 1))
-             printf(", ");
-           ++it;
-         } printf(")\n");)
+      printf("\targs = ("); for (unsigned i = 0; i < typeTags().size(); ++i) {
+        char tag = typeTags()[i];
+        switch (tag) {
+        case 'f': {
+          float v = it->AsFloat();
+          printf("%g", v);
+        } break;
+        case 'i': {
+          long v = it->AsInt32();
+          printf("%ld", v);
+        } break;
+        case 'h': {
+          long long v = it->AsInt64();
+          printf("%" AL_PRINTF_LL "d", v);
+        } break;
+        case 'c': {
+          char v = it->AsChar();
+          printf("'%c' (=%3d)", isprint(v) ? v : ' ', v);
+        } break;
+        case 'd': {
+          double v = it->AsDouble();
+          printf("%g", v);
+        } break;
+        case 's': {
+          const char *v = it->AsString();
+          printf("%s", v);
+        } break;
+        case 'b':
+          printf("blob");
+          break;
+        default:
+          printf("?");
+        }
+        if (i < (typeTags().size() - 1))
+          printf(", ");
+        ++it;
+      } printf(")\n");)
 }
 
 Message &Message::resetStream() {
@@ -280,66 +289,6 @@ Message &Message::operator>>(Blob &v) {
   v.data = b.data;
   v.size = b.size;
   return *this;
-}
-
-#ifdef VERBOSE
-#include <netinet/in.h> // for ntohl
-#endif
-
-void PacketHandler::parse(const char *packet, int size, TimeTag timeTag,
-                          const char *senderAddr) {
-#ifdef VERBOSE
-  int i = 1;
-#endif
-
-  OSCTRY(
-      "PacketHandler::parse",
-      DPRINTF("PacketHandler::parse(size %d, packet %p)\n", size, packet);
-      DPRINTF("Data to parse: "); for (int i = 0; i < size; ++i) {
-        DPRINTF("%c", packet[i]);
-      } DPRINTF("\n");
-
-      // this is the only generic entry point for parsing packets
-      ::osc::ReceivedPacket p(packet, size);
-
-      DPRINTF("Just made an ::osc::ReceivedPacket that has contents %p and "
-              "size %d\n",
-              p.Contents(), (int)p.Size());
-
-      // iterate through all the bundle elements (bundles or messages)
-      if (p.IsBundle()) {
-        DPRINTF("It's a bundle\n");
-        // char *afterTimeTag = (char *)packet+16;  // "#bundle\0" plus
-        // 8-byte time tag
-        DPRINTF("First bundle element has size %d\n",
-                ntohl(*((int *)(packet + 16)) /*firstBundleElementSize*/));
-
-        ::osc::ReceivedBundle r(p);
-
-        // DPRINTF("Just made an ::osc::ReceivedBundle that has time tag at
-        // %p and %d elements\n", r.timeTag_, r.ElementCount() );
-
-        for (auto it = r.ElementsBegin(); it != r.ElementsEnd(); ++it) {
-          const ::osc::ReceivedBundleElement &e = *it;
-
-          DPRINTF("Just made an ::osc::ReceivedBundleElement with contents %p "
-                  "and size %d\n",
-                  e.Contents(), (int)e.Size());
-          DPRINTF("Parsing bundle element %d\n", i++);
-          DPRINTF(
-              "Made an ::osc::ReceivedBundleElement out of the iterator.\n");
-          DPRINTF("\tcontents: %p\n", e.Contents());
-          DPRINTF("\tsize: %d\n", (int)e.Size());
-          DPRINTF("\ttimeTag %lu\n", (unsigned long)r.TimeTag());
-          DPRINTF("\tLet's try to parse it...\n");
-
-          parse(e.Contents(), e.Size(), r.TimeTag(), senderAddr);
-        }
-      } else if (p.IsMessage()) {
-        DPRINTF("Parsing a message\n");
-        Message m(packet, size, timeTag, senderAddr);
-        onMessage(m);
-      }) // OSCTRY
 }
 
 class Send::SocketSender {
@@ -418,7 +367,7 @@ public:
                              const IpEndpointName &remoteEndpoint) override {
     char addr[IpEndpointName::ADDRESS_STRING_LENGTH];
     remoteEndpoint.AddressAsString(addr);
-    recv->parse(data, size, addr);
+    recv->parse(data, size, addr, remoteEndpoint.port);
   }
 
   void loop() { /*receiveSocket.RunUntilSigInt();*/
@@ -476,10 +425,14 @@ void Recv::stop() {
   }
 }
 
-void Recv::parse(const char *packet, int size, const char *senderAddr) {
+void Recv::parse(const char *packet, int size, const char *senderAddr,
+                 uint16_t senderPort) {
   std::memcpy(&mBuffer[0], packet, size);
+  auto messages = parse(&mBuffer[0], size, 1, senderAddr, senderPort);
   for (auto *handler : mHandlers) {
-    handler->parse(&mBuffer[0], size, 1, senderAddr);
+    for (auto m : messages) {
+      handler->onMessage(*m);
+    }
   }
 }
 
@@ -502,6 +455,71 @@ bool Recv::portAvailable(uint16_t port, const char *address) {
     return false;
   }
   return true;
+}
+
+std::vector<std::shared_ptr<Message>> Recv::parse(const char *packet, int size,
+                                                  TimeTag timeTag,
+                                                  const char *senderAddr,
+                                                  uint16_t senderPort) {
+#ifdef VERBOSE
+  int i = 1;
+#endif
+  std::vector<std::shared_ptr<Message>> messages;
+  try {
+    DPRINTF("PacketHandler::parse(size %d, packet %p)\n", size, packet);
+    DPRINTF("Data to parse: ");
+    for (int i = 0; i < size; ++i) {
+      DPRINTF("%c", packet[i]);
+    }
+    DPRINTF("\n");
+
+    // this is the only generic entry point for parsing packets
+    ::osc::ReceivedPacket p(packet, size);
+
+    DPRINTF("Just made an ::osc::ReceivedPacket that has contents %p and "
+            "size %d\n",
+            p.Contents(), (int)p.Size());
+
+    // iterate through all the bundle elements (bundles or messages)
+    if (p.IsBundle()) {
+      DPRINTF("It's a bundle\n");
+      // char *afterTimeTag = (char *)packet+16;  // "#bundle\0" plus
+      // 8-byte time tag
+      DPRINTF("First bundle element has size %d\n",
+              ntohl(*((int *)(packet + 16)) /*firstBundleElementSize*/));
+
+      ::osc::ReceivedBundle r(p);
+
+      // DPRINTF("Just made an ::osc::ReceivedBundle that has time tag at
+      // %p and %d elements\n", r.timeTag_, r.ElementCount() );
+
+      for (auto it = r.ElementsBegin(); it != r.ElementsEnd(); ++it) {
+        const ::osc::ReceivedBundleElement &e = *it;
+
+        DPRINTF("Just made an ::osc::ReceivedBundleElement with contents %p "
+                "and size %d\n",
+                e.Contents(), (int)e.Size());
+        DPRINTF("Parsing bundle element %d\n", i++);
+        DPRINTF("Made an ::osc::ReceivedBundleElement out of the iterator.\n");
+        DPRINTF("\tcontents: %p\n", e.Contents());
+        DPRINTF("\tsize: %d\n", (int)e.Size());
+        DPRINTF("\ttimeTag %lu\n", (unsigned long)r.TimeTag());
+        DPRINTF("\tLet's try to parse it...\n");
+
+        auto innerMessages =
+            parse(e.Contents(), e.Size(), r.TimeTag(), senderAddr, senderPort);
+        messages.insert(messages.end(), innerMessages.begin(),
+                        innerMessages.end());
+      }
+    } else if (p.IsMessage()) {
+      DPRINTF("Parsing a message\n");
+      messages.push_back(std::make_shared<Message>(packet, size, timeTag,
+                                                   senderAddr, senderPort));
+    }
+  } catch (::osc::Exception &e) {
+    AL_WARN("OSC error: %s", e.what());
+  }
+  return messages;
 }
 
 } // namespace osc

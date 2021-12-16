@@ -52,6 +52,7 @@
 #include <functional>
 #include <iostream>
 #include <list>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -73,26 +74,27 @@ typedef double al_sec; /**< seconds type */
 
 namespace al {
 
+std::string demangle(const char *name); // Utility function.
 /// A pair of path (folder/directory) and file name
 ///
 /// @ingroup IO
 class FilePath {
- public:
+public:
   FilePath() {}
 
   /// @param[in] file			File name without directory
   /// @param[in] path			Directory of file
-  FilePath(const std::string& file, const std::string& path);
+  FilePath(const std::string &file, const std::string &path);
 
   /// @param[in] fullpath		Full path to file (directory + file
   /// name)
-  explicit FilePath(const std::string& fullpath);
+  explicit FilePath(const std::string &fullpath);
 
   /// Get file name without directory
-  const std::string& file() const { return mFile; }
+  const std::string &file() const { return mFile; }
 
   /// Get path (directory) of file
-  const std::string& path() const { return mPath; }
+  const std::string &path() const { return mPath; }
 
   /// Get file with directory
   std::string filepath() const { return path() + file(); }
@@ -101,23 +103,23 @@ class FilePath {
   bool valid() const { return file() != ""; }
 
   /// Set file name without directory
-  FilePath& file(const std::string& v) {
+  FilePath &file(const std::string &v) {
     mFile = v;
     return *this;
   }
 
   /// Set path (directory) of file
-  FilePath& path(const std::string& v) {
+  FilePath &path(const std::string &v) {
     mPath = v;
     return *this;
   }
 
- protected:
+protected:
   std::string mPath;
   std::string mFile;
 };
 
-#if 0  /* commenting out FileInfo */
+#if 0 /* commenting out FileInfo */
 /// File information
 ///
 /// @ingroup IO
@@ -162,12 +164,12 @@ private:
 ///
 /// @ingroup IO
 class File {
- public:
+public:
   /// @param[in] path		path of file
   /// @param[in] mode		i/o mode "w", "r", "wb", "rb"
   /// @param[in] open		whether to open the file
   File(std::string path = ".", std::string mode = "r", bool open_ = false);
-  File(const FilePath& path, std::string mode = "r", bool open_ = false);
+  File(const FilePath &path, std::string mode = "r", bool open_ = false);
 
   ~File();
 
@@ -176,7 +178,7 @@ class File {
   /// @param[in] path		path of file
   /// @param[in] mode		i/o mode "w", "r", "wb", "rb"
   /// \returns true on success, false otherwise
-  bool open(const std::string& path, const std::string& mode = "r");
+  bool open(const std::string &path, const std::string &mode = "r");
 
   /// Open file using member variables
 
@@ -191,60 +193,60 @@ class File {
 
   /// @param[in] v	A string indicating the i/o mode.
   ///
-  File& mode(const std::string& v) {
+  File &mode(const std::string &v) {
     mMode = v;
     return *this;
   }
 
   /// Set path of file
-  File& path(const std::string& v) {
+  File &path(const std::string &v) {
     mPath = v;
     return *this;
   }
 
   /// Write string to file
-  int write(const std::string& v) {
+  int write(const std::string &v) {
     return write(v.data(), 1, static_cast<int>(v.length()));
   }
 
   /// Write memory elements to file
-  int write(const void* v, int itemSizeInBytes, int items = 1) {
+  int write(const void *v, int itemSizeInBytes, int items = 1) {
     int itemsWritten = static_cast<int>(fwrite(v, itemSizeInBytes, items, mFP));
     mSizeBytes += itemsWritten * itemSizeInBytes;
     return itemsWritten;
   }
 
   /// Read memory elements from file
-  int read(void* v, int size, int items = 1) {
+  int read(void *v, int size, int items = 1) {
     return static_cast<int>(fread(v, size, items, mFP));
   }
 
   /// Returns character string of file contents (read mode only)
-  const char* readAll();
+  const char *readAll();
 
   /// Returns whether file is open
   bool opened() const { return 0 != mFP; }
 
   /// Returns file i/o mode string
-  const std::string& mode() const { return mMode; }
+  const std::string &mode() const { return mMode; }
 
   /// Returns path string
-  const std::string& path() const { return mPath; }
+  const std::string &path() const { return mPath; }
 
   /// Returns size, in bytes, of file contents
   size_t size() const { return mSizeBytes; }
 
   /// Return modification time of file (or 0 on failure) as number of seconds
   /// since 00:00:00 January 1, 1970 UTC
-  // al_sec modified() const;
+  al_sec modified() const;
 
   /// Return last access time of file (or 0 on failure) as number of seconds
   /// since 00:00:00 January 1, 1970 UTC
-  // al_sec accessed() const;
+  al_sec accessed() const;
 
   /// Return creation time of file (or 0 on failure) as number of seconds since
   /// 00:00:00 January 1, 1970 UTC
-  // al_sec created() const;
+  al_sec created() const;
 
   /// Return size file (or 0 on failure)
   // size_t sizeFile() const;
@@ -252,46 +254,50 @@ class File {
   /// Return space used on disk of file (or 0 on failure)
   // size_t storage() const;
 
-  FILE* filePointer() { return mFP; }
+  FILE *filePointer() { return mFP; }
 
   /// Quick and dirty read of all bytes from file
-  static std::string read(const std::string& path);
+  static std::string read(const std::string &path);
 
   /// Quick and dirty write memory to file
-  static int write(const std::string& path, const void* v, int size,
+  static int write(const std::string &path, const void *v, int size,
                    int items = 1);
 
   /// Quick and dirty write character string to file
-  static int write(const std::string& path, const std::string& data);
+  static int write(const std::string &path, const std::string &data);
 
   /// Copy a file in srcPath to a new location. dstPath can be the new file name
   /// or the directory where the file is copied. Returns true when sucessful.
-  static bool copy(const std::string& srcPath, const std::string& dstPath,
+  static bool copy(const std::string &srcPath, const std::string &dstPath,
                    unsigned int bufferSize = 1e6);
 
   /// Delete file from file system
-  static bool remove(const std::string& path);
+  static bool remove(const std::string &path);
 
   /// Returns string ensured to having an ending delimiter
 
   /// The directory string argument is not checked to actually exist in
   /// the file system.
-  static std::string conformDirectory(const std::string& dir);
+  static std::string conformDirectory(const std::string &dir);
 
   /// Conforms path
 
   /// This function takes a path as an argument and returns a new path with
   /// correct platform-specific directory delimiters, '/' or '\' and
   /// an extra delimiter at the end if the argument is a valid directory.
-  static std::string conformPathToOS(const std::string& path);
+  static std::string conformPathToOS(const std::string &path);
 
   /// Convert relative paths to absolute paths
-  static std::string absolutePath(const std::string& path);
+  static std::string absolutePath(const std::string &path);
+
+  static bool isRelativePath(const std::string &path);
 
   /// Returns current path in filesystem
   /// This function should be replaced when moved to C++17 to
   /// std::filesystem::current_path()
   static std::string currentPath();
+
+  static bool isSamePath(const std::string &path1, const std::string &path2);
 
   /// Returns the base name of path.
 
@@ -299,32 +305,32 @@ class File {
   /// @param[in] path		The input path
   /// @param[in] suffix	An optional suffix to strip from the end of the base
   /// name
-  static std::string baseName(const std::string& path,
-                              const std::string& suffix = "");
+  static std::string baseName(const std::string &path,
+                              const std::string &suffix = "");
 
   /// Returns the directory part of path.
 
   /// The directory part of the path is everything up through (and  including)
   /// the last slash in it. If the path contains no slash, the directory part
   /// is the string './'. E.g., /usr/bin/man -> /usr/bin/.
-  static std::string directory(const std::string& path);
+  static std::string directory(const std::string &path);
 
   /// Returns extension of file name.
 
   /// The extension is everything including and after the last period.
   /// If there is no period, an empty string is returned.
-  static std::string extension(const std::string& path);
+  static std::string extension(const std::string &path);
 
   /// Returns whether a file or directory exists
-  static bool exists(const std::string& path);
+  static bool exists(const std::string &path);
 
   /// Returns whether a file in a directory exists
-  static bool exists(const std::string& name, const std::string& path) {
+  static bool exists(const std::string &name, const std::string &path) {
     return exists(path + name);
   }
 
   /// Returns true if path is a directory
-  static bool isDirectory(const std::string& path);
+  static bool isDirectory(const std::string &path);
 
   /// Search for file or directory back from current directory
 
@@ -335,7 +341,7 @@ class File {
   /// @param[in]  matchPath	File or directory to search for
   /// @param[in]  maxDepth	Maximum number of directories to search back
   /// \returns whether the file or directory was found
-  static bool searchBack(std::string& rootPath, const std::string& matchPath,
+  static bool searchBack(std::string &rootPath, const std::string &matchPath,
                          int maxDepth = 6);
 
   /// Search for file or directory back from current directory
@@ -344,24 +350,33 @@ class File {
   /// to the input. Otherwise, the input path is not modified.
   /// @param[in]  maxDepth	Maximum number of directories to search back
   /// \returns whether the file or directory was found
-  static bool searchBack(std::string& path, int maxDepth = 6);
+  static bool searchBack(std::string &path, int maxDepth = 6);
 
+  static al_sec modificationTime(const char *path);
+
+  static al_sec modified(const std::string &path) {
+    return modificationTime(path.c_str());
+  }
   // TODO: Implement these.
-  // static al_sec modified(const std::string& path){ return
-  // File(path).modified(); } static al_sec accessed(const std::string& path){
-  // return File(path).accessed(); } static al_sec created (const std::string&
-  // path){ return File(path).created(); } static size_t sizeFile(const
-  // std::string& path){ return File(path).sizeFile(); } static size_t storage
-  // (const std::string& path){ return File(path).storage(); }
+  //  static al_sec accessed(const std::string &path) {
+  //    return File(path).accessed();
+  //  }
+  //  static al_sec created(const std::string &path) {
+  //    return File(path).created();
+  //  }
+  static size_t sizeFile(const std::string &path) { return File(path).size(); }
+  //  static size_t storage(const std::string &path) {
+  //    return File(path).storage();
+  //  }
 
- protected:
+protected:
   // class Impl; Impl * mImpl;
 
   std::string mPath;
   std::string mMode;
-  char* mContent;
+  char *mContent;
   size_t mSizeBytes;
-  FILE* mFP;
+  FILE *mFP;
 
   void dtor();
   void freeContent();
@@ -371,11 +386,24 @@ class File {
   friend class Dir;
 };
 
+class PushDirectory {
+public:
+  PushDirectory(std::string directory, bool verbose = false);
+
+  ~PushDirectory();
+
+private:
+  char previousDirectory[4096];
+  bool mVerbose;
+
+  static std::mutex mDirectoryLock; // Protects all instances of PushDirectory
+};
+
 /// Filesystem directory
 ///
 /// @ingroup IO
 class Dir {
- public:
+public:
   /// Constructor. This does not attempt to open the directory.
   // Dir() {};
 
@@ -408,17 +436,17 @@ class Dir {
   /// Go back to first entry in directory
   // bool rewind();
 
-  /// Make a directory
+  /// Make a directory (recursively create directories if possible)
   // static bool make(const std::string& path, bool recursive=true);
-  static bool make(const std::string& path);
+  static bool make(const std::string &path);
 
   /// Remove a directory
-  static bool remove(const std::string& path);
+  static bool remove(const std::string &path);
 
   /// Remove a directory recursively
-  static bool removeRecursively(const std::string& path);
+  static bool removeRecursively(const std::string &path);
 
- private:
+private:
   // class Impl; Impl * mImpl;
   // std::string mDirToOpen;
   // FileInfo mEntry;
@@ -428,28 +456,29 @@ class Dir {
 ///
 /// @ingroup IO
 class FileList {
- public:
+public:
   typedef std::vector<FilePath>::iterator iterator;
 
   FileList() : indx(0) {}
 
   /// return currently selected file in list
-  FilePath& operator()() { return mFiles[indx]; }
+  FilePath &operator()() { return mFiles[indx]; }
 
   /// find a file in list
   // FilePath& select(const std::string& filename);
 
-  FilePath& select(int i) {
+  FilePath &select(int i) {
     indx = i % count();
     return (*this)();
   }
-  FilePath& next() {
+  FilePath &next() {
     ++indx %= count();
     return (*this)();
   }
-  FilePath& prev() {
+  FilePath &prev() {
     --indx;
-    if (indx < 0) indx = count() - 1;
+    if (indx < 0)
+      indx = count() - 1;
     return (*this)();
   }
 
@@ -457,20 +486,20 @@ class FileList {
 
   void sort();
 
-  void print(std::ostream& stream = std::cout) const;
+  void print(std::ostream &stream = std::cout) const;
 
-  FilePath& operator[](int i) { return mFiles[i]; }
+  FilePath &operator[](int i) { return mFiles[i]; }
   iterator begin() { return mFiles.begin(); }
   iterator end() { return mFiles.end(); }
 
-  void add(FilePath& fp) { mFiles.push_back(fp); }
-  void add(FilePath&& fp) { mFiles.push_back(fp); }
-  void add(FileList const& fl) {
+  void add(FilePath &fp) { mFiles.push_back(fp); }
+  void add(FilePath &&fp) { mFiles.push_back(fp); }
+  void add(FileList const &fl) {
     mFiles.insert(mFiles.end(), fl.mFiles.begin(), fl.mFiles.end());
   }
   void sort(bool (*f)(FilePath, FilePath)) { std::sort(begin(), end(), f); }
 
- protected:
+protected:
   int indx;
   std::vector<FilePath> mFiles;
 };
@@ -479,43 +508,43 @@ class FileList {
 ///
 /// @ingroup IO
 class SearchPaths {
- public:
+public:
   typedef std::pair<std::string, bool> searchpath;
   typedef std::list<searchpath> searchpathlist;
   typedef std::list<searchpath>::iterator iterator;
 
   SearchPaths() {}
-  SearchPaths(const std::string& file);
-  SearchPaths(int argc, char* const argv[], bool recursive = true);
-  SearchPaths(const SearchPaths& cpy);
+  SearchPaths(const std::string &file);
+  SearchPaths(int argc, char *const argv[], bool recursive = true);
+  SearchPaths(const SearchPaths &cpy);
 
   /// find a file in the searchpaths
-  FilePath find(const std::string& filename);
+  FilePath find(const std::string &filename);
   // FileList glob(const std::string& regex);
-  FileList filter(bool (*f)(FilePath const&));
+  FileList filter(bool (*f)(FilePath const &));
   FileList listAll();
 
   /// add a path to search in; recursive searching is optional
-  void addSearchPath(const std::string& path, bool recursive = true);
+  void addSearchPath(const std::string &path, bool recursive = true);
   void addRelativePath(std::string rel, bool recursive = true) {
     addSearchPath(appPath() + rel, recursive);
   }
 
   /// adds best estimate of application launch paths (cwd etc.)
   /// can pass in argv from the main() function if desired.
-  void addAppPaths(int argc, char* const argv[], bool recursive = true);
-  void addAppPaths(int argc, const char** argv, bool recursive = true);
+  void addAppPaths(int argc, char *const argv[], bool recursive = true);
+  void addAppPaths(int argc, const char **argv, bool recursive = true);
   void addAppPaths(std::string path, bool recursive = true);
   void addAppPaths(bool recursive = true);
 
-  const std::string& appPath() const { return mAppPath; }
+  const std::string &appPath() const { return mAppPath; }
 
-  void print(std::ostream& stream = std::cout) const;
+  void print(std::ostream &stream = std::cout) const;
 
   iterator begin() { return mSearchPaths.begin(); }
   iterator end() { return mSearchPaths.end(); }
 
- protected:
+protected:
   std::list<searchpath> mSearchPaths;
   std::string mAppPath;
 };
@@ -524,23 +553,23 @@ class SearchPaths {
 // TODO: NEED TO CLEAN THESE CALLS...
 
 // not recursive, contains dirs
-FileList itemListInDir(std::string const& dir);
+FileList itemListInDir(std::string const &dir);
 
 // recursive, does not contain dirs
-FileList fileListFromDir(std::string const& dir);
+FileList fileListFromDir(std::string const &dir);
 
 //
-FilePath searchFileFromDir(std::string const& filename, std::string const& dir);
+FilePath searchFileFromDir(std::string const &filename, std::string const &dir);
 
 // pass lambda with given signature, returns list of files that f(file) is true
-FileList filterInDir(std::string const& dir,
-                     std::function<bool(FilePath const&)> f,
+FileList filterInDir(std::string const &dir,
+                     std::function<bool(FilePath const &)> f,
                      bool recursive = false);
 
 // returns true if given file name/path ends in extension
-bool checkExtension(std::string const& filename, std::string const& extension);
-bool checkExtension(FilePath const& filepath, std::string const& extension);
+bool checkExtension(std::string const &filename, std::string const &extension);
+bool checkExtension(FilePath const &filepath, std::string const &extension);
 
-}  // namespace al
+} // namespace al
 
 #endif

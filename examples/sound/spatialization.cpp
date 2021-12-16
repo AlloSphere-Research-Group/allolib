@@ -102,8 +102,8 @@ struct MyApp : public App {
   void onDraw(Graphics &g) override {
     g.clear(0);
 
-    gl::blending(true);
-    gl::blendTrans();
+    g.blending(true);
+    g.blendTrans();
     // Draw the speakers
     for (size_t i = 0; i < speakerLayout.size(); ++i) {
       g.pushMatrix();
@@ -113,7 +113,7 @@ struct MyApp : public App {
       float peak = mPeaks[i].load();
       g.scale(0.02f + fabs(peak) * 5);
       g.color(HSV(0.5f + (peak * 4)));
-      gl::polygonLine();
+      g.polygonLine();
       g.draw(mMarker);
       g.popMatrix();
     }
@@ -136,7 +136,7 @@ struct MyApp : public App {
 
     // Draw the source
     g.pushMatrix();
-    gl::polygonFill();
+    g.polygonFill();
     g.scale(0.8f);
     g.color(0.4f, 0.4f, 0.4f, 0.5f);
     g.draw(mMarker);

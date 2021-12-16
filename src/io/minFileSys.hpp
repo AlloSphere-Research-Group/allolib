@@ -14,18 +14,18 @@
 #include <vector>
 
 namespace minFileSys {
-void readDir(const std::string& name, std::vector<std::string>& v);
-bool pathExists(std::string const& path);
-bool isPathDir(std::string const& path);
-bool isDirEmpty(std::string const& dir_path);
-void copyFile(std::string const& orig, std::string const& cpyd);
-bool deleteFile(std::string const& f);
-bool createDir(std::string const& dir_path);
-bool deleteDir(std::string const& dir_path);             // only for empty dir
-bool deleteDirRecursively(std::string const& dir_path);  // delete non-empty dir
-std::string addPath(std::string parent, std::string const& child);
+void readDir(const std::string &name, std::vector<std::string> &v);
+bool pathExists(std::string const &path);
+bool isPathDir(std::string const &path);
+bool isDirEmpty(std::string const &dir_path);
+void copyFile(std::string const &orig, std::string const &cpyd);
+bool deleteFile(std::string const &f);
+bool createDir(std::string const &dir_path);
+bool deleteDir(std::string const &dir_path);            // only for empty dir
+bool deleteDirRecursively(std::string const &dir_path); // delete non-empty dir
+std::string addPath(std::string parent, std::string const &child);
 std::string currentPath();
-}  // namespace minFileSys
+} // namespace minFileSys
 
 // IMPLEMENTATION --------------------------------------------------------------
 
@@ -55,35 +55,37 @@ std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 #ifdef ITS_POSIX
 #include <dirent.h>
 #include <errno.h>
-#include <sys/stat.h>  // int stat(const char*, struct stat*), mkdir
+#include <sys/stat.h> // int stat(const char*, struct stat*), mkdir
 #include <sys/types.h>
-#include <unistd.h>  // rmdir
+#include <unistd.h> // rmdir
 
-#include <cstdio>  // std::remove
+#include <cstdio> // std::remove
 #endif
 
-#include <cstring>  // std::strcmp
+#include <cstring> // std::strcmp
 #include <fstream>
 #include <iostream>
 
 namespace minFileSys {
 
-inline std::string addPath(std::string parent, std::string const& child) {
+inline std::string addPath(std::string parent, std::string const &child) {
 #ifdef ITS_WINDOWS
-  if (parent[parent.size() - 1] != '\\') parent += "\\";
+  if (parent[parent.size() - 1] != '\\' || parent[parent.size() - 1] != '\\')
+    parent += "\\";
   parent += child;
   return parent;
 #endif
 
 #ifdef ITS_POSIX
-  if (parent[parent.size() - 1] != '/') parent += "/";
+  if (parent[parent.size() - 1] != '/')
+    parent += "/";
   parent += child;
   return parent;
 #endif
 }
 
 // http://www.martinbroadhurst.com/list-the-files-in-a-directory-in-c.html
-inline void readDir(const std::string& name, std::vector<std::string>& v) {
+inline void readDir(const std::string &name, std::vector<std::string> &v) {
   if (!pathExists(name)) {
     std::cout << "[!] [readDir] " << name << " does not exist" << std::endl;
     return;
@@ -104,8 +106,10 @@ inline void readDir(const std::string& name, std::vector<std::string>& v) {
   if ((hFind = FindFirstFileA(pattern.c_str(), &data)) !=
       INVALID_HANDLE_VALUE) {
     do {
-      if (std::strcmp(data.cFileName, ".") == 0) continue;
-      if (std::strcmp(data.cFileName, "..") == 0) continue;
+      if (std::strcmp(data.cFileName, ".") == 0)
+        continue;
+      if (std::strcmp(data.cFileName, "..") == 0)
+        continue;
       // unicode
       // v.push_back(converter.to_bytes(data.cFileName));
 
@@ -116,18 +120,20 @@ inline void readDir(const std::string& name, std::vector<std::string>& v) {
 #endif
 
 #ifdef ITS_POSIX
-  DIR* dirp = opendir(name.c_str());
-  struct dirent* dp;
+  DIR *dirp = opendir(name.c_str());
+  struct dirent *dp;
   while ((dp = readdir(dirp)) != NULL) {
-    if (std::strcmp(dp->d_name, ".") == 0) continue;
-    if (std::strcmp(dp->d_name, "..") == 0) continue;
+    if (std::strcmp(dp->d_name, ".") == 0)
+      continue;
+    if (std::strcmp(dp->d_name, "..") == 0)
+      continue;
     v.push_back(dp->d_name);
   }
   closedir(dirp);
 #endif
 }
 
-inline bool pathExists(std::string const& path) {
+inline bool pathExists(std::string const &path) {
 #ifdef ITS_WINDOWS
   // unicode
   // return !(INVALID_FILE_ATTRIBUTES == GetFileAttributes(path.c_str()));
@@ -141,24 +147,26 @@ inline bool pathExists(std::string const& path) {
 #endif
 }
 
-inline bool isPathDir(std::string const& path) {
+inline bool isPathDir(std::string const &path) {
 #ifdef ITS_WINDOWS
   // unicode
   // auto attr = GetFileAttributes(path.c_str());
 
   auto attr = GetFileAttributesA(path.c_str());
-  if (attr == INVALID_FILE_ATTRIBUTES) return false;
+  if (attr == INVALID_FILE_ATTRIBUTES)
+    return false;
   return attr & FILE_ATTRIBUTE_DIRECTORY;
 #endif
 
 #ifdef ITS_POSIX
   struct stat result;
-  if (stat(path.c_str(), &result) != 0) return false;
+  if (stat(path.c_str(), &result) != 0)
+    return false;
   return S_ISDIR(result.st_mode);
 #endif
 }
 
-inline bool isDirEmpty(std::string const& dir_path) {
+inline bool isDirEmpty(std::string const &dir_path) {
 #ifdef ITS_WINDOWS
   std::string pattern(dir_path);
   pattern.append("\\*");
@@ -175,8 +183,10 @@ inline bool isDirEmpty(std::string const& dir_path) {
   if ((hFind = FindFirstFileA(pattern.c_str(), &data)) !=
       INVALID_HANDLE_VALUE) {
     do {
-      if (std::strcmp(data.cFileName, ".") == 0) continue;
-      if (std::strcmp(data.cFileName, "..") == 0) continue;
+      if (std::strcmp(data.cFileName, ".") == 0)
+        continue;
+      if (std::strcmp(data.cFileName, "..") == 0)
+        continue;
       FindClose(hFind);
       return false;
     } while (FindNextFileA(hFind, &data) != 0);
@@ -186,11 +196,13 @@ inline bool isDirEmpty(std::string const& dir_path) {
 #endif
 
 #ifdef ITS_POSIX
-  DIR* dirp = opendir(dir_path.c_str());
-  struct dirent* dp;
+  DIR *dirp = opendir(dir_path.c_str());
+  struct dirent *dp;
   while ((dp = readdir(dirp)) != NULL) {
-    if (std::strcmp(dp->d_name, ".") == 0) continue;
-    if (std::strcmp(dp->d_name, "..") == 0) continue;
+    if (std::strcmp(dp->d_name, ".") == 0)
+      continue;
+    if (std::strcmp(dp->d_name, "..") == 0)
+      continue;
     closedir(dirp);
     return false;
   }
@@ -199,7 +211,7 @@ inline bool isDirEmpty(std::string const& dir_path) {
 #endif
 }
 
-inline void copyFile(std::string const& orig, std::string const& cpyd) {
+inline void copyFile(std::string const &orig, std::string const &cpyd) {
   std::ifstream origStream{orig, std::ios::binary};
   std::ofstream cpydStream{cpyd, std::ios::binary};
   cpydStream << origStream.rdbuf();
@@ -207,7 +219,7 @@ inline void copyFile(std::string const& orig, std::string const& cpyd) {
   cpydStream.close();
 }
 
-inline bool deleteFile(std::string const& f) {
+inline bool deleteFile(std::string const &f) {
 #ifdef ITS_WINDOWS
   // unicode
   // DeleteFile(f.c_str());
@@ -218,13 +230,13 @@ inline bool deleteFile(std::string const& f) {
 #endif
 
 #ifdef ITS_POSIX
-  // 0​ upon success or non-zero value on error.
+  // 0 upon success or non-zero value on error.
   auto result = std::remove(f.c_str());
   return (result == 0);
 #endif
 }
 
-inline bool createDir(std::string const& path) {
+inline bool createDir(std::string const &path) {
   if (pathExists(path)) {
     std::cout << "[!] [createDir] " << path << " already exists" << std::endl;
     return true;
@@ -236,7 +248,7 @@ inline bool createDir(std::string const& path) {
 #ifdef ITS_WINDOWS
   // Create all intermediate dirs up to last one
   for (unsigned i = 0; i < path.size() - 1; ++i) {
-    if (path[i] == '/') {
+    if (path[i] == '/' || path[i] == '\\') {
       if (CreateDirectory(path.substr(0, i + 1).c_str(), NULL) != 0) {
         if (GetLastError() != ERROR_ALREADY_EXISTS) {
           std::cout << "[!] [createDir] Error creating directory " << path
@@ -254,7 +266,7 @@ inline bool createDir(std::string const& path) {
   // Group: S_IRGRP (read), S_IWGRP (write), S_IXGRP (execute)
   // Others: S_IROTH (read), S_IWOTH (write), S_IXOTH (execute)
   // Read + Write + Execute: S_IRWXU (User), S_IRWXG (Group), S_IRWXO (Others)
-  auto mode = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH;  // 755
+  auto mode = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH; // 755
 
   // const int dir_err = mkdir(path.c_str(), mode);
   // if (-1 == dir_err) {
@@ -279,7 +291,7 @@ inline bool createDir(std::string const& path) {
 #endif
 }
 
-inline bool deleteDir(std::string const& dir_path) {
+inline bool deleteDir(std::string const &dir_path) {
   if (!pathExists(dir_path)) {
     std::cout << "[!] [deleteDir] " << dir_path << " does not exist"
               << std::endl;
@@ -315,8 +327,10 @@ inline bool move_files_to_temp_dir_recursively_and_delete_original_folder(
   if ((hFind = FindFirstFileA(pattern.c_str(), &data)) !=
       INVALID_HANDLE_VALUE) {
     do {
-      if (std::strcmp(data.cFileName, ".") == 0) continue;
-      if (std::strcmp(data.cFileName, "..") == 0) continue;
+      if (std::strcmp(data.cFileName, ".") == 0)
+        continue;
+      if (std::strcmp(data.cFileName, "..") == 0)
+        continue;
 
       std::string child = d;
       child.append("\\");
@@ -330,7 +344,8 @@ inline bool move_files_to_temp_dir_recursively_and_delete_original_folder(
         bool result =
             move_files_to_temp_dir_recursively_and_delete_original_folder(
                 child, tempd);
-        if (!result) return false;
+        if (!result)
+          return false;
       } else {
         std::string new_file_path = tempd;
         new_file_path.append("\\");
@@ -372,9 +387,9 @@ inline bool delete_files_that_starts_with(std::string prefix) {
   }
   return true;
 }
-#endif  // ITS_WINDOWS
+#endif // ITS_WINDOWS
 
-inline bool deleteDirRecursively(std::string const& dir_path) {
+inline bool deleteDirRecursively(std::string const &dir_path) {
   if (!pathExists(dir_path)) {
     std::cout << "[!] [deleteDirRecursively] " << dir_path << " does not exist"
               << std::endl;
@@ -389,7 +404,7 @@ inline bool deleteDirRecursively(std::string const& dir_path) {
   // contained it can fail because the directory isn't (yet) empty. This talk
   // explains the problem in detail and gives a safer way to delete a
   // directory/tree on Windows: youtube.com/watch?v=uhRWMGBjlO8
-  // – Adrian McCarthy
+  // - Adrian McCarthy
 
   // deleting a directory tree on Windows
   // 1. enumerate directory contents
@@ -402,29 +417,32 @@ inline bool deleteDirRecursively(std::string const& dir_path) {
   //   (may take as long as any item opened without FILE_SHARE_DELETE is open)
 
   // move all the files to current dir and delete empty directory
-  move_files_to_temp_dir_recursively_and_delete_original_folder(dir_path, ".");
+  bool ret = move_files_to_temp_dir_recursively_and_delete_original_folder(
+      dir_path, ".");
   // delete all files
-  delete_files_that_starts_with("minfilesys_file_to_be_deleted_");
-  return false;
+  ret &= delete_files_that_starts_with("minfilesys_file_to_be_deleted_");
+  return ret;
 #endif
 
 #ifdef ITS_POSIX
   std::vector<std::string> files;
   readDir(dir_path, files);
-  for (auto const& f : files) {
+  for (auto const &f : files) {
     auto added_path = addPath(dir_path, f);
     std::cout << added_path << std::endl;
     if (isPathDir(added_path)) {
-      if (!deleteDirRecursively(added_path)) return false;
+      if (!deleteDirRecursively(added_path))
+        return false;
     } else {
-      if (!deleteFile(added_path)) return false;
+      if (!deleteFile(added_path))
+        return false;
     }
   }
   return deleteDir(dir_path);
 #endif
 }
 
-}  // namespace minFileSys
+} // namespace minFileSys
 
 #if defined(ITS_WINDOWS)
 #undef ITS_WINDOWS

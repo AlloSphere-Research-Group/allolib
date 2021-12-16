@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <algorithm>  // for std::swap
 #include "al/system/al_Thread.hpp"
+#include <algorithm> // for std::swap
+#include <stdio.h>
 
 #ifdef AL_WINDOWS
 #define USE_THREADEX
@@ -16,19 +16,20 @@
 //#define THREAD_FUNCTION(name) void * name(void * user)
 namespace al {
 struct Thread::Impl {
-  Impl() : mHandle(0) {  // printf("Thread::Impl(): %p\n", this);
+  Impl() : mHandle(0) { // printf("Thread::Impl(): %p\n", this);
     pthread_attr_init(&mAttr);
 
     // threads are not required to be joinable by default, so make it so
     pthread_attr_setdetachstate(&mAttr, PTHREAD_CREATE_JOINABLE);
   }
 
-  ~Impl() {  // printf("Thread::~Impl(): %p\n", this);
+  ~Impl() { // printf("Thread::~Impl(): %p\n", this);
     pthread_attr_destroy(&mAttr);
   }
 
-  bool start(ThreadFunction& func) {
-    if (mHandle) return false;
+  bool start(ThreadFunction &func) {
+    if (mHandle)
+      return false;
     // return 0 == pthread_create(&mHandle, NULL, cThreadFunc, &func);
     return 0 == pthread_create(&mHandle, &mAttr, cThreadFunc, &func);
   }
@@ -69,21 +70,21 @@ struct Thread::Impl {
   pthread_t mHandle;
   pthread_attr_t mAttr;
 
-  static void* cThreadFunc(void* user) {
-    ThreadFunction& tfunc = *((ThreadFunction*)user);
+  static void *cThreadFunc(void *user) {
+    ThreadFunction &tfunc = *((ThreadFunction *)user);
     tfunc();
     return NULL;
   }
 };
 
-void* Thread::current() {
+void *Thread::current() {
   // pthread_t pthread_self(void);
   static pthread_t r;
   r = pthread_self();
-  return (void*)(&r);
+  return (void *)(&r);
 }
 
-}  // namespace al
+} // namespace al
 #elif defined(USE_THREADEX)
 
 #define WIN32_MEAN_AND_LEAN
@@ -94,16 +95,18 @@ void* Thread::current() {
 // typedef unsigned (__stdcall *ThreadFunction)(void *);
 //#define THREAD_FUNCTION(name) unsigned _stdcall * name(void * user)
 namespace al {
-class Thread::Impl {
- public:
+struct Thread::Impl {
+public:
   Impl() : mHandle(0) {}
 
-  bool start(ThreadFunction& func) {
-    if (mHandle) return false;
+  bool start(ThreadFunction &func) {
+    if (mHandle)
+      return false;
     unsigned thread_id;
     mHandle = _beginthreadex(NULL, 0, (_beginthreadex_proc_type)cThreadFunc,
                              &func, 0, &thread_id);
-    if (mHandle) return true;
+    if (mHandle)
+      return true;
     return false;
   }
 
@@ -128,49 +131,49 @@ class Thread::Impl {
   //	void testCancel(){
   //	}
 
-  unsigned long mHandle;
+  unsigned long long mHandle;
   //	ThreadFunction mRoutine;
 
-  static unsigned cThreadFunc(void* user) {
+  static unsigned cThreadFunc(void *user) {
     // static unsigned _stdcall cThreadFunc(void * user){
-    ThreadFunction& tfunc = *((ThreadFunction*)user);
+    ThreadFunction &tfunc = *((ThreadFunction *)user);
     tfunc();
     return 0;
   }
 };
-}  // namespace al
+} // namespace al
 #endif
 
 namespace al {
 Thread::Thread() : mImpl(new Impl), mJoinOnDestroy(false) {}
 
-Thread::Thread(ThreadFunction& func) : mImpl(new Impl), mJoinOnDestroy(false) {
+Thread::Thread(ThreadFunction &func) : mImpl(new Impl), mJoinOnDestroy(false) {
   start(func);
 }
 
-Thread::Thread(void* (*cThreadFunc)(void* userData), void* userData)
+Thread::Thread(void *(*cThreadFunc)(void *userData), void *userData)
     : mImpl(new Impl), mJoinOnDestroy(false) {
   start(cThreadFunc, userData);
 }
 
-Thread::Thread(const Thread& other)
-    : mImpl(new Impl),
-      mCFunc(other.mCFunc),
+Thread::Thread(const Thread &other)
+    : mImpl(new Impl), mCFunc(other.mCFunc),
       mJoinOnDestroy(other.mJoinOnDestroy) {}
 
 Thread::~Thread() {
-  if (mJoinOnDestroy) join();
+  if (mJoinOnDestroy)
+    join();
   delete mImpl;
 }
 
-void swap(Thread& a, Thread& b) {
+void swap(Thread &a, Thread &b) {
   using std::swap;
   swap(a.mImpl, b.mImpl);
   swap(a.mCFunc, b.mCFunc);
   swap(a.mJoinOnDestroy, b.mJoinOnDestroy);
 }
 
-Thread& Thread::operator=(Thread other) {
+Thread &Thread::operator=(Thread other) {
   swap(*this, other);
   return *this;
 }
@@ -191,13 +194,13 @@ Thread& Thread::operator=(Thread other) {
         return *this;
 }*/
 
-Thread& Thread::priority(int v) {
+Thread &Thread::priority(int v) {
   mImpl->priority(v);
   return *this;
 }
 
-bool Thread::start(ThreadFunction& func) { return mImpl->start(func); }
+bool Thread::start(ThreadFunction &func) { return mImpl->start(func); }
 
 bool Thread::join() { return mImpl->join(); }
 
-}  // namespace al
+} // namespace al

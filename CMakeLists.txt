@@ -17,10 +17,12 @@ MACRO_ENSURE_OUT_OF_SOURCE_BUILD(
 )
 
 option(AL_VERBOSE_OUTPUT "" OFF)
-option(BUILD_EXAMPLES "" OFF)
+option(ALLOLIB_BUILD_EXAMPLES "" OFF)
 option(TRAVIS_BUILD "" OFF)
 option(APPVEYOR_BUILD "" OFF)
 option(ALLOLIB_BUILD_TESTS "" OFF)
+option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF)
+option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(AL_MACOS 1 CACHE BOOL "Building on OS X")
@@ -47,6 +49,7 @@ add_subdirectory(external)
 
 set(headers
   include/al/app/al_App.hpp
+  include/al/app/al_AppRecorder.hpp
   include/al/app/al_DistributedApp.hpp
   include/al/app/al_FPS.hpp
   include/al/app/al_NodeConfiguration.hpp
@@ -54,6 +57,7 @@ set(headers
   include/al/app/al_AudioDomain.hpp
   include/al/app/al_ComputationDomain.hpp
   include/al/app/al_ConsoleDomain.hpp
+  include/al/app/al_GUIDomain.hpp
   include/al/app/al_OpenGLGraphicsDomain.hpp
   include/al/app/al_OSCDomain.hpp
   include/al/app/al_SimulationDomain.hpp
@@ -104,6 +108,7 @@ set(headers
   include/al/math/al_Vec.hpp
 
   include/al/protocol/al_OSC.hpp
+  include/al/protocol/al_CommandConnection.hpp
 
   include/al/scene/al_DistributedScene.hpp
   include/al/scene/al_DynamicScene.hpp
@@ -138,11 +143,13 @@ set(headers
   include/al/system/al_Time.hpp
 
   include/al/types/al_Color.hpp
+  include/al/types/al_VariantValue.hpp
 
   include/al/ui/al_BoundingBox.hpp
   include/al/ui/al_Composition.hpp
   include/al/ui/al_ControlGUI.hpp
   include/al/ui/al_Dialog.hpp
+  include/al/ui/al_DiscreteParameterValues.hpp
   include/al/ui/al_FileSelector.hpp
   include/al/ui/al_Gnomon.hpp
   include/al/ui/al_HtmlInterfaceServer.hpp
@@ -164,11 +171,13 @@ set(headers
 
 set(sources
   src/app/al_App.cpp
+  src/app/al_AppRecorder.cpp
   src/app/al_DistributedApp.cpp
   src/app/al_FPS.cpp
 
   src/app/al_AudioDomain.cpp
   src/app/al_ComputationDomain.cpp
+  src/app/al_GUIDomain.cpp
   src/app/al_OmniRendererDomain.cpp
   src/app/al_OpenGLGraphicsDomain.cpp
   src/app/al_OSCDomain.cpp
@@ -220,6 +229,7 @@ set(sources
   src/math/al_StdRandom.cpp
 
   src/protocol/al_OSC.cpp
+  src/protocol/al_CommandConnection.cpp
 
   src/scene/al_DistributedScene.cpp
   src/scene/al_DynamicScene.cpp
@@ -252,11 +262,13 @@ set(sources
   src/system/al_Time.cpp
 
   src/types/al_Color.cpp
+  src/types/al_VariantValue.cpp
 
   src/ui/al_BoundingBox.cpp
   src/ui/al_Composition.cpp
   src/ui/al_ControlGUI.cpp
   src/ui/al_Dialog.cpp
+  src/ui/al_DiscreteParameterValues.cpp
   src/ui/al_FileSelector.cpp
   src/ui/al_Gnomon.cpp
   src/ui/al_HtmlInterfaceServer.cpp
@@ -272,6 +284,7 @@ set(sources
   src/ui/al_PresetServer.cpp
   src/ui/al_Parameter.cpp
   src/ui/al_Pickable.cpp
+  src/ui/al_PickableManager.cpp
   src/ui/al_PresetMapper.cpp
 
 )
@@ -290,7 +303,26 @@ else()
     target_compile_options(al PRIVATE "-Wall")
 endif (AL_WINDOWS)
 
-target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
+if (ALLOLIB_USE_PORTAUDIO)
+    # TODO needs more work on Windows
+    if(ALLOLIB_USE_DUMMY_AUDIO)
+        message("ALLOLIB_USE_DUMMY_AUDIO ignored. Using PortAudio")
+    endif(ALLOLIB_USE_DUMMY_AUDIO)
+    target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_PORTAUDIO)
+    target_link_libraries(al PUBLIC portaudio)
+else ()
+    if (ALLOLIB_USE_DUMMY_AUDIO)
+        target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_DUMMY)
+    else()
+        target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
+
+        target_link_libraries(al PUBLIC rtaudio)
+    endif(ALLOLIB_USE_DUMMY_AUDIO)
+endif()
+
+if(SNDFILE_LIBRARY)
+  target_compile_definitions(al PUBLIC AL_LIBSNDFILE)
+endif(SNDFILE_LIBRARY)
 
 if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
     target_compile_options(al PUBLIC
@@ -306,12 +338,16 @@ target_include_directories(al PUBLIC
   external/Gamma
   external/rtaudio
   external/rtmidi
+  external/imgui
+  external/glad/include
+  external/json/include
   external/glew/include
+  external/cpptoml/include
 )
 
 target_link_libraries(al PUBLIC
   ${OPENGL_gl_LIBRARY}
-  Gamma glfw glad rtaudio rtmidi cpptoml dr_libs
+  Gamma glfw glad rtmidi cpptoml dr_libs
   nlohmann_json::nlohmann_json imgui oscpack stb serial)
 
 macro(Copy_dlls dest_path target DLLS_TO_COPY)
@@ -333,7 +369,7 @@ if (ALLOLIB_BUILD_TESTS)
   add_subdirectory(test)
 endif()
 
-if (BUILD_EXAMPLES)
+if (ALLOLIB_BUILD_EXAMPLES)
   message("including allolib examples")
   add_subdirectory(examples)
 endif()

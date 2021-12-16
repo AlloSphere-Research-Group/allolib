@@ -12,6 +12,7 @@
 #include "al/app/al_NodeConfiguration.hpp"
 #include "al/app/al_OmniRendererDomain.hpp"
 #include "al/app/al_StateDistributionDomain.hpp"
+#include "al/io/al_PersistentConfig.hpp"
 #include "al/io/al_Socket.hpp"
 #include "al/io/al_Toml.hpp"
 #include "al/scene/al_DistributedScene.hpp"
@@ -27,7 +28,7 @@ public:
 
   void update(AudioIO &io) { gain = io.mGain; }
 
-  Parameter gain{"gain", "sound", 1.0, "alloapp", 0.0, 2.0};
+  Parameter gain{"gain", "sound", 1.0, 0.0, 2.0};
 };
 
 /**
@@ -73,7 +74,16 @@ public:
 
   std::string name();
 
-  virtual void init();
+  /**
+   * @brief prepares domains and configuration
+   *
+   * You can run this function manually to change domain behavior before the
+   * domains are actually started, for example to disable state sharing on a
+   * primary application.
+   */
+  virtual void prepare();
+
+  std::string getPrimaryHost();
 
   void registerDynamicScene(DynamicScene &scene);
 
@@ -90,6 +100,8 @@ public:
 
 private:
   AudioControl mAudioControl;
+
+  bool initialized{false};
 
   std::map<std::string, std::string> mRoleMap;
   bool mFoundHost = false;
@@ -130,24 +142,47 @@ public:
         ->state();
   }
 
-  void init() override {
-    DistributedApp::init();
+  void setPort(uint16_t port) {
+    if (this->mRunningDomains.size() == 0) {
+      std::cerr << __FUNCTION__
+                << " ERROR can't set port while application"
+                   "is running. Port will be applied on next call to start()."
+                << std::endl;
+    }
+    mPortToSet = port;
+  }
+
+  void start() override {
+    prepare();
     auto distDomain =
         std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
             mSimulationDomain);
     if (isPrimary()) {
-      std::cout << "Running primary" << std::endl;
-      auto sender = distDomain->addStateSender("state", distDomain->statePtr());
-      sender->configure(10101, "state", additionalConfig["broadcastAddress"]);
+      if (hasCapability(CAP_STATE_SEND)) {
+        std::cout << "DistributedApp: state SEND "
+                  << additionalConfig["broadcastAddress"] << ":" << mPortToSet
+                  << std::endl;
+        auto sender =
+            distDomain->addStateSender("state", distDomain->statePtr());
+        sender->configure(mPortToSet, "state",
+                          additionalConfig["broadcastAddress"]);
+      } else {
+        std::cout << "Not enabling state sending for primary." << std::endl;
+      }
     } else {
-      std::cout << "Running REPLICA" << std::endl;
-      auto receiver =
-          distDomain->addStateReceiver("state", distDomain->statePtr());
-      receiver->configure(10101);
+      if (hasCapability(CAP_STATE_RECEIVE)) {
+        std::cout << "DistributedApp: state RECV " << mPortToSet << std::endl;
+        auto receiver =
+            distDomain->addStateReceiver("state", distDomain->statePtr());
+        receiver->configure(mPortToSet, "state",
+                            additionalConfig["broadcastAddress"]);
+      }
     }
+    DistributedApp::start();
   }
 
 private:
+  uint16_t mPortToSet{10101};
 };
 
 } // namespace al

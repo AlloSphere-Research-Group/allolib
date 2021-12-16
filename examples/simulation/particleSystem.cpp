@@ -87,9 +87,9 @@ struct MyApp : public App {
 
   void onDraw(Graphics& g) {
     g.clear(0);
-    gl::blending(true);
-    gl::blendAdd();
-    gl::pointSize(6);
+    g.blending(true);
+    g.blendAdd();
+    g.pointSize(6);
     g.meshColor();
     g.draw(mesh);
   }

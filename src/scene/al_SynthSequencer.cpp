@@ -23,19 +23,22 @@ void SynthSequencer::render(AudioIOData &io) {
 }
 
 void SynthSequencer::render(Graphics &g) {
-  assert(mFps > 0);
   if (mMasterMode == TimeMasterMode::TIME_MASTER_GRAPHICS) {
-    update(1.0 / mFps);
+    assert(mFps > 0);
+    double blockStartTime = mMasterTime;
+    mMasterTime += (1.0 / mFps);
+    processEvents(blockStartTime, mNormalizedTempo);
   }
   mPolySynth->render(g);
 }
 
 void SynthSequencer::update(double dt) {
-  double timeIncrement = dt;
-  double blockStartTime = mMasterTime;
-  mMasterTime += timeIncrement;
-
-  processEvents(blockStartTime, mNormalizedTempo);
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_UPDATE) {
+    double blockStartTime = mMasterTime;
+    mMasterTime += dt;
+    processEvents(blockStartTime, mNormalizedTempo);
+  }
+  mPolySynth->update(dt);
 }
 
 void SynthSequencer::print() {
@@ -59,7 +62,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
     mNextEvent = 0;
     lk.unlock();
   }
-  mPlaybackStartTime = currentMasterTime - startTime + startPad;
+  mPlaybackStartTime = currentMasterTime + startPad;
   mPlaying = true;
   for (auto cb : mSequenceBeginCallbacks) {
     cb(mLastSequencePlayed);
@@ -207,7 +210,7 @@ SynthSequencer::loadSequence(std::string sequenceName, double timeOffset,
       double duration = std::stod(durationText) * timeScale * tempoFactor;
 
       // const int maxPFields = 64;
-      std::vector<ParameterField> pFields;
+      std::vector<VariantValue> pFields;
 
       // int numFields = 0;
       std::string fieldsString;
@@ -399,8 +402,12 @@ SynthSequencer::loadSequence(std::string sequenceName, double timeOffset,
     } else if (command == '=' && ss.get() == ' ') {
       std::string time, sequenceName, timeScaleInFile;
       std::getline(ss, time, ' ');
-      std::getline(ss, sequenceName, ' ');
-      std::getline(ss, timeScaleInFile);
+      while (sequenceName.size() == 0 && ss.good()) {
+        std::getline(ss, sequenceName, ' ');
+      }
+      while (timeScaleInFile.size() == 0 && ss.good()) {
+        std::getline(ss, timeScaleInFile);
+      }
       if (sequenceName.at(0) == '"') {
         sequenceName = sequenceName.substr(1);
       }
@@ -538,8 +545,8 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
           auto *voice = mPolySynth->getVoice(event->fields.name);
           if (voice) {
             voice->setTriggerParams(event->fields.pFields);
-            mPolySynth->triggerOn(voice, event->offsetCounter);
-            event->voiceId = voice->id();
+
+            event->voiceId = mPolySynth->triggerOn(voice, event->offsetCounter);
 
             //            std::cout << " ++ trigger ON " << voice->id() << " "
             //            << mMasterTime

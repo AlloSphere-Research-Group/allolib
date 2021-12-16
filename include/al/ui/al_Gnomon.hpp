@@ -42,12 +42,13 @@ struct Gnomon {
   void drawLabels(Graphics &g, FontRenderer &fontrender, Pose cam_pose,
                   double scale = 1.0, Vec3f offset = Vec3f(0, 0, 0)) {
     // XYZ labels
-    gl::polygonMode(GL_FILL);
+    g.polygonFill();
     //    glEnable(GL_BLEND);
     //    glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR);
     //    glEnable(GL_ALPHA_TEST);
     //    glAlphaFunc(GL_GREATER, 0.5);
-    gl::blendTrans();
+    g.blending(true);
+    g.blendTrans();
     for (int i = 0; i < 3; i++) {
       g.pushMatrix();
       Vec3f xform = gnomonMesh.vertices()[(i * 2) + 1];
@@ -56,10 +57,10 @@ struct Gnomon {
 
       g.translate(xform);
       g.rotate(rot);
-      g.scale(scale);
+      g.scale((float)scale);
 
       g.color(colors[i]);
-      fontrender.write(labels[i], 0.1);
+      fontrender.write(labels[i], 0.1f);
       fontrender.render(g);
       g.popMatrix();
     }
@@ -68,7 +69,7 @@ struct Gnomon {
   }
 };
 
-}  // namespace al
+} // namespace al
 // Gnomon Gnomon::gnomon;
 
 #endif

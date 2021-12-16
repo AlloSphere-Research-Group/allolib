@@ -50,12 +50,11 @@
 
 #include "al/graphics/al_Graphics.hpp"
 #include "al/io/al_AudioIOData.hpp"
+#include "al/io/al_File.hpp"
 #include "al/types/al_SingleRWRingBuffer.hpp"
 #include "al/ui/al_Parameter.hpp"
 
 namespace al {
-
-std::string demangle(const char *name); // Utility function.
 
 int asciiToIndex(int asciiKey, int offset = 0);
 
@@ -134,7 +133,7 @@ the other
    * @param pFields std::vector<float> containing the values
    * @return true if able to set the fields
    */
-  virtual bool setTriggerParams(std::vector<ParameterField> pFields,
+  virtual bool setTriggerParams(std::vector<VariantValue> pFields,
                                 bool noCalls = false);
 
   /**
@@ -161,7 +160,7 @@ the other
    * operator. Override this function in your voice if you need a different
    * behavior.
    */
-  virtual std::vector<ParameterField> getTriggerParams();
+  virtual std::vector<VariantValue> getTriggerParams();
 
   /**
    * @brief Override this function to define audio processing.
@@ -335,7 +334,7 @@ the other
    * Allows registering any number of trigger parameters on a single line
    */
   template <class... Args>
-  SynthVoice &registerTriggerParameters(Args &... paramsArgs) {
+  SynthVoice &registerTriggerParameters(Args &...paramsArgs) {
     std::vector<ParameterMeta *> params{&paramsArgs...};
     for (auto *param : params) {
       registerTriggerParameter(*param);
@@ -369,8 +368,7 @@ the other
   /**
    * Allows registering any number of parameters on a single line
    */
-  template <class... Args>
-  SynthVoice &registerParameters(Args &... paramsArgs) {
+  template <class... Args> SynthVoice &registerParameters(Args &...paramsArgs) {
     std::vector<ParameterMeta *> params{&paramsArgs...};
     for (auto *param : params) {
       registerParameter(*param);
@@ -397,6 +395,11 @@ the other
    */
   void free() { mActive = false; } // Mark this voice as done.
 
+  /**
+   * @brief Set voice as part of a replica distributed scene
+   */
+  void markAsReplica() { mIsReplica = true; }
+
   SynthVoice *next{nullptr}; // To support SynthVoices as linked lists
 
 protected:
@@ -417,6 +420,9 @@ protected:
   std::vector<ParameterMeta *> mContinuousParameters;
 
   std::vector<std::shared_ptr<Parameter>> mInternalParameters;
+
+  bool mIsReplica{false}; // If voice is replica, it should not send its
+                          // internal state but listen for changes.
 
 private:
   int mId{-1};
@@ -750,9 +756,7 @@ public:
    * Always call prepare() after calling this function. The changes are only
    * applied by prepare().
    */
-  void setVoiceMaxOutputChannels(uint16_t channels) {
-    mVoiceMaxOutputChannels = channels;
-  }
+  void setVoiceMaxOutputChannels(uint16_t channels);
 
   /**
    * @brief Determines the number of buses for the internal AudioIOData objects
@@ -775,9 +779,18 @@ public:
    * and prior to the function call to process spatialization. Can be used to
    * route signals to buses.
    */
-  void setBusRoutingCallback(BusRoutingCallback cb) {
-    mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
-  }
+  void setBusRoutingCallback(BusRoutingCallback cb);
+
+  /**
+   * @brief Set channel map for output.
+   * @param channelMap
+   *
+   * The index into the vector refers to the output channel in the voice buffer,
+   * the value is the channel index to write for audio output. This operation
+   * should be performed only when audio is not running. Channel mapping is
+   * ignored in DynamicScene and DistributedScene.
+   */
+  void setChannelMap(std::vector<size_t> channelMap);
 
   /**
    * @brief Set the time in seconds to wait between sequencer updates when time
@@ -916,7 +929,7 @@ public:
             voice->onFree();
             voice = voice->next; // prepare next iteration
           }
-          for (auto cbNode : mFreeCallbacks) {
+          for (const auto &cbNode : mFreeCallbacks) {
             cbNode.first(id, cbNode.second);
           }
         }
@@ -957,7 +970,7 @@ protected:
   SynthVoice *mActiveVoices{nullptr};
   std::mutex mVoiceToInsertLock;
   std::mutex mFreeVoiceLock;
-  std::mutex mGraphicsLock;
+  std::mutex mGraphicsLock; // TODO: remove this lock?
 
   bool m_useInternalAudioIO = true;
   bool m_internalAudioConfigured = false;
@@ -975,21 +988,20 @@ protected:
 
   std::vector<AudioCallback *> mPostProcessing;
 
-  typedef std::pair<
+  using TriggerOnCallback = std::pair<
       std::function<bool(SynthVoice *voice, int offsetFrames, int id, void *)>,
-      void *>
-      TriggerOnCallback;
+      void *>;
   std::vector<TriggerOnCallback> mTriggerOnCallbacks;
 
-  typedef std::pair<std::function<bool(int id, void *)>, void *>
-      TriggerOffCallback;
+  using TriggerOffCallback =
+      std::pair<std::function<bool(int id, void *)>, void *>;
   std::vector<TriggerOffCallback> mTriggerOffCallbacks;
 
-  typedef std::pair<std::function<bool(int id, void *)>, void *> FreeCallback;
+  using FreeCallback = std::pair<std::function<bool(int id, void *)>, void *>;
   std::vector<FreeCallback> mFreeCallbacks;
 
-  typedef std::pair<std::function<void(SynthVoice *voice, void *)>, void *>
-      AllocationCallback;
+  using AllocationCallback =
+      std::pair<std::function<void(SynthVoice *voice, void *)>, void *>;
   std::vector<AllocationCallback> mAllocationCallbacks;
 
   float mAudioGain{1.0f};
@@ -1007,6 +1019,7 @@ protected:
   Creators mCreators;
   // Disallow auto allocation for class name. Set in allocateVoice()
   std::vector<std::string> mNoAllocationList;
+  std::vector<size_t> mChannelMap; // Maps synth output to audio channels
 
   bool mRunCPUClock{true};
   double mCpuGranularitySec = 0.001; // 1ms

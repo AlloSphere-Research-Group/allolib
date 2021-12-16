@@ -194,6 +194,13 @@ public:
   /// @param[in ] numDecFrames	number of frames in time domain buffers
   virtual void decode(float *dec, const float *enc, int numDecFrames) const;
 
+  /// @param[out] dec				output time domain buffers
+  /// (non-interleaved)
+  /// @param[in ] enc				input Ambisonic domain buffers
+  /// (non-interleaved)
+  /// @param[in ] numDecFrames	number of frames in time domain buffers
+  virtual void decode(float **dec, const float **enc, int numDecFrames) const;
+
   float decodeWeight(int speaker, int channel) const {
     return mWeights[channel] * mDecodeMatrix[speaker * channels() + channel];
   }

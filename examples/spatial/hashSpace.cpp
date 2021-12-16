@@ -93,7 +93,7 @@ struct World : public App {
 
         m.vertex(o.pos);
       }
-      gl::pointSize(2);
+      g.pointSize(2);
       g.color(0.2, 0.5, 0.5);
       g.draw(m);
     }

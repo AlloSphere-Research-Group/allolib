@@ -44,7 +44,7 @@ protected:
   static void AppAudioCB(AudioIOData &io);
 
 private:
-  Parameter mGainParameter{"gain", "", 1.0, "", 0.0, 2.0};
+  Parameter mGainParameter{"gain", "", 1.0, 0.0, 2.0};
   AudioIO mAudioIO;
 };
 

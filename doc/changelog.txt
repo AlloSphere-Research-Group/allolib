@@ -1,0 +1,10 @@
+Version x.xxxx - Jun 8
+  Editor: Kon Hyong Kim
+  - gl:: function calls are available from the graphics class now, except for viewport, which is available from the RenderManager class
+  - moved OpenGL inline convenience functions from gl:: namespace to al::Graphics class
+  - removed glEnable(GL_BLEND) from blend inline convenience funtions
+  - removed blendDisable()
+  - removed glEnable(GL_CULL_FACE) from culling inline convenience functions
+  - removed cullFaceNone()
+  - gl::faceToCull() is now called gl::cullFace()
+  - gl::faceCulling() is now called gl::culling()

@@ -126,7 +126,7 @@ struct MyApp : public App {
     // is handled by the App
     // We can just draw our geometry immediately!
 
-    gl::polygonMode(GL_LINE);  // wireframe mode
+    g.polygonLine();  // wireframe mode
     g.pushMatrix();
     g.rotate(phase * 360, 0, 1, 0);
     g.color(1);

@@ -37,7 +37,7 @@ void SynthRecorder::stopRecord() {
     for (SynthEvent &event : mSequence) {
       f << "s.add<" << event.synthName << ">(" << event.time << ").set(";
       for (unsigned int i = 0; i < event.pFields.size(); i++) {
-        if (event.pFields[i].type() == ParameterField::STRING) {
+        if (event.pFields[i].type() == VariantType::VARIANT_STRING) {
           f << "\"" << event.pFields[i].get<std::string>() << "\"";
         } else {
           f << event.pFields[i].get<float>();
@@ -64,7 +64,7 @@ void SynthRecorder::stopRecord() {
           f << "@ " << idMatch->second->time << " " << duration << " "
             << idMatch->second->synthName << " ";
           for (auto &field : idMatch->second->pFields) {
-            if (field.type() == ParameterField::STRING) {
+            if (field.type() == VariantType::VARIANT_STRING) {
               f << "\"" << field.get<std::string>() << "\" ";
             } else {
               f << field.get<float>() << " ";
@@ -90,7 +90,7 @@ void SynthRecorder::stopRecord() {
         f << "+ " << event.time << " " << event.id << " " << event.synthName
           << " ";
         for (auto field : event.pFields) {
-          if (field.type() == ParameterField::STRING) {
+          if (field.type() == VariantType::VARIANT_STRING) {
             f << "\"" << field.get<std::string>() << "\"";
           } else {
             f << field.get<float>() << " ";
@@ -100,7 +100,7 @@ void SynthRecorder::stopRecord() {
       } else if (event.type == SynthEventType::TRIGGER_OFF) {
         f << "- " << event.time << " " << event.id << " ";
         for (unsigned int i = 0; i < event.pFields.size(); i++) {
-          if (event.pFields[i].type() == ParameterField::STRING) {
+          if (event.pFields[i].type() == VariantType::VARIANT_STRING) {
             f << "\"" << event.pFields[i].get<std::string>() << "\" ";
           } else {
             f << event.pFields[i].get<float>() << " ";

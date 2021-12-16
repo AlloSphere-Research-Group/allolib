@@ -111,7 +111,7 @@ void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix,
     return;
   assert(index < (int)params.size());
   auto &param = params[index];
-  if (param->getHint("hide") == 1.0)
+  if (param->getHint("hide") == 1.0 || (param->min() > param->max()))
     return;
   float value = param->get();
   bool changed;
@@ -153,7 +153,7 @@ void ParameterGUI::drawParameterInt(std::vector<ParameterInt *> params,
     return;
   assert(index < (int)params.size());
   auto &param = params[index];
-  if (param->getHint("hide") == 1.0)
+  if (param->getHint("hide") == 1.0 || (param->min() > param->max()))
     return;
   int value = param->get();
   bool changed = ImGui::SliderInt((param->displayName() + suffix).c_str(),
@@ -192,6 +192,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
     return;
   if (ImGui::CollapsingHeader(("Pose:" + pose->displayName()).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader)) {
+    ImGui::Indent();
     Vec3d currentPos = pose->get().pos();
     Quatd currQuat = pose->get().quat();
     float x = currentPos.x;
@@ -258,8 +259,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
         p->set(Pose(currentPos, currQuat));
       }
     }
-
-    ImGui::Spacing();
+    ImGui::Unindent();
   }
 }
 
@@ -291,7 +291,7 @@ void ParameterGUI::drawParameterColor(std::vector<ParameterColor *> params,
            ? ImGuiColorEditFlags_AlphaPreviewHalf
            : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) |
       (options_menu ? 0 : ImGuiColorEditFlags_NoOptions) |
-      (!showHsv ? 0 : ImGuiColorEditFlags_HSV);
+      (!showHsv ? 0 : ImGuiColorEditFlags_PickerHueWheel);
 
   //    ImGui::Text("Color widget HSV with Alpha:");
   if (ImGui::ColorEdit4((param->displayName() + suffix).c_str(),
@@ -334,22 +334,27 @@ void ParameterGUI::drawChoice(std::vector<ParameterChoice *> params,
   auto &param = params[index];
   if (param->getHint("hide") == 1.0)
     return;
-  uint16_t value = param->get();
+  uint64_t value = param->get();
   auto elements = param->getElements();
   if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
-    for (unsigned int i = 0; i < elements.size(); i++) {
-      bool state = value & (1 << i);
-      if (ImGui::Checkbox((elements[i] + suffix + param->getName()).c_str(),
-                          &state)) {
-        std::cout << elements[i] + suffix + param->getName() << std::endl;
-        value ^= (-(state) ^ value) & (1UL << i); // Set an individual bit
+    ImGui::Indent();
+    for (size_t i = 0; i < elements.size(); i++) {
+      bool state = value & (1ULL << i);
+      ImGui::PushID((const void *)param);
+      if (ImGui::Checkbox(
+              (elements[i] + suffix + "_" + std::to_string(i)).c_str(),
+              &state)) {
+        value ^=
+            ((state ? -1 : 0) ^ value) & (1ULL << i); // Set an individual bit
         for (auto *p : params) {
           p->set(value);
         }
       }
+      ImGui::PopID();
     }
+    ImGui::Unindent();
   }
 }
 
@@ -364,6 +369,7 @@ void ParameterGUI::drawVec3(std::vector<ParameterVec3 *> params, string suffix,
   if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Indent();
     Vec3f currentValue = param->get();
     float x = currentValue.elems()[0];
     bool updated = false;
@@ -424,6 +430,7 @@ void ParameterGUI::drawVec3(std::vector<ParameterVec3 *> params, string suffix,
         p->set(currentValue);
       }
     }
+    ImGui::Unindent();
   }
 }
 
@@ -438,6 +445,7 @@ void ParameterGUI::drawVec4(std::vector<ParameterVec4 *> params, string suffix,
   if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Indent();
     Vec4f currentValue = param->get();
     float x = currentValue.elems()[0];
     bool updated = false;
@@ -476,6 +484,7 @@ void ParameterGUI::drawVec4(std::vector<ParameterVec4 *> params, string suffix,
         p->set(currentValue);
       }
     }
+    ImGui::Unindent();
   }
 }
 
@@ -500,6 +509,7 @@ void ParameterGUI::drawNav(Nav *mNav, std::string suffix) {
   if (ImGui::CollapsingHeader(("Navigation##nav" + suffix).c_str(),
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Indent();
     Vec3d &currentPos = mNav->pos();
     float x = currentPos.elems()[0];
 
@@ -518,7 +528,7 @@ void ParameterGUI::drawNav(Nav *mNav, std::string suffix) {
     if (changed) {
       currentPos.elems()[2] = z;
     }
-    ImGui::Spacing();
+    ImGui::Unindent();
   }
 }
 
@@ -543,23 +553,41 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
     });
   }
   PresetHandlerState &state = stateMap[presetHandler];
-  float fontSize = ImGui::GetFontSize();
+  //  float fontSize = ImGui::GetFontSize();
 
-  std::string id = std::to_string((unsigned long)presetHandler);
+  std::string id = std::to_string((uint64_t)presetHandler);
   std::string suffix = "##PresetHandler" + id;
   ImGui::PushID(suffix.c_str());
 
   if (ImGui::CollapsingHeader(
-          ("Presets " + presetHandler->getCurrentPath()).c_str(),
+          ("Presets " + presetHandler->getSubDirectory()).c_str(),
           ImGuiTreeNodeFlags_CollapsingHeader |
               ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::IsItemHovered()) { // tooltip showing root path for presets
+      const std::string currentRootPath = presetHandler->getRootPath();
+      if (currentRootPath.size() > 0) {
+        ImGui::SetTooltip("%s", currentRootPath.c_str());
+      }
+    }
     int selection = presetHandler->getCurrentPresetIndex();
     std::string currentPresetName = presetHandler->getCurrentPresetName();
-    ImGui::Text("%s", currentPresetName.c_str());
+    size_t delim_index = 0;
+    if (currentPresetName.length() == 0)
+      currentPresetName = "none";
+    else
+      delim_index = (state.currentBank + "-").size();
+
+    if (currentPresetName.size() > delim_index &&
+        currentPresetName.substr(0, delim_index) == state.currentBank + "-")
+      ImGui::Text("Current Preset: %s",
+                  currentPresetName.substr(delim_index).c_str());
+    else
+      ImGui::Text("Current Preset: %s", currentPresetName.c_str());
     int counter = state.presetHandlerBank * (presetColumns * presetRows);
     if (state.storeButtonState) {
       ImGui::PushStyleColor(ImGuiCol_Text, 0xff0000ff);
     }
+    float presetWidth = (ImGui::GetContentRegionAvail().x / 12.0f) - 8.0f;
     for (int row = 0; row < presetRows; row++) {
       for (int column = 0; column < presetColumns; column++) {
         std::string name = std::to_string(counter);
@@ -570,8 +598,12 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
           ImGui::PushStyleColor(ImGuiCol_Border,
                                 ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         }
-        if (ImGui::Selectable(name.c_str(), is_selected, 0,
-                              ImVec2(fontSize * 1.4, fontSize * 1.2))) {
+
+        const bool selectableClicked =
+            ImGui::Selectable(name.c_str(), is_selected, 0,
+                              ImVec2(presetWidth, ImGui::GetFontSize() * 1.2f));
+        if (selectableClicked) {
+
           if (state.storeButtonState) {
             std::string saveName = state.enteredText;
             if (saveName.size() == 0) {
@@ -589,12 +621,17 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
             }
           }
         }
+
+        if (ImGui::IsItemHovered()) { // tooltip showing preset name
+          const std::string currentlyhoveringPresetName =
+              presetHandler->getPresetName(counter);
+          if (currentlyhoveringPresetName.size() > 0) {
+            ImGui::SetTooltip("%s", currentlyhoveringPresetName.c_str());
+          }
+        }
         if (is_selected) {
           ImGui::PopStyleColor(1);
         }
-        //                if (ImGui::IsItemHovered()) {
-        //                    ImGui::SetTooltip("I am a tooltip");
-        //                }
         if (column < presetColumns - 1)
           ImGui::SameLine();
         counter++;
@@ -643,7 +680,6 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
       }
       ImGui::Text("Click on a preset number to store.");
     } else {
-      vector<string> mapList = presetHandler->availablePresetMaps();
       //          ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);
       if (ImGui::BeginCombo("Preset Map", state.currentBank.data())) {
         stateMap[presetHandler].mapList = presetHandler->availablePresetMaps();
@@ -683,6 +719,9 @@ ParameterGUI::drawPresetHandler(PresetHandler *presetHandler, int presetColumns,
           file.open(path, ios::out);
           file.close();
           state.newMap = false;
+
+          stateMap[presetHandler].mapList =
+              presetHandler->availablePresetMaps();
         }
         ImGui::SameLine();
         if (ImGui::Button("Cancel")) {
@@ -748,7 +787,7 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
     }
   }
   SequencerState &state = stateMap[presetSequencer];
-  std::string id = std::to_string((unsigned long)presetSequencer);
+  std::string id = std::to_string((uint64_t)presetSequencer);
   std::string suffix = "##PresetSequencer" + id;
   ImGui::PushID(suffix.c_str());
   if (ImGui::CollapsingHeader("Preset Sequencer",
@@ -879,7 +918,7 @@ void ParameterGUI::drawSynthSequencer(SynthSequencer *synthSequencer) {
   }
   SynthSequencerState &state = stateMap[synthSequencer];
 
-  std::string id = std::to_string((unsigned long)synthSequencer);
+  std::string id = std::to_string((uint64_t)synthSequencer);
   std::string suffix = "##EventSequencer" + id;
   ImGui::PushID(suffix.c_str());
   std::string headerLabel = "Event Sequencer";
@@ -999,7 +1038,7 @@ void ParameterGUI::drawParameterMIDI(ParameterMIDI *midi) {
   }
   ParameterMIDIState &state = stateMap[midi];
 
-  ImGui::PushID(std::to_string((unsigned long)midi).c_str());
+  ImGui::PushID(std::to_string((uint64_t)midi).c_str());
   if (ImGui::CollapsingHeader("Paramter MIDI",
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -1061,7 +1100,7 @@ void ParameterGUI::drawPresetMIDI(PresetMIDI *presetMidi) {
   }
   PresetMIDIState &state = stateMap[presetMidi];
 
-  ImGui::PushID(std::to_string((unsigned long)presetMidi).c_str());
+  ImGui::PushID(std::to_string((uint64_t)presetMidi).c_str());
   if (ImGui::CollapsingHeader("Preset MIDI",
                               ImGuiTreeNodeFlags_CollapsingHeader |
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -1095,6 +1134,65 @@ void ParameterGUI::drawPresetMIDI(PresetMIDI *presetMidi) {
   ImGui::PopID();
 }
 
+void ParameterGUI::drawMIDIIn(RtMidiIn *midiIn) {
+  struct MIDIInState {
+    std::vector<std::string> devices;
+    int currentDevice;
+  };
+  auto updateDevices = [](MIDIInState &state) {
+    RtMidiIn in;
+    state.devices.clear();
+    unsigned int numDevices = in.getPortCount();
+    for (unsigned int i = 0; i < numDevices; i++) {
+      state.devices.push_back(in.getPortName(i));
+    }
+  };
+  static std::map<RtMidiIn *, MIDIInState> stateMap;
+  if (stateMap.find(midiIn) == stateMap.end()) {
+    stateMap[midiIn] = MIDIInState();
+    updateDevices(stateMap[midiIn]);
+  }
+  MIDIInState &state = stateMap[midiIn];
+  ImGui::PushID(midiIn);
+  if (midiIn->isPortOpen()) {
+    // TODO adjust valid number of channels.
+    ImGui::Text("MIDI In Device: %s",
+                midiIn->getPortName(state.currentDevice).c_str());
+    if (ImGui::Button("Stop")) {
+      if (midiIn->isPortOpen()) {
+        midiIn->closePort();
+      }
+    }
+  } else {
+    ImGui::Combo("MIDI In Device", &state.currentDevice,
+                 ParameterGUI::vector_getter,
+                 static_cast<void *>(&state.devices), state.devices.size());
+
+    if (ImGui::Button("Start")) {
+
+      if (midiIn->isPortOpen()) {
+        midiIn->closePort();
+      }
+      try {
+        if (state.currentDevice >= 0 &&
+            state.currentDevice < (int)midiIn->getPortCount()) {
+          midiIn->openPort(state.currentDevice);
+          std::cout << "RtMidi: Opened port to "
+                    << midiIn->getPortName(state.currentDevice) << std::endl;
+        } else {
+          std::cerr << "RtMidi Warning: MIDI port unavailable: "
+                    << state.currentDevice << std::endl;
+        }
+      } catch (RtMidiError &error) {
+        std::cerr << error.getMessage() << std::endl;
+        std::cerr << "RtMidi Error: Could not open MIDI port "
+                  << state.currentDevice << std::endl;
+      }
+    }
+  }
+  ImGui::PopID();
+}
+
 void ParameterGUI::drawAudioIO(AudioIO *io) {
   struct AudioIOState {
     int currentSr = 0;
@@ -1115,7 +1213,7 @@ void ParameterGUI::drawAudioIO(AudioIO *io) {
     updateDevices(stateMap[io]);
   }
   AudioIOState &state = stateMap[io];
-  ImGui::PushID(std::to_string((unsigned long)io).c_str());
+  ImGui::PushID(std::to_string((uint64_t)io).c_str());
   if (ImGui::CollapsingHeader("Audio", ImGuiTreeNodeFlags_CollapsingHeader |
                                            ImGuiTreeNodeFlags_DefaultOpen)) {
     if (io->isOpen()) {
@@ -1235,7 +1333,7 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
 
 void ParameterGUI::drawBundle(ParameterBundle *bundle) {
   auto name = bundle->name();
-  ImGui::PushID((name + std::to_string((unsigned long)bundle)).c_str());
+  ImGui::PushID((name + std::to_string((uint64_t)bundle)).c_str());
 
   if (ImGui::CollapsingHeader(name.c_str())) {
     for (ParameterMeta *param : bundle->parameters()) {

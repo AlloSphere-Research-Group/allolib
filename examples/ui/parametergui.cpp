@@ -11,9 +11,9 @@ using namespace al;
 // knowledge of how ImGUI works
 
 struct MyApp : public App {
-  Parameter x{"X", "", 0, "", -2.0, 2.0};
-  Parameter y{"Y", "", 0, "", -2.0, 2.0};
-  Parameter z{"Z", "", 0, "", -2.0, 2.0};
+  Parameter x{"X", "", 0, -2.0, 2.0};
+  Parameter y{"Y", "", 0, -2.0, 2.0};
+  Parameter z{"Z", "", 0, -2.0, 2.0};
 
   ParameterColor color{"Color"};
 
@@ -36,15 +36,11 @@ struct MyApp : public App {
     navControl().useMouse(false);
   }
 
-  virtual void onDraw(Graphics &g) override {
-    g.clear(0);
-    g.pushMatrix();
-    g.translate(x, y, z);
-    g.color(color);
-    g.draw(mMesh);
-    g.popMatrix();
+  void onAnimate(double dt) override {
+    // ImGUI should be prepared in onAnimate as onDraw might be called more than
+    // once
 
-    // You are responsible for wrapping all your ImGUI code
+    // With ParameterGUI, you are responsible for wrapping all your ImGUI code
     // between imguiBeginFrame() and imguiEndFrame()
     // Don't forget this or this will crash or not work!
 
@@ -75,6 +71,15 @@ struct MyApp : public App {
     ParameterGUI::endPanel();
 
     imguiEndFrame();
+  }
+
+  virtual void onDraw(Graphics &g) override {
+    g.clear(0);
+    g.pushMatrix();
+    g.translate(x, y, z);
+    g.color(color);
+    g.draw(mMesh);
+    g.popMatrix();
 
     // Finally, draw the GUI
     imguiDraw();

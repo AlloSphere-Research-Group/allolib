@@ -29,12 +29,10 @@ bool OpenGLGraphicsDomain::start() {
     callStartCallbacks();
     bool subdomainsOk = true;
     while (!shouldQuit() && subdomainsOk) {
-      mSubdomainLock.lock();
       subdomainsOk &= tickSubdomains(true);
       tickFPS();
       mTimeDrift = dt_sec();
       subdomainsOk &= tickSubdomains(false);
-      mSubdomainLock.unlock();
     }
 
     ret &= stop();
@@ -96,8 +94,11 @@ bool GLFWOpenGLWindowDomain::init(ComputationDomain *parent) {
   //  0) {
   //    mGraphics = &static_cast<OpenGLGraphicsDomain *>(parent)->graphics();
   //  }
+  bool ret = true;
   assert(strcmp(typeid(*parent).name(), typeid(OpenGLGraphicsDomain).name()) ==
          0);
+
+  ret &= initializeSubdomains(true);
   mParent = static_cast<OpenGLGraphicsDomain *>(parent);
   if (!mWindow) {
     mWindow = std::make_unique<Window>();
@@ -110,8 +111,9 @@ bool GLFWOpenGLWindowDomain::init(ComputationDomain *parent) {
     mGraphics->init();
     return ret;
   }
-
-  return true;
+  ret &= initializeSubdomains(false);
+  mInitialized = true;
+  return ret;
 }
 
 bool GLFWOpenGLWindowDomain::tick() {
@@ -121,14 +123,20 @@ bool GLFWOpenGLWindowDomain::tick() {
   onNewFrame();
   /* Make the window's context current */
   mWindow->makeCurrent();
+  tickSubdomains(true);
   preOnDraw();
   onDraw(*mGraphics);
   postOnDraw();
+  tickSubdomains(false);
   mWindow->refresh();
   return true;
 }
 
 bool GLFWOpenGLWindowDomain::cleanup(ComputationDomain *parent) {
+  bool ret = true;
+  ret &= cleanupSubdomains(true);
+  ret &= cleanupSubdomains(false);
+
   if (mWindow) {
     mWindow->destroy();
     mWindow = nullptr;
@@ -136,5 +144,6 @@ bool GLFWOpenGLWindowDomain::cleanup(ComputationDomain *parent) {
   if (mGraphics) {
     mGraphics = nullptr;
   }
-  return true;
+  mInitialized = false;
+  return ret;
 }

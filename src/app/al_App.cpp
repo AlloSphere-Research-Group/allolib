@@ -2,16 +2,7 @@
 
 using namespace al;
 
-App::App() {
-  mOSCDomain = newDomain<OSCDomain>();
-
-  mAudioDomain = newDomain<GammaAudioDomain>();
-  mAudioDomain->configure();
-
-  mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
-  mSimulationDomain =
-      mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
-}
+App::App() { createDomains(); }
 
 void App::quit() { graphicsDomain()->quit(); }
 
@@ -26,23 +17,77 @@ Window &App::defaultWindow() {
     std::cerr
         << "ERROR: calling function for Window before window is available!"
         << std::endl;
+    throw std::runtime_error(
+        "calling function for Window before window is available");
   }
   return mDefaultWindowDomain->window();
 }
 
-Graphics &App::graphics() { return mDefaultWindowDomain->graphics(); }
+Graphics &App::graphics() {
+  if (!mDefaultWindowDomain) {
+    std::cerr
+        << "ERROR: calling function for Window before window is available!"
+        << std::endl;
+    throw std::runtime_error(
+        "calling function for Window before window is available");
+  }
+  return mDefaultWindowDomain->graphics();
+}
 
-Viewpoint &App::view() { return mDefaultWindowDomain->view(); }
+Viewpoint &App::view() {
+  if (!mDefaultWindowDomain) {
+    std::cerr
+        << "ERROR: calling function for Window before window is available!"
+        << std::endl;
+    throw std::runtime_error(
+        "calling function for Window before window is available");
+  }
+  return mDefaultWindowDomain->view();
+}
 
-Nav &App::nav() { return mDefaultWindowDomain->nav(); }
+Nav &App::nav() {
+  if (!mDefaultWindowDomain) {
+    std::cerr
+        << "ERROR: calling function for Window before window is available!"
+        << std::endl;
+    throw std::runtime_error(
+        "calling function for Window before window is available");
+  }
+  return mDefaultWindowDomain->nav();
+}
 
-Pose &App::pose() { return mDefaultWindowDomain->nav(); }
+Pose &App::pose() {
+  if (!mDefaultWindowDomain) {
+    std::cerr
+        << "ERROR: calling function for Window before window is available!"
+        << std::endl;
+    throw std::runtime_error(
+        "calling function for Window before window is available");
+  }
+  return mDefaultWindowDomain->nav();
+}
 
 NavInputControl &App::navControl() {
+  if (!mDefaultWindowDomain) {
+    std::cerr
+        << "ERROR: calling function for Window before window is available!"
+        << std::endl;
+    throw std::runtime_error(
+        "calling function for Window before window is available");
+  }
   return mDefaultWindowDomain->navControl();
 }
 
-Lens &App::lens() { return mDefaultWindowDomain->view().lens(); }
+Lens &App::lens() {
+  if (!mDefaultWindowDomain) {
+    std::cerr
+        << "ERROR: calling function for Window before window is available!"
+        << std::endl;
+    throw std::runtime_error(
+        "calling function for Window before window is available");
+  }
+  return mDefaultWindowDomain->view().lens();
+}
 
 Keyboard &App::keyboard() { return defaultWindow().mKeyboard; }
 
@@ -255,6 +300,17 @@ void App::start() {
       std::cerr << "ERROR cleaning up domain " << std::endl;
     }
   }
+}
+
+void App::createDomains() {
+  mOSCDomain = newDomain<OSCDomain>();
+
+  mAudioDomain = newDomain<GammaAudioDomain>();
+  mAudioDomain->configure();
+
+  mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
+  mSimulationDomain =
+      mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
 }
 
 void App::initializeDomains() {

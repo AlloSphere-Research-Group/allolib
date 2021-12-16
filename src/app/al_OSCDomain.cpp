@@ -14,6 +14,8 @@ bool OSCDomain::init(ComputationDomain *parent) {
 bool OSCDomain::start() {
   if (parameterServer().listen(port, interfaceIP)) {
     parameterServer().startHandshakeServer();
+    std::cout << "Parameter Server OSC port (primary): " << interfaceIP << ":"
+              << parameterServer().serverPort() << std::endl;
     return true;
   } else {
     uint16_t primaryPort = port;
@@ -25,8 +27,8 @@ bool OSCDomain::start() {
     if (parameterServer().serverRunning()) {
       port = portOffset + port;
       parameterServer().startCommandListener(interfaceIP);
-      std::cout << "Application is replica on port: "
-                << parameterServer().serverPort() << std::endl;
+      std::cout << "Parameter Server OSC port (secondary): " << interfaceIP
+                << ":" << parameterServer().serverPort() << std::endl;
     } else {
       port = 0;
       std::cerr << "Warning: Application could not start network role."

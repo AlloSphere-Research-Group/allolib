@@ -4,40 +4,6 @@
 
 using namespace al;
 
-#ifdef __GNUG__
-#include <cxxabi.h>
-
-#include <cstdlib>
-#include <memory>
-
-std::string al::demangle(const char *name) {
-  int status = -4; // some arbitrary value to eliminate the compiler warning
-
-  // enable c++11 by passing the flag -std=c++11 to g++
-  std::unique_ptr<char, void (*)(void *)> res{
-      abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
-
-  return (status == 0) ? res.get() : name;
-}
-
-#else
-
-#if AL_WINDOWS
-
-// does nothing if not g++
-std::string al::demangle(const char *name) {
-  // Windows prepends "struct " or "class " here, so remove it
-  auto demangled = std::string(name);
-  return demangled.substr(demangled.find(' ') + 1);
-}
-
-#else
-// does nothing if not g++
-std::string al::demangle(const char *name) { return name; }
-#endif
-
-#endif
-
 int al::asciiToIndex(int asciiKey, int offset) {
   switch (asciiKey) {
   case '1':
@@ -134,14 +100,14 @@ int al::asciiToMIDI(int asciiKey, int offset) {
     return offset + 73;
   case '3':
     return offset + 75;
-    //	case '4': return offset + 3;
+  //	case '4': return offset + 3;
   case '5':
     return offset + 78;
   case '6':
     return offset + 80;
   case '7':
     return offset + 82;
-    //	case '8': return offset + 7;
+  //	case '8': return offset + 7;
   case '9':
     return offset + 85;
   case '0':
@@ -168,19 +134,19 @@ int al::asciiToMIDI(int asciiKey, int offset) {
   case 'p':
     return offset + 88;
 
-    //	case 'a': return offset + 20;
+  //	case 'a': return offset + 20;
   case 's':
     return offset + 61;
   case 'd':
     return offset + 63;
-    //	case 'f': return offset + 23;
+  //	case 'f': return offset + 23;
   case 'g':
     return offset + 66;
   case 'h':
     return offset + 68;
   case 'j':
     return offset + 70;
-    //	case 'k': return offset + 27;
+  //	case 'k': return offset + 27;
   case 'l':
     return offset + 73;
   case ';':
@@ -212,7 +178,7 @@ int al::asciiToMIDI(int asciiKey, int offset) {
 
 // --------- SynthVoice
 
-bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
+bool SynthVoice::setTriggerParams(std::vector<VariantValue> pFields,
                                   bool noCalls) {
   if (pFields.size() < mTriggerParams.size()) {
     // std::cout << "pField count mismatch. Ignoring." << std::endl;
@@ -224,45 +190,136 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
   // If you need the callbacks to propagate, set the parameter values
   // directly instead of through these functions.
   if (noCalls) {
-    for (auto &param : mTriggerParams) {
-      if (it->type() == ParameterField::FLOAT) {
-        if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
-          static_cast<Parameter *>(param)->setNoCalls(it->get<float>());
-        } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name()) ==
-                   0) {
-          static_cast<ParameterInt *>(param)->setNoCalls(it->get<float>());
-        } else if (strcmp(typeid(*param).name(),
-                          typeid(ParameterMenu).name()) == 0) {
-          static_cast<ParameterMenu *>(param)->setNoCalls(it->get<float>());
-        } else if (strcmp(typeid(*param).name(),
-                          typeid(ParameterString).name()) == 0) {
-          static_cast<ParameterString *>(param)->setNoCalls(
-              std::to_string(it->get<float>()));
+    for (auto *param : mTriggerParams) {
+      switch (it->type()) {
+
+      case (VariantType::VARIANT_FLOAT): {
+        Parameter *p = nullptr;
+        if ((p = dynamic_cast<Parameter *>(param))) {
+          p->setNoCalls(it->get<float>());
         } else {
-          std::cerr << "ERROR: p-field string not setting parameter. Invalid "
+          std::cout << __FILE__ << ":" << __LINE__
+                    << " ERROR field data type and parameter type mismatch"
+                    << std::endl;
+        }
+      } break;
+      case (VariantType::VARIANT_DOUBLE): {
+        Parameter *p = nullptr;
+        if ((p = dynamic_cast<Parameter *>(param))) {
+          p->setNoCalls(it->get<double>());
+        } else {
+          std::cout << __FILE__ << ":" << __LINE__
+                    << " ERROR field data type and parameter type mismatch"
+                    << std::endl;
+        }
+      } break;
+      case (VariantType::VARIANT_INT32): {
+        ParameterInt *p = nullptr;
+        ParameterMenu *pm = nullptr;
+        if ((p = dynamic_cast<ParameterInt *>(param))) {
+          p->setNoCalls(it->get<int32_t>());
+        } else if ((pm = dynamic_cast<ParameterMenu *>(param))) {
+          pm->setNoCalls(it->get<int32_t>());
+        } else {
+          std::cout << __FILE__ << ":" << __LINE__
+                    << " ERROR field data type and parameter type mismatch"
+                    << std::endl;
+        }
+      } break;
+      case (VariantType::VARIANT_UINT32): {
+        ParameterUInt32 *p = nullptr;
+        if ((p = dynamic_cast<ParameterUInt32 *>(param))) {
+          p->setNoCalls(it->get<uint32_t>());
+        } else {
+          std::cout << __FILE__ << ":" << __LINE__
+                    << " ERROR field data type and parameter type mismatch"
+                    << std::endl;
+        }
+      } break;
+      case (VariantType::VARIANT_INT16): {
+        ParameterInt16 *p = nullptr;
+        if ((p = dynamic_cast<ParameterInt16 *>(param))) {
+          p->setNoCalls(it->get<int16_t>());
+        } else {
+          std::cout << __FILE__ << ":" << __LINE__
+                    << " ERROR field data type and parameter type mismatch"
+                    << std::endl;
+        }
+      } break;
+      case (VariantType::VARIANT_UINT16): {
+        ParameterUInt16 *p = nullptr;
+        if ((p = dynamic_cast<ParameterUInt16 *>(param))) {
+          p->setNoCalls(it->get<uint16_t>());
+        } else {
+          std::cout << __FILE__ << ":" << __LINE__
+                    << " ERROR field data type and parameter type mismatch"
+                    << std::endl;
+        }
+      } break;
+      case (VariantType::VARIANT_INT8): {
+        ParameterInt8 *p = nullptr;
+        if ((p = dynamic_cast<ParameterInt8 *>(param))) {
+          p->setNoCalls(it->get<int8_t>());
+        } else {
+          std::cout << __FILE__ << ":" << __LINE__
+                    << " ERROR field data type and parameter type mismatch"
+                    << std::endl;
+        }
+      } break;
+      case (VariantType::VARIANT_UINT8): {
+        ParameterUInt8 *p = nullptr;
+        if ((p = dynamic_cast<ParameterUInt8 *>(param))) {
+          p->setNoCalls(it->get<uint8_t>());
+        } else {
+          std::cout << __FILE__ << ":" << __LINE__
+                    << " ERROR field data type and parameter type mismatch"
+                    << std::endl;
+        }
+      } break;
+      case (VariantType::VARIANT_INT64): {
+        ParameterInt64 *p = nullptr;
+        if ((p = dynamic_cast<ParameterInt64 *>(param))) {
+          p->setNoCalls(it->get<int64_t>());
+        } else {
+          std::cout << __FILE__ << ":" << __LINE__
+                    << " ERROR field data type and parameter type mismatch"
+                    << std::endl;
+        }
+      } break;
+      case (VariantType::VARIANT_UINT64): {
+        ParameterUInt64 *p = nullptr;
+        if ((p = dynamic_cast<ParameterUInt64 *>(param))) {
+          static_cast<ParameterUInt64 *>(param)->setNoCalls(
+              it->get<uint64_t>());
+        } else {
+          std::cout << __FILE__ << ":" << __LINE__
+                    << " ERROR field data type and parameter type mismatch"
+                    << std::endl;
+        }
+      } break;
+      case (VariantType::VARIANT_STRING): {
+        ParameterString *p = nullptr;
+        ParameterMenu *pm = nullptr;
+        if ((p = dynamic_cast<ParameterString *>(param))) {
+          p->setNoCalls(it->get<std::string>());
+        } else if ((pm = dynamic_cast<ParameterMenu *>(param))) {
+          pm->setCurrent(it->get<std::string>(), true);
+        } else {
+          std::cerr << "ERROR: p-field string setting parameter. Invalid "
                        "parameter type for parameter "
                     << param->getFullAddress() << std::endl;
         }
-      } else if (it->type() == ParameterField::STRING) {
-        if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
-            0) {
-          static_cast<ParameterString *>(param)->setNoCalls(
-              it->get<std::string>());
-        } else if (strcmp(typeid(*param).name(),
-                          typeid(ParameterMenu).name()) == 0) {
-          static_cast<ParameterMenu *>(param)->setCurrent(
-              it->get<std::string>(), noCalls);
-        } else {
-          std::cerr << "ERROR: p-field string not setting parameter. Invalid "
-                       "parameter type for parameter "
-                    << param->getFullAddress() << std::endl;
-        }
+      } break;
+
+      case (VariantType::VARIANT_NONE):
+        std::cout << "Ignoring VARIANT_NONE parameter field" << std::endl;
       }
+
       it++;
     }
   } else {
     for (auto &param : mTriggerParams) {
-      if (it->type() == ParameterField::FLOAT) {
+      if (it->type() == VariantType::VARIANT_FLOAT) {
         if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
           static_cast<Parameter *>(param)->set(it->get<float>());
         } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name()) ==
@@ -280,7 +337,7 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
                        "parameter type for parameter "
                     << param->getFullAddress() << std::endl;
         }
-      } else if (it->type() == ParameterField::STRING) {
+      } else if (it->type() == VariantType::VARIANT_STRING) {
         if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
             0) {
           static_cast<ParameterString *>(param)->set(it->get<std::string>());
@@ -301,7 +358,7 @@ bool SynthVoice::setTriggerParams(std::vector<ParameterField> pFields,
 }
 
 int SynthVoice::getTriggerParams(float *pFields, int maxParams) {
-  std::vector<ParameterField> pFieldsVector = getTriggerParams();
+  std::vector<VariantValue> pFieldsVector = getTriggerParams();
   if (maxParams == -1) {
     assert(pFieldsVector.size() < INT_MAX);
     maxParams = int(pFieldsVector.size());
@@ -311,7 +368,7 @@ int SynthVoice::getTriggerParams(float *pFields, int maxParams) {
     if (count == maxParams) {
       break;
     }
-    if (param.type() == ParameterField::FLOAT) {
+    if (param.type() == VariantType::VARIANT_FLOAT) {
       *pFields++ = param.get<float>();
     } else {
       *pFields++ = 0.0f; // Ignore strings...
@@ -321,8 +378,8 @@ int SynthVoice::getTriggerParams(float *pFields, int maxParams) {
   return count;
 }
 
-std::vector<ParameterField> SynthVoice::getTriggerParams() {
-  std::vector<ParameterField> pFields;
+std::vector<VariantValue> SynthVoice::getTriggerParams() {
+  std::vector<VariantValue> pFields;
   pFields.reserve(mTriggerParams.size());
   for (auto param : mTriggerParams) {
     if (param) {
@@ -430,7 +487,13 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id,
   if (verbose()) {
     std::cout << "Trigger on ";
     for (auto *param : voice->triggerParameters()) {
-      std::cout << param->getName() << ":" << param->toFloat() << " ";
+      if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) == 0) {
+        std::cout << param->getName() << ":"
+                  << static_cast<ParameterString *>(param)->get() << " ";
+
+      } else {
+        std::cout << param->getName() << ":" << param->toFloat() << " ";
+      }
     }
     std::cout << std::endl;
   }
@@ -447,7 +510,7 @@ int PolySynth::triggerOn(SynthVoice *voice, int offsetFrames, int id,
     voice->userData(userData);
   }
   bool allCallbacksOk = true;
-  for (auto cbNode : mTriggerOnCallbacks) {
+  for (const auto &cbNode : mTriggerOnCallbacks) {
     allCallbacksOk &= cbNode.first(voice, offsetFrames, thisId, cbNode.second);
   }
   if (allCallbacksOk) {
@@ -502,10 +565,12 @@ SynthVoice *PolySynth::getVoice(std::string name, bool forceAlloc) {
     freeVoice = freeVoice->next;
   }
   if (!freeVoice) { // No free voice in list, so we need to allocate it
-                    //  But only allocate if allocation has not been disabled
+                    //  But only allocate if allocation has not been
+                    //  disabled
     if (std::find(mNoAllocationList.begin(), mNoAllocationList.end(), name) ==
         mNoAllocationList.end()) {
-      // TODO report current polyphony for more informed allocation of polyphony
+      // TODO report current polyphony for more informed allocation of
+      // polyphony
       freeVoice = allocateVoice(name);
     } else {
       std::cout << "Automatic allocation disabled for voice:" << name
@@ -558,12 +623,17 @@ void PolySynth::render(AudioIOData &io) {
             Pose p;
             (*mBusRoutingCallback)(internalAudioIO, p);
           }
-          // Then gather all the internal buses into the master AudioIO buses
+          // Then gather all the internal buses into the master AudioIO
+          // buses
           io.frame(offset);
           internalAudioIO.frame(offset);
           while (io() && internalAudioIO()) {
             for (int i = 0; i < mVoiceMaxOutputChannels; i++) {
-              io.out(i) += internalAudioIO.out(i);
+              if (mChannelMap.size() > i) {
+                io.out(mChannelMap[i]) += internalAudioIO.out(i);
+              } else {
+                io.out(i) += internalAudioIO.out(i);
+              }
             }
             for (int i = 0; i < mVoiceBusChannels; i++) {
               io.bus(i) += internalAudioIO.bus(i);
@@ -803,6 +873,26 @@ SynthVoice *PolySynth::allocateVoice(std::string name) {
     }
   }
   return nullptr;
+}
+
+void PolySynth::setVoiceMaxOutputChannels(uint16_t channels) {
+  mVoiceMaxOutputChannels = channels;
+  for (size_t i = 0; i < channels; i++) {
+    mChannelMap[i] = i;
+  }
+}
+
+void PolySynth::setBusRoutingCallback(PolySynth::BusRoutingCallback cb) {
+  mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
+}
+
+void PolySynth::setChannelMap(std::vector<size_t> channelMap) {
+  if (channelMap.size() != mVoiceMaxOutputChannels) {
+    std::cerr << "ERROR setting channel map. " << __FUNCTION__
+              << " in " __FILE__ << ":" << __LINE__ << std::endl;
+    return;
+  }
+  mChannelMap = channelMap;
 }
 
 void PolySynth::startCpuClockThread() {

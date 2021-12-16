@@ -45,6 +45,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+
 #include <cmath>
 
 namespace al {
@@ -57,16 +58,15 @@ namespace al {
 /// reverb.
 ///
 /// @ingroup Sound
-template <int N, class T>
-class StaticDelayLine {
- public:
+template <int N, class T> class StaticDelayLine {
+public:
   StaticDelayLine() : mPos(0) { zero(); }
 
   /// Get size of delay-line
   static int size() { return N; }
 
   /// Get element at back
-  const T& back() const { return mBuf[indexBack()]; }
+  const T &back() const { return mBuf[indexBack()]; }
 
   /// Get index of back element
   int indexBack() const {
@@ -78,22 +78,24 @@ class StaticDelayLine {
   int pos() const { return mPos; }
 
   /// Read value at delay i
-  const T& read(int i) const {
+  const T &read(int i) const {
     int ind = pos() - i;
-    if (ind < 0) ind += size();
+    if (ind < 0)
+      ind += size();
     // else if(ind >= size()) ind -= size();
     return mBuf[ind];
   }
 
   /// Write value to delay
-  void write(const T& v) {
+  void write(const T &v) {
     mBuf[pos()] = v;
     ++mPos;
-    if (mPos >= size()) mPos = 0;
+    if (mPos >= size())
+      mPos = 0;
   }
 
   /// Write new value and return oldest value
-  T operator()(const T& v) {
+  T operator()(const T &v) {
     T r = mBuf[pos()];
     write(v);
     return r;
@@ -101,7 +103,7 @@ class StaticDelayLine {
 
   /// Comb filter input using a delay time equal to the maximum size of the
   /// delay-line
-  T comb(const T& v, const T& ffd, const T& fbk) {
+  T comb(const T &v, const T &ffd, const T &fbk) {
     T d = mBuf[pos()];
     T r = v + d * fbk;
     write(r);
@@ -110,12 +112,12 @@ class StaticDelayLine {
 
   /// Allpass filter input using a delay time equal to the maximum size of the
   /// delay-line
-  T allpass(const T& v, const T& ffd) { return comb(v, ffd, -ffd); }
+  T allpass(const T &v, const T &ffd) { return comb(v, ffd, -ffd); }
 
   /// Zeroes all elements (byte-wise)
   void zero() { ::memset(&mBuf, 0, sizeof(mBuf)); }
 
- protected:
+protected:
   int mPos;
   T mBuf[N];
 };
@@ -124,25 +126,24 @@ class StaticDelayLine {
 
 /// Design from:
 /// Dattorro, J. (1997). Effect design: Part 1: Reverberator and other filters.
-/// Journal of the Audio Engineering Society, 45(9):660–684.
+/// Journal of the Audio Engineering Society, 45(9):660-684.
 /// https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf
 ///
 /// @ingroup Sound
-template <class T = float>
-class Reverb {
- public:
+template <class T = float> class Reverb {
+public:
   Reverb() {
-    bandwidth(0.9995);
-    decay(0.85);
-    damping(0.4);
-    diffusion(0.76, 0.666, 0.707, 0.571);
+    bandwidth(0.9995f);
+    decay(0.85f);
+    damping(0.4f);
+    diffusion(0.76f, 0.666f, 0.707f, 0.571f);
   }
 
   /// Set input signal bandwidth, in [0,1]
 
   /// This sets the cutoff frequency of a one-pole low-pass filter on the
   /// input signal.
-  Reverb& bandwidth(T v) {
+  Reverb &bandwidth(T v) {
     mOPIn.damping(T(1) - v);
     return *this;
   }
@@ -152,14 +153,14 @@ class Reverb {
   /// Higher amounts will dampen the diffusive sound more quickly.
   /// Note: values in [-1, 0] create an inverse effect that attentuates low
   /// rather than high frequencies.
-  Reverb& damping(T v) {
+  Reverb &damping(T v) {
     mOP1.damping(v);
     mOP2.damping(v);
     return *this;
   }
 
   /// Set decay factor, in [0, 1)
-  Reverb& decay(T v) {
+  Reverb &decay(T v) {
     mDecay = v;
     return *this;
   }
@@ -168,7 +169,7 @@ class Reverb {
 
   /// Values near 0.7 are recommended. Moving further away from 0.7 will lead
   /// to more distinct echoes.
-  Reverb& diffusion(T in1, T in2, T decay1, T decay2) {
+  Reverb &diffusion(T in1, T in2, T decay1, T decay2) {
     mDfIn1 = in1;
     mDfIn2 = in2;
     mDfDcy1 = decay1;
@@ -177,25 +178,25 @@ class Reverb {
   }
 
   /// Set input diffusion 1 amount, [0,1)
-  Reverb& diffusionIn1(T v) {
+  Reverb &diffusionIn1(T v) {
     mDfIn1 = v;
     return *this;
   }
 
   /// Set input diffusion 2 amount, [0,1)
-  Reverb& diffusionIn2(T v) {
+  Reverb &diffusionIn2(T v) {
     mDfIn2 = v;
     return *this;
   }
 
   /// Set tank decay diffusion 1 amount, [0,1)
-  Reverb& diffusionDecay1(T v) {
+  Reverb &diffusionDecay1(T v) {
     mDfDcy1 = v;
     return *this;
   }
 
   /// Set tank decay diffusion 2 amount, [0,1)
-  Reverb& diffusionDecay2(T v) {
+  Reverb &diffusionDecay2(T v) {
     mDfDcy2 = v;
     return *this;
   }
@@ -206,7 +207,7 @@ class Reverb {
   /// @param[out] out1	wet output sample 1
   /// @param[out] out2	wet output sample 2
   /// @param[ in] gain	gain of output
-  void operator()(T in, T& out1, T& out2, T gain = T(0.6)) {
+  void operator()(T in, T &out1, T &out2, T gain = T(0.6)) {
     T v = mPreDelay(in * T(0.5));
     v = mOPIn(v);
     v = mAPIn1.allpass(v, mDfIn1);
@@ -246,7 +247,7 @@ class Reverb {
   /// @param[   out]   out2		wet/dry output 2
   /// @param[in    ] wetAmt		wet mix amount
   /// \returns dry input sample
-  T mix(T& inout1, T& out2, T wetAmt) {
+  T mix(T &inout1, T &out2, T wetAmt) {
     T s = inout1;
     (*this)(s, inout1, out2, wetAmt * T(0.6));
     inout1 += s;
@@ -273,9 +274,9 @@ class Reverb {
     mOP2.zero();
   }
 
- protected:
+protected:
   class OnePole {
-   public:
+  public:
     OnePole() : mO1(0), mA0(1), mB1(0) {}
     void damping(T v) { coef(v); }
     void coef(T v) {
@@ -285,7 +286,7 @@ class Reverb {
     T operator()(T i0) { return mO1 = i0 * mA0 + mO1 * mB1; }
     void zero() { mO1 = 0.0; }
 
-   protected:
+  protected:
     T mO1, mA0, mB1;
   };
 
@@ -309,5 +310,5 @@ class Reverb {
   OnePole mOP2;
 };
 
-}  // namespace al
+} // namespace al
 #endif

@@ -119,15 +119,15 @@ public:
    * @param pFields std::vector<float> containing the values
    * @return true if able to set the fields
    */
-  virtual bool setTriggerParams(std::vector<ParameterField> pFields,
+  virtual bool setTriggerParams(std::vector<VariantValue> pFields,
                                 bool noCalls = false) override;
 
   /**
    * @brief For PositionedVoice, the pose (7 floats) and the size are appended
    * to the pfields
    */
-  virtual std::vector<ParameterField> getTriggerParams() override {
-    std::vector<ParameterField> pFields = SynthVoice::getTriggerParams();
+  virtual std::vector<VariantValue> getTriggerParams() override {
+    std::vector<VariantValue> pFields = SynthVoice::getTriggerParams();
     pFields.reserve(pFields.size() + 8);
     Pose currentPose = pose();
     pFields.insert(pFields.end(), currentPose.vec().begin(),
@@ -144,12 +144,13 @@ public:
     return pFields;
   }
 
-protected:
   /**
-   * @brief Set voice as part of a replica distributed scene
+   * @brief Apply translation, rotation and scaling for this PositionedVoice
+   * @param g
    */
-  void markAsReplica() { mIsReplica = true; }
+  virtual void applyTransformations(Graphics &g);
 
+protected:
   ParameterPose mPose{"_pose"};
   Parameter mSize{"_size", "", 1.0};
   //    ParameterPose mPose {"_pose"};
@@ -160,8 +161,6 @@ protected:
                                 // audio out
 
   bool mUseDistAtten{true};
-  bool mIsReplica{false}; // If voice is replica, it should not send its
-                          // internal state but listen for changes.
 };
 
 struct UpdateThreadFuncData {
@@ -272,6 +271,11 @@ public:
   void showWorldMarker(bool show = true) { mDrawWorldMarker = show; }
 
   /**
+   * @brief Enables/disables sorting by distance to listener on graphics render
+   */
+  void sortDrawingByDistance(bool sort = true);
+
+  /**
    * @brief Stop all audio threads. No processing is possible after calling this
    * function
    *
@@ -295,6 +299,7 @@ private:
   Pose mListenerPose;
   DistAtten<> mDistAtten;
 
+  bool mSortDrawingByDistance{false};
   // For threaded simulation
   std::unique_ptr<ThreadPool> mWorkerThreads; // Update worker threads
   bool mThreadedUpdate{true};

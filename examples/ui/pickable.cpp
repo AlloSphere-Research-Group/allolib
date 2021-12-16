@@ -67,7 +67,7 @@ struct MyApp : public App {
   void onAnimate(double dt) override {
     // move light in a circle
     t += dt;
-    light.pos(10 * cos(t), 0, 10 * sin(t));
+    light.pos(10 * cos((float)t), 0, 10 * sin((float)t));
   }
 
   void onDraw(Graphics &g) override {
@@ -77,13 +77,13 @@ struct MyApp : public App {
     g.lighting(true);
     g.light(light);
 
-    gl::polygonLine(); // as lines
+    g.polygonLine(); // as lines
 
     // pass function to draw pickable and child meshes
     pickable.draw(g, [&](Pickable &p) {
       auto &b = dynamic_cast<PickableBB &>(p);
       if (p.depth == 3) { // change rendering based on pickable depth
-        gl::polygonFill();
+        g.polygonFill();
         g.color(1, 0, 0);
       }
       b.drawMesh(g);
