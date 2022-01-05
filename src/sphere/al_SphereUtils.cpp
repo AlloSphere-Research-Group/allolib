@@ -128,7 +128,7 @@ std::map<std::string, NodeConfiguration> sphere::getSphereNodes() {
   std::map<std::string, NodeConfiguration> nodes = {
       {"ar01.1g",
        NodeConfiguration{
-           0, 0, "/Volumes/Data",
+           0, 0, "/Volumes/Data/",
            (Capability)(Capability::CAP_SIMULATOR | Capability::CAP_STATE_SEND |
                         Capability::CAP_RENDERING | Capability::CAP_AUDIO_IO |
                         Capability::CAP_OSC)}},
@@ -145,7 +145,7 @@ std::map<std::string, NodeConfiguration> sphere::getSphereNodes() {
     snprintf(str, 3, "%02d", i);
     std::string name = "gr" + std::string(str);
     nodes[name] =
-        NodeConfiguration{i, 0, "/alloshare",
+        NodeConfiguration{i, 0, "/data/",
                           (Capability)(CAP_SIMULATOR | CAP_STATE_RECEIVE |
                                        CAP_OMNIRENDERING | CAP_OSC)};
   }
