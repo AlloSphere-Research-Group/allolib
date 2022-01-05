@@ -275,7 +275,7 @@ SynthSequencer::loadSequence(std::string sequenceName, double timeOffset,
             std::cout << "Error setting pFields for voice of type " << name
                       << ". Fields: ";
             for (auto &field : pFields) {
-              std::cout << field.type() << " ";
+              std::cout << int(field.type()) << " ";
             }
             std::cout << std::endl;
             mPolySynth->insertFreeVoice(newVoice); // Return voice to sequencer.

@@ -112,7 +112,7 @@ protected:
   int64_t valueToInt64(void *value);
 
 private:
-  VariantType mDatatype{VARIANT_FLOAT};
+  VariantType mDatatype{VariantType::VARIANT_FLOAT};
   size_t mSize{0};
   uint8_t mDataSize;
   unsigned char *mValues{nullptr};

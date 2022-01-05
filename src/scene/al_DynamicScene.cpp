@@ -508,44 +508,46 @@ bool PositionedVoice::setTriggerParams(std::vector<VariantValue> pFields,
       mTriggerParams.size() +
           8) { // If eight extra, it means pose and size are there too
     size_t index = mTriggerParams.size();
+
     double x;
-    if (pFields[index].type() == VARIANT_DOUBLE) {
+    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
       x = pFields[index++].get<double>();
     } else {
       x = pFields[index++].get<float>();
     }
     double y;
-    if (pFields[index].type() == VARIANT_DOUBLE) {
+
+    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
       y = pFields[index++].get<double>();
     } else {
       y = pFields[index++].get<float>();
     }
     double z;
-    if (pFields[index].type() == VARIANT_DOUBLE) {
+    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
       z = pFields[index++].get<double>();
     } else {
       z = pFields[index++].get<float>();
     }
     double qw;
-    if (pFields[index].type() == VARIANT_DOUBLE) {
+    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
       qw = pFields[index++].get<double>();
     } else {
       qw = pFields[index++].get<float>();
     }
     double qx;
-    if (pFields[index].type() == VARIANT_DOUBLE) {
+    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
       qx = pFields[index++].get<double>();
     } else {
       qx = pFields[index++].get<float>();
     }
     double qy;
-    if (pFields[index].type() == VARIANT_DOUBLE) {
+    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
       qy = pFields[index++].get<double>();
     } else {
       qy = pFields[index++].get<float>();
     }
     double qz;
-    if (pFields[index].type() == VARIANT_DOUBLE) {
+    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
       qz = pFields[index++].get<double>();
     } else {
       qz = pFields[index++].get<float>();

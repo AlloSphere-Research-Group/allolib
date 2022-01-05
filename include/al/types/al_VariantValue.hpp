@@ -40,7 +40,7 @@
 namespace al {
 
 // VariantType enum is equivalent to NC_* types
-enum VariantType {
+enum class VariantType {
   VARIANT_NONE = 0,
   VARIANT_INT64 = 10,
   VARIANT_INT32 = 4,
@@ -86,7 +86,7 @@ struct VariantValue {
 
   // Move constructor
   VariantValue(VariantValue &&that) noexcept
-      : mType(VARIANT_NONE), mData(nullptr) {
+      : mType(VariantType::VARIANT_NONE), mData(nullptr) {
     swap(*this, that);
   }
 
@@ -116,7 +116,7 @@ struct VariantValue {
 
   template <typename type> void set(type value) {
     if (std::is_same<type, float>::value) {
-      if (mType == VARIANT_FLOAT) {
+      if (mType == VariantType::VARIANT_FLOAT) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -124,7 +124,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, double>::value) {
-      if (mType == VARIANT_DOUBLE) {
+      if (mType == VariantType::VARIANT_DOUBLE) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -132,9 +132,9 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, std::string>::value) {
-      if (mType == VARIANT_STRING) {
+      if (mType == VariantType::VARIANT_STRING) {
         *static_cast<type *>(mData) = value;
-      } else if (mType == VARIANT_MAX_ATOMIC_TYPE) {
+      } else if (mType == VariantType::VARIANT_MAX_ATOMIC_TYPE) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -142,7 +142,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, char *>::value) {
-      if (mType == VARIANT_CHAR) {
+      if (mType == VariantType::VARIANT_CHAR) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -150,7 +150,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, int8_t>::value) {
-      if (mType == VARIANT_INT8) {
+      if (mType == VariantType::VARIANT_INT8) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -158,7 +158,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, int16_t>::value) {
-      if (mType == VARIANT_INT16) {
+      if (mType == VariantType::VARIANT_INT16) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -166,7 +166,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, int32_t>::value) {
-      if (mType == VARIANT_INT32) {
+      if (mType == VariantType::VARIANT_INT32) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -174,7 +174,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, int64_t>::value) {
-      if (mType == VARIANT_INT64) {
+      if (mType == VariantType::VARIANT_INT64) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -182,7 +182,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, uint8_t>::value) {
-      if (mType == VARIANT_UINT8) {
+      if (mType == VariantType::VARIANT_UINT8) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -190,7 +190,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, uint16_t>::value) {
-      if (mType == VARIANT_UINT16) {
+      if (mType == VariantType::VARIANT_UINT16) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -198,7 +198,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, uint32_t>::value) {
-      if (mType == VARIANT_UINT32) {
+      if (mType == VariantType::VARIANT_UINT32) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -206,7 +206,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, uint64_t>::value) {
-      if (mType == VARIANT_UINT64) {
+      if (mType == VariantType::VARIANT_UINT64) {
         *static_cast<type *>(mData) = value;
       } else {
         std::cerr
@@ -214,7 +214,7 @@ struct VariantValue {
             << std::endl;
       }
     } else if (std::is_same<type, bool>::value) {
-      if (mType == VARIANT_BOOL) {
+      if (mType == VariantType::VARIANT_BOOL) {
         *static_cast<bool *>(mData) = value;
       } else {
         std::cerr
