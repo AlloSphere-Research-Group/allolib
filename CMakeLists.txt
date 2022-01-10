@@ -27,6 +27,18 @@ option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(AL_MACOS 1 CACHE BOOL "Building on OS X")
   set(PLATFORM_DEFINITION -DAL_OSX)
+
+  # Fix for Catalina bug with cmath
+  cmake_host_system_information(RESULT MACOS_VERSION QUERY OS_VERSION)
+  message("Applying fix for Catalina issue with cmath")
+  string(SUBSTRING ${OS_VERSION} 0 2 CATALINA_OS_VERSION_ID)
+  # Catalina build ids all start with 19: https://moof-it.co.uk/using-macos-versions-in-scripts/
+  if ("${CATALINA_OS_VERSION_ID}" MATCHES "19")
+    execute_process(COMMAND xcrun --show-sdk-path
+            OUTPUT_VARIABLE CATALINA_SDK_PATH)
+    list(append CMAKE_CXX_FLAGS with "-isysroot ${CATALINA_SDK_PATH}")
+  endif()
+
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(AL_LINUX 1 CACHE BOOL "Building on Linux")
   set(PLATFORM_DEFINITION -DAL_LINUX)
