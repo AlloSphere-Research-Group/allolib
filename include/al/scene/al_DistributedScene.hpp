@@ -31,6 +31,17 @@ public:
   virtual bool consumeMessage(osc::Message &m,
                               std::string rootOSCPath = "") override;
 
+  /**
+   * @brief registerVoiceParameters
+   * @param voice
+   *
+   * This function is called internally when the allocation is requested through
+   * PolySynth::getVoice() or PolySynth::allocatePolyphony(). You only need to
+   * call it if you are allocating the voices outside and then adding the voices
+   * through triggerOn() or insertFreeVoice().
+   */
+  void registerVoiceParameters(SynthVoice *voice);
+
 protected:
 private:
   OSCNotifier *mNotifier{nullptr};

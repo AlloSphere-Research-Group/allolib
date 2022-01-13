@@ -55,10 +55,46 @@ void PersistentConfig::registerParameter(ParameterString &param) {
   }
 }
 
+void PersistentConfig::registerParameter(ParameterVec3 &param) {
+  auto fullAddress = param.getFullAddress();
+  if (fullAddress.find('.') == std::string::npos) {
+    mParameterVec3s.push_back(&param);
+  } else {
+    std::cerr << "ERROR: Parameters with '.' in name are not supported in "
+                 "PersistentConfig. Not including: "
+              << fullAddress << std::endl;
+    assert(0 == 1);
+  }
+}
+
+void PersistentConfig::registerParameter(ParameterVec4 &param) {
+  auto fullAddress = param.getFullAddress();
+  if (fullAddress.find('.') == std::string::npos) {
+    mParameterVec4s.push_back(&param);
+  } else {
+    std::cerr << "ERROR: Parameters with '.' in name are not supported in "
+                 "PersistentConfig. Not including: "
+              << fullAddress << std::endl;
+    assert(0 == 1);
+  }
+}
+
 void PersistentConfig::registerParameter(ParameterColor &param) {
   auto fullAddress = param.getFullAddress();
   if (fullAddress.find('.') == std::string::npos) {
     mParameterColors.push_back(&param);
+  } else {
+    std::cerr << "ERROR: Parameters with '.' in name are not supported in "
+                 "PersistentConfig. Not including: "
+              << fullAddress << std::endl;
+    assert(0 == 1);
+  }
+}
+
+void PersistentConfig::registerParameter(ParameterPose &param) {
+  auto fullAddress = param.getFullAddress();
+  if (fullAddress.find('.') == std::string::npos) {
+    mParameterPoses.push_back(&param);
   } else {
     std::cerr << "ERROR: Parameters with '.' in name are not supported in "
                  "PersistentConfig. Not including: "
@@ -130,6 +166,18 @@ bool PersistentConfig::read() {
       param->setNoCalls(Color(vals[0], vals[1], vals[2], vals[3]));
     }
   }
+  for (auto param : mParameterPoses) {
+    std::string name;
+    if (param->getGroup().size() > 0) {
+      name = param->getGroup() + ".";
+    }
+    name += param->getName();
+    if (loader.root->get_array_of<double>(name)) {
+      auto vals = loader.getVector<double>(name);
+      param->setNoCalls(Pose(Vec3d(vals[0], vals[1], vals[2]),
+                             Quatd(vals[3], vals[4], vals[5], vals[6])));
+    }
+  }
   return true;
 }
 
@@ -184,6 +232,24 @@ void PersistentConfig::write() {
     rgba[2] = bg.b;
     rgba[3] = bg.a;
     loader.setVector<double>(name, rgba);
+  }
+  for (auto param : mParameterPoses) {
+    std::string name;
+    if (param->getGroup().size() > 0) {
+      name = param->getGroup() + ".";
+    }
+    name += param->getName();
+    std::vector<double> poseList;
+    poseList.resize(7);
+    Pose pose = param->get();
+    poseList[0] = pose.x();
+    poseList[1] = pose.y();
+    poseList[2] = pose.z();
+    poseList[3] = pose.quat().w;
+    poseList[4] = pose.quat().x;
+    poseList[5] = pose.quat().y;
+    poseList[6] = pose.quat().z;
+    loader.setVector<double>(name, poseList);
   }
 
   loader.writeFile();
