@@ -164,7 +164,7 @@ void DistributedApp::prepare() {
 }
 
 std::string DistributedApp::getPrimaryHost() {
-  for (auto node : mRoleMap) {
+  for (const auto &node : mRoleMap) {
     if (node.second == "simulator" || node.second == "desktop") {
       return node.first;
     }

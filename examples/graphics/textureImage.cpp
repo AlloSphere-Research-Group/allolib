@@ -14,6 +14,7 @@ smooth.  This is because interpolation is done on the GPU.
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Image.hpp"
+#include "al/io/al_File.hpp"
 
 using namespace al;
 using namespace std;
@@ -25,12 +26,12 @@ public:
   void onCreate() {
     // Load a .jpg file
     //
-    const char *filename = "data/hubble.jpg";
+    const std::string filename = al::File::currentPath() + "data/hubble.jpg";
 
     auto imageData = Image(filename);
 
     if (imageData.array().size() == 0) {
-      cout << "failed to load image" << endl;
+      cout << "failed to load image " << filename << endl;
     }
     cout << "loaded image size: " << imageData.width() << ", "
          << imageData.height() << endl;
