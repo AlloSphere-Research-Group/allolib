@@ -421,7 +421,7 @@ int addSphereWithTexcoords(Mesh &m, double radius, int bands, bool isSkyBox) {
       m.texCoord(u, v);
 
       // inversed normal if skybox
-      if (isSkybox)
+      if (isSkyBox)
         m.normal(-x, -y, -z);
       else
         m.normal(x, y, z);
