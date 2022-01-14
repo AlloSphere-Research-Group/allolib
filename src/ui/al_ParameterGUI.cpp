@@ -213,7 +213,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
     }
     float z = currentPos.z;
     if (ImGui::SliderFloat(("Z" + suffix + pose->displayName()).c_str(), &z,
-                           -10, 0)) {
+                           -10, 10)) {
       currentPos.z = z;
       for (auto *p : params) {
         p->set(Pose(currentPos, currQuat));
