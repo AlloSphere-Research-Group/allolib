@@ -1,7 +1,7 @@
 #include "al/graphics/al_Shapes.hpp"
-#include <math.h>
-#include <map>
 #include "al/math/al_Constants.hpp"
+#include <map>
+#include <math.h>
 
 /*
 Platonic solids code derived from:
@@ -11,7 +11,7 @@ Accessed from http://paulbourke.net/geometry/platonic/.
 
 namespace al {
 
-const double phi = (1 + sqrt(5)) / 2;  // the golden ratio
+const double phi = (1 + sqrt(5)) / 2; // the golden ratio
 
 // Complex sinusoid used for fast circle generation
 struct CSin {
@@ -30,7 +30,7 @@ struct CSin {
 };
 
 // Scale last N vertices
-static void scaleVerts(Mesh& m, float radius, int N) {
+static void scaleVerts(Mesh &m, float radius, int N) {
   if (radius != 1.f) {
     int Ne = m.vertices().size();
     int Nb = Ne - N;
@@ -40,7 +40,7 @@ static void scaleVerts(Mesh& m, float radius, int N) {
   }
 }
 
-int addCube(Mesh& m, bool withNormalsAndTexcoords, float l) {
+int addCube(Mesh &m, bool withNormalsAndTexcoords, float l) {
   m.primitive(Mesh::TRIANGLES);
 
   // This generates a cube with face-oriented normals and unit texture
@@ -55,57 +55,63 @@ int addCube(Mesh& m, bool withNormalsAndTexcoords, float l) {
     }
 
     // +x face
-    for (int i = 0; i < 4; ++i) m.normal(1, 0, 0);
+    for (int i = 0; i < 4; ++i)
+      m.normal(1, 0, 0);
     m.vertex(l, -l, l);
     m.vertex(l, -l, -l);
     m.vertex(l, l, -l);
     m.vertex(l, l, l);
 
     // -x face
-    for (int i = 0; i < 4; ++i) m.normal(-1, 0, 0);
+    for (int i = 0; i < 4; ++i)
+      m.normal(-1, 0, 0);
     m.vertex(-l, l, l);
     m.vertex(-l, l, -l);
     m.vertex(-l, -l, -l);
     m.vertex(-l, -l, l);
 
     // +y face
-    for (int i = 0; i < 4; ++i) m.normal(0, 1, 0);
+    for (int i = 0; i < 4; ++i)
+      m.normal(0, 1, 0);
     m.vertex(-l, l, l);
     m.vertex(l, l, l);
     m.vertex(l, l, -l);
     m.vertex(-l, l, -l);
 
     // -y face
-    for (int i = 0; i < 4; ++i) m.normal(0, -1, 0);
+    for (int i = 0; i < 4; ++i)
+      m.normal(0, -1, 0);
     m.vertex(-l, -l, -l);
     m.vertex(l, -l, -l);
     m.vertex(l, -l, l);
     m.vertex(-l, -l, l);
 
     // +z face
-    for (int i = 0; i < 4; ++i) m.normal(0, 0, 1);
+    for (int i = 0; i < 4; ++i)
+      m.normal(0, 0, 1);
     m.vertex(-l, -l, l);
     m.vertex(l, -l, l);
     m.vertex(l, l, l);
     m.vertex(-l, l, l);
 
     // -z face
-    for (int i = 0; i < 4; ++i) m.normal(0, 0, -1);
+    for (int i = 0; i < 4; ++i)
+      m.normal(0, 0, -1);
     m.vertex(-l, l, -l);
     m.vertex(l, l, -l);
     m.vertex(l, -l, -l);
     m.vertex(-l, -l, -l);
 
     static const int indices[] = {
-      0,1,2, 2,3,0, //r
-      4,5,6, 6,7,4, //l
-      8,9,10, 10,11,8, //t
-      12,13,14, 14,15,12, //b
-      16,17,18, 18,19,16, //f
-      20,21,22, 22,23,20 //back
+        0,  1,  2,  2,  3,  0,  // r
+        4,  5,  6,  6,  7,  4,  // l
+        8,  9,  10, 10, 11, 8,  // t
+        12, 13, 14, 14, 15, 12, // b
+        16, 17, 18, 18, 19, 16, // f
+        20, 21, 22, 22, 23, 20  // back
     };
-    
-    int Nv = 6*4;
+
+    int Nv = 6 * 4;
 
     int offset = m.vertices().size() - Nv;
     int num = sizeof(indices) / sizeof(*indices);
@@ -151,7 +157,7 @@ int addCube(Mesh& m, bool withNormalsAndTexcoords, float l) {
   }
 }
 
-int addTetrahedron(Mesh& m, float radius) {
+int addTetrahedron(Mesh &m, float radius) {
   m.primitive(Mesh::TRIANGLES);
 
   static const float l = sqrt(1. / 3);
@@ -171,12 +177,12 @@ int addTetrahedron(Mesh& m, float radius) {
   return Nv;
 }
 
-int addOctahedron(Mesh& m, float radius) {
+int addOctahedron(Mesh &m, float radius) {
   m.primitive(Mesh::TRIANGLES);
 
   static const float vertices[] = {
-      1,  0, 0, 0, 1,  0, 0, 0, 1,  // 0 1 2
-      -1, 0, 0, 0, -1, 0, 0, 0, -1  // 3 4 5
+      1,  0, 0, 0, 1,  0, 0, 0, 1, // 0 1 2
+      -1, 0, 0, 0, -1, 0, 0, 0, -1 // 3 4 5
   };
 
   static const int indices[] = {0, 1, 2, 1, 3, 2, 3, 4, 2, 4, 0, 2,
@@ -194,7 +200,7 @@ int addOctahedron(Mesh& m, float radius) {
   return Nv;
 }
 
-int addDodecahedron(Mesh& m, float radius) {
+int addDodecahedron(Mesh &m, float radius) {
   m.primitive(Mesh::TRIANGLES);
 
   static const float b = sqrt(1. / 3);
@@ -227,7 +233,7 @@ int addDodecahedron(Mesh& m, float radius) {
   return Nv;
 }
 
-int addIcosahedron(Mesh& m, float radius) {
+int addIcosahedron(Mesh &m, float radius) {
   m.primitive(Mesh::TRIANGLES);
 
   static const float a = (0.5) / 0.587785;
@@ -235,10 +241,10 @@ int addIcosahedron(Mesh& m, float radius) {
   // printf("%f\n", sqrt(a*a + b*b));
 
   static const float vertices[] = {
-      0,  b, -a, b, a,  0,  -b, a,  0,   //  0  1  2
-      0,  b, a,  0, -b, a,  -a, 0,  b,   //  3  4  5
-      a,  0, b,  0, -b, -a, a,  0,  -b,  //  6  7  8
-      -a, 0, -b, b, -a, 0,  -b, -a, 0    //  9 10 11
+      0,  b, -a, b, a,  0,  -b, a,  0,  //  0  1  2
+      0,  b, a,  0, -b, a,  -a, 0,  b,  //  3  4  5
+      a,  0, b,  0, -b, -a, a,  0,  -b, //  6  7  8
+      -a, 0, -b, b, -a, 0,  -b, -a, 0   //  9 10 11
   };
 
   static const int indices[] = {
@@ -263,10 +269,11 @@ int addIcosahedron(Mesh& m, float radius) {
 // This function subdivides each triangle in the mesh into four new triangles
 // formed from the vertices and edge midpoints of the original triangle.
 // TODO: add as method to Mesh?
-void subdivide(Mesh& m, unsigned iterations, bool normalize) {
+void subdivide(Mesh &m, unsigned iterations, bool normalize) {
   typedef std::map<uint64_t, unsigned> PointToIndex;
 
-  if (m.primitive() != Mesh::TRIANGLES) return;
+  if (m.primitive() != Mesh::TRIANGLES)
+    return;
 
   for (unsigned k = 0; k < iterations; ++k) {
     PointToIndex middlePointIndexCache;
@@ -279,7 +286,7 @@ void subdivide(Mesh& m, unsigned iterations, bool normalize) {
     for (unsigned j = 0; j < (unsigned)oldIndices.size(); j += 3) {
       // printf("%u %u\n", k, j);
 
-      Mesh::Index* corner = &oldIndices[j];
+      Mesh::Index *corner = &oldIndices[j];
       Mesh::Index mid[3];
 
       for (unsigned i = 0; i < 3; ++i) {
@@ -319,7 +326,7 @@ void subdivide(Mesh& m, unsigned iterations, bool normalize) {
   }
 }
 
-int addIcosphere(Mesh& m, double radius, int divisions) {
+int addIcosphere(Mesh &m, double radius, int divisions) {
   int Nv = m.vertices().size();
   addIcosahedron(m, radius);
   subdivide(m, divisions, true);
@@ -329,7 +336,7 @@ int addIcosphere(Mesh& m, double radius, int divisions) {
 // Stacks are circles cut perpendicular to the z axis while slices are circles
 // cut through the z axis.
 // The top is (0,0,radius) and the bottom is (0,0,-radius).
-int addSphere(Mesh& m, double radius, int slices, int stacks) {
+int addSphere(Mesh &m, double radius, int slices, int stacks) {
   m.primitive(Mesh::TRIANGLES);
 
   int Nv = m.vertices().size();
@@ -346,7 +353,7 @@ int addSphere(Mesh& m, double radius, int slices, int stacks) {
   for (int i = 0; i < slices; ++i) {
     m.index(Nv + 1 + i);
     m.index(Nv + 1 + ((i + 1) % slices));
-    m.index(Nv);  // the north pole
+    m.index(Nv); // the north pole
   }
 
   // Add rings
@@ -387,10 +394,10 @@ int addSphere(Mesh& m, double radius, int slices, int stacks) {
   return m.vertices().size() - Nv;
 }
 
-int addSphereWithTexcoords(Mesh& m, double radius, int bands) {
+int addSphereWithTexcoords(Mesh &m, double radius, int bands, bool isSkyBox) {
   m.primitive(Mesh::TRIANGLES);
 
-  double r = radius;
+  double &r = radius;
 
   // calculate vertex data with closing duplicate vertices for texturing
   for (int lat = 0; lat <= bands; lat++) {
@@ -399,23 +406,31 @@ int addSphereWithTexcoords(Mesh& m, double radius, int bands) {
     double cosTheta = cos(theta);
 
     for (int lon = 0; lon <= bands; lon++) {
-      double phi = lon * 2.0 * M_PI / bands;
+      double phi = lon * M_2PI / bands;
       double sinPhi = sin(phi);
       double cosPhi = cos(phi);
-      double x = cosPhi * sinTheta;
+
+      double x = sinPhi * sinTheta;
       double y = cosTheta;
-      double z = sinPhi * sinTheta;
+      double z = cosPhi * sinTheta;
+
       double u = 1.0 - ((double)lon / bands);
       double v = (double)lat / bands;
+
       m.vertex(r * x, r * y, r * z);
       m.texCoord(u, v);
-      m.normal(x, y, z);
+
+      // inversed normal if skybox
+      if (isSkybox)
+        m.normal(-x, -y, -z);
+      else
+        m.normal(x, y, z);
     }
   }
 
   // add indices
-  for (int lat = 0; lat < bands; lat++) {
-    for (int lon = 0; lon < bands; lon++) {
+  for (int lat = 0; lat < bands; ++lat) {
+    for (int lon = 0; lon < bands; ++lon) {
       int first = (lat * (bands + 1)) + lon;
       int second = first + bands + 1;
       m.index(first);
@@ -427,14 +442,13 @@ int addSphereWithTexcoords(Mesh& m, double radius, int bands) {
       // m.index((second + 1));
       m.index((first + 1));
       m.index((second + 1));
-
     }
   }
 
   return m.vertices().size();
 }
 
-int addWireBox(Mesh& m, float w, float h, float d) {
+int addWireBox(Mesh &m, float w, float h, float d) {
   m.primitive(Mesh::LINES);
 
   int Nv = m.vertices().size();
@@ -460,7 +474,7 @@ int addWireBox(Mesh& m, float w, float h, float d) {
   return m.vertices().size() - Nv;
 }
 
-int addCone(Mesh& m, float radius, const Vec3f& apex, unsigned slices,
+int addCone(Mesh &m, float radius, const Vec3f &apex, unsigned slices,
             unsigned cycles) {
   m.primitive(Mesh::TRIANGLES);
 
@@ -485,11 +499,11 @@ int addCone(Mesh& m, float radius, const Vec3f& apex, unsigned slices,
   return 1 + slices;
 }
 
-int addDisc(Mesh& m, float radius, unsigned slices) {
+int addDisc(Mesh &m, float radius, unsigned slices) {
   return addCone(m, radius, Vec3f(0, 0, 0), slices);
 }
 
-int addPrism(Mesh& m, float btmRadius, float topRadius, float height,
+int addPrism(Mesh &m, float btmRadius, float topRadius, float height,
              unsigned slices, float twist) {
   m.primitive(Mesh::TRIANGLE_STRIP);
   unsigned Nv = m.vertices().size();
@@ -525,17 +539,17 @@ int addPrism(Mesh& m, float btmRadius, float topRadius, float height,
   return 2 * slices;
 }
 
-int addAnnulus(Mesh& m, float inRadius, float outRadius, unsigned slices,
+int addAnnulus(Mesh &m, float inRadius, float outRadius, unsigned slices,
                float twist) {
   return addPrism(m, inRadius, outRadius, 0, slices, twist);
 }
 
-int addCylinder(Mesh& m, float radius, float height, unsigned slices,
+int addCylinder(Mesh &m, float radius, float height, unsigned slices,
                 float twist) {
   return addPrism(m, radius, radius, height, slices, twist);
 }
 
-int addSurface(Mesh& m, int Nx, int Ny, double width, double height, double x,
+int addSurface(Mesh &m, int Nx, int Ny, double width, double height, double x,
                double y) {
   m.primitive(Mesh::TRIANGLE_STRIP);
 
@@ -572,7 +586,7 @@ int addSurface(Mesh& m, int Nx, int Ny, double width, double height, double x,
   return Nx * Ny;
 }
 
-int addSurfaceLoop(Mesh& m, int Nx, int Ny, int loopMode, double width,
+int addSurfaceLoop(Mesh &m, int Nx, int Ny, int loopMode, double width,
                    double height, double x, double y) {
   m.primitive(Mesh::TRIANGLE_STRIP);
 
@@ -615,14 +629,14 @@ int addSurfaceLoop(Mesh& m, int Nx, int Ny, int loopMode, double width,
   return Nx * Ny;
 }
 
-int addTorus(Mesh& m, double minRadius, double majRadius, int Nmin, int Nmaj,
+int addTorus(Mesh &m, double minRadius, double majRadius, int Nmin, int Nmaj,
              double minPhase) {
   int beg = m.vertices().size();
   int Nv = addSurfaceLoop(m, Nmaj, Nmin, 2, 2 * M_PI, 2 * M_PI, M_PI,
                           M_PI - minPhase * 2 * M_PI / Nmin);
 
   for (int i = beg; i < beg + Nv; ++i) {
-    Mesh::Vertex& v = m.vertices()[i];
+    Mesh::Vertex &v = m.vertices()[i];
     v = Mesh::Vertex((majRadius + minRadius * ::cos(v.y)) * ::cos(v.x),
                      (majRadius + minRadius * ::cos(v.y)) * ::sin(v.x),
                      minRadius * ::sin(v.y));
@@ -631,7 +645,7 @@ int addTorus(Mesh& m, double minRadius, double majRadius, int Nmin, int Nmaj,
   return Nv;
 }
 
-int addTexQuad(Mesh& m, float half_width, float half_height) {
+int addTexQuad(Mesh &m, float half_width, float half_height) {
   m.reset();
   m.primitive(Mesh::TRIANGLES);
   m.vertex(-half_width, -half_height, 0);
@@ -649,7 +663,7 @@ int addTexQuad(Mesh& m, float half_width, float half_height) {
   return 6;
 }
 
-int addQuad(Mesh& m, float half_width, float half_height) {
+int addQuad(Mesh &m, float half_width, float half_height) {
   m.reset();
   m.primitive(Mesh::TRIANGLES);
   m.vertex(-half_width, -half_height, 0);
@@ -661,7 +675,7 @@ int addQuad(Mesh& m, float half_width, float half_height) {
   return 6;
 }
 
-int addRect(Mesh& m, float x, float y, float w, float h) {
+int addRect(Mesh &m, float x, float y, float w, float h) {
   m.reset();
   m.primitive(Mesh::TRIANGLES);
   m.vertex(x, y, 0);
@@ -673,7 +687,7 @@ int addRect(Mesh& m, float x, float y, float w, float h) {
   return 6;
 }
 
-int addTexRect(Mesh& m, float x, float y, float w, float h) {
+int addTexRect(Mesh &m, float x, float y, float w, float h) {
   m.reset();
   m.primitive(Mesh::TRIANGLES);
   m.vertex(x, y, 0);
@@ -692,4 +706,4 @@ int addTexRect(Mesh& m, float x, float y, float w, float h) {
   return 6;
 }
 
-}  // namespace al
+} // namespace al
