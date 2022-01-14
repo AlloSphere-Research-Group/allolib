@@ -87,6 +87,16 @@ public:
   std::vector<Vec3f> &audioOutOffsets() { return mAudioOutPositionOffsets; }
 
   /**
+   * @brief Test whether voice is primary or a replica
+   *
+   * Replica voices should not perform certain update computation, and should
+   * get state and values from primary node. This test allows writing code
+   * specific to one or the other type of voices. Only really important if using
+   * DistributedScene.
+   */
+  bool isPrimary() { return !mIsReplica; }
+
+  /**
    * @brief Set the position offset for each of the audio outputs for this voice
    * @param offsets The size of offsets must be equal to the number of outputs
    */
