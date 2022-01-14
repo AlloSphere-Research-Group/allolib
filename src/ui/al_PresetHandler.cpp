@@ -2,6 +2,7 @@
 #include "al/ui/al_PresetHandler.hpp"
 
 #include <cassert>
+#include <chrono>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -228,7 +229,7 @@ void PresetHandler::recallPreset(std::string name) {
   morphTo(name, mMorphTime.get());
 
   int index = -1;
-  for (auto preset : mPresetsMap) {
+  for (const auto &preset : mPresetsMap) {
     if (preset.second == name) {
       index = preset.first;
       break;
@@ -297,14 +298,14 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
                 }
               }
             }
-            for (auto bundleGroup : bundles.at(i)->bundles()) {
+            for (const auto &bundleGroup : bundles.at(i)->bundles()) {
               prefix += "/" + bundleGroup.first + "/";
               processBundleGroup({bundleGroup.second}, prefix);
             }
           }
         };
 
-    for (auto bundleGroup : mBundles) {
+    for (const auto &bundleGroup : mBundles) {
       std::string prefix = "/" + bundleGroup.first + "/";
       processBundleGroup(bundleGroup.second, prefix);
     }
@@ -324,7 +325,7 @@ void PresetHandler::morphTo(std::string presetName, float morphTime) {
   auto parameterStates = loadPresetValues(presetName);
   if (mUseCallbacks) {
     int index = -1;
-    for (auto mapped : mPresetsMap) {
+    for (const auto &mapped : mPresetsMap) {
       if (mapped.second == presetName) {
         index = mapped.first;
         break;
@@ -832,22 +833,22 @@ void PresetHandler::storeCurrentPresetMap(std::string mapName,
 void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
                                           ParameterStates &endValues,
                                           double factor) {
-  for (auto startValue : startValues) {
+  for (auto &startValue : startValues) {
     std::vector<VariantValue> interpValues;
-    for (auto endValue : endValues) {
+    for (auto &endValue : endValues) {
       if (startValue.first == endValue.first) {
         assert(startValue.second.size() == endValue.second.size());
         if (factor != 1.0) {
           for (size_t i = 0; i < endValue.second.size(); i++) {
-            if (startValue.second[i].type() != endValue.second[i].type()) {
-              if (startValue.second[i].type() == VariantType::VARIANT_FLOAT &&
-                  endValue.second[i].type() == VariantType::VARIANT_INT32) {
+            auto startDataType = startValue.second[i].type();
+            auto endDataType = startValue.second[i].type();
+            if (startDataType != endDataType) {
+              if (startDataType == VariantType::VARIANT_FLOAT &&
+                  endDataType == VariantType::VARIANT_INT32) {
                 endValue.second[i] =
                     VariantValue(float(endValue.second[i].get<int32_t>()));
-              } else if (endValue.second[i].type() ==
-                             VariantType::VARIANT_FLOAT &&
-                         startValue.second[i].type() ==
-                             VariantType::VARIANT_INT32) {
+              } else if (endDataType == VariantType::VARIANT_FLOAT &&
+                         startDataType == VariantType::VARIANT_INT32) {
                 startValue.second[i] =
                     VariantValue(float(startValue.second[i].get<int32_t>()));
               } else {
@@ -855,22 +856,21 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
                           << std::endl;
                 return;
               }
-            }
-            if (startValue.second[i].type() == VariantType::VARIANT_FLOAT) {
-              interpValues.push_back(VariantValue(
-                  startValue.second[i].get<float>() +
-                  ((float)factor * (endValue.second[i].get<float>() -
-                                    startValue.second[i].get<float>()))));
-            } else if (startValue.second[i].type() ==
-                       VariantType::VARIANT_INT32) {
-              float value = startValue.second[i].get<int32_t>() +
-                            ((float)factor *
-                             (endValue.second[i].get<int32_t>() -
-                              (float)startValue.second[i].get<int32_t>()));
-              interpValues.push_back(VariantValue((int32_t)value));
-            } else if (startValue.second[i].type() ==
-                       VariantType::VARIANT_STRING) {
-              interpValues.push_back(endValue.second[i]);
+            } else {
+              if (startDataType == VariantType::VARIANT_FLOAT) {
+                interpValues.push_back(VariantValue(
+                    startValue.second[i].get<float>() +
+                    ((float)factor * (endValue.second[i].get<float>() -
+                                      startValue.second[i].get<float>()))));
+              } else if (startDataType == VariantType::VARIANT_INT32) {
+                float value = startValue.second[i].get<int32_t>() +
+                              ((float)factor *
+                               (endValue.second[i].get<int32_t>() -
+                                (float)startValue.second[i].get<int32_t>()));
+                interpValues.push_back(VariantValue((int32_t)value));
+              } else if (startDataType == VariantType::VARIANT_STRING) {
+                interpValues.push_back(endValue.second[i]);
+              }
             }
           }
         } else {
@@ -899,9 +899,9 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
           }
         }
 
-        std::function<void(std::vector<ParameterBundle *>, std::string)>
+        std::function<void(std::vector<ParameterBundle *>, std::string &)>
             processBundleGroup = [&](std::vector<ParameterBundle *> bundles,
-                                     std::string prefix) {
+                                     std::string &prefix) {
               for (unsigned int i = 0; i < bundles.size(); i++) {
                 std::string bundlePrefix = prefix + std::to_string(i);
                 for (auto *param : bundles.at(i)->parameters()) {
@@ -919,7 +919,7 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
               }
             };
 
-        for (auto bundleGroup : mBundles) {
+        for (const auto &bundleGroup : mBundles) {
           std::string prefix = "/" + bundleGroup.first + "/";
           processBundleGroup(bundleGroup.second, prefix);
         }
@@ -944,8 +944,19 @@ void PresetHandler::stepMorphing() {
 
 void PresetHandler::morphingFunction(al::PresetHandler *handler) {
   while (handler->mCpuThreadRunning) {
+    auto start = std::chrono::steady_clock::now();
     handler->stepMorphing();
-    al::wait(handler->mMorphInterval);
+    auto end = std::chrono::steady_clock::now();
+    auto duration =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+            .count() *
+        10e-6;
+    if (duration < handler->mMorphInterval) {
+      al::wait(handler->mMorphInterval - duration);
+    } else {
+      std::cout << "WARNING missed morphing step time by "
+                << duration - handler->mMorphInterval << std::endl;
+    }
   }
 }
 
