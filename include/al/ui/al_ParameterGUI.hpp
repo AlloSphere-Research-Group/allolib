@@ -232,6 +232,14 @@ public:
   std::string name() { return mName; }
 
   int &currentBundle() { return mCurrentBundle; }
+
+  void setCurrentBundle(int index) {
+    if (index >= 0) {
+      mCurrentBundle = index;
+    } else {
+      mBundleGlobal = true;
+    }
+  }
   bool &bundleGlobal() { return mBundleGlobal; }
   std::vector<ParameterBundle *> bundles() { return mBundles; }
 

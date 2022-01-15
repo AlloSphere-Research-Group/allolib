@@ -281,6 +281,15 @@ public:
   }
 
   /**
+   * @brief Set currently active bundle
+   *
+   * -1 enables global bundle control
+   */
+  void setCurrentBundle(std::string bundleName, int index) {
+    mBundles[bundleName]->setCurrentBundle(index);
+  }
+
+  /**
    * @brief Set background alpha value
    *
    * 0 for transparent, 1 for opaque
