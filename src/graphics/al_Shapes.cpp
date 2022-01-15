@@ -394,7 +394,7 @@ int addSphere(Mesh &m, double radius, int slices, int stacks) {
   return m.vertices().size() - Nv;
 }
 
-int addSphereWithTexcoords(Mesh &m, double radius, int bands, bool isSkyBox) {
+int addSphereWithTexcoords(Mesh &m, double radius, int bands, bool isSkybox) {
   m.primitive(Mesh::TRIANGLES);
 
   double &r = radius;
@@ -421,7 +421,7 @@ int addSphereWithTexcoords(Mesh &m, double radius, int bands, bool isSkyBox) {
       m.texCoord(u, v);
 
       // inversed normal if skybox
-      if (isSkyBox)
+      if (isSkybox)
         m.normal(-x, -y, -z);
       else
         m.normal(x, y, z);
