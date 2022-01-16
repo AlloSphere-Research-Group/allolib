@@ -196,16 +196,16 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
     Vec3d currentPos = pose->get().pos();
     Quatd currQuat = pose->get().quat();
     float x = currentPos.x;
-    if (ImGui::SliderFloat(("X" + suffix + pose->displayName()).c_str(), &x, -5,
-                           5)) {
+    if (ImGui::SliderFloat(("X" + suffix + pose->displayName()).c_str(), &x,
+                           -10, 10)) {
       currentPos.x = x;
       for (auto *p : params) {
         p->set(Pose(currentPos, currQuat));
       }
     }
     float y = currentPos.y;
-    if (ImGui::SliderFloat(("Y" + suffix + pose->displayName()).c_str(), &y, -5,
-                           5)) {
+    if (ImGui::SliderFloat(("Y" + suffix + pose->displayName()).c_str(), &y,
+                           -10, 10)) {
       currentPos.y = y;
       for (auto *p : params) {
         p->set(Pose(currentPos, currQuat));
@@ -221,7 +221,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
     }
     ImGui::Text("Quaternion");
     float w = currQuat.w;
-    if (ImGui::SliderFloat(("w" + suffix + pose->displayName()).c_str(), &w, 0,
+    if (ImGui::SliderFloat(("w" + suffix + pose->displayName()).c_str(), &w, -1,
                            1)) {
       currQuat.w = w;
       currQuat.normalize();
@@ -231,7 +231,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
     }
 
     x = currQuat.x;
-    if (ImGui::SliderFloat(("x" + suffix + pose->displayName()).c_str(), &x, 0,
+    if (ImGui::SliderFloat(("x" + suffix + pose->displayName()).c_str(), &x, -1,
                            1)) {
       currQuat.x = x;
       currQuat.normalize();
@@ -241,7 +241,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
     }
 
     y = currQuat.y;
-    if (ImGui::SliderFloat(("y" + suffix + pose->displayName()).c_str(), &y, 0,
+    if (ImGui::SliderFloat(("y" + suffix + pose->displayName()).c_str(), &y, -1,
                            1)) {
       currQuat.y = y;
       currQuat.normalize();
@@ -251,7 +251,7 @@ void ParameterGUI::drawParameterPose(std::vector<ParameterPose *> params,
     }
 
     z = currQuat.z;
-    if (ImGui::SliderFloat(("z" + suffix + pose->displayName()).c_str(), &z, 0,
+    if (ImGui::SliderFloat(("z" + suffix + pose->displayName()).c_str(), &z, -1,
                            1)) {
       currQuat.z = z;
       currQuat.normalize();
