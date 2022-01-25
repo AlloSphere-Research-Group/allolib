@@ -51,7 +51,13 @@ add_subdirectory(stb)
 add_subdirectory(dr_libs)
 
 # Imgui
-add_library(imgui STATIC
+if(ALLOLIB_BUILD_SHARED)
+    set(ALLOLIB_EXTERNAL_LIB_TYPE "SHARED")
+else()
+    set(ALLOLIB_EXTERNAL_LIB_TYPE "STATIC")
+endif()
+
+add_library(imgui ${ALLOLIB_EXTERNAL_LIB_TYPE}
     imgui/imgui.cpp
     imgui/imgui_demo.cpp
     imgui/imgui_draw.cpp
@@ -76,7 +82,7 @@ else ()
     set(IpSystemTypePath ip/posix)
 endif ()
 
-add_library(oscpack STATIC
+add_library(oscpack ${ALLOLIB_EXTERNAL_LIB_TYPE}
 
     oscpack/ip/IpEndpointName.h
     oscpack/ip/IpEndpointName.cpp
