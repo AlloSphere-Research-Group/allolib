@@ -338,7 +338,9 @@ if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
         -Wall>
         $<$<CXX_COMPILER_ID:MSVC>:
         /wd4221 /wd4224 /wd4244  /wd4305  /wd4267 /wd4005 /wd4996>)
-    set_target_properties(al PROPERTIES LINK_FLAGS "/ignore:4099")
+    if (AL_WINDOWS)
+        set_target_properties(al PROPERTIES LINK_FLAGS "/ignore:4099")
+    endif(AL_WINDOWS)
 endif()
 
 target_include_directories(al PUBLIC
