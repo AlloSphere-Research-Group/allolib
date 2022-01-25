@@ -45,6 +45,13 @@ if(TRAVIS_BUILD)
   add_definitions(-DTRAVIS_BUILD)
 endif(TRAVIS_BUILD)
 
+if(ALLOLIB_BUILD_SHARED)
+    set(AL_LIBRARY_TYPE "SHARED")
+else()
+    set(AL_LIBRARY_TYPE "STATIC")
+endif()
+
+
 find_package(OpenGL REQUIRED)
 add_subdirectory(external)
 
@@ -289,13 +296,6 @@ set(sources
   src/ui/al_PresetMapper.cpp
 
 )
-
-if(ALLOLIB_BUILD_SHARED)
-    set(AL_LIBRARY_TYPE "SHARED")
-else()
-    set(AL_LIBRARY_TYPE "STATIC")
-endif()
-
 
 add_library(al ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
