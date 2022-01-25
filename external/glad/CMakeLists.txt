@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.0)
 project(glad)
 
-add_library(glad STATIC src/glad.c)
+if(ALLOLIB_BUILD_SHARED)
+    set(ALLOLIB_EXTERNAL_LIB_TYPE "SHARED")
+else()
+    set(ALLOLIB_EXTERNAL_LIB_TYPE "STATIC")
+endif()
+
+add_library(glad ${ALLOLIB_EXTERNAL_LIB_TYPE} src/glad.c)
 
 target_include_directories(glad PUBLIC include)
 
