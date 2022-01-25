@@ -23,6 +23,7 @@ option(APPVEYOR_BUILD "" OFF)
 option(ALLOLIB_BUILD_TESTS "" OFF)
 option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF)
 option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF)
+option(ALLOLIB_BUILD_SHARED "Build all libraries as shared libraries" OFF)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(AL_MACOS 1 CACHE BOOL "Building on OS X")
@@ -289,7 +290,14 @@ set(sources
 
 )
 
-add_library(al STATIC ${headers} ${sources})
+if(ALLOLIB_BUILD_SHARED)
+    set(AL_LIBRARY_TYPE "SHARED")
+else()
+    set(AL_LIBRARY_TYPE "STATIC")
+endif()
+
+
+add_library(al ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
 set_target_properties(al PROPERTIES
   DEBUG_POSTFIX d
