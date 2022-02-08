@@ -39,8 +39,25 @@
 
 namespace al {
 
+/*
+#define NC_NAT          0
+#define NC_BYTE         1
+#define NC_CHAR         2
+#define NC_SHORT        3
+#define NC_INT          4
+#define NC_LONG         NC_INT
+#define NC_FLOAT        5
+#define NC_DOUBLE       6
+#define NC_UBYTE        7
+#define NC_USHORT       8
+#define NC_UINT         9
+#define NC_INT64        10
+#define NC_UINT64       11
+#define NC_STRING       12
+*/
+
 // VariantType enum is equivalent to NC_* types
-enum VariantType {
+enum class VariantType {
   VARIANT_NONE = 0,
   VARIANT_INT64 = 10,
   VARIANT_INT32 = 4,
