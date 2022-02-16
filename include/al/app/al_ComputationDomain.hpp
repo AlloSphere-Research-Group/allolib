@@ -70,6 +70,7 @@ public:
    * @param subDomain sub domain to insert
    * @param prepend determines if subdomainshould run before or after this
    * domain
+   * @return true if sub domain was inserted sucessfully
    *
    * It is the caller's responsibility to ensure the domain is initialized and
    * ready if this domain is already running.
@@ -80,18 +81,20 @@ public:
    * It may block indefinitely if the parent domain does not release the
    * sub domain locks.
    */
-  virtual void addSubDomain(std::shared_ptr<SynchronousDomain> subDomain,
+  virtual bool addSubDomain(std::shared_ptr<SynchronousDomain> subDomain,
                             bool prepend = false);
 
   /**
    * @brief Remove a subdomain
-   * @param subDomain
+   * @param subDomain if nullptr all subdomains are removed
+   * @return true if sub domain was inserted sucessfully
    *
    * This operation is thread safe, but it might block causing drops or missed
    * deadlines for the parent domain. If this is a problem, the domain should be
-   * stopped prior to adding/removeing sub-domains.
+   * stopped prior to adding/removing sub-domains.
    */
-  virtual void removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain);
+  virtual bool
+  removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain = nullptr);
 
   /**
    * @brief Return time delta with respect to previous processing pass for this
@@ -222,6 +225,16 @@ public:
   virtual bool start() = 0;
 
   /**
+   * @brief start the domain on a separate thread so it won't block
+   * @return true if start was successful or if already running async
+   *
+   * Assumes that init() has already been called.
+   * Do not mix calls to start with startAsync as the behavior will be undefined
+   * Domain must be stopped with stopAsync().
+   */
+  virtual bool startAsync();
+
+  /**
    * @brief stop the asyncrhonous execution of the domain
    * @return true if stop was successful
    *
@@ -229,6 +242,20 @@ public:
    * work after calling stop()
    */
   virtual bool stop() = 0;
+
+  /**
+   * @brief stop the threaded execution of the domain
+   * @return true if stop was successful
+   *
+   * Only call this function if domain was started with startAsync()
+   */
+  virtual bool stopAsync();
+
+  /**
+   * @brief Returns true if domain is running and has been started with
+   * startAsync()
+   */
+  bool runningAsync();
 
 protected:
   /**
@@ -250,6 +277,7 @@ protected:
 private:
   std::vector<std::function<void(ComputationDomain *)>> mStartCallbacks;
   std::vector<std::function<void(ComputationDomain *)>> mStopCallbacks;
+  std::unique_ptr<std::thread> mAsyncThread;
 };
 
 template <class DomainType>

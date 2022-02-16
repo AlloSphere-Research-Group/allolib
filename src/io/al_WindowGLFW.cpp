@@ -390,8 +390,10 @@ void Window::implRefresh() {
 
 void Window::implDestroy() { mImpl->destroy(); }
 
-void Window::implClose() { /*glfwSetWindowShouldClose(mImpl->mGLFWwindow,
-                              true);*/
+void Window::implClose() {
+  onClose();
+  /*glfwSetWindowShouldClose(mImpl->mGLFWwindow,
+                            true);*/
 }
 
 void *Window::implWindowHandle() { return mImpl->glfwWindow(); }

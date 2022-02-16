@@ -7,7 +7,7 @@ using namespace al;
 
 bool ComputationDomain::initializeSubdomains(bool pre) {
   bool ret = true;
-  for (auto subDomain : mSubDomainList) {
+  for (const auto &subDomain : mSubDomainList) {
     if (subDomain.second == pre) {
       auto syncSubDomain =
           std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
@@ -22,7 +22,7 @@ bool ComputationDomain::initializeSubdomains(bool pre) {
 bool ComputationDomain::tickSubdomains(bool pre) {
   bool ret = true;
   std::unique_lock<std::mutex> lk(mSubdomainLock);
-  for (auto subDomain : mSubDomainList) {
+  for (const auto &subDomain : mSubDomainList) {
     if (subDomain.second == pre) {
       auto syncSubDomain =
           std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
@@ -37,7 +37,7 @@ bool ComputationDomain::tickSubdomains(bool pre) {
 
 bool ComputationDomain::cleanupSubdomains(bool pre) {
   bool ret = true;
-  for (auto subDomain : mSubDomainList) {
+  for (const auto &subDomain : mSubDomainList) {
     if (subDomain.second == pre) {
       auto syncSubDomain =
           std::dynamic_pointer_cast<SynchronousDomain>(subDomain.first);
@@ -75,23 +75,32 @@ bool ComputationDomain::cleanup(ComputationDomain *parent) {
   return ret;
 }
 
-void ComputationDomain::addSubDomain(
+bool ComputationDomain::addSubDomain(
     std::shared_ptr<SynchronousDomain> subDomain, bool prepend) {
   std::lock_guard<std::mutex> lk(mSubdomainLock);
   mSubDomainList.push_back({subDomain, prepend});
+  return true;
 }
 
-void ComputationDomain::removeSubDomain(
+bool ComputationDomain::removeSubDomain(
     std::shared_ptr<SynchronousDomain> subDomain) {
   // Only Synchronous domains are allowed as subdomains
+  if (!subDomain) {
+    for (const auto &existingSubDomain : mSubDomainList) {
+      existingSubDomain.first->cleanup();
+    }
+    mSubDomainList.clear();
+    return true;
+  }
   for (auto existingSubDomain = mSubDomainList.begin();
        existingSubDomain != mSubDomainList.end(); existingSubDomain++) {
     if (existingSubDomain->first == subDomain) {
       existingSubDomain->first->cleanup();
       mSubDomainList.erase(existingSubDomain);
-      break;
+      return true;
     }
   }
+  return false;
 }
 
 void ComputationDomain::registerInitializeCallback(
@@ -109,6 +118,22 @@ bool SynchronousDomain::tick() {
   ret &= tickSubdomains(false);
   return ret;
 }
+
+bool AsynchronousDomain::startAsync() {
+  if (mAsyncThread) {
+    return true;
+  }
+  mAsyncThread = std::make_unique<std::thread>([this]() { this->start(); });
+  return true;
+}
+
+bool AsynchronousDomain::stopAsync() {
+  auto ret = stop();
+  mAsyncThread->join();
+  return ret;
+}
+
+bool AsynchronousDomain::runningAsync() { return mAsyncThread != nullptr; }
 
 void AsynchronousDomain::callStartCallbacks() {
   for (auto callback : mStartCallbacks) {

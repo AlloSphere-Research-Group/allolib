@@ -13,21 +13,11 @@
 #include "al/graphics/al_Graphics.hpp"
 #include "al/io/al_ControlNav.hpp"
 #include "al/io/al_Window.hpp"
+#include "al/types/al_SingleRWRingBuffer.hpp"
 
 namespace al {
 
 class GLFWOpenGLWindowDomain;
-
-struct WindowSetupProperties {
-  Window::Cursor cursor = Window::Cursor::POINTER;
-  bool cursorVisible = true;
-  Window::Dim dimensions{50, 50, 640, 480};
-  Window::DisplayMode displayMode{Window::DEFAULT_BUF};
-  bool fullScreen = false;
-  std::string title = "Alloapp";
-  bool vsync = true;
-  bool decorated = true;
-};
 
 /**
  * @brief OpenGLGraphicsDomain class
@@ -45,10 +35,26 @@ public:
   bool stop() override;
   bool cleanup(ComputationDomain *parent = nullptr) override;
 
-  void quit() { mShouldQuitApp = true; }
-  bool shouldQuit() { return mShouldQuitApp || mSubDomainList.size() == 0; }
+  void quit() { mShouldStopDomain = true; }
+  bool shouldStop() { return mShouldStopDomain; }
 
   bool running() { return mRunning; }
+
+  bool addSubDomain(std::shared_ptr<SynchronousDomain> subDomain,
+                    bool prepend = false) override;
+  bool removeSubDomain(std::shared_ptr<SynchronousDomain> subDomain) override;
+
+  template <class DomainType>
+  std::shared_ptr<DomainType> newSubDomain(bool prepend = false) {
+    auto newDomain = std::make_shared<DomainType>();
+    if (!dynamic_cast<SynchronousDomain *>(newDomain.get())) {
+      // Only Synchronous domains are allowed as subdomains
+      throw std::runtime_error(
+          "Subdomain must be a subclass of SynchronousDomain");
+    }
+    addSubDomain(newDomain, prepend);
+    return newDomain;
+  }
 
   /**
    * @brief Create a new window
@@ -62,7 +68,7 @@ public:
   void closeWindow(std::shared_ptr<GLFWOpenGLWindowDomain> windowDomain);
 
   // Next window details
-  WindowSetupProperties nextWindowProperties;
+  Window::WindowSetupProperties nextWindowProperties;
 
   std::function<void(void)> onCreate = []() {};
   std::function<void()> onExit = []() {};
@@ -72,8 +78,37 @@ public:
 
   virtual void postOnExit() {}
 
+protected:
+  static void processDomainAddRemoveQueues(OpenGLGraphicsDomain *domain);
+  static void domainThreadFunction(OpenGLGraphicsDomain *domain);
+
 private:
-  std::atomic<bool> mShouldQuitApp{false};
+  bool initPrivate();
+  bool startPrivate();
+  bool tick();
+  bool stopPrivate();
+  bool cleanupPrivate();
+
+  std::mutex mSubDomainInsertLock;
+  std::condition_variable mSubDomainInsertSignal;
+  std::pair<std::shared_ptr<SynchronousDomain>, bool> mSubdomainToInsert;
+
+  std::mutex mSubDomainRemoveLock;
+  std::condition_variable mSubDomainRemoveSignal;
+  std::shared_ptr<SynchronousDomain> mSubdomainToRemove;
+
+  enum class CommandType { START, STOP, CLEANUP, NONE };
+  std::mutex mDomainSignalLock;
+
+  std::mutex mDomainCommandLock;
+  std::condition_variable mDomainCommandSignal;
+  CommandType mDomainCommand;
+  bool mCommandResult;
+
+  std::atomic<bool> mDomainStartSpinLock;
+  std::unique_ptr<std::thread> mDomainThread;
+
+  std::atomic<bool> mShouldStopDomain{false};
   bool mRunning{false};
 };
 

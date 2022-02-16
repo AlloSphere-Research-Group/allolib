@@ -289,6 +289,17 @@ public:
     void print() const { printf("Dim: %4d x %4d @ (%4d, %4d)\n", w, h, l, t); }
   };
 
+  struct WindowSetupProperties {
+    Window::Cursor cursor = Window::Cursor::POINTER;
+    bool cursorVisible = true;
+    Window::Dim dimensions{50, 50, 640, 480};
+    Window::DisplayMode displayMode{Window::DEFAULT_BUF};
+    bool fullScreen = false;
+    std::string title = "Alloapp";
+    bool vsync = true;
+    bool decorated = true;
+  };
+
   Window();
   virtual ~Window();
 
@@ -386,6 +397,7 @@ public:
     return true;
   };
   std::function<void(int, int)> onResize = [](int, int) {};
+  std::function<void(void)> onClose = []() {};
 
   WindowEventHandlers &windowEventHandlers() { return mWindowEventHandlers; }
 
@@ -408,6 +420,10 @@ public:
   Keyboard mKeyboard;
   Mouse mMouse;
   WindowEventHandlers mWindowEventHandlers;
+
+  // TODO information here is duplicated below in individual class members.
+  WindowSetupProperties
+      mWindowProperties; // Store window properties before creation
   Dim mDim{50, 50, 640, 480};
   Dim mFullScreenDim{0};
   DisplayMode mDisplayMode = DEFAULT_BUF;

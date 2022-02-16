@@ -158,6 +158,12 @@ void DistributedApp::prepare() {
         std::find(mDomainList.begin(), mDomainList.end(), mAudioDomain));
   }
   parameterServer() << mAudioControl.gain;
+  if (hasCapability(CAP_OMNIRENDERING)) {
+    omniRendering =
+        graphicsDomain()->newSubDomain<GLFWOpenGLOmniRendererDomain>();
+  } else if (hasCapability(CAP_RENDERING)) {
+    mDefaultWindowDomain = graphicsDomain()->newWindow();
+  }
 
   initializeDomains();
   initialized = true;
@@ -176,10 +182,23 @@ void DistributedApp::start() {
   prepare();
   stdControls.app = this;
 
+  if (isPrimary()) {
+    //    std::cout << "Running Primary" << std::endl;
+    if (!mFoundHost) {
+      std::cout << "Using default configuration (no distributed_app.toml)"
+                << std::endl;
+    } else {
+      //      std::cout << "Running REPLICA" << std::endl;
+      for (const auto &hostRole : mRoleMap) {
+        if (hostRole.first != name()) {
+          parameterServer().addListener(hostRole.first, oscDomain()->port);
+        }
+      }
+    }
+    parameterServer().notifyAll();
+  }
+
   if (hasCapability(CAP_OMNIRENDERING)) {
-    omniRendering =
-        graphicsDomain()->newSubDomain<GLFWOpenGLOmniRendererDomain>();
-    omniRendering->init(graphicsDomain().get());
     omniRendering->window().append(stdControls);
 
     omniRendering->window().append(omniRendering->navControl());
@@ -206,8 +225,6 @@ void DistributedApp::start() {
       omniRendering->drawOmni = true;
     }
   } else if (hasCapability(CAP_RENDERING)) {
-    mDefaultWindowDomain = graphicsDomain()->newWindow();
-    mDefaultWindowDomain->init(graphicsDomain().get());
     mDefaultWindowDomain->window().append(stdControls);
     stdControls.app = this;
     stdControls.mWindow = &mDefaultWindowDomain->window();
@@ -230,22 +247,6 @@ void DistributedApp::start() {
         std::bind(&App::onMouseMove, this, std::placeholders::_1);
     mDefaultWindowDomain->window().onMouseScroll =
         std::bind(&App::onMouseScroll, this, std::placeholders::_1);
-  }
-
-  if (isPrimary()) {
-    //    std::cout << "Running Primary" << std::endl;
-    if (!mFoundHost) {
-      std::cout << "Using default configuration (no distributed_app.toml)"
-                << std::endl;
-    } else {
-      //      std::cout << "Running REPLICA" << std::endl;
-      for (const auto &hostRole : mRoleMap) {
-        if (hostRole.first != name()) {
-          parameterServer().addListener(hostRole.first, oscDomain()->port);
-        }
-      }
-    }
-    parameterServer().notifyAll();
   }
 
   onInit();

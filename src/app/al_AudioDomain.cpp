@@ -12,6 +12,10 @@ AudioDomain::AudioDomain() {
 bool AudioDomain::init(ComputationDomain *parent) {
   (void)parent;
   bool ret = true;
+  if (audioIO().callback == nullptr) {
+    audioIO().callback = AudioDomain::AppAudioCB;
+    audioIO().user(this);
+  }
   callInitializeCallbacks();
   return ret;
 }
@@ -28,7 +32,7 @@ bool AudioDomain::stop() {
   bool ret = true;
   ret &= audioIO().stop();
   ret &= audioIO().close();
-  return true;
+  return ret;
 }
 
 bool AudioDomain::cleanup(ComputationDomain * /*parent*/) {

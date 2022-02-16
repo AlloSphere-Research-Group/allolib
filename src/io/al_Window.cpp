@@ -82,6 +82,14 @@ void WindowEventHandler::removeFromWindow() {
 bool Window::create(bool verbose) {
   if (!created()) {
     if (implCreate(verbose)) {
+      decorated(mWindowProperties.decorated);
+      cursor(mWindowProperties.cursor);
+      cursorHide(!mWindowProperties.cursorVisible);
+      dimensions(mWindowProperties.dimensions);
+      displayMode(mWindowProperties.displayMode);
+      fullScreen(mWindowProperties.fullScreen);
+      title(mWindowProperties.title);
+      vsync(mWindowProperties.vsync);
       return true;
     }
   }

@@ -7,7 +7,7 @@ App::App() { createDomains(); }
 void App::quit() { graphicsDomain()->quit(); }
 
 bool App::shouldQuit() {
-  return graphicsDomain()->shouldQuit(); /*|| graphicsDomain()->shouldClose();*/
+  return graphicsDomain()->shouldStop(); /*|| graphicsDomain()->shouldClose();*/
 }
 
 void App::fps(double f) { graphicsDomain()->fps(f); }
@@ -252,7 +252,6 @@ ParameterServer &App::parameterServer() {
 
 void App::start() {
   initializeDomains();
-  mDefaultWindowDomain = graphicsDomain()->newWindow();
 
   mDefaultWindowDomain->onDraw =
       std::bind(&App::onDraw, this, std::placeholders::_1);
@@ -273,6 +272,8 @@ void App::start() {
   mDefaultWindowDomain->window().onResize = std::bind(
       &App::onResize, this, std::placeholders::_1, std::placeholders::_2);
   mDefaultWindowDomain->window().append(stdControls);
+
+  mDefaultWindowDomain->window().onClose = [this]() { this->quit(); };
   stdControls.app = this;
   stdControls.mWindow = &mDefaultWindowDomain->window();
 
@@ -311,10 +312,12 @@ void App::createDomains() {
   mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
   mSimulationDomain =
       mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
+
+  mDefaultWindowDomain = graphicsDomain()->newWindow();
 }
 
 void App::initializeDomains() {
-  for (auto domain : mDomainList) {
+  for (const auto &domain : mDomainList) {
     auto domainPtr = domain.get();
     if (strcmp(typeid(*domainPtr).name(),
                typeid(OpenGLGraphicsDomain).name()) == 0) {
