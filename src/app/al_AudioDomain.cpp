@@ -18,9 +18,11 @@ bool AudioDomain::init(ComputationDomain *parent) {
 
 bool AudioDomain::start() {
   bool ret = true;
-  ret &= audioIO().open();
-  gam::sampleRate(audioIO().framesPerSecond());
-  ret &= audioIO().start();
+  if (audioIO().channelsIn() > 0 && audioIO().channelsOut() > 0) {
+    ret &= audioIO().open();
+    gam::sampleRate(audioIO().framesPerSecond());
+    ret &= audioIO().start();
+  }
   return ret;
 }
 
@@ -28,7 +30,7 @@ bool AudioDomain::stop() {
   bool ret = true;
   ret &= audioIO().stop();
   ret &= audioIO().close();
-  return true;
+  return ret;
 }
 
 bool AudioDomain::cleanup(ComputationDomain * /*parent*/) {
@@ -62,9 +64,11 @@ void AudioDomain::AppAudioCB(AudioIOData &io) {
 // -----
 bool GammaAudioDomain::start() {
   bool ret = true;
-  ret &= audioIO().open();
-  gam::Domain::spu(audioIO().framesPerSecond());
-  gam::sampleRate(audioIO().framesPerSecond());
-  ret &= audioIO().start();
+  if (audioIO().channelsIn() > 0 && audioIO().channelsOut() > 0) {
+    ret &= audioIO().open();
+    gam::Domain::spu(audioIO().framesPerSecond());
+    gam::sampleRate(audioIO().framesPerSecond());
+    ret &= audioIO().start();
+  }
   return ret;
 }

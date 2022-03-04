@@ -32,6 +32,8 @@ public:
   AudioIO &audioIO() { return mAudioIO; }
   const AudioIO &audioIO() const { return mAudioIO; }
 
+  // You can disable the domain from running by setting audioOuputs and
+  // audioInputs to zero
   void configure(double audioRate = 44100, int audioBlockSize = 512,
                  int audioOutputs = -1, int audioInputs = -1);
 
