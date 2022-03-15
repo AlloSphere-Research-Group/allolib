@@ -13,7 +13,19 @@
 #include "al/ui/al_Parameter.hpp"
 
 namespace al {
+
+class ComputationDomain;
 class SynchronousDomain;
+
+class DomainMember {
+public:
+  virtual ComputationDomain *getDefaultDomain() { return nullptr; }
+  virtual void registerWithDomain(ComputationDomain *domain = nullptr);
+  virtual void unregisterFromDomain(ComputationDomain *domain = nullptr);
+
+protected:
+  DomainMember() {}
+};
 
 /**
  * @brief ComputationDomain class
@@ -139,6 +151,11 @@ public:
    */
   std::vector<ParameterMeta *> parameters() { return mParameters; }
 
+  static ComputationDomain *getDomain(std::string tag, size_t index = 0);
+
+  virtual bool registerObject(void *object) { return true; }
+  virtual bool unregisterObject(void *object) { return true; }
+
 protected:
   /**
    * @brief initializeSubdomains should be called within the domain's
@@ -147,8 +164,8 @@ protected:
    * domains.
    * @return true if all initializations sucessful.
    *
-   * You must call this function twice: once for prepended and then for appended
-   * domains.
+   * You must call this function twice: once for prepended and then for
+   * appended domains.
    */
   bool initializeSubdomains(bool pre = false);
 
@@ -157,8 +174,8 @@ protected:
    * @param pre execute prepended domains if true, otherwise appended domains.
    * @return true if all execution sucessful.
    *
-   * You must call this function twice: once for prepended and then for appended
-   * domains.
+   * You must call this function twice: once for prepended and then for
+   * appended domains.
    */
   bool tickSubdomains(bool pre = false);
 
@@ -167,8 +184,8 @@ protected:
    * @param pre cleanup prepended domains if true, otherwise appended domains.
    * @return true if all cleanup sucessful.
    *
-   * You must call this function twice: once for prepended and then for appended
-   * domains.
+   * You must call this function twice: once for prepended and then for
+   * appended domains.
    */
   bool cleanupSubdomains(bool pre = false);
 
@@ -190,9 +207,13 @@ protected:
 
   // Add parameters for domain control here
   std::vector<ParameterMeta *> mParameters;
-
-protected:
   bool mInitialized{false};
+
+  // Global singleton domain manager
+  static std::vector<std::pair<ComputationDomain *, std::string>>
+      mPublicDomains;
+  static std::mutex mPublicDomainsLock;
+  void addPublicDomain(ComputationDomain *domain, std::string tag);
 
 private:
   std::vector<std::function<void(ComputationDomain *)>> mInitializeCallbacks;
@@ -229,8 +250,8 @@ public:
    * @return true if start was successful or if already running async
    *
    * Assumes that init() has already been called.
-   * Do not mix calls to start with startAsync as the behavior will be undefined
-   * Domain must be stopped with stopAsync().
+   * Do not mix calls to start with startAsync as the behavior will be
+   * undefined Domain must be stopped with stopAsync().
    */
   virtual bool startAsync();
 
@@ -259,14 +280,15 @@ public:
 
 protected:
   /**
-   * @brief callStartCallbacks should be called by children of this class after
-   * the domain has been set up to start, before going into the blocking loop
+   * @brief callStartCallbacks should be called by children of this class
+   * after the domain has been set up to start, before going into the blocking
+   * loop
    */
   void callStartCallbacks();
 
   /**
-   * @brief callStopCallbacks should be called by children of this class on the
-   * stop request, before the domain has been stopped
+   * @brief callStopCallbacks should be called by children of this class on
+   * the stop request, before the domain has been stopped
    */
   void callStopCallbacks() {
     for (auto callback : mStopCallbacks) {

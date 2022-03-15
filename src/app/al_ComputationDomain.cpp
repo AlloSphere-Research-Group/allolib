@@ -5,6 +5,10 @@
 
 using namespace al;
 
+std::vector<std::pair<ComputationDomain *, std::string>>
+    ComputationDomain::mPublicDomains;
+std::mutex ComputationDomain::mPublicDomainsLock;
+
 bool ComputationDomain::initializeSubdomains(bool pre) {
   bool ret = true;
   for (const auto &subDomain : mSubDomainList) {
@@ -61,6 +65,18 @@ void ComputationDomain::callCleanupCallbacks() {
   }
 }
 
+void ComputationDomain::addPublicDomain(ComputationDomain *domain,
+                                        std::string tag) {
+  std::lock_guard<std::mutex> lk(mPublicDomainsLock);
+  if (std::find(mPublicDomains.begin(), mPublicDomains.end(),
+                std::pair<ComputationDomain *, std::string>{domain, tag}) ==
+      mPublicDomains.end()) {
+    mPublicDomains.push_back({domain, tag});
+  } else {
+    std::cout << "Warning Domain already registered." << std::endl;
+  }
+}
+
 bool ComputationDomain::init(ComputationDomain *parent) {
   bool ret = initializeSubdomains(true);
   ret &= initializeSubdomains(false);
@@ -103,6 +119,20 @@ bool ComputationDomain::removeSubDomain(
   return false;
 }
 
+ComputationDomain *ComputationDomain::getDomain(std::string tag, size_t index) {
+  std::lock_guard<std::mutex> lk(mPublicDomainsLock);
+  for (const auto &domain : mPublicDomains) {
+    if (domain.second == tag) {
+      if (index == 0) {
+        return domain.first;
+      } else {
+        index--;
+      }
+    }
+  }
+  return nullptr;
+}
+
 void ComputationDomain::registerInitializeCallback(
     std::function<void(ComputationDomain *)> callback) {
   mInitializeCallbacks.push_back(callback);
@@ -139,4 +169,26 @@ void AsynchronousDomain::callStartCallbacks() {
   for (auto callback : mStartCallbacks) {
     callback(this);
   }
+}
+
+void DomainMember::registerWithDomain(ComputationDomain *domain) {
+  if (!domain) {
+    domain = getDefaultDomain();
+  }
+  if (!domain) {
+    std::cerr << "ERROR could not register object with domain" << std::endl;
+    return;
+  }
+  domain->registerObject(this);
+}
+
+void DomainMember::unregisterFromDomain(ComputationDomain *domain) {
+  if (!domain) {
+    domain = getDefaultDomain();
+  }
+  if (!domain) {
+    std::cerr << "ERROR could not unregister object with domain" << std::endl;
+    return;
+  }
+  domain->unregisterObject(this);
 }

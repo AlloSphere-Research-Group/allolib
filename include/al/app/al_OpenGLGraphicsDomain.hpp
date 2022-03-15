@@ -27,6 +27,7 @@ class GLFWOpenGLWindowDomain;
  */
 class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
 public:
+  OpenGLGraphicsDomain();
   virtual ~OpenGLGraphicsDomain() {}
 
   // Domain functions
@@ -78,6 +79,10 @@ public:
 
   virtual void postOnExit() {}
 
+  bool registerObject(void *object) override;
+
+  bool unregisterObject(void *object) override;
+
 protected:
   static void processDomainAddRemoveQueues(OpenGLGraphicsDomain *domain);
   static void domainThreadFunction(OpenGLGraphicsDomain *domain);
@@ -110,6 +115,8 @@ private:
 
   std::atomic<bool> mShouldStopDomain{false};
   bool mRunning{false};
+
+  std::vector<GPUObject *> mObjects;
 };
 
 /**

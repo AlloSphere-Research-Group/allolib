@@ -6,14 +6,14 @@
 namespace al {
 
 BufferObject::BufferObject()
-    : mType(GL_ARRAY_BUFFER),
-      mUsage(GL_DYNAMIC_DRAW),
+    : mType(GL_ARRAY_BUFFER), mUsage(GL_DYNAMIC_DRAW),
       // mMapMode(GL_MAP_READ_BIT | GL_MAP_WRITE_BIT),
       mSize(0) {
   //
 }
 
-BufferObject::~BufferObject() { destroy(); }
+BufferObject::~BufferObject() { /*destroy();*/
+}
 
 int BufferObject::size() const { return static_cast<int>(mSize); }
 
@@ -43,7 +43,7 @@ void BufferObject::onCreate() { glGenBuffers(1, &mID); }
 
 void BufferObject::onDestroy() { glDeleteBuffers(1, &mID); }
 
-void BufferObject::data(size_t size, void const* src) {
+void BufferObject::data(size_t size, void const *src) {
   glBufferData(mType, size, src, mUsage);
   mSize = size;
   // GLint s {0};
@@ -56,8 +56,8 @@ void BufferObject::data(size_t size, void const* src) {
   // }
 }
 
-void BufferObject::subdata(int offset, int size, void const* src) {
+void BufferObject::subdata(int offset, int size, void const *src) {
   glBufferSubData(mType, offset, size, src);
 }
 
-}  // namespace al
+} // namespace al

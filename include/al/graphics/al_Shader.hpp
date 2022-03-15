@@ -46,13 +46,13 @@
 
 */
 
-#include <string>
-#include <unordered_map>
 #include "al/graphics/al_GPUObject.hpp"
 #include "al/math/al_Mat.hpp"
 #include "al/math/al_Quat.hpp"
 #include "al/math/al_Vec.hpp"
 #include "al/types/al_Color.hpp"
+#include <string>
+#include <unordered_map>
 
 #define AL_SHADER_MAX_LOG_SIZE 4096
 
@@ -61,16 +61,14 @@ namespace al {
 /// Shader abstract base class
 /// @ingroup Graphics
 class ShaderBase : public GPUObject {
- public:
-  virtual ~ShaderBase() {}
-
+public:
   /// Returns info log or 0 if none
   const char *log() const;
 
   /// Prints info log, if any
   void printLog() const;
 
- protected:
+protected:
   virtual void get(int pname, void *params) const = 0;
   virtual void getLog(char *buf) const = 0;
 };
@@ -81,14 +79,10 @@ class ShaderBase : public GPUObject {
 /// source code to a shader object and compile the shader object.
 /// @ingroup Graphics
 class Shader : public ShaderBase {
- public:
+public:
   enum Type { VERTEX, GEOMETRY, FRAGMENT };
 
   Shader(const std::string &source = "", Shader::Type type = FRAGMENT);
-
-  /// This will automatically delete the shader object when it is no longer
-  /// attached to any program object.
-  virtual ~Shader() { destroy(); }
 
   Shader &source(const std::string &v);
   Shader &source(const std::string &v, Shader::Type type);
@@ -97,7 +91,7 @@ class Shader : public ShaderBase {
 
   Shader::Type type() const { return mType; }
 
- private:
+private:
   std::string mSource;
   Shader::Type mType;
 
@@ -114,49 +108,42 @@ class Shader : public ShaderBase {
 /// It links one or more shader units into a single program object.
 /// @ingroup Graphics
 class ShaderProgram : public ShaderBase {
- public:
+public:
   /*!
     The basic parameter types
   */
   enum Type {
-    NONE = 0,  // uninitialized type
+    NONE = 0, // uninitialized type
 
-    FLOAT,  ///< A single float value
-    VEC2,   ///< Two float values
-    VEC3,   ///< Three float values
-    VEC4,   ///< Four float values
+    FLOAT, ///< A single float value
+    VEC2,  ///< Two float values
+    VEC3,  ///< Three float values
+    VEC4,  ///< Four float values
 
-    INT,   ///< A single int value
-    INT2,  ///< Two int values
-    INT3,  ///< Three int values
-    INT4,  ///< Four int values
+    INT,  ///< A single int value
+    INT2, ///< Two int values
+    INT3, ///< Three int values
+    INT4, ///< Four int values
 
-    BOOL,   ///< A single bool value
-    BOOL2,  ///< Two bool values
-    BOOL3,  ///< Three bool values
-    BOOL4,  ///< Four bool values
+    BOOL,  ///< A single bool value
+    BOOL2, ///< Two bool values
+    BOOL3, ///< Three bool values
+    BOOL4, ///< Four bool values
 
-    MAT22,  ///< A 2x2 matrix
-    MAT33,  ///< A 3x3 matrix
-    MAT44,  ///< A 4x4 matrix
+    MAT22, ///< A 2x2 matrix
+    MAT33, ///< A 3x3 matrix
+    MAT44, ///< A 4x4 matrix
 
-    SAMPLER_1D,         ///< A 1D texture
-    SAMPLER_2D,         ///< A 2D texture
-    SAMPLER_RECT,       ///< A rectangular texture
-    SAMPLER_3D,         ///< A 3D texture
-    SAMPLER_CUBE,       ///< A cubemap texture
-    SAMPLER_1D_SHADOW,  ///< A 1D depth texture
-    SAMPLER_2D_SHADOW   ///< A 2D depth texture
+    SAMPLER_1D,        ///< A 1D texture
+    SAMPLER_2D,        ///< A 2D texture
+    SAMPLER_RECT,      ///< A rectangular texture
+    SAMPLER_3D,        ///< A 3D texture
+    SAMPLER_CUBE,      ///< A cubemap texture
+    SAMPLER_1D_SHADOW, ///< A 1D depth texture
+    SAMPLER_2D_SHADOW  ///< A 2D depth texture
 
     // textures? non square matrices? attributes?
   };
-
-  struct Attribute {};
-
-  ShaderProgram();
-
-  /// Any attached shaders will automatically be detached, but not deleted.
-  virtual ~ShaderProgram();
 
   /// Attach shader to program
 
@@ -346,10 +333,15 @@ class ShaderProgram : public ShaderBase {
 
   static void use(unsigned programID);
 
- protected:
+protected:
   // Graphics::Primitive mInPrim, mOutPrim;  // IO primitives for geometry
   // shaders unsigned int mOutVertices;
   std::string mVertSource, mFragSource, mGeomSource;
+
+  std::unique_ptr<Shader> mShaderV;
+  std::unique_ptr<Shader> mShaderF;
+  std::unique_ptr<Shader> mShaderG;
+
   mutable std::unordered_map<std::string, int> mUniformLocs, mAttribLocs;
   // bool mActive;
 
@@ -360,6 +352,6 @@ class ShaderProgram : public ShaderBase {
   virtual void onDestroy();
 };
 
-}  // namespace al
+} // namespace al
 
 #endif

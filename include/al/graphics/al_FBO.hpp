@@ -160,7 +160,8 @@ public:
     DEPTH_STENCIL_ATTACHMENT = GL_DEPTH_STENCIL_ATTACHMENT
   };
 
-  ~FBO() { destroy(); }
+  //  ~FBO() { /*destroy();*/
+  //  }
 
   /// Attach RBO at specified attachment point
   FBO &attachRBO(const RBO &rbo, unsigned int attachment = GL_DEPTH_ATTACHMENT);

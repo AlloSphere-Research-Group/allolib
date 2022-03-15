@@ -67,22 +67,24 @@
   context by default.
 */
 
+#include "al/app/al_ComputationDomain.hpp"
+
 namespace al {
 
 /// Base class for allocated resources on the GPU
 ///
 /// @ingroup Graphics
-class GPUObject {
- public:
+class GPUObject : public DomainMember {
+public:
   GPUObject();
 
   // disable copy/move construction
-  GPUObject(GPUObject const&) = delete;
-  GPUObject(GPUObject&&) = delete;
+  GPUObject(GPUObject const &) = delete;
+  GPUObject(GPUObject &&) = delete;
 
   // disable copy/move assignment
-  GPUObject& operator=(GPUObject const&) = delete;
-  GPUObject& operator=(GPUObject&&) = delete;
+  GPUObject &operator=(GPUObject const &) = delete;
+  GPUObject &operator=(GPUObject &&) = delete;
 
   virtual ~GPUObject();
 
@@ -111,7 +113,12 @@ class GPUObject {
   /// Triggers re-creation of object safely
   void invalidate();
 
- protected:
+  // Domain interaction
+  ComputationDomain *getDefaultDomain() override {
+    return ComputationDomain::getDomain("graphics");
+  }
+
+protected:
   unsigned int mID;
   bool mResubmit;
 
@@ -122,6 +129,6 @@ class GPUObject {
   virtual void onDestroy() = 0;
 };
 
-}  // namespace al
+} // namespace al
 
 #endif

@@ -8,7 +8,8 @@ namespace al {
 
 Texture::Texture() {}
 
-Texture::~Texture() { destroy(); }
+Texture::~Texture() { /*destroy();*/
+}
 
 void Texture::create1D(GLsizei width, GLint internal, GLenum format,
                        GLenum type) {
@@ -25,8 +26,8 @@ void Texture::create1D(GLsizei width, GLint internal, GLenum format,
   mWrapUpdated = true;
   mUsingMipmapUpdated = true;
 
-  glTexImage1D(mTarget, 0,                  // level
-               mInternalFormat, mWidth, 0,  // border
+  glTexImage1D(mTarget, 0,                 // level
+               mInternalFormat, mWidth, 0, // border
                mFormat, mType, nullptr);
 
   update_filter();
@@ -55,9 +56,9 @@ void Texture::create2D(unsigned int width, unsigned int height, int internal,
   create();
   bind_temp();
   glTexImage2D(mTarget,
-               0,  // level
+               0, // level
                mInternalFormat, mWidth, mHeight,
-               0,  // border
+               0, // border
                mFormat, mType, nullptr);
   // AL_GRAPHICS_ERROR("creating 2D texture", id());
   update_filter();
@@ -67,11 +68,11 @@ void Texture::create2D(unsigned int width, unsigned int height, int internal,
   unbind_temp();
 }
 
-void Texture::create2DArray(unsigned int width, unsigned int height, unsigned int depth,  
-                            int internal, unsigned int format, unsigned int type) {
+void Texture::create2DArray(unsigned int width, unsigned int height,
+                            unsigned int depth, int internal,
+                            unsigned int format, unsigned int type) {
 
-  mTarget = GL_TEXTURE_2D_ARRAY,
-  mInternalFormat = internal;
+  mTarget = GL_TEXTURE_2D_ARRAY, mInternalFormat = internal;
   mWidth = width;
   mHeight = height;
   mDepth = depth;
@@ -86,10 +87,10 @@ void Texture::create2DArray(unsigned int width, unsigned int height, unsigned in
   create();
   bind_temp();
   glTexImage3D(mTarget,
-             0,  // level
-             mInternalFormat, mWidth, mHeight, mDepth,
-             0,  // border
-             mFormat, mType, nullptr);
+               0, // level
+               mInternalFormat, mWidth, mHeight, mDepth,
+               0, // border
+               mFormat, mType, nullptr);
   update_filter();
   update_wrap();
   unbind_temp();
@@ -114,13 +115,13 @@ void Texture::createCubemap(unsigned int size, int internal,
   create();
   bind_temp();
   for (int i = 0; i < 6; i++) {
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,  //< target
-                 0,                                   //< lod
-                 mInternalFormat,                     //< internal format
-                 mWidth, mWidth, 0,  //< equal throughout the faces
-                 mFormat,            //< format of data
-                 mType,              //< data type (e.g. GL_UNSIGNED_BYTE)
-                 nullptr);           //< no actual data yet
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, //< target
+                 0,                                  //< lod
+                 mInternalFormat,                    //< internal format
+                 mWidth, mWidth, 0, //< equal throughout the faces
+                 mFormat,           //< format of data
+                 mType,             //< data type (e.g. GL_UNSIGNED_BYTE)
+                 nullptr);          //< no actual data yet
   }
   update_filter();
   update_wrap();
@@ -159,12 +160,12 @@ void Texture::unbind(int binding_point, unsigned int target) {
 
 void Texture::filterMin(int v) {
   switch (v) {
-    case GL_NEAREST_MIPMAP_NEAREST:
-    case GL_LINEAR_MIPMAP_NEAREST:
-    case GL_NEAREST_MIPMAP_LINEAR:
-    case GL_LINEAR_MIPMAP_LINEAR:
-    default:
-      break;
+  case GL_NEAREST_MIPMAP_NEAREST:
+  case GL_LINEAR_MIPMAP_NEAREST:
+  case GL_NEAREST_MIPMAP_LINEAR:
+  case GL_LINEAR_MIPMAP_LINEAR:
+  default:
+    break;
   }
   update_param(v, mFilterMin, mFilterUpdated);
 }
@@ -173,16 +174,16 @@ void Texture::filterMag(int v) {
   // no mipmap filtering for magnification,
   // so pick closest one if given
   switch (v) {
-    case GL_NEAREST_MIPMAP_NEAREST:
-    case GL_NEAREST_MIPMAP_LINEAR:
-      v = GL_NEAREST;
-      break;
-    case GL_LINEAR_MIPMAP_NEAREST:
-    case GL_LINEAR_MIPMAP_LINEAR:
-      v = GL_LINEAR;
-      break;
-    default:
-      break;
+  case GL_NEAREST_MIPMAP_NEAREST:
+  case GL_NEAREST_MIPMAP_LINEAR:
+    v = GL_NEAREST;
+    break;
+  case GL_LINEAR_MIPMAP_NEAREST:
+  case GL_LINEAR_MIPMAP_LINEAR:
+    v = GL_LINEAR;
+    break;
+  default:
+    break;
   }
   update_param(v, mFilterMag, mFilterUpdated);
 }
@@ -272,20 +273,19 @@ void Texture::submit(const void *pixels, unsigned int format,
   bind_temp();
   // AL_GRAPHICS_ERROR("before Texture::submit (glTexSubImage)", id());
   switch (target()) {
-    case GL_TEXTURE_1D:
-      glTexSubImage1D(target(), 0, 0, width(), format, type, pixels);
-      break;
-    case GL_TEXTURE_2D:
-      glTexSubImage2D(target(), 0, 0, 0, width(), height(), format, type,
-                      pixels);
-      break;
-    case GL_TEXTURE_2D_ARRAY:
-    case GL_TEXTURE_3D:
-      glTexSubImage3D(target(), 0, 0, 0, 0, width(), height(), depth(), format,
-                      type, pixels);
-      break;
-    default:
-      AL_WARN("invalid texture target %d", target());
+  case GL_TEXTURE_1D:
+    glTexSubImage1D(target(), 0, 0, width(), format, type, pixels);
+    break;
+  case GL_TEXTURE_2D:
+    glTexSubImage2D(target(), 0, 0, 0, width(), height(), format, type, pixels);
+    break;
+  case GL_TEXTURE_2D_ARRAY:
+  case GL_TEXTURE_3D:
+    glTexSubImage3D(target(), 0, 0, 0, 0, width(), height(), depth(), format,
+                    type, pixels);
+    break;
+  default:
+    AL_WARN("invalid texture target %d", target());
   }
   // AL_GRAPHICS_ERROR("Texture::submit (glTexSubImage)", id());
 
@@ -322,39 +322,39 @@ void Texture::copyFrameBuffer(int w, int h, int fbx, int fby, int texx,
 
   bind_temp();
   switch (target()) {
-    case GL_TEXTURE_1D:
-      glCopyTexSubImage1D(GL_TEXTURE_1D, 0, texx, fbx, fby, w);
-      break;
-    case GL_TEXTURE_2D:
-      glCopyTexSubImage2D(GL_TEXTURE_2D, 0, texx, texy, fbx, fby, w, h);
-      break;
-    case GL_TEXTURE_3D:
-      glCopyTexSubImage3D(GL_TEXTURE_3D, 0, texx, texy, texz, fbx, fby, w, h);
-      break;
-    default:;
+  case GL_TEXTURE_1D:
+    glCopyTexSubImage1D(GL_TEXTURE_1D, 0, texx, fbx, fby, w);
+    break;
+  case GL_TEXTURE_2D:
+    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, texx, texy, fbx, fby, w, h);
+    break;
+  case GL_TEXTURE_3D:
+    glCopyTexSubImage3D(GL_TEXTURE_3D, 0, texx, texy, texz, fbx, fby, w, h);
+    break;
+  default:;
   }
   unbind_temp();
 }
 
 int Texture::numComponents(Format v) {
   switch (v) {
-    case RED:
-      return 1;
-    case RG:
-      return 2;
-    case RGB:
-    case BGR:
-      return 3;
-    case RGBA:
-    case BGRA:
-      return 4;
-    case DEPTH_COMPONENT:
-      return 1;
-    case DEPTH_STENCIL:
-      return 2;
-    default:
-      return 0;
+  case RED:
+    return 1;
+  case RG:
+    return 2;
+  case RGB:
+  case BGR:
+    return 3;
+  case RGBA:
+  case BGRA:
+    return 4;
+  case DEPTH_COMPONENT:
+    return 1;
+  case DEPTH_STENCIL:
+    return 2;
+  default:
+    return 0;
   };
 }
 
-}  // namespace al
+} // namespace al

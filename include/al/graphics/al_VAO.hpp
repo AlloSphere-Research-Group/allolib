@@ -16,7 +16,7 @@ namespace al {
 */
 
 class VAO : public GPUObject {
- public:
+public:
   enum DataType : unsigned int /* GLenum */ {
     BYTE = GL_BYTE,             /**< */
     UBYTE = GL_UNSIGNED_BYTE,   /**< */
@@ -28,8 +28,8 @@ class VAO : public GPUObject {
     DOUBLE = GL_DOUBLE          /**< */
   };
 
-  VAO();
-  virtual ~VAO();
+  //  VAO();
+  //  virtual ~VAO();
 
   virtual void onCreate() override;
   virtual void onDestroy() override;
@@ -39,14 +39,14 @@ class VAO : public GPUObject {
 
   void enableAttrib(unsigned int index);
   void disableAttrib(unsigned int index);
-  void attribPointer(unsigned int index, BufferObject& buffer,
-                     int size,  // components
+  void attribPointer(unsigned int index, BufferObject &buffer,
+                     int size, // components
                      unsigned int type = GL_FLOAT,
                      unsigned char normalized = GL_FALSE, int stride = 0,
-                     void const* offset = NULL  // offset of the first component
+                     void const *offset = NULL // offset of the first component
   );
 };
 
-}  // namespace al
+} // namespace al
 
 #endif
