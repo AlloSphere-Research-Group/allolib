@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -252,8 +253,12 @@ public:
    * Assumes that init() has already been called.
    * Do not mix calls to start with startAsync as the behavior will be
    * undefined Domain must be stopped with stopAsync().
+   *
+   * You can wait on the domain through
    */
   virtual bool startAsync();
+
+  const std::future<bool> &waitForDomain() { return mDomainAsyncResult; };
 
   /**
    * @brief stop the asyncrhonous execution of the domain
@@ -295,6 +300,10 @@ protected:
       callback(this);
     }
   }
+
+protected:
+  std::promise<bool> mDomainAsyncResultPromise;
+  std::future<bool> mDomainAsyncResult;
 
 private:
   std::vector<std::function<void(ComputationDomain *)>> mStartCallbacks;

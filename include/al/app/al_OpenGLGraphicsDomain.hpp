@@ -33,7 +33,9 @@ public:
   // Domain functions
   bool init(ComputationDomain *parent = nullptr) override;
   bool start() override;
+  bool startAsync() override;
   bool stop() override;
+  bool stopAsync() override;
   bool cleanup(ComputationDomain *parent = nullptr) override;
 
   void quit() { mShouldStopDomain = true; }

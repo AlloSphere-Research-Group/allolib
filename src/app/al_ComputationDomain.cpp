@@ -159,7 +159,9 @@ bool AsynchronousDomain::startAsync() {
 
 bool AsynchronousDomain::stopAsync() {
   auto ret = stop();
-  mAsyncThread->join();
+  if (mAsyncThread) {
+    mAsyncThread->join();
+  }
   return ret;
 }
 

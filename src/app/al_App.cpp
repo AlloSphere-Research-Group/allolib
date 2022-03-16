@@ -252,32 +252,6 @@ ParameterServer &App::parameterServer() {
 
 void App::start() {
   initializeDomains();
-
-  mDefaultWindowDomain->onDraw =
-      std::bind(&App::onDraw, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onKeyDown =
-      std::bind(&App::onKeyDown, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onKeyUp =
-      std::bind(&App::onKeyUp, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onMouseDown =
-      std::bind(&App::onMouseDown, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onMouseUp =
-      std::bind(&App::onMouseUp, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onMouseDrag =
-      std::bind(&App::onMouseDrag, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onMouseMove =
-      std::bind(&App::onMouseMove, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onMouseScroll =
-      std::bind(&App::onMouseScroll, this, std::placeholders::_1);
-  mDefaultWindowDomain->window().onResize = std::bind(
-      &App::onResize, this, std::placeholders::_1, std::placeholders::_2);
-  mDefaultWindowDomain->window().append(stdControls);
-
-  mDefaultWindowDomain->window().onClose = [this]() { this->quit(); };
-  stdControls.app = this;
-  stdControls.mWindow = &mDefaultWindowDomain->window();
-
-  defaultWindow().append(mDefaultWindowDomain->navControl());
   onInit();
   for (auto &domain : mDomainList) {
     mRunningDomains.push(domain);
@@ -309,6 +283,7 @@ void App::createDomains() {
   mAudioDomain = newDomain<GammaAudioDomain>();
   mAudioDomain->configure();
 
+  // graphics domain must be last as it will block.
   mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
   mSimulationDomain =
       mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
@@ -345,6 +320,32 @@ void App::initializeDomains() {
       std::cerr << "ERROR initializing domain " << std::endl;
     }
   }
+
+  mDefaultWindowDomain->onDraw =
+      std::bind(&App::onDraw, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onKeyDown =
+      std::bind(&App::onKeyDown, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onKeyUp =
+      std::bind(&App::onKeyUp, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onMouseDown =
+      std::bind(&App::onMouseDown, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onMouseUp =
+      std::bind(&App::onMouseUp, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onMouseDrag =
+      std::bind(&App::onMouseDrag, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onMouseMove =
+      std::bind(&App::onMouseMove, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onMouseScroll =
+      std::bind(&App::onMouseScroll, this, std::placeholders::_1);
+  mDefaultWindowDomain->window().onResize = std::bind(
+      &App::onResize, this, std::placeholders::_1, std::placeholders::_2);
+  mDefaultWindowDomain->window().append(stdControls);
+
+  mDefaultWindowDomain->window().onClose = [this]() { this->quit(); };
+  stdControls.app = this;
+  stdControls.mWindow = &mDefaultWindowDomain->window();
+
+  defaultWindow().append(mDefaultWindowDomain->navControl());
 }
 
 bool App::StandardWindowAppKeyControls::keyDown(const Keyboard &k) {

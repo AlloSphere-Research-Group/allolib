@@ -27,13 +27,30 @@ bool OpenGLGraphicsDomain::init(ComputationDomain *parent) {
 
 bool OpenGLGraphicsDomain::start() {
   if (!mRunning) {
+    mDomainAsyncResultPromise = std::promise<bool>();
     {
       std::lock_guard<std::mutex> lksig(mDomainSignalLock);
       mDomainCommand = CommandType::START;
     }
-    std::unique_lock<std::mutex> lk(mDomainCommandLock);
-    mDomainCommandSignal.wait(lk);
-    return mCommandResult;
+    mDomainAsyncResult = mDomainAsyncResultPromise.get_future();
+    mDomainAsyncResult.wait();
+    return mDomainAsyncResult.get();
+  }
+
+  std::cout << "OpenGLGraphicsDomain already started" << std::endl;
+  return true;
+}
+
+bool OpenGLGraphicsDomain::startAsync() {
+  if (!mRunning) {
+    mDomainAsyncResultPromise = std::promise<bool>();
+    {
+      std::lock_guard<std::mutex> lksig(mDomainSignalLock);
+      mDomainCommand = CommandType::START;
+    }
+
+    mDomainAsyncResult = mDomainAsyncResultPromise.get_future();
+    return true;
   }
 
   std::cout << "OpenGLGraphicsDomain already started" << std::endl;
@@ -57,14 +74,13 @@ bool OpenGLGraphicsDomain::stop() {
   return true;
 }
 
+bool OpenGLGraphicsDomain::stopAsync() { return stop(); }
+
 bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
   if (mRunning) {
     stop();
   }
   if (mInitialized) {
-    for (GPUObject *obj : mObjects) {
-      obj->destroy();
-    }
 
     {
       std::lock_guard<std::mutex> lksig(mDomainSignalLock);
@@ -197,31 +213,20 @@ void OpenGLGraphicsDomain::domainThreadFunction(OpenGLGraphicsDomain *domain) {
   }
   domain->mDomainStartSpinLock.store(false, std::memory_order_release);
   while (domain->mInitialized) {
-    bool subDomainsOk = true;
-    // Tick the domain once then check for messages
-    while (domain->mRunning && !domain->shouldStop() && subDomainsOk) {
-      processDomainAddRemoveQueues(domain);
-      subDomainsOk &= domain->tickSubdomains(true);
-      subDomainsOk &= domain->tick();
-      subDomainsOk &= domain->tickSubdomains(false);
-      if (!subDomainsOk) {
-        domain->shouldStop();
-      }
-    }
-
-    for (GPUObject *obj : domain->mObjects) {
-      obj->destroy();
-    }
-
     {
       std::unique_lock<std::mutex> lk(domain->mDomainSignalLock);
       if (domain->mDomainCommand != CommandType::NONE) {
 
         if (domain->mDomainCommand == CommandType::START) {
-          domain->mCommandResult = domain->startPrivate();
-
+          if (!domain->startPrivate()) {
+            domain->mDomainAsyncResultPromise.set_value(false);
+          }
         } else if (domain->mDomainCommand == CommandType::STOP) {
-          domain->mCommandResult = domain->stopPrivate();
+          if (domain->mRunning) {
+            domain->mDomainAsyncResultPromise.set_value(domain->stopPrivate());
+          } else {
+            std::cout << "Domain not running. Stop ignored" << std::endl;
+          }
 
         } else if (domain->mDomainCommand == CommandType::CLEANUP) {
           domain->mCommandResult = domain->cleanupPrivate();
@@ -230,6 +235,24 @@ void OpenGLGraphicsDomain::domainThreadFunction(OpenGLGraphicsDomain *domain) {
         domain->mDomainCommand = CommandType::NONE;
       }
     }
+
+    bool subDomainsOk = true;
+    while (domain->mRunning && !domain->shouldStop() && subDomainsOk) {
+      //      std::cout << "tick graphics" << std::endl;
+      processDomainAddRemoveQueues(domain);
+      subDomainsOk &= domain->tickSubdomains(true);
+      subDomainsOk &= domain->tick();
+      subDomainsOk &= domain->tickSubdomains(false);
+      if (!subDomainsOk) {
+        domain->mShouldStopDomain = true;
+        std::unique_lock<std::mutex> lk(domain->mDomainSignalLock);
+        domain->mDomainCommand = CommandType::STOP;
+      }
+    }
+  }
+
+  for (GPUObject *obj : domain->mObjects) {
+    obj->destroy();
   }
 }
 
@@ -255,6 +278,9 @@ bool OpenGLGraphicsDomain::startPrivate() {
     bool ret = true;
     startFPS();
     callStartCallbacks();
+    if (!ret) {
+      mRunning = false;
+    }
     return ret;
   } else {
     return true;
@@ -265,21 +291,21 @@ bool OpenGLGraphicsDomain::stopPrivate() {
   bool ret = true;
   callStopCallbacks();
 
-  ret &= cleanupSubdomains(true);
-
   onExit(); // user defined
   postOnExit();
 
-  ret &= cleanupSubdomains(false);
   mRunning = false;
   return ret;
 }
 
 bool OpenGLGraphicsDomain::cleanupPrivate() {
+  bool ret = true;
+  ret &= cleanupSubdomains(true);
+  ret &= cleanupSubdomains(false);
   callCleanupCallbacks();
   terminateWindowManager();
   mInitialized = false;
-  return true;
+  return ret;
 }
 
 /// Window Domain ----------------------
