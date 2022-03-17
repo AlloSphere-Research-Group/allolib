@@ -190,7 +190,7 @@ void OpenGLGraphicsDomain::domainThreadFunction(OpenGLGraphicsDomain *domain) {
 
   domain->preOnCreate();
   for (GPUObject *obj : domain->mObjects) {
-    std::cout << obj << std::endl;
+    //    std::cout << obj << std::endl;
     obj->create();
   }
   domain->onCreate();
