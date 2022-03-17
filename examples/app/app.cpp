@@ -228,6 +228,10 @@ struct MyApp : public App {
     return true;
   }
 
+  void onExit() override {
+    std::cout << "onExit() - Cleanup your application here" << std::endl;
+  }
+
   // *****************************************************
   // NOTE: check the App class for more callback functions
 };

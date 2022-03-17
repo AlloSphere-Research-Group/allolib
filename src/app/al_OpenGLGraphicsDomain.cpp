@@ -54,7 +54,7 @@ bool OpenGLGraphicsDomain::stop() {
 
     return mCommandResult;
   }
-  std::cout << "OpenGLGraphicsDomain not running" << std::endl;
+  //  std::cout << "OpenGLGraphicsDomain not running" << std::endl;
   return true;
 }
 
