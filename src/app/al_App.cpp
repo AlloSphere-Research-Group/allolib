@@ -260,6 +260,10 @@ void App::start() {
       break;
     }
   }
+  std::future<bool> &domainReturn = graphicsDomain()->waitForDomain();
+  if (!domainReturn.get()) {
+    std::cerr << "Graphics domain returned false on exit." << std::endl;
+  }
 
   while (mRunningDomains.size() > 0) {
     if (!mRunningDomains.top()->stop()) {

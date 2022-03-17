@@ -13,35 +13,19 @@ OpenGLGraphicsDomain::OpenGLGraphicsDomain() {
 
 bool OpenGLGraphicsDomain::init(ComputationDomain *parent) {
   if (!mDomainThread) {
-    mDomainStartSpinLock.store(true, std::memory_order_release);
+
+    mDomainAsyncInitPromise = std::promise<bool>();
     mDomainThread = std::make_unique<std::thread>(
         OpenGLGraphicsDomain::domainThreadFunction, this);
     // Wait for init to be done on thread;
-    while (mDomainStartSpinLock.exchange(true, std::memory_order_acquire))
-      ;
-    return mCommandResult;
+    mDomainAsyncInit = mDomainAsyncInitPromise.get_future();
+    return mDomainAsyncInit.get();
   }
   std::cout << "OpenGLGraphicsDomain already initialized" << std::endl;
   return true;
 }
 
 bool OpenGLGraphicsDomain::start() {
-  if (!mRunning) {
-    mDomainAsyncResultPromise = std::promise<bool>();
-    {
-      std::lock_guard<std::mutex> lksig(mDomainSignalLock);
-      mDomainCommand = CommandType::START;
-    }
-    mDomainAsyncResult = mDomainAsyncResultPromise.get_future();
-    mDomainAsyncResult.wait();
-    return mDomainAsyncResult.get();
-  }
-
-  std::cout << "OpenGLGraphicsDomain already started" << std::endl;
-  return true;
-}
-
-bool OpenGLGraphicsDomain::startAsync() {
   if (!mRunning) {
     mDomainAsyncResultPromise = std::promise<bool>();
     {
@@ -73,8 +57,6 @@ bool OpenGLGraphicsDomain::stop() {
   std::cout << "OpenGLGraphicsDomain not running" << std::endl;
   return true;
 }
-
-bool OpenGLGraphicsDomain::stopAsync() { return stop(); }
 
 bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
   if (mRunning) {
@@ -201,17 +183,17 @@ void OpenGLGraphicsDomain::processDomainAddRemoveQueues(
 }
 
 void OpenGLGraphicsDomain::domainThreadFunction(OpenGLGraphicsDomain *domain) {
-  domain->mCommandResult = domain->initPrivate();
 
+  domain->mDomainAsyncInitPromise.set_value(domain->initPrivate());
   processDomainAddRemoveQueues(domain);
+  // TODO we should wait here for the onInit() callback to be done
 
   domain->preOnCreate();
-  domain->onCreate();
   for (GPUObject *obj : domain->mObjects) {
     std::cout << obj << std::endl;
     obj->create();
   }
-  domain->mDomainStartSpinLock.store(false, std::memory_order_release);
+  domain->onCreate();
   while (domain->mInitialized) {
     {
       std::unique_lock<std::mutex> lk(domain->mDomainSignalLock);

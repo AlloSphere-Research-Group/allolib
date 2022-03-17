@@ -236,6 +236,13 @@ public:
   virtual bool tick();
 };
 
+/**
+ * @brief The AsynchronousDomain class manages a domain that is run
+ * asynchronously, but the threading is managed elasewhere
+ *
+ * If you need a domain where the thread and concurrency are managed use
+ * AysnchronousThreadDomain.
+ */
 class AsynchronousDomain : public ComputationDomain {
 public:
   /**
@@ -247,20 +254,6 @@ public:
   virtual bool start() = 0;
 
   /**
-   * @brief start the domain on a separate thread so it won't block
-   * @return true if start was successful or if already running async
-   *
-   * Assumes that init() has already been called.
-   * Do not mix calls to start with startAsync as the behavior will be
-   * undefined Domain must be stopped with stopAsync().
-   *
-   * You can wait on the domain through
-   */
-  virtual bool startAsync();
-
-  const std::future<bool> &waitForDomain() { return mDomainAsyncResult; };
-
-  /**
    * @brief stop the asyncrhonous execution of the domain
    * @return true if stop was successful
    *
@@ -268,20 +261,6 @@ public:
    * work after calling stop()
    */
   virtual bool stop() = 0;
-
-  /**
-   * @brief stop the threaded execution of the domain
-   * @return true if stop was successful
-   *
-   * Only call this function if domain was started with startAsync()
-   */
-  virtual bool stopAsync();
-
-  /**
-   * @brief Returns true if domain is running and has been started with
-   * startAsync()
-   */
-  bool runningAsync();
 
 protected:
   /**
@@ -301,13 +280,40 @@ protected:
     }
   }
 
-protected:
-  std::promise<bool> mDomainAsyncResultPromise;
-  std::future<bool> mDomainAsyncResult;
-
 private:
   std::vector<std::function<void(ComputationDomain *)>> mStartCallbacks;
   std::vector<std::function<void(ComputationDomain *)>> mStopCallbacks;
+};
+
+class AsynchronousThreadDomain : public AsynchronousDomain {
+public:
+  /**
+   * @brief start the domain on a separate thread so it won't block
+   * @return true if start was successful or if already running async
+   *
+   * Assumes that init() has already been called. This call will not block. You
+   * can wait on the domain through the std::future provided by waitForDomain()
+   */
+  virtual bool start() = 0;
+
+  std::future<bool> &waitForDomain();
+  ;
+
+  /**
+   * @brief stop the threaded execution of the domain
+   * @return true if stop was successful
+   *
+   * Only call this function if domain was started with startAsync()
+   */
+  virtual bool stop() = 0;
+
+protected:
+  std::promise<bool> mDomainAsyncResultPromise;
+  std::future<bool> mDomainAsyncResult;
+  std::promise<bool> mDomainAsyncInitPromise;
+  std::future<bool> mDomainAsyncInit;
+
+private:
   std::unique_ptr<std::thread> mAsyncThread;
 };
 
@@ -332,5 +338,4 @@ std::shared_ptr<DomainType> ComputationDomain::newSubDomain(bool prepend) {
 }
 
 } // namespace al
-
 #endif // COMPUTATIONDOMAIN_H

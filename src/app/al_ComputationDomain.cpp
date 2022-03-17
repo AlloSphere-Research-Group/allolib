@@ -9,6 +9,30 @@ std::vector<std::pair<ComputationDomain *, std::string>>
     ComputationDomain::mPublicDomains;
 std::mutex ComputationDomain::mPublicDomainsLock;
 
+void DomainMember::registerWithDomain(ComputationDomain *domain) {
+  if (!domain) {
+    domain = getDefaultDomain();
+  }
+  if (!domain) {
+    std::cerr << "ERROR could not register object with domain" << std::endl;
+    return;
+  }
+  domain->registerObject(this);
+}
+
+void DomainMember::unregisterFromDomain(ComputationDomain *domain) {
+  if (!domain) {
+    domain = getDefaultDomain();
+  }
+  if (!domain) {
+    std::cerr << "ERROR could not unregister object with domain" << std::endl;
+    return;
+  }
+  domain->unregisterObject(this);
+}
+
+// --------------------------------------------------
+
 bool ComputationDomain::initializeSubdomains(bool pre) {
   bool ret = true;
   for (const auto &subDomain : mSubDomainList) {
@@ -149,48 +173,35 @@ bool SynchronousDomain::tick() {
   return ret;
 }
 
-bool AsynchronousDomain::startAsync() {
-  if (mAsyncThread) {
-    return true;
-  }
-  mAsyncThread = std::make_unique<std::thread>([this]() { this->start(); });
-  return true;
-}
-
-bool AsynchronousDomain::stopAsync() {
-  auto ret = stop();
-  if (mAsyncThread) {
-    mAsyncThread->join();
-  }
-  return ret;
-}
-
-bool AsynchronousDomain::runningAsync() { return mAsyncThread != nullptr; }
-
 void AsynchronousDomain::callStartCallbacks() {
   for (auto callback : mStartCallbacks) {
     callback(this);
   }
 }
 
-void DomainMember::registerWithDomain(ComputationDomain *domain) {
-  if (!domain) {
-    domain = getDefaultDomain();
-  }
-  if (!domain) {
-    std::cerr << "ERROR could not register object with domain" << std::endl;
-    return;
-  }
-  domain->registerObject(this);
+// ------------------------------------------------------
+
+// bool AsynchronousThreadDomain::start() {
+//  if (mAsyncThread) {
+//    return true;
+//  }
+//  mAsyncThread = std::make_unique<std::thread>([this]() { this->start(); });
+//  return true;
+//}
+
+std::future<bool> &AsynchronousThreadDomain::waitForDomain() {
+  // should std::move be used here to avoid user error?
+  return mDomainAsyncResult;
 }
 
-void DomainMember::unregisterFromDomain(ComputationDomain *domain) {
-  if (!domain) {
-    domain = getDefaultDomain();
-  }
-  if (!domain) {
-    std::cerr << "ERROR could not unregister object with domain" << std::endl;
-    return;
-  }
-  domain->unregisterObject(this);
-}
+// bool AsynchronousThreadDomain::stop() {
+//  bool ret = true;]
+//  if (mAsyncThread) {
+//    mAsyncThread->join();
+//  }
+//  return ret;
+//}
+
+// bool AsynchronousThreadDomain::runningAsync() {
+//  return mAsyncThread != nullptr;
+//}

@@ -83,14 +83,14 @@ int main() {
 
   // The graphics domain must be started asynchronously as it will block
   // otherwise
-  graphicsDomain.startAsync();
+  graphicsDomain.start();
   // Start console domain. This domain will block until enter is pressed.
   consoleDomain.start();
 
   // Once the console domain exits on enter, the domains will be stopped and
   // cleaned up.
 
-  graphicsDomain.stopAsync();
+  graphicsDomain.stop();
   audioDomain.stop();
   consoleDomain.stop();
 

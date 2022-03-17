@@ -25,7 +25,7 @@ class GLFWOpenGLWindowDomain;
  *
  * This domain prepares a GLFW OpenGL domain.
  */
-class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
+class OpenGLGraphicsDomain : public AsynchronousThreadDomain, public FPS {
 public:
   OpenGLGraphicsDomain();
   virtual ~OpenGLGraphicsDomain() {}
@@ -33,9 +33,7 @@ public:
   // Domain functions
   bool init(ComputationDomain *parent = nullptr) override;
   bool start() override;
-  bool startAsync() override;
   bool stop() override;
-  bool stopAsync() override;
   bool cleanup(ComputationDomain *parent = nullptr) override;
 
   void quit() { mShouldStopDomain = true; }
@@ -112,7 +110,6 @@ private:
   CommandType mDomainCommand;
   bool mCommandResult;
 
-  std::atomic<bool> mDomainStartSpinLock;
   std::unique_ptr<std::thread> mDomainThread;
 
   std::atomic<bool> mShouldStopDomain{false};
