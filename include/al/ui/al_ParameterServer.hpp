@@ -50,9 +50,6 @@
 
 namespace al {
 
-constexpr int handshakeServerPort = 16987;
-constexpr int listenerFirstPort = 14000;
-
 class ParameterServer;
 
 class OSCNode {

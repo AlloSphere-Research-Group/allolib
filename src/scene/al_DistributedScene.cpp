@@ -121,7 +121,8 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
       address = address.substr(rootOSCPath.size() + 1);
     } else {
       if (verbose()) {
-        std::cout << "Prefix " << rootOSCPath << " not matched." << std::endl;
+        //        std::cout << "Prefix " << rootOSCPath << " not matched." <<
+        //        std::endl;
         return false;
       }
     }

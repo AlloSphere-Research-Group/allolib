@@ -178,6 +178,35 @@ int al::asciiToMIDI(int asciiKey, int offset) {
 
 // --------- SynthVoice
 
+bool SynthVoice::setTriggerParams(float *pFields, int numFields) {
+  if (numFields < (int)mTriggerParams.size()) {
+    // std::cout << "Pfield size mismatch. Ignoring all." << std::endl;
+    return false;
+  }
+  for (auto &param : mTriggerParams) {
+    param->fromFloat(*pFields++);
+  }
+  return true;
+}
+
+bool SynthVoice::setTriggerParams(std::vector<float> &pFields, bool noCalls) {
+  if (pFields.size() < mTriggerParams.size()) {
+    // std::cout << "pField count mismatch. Ignoring." << std::endl;
+    return false;
+  }
+  auto it = pFields.begin();
+  if (noCalls) {
+    for (auto &param : mTriggerParams) {
+      static_cast<Parameter *>(param)->setNoCalls(*it++);
+    }
+  } else {
+    for (auto &param : mTriggerParams) {
+      static_cast<Parameter *>(param)->set(*it++);
+    }
+  }
+  return true;
+}
+
 bool SynthVoice::setTriggerParams(std::vector<VariantValue> pFields,
                                   bool noCalls) {
   if (pFields.size() < mTriggerParams.size()) {

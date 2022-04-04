@@ -6,6 +6,9 @@
 #include <cctype>
 #include <cstring>
 
+constexpr int handshakeServerPort = 16987;
+constexpr int listenerFirstPort = 14000;
+
 using namespace al;
 
 // OSCNotifier implementation -------------------------------------------------

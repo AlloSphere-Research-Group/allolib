@@ -103,6 +103,10 @@ struct VariantValue {
     return *this;
   }
 
+  bool operator==(const VariantValue &other) {
+    return this->toDouble() == other.toDouble();
+  }
+
   friend void swap(VariantValue &lhs, VariantValue &rhs) noexcept {
     std::swap(lhs.mData, rhs.mData);
     std::swap(lhs.mType, rhs.mType);
@@ -226,57 +230,16 @@ struct VariantValue {
   }
 
   /**
+   * @brief Convert any type to double
+   * @return value as a double
+   */
+  double toDouble() const;
+
+  /**
    * @brief Convert any type to string
    * @return value as a string
    */
-  std::string toString() {
-    std::string v;
-    switch (type()) {
-    case VariantType::VARIANT_FLOAT:
-      v = std::to_string(get<float>());
-      break;
-    case VariantType::VARIANT_DOUBLE:
-      v = std::to_string(get<double>());
-      break;
-    case VariantType::VARIANT_STRING:
-      v = get<std::string>();
-      break;
-    case VariantType::VARIANT_INT64:
-      v = std::to_string(get<int64_t>());
-      break;
-    case VariantType::VARIANT_INT32:
-      v = std::to_string(get<int32_t>());
-      break;
-    case VariantType::VARIANT_INT16:
-      v = std::to_string(get<int16_t>());
-      break;
-    case VariantType::VARIANT_INT8:
-      v = std::to_string(get<int8_t>());
-      break;
-    case VariantType::VARIANT_UINT64:
-      v = std::to_string(get<uint64_t>());
-      break;
-    case VariantType::VARIANT_UINT32:
-      v = std::to_string(get<uint32_t>());
-      break;
-    case VariantType::VARIANT_UINT16:
-      v = std::to_string(get<uint16_t>());
-      break;
-    case VariantType::VARIANT_UINT8:
-      v = std::to_string(get<uint8_t>());
-      break;
-    case VariantType::VARIANT_NONE:
-    case VariantType::VARIANT_BOOL:
-    case VariantType::VARIANT_CHAR:
-    case VariantType::VARIANT_VARIANT_VECTOR:
-    case VariantType::VARIANT_VECTOR_OFFSET:
-
-      std::cerr << __FILE__ << ":" << __LINE__ << " Unsupported value "
-                << std::endl;
-      break;
-    }
-    return v;
-  }
+  std::string toString();
 
 protected:
   VariantType mType;
