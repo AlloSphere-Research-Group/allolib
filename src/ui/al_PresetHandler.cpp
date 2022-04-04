@@ -141,14 +141,14 @@ std::vector<std::string> PresetHandler::availablePresetMaps() {
 
 void PresetHandler::storePreset(std::string name) {
   int index = -1;
-  for (auto preset : mPresetsMap) {
+  for (const auto &preset : mPresetsMap) {
     if (preset.second == name) {
       index = preset.first;
       break;
     }
   }
   if (index < 0) {
-    for (auto preset : mPresetsMap) {
+    for (const auto &preset : mPresetsMap) {
       if (index <= preset.first) {
         index = preset.first + 1;
       }
@@ -163,7 +163,7 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
   std::replace(name.begin(), name.end(), ':', '_');
 
   if (name == "") {
-    for (auto preset : mPresetsMap) {
+    for (const auto &preset : mPresetsMap) {
       if (preset.first == index) {
         name = preset.second;
         break;
@@ -183,7 +183,7 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
       values[address] = fields;
     }
   }
-  for (auto bundleGroup : mBundles) {
+  for (const auto &bundleGroup : mBundles) {
     std::string bundleName = "/" + bundleGroup.first + "/";
 
     for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
@@ -198,7 +198,7 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
         }
       }
       // FIXME enable recursive nesting for bundles
-      for (auto subBundleGroup : bundleGroup.second.at(i)->bundles()) {
+      for (const auto &subBundleGroup : bundleGroup.second.at(i)->bundles()) {
         for (auto *bundle : subBundleGroup.second) {
           auto bundleStates = getBundleStates(bundle, subBundleGroup.first);
           for (auto &bundleValues : bundleStates) {
@@ -440,7 +440,7 @@ void PresetHandler::recallPresetSynchronous(std::string name) {
     //  }
   }
   int index = -1;
-  for (auto preset : mPresetsMap) {
+  for (const auto &preset : mPresetsMap) {
     if (preset.second == name) {
       index = preset.first;
       break;
@@ -499,7 +499,7 @@ int PresetHandler::getCurrentPresetIndex() {
   std::map<int, std::string> presets = availablePresets();
   int current = -1;
   std::string currentPresetName = getCurrentPresetName();
-  for (auto preset : presets) {
+  for (const auto &preset : presets) {
     if (preset.second == currentPresetName) {
       current = preset.first;
       break;
@@ -652,7 +652,7 @@ void PresetHandler::setCurrentPresetMap(std::string mapName, bool autoCreate) {
   if (verbose()) {
     std::cout << "Setting preset map:" << mapName << std::endl;
   }
-  for (auto cb : mPresetsMapCbs) {
+  for (const auto &cb : mPresetsMapCbs) {
     cb(mapName);
   }
 }
@@ -968,10 +968,10 @@ PresetHandler::getBundleStates(ParameterBundle *bundle, std::string id) {
     values[bundlePrefix + p->getFullAddress()] = std::vector<VariantValue>();
     p->getFields(values[bundlePrefix + p->getFullAddress()]);
   }
-  for (auto b : bundle->bundles()) {
+  for (const auto &b : bundle->bundles()) {
     for (auto *bundle : b.second) {
       auto subBundleValues = getBundleStates(bundle, b.first);
-      for (auto bundleValue : subBundleValues) {
+      for (const auto &bundleValue : subBundleValues) {
         values[bundlePrefix + "/" + bundleValue.first] = bundleValue.second;
       }
     }
@@ -1079,7 +1079,7 @@ bool PresetHandler::savePresetValues(const ParameterStates &values,
     return false;
   }
   f << "::" + presetName << std::endl;
-  for (auto value : values) {
+  for (const auto &value : values) {
     std::string types, valueString;
     for (auto &value2 : value.second) {
       if (value2.type() == VariantType::VARIANT_FLOAT) {

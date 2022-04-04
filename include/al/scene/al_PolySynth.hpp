@@ -90,16 +90,7 @@ public:
 the other
 +    * setTriggerParams() that take an argument determine this.
      */
-  virtual bool setTriggerParams(float *pFields, int numFields = -1) {
-    if (numFields < (int)mTriggerParams.size()) {
-      // std::cout << "Pfield size mismatch. Ignoring all." << std::endl;
-      return false;
-    }
-    for (auto &param : mTriggerParams) {
-      param->fromFloat(*pFields++);
-    }
-    return true;
-  }
+  virtual bool setTriggerParams(float *pFields, int numFields = -1);
 
   /**
    * @brief Set trigger parameter values
@@ -110,23 +101,7 @@ the other
    * but that then stay constant throughout the duration of the instance.
    */
   virtual bool setTriggerParams(std::vector<float> &pFields,
-                                bool noCalls = false) {
-    if (pFields.size() < mTriggerParams.size()) {
-      // std::cout << "pField count mismatch. Ignoring." << std::endl;
-      return false;
-    }
-    auto it = pFields.begin();
-    if (noCalls) {
-      for (auto &param : mTriggerParams) {
-        static_cast<Parameter *>(param)->setNoCalls(*it++);
-      }
-    } else {
-      for (auto &param : mTriggerParams) {
-        static_cast<Parameter *>(param)->set(*it++);
-      }
-    }
-    return true;
-  }
+                                bool noCalls = false);
 
   /**
    * @brief Set parameter values

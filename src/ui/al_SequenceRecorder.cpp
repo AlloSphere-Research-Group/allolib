@@ -181,7 +181,7 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder,
     sequenceName = "new_seq";
   }
   std::string fileText;
-  for (PresetSequencer::Step step : steps) {
+  for (const PresetSequencer::Step &step : steps) {
     if (step.type == PresetSequencer::PRESET) {
       fileText += step.name + ":" + std::to_string(step.morphTime) + ":" +
                   std::to_string(step.waitTime) + "\n";

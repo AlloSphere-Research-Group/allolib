@@ -50,6 +50,9 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   //        synth().allNotesOff();
   // Add an offset of 0.1 to make sure the allNotesOff message gets processed
   // before the sequence
+  if (playing()) {
+    stopSequence();
+  }
   mMasterTime = startTime;
   double currentMasterTime = mMasterTime;
   const double startPad = 0.0;
@@ -64,7 +67,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   }
   mPlaybackStartTime = currentMasterTime + startPad;
   mPlaying = true;
-  for (auto cb : mSequenceBeginCallbacks) {
+  for (const auto &cb : mSequenceBeginCallbacks) {
     cb(mLastSequencePlayed);
   }
   if (mMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
@@ -516,7 +519,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
   if (mEventLock.try_lock()) {
     if (mNextEvent < mEvents.size()) {
       int i = 0;
-      for (auto cb : mTimeChangeCallbacks) {
+      for (const auto &cb : mTimeChangeCallbacks) {
         mTimeAccumCallbackNs[i] += (mMasterTime - blockStartTime) * 1.0e9;
         //        std::cout << mTimeAccumCallbackNs[i] << std::endl;
         if (mTimeAccumCallbackNs[i] * 1.0e-9 > cb.second) {

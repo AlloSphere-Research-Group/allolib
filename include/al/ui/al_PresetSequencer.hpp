@@ -118,7 +118,7 @@ class Composition;
 class PresetSequencer : public osc::MessageConsumer {
   friend class Composition;
 
- public:
+public:
   PresetSequencer(
       TimeMasterMode timeMasterMode = TimeMasterMode::TIME_MASTER_CPU);
   ~PresetSequencer() override;
@@ -128,15 +128,15 @@ class PresetSequencer : public osc::MessageConsumer {
   struct Step {
     StepType type = PRESET;
     std::string name;
-    float morphTime;  // The time to get to the preset
-    float waitTime;   // The time to stay in the preset before the next step
+    float morphTime; // The time to get to the preset
+    float waitTime;  // The time to stay in the preset before the next step
+                     //    float morphShape; // Shape of interpolation
     std::vector<VariantValue> params;
   };
 
   typedef struct {
     std::string eventName;
-    std::function<void(void *data, std::vector<VariantValue> &params)>
-        callback;
+    std::function<void(void *data, std::vector<VariantValue> &params)> callback;
     void *callbackData;
   } EventCallback;
 
@@ -321,7 +321,7 @@ class PresetSequencer : public osc::MessageConsumer {
 
   void setSequencerStepTime(double stepTime) { mGranularity = stepTime * 1e9; }
 
- protected:
+protected:
   virtual bool consumeMessage(osc::Message &m,
                               std::string rootOSCPath) override;
 
@@ -330,7 +330,7 @@ class PresetSequencer : public osc::MessageConsumer {
 
   void updateSequencer();
 
- private:
+private:
   static void sequencerFunction(PresetSequencer *sequencer);
 
   std::string buildFullPath(std::string sequenceName);
@@ -345,8 +345,8 @@ class PresetSequencer : public osc::MessageConsumer {
   std::string mOSCsubPath;
   std::string mCurrentSequence;
 
-  std::atomic<float> mTimeRequest{-1.0f};  // Request setting the current time.
-                                           // Passes info to playback thread
+  std::atomic<float> mTimeRequest{-1.0f}; // Request setting the current time.
+                                          // Passes info to playback thread
 
   TimeMasterMode mTimeMasterMode;
 
@@ -354,14 +354,14 @@ class PresetSequencer : public osc::MessageConsumer {
   bool mRunning;
   bool mStartRunning;
   std::queue<Step> mParameterList;
-  double mCurrentTime = 0.0;  // Current time (in seconds)
+  double mCurrentTime = 0.0; // Current time (in seconds)
   double mTargetTime;
-  double mLastPresetTime;  // To anchor parameter deltas
-  double mParameterTargetTime;
+  double mLastPresetTime; // To anchor parameter deltas
+  double mParameterTargetTime{0};
   double mLastTimeUpdate = 0.0;
   double mStepTime;
 
-  uint64_t mGranularity = 10e6;  // nanoseconds
+  uint64_t mGranularity = 10e6; // nanoseconds
   bool mBeginCallbackEnabled;
   std::function<void(PresetSequencer *)> mBeginCallback;
   bool mEndCallbackEnabled;
@@ -385,6 +385,6 @@ class PresetSequencer : public osc::MessageConsumer {
   std::shared_ptr<std::promise<void>> mPlayPromiseObj;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_PRESETSEQUENCER_H
+#endif // AL_PRESETSEQUENCER_H
