@@ -529,7 +529,11 @@ void ParameterServer::requestAllParameters(std::string IPaddress, int oscPort) {
   try {
     osc::Send sender;
     if (sender.open(oscPort, IPaddress.c_str())) {
-      sender.send("/sendAllParameters", mServer->address(), mServer->port());
+      if (mServer) {
+        sender.send("/sendAllParameters", mServer->address(), mServer->port());
+      } else {
+        std::cerr << __FUNCTION__ << " Not connected." << std::endl;
+      }
     }
   } catch (std::exception &e) {
     std::cerr << __FILE__ << ":" << __LINE__
