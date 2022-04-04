@@ -202,3 +202,101 @@ VariantValue::VariantValue(const VariantValue &paramField)
     throw std::invalid_argument("Data type not supported");
   }
 }
+
+double VariantValue::toDouble() const {
+    double v = 0.;
+    switch (type()) {
+    case VariantType::VARIANT_FLOAT:
+        v = get<float>();
+        break;
+    case VariantType::VARIANT_DOUBLE:
+        v = get<double>();
+        break;
+    case VariantType::VARIANT_STRING:
+        v = std::stod(get<std::string>());
+        break;
+    case VariantType::VARIANT_INT64:
+        v = get<int64_t>();
+        break;
+    case VariantType::VARIANT_INT32:
+        v = get<int32_t>();
+        break;
+    case VariantType::VARIANT_INT16:
+        v = get<int16_t>();
+        break;
+    case VariantType::VARIANT_INT8:
+        v = get<int8_t>();
+        break;
+    case VariantType::VARIANT_UINT64:
+        v = get<uint64_t>();
+        break;
+    case VariantType::VARIANT_UINT32:
+        v = get<uint32_t>();
+        break;
+    case VariantType::VARIANT_UINT16:
+        v = get<uint16_t>();
+        break;
+    case VariantType::VARIANT_UINT8:
+        v = get<uint8_t>();
+        break;
+    case VariantType::VARIANT_NONE:
+    case VariantType::VARIANT_BOOL:
+    case VariantType::VARIANT_CHAR:
+    case VariantType::VARIANT_VARIANT_VECTOR:
+    case VariantType::VARIANT_VECTOR_OFFSET:
+
+        std::cerr << __FILE__ << ":" << __LINE__ << " Unsupported value "
+                  << std::endl;
+        break;
+    }
+    return v;
+}
+
+std::string VariantValue::toString() {
+    std::string v;
+    switch (type()) {
+    case VariantType::VARIANT_FLOAT:
+        v = std::to_string(get<float>());
+        break;
+    case VariantType::VARIANT_DOUBLE:
+        v = std::to_string(get<double>());
+        break;
+    case VariantType::VARIANT_STRING:
+        v = get<std::string>();
+        break;
+    case VariantType::VARIANT_INT64:
+        v = std::to_string(get<int64_t>());
+        break;
+    case VariantType::VARIANT_INT32:
+        v = std::to_string(get<int32_t>());
+        break;
+    case VariantType::VARIANT_INT16:
+        v = std::to_string(get<int16_t>());
+        break;
+    case VariantType::VARIANT_INT8:
+        v = std::to_string(get<int8_t>());
+        break;
+    case VariantType::VARIANT_UINT64:
+        v = std::to_string(get<uint64_t>());
+        break;
+    case VariantType::VARIANT_UINT32:
+        v = std::to_string(get<uint32_t>());
+        break;
+    case VariantType::VARIANT_UINT16:
+        v = std::to_string(get<uint16_t>());
+        break;
+    case VariantType::VARIANT_UINT8:
+        v = std::to_string(get<uint8_t>());
+        break;
+    case VariantType::VARIANT_NONE:
+    case VariantType::VARIANT_BOOL:
+    case VariantType::VARIANT_CHAR:
+    case VariantType::VARIANT_VARIANT_VECTOR:
+    case VariantType::VARIANT_VECTOR_OFFSET:
+
+        std::cerr << __FILE__ << ":" << __LINE__ << " Unsupported value "
+                  << std::endl;
+        break;
+    }
+    return v;
+}
