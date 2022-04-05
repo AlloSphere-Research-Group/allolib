@@ -113,14 +113,17 @@ public:
   /// Triggers re-creation of object safely
   void invalidate();
 
+  void verbose(bool setVerbose = true);
+
   // Domain interaction
   ComputationDomain *getDefaultDomain() override {
     return ComputationDomain::getDomain("graphics");
   }
 
 protected:
-  unsigned int mID;
+  unsigned int mID{0};
   bool mResubmit;
+  bool mVerbose{true};
 
   /// Called when currently assigned context is created
   virtual void onCreate() = 0;

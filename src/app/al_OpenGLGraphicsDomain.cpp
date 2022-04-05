@@ -80,6 +80,11 @@ bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
 
 bool OpenGLGraphicsDomain::addSubDomain(
     std::shared_ptr<SynchronousDomain> subDomain, bool prepend) {
+
+  if (!mInitialized) {
+    ComputationDomain::addSubDomain(subDomain, prepend);
+    return true;
+  }
   if (!mRunning) {
     std::unique_lock<std::mutex> lk(mSubDomainInsertLock);
     mSubdomainToInsert = {subDomain, prepend};
@@ -190,8 +195,9 @@ void OpenGLGraphicsDomain::domainThreadFunction(OpenGLGraphicsDomain *domain) {
 
   domain->preOnCreate();
   for (GPUObject *obj : domain->mObjects) {
-    //    std::cout << obj << std::endl;
     obj->create();
+    //    std::cout << obj << " " << typeid(*obj).name() << " id:" << obj->id()
+    //              << std::endl;
   }
   domain->onCreate();
   while (domain->mInitialized) {
@@ -282,6 +288,10 @@ bool OpenGLGraphicsDomain::stopPrivate() {
 
 bool OpenGLGraphicsDomain::cleanupPrivate() {
   bool ret = true;
+
+  for (GPUObject *obj : mObjects) {
+    obj->destroy();
+  }
   ret &= cleanupSubdomains(true);
   ret &= cleanupSubdomains(false);
   callCleanupCallbacks();
@@ -349,6 +359,7 @@ bool GLFWOpenGLWindowDomain::cleanup(ComputationDomain *parent) {
   //  if (mWindow) {
   //    mWindow = nullptr;
   //  }
+
   if (mGraphics) {
     mGraphics = nullptr;
   }

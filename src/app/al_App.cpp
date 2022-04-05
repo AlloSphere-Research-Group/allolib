@@ -287,7 +287,6 @@ void App::createDomains() {
   mAudioDomain = newDomain<GammaAudioDomain>();
   mAudioDomain->configure();
 
-  // graphics domain must be last as it will block.
   mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
   mSimulationDomain =
       mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);

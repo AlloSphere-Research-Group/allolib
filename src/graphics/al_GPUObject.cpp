@@ -26,11 +26,19 @@ void GPUObject::create() {
     return;
   }
   onCreate();
+  if (mVerbose) {
+    std::cout << typeid(*this).name() << " " << this << " id:" << mID
+              << std::endl;
+  }
 }
 
 void GPUObject::destroy() {
   if (created()) {
     onDestroy();
+  }
+  if (mVerbose) {
+    std::cout << "DESTROY " << typeid(*this).name() << " " << this
+              << " id:" << mID << std::endl;
   }
   mID = 0;
 }

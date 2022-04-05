@@ -26,6 +26,7 @@ public:
 
 protected:
   DomainMember() {}
+  ComputationDomain *mParentDomain{nullptr};
 };
 
 /**
@@ -297,7 +298,6 @@ public:
   virtual bool start() = 0;
 
   std::future<bool> &waitForDomain();
-  ;
 
   /**
    * @brief stop the threaded execution of the domain

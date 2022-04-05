@@ -18,17 +18,23 @@ void DomainMember::registerWithDomain(ComputationDomain *domain) {
     return;
   }
   domain->registerObject(this);
+  mParentDomain = domain;
 }
 
 void DomainMember::unregisterFromDomain(ComputationDomain *domain) {
   if (!domain) {
-    domain = getDefaultDomain();
+    if (!mParentDomain) {
+      domain = getDefaultDomain();
+    } else {
+      domain = mParentDomain;
+    }
   }
   if (!domain) {
-    std::cerr << "ERROR could not unregister object with domain" << std::endl;
+    std::cerr << "ERROR could not find domain domain" << std::endl;
     return;
   }
   domain->unregisterObject(this);
+  mParentDomain = nullptr;
 }
 
 // --------------------------------------------------
