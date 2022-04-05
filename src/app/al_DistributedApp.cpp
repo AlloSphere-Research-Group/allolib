@@ -7,6 +7,8 @@
 #include <WinSock2.h>
 #endif
 
+#include <future>
+
 using namespace al;
 
 void DistributedApp::prepare() {
@@ -257,6 +259,11 @@ void DistributedApp::start() {
       std::cerr << "ERROR starting domain " << std::endl;
       break;
     }
+  }
+
+  std::future<bool> &domainReturn = graphicsDomain()->waitForDomain();
+  if (!domainReturn.get()) {
+    std::cerr << "Graphics domain returned false on exit." << std::endl;
   }
 
   while (mRunningDomains.size() > 0) {
