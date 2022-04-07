@@ -49,9 +49,40 @@ target_link_libraries(al_tests al ${OPENGL_gl_LIBRARY} ${ADDITIONAL_LIBRARIES} $
 # endif ()
 target_compile_definitions(al_tests PRIVATE ${definitions})
 
+# Google test
+# Get and build googletest
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        release-1.10.0
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+
+set (gtest_src
+    gtest_main.cpp
+    gtest_presets.cpp
+)
+
+add_executable(al_gtests ${gtest_src})
+set_target_properties(al_gtests PROPERTIES DEBUG_POSTFIX _debug)
+set_target_properties(al_gtests PROPERTIES CXX_STANDARD 14)
+set_target_properties(al_gtests PROPERTIES CXX_STANDARD_REQUIRED ON)
+set_target_properties(al_gtests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set_target_properties(al_gtests PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set_target_properties(al_gtests PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR}/bin)
+
+target_link_libraries(al_gtests PRIVATE gtest al)
+add_test(NAME allolib_gtest COMMAND al_gtests)
+
 if (ALLOLIB_RUN_TESTS)
 add_custom_command( TARGET al_tests POST_BUILD
     COMMAND $<TARGET_FILE:al_tests>
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin )
+add_custom_command( TARGET al_gtests POST_BUILD
+    COMMAND $<TARGET_FILE:al_gtests>
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin )
 
 endif(ALLOLIB_RUN_TESTS)

@@ -140,6 +140,10 @@ public:
    */
   std::string recallPreset(int index);
 
+  /**
+   * @brief recall immediately (not using the morph thread)
+   * @param name preset name
+   */
   void recallPresetSynchronous(std::string name);
 
   /**
@@ -153,26 +157,50 @@ public:
    * @param index1 index of the first preset
    * @param index2 index of the second preset
    * @param factor A value between 0-1 to determine interpolation
-   * @param synchronous The values are set instantly and synchronous to this
-   * call
    *
    * A factor of 0 uses preset 1 and a factor of 1 uses preset 2. Values
    * in between result in linear interpolation of the values.
+   * This sets the parameter values synchronously, without using the morph
+   * thread
    */
   void setInterpolatedPreset(int index1, int index2, double factor);
 
+  /**
+   * @brief Set parameters to values interpolated between two presets
+   * @param presetName1 start preset
+   * @param presetName2 end preset
+   * @param factor A value between 0-1 to determine interpolation
+   *
+   * A factor of 0 uses preset 1 and a factor of 1 uses preset 2. Values
+   * in between result in linear interpolation of the values.
+   * This sets the parameter values synchronously, without using the morph
+   * thread
+   */
   void setInterpolatedPreset(std::string presetName1, std::string presetName2,
                              double factor);
 
-  //  static void setParameterValues(ParameterMeta *param,
-  //                                 std::vector<VariantValue> &values);
   /**
    * @brief Interpolate between start and end values according to
    * factor
    */
   void setInterpolatedValues(ParameterStates &startValues,
                              ParameterStates &endValues, double factor = 1.0);
+  /**
+   * @brief like setInterpolatedValuesDelta but received end delta
+   * @param startValues
+   * @param deltaValues
+   * @param factor
+   *
+   * Value is startValue + delta*factor
+   */
+  void setInterpolatedValuesDelta(ParameterStates &startValues,
+                                  ParameterStates &deltaValues,
+                                  double factor = 1.0);
 
+  /**
+   * @brief Get a list of currently available presets in preset root path
+   * @return map of preset index to preset name
+   */
   std::map<int, std::string> availablePresets();
   std::string getPresetName(int index);
   std::string getCurrentPresetName() { return mCurrentPresetName; }
@@ -203,7 +231,8 @@ public:
 
   /// Step morphing to adjust parameter values to next step. You need to call
   /// this function only if TimeMasterMode is TIME_MASTER_ASYNC
-  void stepMorphing();
+  /// Returns true if morphing is happening, otherwise returns false
+  bool stepMorphing();
 
   void setSubDirectory(std::string directory);
   std::string getSubDirectory() { return mSubDir; }
@@ -362,7 +391,7 @@ private:
   std::mutex mFileLock;
 
   std::mutex mTargetLock;
-  ParameterStates mTargetValues;
+  ParameterStates mDeltaValues;
   ParameterStates mStartValues;
 
   TimeMasterMode mTimeMasterMode{TimeMasterMode::TIME_MASTER_CPU};

@@ -637,7 +637,6 @@ public:
       } else {
         std::cerr << __FUNCTION__ << "Unexpected variant type" << std::endl;
       }
-      assert(fields[0].type() == VariantType::VARIANT_FLOAT);
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
@@ -744,8 +743,11 @@ public:
 
   virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 1) {
-      assert(fields[0].type() == VariantType::VARIANT_INT32);
-      set(fields[0].get<int32_t>());
+      if (fields[0].type() == VariantType::VARIANT_INT32) {
+        set(fields[0].get<int32_t>());
+      } else {
+        set(static_cast<int32_t>(fields[0].toDouble()));
+      }
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
@@ -1655,23 +1657,23 @@ public:
       : ParameterWrapper<al::Vec3f>(parameterName, Group, defaultValue) {}
 
   ParameterVec3 operator=(const Vec3f vec) {
-    this->set(vec);
+    this->set(std::move(vec));
     return *this;
   }
 
   float operator[](size_t index) {
     assert(index < INT_MAX); // Hack to remove
-    Vec3f vec = this->get();
+    Vec3f vec = std::move(this->get());
     return vec[index];
   }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    Vec3f vec = get();
+    Vec3f vec = std::move(get());
     sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z);
   }
 
   virtual void getFields(std::vector<VariantValue> &fields) override {
-    Vec3f vec = this->get();
+    Vec3f vec = std::move(this->get());
     fields.emplace_back(VariantValue(vec.x));
     fields.emplace_back(VariantValue(vec.y));
     fields.emplace_back(VariantValue(vec.z));
@@ -1679,9 +1681,9 @@ public:
 
   virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 3) {
-      Vec3f vec(fields[0].get<float>(), fields[1].get<float>(),
-                fields[2].get<float>());
-      set(vec);
+      Vec3f vec(fields[0].toDouble(), fields[1].toDouble(),
+                fields[2].toDouble());
+      set(std::move(vec));
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
@@ -1765,8 +1767,8 @@ public:
   //    vec[index];}
 
   virtual void getFields(std::vector<VariantValue> &fields) override {
-    Quatd quat = get().quat();
-    Vec4f pos = get().pos();
+    Quatd quat = std::move(get()).quat();
+    Vec4f pos = std::move(get()).pos();
     fields.reserve(7);
     fields.emplace_back(VariantValue(pos.x));
     fields.emplace_back(VariantValue(pos.y));
@@ -1779,10 +1781,16 @@ public:
 
   virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 7) {
-      Pose vec(Vec3f(fields[0].get<float>(), fields[1].get<float>(),
-                     fields[2].get<float>()),
-               Quatf(fields[3].get<float>(), fields[4].get<float>(),
-                     fields[5].get<float>(), fields[6].get<float>()));
+      Pose vec(Vec3f(fields[0].toDouble(), fields[1].toDouble(),
+                     fields[2].toDouble()),
+               Quatf(fields[3].toDouble(), fields[4].toDouble(),
+                     fields[5].toDouble(), fields[6].toDouble()));
+      set(vec);
+    }
+    if (fields.size() == 3) {
+      Pose vec(Vec3f(fields[0].toDouble(), fields[1].toDouble(),
+                     fields[2].toDouble()),
+               mValue.quat());
       set(vec);
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
@@ -2023,9 +2031,25 @@ public:
 
   virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 4) {
-      Color vec(fields[0].get<float>(), fields[1].get<float>(),
-                fields[2].get<float>(), fields[3].get<float>());
-      set(vec);
+      if (fields[0].type() == VariantType::VARIANT_FLOAT) {
+        assert(fields[1].type() == VariantType::VARIANT_FLOAT);
+        assert(fields[2].type() == VariantType::VARIANT_FLOAT);
+        assert(fields[3].type() == VariantType::VARIANT_FLOAT);
+        Color vec(fields[0].get<float>(), fields[1].get<float>(),
+                  fields[2].get<float>(), fields[3].get<float>());
+        set(vec);
+      } else if (fields[0].type() == VariantType::VARIANT_DOUBLE) {
+        assert(fields[1].type() == VariantType::VARIANT_DOUBLE);
+        assert(fields[2].type() == VariantType::VARIANT_DOUBLE);
+        assert(fields[3].type() == VariantType::VARIANT_DOUBLE);
+        Color vec(fields[0].get<double>(), fields[1].get<double>(),
+                  fields[2].get<double>(), fields[3].get<double>());
+        set(vec);
+      } else {
+        std::cout << __FILE__ << ":" << __LINE__
+                  << " ERROR: Unexpected field types for al::Color"
+                  << std::endl;
+      }
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
