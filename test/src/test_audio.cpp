@@ -1,16 +1,17 @@
 
 #include <cmath>
 
+#include "gtest/gtest.h"
+
 #include "al/io/al_AudioIO.hpp"
 #include "al/math/al_Constants.hpp"
 #include "al/system/al_Time.hpp"
-#include "catch.hpp"
 
 using namespace al;
 
 #ifndef TRAVIS_BUILD
 
-TEST_CASE("Audio Device Enum") { AudioDevice::printAll(); }
+TEST(Audio, AudioDeviceEnum) { AudioDevice::printAll(); }
 
 static void callback(AudioIOData &io) {
   static double phase = 0.0;
@@ -24,7 +25,7 @@ static void callback(AudioIOData &io) {
   }
 }
 
-TEST_CASE("Audio IO Object") {
+TEST(Audio, AudioIOObject) {
   int userData = 5;
   AudioIO audioIO;
 #ifdef AL_WINDOWS
@@ -35,25 +36,25 @@ TEST_CASE("Audio IO Object") {
   audioIO.init(callback, &userData, 64, 44100.0, 2, 2);
 #endif
   audioIO.print();
-  REQUIRE(audioIO.user<int>() == 5);
-  REQUIRE(audioIO.open());
-  REQUIRE(audioIO.start());
+  EXPECT_TRUE(audioIO.user<int>() == 5);
+  EXPECT_TRUE(audioIO.open());
+  EXPECT_TRUE(audioIO.start());
   al_sleep(0.5);
-  REQUIRE(audioIO.stop());
-  REQUIRE(audioIO.close());
-  REQUIRE(audioIO.user<int>() == 5);
+  EXPECT_TRUE(audioIO.stop());
+  EXPECT_TRUE(audioIO.close());
+  EXPECT_TRUE(audioIO.user<int>() == 5);
 }
 
-TEST_CASE("Audio Channels/Virtual Channels") {
+TEST(Audio, VirtualChannels) {
   AudioIO audioIO;
   audioIO.init(nullptr, nullptr, 256, 44100, 1, 1);
 
   // Make sure parameters match those passed to constructor
   audioIO.open();
-  REQUIRE(audioIO.framesPerBuffer() == 256);
-  REQUIRE(audioIO.fps() == 44100);
-  REQUIRE(audioIO.channelsOut() == 1);
-  REQUIRE(audioIO.channelsIn() == 1);
+  EXPECT_TRUE(audioIO.framesPerBuffer() == 256);
+  EXPECT_TRUE(audioIO.fps() == 44100);
+  EXPECT_TRUE(audioIO.channelsOut() == 1);
+  EXPECT_TRUE(audioIO.channelsIn() == 1);
   audioIO.close();
 
   // Test virtual channels
@@ -64,17 +65,17 @@ TEST_CASE("Audio Channels/Virtual Channels") {
   audioIO.channelsOut(maxChansOut + 1);
   audioIO.channelsIn(maxChansIn + 1);
   audioIO.open();
-  REQUIRE(audioIO.channelsOutDevice() ==
-          maxChansOut);  // opened all hardware channels?
-  REQUIRE(audioIO.channelsOut() ==
-          (maxChansOut + 1));  // got our extra virtual channel?
-  REQUIRE(audioIO.channelsInDevice() ==
-          maxChansIn);  // opened all hardware channels?
-  REQUIRE(audioIO.channelsIn() ==
-          (maxChansIn + 1));  // got our extra virtual channel?
+  EXPECT_TRUE(audioIO.channelsOutDevice() ==
+              maxChansOut); // opened all hardware channels?
+  EXPECT_TRUE(audioIO.channelsOut() ==
+              (maxChansOut + 1)); // got our extra virtual channel?
+  EXPECT_TRUE(audioIO.channelsInDevice() ==
+              maxChansIn); // opened all hardware channels?
+  EXPECT_TRUE(audioIO.channelsIn() ==
+              (maxChansIn + 1)); // got our extra virtual channel?
   audioIO.close();
 }
 
 #else
 
-#endif  // TRAVIS_BUILD
+#endif // TRAVIS_BUILD

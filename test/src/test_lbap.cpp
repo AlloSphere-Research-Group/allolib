@@ -4,11 +4,12 @@
 #include "al/math/al_Functions.hpp"
 #include "al/sound/al_Lbap.hpp"
 #include "al/sphere/al_AlloSphereSpeakerLayout.hpp"
-#include "catch.hpp"
+
+#include "gtest/gtest.h"
 
 using namespace al;
 
-TEST_CASE("LBAP Allosphere") {
+TEST(LBAP, LBAPAllosphere) {
   const int fpb = 16;
 
   Speakers sl = AlloSphereSpeakerLayout();
@@ -32,15 +33,15 @@ TEST_CASE("LBAP Allosphere") {
   }
 
   Pose pose;
-  pose.pos(0, 0, -4);  // Front Center
+  pose.pos(0, 0, -4); // Front Center
   audioData.zeroOut();
   lbapPanner.renderBuffer(audioData, pose, samples, fpb);
   for (unsigned int i = 0; i < fpb; i++) {
     for (unsigned int chan = 0; chan < 54; chan++) {
       if (chan == 23) {
-        REQUIRE(aeq(audioData.out(23, i), (i + 0.5f)));
+        EXPECT_TRUE(aeq(audioData.out(23, i), (i + 0.5f)));
       } else {
-        REQUIRE(aeq(audioData.out(chan, i), 0.0f));
+        EXPECT_TRUE(aeq(audioData.out(chan, i), 0.0f));
       }
     }
   }
@@ -51,10 +52,10 @@ TEST_CASE("LBAP Allosphere") {
   //  for (int i = 0; i < fpb; i++) {
   //    for (int chan = 0; chan < 54; chan++) {
   //      if (chan == 30 || chan == 31) {
-  //        REQUIRE(aeq((float)audioData.out(chan, i),
+  //        EXPECT_TRUE(aeq((float)audioData.out(chan, i),
   //                    (float)cos(0.25f * M_PI) * (i + 0.5f)));
   //      } else {
-  //        REQUIRE(aeq(audioData.out(chan, i), 0.0f));
+  //        EXPECT_TRUE(aeq(audioData.out(chan, i), 0.0f));
   //      }
   //    }
   //  }
@@ -67,10 +68,10 @@ TEST_CASE("LBAP Allosphere") {
   //  for (int i = 0; i < fpb; i++) {
   //    for (int chan = 0; chan < 54; chan++) {
   //      if (chan == 16 || chan == 45 || chan == 0 || chan == 11) {
-  //        REQUIRE(aeq((float)audioData.out(chan, i), (float)0.5 * (i +
+  //        EXPECT_TRUE(aeq((float)audioData.out(chan, i), (float)0.5 * (i +
   //        0.5f)));
   //      } else {
-  //        REQUIRE(aeq(audioData.out(chan, i), 0.0f));
+  //        EXPECT_TRUE(aeq(audioData.out(chan, i), 0.0f));
   //      }
   //    }
   //  }
