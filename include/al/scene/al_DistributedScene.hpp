@@ -43,6 +43,8 @@ public:
   void registerVoiceParameters(SynthVoice *voice);
 
 protected:
+  void registerCallbackForParameter(SynthVoice *voice, ParameterMeta *param);
+
 private:
   OSCNotifier *mNotifier{nullptr};
   std::string mName;

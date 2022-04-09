@@ -16,16 +16,7 @@ using namespace al;
 // PresetHandler --------------------------------------------------------------
 
 PresetHandler::PresetHandler(std::string rootDirectory, bool verbose)
-    : mVerbose(verbose), mRootDir(rootDirectory) {
-  setCurrentPresetMap("default");
-  setRootPath(rootDirectory);
-
-  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
-    mCpuThreadRunning = true;
-    mMorphingThread =
-        std::make_unique<std::thread>(PresetHandler::morphingFunction, this);
-  }
-}
+    : PresetHandler(TimeMasterMode::TIME_MASTER_CPU, rootDirectory, verbose) {}
 
 PresetHandler::PresetHandler(TimeMasterMode timeMasterMode,
                              std::string rootDirectory, bool verbose)
@@ -42,6 +33,7 @@ PresetHandler::PresetHandler(TimeMasterMode timeMasterMode,
     std::cerr << "ERROR: PresetSequencer: TimeMasterMode not supported, "
                  "treating as TIME_MASTER_CPU"
               << std::endl;
+    startCpuThread();
   }
 }
 
@@ -394,14 +386,16 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
       mTotalSteps.store(ceilf(mMorphTime.get() / mMorphInterval));
     }
   }
-  std::cout << "start morph. steps " << mTotalSteps.load()
-            << " time: " << mMorphTime.get() << " interval " << mMorphInterval
-            << std::endl;
+  if (mVerbose) {
+    std::cout << "start morph. steps " << mTotalSteps.load()
+              << " time: " << mMorphTime.get() << " interval " << mMorphInterval
+              << std::endl;
+  }
 
   mCurrentPresetName = "";
 }
 
-void PresetHandler::morphTo(std::string presetName, float morphTime) {
+void PresetHandler::morphTo(const std::string &presetName, float morphTime) {
   auto parameterStates = loadPresetValues(presetName);
   if (mUseCallbacks) {
     int index = -1;

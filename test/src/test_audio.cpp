@@ -17,7 +17,7 @@ static void callback(AudioIOData &io) {
   static double phase = 0.0;
   static double phaseInc = 2.0 * M_PI * 440.0 / io.framesPerSecond();
   while (io()) {
-    io.out(0) = std::sin(phase);
+    io.out(0) = 0.1 * std::sin(phase);
     phase += phaseInc;
     if (phase > 2.0 * M_PI) {
       phase -= 2.0 * M_PI;

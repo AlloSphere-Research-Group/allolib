@@ -213,6 +213,7 @@ public:
    *
    * This is used within loadPresetValues(), so it will affect both synchronous
    * and asynchronous recall.
+   * This will also affect the storing of parameter values in presets
    */
   void skipParameter(std::string parameterAddr, bool skip = true);
 
@@ -223,7 +224,7 @@ public:
   void setMaxMorphTime(float time);
   void stopMorphing() { mTotalSteps.store(0); }
   void morphTo(ParameterStates &parameterStates, float morphTime);
-  void morphTo(std::string presetName, float morphTime);
+  void morphTo(const std::string &presetName, float morphTime);
 
   void setMorphStepTime(float stepTime) { mMorphInterval = stepTime; }
 

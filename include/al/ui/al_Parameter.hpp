@@ -1786,8 +1786,7 @@ public:
                Quatf(fields[3].toDouble(), fields[4].toDouble(),
                      fields[5].toDouble(), fields[6].toDouble()));
       set(vec);
-    }
-    if (fields.size() == 3) {
+    } else if (fields.size() == 3) {
       Pose vec(Vec3f(fields[0].toDouble(), fields[1].toDouble(),
                      fields[2].toDouble()),
                mValue.quat());

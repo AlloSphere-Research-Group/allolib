@@ -3,7 +3,7 @@
 
 #include "al/ui/al_PresetHandler.hpp"
 
-TEST(Presets, BasicRecall) {
+TEST(Presets, RecallSynchronous) {
 
   al::Parameter p{"param", "group", 0.5f, 0.0, 1.0};
   al::ParameterInt pint{"paramint", "group", 3, 1, 10};
@@ -93,9 +93,9 @@ TEST(Presets, PresetStepMorphing) {
   al::ParameterInt pint{"paramint", "group", 3, 1, 10};
   al::ParameterColor pcolor{"paramcolor", "group", al::Color(0.1f, 0.1f, 0.1f)};
 
-  al::PresetHandler ph;
+  // Disable morph thread
+  al::PresetHandler ph{al::TimeMasterMode::TIME_MASTER_FREE};
 
-  ph.stopCpuThread(); // to test step morphing function
   ph.setMorphTime(0.3);
   ph.setMorphStepTime(0.1); // Should have 3 steps
   ph << p << pint << pcolor;
@@ -143,4 +143,166 @@ TEST(Presets, PresetStepMorphing) {
   EXPECT_FLOAT_EQ(pcolor.get().r, 0.5f);
   EXPECT_FLOAT_EQ(pcolor.get().g, 0.32f);
   EXPECT_FLOAT_EQ(pcolor.get().b, 0.4f);
+}
+
+TEST(Presets, PresetNoMorphing) {
+
+  al::Parameter p{"param", "group", 0.5f, 0.0, 1.0};
+  al::ParameterInt pint{"paramint", "group", 3, 1, 10};
+  al::ParameterColor pcolor{"paramcolor", "group", al::Color(0.1f, 0.1f, 0.1f)};
+
+  al::PresetHandler ph{al::TimeMasterMode::TIME_MASTER_FREE};
+
+  ph.setMorphTime(0.0);
+  ph.setMorphStepTime(0.1);
+  ph << p << pint << pcolor;
+
+  p.set(0.2f);
+  pint.set(8);
+  pcolor.set({0.3f, 0.2f, 0.4f});
+  ph.storePreset("2");
+
+  p.set(0.5f);
+  pint.set(4);
+  pcolor.set({0.65f, 0.73f, 0.8f});
+  ph.storePreset("3");
+
+  ph.recallPreset("2");
+
+  // Should still be on preset 3 values
+  EXPECT_FLOAT_EQ(p.get(), 0.5f);
+  EXPECT_EQ(pint.get(), 4);
+  EXPECT_FLOAT_EQ(pcolor.get().r, 0.65f);
+  EXPECT_FLOAT_EQ(pcolor.get().g, 0.73f);
+  EXPECT_FLOAT_EQ(pcolor.get().b, 0.8f);
+
+  ph.stepMorphing();
+
+  // Should now be in preset 2
+  EXPECT_FLOAT_EQ(p.get(), 0.2f);
+  EXPECT_EQ(pint.get(), 8);
+  EXPECT_FLOAT_EQ(pcolor.get().r, 0.3f);
+  EXPECT_FLOAT_EQ(pcolor.get().g, 0.2f);
+  EXPECT_FLOAT_EQ(pcolor.get().b, 0.4f);
+}
+
+TEST(Presets, PresetNoMorphingThread) {
+
+  al::Parameter p{"param", "group", 0.5f, 0.0, 1.0};
+  al::ParameterInt pint{"paramint", "group", 3, 1, 10};
+  al::ParameterColor pcolor{"paramcolor", "group", al::Color(0.1f, 0.1f, 0.1f)};
+
+  al::PresetHandler ph;
+
+  ph.setMorphTime(0.0);
+  ph.setMorphStepTime(0.1);
+  ph << p << pint << pcolor;
+
+  p.set(0.2f);
+  pint.set(8);
+  pcolor.set({0.3f, 0.2f, 0.4f});
+  ph.storePreset("2");
+
+  p.set(0.5f);
+  pint.set(4);
+  pcolor.set({0.65f, 0.73f, 0.8f});
+  ph.storePreset("3");
+
+  ph.recallPreset("2");
+  std::this_thread::sleep_for(std::chrono::milliseconds(120));
+
+  // Should now be in preset 2
+  EXPECT_FLOAT_EQ(p.get(), 0.2f);
+  EXPECT_EQ(pint.get(), 8);
+  EXPECT_FLOAT_EQ(pcolor.get().r, 0.3f);
+  EXPECT_FLOAT_EQ(pcolor.get().g, 0.2f);
+  EXPECT_FLOAT_EQ(pcolor.get().b, 0.4f);
+}
+
+TEST(Presets, PresetMorphingThread) {
+  al::Parameter p{"param", "group", 0.5f, 0.0, 1.0};
+  al::ParameterInt pint{"paramint", "group", 3, 1, 10};
+  al::ParameterColor pcolor{"paramcolor", "group", al::Color(0.1f, 0.1f, 0.1f)};
+
+  al::PresetHandler ph;
+
+  ph.setMorphTime(0.3);
+  ph.setMorphStepTime(0.1);
+  ph << p << pint << pcolor;
+
+  p.set(0.2f);
+  pint.set(8);
+  pcolor.set({0.3f, 0.2f, 0.4f});
+  ph.storePreset("2");
+
+  p.set(0.5f);
+  pint.set(4);
+  pcolor.set({0.65f, 0.73f, 0.8f});
+  ph.storePreset("3");
+
+  ph.recallPreset("2");
+  std::this_thread::sleep_for(std::chrono::milliseconds(150));
+
+  // Should not be in preset 2 yet
+  EXPECT_NE(p.get(), 0.2f);
+  EXPECT_NE(pint.get(), 8);
+  EXPECT_NE(pcolor.get().r, 0.3f);
+  EXPECT_NE(pcolor.get().g, 0.2f);
+  EXPECT_NE(pcolor.get().b, 0.4f);
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+  // Should now be in preset 2
+  EXPECT_FLOAT_EQ(p.get(), 0.2f);
+  EXPECT_EQ(pint.get(), 8);
+  EXPECT_FLOAT_EQ(pcolor.get().r, 0.3f);
+  EXPECT_FLOAT_EQ(pcolor.get().g, 0.2f);
+  EXPECT_FLOAT_EQ(pcolor.get().b, 0.4f);
+}
+
+TEST(Presets, PresetDifferingParams) {
+  al::Parameter p{"param", "group", 0.5f, 0.0, 1.0};
+  al::ParameterInt pint{"paramint", "group", 3, 1, 10};
+  al::ParameterColor pcolor{"paramcolor", "group", al::Color(0.1f, 0.1f, 0.1f)};
+
+  al::PresetHandler ph;
+
+  ph << p << pint << pcolor;
+
+  // This test also excersizes skipParameter()
+  ph.skipParameter("/group/paramint");
+  p.set(0.2f);
+  pint.set(4);
+  pcolor.set({0.3f, 0.2f, 0.4f});
+  ph.storePreset("2");
+
+  pint.set(5);
+  ph.recallPresetSynchronous("2");
+  EXPECT_EQ(pint.get(), 5);
+
+  ph.skipParameter("/group/paramint", false);
+  ph.skipParameter("/group/param");
+  p.set(0.5f);
+  pint.set(4);
+  pcolor.set({0.65f, 0.73f, 0.8f});
+  ph.storePreset("3");
+
+  p.set(0.2f);
+  ph.recallPresetSynchronous("3");
+  EXPECT_FLOAT_EQ(p.get(), 0.2f);
+
+  ph.setMorphTime(2);
+  ph.setMorphStepTime(0.05);
+  ph.recallPreset("2");
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+  ph.setMorphTime(0.1);
+  ph.recallPreset("3");
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+  EXPECT_NE(p.get(), 0.5f);
+  EXPECT_EQ(pint.get(), 4);
+  EXPECT_FLOAT_EQ(pcolor.get().r, 0.65f);
+  EXPECT_FLOAT_EQ(pcolor.get().g, 0.73f);
+  EXPECT_FLOAT_EQ(pcolor.get().b, 0.8f);
 }
