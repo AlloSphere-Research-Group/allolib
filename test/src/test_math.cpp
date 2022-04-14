@@ -12,6 +12,9 @@
 #include "al/math/al_Frustum.hpp"
 #include "al/math/al_Interval.hpp"
 
+//  Synchronized to AlloSystem commit:
+//  0ddb8ec6594ca66d34dc18849bc2b433e5f67016
+
 using namespace al;
 
 template <class T> inline bool eqVal(T x, T y, T eps = 0.000001) {
@@ -47,7 +50,6 @@ inline bool eq(const Mat<N, T> &a, const Mat<N, T> &b, T eps = 0.000001) {
 TEST(Math, Math) {
   // Vec
   {
-    const int N = 4;
 
     // Should be able to hold objects with constructors
     { Vec<1, Vec<1, int>> t; }
@@ -55,13 +57,75 @@ TEST(Math, Math) {
     { Vec<5, char> t; }
     { Vec<0, int> t; }
 
-    // Vec<0,int>().print();
-    // Vec<1,int>(1).print();
-    // Vec<2,int>(1,2).print();
-    // std::cout << Vec<0,int>();
-
+    const int N = 4;
     Vec<N, double> a, b, c;
     EXPECT_TRUE(a.size() == N);
+    // constructors
+    {
+      decltype(a) t(a);
+      assert(t == a);
+    }
+    {
+      Vec<3, float> t(1);
+      assert(t[0] == 1 && t[1] == 1 && t[2] == 1);
+    }
+    {
+      Vec<3, float> t(1, 2, 3);
+      assert(t[0] == 1 && t[1] == 2 && t[2] == 3);
+    }
+    {
+      Vec<3, float> t({1, 2, 3});
+      assert(t[0] == 1 && t[1] == 2 && t[2] == 3);
+    }
+    {
+      Vec<3, float> t(Vec<2, float>(1, 2), 3);
+      assert(t[0] == 1 && t[1] == 2 && t[2] == 3);
+    }
+    {
+      Vec<3, float> t(Vec<2, float>(1, 2));
+      assert(t[0] == 1 && t[1] == 2 && t[2] == 0);
+    }
+    {
+      float s[] = {1, 10, 2, 20, 3, 30};
+      assert(Vec3f(s) == Vec3f(1, 10, 2));
+      assert(Vec3f(s, 2) == Vec3f(1, 2, 3));
+    }
+
+    // factories
+    assert(Vec3f::aa(0, 1.f) == Vec3f(1, 0, 0));
+    assert(Vec4i::iota(0) == Vec4i(0, 1, 2, 3));
+    assert(Vec4i::iota(1) == Vec4i(1, 2, 3, 4));
+    assert(Vec4i::iota(0, 2) == Vec4i(0, 2, 4, 6));
+    assert(Vec4d::line(0, 3) == Vec4d(0, 1, 2, 3));
+    assert(Vec4d::line<false>(0, 4) == Vec4d(0, 1, 2, 3));
+    assert(toVec(1, 2, 3, 4).size() == 4);
+    assert(toVec(1, 2, 3, 4) == Vec4i(1, 2, 3, 4));
+
+    // access
+    for (int i = 0; i < a.size(); ++i)
+      a[i] = i;
+    assert(a.at<1>() == 1);
+    assert(a.get(0, 1) == Vec2d(0, 1));
+    assert(a.get(2, 2) == Vec2d(2, 2));
+    assert(a.get(2, 1, 0) == Vec3d(2, 1, 0));
+    {
+      bool compileTimeVec_get = a.get<2, 1, 0>() == Vec3d(2, 1, 0);
+      assert(compileTimeVec_get);
+    }
+
+    {
+      for (int i = 0; i < a.size(); ++i)
+        a[i] = i;
+
+      Vec<2, double> t;
+      t = a.sub<2, 0>();
+      assert(t[0] == 0 && t[1] == 1);
+      t = a.sub<2, 2>();
+      assert(t[0] == 2 && t[1] == 3);
+      // verify in-place operations
+      a.sub<2>(0) += 10;
+      assert(a[0] == 10 && a[1] == 11);
+    }
 
     a[0] = 0;
     EXPECT_TRUE(a[0] == 0);
@@ -83,7 +147,21 @@ TEST(Math, Math) {
 
     {
       a.set(1);
-      b.set(0);
+      EXPECT_EQ(a, 1);
+      b.set(a);
+      EXPECT_EQ(b, 1);
+
+      a = 1;
+      assert(a == 1);
+      b = a;
+      assert(b == 1);
+      assert(b == a);
+      b = 2;
+      assert(b != a);
+
+      a = 1;
+      b = 0;
+
       double *p = a.elems();
       EXPECT_TRUE(p[0] == a[0]);
       b.set(p);
@@ -97,7 +175,7 @@ TEST(Math, Math) {
       a.set(c2, 2);
       EXPECT_TRUE(a == 1);
 
-      a.zero();
+      //      a.zero();
       a.set(Vec<N - 1, int>(1, 2, 3), 4);
       EXPECT_TRUE(a[0] == 1);
       EXPECT_TRUE(a[1] == 2);
@@ -105,7 +183,7 @@ TEST(Math, Math) {
       EXPECT_TRUE(a[3] == 4);
     }
 
-    a.zero();
+    a = 0;
     EXPECT_TRUE(a == 0);
 
     a = 1;
@@ -114,6 +192,7 @@ TEST(Math, Math) {
     b = a;
     EXPECT_TRUE(b == a);
     EXPECT_TRUE(!(b != a));
+
     a = 3;
     b = 3;
     a -= b;
@@ -157,10 +236,13 @@ TEST(Math, Math) {
 
     a = -1;
     b = +1;
+    EXPECT_TRUE(a.absVec() == b);
     EXPECT_TRUE(a.dot(b) == -N);
     EXPECT_TRUE(a.dot(a) == N);
+    EXPECT_TRUE(Vec3i(1, 2, -3).product() == -6);
     EXPECT_TRUE(a.sum() == -N);
     EXPECT_TRUE(a.sumAbs() == N);
+    EXPECT_TRUE(Vec3f(1, 2, 3).mean() == 2);
     EXPECT_TRUE(a.mag() == sqrt(N));
     EXPECT_TRUE(b.mag() == sqrt(N));
     EXPECT_TRUE(a.mag() == abs(a));
@@ -168,6 +250,16 @@ TEST(Math, Math) {
     EXPECT_TRUE(b.magSqr() == N);
     EXPECT_TRUE(a.norm1() == N);
     EXPECT_TRUE(a.norm2() == sqrt(N));
+    EXPECT_TRUE(a.norm(1) == a.norm1());
+    EXPECT_TRUE(a.norm(2) == a.norm2());
+
+    (a = 1).negate();
+    EXPECT_TRUE(a == -1);
+    (a = 1).normalize();
+    EXPECT_TRUE(a == 1. / sqrt(N));
+    EXPECT_TRUE(a == (b = 10).normalized());
+    EXPECT_TRUE(Vec4i(-10, 1, 4, 100).indexOfMax() == 3);
+    EXPECT_TRUE(Vec4i(-10, 1, 4, 100).indexOfMin() == 0);
 
     a.set(1).negate();
     EXPECT_TRUE(a == -1);
@@ -175,10 +267,10 @@ TEST(Math, Math) {
     EXPECT_TRUE(a == 1. / sqrt(N));
     EXPECT_TRUE(a == b.set(10).normalized());
 
+    // Vec-Vec ops
     b = a = 1;
     EXPECT_TRUE(concat(a, b) == 1);
 
-    // conversion
     {
       a = 0;
       Vec<N + 1, double> t = concat(a, Vec<1, char>(1));
@@ -196,7 +288,7 @@ TEST(Math, Math) {
         a[i] = i;
 
       Vec<2, double> t;
-      t = a.sub<2>();
+      t = a.sub<2, 0>();
       EXPECT_TRUE(t[0] == 0);
       EXPECT_TRUE(t[1] == 1);
       t = a.sub<2>(2);
@@ -204,13 +296,13 @@ TEST(Math, Math) {
       EXPECT_TRUE(t[1] == 3);
     }
 
+    // geometry and other math ops
     EXPECT_TRUE(eqVal(angle(Vec3d(1, 0, 0), Vec3d(1, 0, 0)), 0.));
     EXPECT_TRUE(eqVal(angle(Vec3d(1, 0, 0), Vec3d(0, 1, 0)), M_PI_2));
     EXPECT_TRUE(eqVal(angle(Vec3d(1, 0, 0), Vec3d(0, -1, 0)), M_PI_2));
 
     {
-      Vec3d r;
-      centroid3(r, Vec3d(1, 0, 0), Vec3d(0, 1, 0), Vec3d(0, 0, 1));
+      Vec3d r = centroid(Vec3d(1, 0, 0), Vec3d(0, 1, 0), Vec3d(0, 0, 1));
       EXPECT_TRUE(eq(r, Vec3d(1 / 3.)));
 
       normal(r, Vec3d(1, 0, 0), Vec3d(0, 1, 0), Vec3d(-1, 0, 0));
@@ -224,6 +316,13 @@ TEST(Math, Math) {
       EXPECT_TRUE(rel[1] == 3);
       EXPECT_TRUE(rel[2] == 3);
     }
+
+    // analysis
+    EXPECT_TRUE(toVec(1, -10, 7, 2).find(7) == 2);
+    EXPECT_TRUE(toVec(1, -10, 7, 2).find(3) < 0);
+    EXPECT_TRUE(toVec(4, 1, 1, 7).find(1) == 1);
+    EXPECT_TRUE(toVec(1, -10, 7, 2).indexOfMin() == 1);
+    EXPECT_TRUE(toVec(1, -10, 7, 2).indexOfMax() == 2);
 
     a = 0;
     b = 1;
@@ -483,6 +582,21 @@ EXPECT_TRUE(eq(m(2,2),i));\
       b = q.fromMatrixTransposed(mat4);
       EXPECT_TRUE((q == b || q == b.conj()));
     }
+    // Test Quat to matrix
+    {
+
+      Quatd q;
+      q.set(1, 0, 0, 0);
+      Mat4d m;
+      q.toMatrix(&m[0]);
+      EXPECT_TRUE(eq(m, Mat4d::identity()));
+
+      q.fromAxisAngle(M_2PI / 4, 0, 0, 1);
+      q.toMatrix(&m[0]);
+      // For a right-handed coordinate system
+      EXPECT_TRUE(
+          eq(m, Mat4d(0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)));
+    }
 
     // Test Quat to component coordinate frame
     {
@@ -551,43 +665,53 @@ EXPECT_TRUE(eq(m(2,2),i));\
     T(0, 0)
     T(1, 1)
     T(2, 2)
-    T(3, 4) T(500, 512) T(999, 1024)
+    T(3, 4)
+    T(500, 512)
+    T(999, 1024)
 
 #undef T
 
 #define T(x, y) EXPECT_TRUE(al::clip(x) == y);
 
-        T(0., 0.) T(0.5, 0.5) T(1., 1.) T(1.2, 1.) T(-0.5, 0.) T(pinf,
-                                                                 1.) T(ninf, 0.)
+    T(0., 0.)
+    T(0.5, 0.5)
+    T(1., 1.)
+    T(1.2, 1.)
+    T(-0.5, 0.)
+    T(pinf, 1.)
+    T(ninf, 0.)
 #undef T
 
 #define T(x, y) EXPECT_TRUE(al::clipS(x) == y);
 
-            T(0., 0.) T(0.5, 0.5) T(1., 1.) T(1.2, 1.) T(-0.5, -0.5) T(
-                -1., -1) T(-1.2, -1.)
+    T(0., 0.)
+    T(0.5, 0.5)
+    T(1., 1.)
+    T(1.2, 1.)
+    T(-0.5, -0.5)
+    T(-1., -1)
+    T(-1.2, -1.)
 #undef T
 
 #define T(x, r) EXPECT_TRUE(al::even(x) == r);
 
-                T(0, true) T(1, false) T(-2, true)
+    T(0, true)
+    T(1, false)
+    T(-2, true)
 #undef T
 
 #define T(x, y) EXPECT_TRUE(al::factorial(x) == y);
 
-                    T(0, 1) T(1, 1) T(2, 2 * 1) T(3, 3 * 2 * 1) T(4,
-                                                                  4 * 3 * 2 * 1)
-                        T(5, 5 * 4 * 3 * 2 * 1) T(6, 6 * 5 * 4 * 3 * 2 * 1)
-                            T(7, 7 * 6 * 5 * 4 * 3 * 2 *
-                                     1) T(8, 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1)
-                                T(9, 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1)
-                                    T(10, 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 *
-                                              1) T(11, 11 * 10 * 9 * 8 * 7 * 6 *
-                                                           5 * 4 * 3 * 2 * 1)
-                                        T(12, 12 * 11 * 10 * 9 * 8 * 7 * 6 * 5 *
-                                                  4 * 3 * 2 * 1)
+        T(0, 1) T(1, 1) T(2, 2 * 1) T(3, 3 * 2 * 1) T(4, 4 * 3 * 2 * 1) T(
+            5, 5 * 4 * 3 * 2 * 1) T(6, 6 * 5 * 4 * 3 * 2 * 1)
+            T(7, 7 * 6 * 5 * 4 * 3 * 2 * 1) T(8, 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1)
+                T(9, 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 *
+                         1) T(10, 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1)
+                    T(11, 11 * 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1)
+                        T(12, 12 * 11 * 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1)
 #undef T
 
-                                            for (int i = 0; i <= 12; ++i) {
+                            for (int i = 0; i <= 12; ++i) {
       EXPECT_TRUE(al::aeq(al::factorialSqrt(i), sqrt(al::factorial(i))));
     }
 
@@ -605,66 +729,77 @@ EXPECT_TRUE(eq(m(2,2),i));\
     T(0.5, 0.5)
     T(1., 1.)
     T(1.2, 0.8)
-    T(-0.2, 0.2) T(2.2, 0.2) T(3.2, 0.8) T(4.2, 0.2) T(5.2, 0.8)
+    T(-0.2, 0.2)
+    T(2.2, 0.2)
+    T(3.2, 0.8)
+    T(4.2, 0.2)
+    T(5.2, 0.8)
 #undef T
 
 #define T(x, y, r) EXPECT_TRUE(al::gcd(x, y) == r);
-        T(7, 7, 7) T(7, 4, 1) T(8, 4, 4)
+    T(7, 7, 7)
+    T(7, 4, 1)
+    T(8, 4, 4)
 #undef T
 
 #define T(x, y, r) EXPECT_TRUE(al::lcm(x, y) == r);
-            T(7, 3, 21) T(8, 4, 8) T(3, 1, 3)
+    T(7, 3, 21)
+    T(8, 4, 8)
+    T(3, 1, 3)
 #undef T
 
 #define T(x, y, r) EXPECT_TRUE(al::lessAbs(x, y) == r);
-                T(0.1, 1., true) T(-0.1, 1., true) T(1., 1., false) T(-1., 1.,
-                                                                      false)
+    T(0.1, 1., true)
+    T(-0.1, 1., true)
+    T(1., 1., false)
+    T(-1., 1., false)
 #undef T
 
 #define T(x, r) EXPECT_TRUE(al::odd(x) == r);
-                    T(0, false) T(1, true) T(-2, false)
+    T(0, false)
+    T(1, true)
+    T(-2, false)
 #undef T
 
 #define T(x) EXPECT_TRUE(al::pow2(x) == x * x);
-                        T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
+    T(0)
+    T(1)
+    T(2)
+    T(3) T(-1) T(-2) T(-3)
 #undef T
 
 #define T(x) EXPECT_TRUE(al::pow2S(x) == x * std::abs(x));
-                            T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
+        T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 #undef T
 
 #define T(x) EXPECT_TRUE(al::pow3(x) == x * x * x);
-                                T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
+            T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 #undef T
 
 #define T(x) EXPECT_TRUE(al::pow3Abs(x) == std::abs(x * x * x));
-                                    T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
+                T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 #undef T
 
 #define T(x) EXPECT_TRUE(al::pow4(x) == x * x * x * x);
-                                        T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
+                    T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 #undef T
 
 #define T(x) EXPECT_TRUE(al::pow5(x) == x * x * x * x * x);
-                                            T(0) T(1) T(2) T(3) T(-1) T(-2) T(
-                                                -3)
+                        T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 #undef T
 
 #define T(x) EXPECT_TRUE(al::pow6(x) == x * x * x * x * x * x);
-                                                T(0) T(1) T(2) T(3) T(-1) T(
-                                                    -2) T(-3)
+                            T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 #undef T
 
 #define T(x) EXPECT_TRUE(al::pow8(x) == x * x * x * x * x * x * x * x);
-                                                    T(0) T(1) T(2) T(3) T(-1) T(
-                                                        -2) T(-3)
+                                T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 #undef T
 
 #define T(x)                                                                   \
   EXPECT_TRUE(al::pow16(x) ==                                                  \
               x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x);
-                                                        T(0) T(1) T(2) T(3) T(
-                                                            -1) T(-2) T(-3)
+                                    T(0) T(1) T(2) T(3) T(-1) T(-2) T(-3)
 #undef T
 
 #define T(x)                                                                   \
@@ -673,8 +808,8 @@ EXPECT_TRUE(eq(m(2,2),i));\
       x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x   \
           *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x \
               *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x *x));
-                                                            T(0.) T(1.) T(1.01) T(1.02) T(
-                                                                -1.) T(-1.01) T(-1.02)
+                                        T(0.) T(1.) T(1.01) T(1.02) T(-1.) T(
+                                            -1.01) T(-1.02)
 #undef T
 
     //	#define T(x,r) EXPECT_TRUE(al::powerOf2(x) == r);
@@ -682,41 +817,27 @@ EXPECT_TRUE(eq(m(2,2),i));\
     //	#undef T
 
 #define T(x, y, r) EXPECT_TRUE(al::round(x, y) == r);
-                                                                T(0.0, 0.1, 0.0) T(0.1, 0.1, 0.1) T(
-                                                                    0.15,
-                                                                    0.1,
-                                                                    0.1) T(-0.15, 0.1, -0.1)
+                                            T(0.0, 0.1, 0.0) T(0.1, 0.1, 0.1) T(
+                                                0.15, 0.1, 0.1) T(-0.15, 0.1,
+                                                                  -0.1)
 #undef T
 
 #define T(x, y, r) EXPECT_TRUE(al::roundAway(x, y) == r);
-                                                                    T(0.0, 0.1,
-                                                                      0.0) T(0.1,
-                                                                             0.1,
-                                                                             0.1)
-                                                                        T(0.15,
-                                                                          0.1,
-                                                                          0.2) T(-0.15,
-                                                                                 0.1,
-                                                                                 -0.2)
+                                                T(0.0, 0.1,
+                                                  0.0) T(0.1, 0.1,
+                                                         0.1) T(0.15, 0.1, 0.2)
+                                                    T(-0.15, 0.1, -0.2)
 #undef T
 
 #define T(x, r) EXPECT_TRUE(al::sgn(x) == r);
-                                                                            T(-0.1, -1.) T(
-                                                                                0.1,
-                                                                                1.) T(0., 0.)
+                                                        T(-0.1, -1.) T(
+                                                            0.1, 1.) T(0., 0.)
 #undef T
 
 #define T(x1, y1, x2, y2, r) EXPECT_TRUE(al::slope(x1, y1, x2, y2) == r);
-                                                                                T(3.,
-                                                                                  3.,
-                                                                                  4.,
-                                                                                  4.,
-                                                                                  1.)
-                                                                                    T(3.,
-                                                                                      -3.,
-                                                                                      4.,
-                                                                                      -4.,
-                                                                                      -1.)
+                                                            T(3., 3., 4., 4.,
+                                                              1.) T(3., -3., 4.,
+                                                                    -4., -1.)
 #undef T
 
     {
@@ -748,7 +869,8 @@ EXPECT_TRUE(eq(m(2,2),i));\
 #undef T
 
 #define T(x, l, h, r) EXPECT_TRUE(al::within(x, l, h) == r);
-        T(0, 0, 1, true) T(1, 0, 1, true)
+    T(0, 0, 1, true)
+    T(1, 0, 1, true)
 #undef T
 
     //	printf("%.20g\n", wrap<double>(-32.0, 32.0, 0.));  // should be 0.0
@@ -757,8 +879,11 @@ EXPECT_TRUE(eq(m(2,2),i));\
     // be 31.999999999999996447
 
 #define T(x, y) EXPECT_TRUE(eqVal(al::wrap(x, 1., -1.), y));
-            T(0., 0.) T(0.5, 0.5) T(1., -1.) T(1.2, -0.8) T(2.2, 0.2)
-                T(-0.5, -0.5) T(-1., -1.) T(-1.2, 0.8) T(-2.2, -0.2)
+    T(0., 0.)
+    T(0.5, 0.5)
+    T(1., -1.)
+    T(1.2, -0.8)
+    T(2.2, 0.2) T(-0.5, -0.5) T(-1., -1.) T(-1.2, 0.8) T(-2.2, -0.2)
 #undef T
   }
 

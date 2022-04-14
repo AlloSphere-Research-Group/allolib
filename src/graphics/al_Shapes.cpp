@@ -1,7 +1,13 @@
 #include "al/graphics/al_Shapes.hpp"
+#include "al/graphics/al_Mesh.hpp"
 #include "al/math/al_Constants.hpp"
+
 #include <map>
 #include <math.h>
+
+#include <cmath>
+#include <cstdint> // uint64_t
+#include <map>
 
 /*
 Platonic solids code derived from:
@@ -40,9 +46,8 @@ static void scaleVerts(Mesh &m, float radius, int N) {
   }
 }
 
-int addCube(Mesh &m, bool withNormalsAndTexcoords, float l) {
-  m.primitive(Mesh::TRIANGLES);
-
+int addCuboid(Mesh &m, float rx, float ry, float rz,
+              bool withNormalsAndTexcoords) {
   // This generates a cube with face-oriented normals and unit texture
   // coordinates per face. It should be rendered using a quad primitive.
   if (withNormalsAndTexcoords) {
@@ -57,50 +62,50 @@ int addCube(Mesh &m, bool withNormalsAndTexcoords, float l) {
     // +x face
     for (int i = 0; i < 4; ++i)
       m.normal(1, 0, 0);
-    m.vertex(l, -l, l);
-    m.vertex(l, -l, -l);
-    m.vertex(l, l, -l);
-    m.vertex(l, l, l);
+    m.vertex(rx, -ry, rz);
+    m.vertex(rx, -ry, -rz);
+    m.vertex(rx, ry, -rz);
+    m.vertex(rx, ry, rz);
 
     // -x face
     for (int i = 0; i < 4; ++i)
       m.normal(-1, 0, 0);
-    m.vertex(-l, l, l);
-    m.vertex(-l, l, -l);
-    m.vertex(-l, -l, -l);
-    m.vertex(-l, -l, l);
+    m.vertex(-rx, ry, rz);
+    m.vertex(-rx, ry, -rz);
+    m.vertex(-rx, -ry, -rz);
+    m.vertex(-rx, -ry, rz);
 
     // +y face
     for (int i = 0; i < 4; ++i)
       m.normal(0, 1, 0);
-    m.vertex(-l, l, l);
-    m.vertex(l, l, l);
-    m.vertex(l, l, -l);
-    m.vertex(-l, l, -l);
+    m.vertex(-rx, ry, rz);
+    m.vertex(rx, ry, rz);
+    m.vertex(rx, ry, -rz);
+    m.vertex(-rx, ry, -rz);
 
     // -y face
     for (int i = 0; i < 4; ++i)
       m.normal(0, -1, 0);
-    m.vertex(-l, -l, -l);
-    m.vertex(l, -l, -l);
-    m.vertex(l, -l, l);
-    m.vertex(-l, -l, l);
+    m.vertex(-rx, -ry, -rz);
+    m.vertex(rx, -ry, -rz);
+    m.vertex(rx, -ry, rz);
+    m.vertex(-rx, -ry, rz);
 
     // +z face
     for (int i = 0; i < 4; ++i)
       m.normal(0, 0, 1);
-    m.vertex(-l, -l, l);
-    m.vertex(l, -l, l);
-    m.vertex(l, l, l);
-    m.vertex(-l, l, l);
+    m.vertex(-rx, -ry, rz);
+    m.vertex(rx, -ry, rz);
+    m.vertex(rx, ry, rz);
+    m.vertex(-rx, ry, rz);
 
     // -z face
     for (int i = 0; i < 4; ++i)
       m.normal(0, 0, -1);
-    m.vertex(-l, l, -l);
-    m.vertex(l, l, -l);
-    m.vertex(l, -l, -l);
-    m.vertex(-l, -l, -l);
+    m.vertex(-rx, ry, -rz);
+    m.vertex(rx, ry, -rz);
+    m.vertex(rx, -ry, -rz);
+    m.vertex(-rx, -ry, -rz);
 
     static const int indices[] = {
         0,  1,  2,  2,  3,  0,  // r
@@ -119,40 +124,32 @@ int addCube(Mesh &m, bool withNormalsAndTexcoords, float l) {
 
     return Nv;
   } else {
-    /*
-        0  1
-
-        2  3
-    4  5
-
-    6  7
-
-      t  b
-      | /
-    l --+--  r
-      /  |
-    f  b
-
-    */
+    m.primitive(Mesh::TRIANGLES);
+    /* 0 1      t  b
+    2 3      | /
+    4 5       l +--r
+    6 7       f b       */
 
     int Nv = 8;
-    m.vertex(-l, l, -l);
-    m.vertex(l, l, -l);
-    m.vertex(-l, -l, -l);
-    m.vertex(l, -l, -l);
-    m.vertex(-l, l, l);
-    m.vertex(l, l, l);
-    m.vertex(-l, -l, l);
-    m.vertex(l, -l, l);
+    m.vertex(-rx, ry, -rz);
+    m.vertex(rx, ry, -rz);
+    m.vertex(-rx, -ry, -rz);
+    m.vertex(rx, -ry, -rz);
+    m.vertex(-rx, ry, rz);
+    m.vertex(rx, ry, rz);
+    m.vertex(-rx, -ry, rz);
+    m.vertex(rx, -ry, rz);
 
-    static const int indices[] = {6, 5, 4, 6, 7, 5, 7, 1, 5, 7, 3, 1,
-                                  3, 0, 1, 3, 2, 0, 2, 4, 0, 2, 6, 4,
-                                  4, 1, 0, 4, 5, 1, 2, 3, 6, 3, 7, 6};
-
-    int offset = m.vertices().size() - Nv;
-    int num = sizeof(indices) / sizeof(*indices);
-    m.index(indices, num, offset);
-
+    static const int indices[] = {
+        6, 5, 4, 6, 7, 5, // front
+        7, 1, 5, 7, 3, 1, // right
+        3, 0, 1, 3, 2, 0, // back
+        2, 4, 0, 2, 6, 4, // left
+        4, 1, 0, 4, 5, 1, // top
+        2, 3, 6, 3, 7, 6  // bottom
+    };
+    m.index<int>(indices, sizeof(indices) / sizeof(*indices),
+                 m.vertices().size() - Nv);
     return Nv;
   }
 }
@@ -448,7 +445,7 @@ int addSphereWithTexcoords(Mesh &m, double radius, int bands, bool isSkybox) {
   return m.vertices().size();
 }
 
-int addWireBox(Mesh &m, float w, float h, float d) {
+int addWireBox(Mesh &m, const Vec3f &l, const Vec3f &h) {
   m.primitive(Mesh::LINES);
 
   int Nv = m.vertices().size();
@@ -458,13 +455,14 @@ int addWireBox(Mesh &m, float w, float h, float d) {
     2 3
     0 1      */
 
-  for (int k = -1; k <= 1; k += 2) {
-    for (int j = -1; j <= 1; j += 2) {
-      for (int i = -1; i <= 1; i += 2) {
-        m.vertex(i * w, j * h, k * d);
-      }
-    }
-  }
+  m.vertex(l[0], l[1], l[2]);
+  m.vertex(h[0], l[1], l[2]);
+  m.vertex(l[0], h[1], l[2]);
+  m.vertex(h[0], h[1], l[2]);
+  m.vertex(l[0], l[1], h[2]);
+  m.vertex(h[0], l[1], h[2]);
+  m.vertex(l[0], h[1], h[2]);
+  m.vertex(h[0], h[1], h[2]);
 
   static const int I[] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 2, 1, 3,
                           4, 6, 5, 7, 0, 4, 1, 5, 2, 6, 3, 7};
@@ -474,79 +472,195 @@ int addWireBox(Mesh &m, float w, float h, float d) {
   return m.vertices().size() - Nv;
 }
 
+int addWireBox(Mesh &m, float w, float h, float d) {
+  Vec3f p(w, h, d);
+  p *= 0.5f;
+  return addWireBox(m, -p, p);
+}
+
 int addCone(Mesh &m, float radius, const Vec3f &apex, unsigned slices,
-            unsigned cycles) {
+            unsigned stacks, unsigned cycles) {
   m.primitive(Mesh::TRIANGLES);
 
   unsigned Nv = m.vertices().size();
 
   // Note: leaving base on xy plane makes it easy to construct a bicone
   m.vertex(apex);
+  for (unsigned i = 0; i < stacks; ++i) {
 
-  CSin csin(cycles * 2 * M_PI / slices, radius);
-  for (unsigned i = Nv + 1; i <= (Nv + slices); ++i) {
-    float x = csin.r;
-    float y = csin.i;
-    csin();
-    m.vertex(x, y);
-    m.index(Nv);
-    m.index(i);
-    m.index(i + 1);
+    float h = float(i + 1) / stacks;
+
+    CSin csin(cycles * 2 * M_PI / slices, h * radius);
+
+    for (unsigned j = 0; j < slices; ++j) {
+      float x = csin.r;
+      float y = csin.i;
+      csin();
+
+      bool lastSlice = j == (slices - 1);
+
+      if (0 == i) { // first stack
+        m.index(Nv);
+        int v2 = 0;
+        int v3 = 1;
+        if (lastSlice)
+          v3 -= slices;
+        m.indexRel(v2, v3);
+      } else {
+        int v1 = -int(slices);
+        int v2 = 0;
+        int v3 = v1 + 1;
+        int v4 = 1;
+        if (lastSlice) {
+          v3 -= slices;
+          v4 -= slices;
+        }
+        m.indexRel(v1, v2, v3, v3, v2, v4);
+      }
+      m.vertex(Vec3f(x, y, 0.) + apex * (1. - h));
+    }
+  }
+  return 1 + slices * stacks;
+}
+
+int addDisc(Mesh &m, float radius, unsigned slices, unsigned stacks) {
+  return addCone(m, radius, Vec3f(0, 0, 0), slices, stacks);
+}
+
+int addEllipse(Mesh &m, float radx, float rady, int N) {
+  m.primitive(Mesh::LINES);
+  int Nv = m.vertices().size();
+  for (int i = 0; i < N; ++i)
+    m.indexRel(i, (i + 1) % N);
+  m.vertices().resize(m.vertices().size() + N);
+  ellipse(&m.vertices().back() - N + 1, N, radx, rady);
+  return N;
+}
+
+int addCircle(Mesh &m, float radius, int N) {
+  return addEllipse(m, radius, radius, N);
+}
+
+int addRect(Mesh &m, float width, float height, float x, float y) {
+  float w_2 = width * 0.5, h_2 = height * 0.5;
+  m.primitive(Mesh::TRIANGLES);
+  m.vertex(x - w_2, y - h_2);
+  m.vertex(x + w_2, y - h_2);
+  m.vertex(x - w_2, y + h_2);
+  m.vertex(x + w_2, y + h_2);
+  m.index(0, 1, 2, 2, 1, 3);
+  return 4;
+}
+
+// int addRect(Mesh &m, float x, float y, float w, float h) {
+//    m.reset();
+//    m.primitive(Mesh::TRIANGLES);
+//    m.vertex(x, y, 0);
+//    m.vertex(x + w, y, 0);
+//    m.vertex(x, y + h, 0);
+//    m.vertex(x, y + h, 0);
+//    m.vertex(x + w, y, 0);
+//    m.vertex(x + w, y + h, 0);
+//    return 6;
+//}
+
+int addQuad(Mesh &m, float x1, float y1, float z1, float x2, float y2, float z2,
+            float x3, float y3, float z3, float x4, float y4, float z4) {
+  m.primitive(Mesh::TRIANGLES);
+  auto i = m.vertices().size();
+  m.vertex(x1, y1, z1).vertex(x2, y2, z2).vertex(x3, y3, z3).vertex(x4, y4, z4);
+  m.index(i, i + 1, i + 2, i, i + 2, i + 3);
+  return 4;
+}
+
+int addFrame(Mesh &m, float w, float h, float cx, float cy) {
+  m.primitive(Mesh::LINES);
+  float l = cx - w * 0.5;
+  float r = cx + w * 0.5;
+  float b = cy - h * 0.5;
+  float t = cy + h * 0.5;
+  m.indexRel(0, 1, 1, 2, 2, 3, 3, 0);
+  m.vertex(l, b, 0);
+  m.vertex(r, b, 0);
+  m.vertex(r, t, 0);
+  m.vertex(l, t, 0);
+  return 4;
+}
+
+#define Spec_addWireGrid(Dim1, Dim2)                                           \
+  template <>                                                                  \
+  int addWireGrid<Dim1, Dim2>(Mesh & m, int n1, int n2, Vec2f radii,           \
+                              Vec2f center) {                                  \
+    m.lines();                                                                 \
+    auto mn = center - radii;                                                  \
+    auto mx = center + radii;                                                  \
+    for (int i = 0; i < n1 + 1; ++i) {                                         \
+      float x = (float(i) / n1 * 2. - 1.) * radii[0] + center[0];              \
+      m.vertex(Vec3f().template set<Dim1>(x).template set<Dim2>(mn[1]));       \
+      m.vertex(Vec3f().template set<Dim1>(x).template set<Dim2>(mx[1]));       \
+    }                                                                          \
+    for (int i = 0; i < n2 + 1; ++i) {                                         \
+      float y = (float(i) / n2 * 2. - 1.) * radii[1] + center[1];              \
+      m.vertex(Vec3f().template set<Dim2>(y).template set<Dim1>(mn[0]));       \
+      m.vertex(Vec3f().template set<Dim2>(y).template set<Dim1>(mx[0]));       \
+    }                                                                          \
+    return (n1 + 1) * 2 + (n2 + 1) * 2;                                        \
   }
 
-  m.indices().back() = Nv + 1;
-
-  return 1 + slices;
-}
-
-int addDisc(Mesh &m, float radius, unsigned slices) {
-  return addCone(m, radius, Vec3f(0, 0, 0), slices);
-}
+Spec_addWireGrid(0, 1);
+Spec_addWireGrid(1, 2);
+Spec_addWireGrid(2, 1);
 
 int addPrism(Mesh &m, float btmRadius, float topRadius, float height,
-             unsigned slices, float twist) {
-  m.primitive(Mesh::TRIANGLE_STRIP);
+             unsigned slices, float twist, bool caps) {
+
+  m.primitive(Mesh::TRIANGLES);
   unsigned Nv = m.vertices().size();
   float height_2 = height / 2;
 
-  if (twist == 0) {
-    CSin csin(2 * M_PI / slices);
-    for (unsigned i = 0; i < slices; ++i) {
-      m.vertex(csin.r * btmRadius, csin.i * btmRadius, height_2);
-      m.vertex(csin.r * topRadius, csin.i * topRadius, -height_2);
-      csin();
-      m.index(Nv + 2 * i);
-      m.index(Nv + 2 * i + 1);
-    }
-  } else {
-    double frq = 2 * M_PI / slices;
-    CSin csinb(frq, btmRadius);
-    CSin csint = csinb;
-    csint.ampPhase(topRadius, twist * frq);
-    for (unsigned i = 0; i < slices; ++i) {
-      m.vertex(csinb.r, csinb.i, height_2);
-      csinb();
-      m.vertex(csint.r, csint.i, -height_2);
-      csint();
-      m.index(Nv + 2 * i);
-      m.index(Nv + 2 * i + 1);
-    }
+  double frq = 2 * M_PI / slices;
+  CSin csinb(frq, btmRadius);
+  CSin csint = csinb;
+  csint.ampPhase(topRadius, twist * frq);
+  for (unsigned i = 0; i < slices; ++i) {
+    m.vertex(csinb.r, csinb.i, -height_2);
+    csinb();
+    m.vertex(csint.r, csint.i, height_2);
+    csint();
+
+    int j = (i + 1) % slices; // next slice over
+    int ib0 = Nv + 2 * i;
+    int ib1 = Nv + 2 * j;
+    int it0 = ib0 + 1;
+    int it1 = ib1 + 1;
+    m.index(ib0, ib1, it0);
+    m.index(it0, ib1, it1);
   }
 
-  m.index(Nv);
-  m.index(Nv + 1);
-
-  return 2 * slices;
+  if (caps) {
+    m.vertex(0., 0., -height_2);
+    m.vertex(0., 0., height_2);
+    int ib = m.vertices().size() - 2;
+    int it = m.vertices().size() - 1;
+    for (int i = 0; i < slices; ++i) {
+      int j = (i + 1) % slices; // next slice over
+      int ib0 = Nv + 2 * i;
+      int ib1 = Nv + 2 * j;
+      m.index(ib, ib1, ib0);
+      m.index(it, ib0 + 1, ib1 + 1);
+    }
+  }
+  return 2 * slices + 2 * caps;
 }
 
 int addAnnulus(Mesh &m, float inRadius, float outRadius, unsigned slices,
                float twist) {
-  return addPrism(m, inRadius, outRadius, 0, slices, twist);
+  return addPrism(m, inRadius, outRadius, 0, slices, twist, false);
 }
 
 int addCylinder(Mesh &m, float radius, float height, unsigned slices,
-                float twist) {
-  return addPrism(m, radius, radius, height, slices, twist);
+                float twist, bool caps) {
+  return addPrism(m, radius, radius, height, slices, twist, caps);
 }
 
 int addSurface(Mesh &m, int Nx, int Ny, double width, double height, double x,
@@ -564,7 +678,8 @@ int addSurface(Mesh &m, int Nx, int Ny, double width, double height, double x,
     double u = x - width * 0.5;
     for (int i = 0; i < Nx; ++i) {
       m.vertex(u, v);
-      // m.texCoord(float(i)/(Nx-1), float(j)/(Ny-1)); //TODO: make Mesh method
+      // m.texCoord(float(i)/(Nx-1), float(j)/(Ny-1)); //TODO: make Mesh
+      // method
       u += du;
     }
     v += dv;
@@ -576,11 +691,11 @@ int addSurface(Mesh &m, int Nx, int Ny, double width, double height, double x,
     m.index(j * Nx + Nv);
     for (int i = 0; i < Nx; ++i) {
       int idx = j * Nx + i + Nv;
+      // First tri degenerate, so winding order seems reversed here
       m.index(idx);
       m.index(idx + Nx);
     }
-    int idx = m.indices().back();
-    m.index(idx);
+    m.index((m.indices().back()));
   }
 
   return Nx * Ny;
@@ -624,7 +739,7 @@ int addSurfaceLoop(Mesh &m, int Nx, int Ny, int loopMode, double width,
     m.index(j2);
   }
 
-  m.index(m.indices().back());
+  m.index((m.indices().back()));
 
   return Nx * Ny;
 }
@@ -675,18 +790,6 @@ int addQuad(Mesh &m, float half_width, float half_height) {
   return 6;
 }
 
-int addRect(Mesh &m, float x, float y, float w, float h) {
-  m.reset();
-  m.primitive(Mesh::TRIANGLES);
-  m.vertex(x, y, 0);
-  m.vertex(x + w, y, 0);
-  m.vertex(x, y + h, 0);
-  m.vertex(x, y + h, 0);
-  m.vertex(x + w, y, 0);
-  m.vertex(x + w, y + h, 0);
-  return 6;
-}
-
 int addTexRect(Mesh &m, float x, float y, float w, float h) {
   m.reset();
   m.primitive(Mesh::TRIANGLES);
@@ -704,6 +807,87 @@ int addTexRect(Mesh &m, float x, float y, float w, float h) {
   m.texCoord(1.0, 1.0);
 
   return 6;
+}
+
+int addVoxels(Mesh &m,
+              const std::function<float(int x, int y, int z)> &getVoxel, int Nx,
+              int Ny, int Nz, float cellSize,
+              const std::function<void(int vertex)> &onFace) {
+  int numVertIn = m.vertices().size();
+  m.primitive(Mesh::TRIANGLES);
+  float n = 1.; // 1 normals point out, -1 normals point in
+  for (int k = 0; k < Nz + 1; ++k) {
+    for (int j = 0; j < Ny + 1; ++j) {
+      for (int i = 0; i < Nx + 1; ++i) {
+        bool igood = i <= (Nx - 1);
+        bool jgood = j <= (Ny - 1);
+        bool kgood = k <= (Nz - 1);
+        auto v = igood && jgood && kgood ? getVoxel(i, j, k) : 0.f;
+        auto vx = i > 0 && jgood && kgood ? getVoxel(i - 1, j, k) : 0.f;
+        auto vy = j > 0 && igood && kgood ? getVoxel(i, j - 1, k) : 0.f;
+        auto vz = k > 0 && igood && jgood ? getVoxel(i, j, k - 1) : 0.f;
+        Vec3f pos(i, j, k);
+        pos = pos * cellSize;
+        float D = cellSize;
+        if ((v * vx) == 0. &&
+            v != vx) { // one value zero and the other non-zero
+          int Nv = m.vertices().size();
+          m.vertex(pos.x, pos.y, pos.z);
+          m.vertex(pos.x, pos.y + D, pos.z);
+          m.vertex(pos.x, pos.y, pos.z + D);
+          m.vertex(pos.x, pos.y + D, pos.z + D);
+          if (v < vx) {
+            for (int i = 0; i < 4; ++i)
+              m.normal(n, 0., 0.);
+            m.index(Nv, Nv + 1, Nv + 2, Nv + 2, Nv + 1, Nv + 3);
+          } else {
+            for (int i = 0; i < 4; ++i)
+              m.normal(-n, 0., 0.);
+            m.index(Nv + 2, Nv + 1, Nv, Nv + 3, Nv + 1, Nv + 2);
+          }
+          onFace(Nv);
+        }
+        if ((v * vy) == 0. && v != vy) {
+          int Nv = m.vertices().size();
+          m.vertex(pos.x, pos.y, pos.z);
+          m.vertex(pos.x + D, pos.y, pos.z);
+          m.vertex(pos.x, pos.y, pos.z + D);
+          m.vertex(pos.x + D, pos.y, pos.z + D);
+          RGB col = HSV((v + vy - 1.) * 0.03, cos(v + vy) * 0.2 + 0.8,
+                        sin(v + vy) * 0.3 + 0.7);
+          if (v < vy) {
+            for (int i = 0; i < 4; ++i)
+              m.normal(0., n, 0.);
+            m.index(Nv + 2, Nv + 1, Nv, Nv + 3, Nv + 1, Nv + 2);
+          } else {
+            for (int i = 0; i < 4; ++i)
+              m.normal(0., -n, 0.);
+            m.index(Nv, Nv + 1, Nv + 2, Nv + 2, Nv + 1, Nv + 3);
+          }
+          onFace(Nv);
+        }
+        if ((v * vz) == 0. && v != vz) {
+          int Nv = m.vertices().size();
+          m.vertex(pos.x, pos.y, pos.z);
+          m.vertex(pos.x + D, pos.y, pos.z);
+          m.vertex(pos.x, pos.y + D, pos.z);
+          m.vertex(pos.x + D, pos.y + D, pos.z);
+          if (v < vz) {
+            for (int i = 0; i < 4; ++i)
+              m.normal(0., 0., n);
+            m.index(Nv, Nv + 1, Nv + 2, Nv + 2, Nv + 1, Nv + 3);
+          } else {
+            for (int i = 0; i < 4; ++i)
+              m.normal(0., 0., -n);
+            m.index(Nv + 2, Nv + 1, Nv, Nv + 3, Nv + 1, Nv + 2);
+          }
+          onFace(Nv);
+        }
+      }
+    }
+  }
+
+  return m.vertices().size() - numVertIn;
 }
 
 } // namespace al

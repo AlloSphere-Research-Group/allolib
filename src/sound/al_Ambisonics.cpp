@@ -489,7 +489,7 @@ void AmbisonicsSpatializer::renderBuffer(AudioIOData &io,
   // Rotate vector according to listener-rotation
   Quatd srcRot = listeningPose.quat();
   direction = srcRot.rotate(direction);
-  direction = Vec4d(-direction.z, -direction.x, direction.y).normalize();
+  direction = Vec3d(-direction.z, -direction.x, direction.y).normalize();
   mEncoder.direction(direction);
   //	for(int i = 0; i < numFrames; i++){
   ////		// cheaper:
@@ -534,12 +534,12 @@ void AmbisonicsSpatializer::renderSample(AudioIOData &io,
   // Rotate vector according to listener-rotation
   Quatd srcRot = listeningPose.quat();
   direction = srcRot.rotate(direction);
-  direction = Vec4d(direction.x, direction.z, direction.y);
+  direction = Vec3d(direction.x, direction.z, direction.y);
 
   // mEncoder.direction(azimuth, elevation);
   // mEncoder.direction(-rf, -rr, ru);
   //    mEncoder.direction(-direction[2], -direction[0], direction[1]);
-  direction = Vec4d(-direction.z, -direction.x, direction.y).normalize();
+  direction = Vec3d(-direction.z, -direction.x, direction.y).normalize();
   mEncoder.direction(direction);
   mEncoder.encode(ambiChans(), io.framesPerBuffer(), frameIndex, sample);
 }

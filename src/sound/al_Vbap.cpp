@@ -399,7 +399,7 @@ void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
   // Rotate vector according to listener-rotation
   Quatd srcRot = listeningPose.quat();
   vec = srcRot.rotate(vec);
-  vec = Vec4d(-vec.z, vec.x, vec.y);
+  vec = Vec3d(-vec.z, vec.x, vec.y);
 
   // Silent by default
   Vec3d gains;
@@ -486,7 +486,7 @@ void Vbap::renderSample(AudioIOData &io, const Pose &listeningPose,
   vec = srcRot.rotate(vec).normalize();
 
   // now transform to audio positions
-  vec = Vec4d(vec.x, vec.z, vec.y);
+  vec = Vec3d(vec.x, vec.z, vec.y);
   // Silent by default
   Vec3d gains;
   //	Vec3d gainsTemp;
@@ -580,7 +580,7 @@ void Vbap::compile() {
 
   if (mTriplets.size() == 0) {
     printf("No SpeakerSets found. Check mode setting or speaker layout.\n");
-    throw - 1;
+    throw -1;
   }
 }
 

@@ -28,7 +28,7 @@ void Lbap::prepare(AudioIOData &io) {
     free(buffer);
   }
   buffer = (float *)malloc(2 * io.framesPerBuffer() *
-                           sizeof(float));  // Allocate 2 buffers
+                           sizeof(float)); // Allocate 2 buffers
   bufferSize = io.framesPerBuffer();
 }
 
@@ -42,7 +42,7 @@ void Lbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
   // Rotate vector according to listener-rotation
   Quatd srcRot = listeningPose.quat();
   vec = srcRot.rotate(vec);
-  vec = Vec4d(-vec.z, -vec.x, vec.y);
+  vec = Vec3d(-vec.z, -vec.x, vec.y);
 
   float elev =
       RAD_2_DEG_SCALE * atan(vec.z / sqrt(vec.x * vec.x + vec.y * vec.y));
@@ -51,15 +51,15 @@ void Lbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
   while (it != mRings.end() && it->elevation > elev) {
     it++;
   }
-  if (it == mRings.begin()) {  // Top ring
+  if (it == mRings.begin()) { // Top ring
     it->vbap->renderBuffer(io, listeningPose, samples, numFrames);
-  } else if (it == mRings.end()) {  // Bottom ring
+  } else if (it == mRings.end()) { // Bottom ring
     mRings.back().vbap->renderBuffer(io, listeningPose, samples, numFrames);
-  } else {                    // Between inner rings
-    auto topRingIt = it - 1;  // top ring is previous ring
+  } else {                   // Between inner rings
+    auto topRingIt = it - 1; // top ring is previous ring
     float fraction = (elev - it->elevation) /
                      (topRingIt->elevation -
-                      it->elevation);  // elevation angle between layers
+                      it->elevation); // elevation angle between layers
     float gainTop = sin(M_PI_2 * fraction);
     float gainBottom = cos(M_PI_2 * fraction);
     for (int i = 0; i < bufferSize; i++) {

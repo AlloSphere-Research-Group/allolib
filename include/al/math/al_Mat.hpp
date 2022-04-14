@@ -43,24 +43,23 @@
   Graham Wakefield, 2010, grrrwaaa@gmail.com
 */
 
-#include <stdio.h>
-#include <cmath>
 #include "al/math/al_Vec.hpp"
+#include <cmath>
+#include <stdio.h>
 
 namespace al {
 
-template <int N, class T>
-class Mat;
+template <int N, class T> class Mat;
 
-typedef Mat<2, float> Mat2f;   ///< float 2x2 matrix
-typedef Mat<2, double> Mat2d;  ///< double 2x2 matrix
-typedef Mat<2, int> Mat2i;     ///< integer 2x2 matrix
-typedef Mat<3, float> Mat3f;   ///< float 3x3 matrix
-typedef Mat<3, double> Mat3d;  ///< double 3x3 matrix
-typedef Mat<3, int> Mat3i;     ///< integer 3x3 matrix
-typedef Mat<4, float> Mat4f;   ///< float 4x4 matrix
-typedef Mat<4, double> Mat4d;  ///< double 4x4 matrix
-typedef Mat<4, int> Mat4i;     ///< integer 4x4 matrix
+typedef Mat<2, float> Mat2f;  ///< float 2x2 matrix
+typedef Mat<2, double> Mat2d; ///< double 2x2 matrix
+typedef Mat<2, int> Mat2i;    ///< integer 2x2 matrix
+typedef Mat<3, float> Mat3f;  ///< float 3x3 matrix
+typedef Mat<3, double> Mat3d; ///< double 3x3 matrix
+typedef Mat<3, int> Mat3i;    ///< integer 3x3 matrix
+typedef Mat<4, float> Mat4f;  ///< float 4x4 matrix
+typedef Mat<4, double> Mat4d; ///< double 4x4 matrix
+typedef Mat<4, int> Mat4i;    ///< integer 4x4 matrix
 
 // Forward iterates from 0 to n-1. Current index is 'i'.
 #define IT(n) for (int i = 0; i < (n); ++i)
@@ -74,9 +73,8 @@ static struct MatNoInit {
 /// Elements are stored in column-major format.
 ///
 /// @ingroup Math
-template <int N, class T>
-class Mat {
- public:
+template <int N, class T> class Mat {
+public:
   /// Column-major array of elements
   T mElems[N * N];
 
@@ -87,36 +85,30 @@ class Mat {
   Mat() { set(T(0)); }
 
   /// @param[in] arr  one dimensional array in column-major
-  template <class U>
-  Mat(const U* arr) {
-    set(arr);
-  }
+  template <class U> Mat(const U *arr) { set(arr); }
 
   /// @param[in] src  matrix with same dimension, but possibly different type
-  template <class U>
-  Mat(const Mat<N, U>& src) {
-    set(src.elems());
-  }
+  template <class U> Mat(const Mat<N, U> &src) { set(src.elems()); }
 
   /// Construct without initializing elements
-  Mat(const MatNoInit& v) {}
+  Mat(const MatNoInit &v) {}
 
   /// 2x2 matrix constructor with element initialization
-  Mat(const T& r1c1, const T& r1c2, const T& r2c1, const T& r2c2) {
+  Mat(const T &r1c1, const T &r1c2, const T &r2c1, const T &r2c2) {
     set(r1c1, r1c2, r2c1, r2c2);
   }
 
   /// 3x3 matrix constructor with element initialization
-  Mat(const T& r1c1, const T& r1c2, const T& r1c3, const T& r2c1, const T& r2c2,
-      const T& r2c3, const T& r3c1, const T& r3c2, const T& r3c3) {
+  Mat(const T &r1c1, const T &r1c2, const T &r1c3, const T &r2c1, const T &r2c2,
+      const T &r2c3, const T &r3c1, const T &r3c2, const T &r3c3) {
     set(r1c1, r1c2, r1c3, r2c1, r2c2, r2c3, r3c1, r3c2, r3c3);
   }
 
   /// 4x4 matrix constructor with element initialization
-  Mat(const T& r1c1, const T& r1c2, const T& r1c3, const T& r1c4, const T& r2c1,
-      const T& r2c2, const T& r2c3, const T& r2c4, const T& r3c1, const T& r3c2,
-      const T& r3c3, const T& r3c4, const T& r4c1, const T& r4c2, const T& r4c3,
-      const T& r4c4) {
+  Mat(const T &r1c1, const T &r1c2, const T &r1c3, const T &r1c4, const T &r2c1,
+      const T &r2c2, const T &r2c3, const T &r2c4, const T &r3c1, const T &r3c2,
+      const T &r3c3, const T &r3c4, const T &r4c1, const T &r4c2, const T &r4c3,
+      const T &r4c4) {
     set(r1c1, r1c2, r1c3, r1c4, r2c1, r2c2, r2c3, r2c4, r3c1, r3c2, r3c3, r3c4,
         r4c1, r4c2, r4c3, r4c4);
   }
@@ -142,38 +134,35 @@ class Mat {
   }
 
   /// Get a scaling transform matrix
-  template <class V>
-  static Mat scaling(const Vec<N - 1, V>& v) {
+  template <class V> static Mat scaling(const Vec<N - 1, V> &v) {
     Mat m;
-    for (int r = 0; r < N - 1; ++r) m(r, r) = v[r];
+    for (int r = 0; r < N - 1; ++r)
+      m(r, r) = v[r];
     m(N - 1, N - 1) = T(1);
     return m;
   }
 
   /// Get a scaling transform matrix
-  template <class V>
-  static Mat scaling(V v) {
+  template <class V> static Mat scaling(V v) {
     return scaling(Vec<N - 1, V>(v));
   }
 
   /// Get a scaling transform matrix
-  template <typename... Vals>
-  static Mat scaling(Vals... vals) {
+  template <typename... Vals> static Mat scaling(Vals... vals) {
     return scaling(Vec<(sizeof...(Vals)), T>(vals...));
   }
 
   /// Get a translation transform matrix
-  template <class V>
-  static Mat translation(const Vec<N - 1, V>& v) {
+  template <class V> static Mat translation(const Vec<N - 1, V> &v) {
     Mat m(MAT_NO_INIT);
     m.setIdentity();
-    for (int r = 0; r < N - 1; ++r) m(r, N - 1) = v[r];
+    for (int r = 0; r < N - 1; ++r)
+      m(r, N - 1) = v[r];
     return m;
   }
 
   /// Get a translation transform matrix
-  template <typename... Vals>
-  static Mat translation(Vals... vals) {
+  template <typename... Vals> static Mat translation(Vals... vals) {
     return translation(Vec<(sizeof...(Vals)), T>(vals...));
   }
 
@@ -181,29 +170,29 @@ class Mat {
   // Memory Operations
 
   /// Returns C array type punned into a matrix
-  static Mat& pun(T* src) { return *(Mat*)(src); }
-  static const Mat& pun(const T* src) { return *(const Mat*)(src); }
+  static Mat &pun(T *src) { return *(Mat *)(src); }
+  static const Mat &pun(const T *src) { return *(const Mat *)(src); }
 
   /// Returns total number of elements
   static int size() { return N * N; }
 
   /// Get read-only pointer to elements
-  const T* elems() const { return mElems; }
+  const T *elems() const { return mElems; }
 
   /// Get read-write pointer to elements
-  T* elems() { return mElems; }
+  T *elems() { return mElems; }
 
   /// Set element at index with no bounds checking
-  T& operator[](int i) { return elems()[i]; }
+  T &operator[](int i) { return elems()[i]; }
 
   /// Get element at index with no bounds checking
-  const T& operator[](int i) const { return elems()[i]; }
+  const T &operator[](int i) const { return elems()[i]; }
 
   /// Set element at row i, column j
-  T& operator()(int i, int j) { return (*this)[j * N + i]; }
+  T &operator()(int i, int j) { return (*this)[j * N + i]; }
 
   /// Get element at row i, column j
-  const T& operator()(int i, int j) const { return (*this)[j * N + i]; }
+  const T &operator()(int i, int j) const { return (*this)[j * N + i]; }
 
   /// Return column i as vector
   Vec<N, T> col(int i) const { return Vec<N, T>(elems() + i * N); }
@@ -215,22 +204,21 @@ class Mat {
   Vec<N, T> diagonal() const { return Vec<N, T>(elems(), N + 1); }
 
   /// Transpose elements
-  Mat& transpose() {
-    for (int j = 0; j < N - 1; ++j) {    // row and column
-      for (int i = j + 1; i < N; ++i) {  // offset into row or column
-        T& a = (*this)(i, j);
-        T& b = (*this)(j, i);
+  Mat &transpose() {
+    for (int j = 0; j < N - 1; ++j) {   // row and column
+      for (int i = j + 1; i < N; ++i) { // offset into row or column
+        T &a = (*this)(i, j);
+        T &b = (*this)(j, i);
         T c = a;
         a = b;
-        b = c;  // swap elements
+        b = c; // swap elements
       }
     }
     return *this;
   }
 
   /// Get an MxM submatrix
-  template <int M>
-  Mat<M, T> sub(int row = 0, int col = 0) const {
+  template <int M> Mat<M, T> sub(int row = 0, int col = 0) const {
     Mat<M, T> res(MAT_NO_INIT);
     for (int j = 0; j < M; ++j) {
       for (int i = 0; i < M; ++i) {
@@ -254,33 +242,33 @@ class Mat {
   }
 
   /// Return matrix punned as a vector
-  Vec<N * N, T>& vec() { return *(Vec<N * N, T>*)(this); }
+  Vec<N * N, T> &vec() { return *(Vec<N * N, T> *)(this); }
 
   //--------------------------------------------------------------------------
   // Basic Arithmetic Operations
 
-  Mat& operator*=(const Mat& v) { return multiply(*this, Mat(*this), v); }
-  Mat& operator+=(const Mat& v) {
+  Mat &operator*=(const Mat &v) { return multiply(*this, Mat(*this), v); }
+  Mat &operator+=(const Mat &v) {
     IT(size()) { (*this)[i] += v[i]; }
     return *this;
   }
-  Mat& operator-=(const Mat& v) {
+  Mat &operator-=(const Mat &v) {
     IT(size()) { (*this)[i] -= v[i]; }
     return *this;
   }
-  Mat& operator+=(const T& v) {
+  Mat &operator+=(const T &v) {
     IT(size()) { (*this)[i] += v; }
     return *this;
   }
-  Mat& operator-=(const T& v) {
+  Mat &operator-=(const T &v) {
     IT(size()) { (*this)[i] -= v; }
     return *this;
   }
-  Mat& operator*=(const T& v) {
+  Mat &operator*=(const T &v) {
     IT(size()) { (*this)[i] *= v; }
     return *this;
   }
-  Mat& operator/=(const T& v) {
+  Mat &operator/=(const T &v) {
     IT(size()) { (*this)[i] /= v; }
     return *this;
   }
@@ -290,21 +278,21 @@ class Mat {
     IT(size()) { r[i] = -(*this)[i]; }
     return r;
   }
-  Mat operator+(const Mat& v) const { return Mat(*this) += v; }
-  Mat operator-(const Mat& v) const { return Mat(*this) -= v; }
-  Mat operator*(const Mat& v) const { return Mat(*this) *= v; }
-  Mat operator+(const T& v) const { return Mat(*this) += v; }
-  Mat operator-(const T& v) const { return Mat(*this) -= v; }
-  Mat operator*(const T& v) const { return Mat(*this) *= v; }
-  Mat operator/(const T& v) const { return Mat(*this) /= v; }
+  Mat operator+(const Mat &v) const { return Mat(*this) += v; }
+  Mat operator-(const Mat &v) const { return Mat(*this) -= v; }
+  Mat operator*(const Mat &v) const { return Mat(*this) *= v; }
+  Mat operator+(const T &v) const { return Mat(*this) += v; }
+  Mat operator-(const T &v) const { return Mat(*this) -= v; }
+  Mat operator*(const T &v) const { return Mat(*this) *= v; }
+  Mat operator/(const T &v) const { return Mat(*this) /= v; }
 
   /// Computes matrix product r = a * b
 
   /// Returns reference to result
   ///
-  static Mat& multiply(Mat& r, const Mat& a, const Mat& b) {
+  static Mat &multiply(Mat &r, const Mat &a, const Mat &b) {
     for (int j = 0; j < N; ++j) {
-      const Vec<N, T>& bcol = b.col(j);
+      const Vec<N, T> &bcol = b.col(j);
       for (int i = 0; i < N; ++i) {
         r(i, j) = a.row(i).dot(bcol);
       }
@@ -314,35 +302,31 @@ class Mat {
 
   /// Computes product of matrix multiplied by column vector, r = m * vCol
   template <class U>
-  static Vec<N, U>& multiply(Vec<N, U>& r, const Mat& m,
-                             const Vec<N, U>& vCol) {
+  static Vec<N, U> &multiply(Vec<N, U> &r, const Mat &m,
+                             const Vec<N, U> &vCol) {
     IT(N) { r[i] = m.row(i).dot(vCol); }
     return r;
   }
 
   /// Computes product of row vector multiplied by matrix, r = vRow * m
   template <class U>
-  static Vec<N, U>& multiply(Vec<N, U>& r, const Vec<N, U>& vRow,
-                             const Mat& m) {
+  static Vec<N, U> &multiply(Vec<N, U> &r, const Vec<N, U> &vRow,
+                             const Mat &m) {
     IT(N) { r[i] = vRow.dot(m.col(i)); }
     return r;
   }
 
   /// Set all elements to value
-  Mat& set(const T& v) {
+  Mat &set(const T &v) {
     IT(size()) { (*this)[i] = v; }
     return *this;
   }
 
   /// Set elements from another matrix
-  template <class U>
-  Mat& set(const Mat<N, U>& v) {
-    return set(v.elems());
-  }
+  template <class U> Mat &set(const Mat<N, U> &v) { return set(v.elems()); }
 
   /// Set elements in column-major order from C array
-  template <class U>
-  Mat& set(const U* arr) {
+  template <class U> Mat &set(const U *arr) {
     IT(size()) { (*this)[i] = arr[i]; }
     return *this;
   }
@@ -354,13 +338,13 @@ class Mat {
   /// @param[in] matOffset  index offset into matrix
   /// @param[in] matStride  amount to stride through matrix
   template <class U>
-  Mat& set(const U* arr, int numElements, int matOffset, int matStride = 1) {
+  Mat &set(const U *arr, int numElements, int matOffset, int matStride = 1) {
     IT(numElements) { (*this)[i * matStride + matOffset] = arr[i]; }
     return *this;
   }
 
   /// Set 2-by-2 (sub)matrix from arguments
-  Mat& set(const T& r1c1, const T& r1c2, const T& r2c1, const T& r2c2,
+  Mat &set(const T &r1c1, const T &r1c2, const T &r2c1, const T &r2c2,
            int row = 0, int col = 0) {
     setCol2(r1c1, r2c1, col, row);
     setCol2(r1c2, r2c2, col + 1, row);
@@ -368,9 +352,9 @@ class Mat {
   }
 
   /// Set 3-by-3 (sub)matrix from arguments
-  Mat& set(const T& r1c1, const T& r1c2, const T& r1c3, const T& r2c1,
-           const T& r2c2, const T& r2c3, const T& r3c1, const T& r3c2,
-           const T& r3c3, int row = 0, int col = 0) {
+  Mat &set(const T &r1c1, const T &r1c2, const T &r1c3, const T &r2c1,
+           const T &r2c2, const T &r2c3, const T &r3c1, const T &r3c2,
+           const T &r3c3, int row = 0, int col = 0) {
     setCol3(r1c1, r2c1, r3c1, col, row);
     setCol3(r1c2, r2c2, r3c2, col + 1, row);
     setCol3(r1c3, r2c3, r3c3, col + 2, row);
@@ -378,10 +362,10 @@ class Mat {
   }
 
   /// Set 4-by-4 (sub)matrix from arguments
-  Mat& set(const T& r1c1, const T& r1c2, const T& r1c3, const T& r1c4,
-           const T& r2c1, const T& r2c2, const T& r2c3, const T& r2c4,
-           const T& r3c1, const T& r3c2, const T& r3c3, const T& r3c4,
-           const T& r4c1, const T& r4c2, const T& r4c3, const T& r4c4,
+  Mat &set(const T &r1c1, const T &r1c2, const T &r1c3, const T &r1c4,
+           const T &r2c1, const T &r2c2, const T &r2c3, const T &r2c4,
+           const T &r3c1, const T &r3c2, const T &r3c3, const T &r3c4,
+           const T &r4c1, const T &r4c2, const T &r4c3, const T &r4c4,
            int row = 0, int col = 0) {
     setCol4(r1c1, r2c1, r3c1, r4c1, col, row);
     setCol4(r1c2, r2c2, r3c2, r4c2, col + 1, row);
@@ -391,14 +375,14 @@ class Mat {
   }
 
   /// Set a (sub)column
-  Mat& setCol2(const T& v1, const T& v2, int col = 0, int row = 0) {
+  Mat &setCol2(const T &v1, const T &v2, int col = 0, int row = 0) {
     (*this)(row, col) = v1;
     (*this)(row + 1, col) = v2;
     return *this;
   }
 
   /// Set a (sub)column
-  Mat& setCol3(const T& v1, const T& v2, const T& v3, int col = 0,
+  Mat &setCol3(const T &v1, const T &v2, const T &v3, int col = 0,
                int row = 0) {
     (*this)(row, col) = v1;
     (*this)(row + 1, col) = v2;
@@ -407,7 +391,7 @@ class Mat {
   }
 
   /// Set a (sub)column
-  Mat& setCol4(const T& v1, const T& v2, const T& v3, const T& v4, int col = 0,
+  Mat &setCol4(const T &v1, const T &v2, const T &v3, const T &v4, int col = 0,
                int row = 0) {
     (*this)(row, col) = v1;
     (*this)(row + 1, col) = v2;
@@ -417,8 +401,9 @@ class Mat {
   }
 
   /// Set elements on diagonal to one and all others to zero
-  Mat& setIdentity() {
-    for (int i = 0; i < N; ++i) (*this)[i * (N + 1)] = T(1);
+  Mat &setIdentity() {
+    for (int i = 0; i < N; ++i)
+      (*this)[i * (N + 1)] = T(1);
 
     for (int i = 0; i < N - 1; ++i) {
       for (int j = i + 1; j < N + i + 1; ++j) {
@@ -467,12 +452,12 @@ class Mat {
   /// @param[in] angle  angle of rotation, in radians
   /// @param[in] dim1    local coordinate frame axis to rotate away from
   /// @param[in] dim2    local coordinate frame axis to rotate towards
-  Mat& rotate(double angle, int dim1, int dim2) {
+  Mat &rotate(double angle, int dim1, int dim2) {
     double cs = cos(angle);
     double sn = sin(angle);
     for (int R = 0; R < N - 1; ++R) {
-      const T& v1 = (*this)(R, dim1);
-      const T& v2 = (*this)(R, dim2);
+      const T &v1 = (*this)(R, dim1);
+      const T &v2 = (*this)(R, dim2);
       T t = v1 * cs + v2 * sn;
       (*this)(R, dim2) = v2 * cs - v1 * sn;
       (*this)(R, dim1) = t;
@@ -481,13 +466,12 @@ class Mat {
   }
 
   /// Rotate submatrix on a global plane (A' = RA)
-  template <int M>
-  Mat& rotateGlobal(double angle, int dim1, int dim2) {
+  template <int M> Mat &rotateGlobal(double angle, int dim1, int dim2) {
     double cs = cos(angle);
     double sn = sin(angle);
     for (int C = 0; C < M; ++C) {
-      const T& v1 = (*this)(dim1, C);
-      const T& v2 = (*this)(dim2, C);
+      const T &v1 = (*this)(dim1, C);
+      const T &v2 = (*this)(dim2, C);
       T t = v1 * cs - v2 * sn;
       (*this)(dim2, C) = v2 * cs + v1 * sn;
       (*this)(dim1, C) = t;
@@ -496,13 +480,12 @@ class Mat {
   }
 
   /// Rotate transformation matrix on a global plane (A' = RA)
-  Mat& rotateGlobal(double angle, int dim1, int dim2) {
+  Mat &rotateGlobal(double angle, int dim1, int dim2) {
     return rotateGlobal<N - 1>(angle, dim1, dim2);
   }
 
   /// Scale transformation matrix
-  template <class V>
-  Mat& scale(const Vec<N - 1, V>& amount) {
+  template <class V> Mat &scale(const Vec<N - 1, V> &amount) {
     for (int C = 0; C < N - 1; ++C) {
       for (int R = 0; R < N - 1; ++R) {
         (*this)(R, C) *= amount[C];
@@ -512,20 +495,17 @@ class Mat {
   }
 
   /// Scale transformation matrix by uniform amount
-  template <class V>
-  Mat& scale(const V& amount) {
+  template <class V> Mat &scale(const V &amount) {
     return scale(Vec<N - 1, V>(amount));
   }
 
   /// Scale transformation matrix
-  template <typename... Vals>
-  Mat& scale(Vals... vals) {
+  template <typename... Vals> Mat &scale(Vals... vals) {
     return scale(Vec<(sizeof...(Vals)), T>(vals...));
   }
 
   /// Scale transformation matrix global coordinates
-  template <class V>
-  Mat& scaleGlobal(const Vec<N - 1, V>& amount) {
+  template <class V> Mat &scaleGlobal(const Vec<N - 1, V> &amount) {
     for (int R = 0; R < N - 1; ++R) {
       for (int C = 0; C < N - 1; ++C) {
         (*this)(R, C) *= amount[R];
@@ -535,8 +515,7 @@ class Mat {
   }
 
   /// Translate transformation matrix
-  template <class V>
-  Mat& translate(const Vec<N - 1, V>& amount) {
+  template <class V> Mat &translate(const Vec<N - 1, V> &amount) {
     for (int R = 0; R < N - 1; ++R) {
       (*this)(R, N - 1) += amount[R];
     }
@@ -544,19 +523,17 @@ class Mat {
   }
 
   /// Translate transformation matrix by same amount in all directions
-  template <class V>
-  Mat& translate(const V& amount) {
+  template <class V> Mat &translate(const V &amount) {
     return translate(Vec<N - 1, V>(amount));
   }
 
   /// Translate transformation matrix
-  template <typename... Vals>
-  Mat& translate(Vals... vals) {
+  template <typename... Vals> Mat &translate(Vals... vals) {
     return translate(Vec<(sizeof...(Vals)), T>(vals...));
   }
 
   /// Print to file (stream)
-  void print(std::ostream& stream) const;
+  void print(std::ostream &stream) const;
 };
 
 // -----------------------------------------------------------------------------
@@ -565,29 +542,29 @@ class Mat {
 
 // Non-member binary arithmetic operations
 template <int N, class T>
-inline Mat<N, T> operator+(const T& s, const Mat<N, T>& v) {
+inline Mat<N, T> operator+(const T &s, const Mat<N, T> &v) {
   return v + s;
 }
 
 template <int N, class T>
-inline Mat<N, T> operator-(const T& s, const Mat<N, T>& v) {
+inline Mat<N, T> operator-(const T &s, const Mat<N, T> &v) {
   return -v + s;
 }
 
 template <int N, class T>
-inline Mat<N, T> operator*(const T& s, const Mat<N, T>& v) {
+inline Mat<N, T> operator*(const T &s, const Mat<N, T> &v) {
   return v * s;
 }
 
 // Basic Vec/Mat Arithmetic
 template <int N, class T, class U>
-inline Vec<N, U> operator*(const Mat<N, T>& m, const Vec<N, U>& vCol) {
+inline Vec<N, U> operator*(const Mat<N, T> &m, const Vec<N, U> &vCol) {
   Vec<N, U> r;
   return Mat<N, T>::multiply(r, m, vCol);
 }
 
 template <int N, class T, class U>
-inline Vec<N, U> operator*(const Vec<N, U>& vRow, const Mat<N, T>& m) {
+inline Vec<N, U> operator*(const Vec<N, U> &vRow, const Mat<N, T> &m) {
   Vec<N, U> r;
   return Mat<N, T>::multiply(r, vRow, m);
 }
@@ -595,24 +572,19 @@ inline Vec<N, U> operator*(const Vec<N, U>& vRow, const Mat<N, T>& m) {
 /// Get determinant
 ///
 /// @ingroup allocore
-template <class T>
-T determinant(const Mat<1, T>& m) {
-  return m(0, 0);
-}
+template <class T> T determinant(const Mat<1, T> &m) { return m(0, 0); }
 
 /// Get determinant
 ///
 /// @ingroup allocore
-template <class T>
-T determinant(const Mat<2, T>& m) {
+template <class T> T determinant(const Mat<2, T> &m) {
   return m(0, 0) * m(1, 1) - m(0, 1) * m(1, 0);
 }
 
 /// Get determinant
 ///
 /// @ingroup allocore
-template <class T>
-T determinant(const Mat<3, T>& m) {
+template <class T> T determinant(const Mat<3, T> &m) {
   return m(0, 0) * (m(1, 1) * m(2, 2) - m(1, 2) * m(2, 1)) +
          m(0, 1) * (m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2)) +
          m(0, 2) * (m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0));
@@ -624,8 +596,7 @@ T determinant(const Mat<3, T>& m) {
 /// The algorithm operates by recursively computing determinants of submatrices.
 ///
 /// @ingroup allocore
-template <int N, class T>
-T determinant(const Mat<N, T>& m) {
+template <int N, class T> T determinant(const Mat<N, T> &m) {
   T res = 0;
   for (int i = 0; i < N; ++i) {
     T entry = m(0, i);
@@ -639,8 +610,7 @@ T determinant(const Mat<N, T>& m) {
 /// Invert matrix, returns whether matrix was able to be inverted
 ///
 /// @ingroup allocore
-template <class T>
-bool invert(Mat<1, T>& m) {
+template <class T> bool invert(Mat<1, T> &m) {
   T det = determinant(m);
   if (det != 0) {
     m(0, 0) /= det;
@@ -652,8 +622,7 @@ bool invert(Mat<1, T>& m) {
 /// Invert matrix, returns whether matrix was able to be inverted
 ///
 /// @ingroup allocore
-template <class T>
-bool invert(Mat<2, T>& m) {
+template <class T> bool invert(Mat<2, T> &m) {
   T det = determinant(m);
   if (det != 0) {
     m = Mat<2, T>(m(1, 1), -m(0, 1), -m(1, 0), m(0, 0)) /= det;
@@ -665,8 +634,7 @@ bool invert(Mat<2, T>& m) {
 /// Invert matrix, returns whether matrix was able to be inverted
 ///
 /// @ingroup allocore
-template <int N, class T>
-bool invert(Mat<N, T>& m) {
+template <int N, class T> bool invert(Mat<N, T> &m) {
   // Get cofactor matrix, C
   Mat<N, T> C = m.cofactorMatrix();
 
@@ -685,11 +653,36 @@ bool invert(Mat<N, T>& m) {
   return false;
 }
 
+/// Get "normal" matrix from modelview
+
+/// This matrix is used to convert normals from object to eye space.
+/// It assumes the input matrix is composed of rotation, scaling, and
+/// translation. It is normally obtained as the inverse transpose of the
+/// modelview, however, this computes it much faster under the given assumption.
+template <int N, class T> Mat<N - 1, T> normalMatrix(const Mat<N, T> &mv) {
+  // Given A = S * R,
+  //       N = (A^-1)^T
+  //         = (R^-1 * S^-1)^T
+  //         =  S^-1 * R
+
+  // Compute S^-2
+  T iss[N - 1];
+  for (int i = 0; i < N - 1; ++i)
+    iss[i] = T(1) / sub<N - 1, 0>(mv.col(i)).magSqr();
+
+  Mat<N - 1, T> res = mv.template sub<N - 1>();
+
+  // Apply S^-2
+  for (int i = 0; i < N - 1; ++i)
+    res.col(i) *= iss[i];
+
+  return res;
+}
+
 //----------------------------
 // Member function definitions
 
-template <int N, class T>
-void Mat<N, T>::print(std::ostream& stream) const {
+template <int N, class T> void Mat<N, T>::print(std::ostream &stream) const {
   for (int R = 0; R < N; ++R) {
     stream << (R == 0 ? " {" : "");
     for (int C = 0; C < N; ++C) {
@@ -701,5 +694,5 @@ void Mat<N, T>::print(std::ostream& stream) const {
 }
 
 #undef IT
-}  // namespace al
+} // namespace al
 #endif

@@ -6,89 +6,90 @@
 
 namespace al {
 
-RGB& RGB::operator=(const HSV& hsv) {
+RGB &RGB::operator=(const HSV &hsv) {
   float h = hsv.h * 6.f, s = hsv.s, v = hsv.v;
 
-  if (s == 0.f) {  // achromatic (gray)
+  if (s == 0.f) { // achromatic (gray)
     return set(v);
   }
   // sector 0 to 5
-  unsigned int i = (unsigned int)(h);  // integer part of h
-  float f = h - float(i);              // fractional part of h
+  unsigned int i = (unsigned int)(h); // integer part of h
+  float f = h - float(i);             // fractional part of h
   float p = v * (1.f - s);
 
   // depends on hue section being even or odd
   float q = v * (1.f - s * ((i & 1U) ? f : (1.f - f)));
 
   switch (i) {
-    case 0:
-      r = v;
-      g = q;
-      b = p;
-      break;
-    case 1:
-      r = q;
-      g = v;
-      b = p;
-      break;
-    case 2:
-      r = p;
-      g = v;
-      b = q;
-      break;
-    case 3:
-      r = p;
-      g = q;
-      b = v;
-      break;
-    case 4:
-      r = q;
-      g = p;
-      b = v;
-      break;
-    default:
-      r = v;
-      g = p;
-      b = q;
-      break;
+  case 0:
+    r = v;
+    g = q;
+    b = p;
+    break;
+  case 1:
+    r = q;
+    g = v;
+    b = p;
+    break;
+  case 2:
+    r = p;
+    g = v;
+    b = q;
+    break;
+  case 3:
+    r = p;
+    g = q;
+    b = v;
+    break;
+  case 4:
+    r = q;
+    g = p;
+    b = v;
+    break;
+  default:
+    r = v;
+    g = p;
+    b = q;
+    break;
   }
 
   return *this;
 }
 
-HSV& HSV::operator=(const RGB& c) {
+HSV &HSV::operator=(const RGB &c) {
   float r = c.r, g = c.g, b = c.b;
 
   float min = r < g ? (r < b ? r : b) : (g < b ? g : b);
   float max = r > g ? (r > b ? r : b) : (g > b ? g : b);
 
-  v = max;                // set value
-  float rng = max - min;  // range of RGB components
+  v = max;               // set value
+  float rng = max - min; // range of RGB components
 
-  if (rng != 0.f && max != 0.f) {  // chromatic data...
-    s = rng / max;                 // set saturation
+  if (rng != 0.f && max != 0.f) { // chromatic data...
+    s = rng / max;                // set saturation
 
     float hl;
     if (r == max)
-      hl = (g - b) / rng;  // between yellow & magenta
+      hl = (g - b) / rng; // between yellow & magenta
     else if (g == max)
-      hl = 2.f + (b - r) / rng;  // between cyan & yellow
+      hl = 2.f + (b - r) / rng; // between cyan & yellow
     else
-      hl = 4.f + (r - g) / rng;  // between magenta & cyan
+      hl = 4.f + (r - g) / rng; // between magenta & cyan
 
-    if (hl < 0.f) hl += 6.f;
+    if (hl < 0.f)
+      hl += 6.f;
 
     static const float _1_6 = 1.f / 6.f;
     h = hl * _1_6;
   } else {
     h = s = 0.f;
-  }  // this is a gray, no chroma...
+  } // this is a gray, no chroma...
 
   return *this;
 }
 
 // RGB operators
-RGB& RGB::operator=(const CIE_XYZ& v) {
+RGB &RGB::operator=(const CIE_XYZ &v) {
   // using sRGB and reference white D65
   static const Mat3f transformMatrix(3.2405f, -1.5371f, -0.4985f, -0.9693f,
                                      1.8760f, 0.0416f, 0.0556f, -0.2040f,
@@ -102,11 +103,11 @@ RGB& RGB::operator=(const CIE_XYZ& v) {
 
   // convert linear RGB values to vanilla RGB
   r = (float)(rl <= 0.0031308) ? rl * 12.92
-                               : pow(rl, 1.0 / 2.4) * 1.055 - 0.055;
+                               : std::pow(rl, 1.0 / 2.4) * 1.055 - 0.055;
   g = (float)(gl <= 0.0031308) ? gl * 12.92
-                               : pow(gl, 1.0 / 2.4) * 1.055 - 0.055;
+                               : std::pow(gl, 1.0 / 2.4) * 1.055 - 0.055;
   b = (float)(bl <= 0.0031308) ? bl * 12.92
-                               : pow(bl, 1.0 / 2.4) * 1.055 - 0.055;
+                               : std::pow(bl, 1.0 / 2.4) * 1.055 - 0.055;
   // clamp RGB values to [0, 1]
   if (r > 1.f)
     r = 1.f;
@@ -127,16 +128,16 @@ RGB& RGB::operator=(const CIE_XYZ& v) {
 }
 
 // CIE_XYZ operators
-CIE_XYZ& CIE_XYZ::operator=(const RGB& v) {
+CIE_XYZ &CIE_XYZ::operator=(const RGB &v) {
   // using sRGB and reference white D65
   static const Mat3f transformMatrix(0.4124f, 0.3576f, 0.1805f, 0.2126f,
                                      0.7152f, 0.0722f, 0.0193f, 0.1192f,
                                      0.9505f);
   float R = v.r, G = v.g, B = v.b;
   // convert vanilla RGB values to be linear with respect to energy
-  R = (float)(R <= 0.04045) ? R / 12.92 : pow(((R + 0.055) / 1.055), 2.4);
-  G = (float)(G <= 0.04045) ? G / 12.92 : pow(((G + 0.055) / 1.055), 2.4);
-  B = (float)(B <= 0.04045) ? B / 12.92 : pow(((B + 0.055) / 1.055), 2.4);
+  R = (float)(R <= 0.04045) ? R / 12.92 : std::pow(((R + 0.055) / 1.055), 2.4);
+  G = (float)(G <= 0.04045) ? G / 12.92 : std::pow(((G + 0.055) / 1.055), 2.4);
+  B = (float)(B <= 0.04045) ? B / 12.92 : std::pow(((B + 0.055) / 1.055), 2.4);
 
   // convert rgb to CIE_XYZ
   Vec3f rgb(R, G, B);
@@ -150,7 +151,7 @@ CIE_XYZ& CIE_XYZ::operator=(const RGB& v) {
   return *this;
 };
 
-CIE_XYZ& CIE_XYZ::operator=(const Lab& v) {
+CIE_XYZ &CIE_XYZ::operator=(const Lab &v) {
   float l, a, b, fx, fy, fz, xr, yr, zr;
   float epsilon = (216.0f / 24389.0f), kappa = (24389.0f / 27.0f);
   // using reference white D65
@@ -164,12 +165,12 @@ CIE_XYZ& CIE_XYZ::operator=(const Lab& v) {
   fx = (a / 500) + fy;
   fz = fy - (b / 200);
 
-  xr = (float)(pow(fx, 3.0) > epsilon) ? pow(fx, 3.0)
-                                       : ((116.0f * fx - 16.0f) / kappa);
-  yr =
-      (float)(l > epsilon * kappa) ? pow((l + 16.0f) / 116.0f, 3.0) : l / kappa;
-  zr = (float)(pow(fz, 3.0) > epsilon) ? pow(fz, 3.0)
-                                       : ((116.0f * fz - 16.0f) / kappa);
+  xr = (float)(std::pow(fx, 3.0) > epsilon) ? std::pow(fx, 3.0)
+                                            : ((116.0f * fx - 16.0f) / kappa);
+  yr = (float)(l > epsilon * kappa) ? std::pow((l + 16.0f) / 116.0f, 3.0)
+                                    : l / kappa;
+  zr = (float)(std::pow(fz, 3.0) > epsilon) ? std::pow(fz, 3.0)
+                                            : ((116.0f * fz - 16.0f) / kappa);
 
   x = xr * Xn;
   y = yr * Yn;
@@ -180,7 +181,7 @@ CIE_XYZ& CIE_XYZ::operator=(const Lab& v) {
   return *this;
 }
 
-CIE_XYZ& CIE_XYZ::operator=(const Luv& w) {
+CIE_XYZ &CIE_XYZ::operator=(const Luv &w) {
   float l, u, v, a, b, c, d, ur, vr;
   float epsilon = (216.0f / 24389.0f), kappa = (24389.0f / 27.0f);
   // using reference white D65
@@ -195,7 +196,8 @@ CIE_XYZ& CIE_XYZ::operator=(const Luv& w) {
   c = (-1.0f / 3.0f);
   a = -c * (((52.0f * l) / (u + 13.0f * l * ur)) - 1.0f);
 
-  y = (float)(l > epsilon * kappa) ? pow((l + 16.0) / 116.0, 3.0) : l / kappa;
+  y = (float)(l > epsilon * kappa) ? std::pow((l + 16.0) / 116.0, 3.0)
+                                   : l / kappa;
 
   b = -5.0f * y;
   d = y * (((39.0f * l) / (v + 13.0f * l * vr)) - 5.0f);
@@ -209,7 +211,7 @@ CIE_XYZ& CIE_XYZ::operator=(const Luv& w) {
 }
 
 // Lab operators
-Lab& Lab::operator=(const CIE_XYZ& v) {
+Lab &Lab::operator=(const CIE_XYZ &v) {
   float fx, fy, fz, xr, yr, zr;
   float epsilon = (216.0f / 24389.0f), kappa = (24389.0f / 27.0f);
   // using reference white D65
@@ -219,11 +221,11 @@ Lab& Lab::operator=(const CIE_XYZ& v) {
   xr = v.x / Xn;
   yr = v.y / Yn;
   zr = v.z / Zn;
-  fx = (float)(xr > epsilon) ? pow(xr, 1.0 / 3.0)
+  fx = (float)(xr > epsilon) ? std::pow(xr, 1.0 / 3.0)
                              : ((kappa * xr + 16.0) / 116.0);
-  fy = (float)(yr > epsilon) ? pow(yr, 1.0 / 3.0)
+  fy = (float)(yr > epsilon) ? std::pow(yr, 1.0 / 3.0)
                              : ((kappa * yr + 16.0) / 116.0);
-  fz = (float)(zr > epsilon) ? pow(zr, 1.0 / 3.0)
+  fz = (float)(zr > epsilon) ? std::pow(zr, 1.0 / 3.0)
                              : ((kappa * zr + 16.0) / 116.0);
 
   l = 116.0f * fy - 16.0f;
@@ -233,7 +235,7 @@ Lab& Lab::operator=(const CIE_XYZ& v) {
   return *this;
 }
 
-Lab& Lab::operator=(const HCLab& v) {
+Lab &Lab::operator=(const HCLab &v) {
   l = v.l * 100.0f;
   static const float TAU = 2 * M_PI;
   a = (v.c * 133.419f) * cos(v.h * TAU);
@@ -243,21 +245,22 @@ Lab& Lab::operator=(const HCLab& v) {
 }
 
 // HCLab operators
-HCLab& HCLab::operator=(const Lab& v) {
+HCLab &HCLab::operator=(const Lab &v) {
   float L = v.l, a = v.a, b = v.b;
   // calculate hue angle from 0 to 1
-  h = atan2(b, a) * (1.f / (2.f * M_PI));  // hue in [-0.5, 0.5]
-  if (h < 0.f) h += 1.f;                   // wrap hue angle into [0, 1]
+  h = atan2(b, a) * (1.f / (2.f * M_PI)); // hue in [-0.5, 0.5]
+  if (h < 0.f)
+    h += 1.f; // wrap hue angle into [0, 1]
   c = sqrt(a * a + b * b) /
-      133.419f;  // range determined empirically using
-                 // 16million RGB color image from http://brucelindbloom.com
+      133.419f; // range determined empirically using
+                // 16million RGB color image from http://brucelindbloom.com
   l = L / 100.0f;
   // cout << "HCLab: {" << h << ", " << c << ", " << l << "}" << endl;
   return *this;
 }
 
 // Luv operators
-Luv& Luv::operator=(const CIE_XYZ& w) {
+Luv &Luv::operator=(const CIE_XYZ &w) {
   float up, vp, ur, yr, vr, x, y, z;
   float epsilon = (216.0f / 24389.0f), kappa = (24389.0f / 27.0f);
   // using reference white D65
@@ -274,14 +277,15 @@ Luv& Luv::operator=(const CIE_XYZ& w) {
   up = (4 * x) / (x + 15 * y + 3 * z);
   vp = (9 * y) / (x + 15 * y + 3 * z);
 
-  l = (float)(yr > epsilon) ? 116.0f * pow(yr, 1.0 / 3.0) - 16.0f : kappa * yr;
+  l = (float)(yr > epsilon) ? 116.0f * std::pow(yr, 1.0 / 3.0) - 16.0f
+                            : kappa * yr;
   u = 13.0f * l * (up - ur);
   v = 13.0f * l * (vp - vr);
   // cout << "Luv: {" << l << ", " << u << ", " << v << "}" << endl;
   return *this;
 }
 
-Luv& Luv::operator=(const HCLuv& w) {
+Luv &Luv::operator=(const HCLuv &w) {
   l = w.l * 100.0f;
   static const float TAU = 2 * M_PI;
   u = (w.c * 178.387f) * cos(w.h * TAU);
@@ -291,59 +295,60 @@ Luv& Luv::operator=(const HCLuv& w) {
 }
 
 // HCLuv operators
-HCLuv& HCLuv::operator=(const Luv& w) {
+HCLuv &HCLuv::operator=(const Luv &w) {
   float L = w.l, u = w.u, v = w.v;
   // calculate hue angle from 0 to 1
-  h = atan2(v, u) * (1.f / (2.f * M_PI));  // hue in [-0.5, 0.5]
-  if (h < 0.f) h += 1.f;                   // wrap hue angle into [0, 1]
+  h = atan2(v, u) * (1.f / (2.f * M_PI)); // hue in [-0.5, 0.5]
+  if (h < 0.f)
+    h += 1.f; // wrap hue angle into [0, 1]
   c = sqrt(u * u + v * v) /
-      178.387f;  // range determined empirically using
-                 // 16million RGB color image from http://brucelindbloom.com
+      178.387f; // range determined empirically using
+                // 16million RGB color image from http://brucelindbloom.com
   l = L / 100.0f;
   // cout << "HCLuv: {" << h << ", " << c << ", " << l << "}" << endl;
   return *this;
 }
 
 // RGB operators
-RGB& RGB::operator=(const Lab& v) { return *this = CIE_XYZ(v); }
+RGB &RGB::operator=(const Lab &v) { return *this = CIE_XYZ(v); }
 
-RGB& RGB::operator=(const HCLab& v) { return *this = Lab(v); }
+RGB &RGB::operator=(const HCLab &v) { return *this = Lab(v); }
 
-RGB& RGB::operator=(const Luv& v) { return *this = CIE_XYZ(v); }
+RGB &RGB::operator=(const Luv &v) { return *this = CIE_XYZ(v); }
 
-RGB& RGB::operator=(const HCLuv& v) { return *this = Luv(v); }
+RGB &RGB::operator=(const HCLuv &v) { return *this = Luv(v); }
 
 // HSV operators
-HSV& HSV::operator=(const CIE_XYZ& v) { return *this = RGB(v); }
+HSV &HSV::operator=(const CIE_XYZ &v) { return *this = RGB(v); }
 
-HSV& HSV::operator=(const Lab& v) { return *this = CIE_XYZ(v); }
+HSV &HSV::operator=(const Lab &v) { return *this = CIE_XYZ(v); }
 
-HSV& HSV::operator=(const HCLab& v) { return *this = Lab(v); }
+HSV &HSV::operator=(const HCLab &v) { return *this = Lab(v); }
 
-HSV& HSV::operator=(const Luv& v) { return *this = CIE_XYZ(v); }
+HSV &HSV::operator=(const Luv &v) { return *this = CIE_XYZ(v); }
 
-HSV& HSV::operator=(const HCLuv& v) { return *this = Luv(v); }
+HSV &HSV::operator=(const HCLuv &v) { return *this = Luv(v); }
 
 // Color operators
-Color& Color::operator=(const CIE_XYZ& v) { return *this = RGB(v); }
+Color &Color::operator=(const CIE_XYZ &v) { return *this = RGB(v); }
 
-Color& Color::operator=(const Lab& v) { return *this = RGB(v); }
+Color &Color::operator=(const Lab &v) { return *this = RGB(v); }
 
-Color& Color::operator=(const HCLab& v) { return *this = RGB(v); }
+Color &Color::operator=(const HCLab &v) { return *this = RGB(v); }
 
-Color& Color::operator=(const Luv& v) { return *this = RGB(v); }
+Color &Color::operator=(const Luv &v) { return *this = RGB(v); }
 
-Color& Color::operator=(const HCLuv& v) { return *this = RGB(v); }
+Color &Color::operator=(const HCLuv &v) { return *this = RGB(v); }
 
 // Colori operators
-Colori& Colori::operator=(const CIE_XYZ& v) { return *this = RGB(v); }
+Colori &Colori::operator=(const CIE_XYZ &v) { return *this = RGB(v); }
 
-Colori& Colori::operator=(const Lab& v) { return *this = RGB(v); }
+Colori &Colori::operator=(const Lab &v) { return *this = RGB(v); }
 
-Colori& Colori::operator=(const HCLab& v) { return *this = RGB(v); }
+Colori &Colori::operator=(const HCLab &v) { return *this = RGB(v); }
 
-Colori& Colori::operator=(const Luv& v) { return *this = RGB(v); }
+Colori &Colori::operator=(const Luv &v) { return *this = RGB(v); }
 
-Colori& Colori::operator=(const HCLuv& v) { return *this = RGB(v); }
+Colori &Colori::operator=(const HCLuv &v) { return *this = RGB(v); }
 
-}  // namespace al
+} // namespace al

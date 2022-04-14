@@ -21,7 +21,7 @@ void Dbap::renderSample(AudioIOData &io, const Pose &listeningPose,
   // Rotate vector according to listener-rotation
   Quatd srcRot = listeningPose.quat();
   relpos = srcRot.rotate(relpos);
-  relpos = Vec4d(relpos.x, relpos.z, relpos.y);
+  relpos = Vec3d(relpos.x, relpos.z, relpos.y);
   for (unsigned int i = 0; i < mNumSpeakers; ++i) {
     float gain = 1.f;
     Vec3d vec = relpos - mSpeakerVecs[i];
@@ -40,7 +40,7 @@ void Dbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
   // Rotate vector according to listener-rotation
   Quatd srcRot = listeningPose.quat();
   relpos = srcRot.rotate(relpos);
-  relpos = Vec4d(relpos.x, relpos.z, relpos.y);
+  relpos = Vec3d(relpos.x, relpos.z, relpos.y);
 
   for (unsigned int k = 0; k < mNumSpeakers; ++k) {
     float gain = 1.f;
@@ -62,4 +62,4 @@ void Dbap::print(std::ostream &stream) {
          << std::endl;
 }
 
-}  // namespace al
+} // namespace al
