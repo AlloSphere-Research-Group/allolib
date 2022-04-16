@@ -189,7 +189,8 @@ bool SynthVoice::setTriggerParams(float *pFields, int numFields) {
   return true;
 }
 
-bool SynthVoice::setTriggerParams(std::vector<float> &pFields, bool noCalls) {
+bool SynthVoice::setTriggerParams(const std::vector<float> &pFields,
+                                  bool noCalls) {
   if (pFields.size() < mTriggerParams.size()) {
     // std::cout << "pField count mismatch. Ignoring." << std::endl;
     return false;
@@ -207,7 +208,7 @@ bool SynthVoice::setTriggerParams(std::vector<float> &pFields, bool noCalls) {
   return true;
 }
 
-bool SynthVoice::setTriggerParams(std::vector<VariantValue> pFields,
+bool SynthVoice::setTriggerParams(const std::vector<VariantValue> &pFields,
                                   bool noCalls) {
   if (pFields.size() < mTriggerParams.size()) {
     // std::cout << "pField count mismatch. Ignoring." << std::endl;

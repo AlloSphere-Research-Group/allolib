@@ -121,7 +121,7 @@ public:
    * @param pFields std::vector<float> containing the values
    * @return true if able to set the fields
    */
-  virtual bool setTriggerParams(std::vector<float> &pFields,
+  virtual bool setTriggerParams(const std::vector<float> &pFields,
                                 bool noCalls = false) override;
 
   /**
@@ -129,7 +129,7 @@ public:
    * @param pFields std::vector<float> containing the values
    * @return true if able to set the fields
    */
-  virtual bool setTriggerParams(std::vector<VariantValue> pFields,
+  virtual bool setTriggerParams(const std::vector<VariantValue> &pFields,
                                 bool noCalls = false) override;
 
   /**
@@ -271,7 +271,10 @@ public:
    */
   virtual void update(double dt = 0) final;
 
+  // Set update context to use threading
   void setUpdateThreaded(bool threaded) { mThreadedUpdate = threaded; }
+
+  // Set audio context to use thread pool to render voices
   void setAudioThreaded(bool threaded) { mThreadedAudio = threaded; }
 
   DistAtten<> &distanceAttenuation() { return mDistAtten; }

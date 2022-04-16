@@ -69,6 +69,9 @@ public:
   /// Copy constructor
   Pose(const Pose &p);
 
+  /// Copy operator
+  Pose &operator=(const Pose &other) { return set(other); }
+
   /// Get identity
   static Pose identity() { return Pose().setIdentity(); }
 
