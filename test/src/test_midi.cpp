@@ -1,12 +1,12 @@
 
 #include "al/io/al_MIDI.hpp"
-#include "catch.hpp"
+#include "gtest/gtest.h"
 
 using namespace al;
 
 #ifndef TRAVIS_BUILD
 
-TEST_CASE("MIDI test") {
+TEST(MIDI, Basic) {
   RtMidiIn midiInput;
   RtMidiOut midiOutput;
 }

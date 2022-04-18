@@ -639,7 +639,9 @@ bool AudioBackend::close() {
         e.printMessage();
       }
     }
-    data->audio.closeStream();
+    if (data->audio.isStreamOpen()) {
+      data->audio.closeStream();
+    }
   }
 
   return true;
@@ -661,7 +663,9 @@ bool AudioBackend::start(int framesPerSecond, int framesPerBuffer,
 bool AudioBackend::stop() {
   AudioBackendData *data = static_cast<AudioBackendData *>(mBackendData.get());
   try {
-    data->audio.stopStream();
+    if (data->audio.isStreamRunning()) {
+      data->audio.stopStream();
+    }
   } catch (RtAudioError &e) {
     e.printMessage();
     return false;

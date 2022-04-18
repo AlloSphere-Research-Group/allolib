@@ -3,7 +3,7 @@
 #include "al/io/al_AudioIO.hpp"
 #include "al/sound/al_Vbap.hpp"
 #include "al/sphere/al_AlloSphereSpeakerLayout.hpp"
-#include "catch.hpp"
+#include "gtest/gtest.h"
 
 using namespace al;
 
@@ -11,7 +11,7 @@ bool almostEqual(float a, float b, float tol = 0.000001) {
   return fabs(a - b) < tol;
 }
 
-TEST_CASE("VBAP 8 speakers") {
+TEST(VBAP, EightSpeakers) {
   const int fpb = 16;
 
   Speakers sl = OctalSpeakerLayout();
@@ -38,9 +38,9 @@ TEST_CASE("VBAP 8 speakers") {
 
   audioData.frame(0);
   for (int i = 0; i < fpb; i++) {
-    REQUIRE(audioData.out(0, i) == i + 0.5);
+    EXPECT_TRUE(audioData.out(0, i) == i + 0.5);
     for (int chan = 1; chan < 8; chan++) {
-      REQUIRE(audioData.out(chan, i) == 0.0f);
+      EXPECT_TRUE(audioData.out(chan, i) == 0.0f);
     }
   }
 
@@ -51,10 +51,10 @@ TEST_CASE("VBAP 8 speakers") {
   audioData.frame(0);
   for (unsigned int i = 0; i < fpb; i++) {
     for (unsigned int chan = 0; chan < 6; chan++) {
-      REQUIRE(almostEqual(audioData.out(chan, i), 0.0f));
+      EXPECT_TRUE(almostEqual(audioData.out(chan, i), 0.0f));
     }
-    REQUIRE(almostEqual(audioData.out(6, i), i + 0.5f));
-    REQUIRE(almostEqual(audioData.out(7, i), 0.0f));
+    EXPECT_TRUE(almostEqual(audioData.out(6, i), i + 0.5f));
+    EXPECT_TRUE(almostEqual(audioData.out(7, i), 0.0f));
   }
 
   pose.pos(1, 0, -1); // 45 deg. front right
@@ -63,10 +63,10 @@ TEST_CASE("VBAP 8 speakers") {
 
   audioData.frame(0);
   for (unsigned int i = 0; i < fpb; i++) {
-    REQUIRE(almostEqual(audioData.out(0, i), 0.0f));
-    REQUIRE(almostEqual(audioData.out(1, i), i + 0.5));
+    EXPECT_TRUE(almostEqual(audioData.out(0, i), 0.0f));
+    EXPECT_TRUE(almostEqual(audioData.out(1, i), i + 0.5));
     for (unsigned int chan = 2; chan < 8; chan++) {
-      REQUIRE(almostEqual(audioData.out(chan, i), 0.0f));
+      EXPECT_TRUE(almostEqual(audioData.out(chan, i), 0.0f));
     }
   }
 
@@ -76,15 +76,15 @@ TEST_CASE("VBAP 8 speakers") {
 
   audioData.frame(0);
   for (unsigned int i = 0; i < fpb; i++) {
-    REQUIRE(almostEqual(audioData.out(0, i), (i + 0.5) * sin(M_PI * 0.25)));
-    REQUIRE(almostEqual(audioData.out(1, i), (i + 0.5) * sin(M_PI * 0.25)));
+    EXPECT_TRUE(almostEqual(audioData.out(0, i), (i + 0.5) * sin(M_PI * 0.25)));
+    EXPECT_TRUE(almostEqual(audioData.out(1, i), (i + 0.5) * sin(M_PI * 0.25)));
     for (unsigned int chan = 2; chan < 8; chan++) {
-      REQUIRE(almostEqual(audioData.out(chan, i), 0.0f));
+      EXPECT_TRUE(almostEqual(audioData.out(chan, i), 0.0f));
     }
   }
 }
 
-TEST_CASE("VBAP 3D tetrahedron") {
+TEST(VBAP, Tetrahedron3D) {
   const int fpb = 16;
 
   Speakers sl;
@@ -117,10 +117,10 @@ TEST_CASE("VBAP 3D tetrahedron") {
   audioData.zeroOut();
   vbapPanner.renderBuffer(audioData, pose, samples, fpb);
   for (unsigned int i = 0; i < fpb; i++) {
-    REQUIRE(almostEqual(audioData.out(0, i), (i + 0.5) * sin(M_PI * 0.25)));
-    REQUIRE(almostEqual(audioData.out(3, i), (i + 0.5) * sin(M_PI * 0.25)));
+    EXPECT_TRUE(almostEqual(audioData.out(0, i), (i + 0.5) * sin(M_PI * 0.25)));
+    EXPECT_TRUE(almostEqual(audioData.out(3, i), (i + 0.5) * sin(M_PI * 0.25)));
     for (unsigned int chan = 1; chan < 2; chan++) {
-      REQUIRE(almostEqual(audioData.out(chan, i), 0.0f));
+      EXPECT_TRUE(almostEqual(audioData.out(chan, i), 0.0f));
     }
   }
 
@@ -128,17 +128,17 @@ TEST_CASE("VBAP 3D tetrahedron") {
   audioData.zeroOut();
   vbapPanner.renderBuffer(audioData, pose, samples, fpb);
   for (unsigned int i = 0; i < fpb; i++) {
-    REQUIRE(almostEqual(audioData.out(0, i), (i + 0.5) * sqrt(1 / 3.0)));
-    REQUIRE(almostEqual(audioData.out(1, i),
-                        (i + 0.5) * sqrt(1 / 3.0f))); // 0.225427702
-    REQUIRE(almostEqual(audioData.out(3, i),
-                        (i + 0.5) * sqrt(1 / 3.0))); // 0.323040754
+    EXPECT_TRUE(almostEqual(audioData.out(0, i), (i + 0.5) * sqrt(1 / 3.0)));
+    EXPECT_TRUE(almostEqual(audioData.out(1, i),
+                            (i + 0.5) * sqrt(1 / 3.0f))); // 0.225427702
+    EXPECT_TRUE(almostEqual(audioData.out(3, i),
+                            (i + 0.5) * sqrt(1 / 3.0))); // 0.323040754
 
-    REQUIRE(almostEqual(audioData.out(2, i), 0.0));
+    EXPECT_TRUE(almostEqual(audioData.out(2, i), 0.0));
   }
 }
 
-TEST_CASE("VBAP 3D Allosphere") {
+TEST(VBAP, Allosphere3D) {
   const int fpb = 16;
 
   Speakers sl = AlloSphereSpeakerLayout();
@@ -165,10 +165,11 @@ TEST_CASE("VBAP 3D Allosphere") {
 
   //    vbapPanner.renderBuffer(audioData, pose, samples, fpb);
   //    for (int i = 0; i < fpb; i++) {
-  //        REQUIRE(almostEqual(audioData.out(0,i) , (i + 0.5) *
-  //        sin(M_PI*0.25))); REQUIRE(almostEqual(audioData.out(3,i) , (i + 0.5)
+  //        EXPECT_TRUE(almostEqual(audioData.out(0,i) , (i + 0.5) *
+  //        sin(M_PI*0.25))); EXPECT_TRUE(almostEqual(audioData.out(3,i) , (i +
+  //        0.5)
   //        * sin(M_PI*0.25))); for (int chan = 1; chan < 2; chan ++) {
-  //            REQUIRE(almostEqual(audioData.out(chan,i),0.0f));
+  //            EXPECT_TRUE(almostEqual(audioData.out(chan,i),0.0f));
   //        }
   //    }
 
@@ -176,12 +177,13 @@ TEST_CASE("VBAP 3D Allosphere") {
   //    audioData.zeroOut();
   //    vbapPanner.renderBuffer(audioData, pose, samples, fpb);
   //    for (int i = 0; i < fpb; i++) {
-  //        REQUIRE(almostEqual(audioData.out(0,i) , (i + 0.5) * sqrt(1/3.0)));
-  //        REQUIRE(almostEqual(audioData.out(2,i), (i + 0.5) * sqrt(1/3.0)));
-  //        // 0.225427702 REQUIRE(almostEqual(audioData.out(3,i), (i + 0.5) *
-  //        sqrt(1/3.0))); // 0.323040754
+  //        EXPECT_TRUE(almostEqual(audioData.out(0,i) , (i + 0.5) *
+  //        sqrt(1/3.0))); EXPECT_TRUE(almostEqual(audioData.out(2,i), (i + 0.5)
+  //        * sqrt(1/3.0)));
+  //        // 0.225427702 EXPECT_TRUE(almostEqual(audioData.out(3,i), (i + 0.5)
+  //        * sqrt(1/3.0))); // 0.323040754
 
-  //        REQUIRE(almostEqual(audioData.out(1,i) , 0.0));
+  //        EXPECT_TRUE(almostEqual(audioData.out(1,i) , 0.0));
 
   //    }
 }

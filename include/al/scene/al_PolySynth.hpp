@@ -100,7 +100,7 @@ the other
    * Trigger parameters are parameters meant to be set at triggering,
    * but that then stay constant throughout the duration of the instance.
    */
-  virtual bool setTriggerParams(std::vector<float> &pFields,
+  virtual bool setTriggerParams(const std::vector<float> &pFields,
                                 bool noCalls = false);
 
   /**
@@ -108,7 +108,7 @@ the other
    * @param pFields std::vector<float> containing the values
    * @return true if able to set the fields
    */
-  virtual bool setTriggerParams(std::vector<VariantValue> pFields,
+  virtual bool setTriggerParams(const std::vector<VariantValue> &pFields,
                                 bool noCalls = false);
 
   /**

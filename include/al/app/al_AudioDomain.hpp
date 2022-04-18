@@ -32,6 +32,8 @@ public:
   AudioIO &audioIO() { return mAudioIO; }
   const AudioIO &audioIO() const { return mAudioIO; }
 
+  // You can disable the domain from running by setting audioOuputs and
+  // audioInputs to zero
   void configure(double audioRate = 44100, int audioBlockSize = 512,
                  int audioOutputs = -1, int audioInputs = -1);
 
@@ -49,6 +51,9 @@ private:
   AudioIO mAudioIO;
 };
 
+/**
+ * @brief Convenience class that synchronizes hardware fps to Gamma objects
+ */
 class GammaAudioDomain : public AudioDomain, public gam::Domain {
 public:
   bool start() override;
