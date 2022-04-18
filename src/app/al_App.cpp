@@ -314,7 +314,7 @@ void App::createDomains() {
 }
 
 void App::initializeDomains() {
-  for (auto domain : mDomainList) {
+  for (const auto &domain : mDomainList) {
     auto domainPtr = domain.get();
     if (strcmp(typeid(*domainPtr).name(),
                typeid(OpenGLGraphicsDomain).name()) == 0) {
