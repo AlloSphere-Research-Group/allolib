@@ -27,6 +27,7 @@ struct MyApp : public App {
   void onInit() override {
     // Add parameters to preset handling
     presets << Number << Size << Red << Green << Blue << Shape;
+    presets.verbose(true);
 
     Shape.setElements({"Cone", "Cube"});
 
