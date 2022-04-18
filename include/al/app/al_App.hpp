@@ -165,6 +165,7 @@ public:
     bool keyDown(const Keyboard &k);
     App *app;
   };
+
   StandardWindowAppKeyControls stdControls;
 
   // Modify these with care
