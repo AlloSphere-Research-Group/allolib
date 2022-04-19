@@ -142,8 +142,11 @@ public:
   static void drawSynthSequencer(SynthSequencer *synthSequencer);
   static void drawSynthRecorder(SynthRecorder *synthRecorder);
 
-  static void drawAudioIO(AudioIO &io) { drawAudioIO(&io); }
-  static void drawAudioIO(AudioIO *io);
+  /**
+   * @brief returns true if audio device has been restarted
+   */
+  static bool drawAudioIO(AudioIO &io) { return drawAudioIO(&io); }
+  static bool drawAudioIO(AudioIO *io);
   static void drawParameterMIDI(ParameterMIDI &midi) {
     drawParameterMIDI(&midi);
   }

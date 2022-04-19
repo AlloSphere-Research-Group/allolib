@@ -1193,7 +1193,8 @@ void ParameterGUI::drawMIDIIn(RtMidiIn *midiIn) {
   ImGui::PopID();
 }
 
-void ParameterGUI::drawAudioIO(AudioIO *io) {
+bool ParameterGUI::drawAudioIO(AudioIO *io) {
+  bool ret = false;
   struct AudioIOState {
     int currentSr = 0;
     int currentBufSize = 0;
@@ -1252,10 +1253,12 @@ void ParameterGUI::drawAudioIO(AudioIO *io) {
         io->device(AudioDevice(state.currentDevice));
         io->open();
         io->start();
+        ret = true;
       }
     }
   }
   ImGui::PopID();
+  return ret;
 }
 
 void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
