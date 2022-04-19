@@ -7,11 +7,9 @@ struct MyApp : public App {
   Mesh m;
   Texture tex;
 
-  void onInit() override {
-    addIcosahedron(m);
+  void onInit() override { addIcosahedron(m); }
 
-    tex.create2D(width(), height());
-  }
+  void onCreate() override { tex.create2D(width(), height()); }
 
   void onDraw(Graphics &g) override {
     g.clear(0.3);

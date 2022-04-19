@@ -77,11 +77,12 @@ struct lighting_shader_uniforms {
   bool has_material = false;
 };
 
-void al_print_lighting_uniforms(lighting_shader_uniforms const& u,
+void al_print_lighting_uniforms(lighting_shader_uniforms const &u,
                                 std::string name = "shader");
 
-lighting_shader_uniforms al_get_lighting_uniform_locations(
-    al::ShaderProgram& s, bool print_result = false);
+lighting_shader_uniforms
+al_get_lighting_uniform_locations(al::ShaderProgram &s,
+                                  bool print_result = false);
 
 inline std::string al_default_shader_version_string() {
   return R"(#version 330
@@ -246,17 +247,17 @@ void main() {
 namespace al {
 
 enum class ShaderType : unsigned char {
-  COLOR,             // uniform color
-  MESH,              // per vertex mesh color
-  TEXTURE,           // sample texture from texture coordinate per vertex
-  LIGHTING_COLOR,    // ShaderType::COLOR with lighting
-  LIGHTING_MESH,     // ShaderType::MESH with lighting
-  LIGHTING_TEXTURE,  // ShaderType::TEXTURE with lighting
-  LIGHTING_MATERIAL  // Use material for coloring with lighting
+  COLOR,            // uniform color
+  MESH,             // per vertex mesh color
+  TEXTURE,          // sample texture from texture coordinate per vertex
+  LIGHTING_COLOR,   // ShaderType::COLOR with lighting
+  LIGHTING_MESH,    // ShaderType::MESH with lighting
+  LIGHTING_TEXTURE, // ShaderType::TEXTURE with lighting
+  LIGHTING_MATERIAL // Use material for coloring with lighting
 };
 
 // compile shader program as with given config
-void compileDefaultShader(ShaderProgram& s, ShaderType type,
+void compileDefaultShader(ShaderProgram &s, ShaderType type,
                           bool is_omni = false);
 
 // return vertex shader string for specified configuration
@@ -269,9 +270,9 @@ std::string multilight_frag_shader(ShaderType type, int num_lights);
 // compile shader program as with given config with lighting
 // TODO - `al::compileDefaultShader`
 //        overlaps functionality with this one
-void compileMultiLightShader(ShaderProgram& s, ShaderType type, int num_lights,
+void compileMultiLightShader(ShaderProgram &s, ShaderType type, int num_lights,
                              bool is_omni = false);
 
-}  // namespace al
+} // namespace al
 
 #endif

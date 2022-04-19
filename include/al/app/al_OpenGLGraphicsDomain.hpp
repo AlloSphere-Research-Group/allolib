@@ -28,7 +28,6 @@ class GLFWOpenGLWindowDomain;
 class OpenGLGraphicsDomain : public AsynchronousThreadDomain, public FPS {
 public:
   OpenGLGraphicsDomain();
-  virtual ~OpenGLGraphicsDomain() {}
 
   // Domain functions
   bool init(ComputationDomain *parent = nullptr) override;
@@ -96,11 +95,12 @@ private:
 
   std::mutex mSubDomainInsertLock;
   std::condition_variable mSubDomainInsertSignal;
-  std::pair<std::shared_ptr<SynchronousDomain>, bool> mSubdomainToInsert;
+  std::vector<std::pair<std::shared_ptr<SynchronousDomain>, bool>>
+      mSubdomainsToInsert;
 
   std::mutex mSubDomainRemoveLock;
   std::condition_variable mSubDomainRemoveSignal;
-  std::shared_ptr<SynchronousDomain> mSubdomainToRemove;
+  std::vector<std::shared_ptr<SynchronousDomain>> mSubdomainsToRemove;
 
   enum class CommandType { START, STOP, CLEANUP, NONE };
   std::mutex mDomainSignalLock;

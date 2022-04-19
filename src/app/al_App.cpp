@@ -290,8 +290,6 @@ void App::createDomains() {
   mOpenGLGraphicsDomain = newDomain<OpenGLGraphicsDomain>();
   mSimulationDomain =
       mOpenGLGraphicsDomain->newSubDomain<SimulationDomain>(true);
-
-  mDefaultWindowDomain = graphicsDomain()->newWindow();
 }
 
 void App::initializeDomains() {
@@ -311,10 +309,14 @@ void App::initializeDomains() {
     } else {
       std::cout << "WARNING: Domain unknown for auto connection" << std::endl;
     }
+  }
+
+  for (const auto &domain : mDomainList) {
     if (!domain->init()) {
       std::cerr << "ERROR initializing domain " << std::endl;
     }
   }
+  mDefaultWindowDomain = graphicsDomain()->newWindow();
 
   mDefaultWindowDomain->onDraw =
       std::bind(&App::onDraw, this, std::placeholders::_1);

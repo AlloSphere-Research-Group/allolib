@@ -82,16 +82,17 @@ bool OpenGLGraphicsDomain::addSubDomain(
     std::shared_ptr<SynchronousDomain> subDomain, bool prepend) {
 
   if (!mInitialized) {
-    ComputationDomain::addSubDomain(subDomain, prepend);
+    std::unique_lock<std::mutex> lk(mSubDomainInsertLock);
+    mSubdomainsToInsert.push_back({subDomain, prepend});
     return true;
   }
   if (!mRunning) {
     std::unique_lock<std::mutex> lk(mSubDomainInsertLock);
-    mSubdomainToInsert = {subDomain, prepend};
+    mSubdomainsToInsert.push_back({subDomain, prepend});
     return true;
   } else {
     std::unique_lock<std::mutex> lk(mSubDomainInsertLock);
-    mSubdomainToInsert = {subDomain, prepend};
+    mSubdomainsToInsert.push_back({subDomain, prepend});
     auto status = mSubDomainInsertSignal.wait_for(lk, std::chrono::seconds(15));
     // FIXME adjust for the case where the domain stops while doing this,
     // causing the wait to timeout
@@ -109,7 +110,7 @@ bool OpenGLGraphicsDomain::removeSubDomain(
     AsynchronousDomain::removeSubDomain(subDomain);
   } else {
     std::unique_lock<std::mutex> lk(mSubDomainRemoveLock);
-    mSubdomainToRemove = subDomain;
+    mSubdomainsToRemove.push_back(subDomain);
     auto status = mSubDomainRemoveSignal.wait_for(lk, std::chrono::seconds(15));
 
     // FIXME adjust for the case where the domain stops while doing this,
@@ -124,7 +125,6 @@ bool OpenGLGraphicsDomain::removeSubDomain(
 
 std::shared_ptr<GLFWOpenGLWindowDomain> OpenGLGraphicsDomain::newWindow() {
   auto newWindowDomain = newSubDomain<GLFWOpenGLWindowDomain>();
-  //  newWindowDomain->init(this);
   return newWindowDomain;
 }
 
@@ -153,36 +153,35 @@ void OpenGLGraphicsDomain::processDomainAddRemoveQueues(
     OpenGLGraphicsDomain *domain) {
   {
     std::unique_lock<std::mutex> lk(domain->mSubDomainInsertLock);
-    if (domain->mSubdomainToInsert.first) {
-      if (!domain->mSubdomainToInsert.first->init(domain)) {
-        std::cerr << "ERROR initializing Window domain. Not injecting."
-                  << std::endl;
-      } else {
-        domain->mSubDomainList.push_back(domain->mSubdomainToInsert);
+    for (const auto &domainToInsert : domain->mSubdomainsToInsert) {
+      if (domainToInsert.first) {
+        if (!domainToInsert.first->init(domain)) {
+          std::cerr << "ERROR initializing Window domain. Not injecting."
+                    << std::endl;
+        } else {
+          domain->mSubDomainList.push_back(domainToInsert);
+        }
       }
-
-      domain->mSubDomainInsertSignal.notify_one();
-      domain->mSubdomainToInsert.first = nullptr;
     }
+    domain->mSubDomainInsertSignal.notify_one();
+    domain->mSubdomainsToInsert.clear();
   }
   {
-    if (domain->mSubdomainToRemove) {
+    std::unique_lock<std::mutex> lk(domain->mSubDomainRemoveLock);
+    for (const auto &domainToRemove : domain->mSubdomainsToRemove) {
       auto it = domain->mSubDomainList.begin();
-      while (it->first != domain->mSubdomainToRemove &&
+      while (it->first != domainToRemove &&
              it != domain->mSubDomainList.end()) {
         it++;
       }
       if (it != domain->mSubDomainList.end()) {
-        domain->mSubdomainToRemove->cleanup();
+        domainToRemove->cleanup();
         domain->mSubDomainList.erase(it);
       } else {
         std::cerr << "Domain not found for removal." << std::endl;
       }
-      {
-        std::unique_lock<std::mutex> lk(domain->mSubDomainRemoveLock);
-        domain->mSubdomainToRemove = nullptr;
-        domain->mSubDomainRemoveSignal.notify_one();
-      }
+      domain->mSubDomainRemoveSignal.notify_one();
+      domain->mSubdomainsToRemove.clear();
     }
   }
 }
@@ -191,15 +190,10 @@ void OpenGLGraphicsDomain::domainThreadFunction(OpenGLGraphicsDomain *domain) {
 
   domain->mDomainAsyncInitPromise.set_value(domain->initPrivate());
   processDomainAddRemoveQueues(domain);
-  // TODO we should wait here for the onInit() callback to be done
-
   domain->preOnCreate();
   for (GPUObject *obj : domain->mObjects) {
     obj->create();
-    //    std::cout << obj << " " << typeid(*obj).name() << " id:" << obj->id()
-    //              << std::endl;
   }
-  domain->onCreate();
   while (domain->mInitialized) {
     {
       std::unique_lock<std::mutex> lk(domain->mDomainSignalLock);
@@ -269,6 +263,7 @@ bool OpenGLGraphicsDomain::startPrivate() {
     if (!ret) {
       mRunning = false;
     }
+    onCreate();
     return ret;
   } else {
     return true;
@@ -313,15 +308,13 @@ bool GLFWOpenGLWindowDomain::init(ComputationDomain *parent) {
   //  }
   bool ret = true;
   assert(dynamic_cast<OpenGLGraphicsDomain *>(parent));
-  mGraphics = std::make_unique<Graphics>();
-
-  ret &= initializeSubdomains(true);
-  mParent = static_cast<OpenGLGraphicsDomain *>(parent);
-  //  if (!mWindow) {
-  //    mWindow = std::make_unique<Window>();
-  //  }
   if (!mGraphics) {
     mGraphics = std::make_unique<Graphics>();
+  }
+  ret &= initializeSubdomains(true);
+  mParent = static_cast<OpenGLGraphicsDomain *>(parent);
+  if (!mWindow) {
+    mWindow = std::make_unique<Window>();
   }
   mWindow->mWindowProperties =
       dynamic_cast<OpenGLGraphicsDomain *>(parent)->nextWindowProperties;
