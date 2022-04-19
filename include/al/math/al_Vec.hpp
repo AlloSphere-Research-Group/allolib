@@ -1205,7 +1205,7 @@ template <int N, class T> Vec<N, T> &Vec<N, T>::mag(T v) {
 //#undef TypeString
 
 template <int N, class T>
-void Vec<N, T>::print(FILE *out, const char *append = "") const {
+void Vec<N, T>::print(FILE *out, const char *append) const {
   fprintf(out, "{");
   if (size()) {
     fprintf(out, "%g", (double)((*this)[0]));
