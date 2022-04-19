@@ -1657,23 +1657,23 @@ public:
       : ParameterWrapper<al::Vec3f>(parameterName, Group, defaultValue) {}
 
   ParameterVec3 operator=(const Vec3f vec) {
-    this->set(std::move(vec));
+    this->set(vec);
     return *this;
   }
 
   float operator[](size_t index) {
     assert(index < INT_MAX); // Hack to remove
-    Vec3f vec = std::move(this->get());
+    Vec3f vec = this->get();
     return vec[index];
   }
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    Vec3f vec = std::move(get());
+    Vec3f vec = get();
     sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z);
   }
 
   virtual void getFields(std::vector<VariantValue> &fields) override {
-    Vec3f vec = std::move(this->get());
+    Vec3f vec = this->get();
     fields.emplace_back(VariantValue(vec.x));
     fields.emplace_back(VariantValue(vec.y));
     fields.emplace_back(VariantValue(vec.z));
@@ -1683,7 +1683,7 @@ public:
     if (fields.size() == 3) {
       Vec3f vec(fields[0].toDouble(), fields[1].toDouble(),
                 fields[2].toDouble());
-      set(std::move(vec));
+      set(vec);
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
@@ -1767,8 +1767,8 @@ public:
   //    vec[index];}
 
   virtual void getFields(std::vector<VariantValue> &fields) override {
-    Quatd quat = std::move(get()).quat();
-    Vec4f pos = std::move(get()).pos();
+    Quatd quat = get().quat();
+    Vec4f pos = get().pos();
     fields.reserve(7);
     fields.emplace_back(VariantValue(pos.x));
     fields.emplace_back(VariantValue(pos.y));
