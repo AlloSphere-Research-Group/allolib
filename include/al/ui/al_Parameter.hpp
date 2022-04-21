@@ -2049,6 +2049,24 @@ public:
                   << " ERROR: Unexpected field types for al::Color"
                   << std::endl;
       }
+    } else if (fields.size() == 3) {
+      if (fields[0].type() == VariantType::VARIANT_FLOAT) {
+        assert(fields[1].type() == VariantType::VARIANT_FLOAT);
+        assert(fields[2].type() == VariantType::VARIANT_FLOAT);
+        Color vec(fields[0].get<float>(), fields[1].get<float>(),
+                  fields[2].get<float>());
+        set(vec);
+      } else if (fields[0].type() == VariantType::VARIANT_DOUBLE) {
+        assert(fields[1].type() == VariantType::VARIANT_DOUBLE);
+        assert(fields[2].type() == VariantType::VARIANT_DOUBLE);
+        Color vec(fields[0].get<double>(), fields[1].get<double>(),
+                  fields[2].get<double>());
+        set(vec);
+      } else {
+        std::cout << __FILE__ << ":" << __LINE__
+                  << " ERROR: Unexpected field types for al::Color"
+                  << std::endl;
+      }
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;

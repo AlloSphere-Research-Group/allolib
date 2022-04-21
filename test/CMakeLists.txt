@@ -11,6 +11,7 @@ FetchContent_MakeAvailable(googletest)
 # Unit tests application
 set (gtest_src
     main.cpp
+    src/test_preset_sequencer.cpp
     src/test_presets.cpp
     src/test_file.cpp
     src/test_audio.cpp

@@ -2,6 +2,61 @@
 #include "gtest/gtest.h"
 
 #include "al/ui/al_PresetHandler.hpp"
+#include "al/ui/al_PresetSequencer.hpp"
+
+#include <fstream>
+
+TEST(Presets, ParameterValues) {
+  al::Parameter p{"param", "group", 0.5f, 0.0, 1.0};
+  al::ParameterInt pint{"paramint", "group", 3, 1, 10};
+  al::ParameterColor pcolor{"paramcolor", "group", al::Color(0.1f, 0.1f, 0.1f)};
+  al::ParameterPose pose{"parampose", "group"};
+
+  pose.set(al::Pose({1, 1, 1}));
+  al::PresetHandler ph{al::TimeMasterMode::TIME_MASTER_FREE};
+
+  ph << p << pint << pcolor;
+  ph << pose;
+
+  ph.setMorphTime(0.3f);
+  ph.setMorphStepTime(0.1f);
+  al::PresetHandler::ParameterStates states;
+
+  states["/group/param"] = {1.0f};
+  states["/group/paramint"] = {6};
+  states["/group/parampose"] = {4, 0.25, -2};
+  ph.morphTo(states, 0.3f);
+
+  EXPECT_FLOAT_EQ(p.get(), 0.5f);
+  EXPECT_EQ(pint.get(), 3);
+  EXPECT_EQ(pose.get().x(), 1);
+  EXPECT_EQ(pose.get().y(), 1);
+  EXPECT_EQ(pose.get().z(), 1);
+  ph.stepMorphing();
+  EXPECT_FLOAT_EQ(p.get(), 0.5f);
+  EXPECT_EQ(pint.get(), 3);
+  EXPECT_EQ(pose.get().x(), 1);
+  EXPECT_EQ(pose.get().y(), 1);
+  EXPECT_EQ(pose.get().z(), 1);
+  ph.stepMorphing();
+  EXPECT_FLOAT_EQ(p.get(), 0.6666667f);
+  EXPECT_EQ(pint.get(), 4);
+  EXPECT_FLOAT_EQ(pose.get().x(), 2);
+  EXPECT_FLOAT_EQ(pose.get().y(), 0.75);
+  EXPECT_FLOAT_EQ(pose.get().z(), 0);
+  ph.stepMorphing();
+  EXPECT_FLOAT_EQ(p.get(), 0.8333333f);
+  EXPECT_EQ(pint.get(), 5);
+  EXPECT_FLOAT_EQ(pose.get().x(), 3);
+  EXPECT_FLOAT_EQ(pose.get().y(), 0.5);
+  EXPECT_FLOAT_EQ(pose.get().z(), -1);
+  ph.stepMorphing();
+  EXPECT_FLOAT_EQ(p.get(), 1.0f);
+  EXPECT_EQ(pint.get(), 6);
+  EXPECT_FLOAT_EQ(pose.get().x(), 4);
+  EXPECT_FLOAT_EQ(pose.get().y(), 0.25);
+  EXPECT_FLOAT_EQ(pose.get().z(), -2);
+}
 
 TEST(Presets, RecallSynchronous) {
 
@@ -96,8 +151,8 @@ TEST(Presets, PresetStepMorphing) {
   // Disable morph thread
   al::PresetHandler ph{al::TimeMasterMode::TIME_MASTER_FREE};
 
-  ph.setMorphTime(0.3);
-  ph.setMorphStepTime(0.1); // Should have 3 steps
+  ph.setMorphTime(0.3f);
+  ph.setMorphStepTime(0.1f); // Should have 3 steps
   ph << p << pint << pcolor;
 
   p.set(0.1f);
@@ -110,7 +165,7 @@ TEST(Presets, PresetStepMorphing) {
   ph.storePreset("3");
 
   ph.recallPresetSynchronous("2");
-  ph.morphTo("3", 0.3);
+  ph.morphTo("3", 0.3f);
   al::al_sleep(0.2);
   // Ensure no morphing has happened
 
@@ -195,7 +250,7 @@ TEST(Presets, PresetNoMorphingThread) {
   al::PresetHandler ph;
 
   ph.setMorphTime(0.0);
-  ph.setMorphStepTime(0.1);
+  ph.setMorphStepTime(0.1f);
   ph << p << pint << pcolor;
 
   p.set(0.2f);
@@ -226,8 +281,8 @@ TEST(Presets, PresetMorphingThread) {
 
   al::PresetHandler ph;
 
-  ph.setMorphTime(0.3);
-  ph.setMorphStepTime(0.1);
+  ph.setMorphTime(0.3f);
+  ph.setMorphStepTime(0.1f);
   ph << p << pint << pcolor;
 
   p.set(0.2f);
@@ -292,12 +347,12 @@ TEST(Presets, PresetDifferingParams) {
   EXPECT_FLOAT_EQ(p.get(), 0.2f);
 
   ph.setMorphTime(2);
-  ph.setMorphStepTime(0.05);
+  ph.setMorphStepTime(0.05f);
   ph.recallPreset("2");
 
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-  ph.setMorphTime(0.1);
+  ph.setMorphTime(0.1f);
   ph.recallPreset("3");
   std::this_thread::sleep_for(std::chrono::milliseconds(200));
   EXPECT_NE(p.get(), 0.5f);

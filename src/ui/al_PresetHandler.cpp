@@ -266,10 +266,19 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
     for (ParameterMeta *param : mParameters) {
       auto address = param->getFullAddress();
       if (parameterStates.find(address) != parameterStates.end()) {
-        mStartValues[param->getFullAddress()].clear();
-        param->getFields(mStartValues[param->getFullAddress()]);
-        auto &params = mStartValues[param->getFullAddress()];
-        auto targetValues = parameterStates[address];
+        mStartValues[address].clear();
+        param->getFields(mStartValues[address]);
+        auto &params = mStartValues[address];
+        auto &targetValues = parameterStates[address];
+        if (targetValues.size() < mStartValues[address].size()) {
+          auto copyStart = mStartValues[address].begin();
+          std::advance(copyStart, targetValues.size());
+          targetValues.insert(targetValues.end(), copyStart,
+                              mStartValues[address].end());
+        } else if (targetValues.size() > mStartValues.size()) {
+          std::cout << "morphTo() too many values. Discarding values"
+                    << std::endl;
+        }
         auto &deltaValues = mDeltaValues[address];
         deltaValues.resize(targetValues.size());
         for (size_t i = 0; i < targetValues.size(); i++) {
@@ -376,7 +385,7 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
       processBundleGroup(bundleGroup.second, prefix);
     }
 
-    if (morphTime != morphTime) {
+    if (morphTime != mMorphTime) {
       mMorphTime.set(morphTime);
     }
     mMorphStepCount = 0;
@@ -1018,13 +1027,12 @@ void PresetHandler::setInterpolatedValuesDelta(ParameterStates &startValues,
                                            float(deltaValue[i].get<int32_t>()));
           } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
                      startDataType == VariantType::VARIANT_DOUBLE) {
-            interpValues[i] =
-                VariantValue(startValue.second[i].get<double>() +
-                             factor * ceil(deltaValue[i].get<float>()));
+            interpValues[i] = VariantValue(startValue.second[i].get<double>() +
+                                           factor * deltaValue[i].get<float>());
           } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
                      startDataType == VariantType::VARIANT_FLOAT) {
             interpValues[i] = VariantValue(startValue.second[i].get<float>() +
-                                           ceil(deltaValue[i].get<double>()));
+                                           deltaValue[i].get<double>());
           } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
                      startDataType == VariantType::VARIANT_INT32) {
             interpValues[i] = VariantValue(startValue.second[i].get<int32_t>() +
@@ -1060,14 +1068,13 @@ void PresetHandler::setInterpolatedValuesDelta(ParameterStates &startValues,
                              factor * float(deltaValue[i].get<int32_t>()));
           } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
                      startDataType == VariantType::VARIANT_DOUBLE) {
-            interpValues[i] =
-                VariantValue(startValue.second[i].get<double>() +
-                             factor * ceil(deltaValue[i].get<float>()));
+            interpValues[i] = VariantValue(startValue.second[i].get<double>() +
+                                           factor * deltaValue[i].get<float>());
           } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
                      startDataType == VariantType::VARIANT_FLOAT) {
             interpValues[i] =
                 VariantValue(startValue.second[i].get<float>() +
-                             factor * ceil(deltaValue[i].get<double>()));
+                             factor * deltaValue[i].get<double>());
           } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
                      startDataType == VariantType::VARIANT_INT32) {
             interpValues[i] =
