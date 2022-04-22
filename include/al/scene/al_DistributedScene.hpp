@@ -24,7 +24,7 @@ public:
 
   std::string name() { return mName; }
 
-  void registerNotifier(OSCNotifier &notifier) { mNotifier = &notifier; }
+  void registerNotifier(OSCNotifier &notifier);
 
   virtual void allNotesOff() override;
 
