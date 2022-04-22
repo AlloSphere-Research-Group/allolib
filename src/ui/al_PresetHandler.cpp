@@ -263,6 +263,7 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
     std::lock_guard<std::mutex> lk(mTargetLock);
     //    mDeltaValues = parameterStates;
     mDeltaValues.clear();
+    mStartValues.clear();
     for (ParameterMeta *param : mParameters) {
       auto address = param->getFullAddress();
       if (parameterStates.find(address) != parameterStates.end()) {
@@ -302,6 +303,10 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
           } else if (targetValues[i].type() == VariantType::VARIANT_FLOAT &&
                      params[i].type() == VariantType::VARIANT_INT32) {
             deltaValues[i] = VariantValue(targetValues[i].get<float>() -
+                                          params[i].get<int32_t>());
+          } else if (targetValues[i].type() == VariantType::VARIANT_DOUBLE &&
+                     params[i].type() == VariantType::VARIANT_INT32) {
+            deltaValues[i] = VariantValue(targetValues[i].get<double>() -
                                           params[i].get<int32_t>());
           } else if (targetValues[i].type() == VariantType::VARIANT_INT32 &&
                      params[i].type() == VariantType::VARIANT_FLOAT) {
@@ -953,6 +958,10 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
                      startDataType == VariantType::VARIANT_INT32) {
             startValue.second[i] =
                 VariantValue(float(startValue.second[i].get<int32_t>()));
+          } else if (endDataType == VariantType::VARIANT_DOUBLE &&
+                     startDataType == VariantType::VARIANT_INT32) {
+            startValue.second[i] =
+                VariantValue(double(startValue.second[i].get<int32_t>()));
           } else {
             std::cerr << "Parameter data type mismatch. Aborting." << std::endl;
             return;
@@ -1037,6 +1046,10 @@ void PresetHandler::setInterpolatedValuesDelta(ParameterStates &startValues,
                      startDataType == VariantType::VARIANT_INT32) {
             interpValues[i] = VariantValue(startValue.second[i].get<int32_t>() +
                                            ceil(deltaValue[i].get<float>()));
+          } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
+                     startDataType == VariantType::VARIANT_INT32) {
+            interpValues[i] = VariantValue(startValue.second[i].get<int32_t>() +
+                                           ceil(deltaValue[i].get<double>()));
           } else {
             std::cerr << "Parameter data type mismatch. Aborting." << std::endl;
             return;
@@ -1080,6 +1093,11 @@ void PresetHandler::setInterpolatedValuesDelta(ParameterStates &startValues,
             interpValues[i] =
                 VariantValue(startValue.second[i].get<int32_t>() +
                              factor * ceil(deltaValue[i].get<float>()));
+          } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
+                     startDataType == VariantType::VARIANT_INT32) {
+            interpValues[i] =
+                VariantValue(startValue.second[i].get<int32_t>() +
+                             factor * ceil(deltaValue[i].get<double>()));
           } else {
             std::cerr << "Parameter data type mismatch. Aborting." << std::endl;
             return;

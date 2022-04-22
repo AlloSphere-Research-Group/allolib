@@ -328,6 +328,8 @@ public:
    */
   void setSequencerStepTime(double stepTime) { mGranularity = stepTime * 1e9; }
 
+  void setVerbose(bool newVerbose);
+
 protected:
   virtual bool consumeMessage(osc::Message &m,
                               std::string rootOSCPath) override;
@@ -351,6 +353,7 @@ private:
   std::vector<ParameterMeta *> mParameters;
   std::string mOSCsubPath;
   std::string mCurrentSequence;
+  bool mVerbose{false};
 
   std::atomic<float> mTimeRequest{-1.0f}; // Request setting the current time.
                                           // Passes info to playback thread

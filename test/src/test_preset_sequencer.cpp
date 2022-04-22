@@ -20,9 +20,9 @@ TEST(Presets, ParameterValuesSeqMorph) {
   std::string seqFile = R"(
 +0.0:/group/param:0.6:0.0
 +0.15:/group/param:0.7:0.3
-#+0.15:/group/paramint:5:0.0
-#+0.15:/group/paramcolor:0.3,0.4,0.5:0.0
-#+0.15:/group/parampose:0.3,0.4,0.5:0.0
++0.45:/group/paramint:6:0.3
++0.45:/group/paramcolor:0.3,0.4,0.5:0.3
++0.45:/group/parampose:0.3,0.4,0.5:0.3
 )";
   const std::string seqFileName = "test.sequence";
   std::ofstream f(ph.getRootPath() + seqFileName);
@@ -41,10 +41,11 @@ TEST(Presets, ParameterValuesSeqMorph) {
   ph.setMorphStepTime(0.1f);
 
   EXPECT_FLOAT_EQ(p.get(), 0.6f);
+
   seq.stepSequencer(0.1f);
   ph.stepMorphing();
   EXPECT_FLOAT_EQ(p.get(), 0.6f);
-  seq.stepSequencer(0.1f);
+  seq.stepSequencer(0.1f); // morph starts
   ph.stepMorphing();
   EXPECT_FLOAT_EQ(p.get(), 0.6f);
   seq.stepSequencer(0.1f);
@@ -55,7 +56,21 @@ TEST(Presets, ParameterValuesSeqMorph) {
   EXPECT_FLOAT_EQ(p.get(), 0.666666666f);
   seq.stepSequencer(0.1f);
   ph.stepMorphing();
+  EXPECT_EQ(pint.get(), 3);
   EXPECT_FLOAT_EQ(p.get(), 0.7f);
+  seq.stepSequencer(0.1f);
+  ph.stepMorphing();
+  EXPECT_EQ(pint.get(), 3);
+  EXPECT_FLOAT_EQ(p.get(), 0.7f);
+  seq.stepSequencer(0.1f);
+  ph.stepMorphing();
+  EXPECT_EQ(pint.get(), 4);
+  seq.stepSequencer(0.1f);
+  ph.stepMorphing();
+  EXPECT_EQ(pint.get(), 5);
+  seq.stepSequencer(0.1f);
+  ph.stepMorphing();
+  EXPECT_EQ(pint.get(), 6);
 }
 
 TEST(Presets, SeqPresets) {
@@ -90,7 +105,6 @@ p2:0:0.15
   f.close();
 
   al::PresetSequencer seq{al::TimeMasterMode::TIME_MASTER_FREE};
-
   seq << ph;
 
   EXPECT_FLOAT_EQ(p.get(), 0.5f);

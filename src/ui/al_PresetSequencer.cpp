@@ -194,11 +194,13 @@ PresetSequencer::registerPresetHandler(PresetHandler &presetHandler) {
   // We need to take over the preset handler timing.
   //  mPresetHandler->setTimeMaster(TimeMasterMode::TIME_MASTER_CPU);
   mDirectory = mPresetHandler->getCurrentPath();
-  for (auto *param : presetHandler.parameters()) {
-    if (std::find(mParameters.begin(), mParameters.end(), param) ==
-        mParameters.end()) {
-      std::cout << "WARNING: Parameter: " << param->getFullAddress()
-                << " not in sequencer. Will be ignored" << std::endl;
+  if (mVerbose) {
+    for (auto *param : presetHandler.parameters()) {
+      if (std::find(mParameters.begin(), mParameters.end(), param) ==
+          mParameters.end()) {
+        std::cout << "WARNING: Parameter: " << param->getFullAddress()
+                  << " not in sequencer. Will be ignored" << std::endl;
+      }
     }
   }
   //		std::cout << "Path set to:" << mDirectory << std::endl;
@@ -417,14 +419,16 @@ void PresetSequencer::updateTime(double time) {
 
     // Queue parameter and event steps before first preset.
     // FIXME allow paramter events without an initial preset.
+    if (mSteps[mCurrentStep].type != StepType::PRESET) {
+      mParameterTargetTime = mCurrentTime + mSteps[mCurrentStep].waitTime;
+      mLastTimeUpdate = mParameterTargetTime;
+    }
     while ((mSteps.size() > mCurrentStep) &&
            (mSteps[mCurrentStep].type != StepType::PRESET)) {
       mParameterList.push(mSteps[mCurrentStep]);
       // Move current time back to accomodate these steps
       //      mCurrentTime -= mSteps[mCurrentStep].waitTime;
-      mLastPresetTime = mCurrentTime;
-      mParameterTargetTime = mLastPresetTime;
-      mLastTimeUpdate = mParameterTargetTime;
+      //      mLastPresetTime = mCurrentTime;
       mCurrentStep++;
     }
 
@@ -521,7 +525,7 @@ void PresetSequencer::updateSequencer() {
       }
       mParameterList.pop();
       if (mParameterList.size() > 0) {
-        mParameterTargetTime += mParameterList.back().waitTime;
+        mParameterTargetTime += mParameterList.front().waitTime;
       }
     } else {
       break;
@@ -612,4 +616,9 @@ void PresetSequencer::stopCpuThread() {
     mSequencerThread->join();
     mSequencerThread = nullptr;
   }
+}
+
+void PresetSequencer::setVerbose(bool newVerbose)
+{
+    mVerbose = newVerbose;
 }
