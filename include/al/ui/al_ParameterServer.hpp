@@ -90,14 +90,27 @@ public:
    * @param oscPort The network port so send the value changes on
    */
   virtual void addListener(std::string IPaddress, uint16_t oscPort) {
+
     auto newListenerSocket = new osc::Send;
 
     if (newListenerSocket->open(oscPort, IPaddress.c_str())) {
       mListenerLock.lock();
+      for (const auto &sender : mOSCSenders) {
+        if (sender->address() == IPaddress && sender->port() == oscPort) {
+          // FIXME check for addresses that are different but map to the same
+          // address, e.g. 127.0.0.1 and localhost
+
+          std::cout << "Listener already registered: " << IPaddress << ":"
+                    << oscPort << std::endl;
+          mListenerLock.unlock();
+          delete newListenerSocket;
+        }
+      }
+
       mOSCSenders.push_back(newListenerSocket);
       mListenerLock.unlock();
-      //		std::cout << "Registered listener " << IPaddress << ":"
-      //<< oscPort<< std::endl;
+      std::cout << "Registered listener " << IPaddress << ":" << oscPort
+                << std::endl;
     } else {
       delete newListenerSocket;
       std::cerr << "ERROR: Could not register listener " << IPaddress << ":"
@@ -200,8 +213,7 @@ public:
   paramServer << freq << amp;
    @endcode
    */
-  // ParameterServer() : mServer(nullptr) {};
-  ParameterServer(std::string oscAddress = "", int oscPort = 9010,
+  ParameterServer(std::string address = "", int oscPort = 9010,
                   bool autoStart = true);
   ~ParameterServer();
 
@@ -216,7 +228,7 @@ public:
   /**
    * Open and start receiving osc. Returns true on successful start.
    */
-  bool listen(int oscPort = -1, std::string oscAddress = "");
+  bool listen(int oscPort = -1, std::string address = "");
 
   /**
    * Register a parameter with the server.
