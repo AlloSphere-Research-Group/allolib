@@ -63,7 +63,8 @@ std::vector<float> CommandServer::ping(double timeoutSecs) {
   std::unique_lock<std::mutex> lk(mConnectionsLock);
   for (auto listener : mServerConnections) {
     if (mVerbose) {
-      std::cout << "pinging " << listener->address() << ":" << listener->port()
+      std::cout << "pinging " + listener->address() + ":" +
+                       std::to_string(listener->port())
                 << std::endl;
     }
     //    auto startTime = al_steady_time();
@@ -71,20 +72,6 @@ std::vector<float> CommandServer::ping(double timeoutSecs) {
 
     message[0] = PING;
     listener->send((const char *)message, 2);
-    //    size_t bytes = 0;
-    // FIXME need to check responses
-
-    //    auto endTime = al_steady_time();
-    //    if (bytes == 2 && message[0] == COMMAND_PONG) {
-    //      std::cout << "Pong from " << listener->address() << ":"
-    //                << listener->port() << " in " << (endTime - startTime) *
-    //                1000.0
-    //                << " ms" << std::endl;
-    //    } else {
-    //      std::cout << "No response from: " << listener->address() << ":"
-    //                << listener->port() << std::endl;
-    //      allResponded = false;
-    //    }
   }
 
   return pingTimes;
@@ -107,17 +94,20 @@ std::vector<std::pair<std::string, uint16_t>> CommandServer::connections() {
 
 bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
   al_sec timeout = 0.5;
+  if (mVerbose) {
+    std::cout << "[+Server] starting" << std::endl;
+  }
   if (!mSocket.open(serverPort, serverAddr, timeout, al::Socket::TCP)) {
-    std::cerr << "ERROR opening port" << std::endl;
+    std::cerr << "[+Server] ERROR opening port" << std::endl;
     return false;
   }
   if (!mSocket.bind()) {
-    std::cerr << "ERROR on bind" << std::endl;
+    std::cerr << "[+Server] ERROR on bind" << std::endl;
     return false;
   }
 
   if (!mSocket.listen()) {
-    std::cerr << "ERROR on listen" << std::endl;
+    std::cerr << "[+Server] ERROR on listen" << std::endl;
     return false;
   }
 
@@ -125,7 +115,7 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
   mBootstrapServerThread = std::make_unique<std::thread>([&]() {
     // Receive data
     if (mVerbose) {
-      std::cout << "Server started" << std::endl;
+      std::cout << "[+Server] started" << std::endl;
     }
 
     while (mRunning) {
@@ -133,7 +123,7 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
           std::make_shared<Socket>();
       if (mSocket.accept(*incomingConnectionSocket)) {
         if (mVerbose) {
-          std::cout << "Got Connection Request "
+          std::cout << "[+Server] Got Connection Request "
                     << incomingConnectionSocket->address() << ":"
                     << incomingConnectionSocket->port() << std::endl;
         }
@@ -151,11 +141,11 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
             }
 
             if (mVerbose) {
-              std::cout << "Handshake for "
+              std::cout << "[+Server] Handshake for "
                         << incomingConnectionSocket->address() << ":"
                         << incomingConnectionSocket->port() << std::endl;
-              std::cout << "Client reports protocol version " << version
-                        << " revision " << revision << std::endl;
+              std::cout << "[+Server] Client reports protocol version "
+                        << version << " revision " << revision << std::endl;
             }
 
             message[0] = HANDSHAKE_ACK;
@@ -166,7 +156,7 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
             auto bytesSent =
                 incomingConnectionSocket->send((const char *)message, 5);
             if (bytesSent != 5) {
-              std::cerr << "ERROR sending handshake ack" << std::endl;
+              std::cerr << "[+Server] ERROR sending handshake ack" << std::endl;
             }
             {
               std::unique_lock<std::mutex> lk(mConnectionsLock);
@@ -186,7 +176,7 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                     while (bytes > 0 && bytes < 16385) {
                       Message message(commandMessage, bytes);
                       if (mVerbose) {
-                        std::cout << "Server received message from "
+                        std::cout << "[+Server] Received message from "
                                   << client->address() << ":" << client->port()
                                   << std::endl;
                       }
@@ -209,7 +199,8 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                           client->recv((char *)(commandMessage + bufferSize),
                                        16384 - bufferSize);
                       if (bufferSize >= 16384 && bytes == 0) {
-                        std::cerr << "ERROR: Network buffer overrun. Flushing "
+                        std::cerr << "[+Server] ERROR: Network buffer overrun. "
+                                     "Flushing "
                                      "buffers "
                                   << bytes << std::endl;
                         bufferSize = 0;
@@ -224,7 +215,7 @@ bool CommandServer::start(uint16_t serverPort, const char *serverAddr) {
                   }
 
                   if (mVerbose) {
-                    std::cout << "Client stopped" << std::endl;
+                    std::cout << "[+Server] Client stopped" << std::endl;
                   }
                 },
                 incomingConnectionSocket));
@@ -275,7 +266,7 @@ uint16_t CommandServer::waitForConnections(uint16_t connectionCount,
     double currentTime = al_steady_time();
 
     //    size_t existingConnections = mServerConnections.size();
-    size_t existingConnections = 0;
+    uint16_t existingConnections = 0;
     mConnectionsLock.lock();
     size_t totalConnections = mServerConnections.size();
     mConnectionsLock.unlock();
@@ -286,9 +277,6 @@ uint16_t CommandServer::waitForConnections(uint16_t connectionCount,
         std::unique_lock<std::mutex> lk(mConnectionsLock);
         totalConnections = mServerConnections.size();
       }
-      // FIXME this could allow more connections through than requested.
-      // Should
-      // the number be treated as a maximum?
       if (totalConnections - existingConnections < connectionCount) {
         al_sleep(0.3);
       } else {
@@ -339,7 +327,7 @@ bool CommandServer::sendMessage(uint8_t *message, size_t length,
 
 bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
   if (!mSocket.open(serverPort, serverAddr, 1.0, al::Socket::TCP)) {
-    std::cerr << "Error opening bootstrap socket" << std::endl;
+    std::cerr << "[Client] Error opening bootstrap socket" << std::endl;
     return false;
   }
   std::condition_variable cv;
@@ -350,7 +338,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
     // the other end.
 
     if (!mSocket.connect()) {
-      std::cerr << "Error connecting bootstrap socket" << std::endl;
+      std::cerr << "[Client] Error connecting bootstrap socket" << std::endl;
       return;
     }
 
@@ -366,7 +354,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
     // TODO provide functionality to validat connection versions
     auto bytesSent = mSocket.send((const char *)message, 5);
     if (bytesSent != 5) {
-      std::cerr << "ERROR sending handshake" << std::endl;
+      std::cerr << "[Client] ERROR sending handshake" << std::endl;
     }
     size_t bytesRecv = mSocket.recv((char *)message, 5);
     if (bytesRecv == 5 && message[0] == HANDSHAKE_ACK) {
@@ -377,9 +365,9 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
         Convert::from_bytes((const uint8_t *)&message[3], revision);
       }
       if (mVerbose) {
-        std::cout << "Client got handshake ack from " << mSocket.address()
+        std::cout << "[Client] Got handshake ack from " << mSocket.address()
                   << ":" << mSocket.port() << std::endl;
-        std::cout << "Server reports protocol version " << version
+        std::cout << "[Client] Server reports protocol version " << version
                   << " revision " << revision << std::endl;
       }
       mRunning = true;
@@ -396,17 +384,21 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
     size_t bufferSize = 0;
     while (mRunning) {
       if (!mSocket.opened()) {
-        std::cerr << "ERROR: Socket not open" << std::endl;
+        std::cerr << "[Client] ERROR: Socket not open" << std::endl;
+        mRunning = false;
+        continue;
       }
 
       size_t bytes = mSocket.recv((char *)(commandMessage + bufferSize),
                                   16384 - bufferSize);
 
       if (bufferSize >= 16384 && bytes == 0) {
-        std::cerr << "ERROR: Network buffer overrun. Flushing buffers " << bytes
-                  << std::endl;
+        std::cerr << "[Client] ERROR: Network buffer overrun. Flushing buffers "
+                  << bytes << std::endl;
         bufferSize = 0;
       }
+      mBusy.store(true); // FIXME This helps, but we should add timeout to recv,
+                         // and mark as not busy when there is no incoming data
       if (bytes > 0 && bytes < 16385) {
         bufferSize += bytes;
         if (commandMessage[0] == PING) {
@@ -414,7 +406,7 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
         } else {
           Message message(commandMessage, bytes);
           if (mVerbose) {
-            std::cout << "Client received message from " << mSocket.address()
+            std::cout << "[Client] Received message from " << mSocket.address()
                       << ":" << mSocket.port() << std::endl;
           }
           if (!processIncomingMessage(message, &mSocket)) {
@@ -433,12 +425,14 @@ bool CommandClient::start(uint16_t serverPort, const char *serverAddr) {
           }
         }
       } else if (bytes != SIZE_MAX && bytes != 0) {
-        std::cerr << "ERROR: Network buffer overrun. " << bytes << std::endl;
+        std::cerr << "[Client] ERROR: Network buffer overrun. " << bytes
+                  << std::endl;
       }
+      mBusy.store(false);
     }
     //        connectionSocket.close();
     if (mVerbose) {
-      std::cout << "Client stopped " << std::endl;
+      std::cout << "[Client] stopped" << std::endl;
     }
   }));
 
