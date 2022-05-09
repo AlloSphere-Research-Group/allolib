@@ -232,7 +232,14 @@ public:
    *  If not called, the default is stereo panning over two speakers.
    */
   template <class TSpatializer>
-  std::shared_ptr<TSpatializer> setSpatializer(Speakers &sl) {
+  std::shared_ptr<TSpatializer> setSpatializer(const Speakers &sl) {
+    mSpatializer = std::make_shared<TSpatializer>(sl);
+    mSpatializer->compile();
+    return std::static_pointer_cast<TSpatializer>(mSpatializer);
+  }
+
+  template <class TSpatializer>
+  std::shared_ptr<TSpatializer> setSpatializer(const Speakers &&sl) {
     mSpatializer = std::make_shared<TSpatializer>(sl);
     mSpatializer->compile();
     return std::static_pointer_cast<TSpatializer>(mSpatializer);
