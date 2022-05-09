@@ -18,8 +18,8 @@ namespace al {
 ///
 /// @ingroup Sound
 class StereoPanner : public Spatializer {
- public:
-  StereoPanner(Speakers& sl) : Spatializer(sl), numSpeakers(0) {
+public:
+  StereoPanner(const Speakers &sl) : Spatializer(sl), numSpeakers(0) {
     numSpeakers = mSpeakers.size();
     if (numSpeakers != 2) {
       std::cout << "Stereo Panner Requires exactly 2 speakers (" << numSpeakers
@@ -28,21 +28,21 @@ class StereoPanner : public Spatializer {
   }
 
   /// Per Sample Processing
-  virtual void renderSample(AudioIOData& io, const Pose& listeningPose,
-                            const float& sample,
-                            const unsigned int& frameIndex) override;
+  virtual void renderSample(AudioIOData &io, const Pose &listeningPose,
+                            const float &sample,
+                            const unsigned int &frameIndex) override;
 
   /// Per Buffer Processing
-  virtual void renderBuffer(AudioIOData& io, const Pose& listeningPose,
-                            const float* samples,
-                            const unsigned int& numFrames) override;
+  virtual void renderBuffer(AudioIOData &io, const Pose &listeningPose,
+                            const float *samples,
+                            const unsigned int &numFrames) override;
 
- private:
+private:
   size_t numSpeakers;
 
-  void equalPowerPan(const Vec3d& relPos, float& gainL, float& gainR);
+  void equalPowerPan(const Vec3d &relPos, float &gainL, float &gainR);
 };
 
-}  // namespace al
+} // namespace al
 
 #endif

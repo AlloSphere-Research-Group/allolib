@@ -4,12 +4,8 @@ using namespace al;
 
 Speaker::Speaker(unsigned int deviceChan, float az, float el, int group,
                  float radius, float gain)
-    : deviceChannel(deviceChan),
-      azimuth(az),
-      elevation(el),
-      group(group),
-      radius(radius),
-      gain(gain) {}
+    : deviceChannel(deviceChan), azimuth(az), elevation(el), group(group),
+      radius(radius), gain(gain) {}
 
 void Speaker::posCart2(Vec3d xyz) {
   using namespace std;
@@ -72,12 +68,22 @@ Speakers OctalSpeakerLayout(unsigned int deviceChannelStart, float phase,
 Speakers CubeLayout(unsigned int deviceChannelStart) {
   Speakers mSpeakers;
   mSpeakers.reserve(8);
-  for (unsigned int i = 0; i < 4; ++i) {
-    mSpeakers.emplace_back(Speaker(i + deviceChannelStart, 45.f + (i * 90), 0));
-    mSpeakers.emplace_back(
-        Speaker(4 + i + deviceChannelStart, 45.f + (i * 90), 60, 0, sqrt(5.f)));
-  }
+  // Top square
+  mSpeakers.emplace_back(
+      Speaker(0 + deviceChannelStart, 45.f, 60, 0, sqrt(5.f)));
+  mSpeakers.emplace_back(
+      Speaker(1 + deviceChannelStart, 45.f + 90, 60, 0, sqrt(5.f)));
+  mSpeakers.emplace_back(
+      Speaker(2 + deviceChannelStart, 45.f + 180, 60, 0, sqrt(5.f)));
+  mSpeakers.emplace_back(
+      Speaker(3 + deviceChannelStart, 45.f + 270, 60, 0, sqrt(5.f)));
+  // bottom sqaure
+  mSpeakers.emplace_back(Speaker(4 + deviceChannelStart, 45.f, 0, 1));
+  mSpeakers.emplace_back(Speaker(5 + deviceChannelStart, 45.f + 90, 0, 1));
+  mSpeakers.emplace_back(Speaker(6 + deviceChannelStart, 45.f + 180, 0, 1));
+  mSpeakers.emplace_back(Speaker(7 + deviceChannelStart, 45.f + 270, 0, 1));
+
   return mSpeakers;
 }
 
-}  // namespace al
+} // namespace al
