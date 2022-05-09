@@ -89,6 +89,9 @@ public:
   /// Get number of speakers
   int numSpeakers() const { return int(mSpeakers.size()); }
 
+  // Get speaker layout
+  const Speakers &speakerLayout() { return mSpeakers; }
+
   /// Set number of frames
   virtual void numFrames(unsigned int v) { mNumFrames = v; }
 
