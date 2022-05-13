@@ -864,15 +864,11 @@ void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
     std::cout << "ParameterServer handshake from " << m.senderAddress() << ":"
               << commandPort << std::endl;
 
+    // Request listener info to get address and port for OSC forwarding
     osc::Send listenerRequest(commandPort, m.senderAddress().c_str());
     listenerRequest.send("/requestListenerInfo",
                          notifier->mHandshakeServer.address(),
                          notifier->mHandshakeServer.port());
-
-    // FIXME we should register this server as listener but we don't have the
-    // details to do it here....
-    //    listenerRequest.send("/registerListener", mServer->address(),
-    //    mServer->port());
   } else if (m.addressPattern() == "/registerListener" &&
              m.typeTags() == "si") {
     std::string addr;

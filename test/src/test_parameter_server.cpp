@@ -17,8 +17,8 @@ TEST(ParameterSever, Handshake) {
   al::Parameter p{"test", "", 0.5, 0.0, 1.0};
   al::Parameter p2{"test", "", 0.5, 0.0, 1.0};
 
-  s << p;
-  c << p2;
+  s << p << p2;
+  c << p << p2;
 
   p.set(0.1f);
   al::al_sleep(0.1);
