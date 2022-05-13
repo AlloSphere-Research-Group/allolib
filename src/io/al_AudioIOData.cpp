@@ -12,9 +12,7 @@ namespace al {
 //==============================================================================
 
 AudioDeviceInfo::AudioDeviceInfo(int deviceNum)
-    : mID(deviceNum),
-      mChannelsInMax(0),
-      mChannelsOutMax(0),
+    : mID(deviceNum), mChannelsInMax(0), mChannelsOutMax(0),
       mDefaultSampleRate(0.0) {}
 
 bool AudioDeviceInfo::valid() const { return true; }
@@ -38,19 +36,9 @@ void AudioDeviceInfo::setDefaultSampleRate(double rate) {
 //==============================================================================
 
 AudioIOData::AudioIOData(void *userData)
-    : mGain(1),
-      mGainPrev(1),
-      mUser(userData),
-      mFrame(0),
-      mFramesPerBuffer(512),
-      mFramesPerSecond(44100),
-      mBufI(nullptr),
-      mBufO(nullptr),
-      mBufB(nullptr),
-      mBufT(nullptr),
-      mNumI(0),
-      mNumO(0),
-      mNumB(0) {}
+    : mGain(1), mGainPrev(1), mUser(userData), mFrame(0), mFramesPerBuffer(512),
+      mFramesPerSecond(44100), mBufI(nullptr), mBufO(nullptr), mBufB(nullptr),
+      mBufT(nullptr), mNumI(0), mNumO(0), mNumB(0) {}
 
 AudioIOData::~AudioIOData() {
   deleteBuf(mBufI);
@@ -84,7 +72,7 @@ void AudioIOData::channelsIn(int n) { channels(n, false); }
 void AudioIOData::channelsOut(int n) { channels(n, true); }
 
 void AudioIOData::framesPerSecond(
-    double v) {  // printf("AudioIO::fps(%f)\n", v);
+    double v) { // printf("AudioIO::fps(%f)\n", v);
   if (framesPerSecond() != v) {
     mFramesPerSecond = v;
   }
@@ -102,11 +90,12 @@ void AudioIOData::framesPerBuffer(unsigned int n) {
 
 void AudioIOData::resizeBuffer(bool forOutput) {
   float *&buffer = forOutput ? mBufO : mBufI;
-  unsigned int &chans = forOutput ? mNumO : mNumI;
+  unsigned int chans = forOutput ? mNumO : mNumI;
 
   if (chans > 0 && mFramesPerBuffer > 0) {
     int n = resize(buffer, chans * mFramesPerBuffer);
-    if (0 == n) chans = 0;
+    if (0 == n)
+      chans = 0;
   } else {
     deleteBuf(buffer);
   }
@@ -126,4 +115,4 @@ double AudioIOData::secondsPerBuffer() const {
   return (double)framesPerBuffer() / framesPerSecond();
 }
 
-}  // namespace al
+} // namespace al

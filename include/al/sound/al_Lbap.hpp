@@ -53,19 +53,19 @@
 #include "al/spatial/al_DistAtten.hpp"
 #include "al/spatial/al_Pose.hpp"
 
-#define RAD_2_DEG_SCALE 57.29577951308232  // 360/(2*pi)
+#define RAD_2_DEG_SCALE 57.29577951308232 // 360/(2*pi)
 
 namespace al {
 
 class LdapRing {
- public:
+public:
   LdapRing(Speakers &sl) {
     vbap = std::make_shared<Vbap>(sl);
     elevation = 0;
     for (auto speaker : sl) {
       elevation += speaker.elevation;
     }
-    elevation /= sl.size();  // store average elevation
+    elevation /= sl.size(); // store average elevation
     vbap->compile();
   }
 
@@ -77,10 +77,10 @@ class LdapRing {
 ///
 /// @ingroup Sound
 class Lbap : public Spatializer {
- public:
+public:
   typedef enum {
     KEEP_SAME_ELEVATION =
-        0x1,  // Don't discard triplets that have the same elevation
+        0x1, // Don't discard triplets that have the same elevation
   } VbapOptions;
 
   /// @param[in] sl	A speaker layout
@@ -96,20 +96,20 @@ class Lbap : public Spatializer {
 
   void prepare(AudioIOData &io) override;
 
-  void renderSample(AudioIOData &io, const Pose &reldir, const float &sample,
+  void renderSample(AudioIOData &io, const Vec3f &reldir, const float &sample,
                     const unsigned int &frameIndex) override;
 
-  void renderBuffer(AudioIOData &io, const Pose &listeningPose,
+  void renderBuffer(AudioIOData &io, const Vec3f &reldir,
                     const float *samples,
                     const unsigned int &numFrames) override;
 
   void print(std::ostream &stream = std::cout) override;
 
- private:
+private:
   std::vector<LdapRing> mRings;
-  float *buffer{nullptr};  // Two consecutive buffers (non-interleaved)
+  float *buffer{nullptr}; // Two consecutive buffers (non-interleaved)
   int bufferSize{0};
 };
 
-}  // namespace al
+} // namespace al
 #endif

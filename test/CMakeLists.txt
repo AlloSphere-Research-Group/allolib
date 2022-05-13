@@ -24,6 +24,7 @@ set (gtest_src
     src/test_osc.cpp
     src/test_lbap.cpp
     src/test_vbap.cpp
+    src/test_speakers.cpp
 )
 
 add_executable(al_tests ${gtest_src})

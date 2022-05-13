@@ -32,29 +32,36 @@ void Lbap::prepare(AudioIOData &io) {
   bufferSize = io.framesPerBuffer();
 }
 
-void Lbap::renderSample(AudioIOData &io, const Pose &reldir,
-                        const float &sample, const unsigned int &frameIndex) {}
+void Lbap::renderSample(AudioIOData &io, const Vec3f &reldir,
+                        const float &sample, const unsigned int &frameIndex) {
 
-void Lbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
+  assert(0 == 1);
+  // FIXME implement
+}
+
+void Lbap::renderBuffer(AudioIOData &io, const Vec3f &reldir,
                         const float *samples, const unsigned int &numFrames) {
-  Vec3d vec = listeningPose.vec();
+  //  Vec3d vec = reldir;
 
   // Rotate vector according to listener-rotation
-  Quatd srcRot = listeningPose.quat();
-  vec = srcRot.rotate(vec);
-  vec = Vec3d(-vec.z, -vec.x, vec.y);
+  //  Quatd srcRot = listeningPose.quat();
+  //  vec = srcRot.rotate(vec);
+
+  // Turn to audio space
+  //  vec = Vec3d(vec.x, vec.z, -vec.y);
 
   float elev =
-      RAD_2_DEG_SCALE * atan(vec.z / sqrt(vec.x * vec.x + vec.y * vec.y));
+      RAD_2_DEG_SCALE *
+      std::atan2f(reldir.y, sqrt(reldir.x * reldir.x + reldir.z * reldir.z));
 
   auto it = mRings.begin();
   while (it != mRings.end() && it->elevation > elev) {
     it++;
   }
-  if (it == mRings.begin()) { // Top ring
-    it->vbap->renderBuffer(io, listeningPose, samples, numFrames);
-  } else if (it == mRings.end()) { // Bottom ring
-    mRings.back().vbap->renderBuffer(io, listeningPose, samples, numFrames);
+  if (it == mRings.begin()) { // Above Top ring
+    it->vbap->renderBuffer(io, reldir, samples, numFrames);
+  } else if (it == mRings.end()) { // Below Bottom ring
+    mRings.back().vbap->renderBuffer(io, reldir, samples, numFrames);
   } else {                   // Between inner rings
     auto topRingIt = it - 1; // top ring is previous ring
     float fraction = (elev - it->elevation) /
@@ -67,13 +74,17 @@ void Lbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
       buffer[i + bufferSize] = samples[i] * gainBottom;
     }
 
-    topRingIt->vbap->renderBuffer(io, listeningPose, buffer, bufferSize);
-    it->vbap->renderBuffer(io, listeningPose, buffer + bufferSize, bufferSize);
+    if (gainTop != 0) {
+      topRingIt->vbap->renderBuffer(io, reldir, buffer, bufferSize);
+    }
+    if (gainBottom != 0) {
+      it->vbap->renderBuffer(io, reldir, buffer + bufferSize, bufferSize);
+    }
   }
 }
 
 void Lbap::print(std::ostream &stream) {
-  for (auto ring : mRings) {
+  for (const auto &ring : mRings) {
     stream << " ---- Ring at elevation:" << ring.elevation << std::endl;
     ring.vbap->print(stream);
   }

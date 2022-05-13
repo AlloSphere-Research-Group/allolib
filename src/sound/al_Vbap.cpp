@@ -346,10 +346,10 @@ void Vbap::findSpeakerTriplets(const std::vector<Speaker> &spkrs) {
     Vec3d vec = s.vec().normalized();
     unsigned int devChan = s.deviceChannel;
 
-    std::list<SpeakerTriple>::iterator itg = triplets.begin();
+    auto itg = triplets.cbegin();
 
     while (itg != triplets.end()) {
-      SpeakerTriple trip2 = (*itg);
+      const SpeakerTriple &trip2 = (*itg);
       if ((devChan == trip2.s1Chan) || (devChan == trip2.s2Chan) ||
           (devChan == trip2.s3Chan)) {
         ++itg;
@@ -386,20 +386,21 @@ void Vbap::makePhantomChannel(int channelIndex,
 //	this->mListener = &listener;
 //}
 
-void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
-                        const float *samples, const unsigned int &numFrames) {
+void Vbap::renderBuffer(AudioIOData &io, const Vec3f &pos, const float *samples,
+                        const unsigned int &numFrames) {
   // FIMXE AC use cached index
   //	unsigned currentTripletIndex = src.cachedIndex();
   unsigned currentTripletIndex = 0;
   // unsigned currentTripletIndex = mCachedTripletIndex; // Cached source
   // placement, so it starts searching from there.
 
-  Vec3d vec = listeningPose.vec();
+  //  Vec3d vec = listeningPose.vec();
 
   // Rotate vector according to listener-rotation
-  Quatd srcRot = listeningPose.quat();
-  vec = srcRot.rotate(vec);
-  vec = Vec3d(-vec.z, vec.x, vec.y);
+  //  Quatd srcRot = listeningPose.quat();
+  //  vec = srcRot.rotate({0, 0, -4});
+  // Transform vector to audio space
+  Vec3d vec = Vec3d(pos.x, -pos.z, pos.y);
 
   // Silent by default
   Vec3d gains;
@@ -472,21 +473,23 @@ void Vbap::renderBuffer(AudioIOData &io, const Pose &listeningPose,
   // mCachedTripletIndex = currentTripletIndex; // Store the new index
 }
 
-void Vbap::renderSample(AudioIOData &io, const Pose &listeningPose,
-                        const float &sample, const unsigned int &frameIndex) {
+void Vbap::renderSample(AudioIOData &io, const Vec3f &pos, const float &sample,
+                        const unsigned int &frameIndex) {
   // FIXME AC use cached index
   //	unsigned currentTripletIndex = src.cachedIndex();
   // unsigned currentTripletIndex = mCachedTripletIndex; // Cached source
   // placement, so it starts searching from there.
   unsigned currentTripletIndex = 0;
-  Vec3d vec = listeningPose.vec();
+  //  Vec3d vec = listeningPose.vec();
 
-  // Rotate vector according to listener-rotation
-  Quatd srcRot = listeningPose.quat();
-  vec = srcRot.rotate(vec).normalize();
+  //  // Rotate vector according to listener-rotation
+  //  Quatd srcRot = listeningPose.quat();
+  //  vec = srcRot.rotate(vec).normalize();
 
-  // now transform to audio positions
-  vec = Vec3d(vec.x, vec.z, vec.y);
+  //  // now transform to audio positions
+  //  vec = Vec3d(vec.x, vec.z, vec.y);
+
+  Vec3d vec = Vec3d(pos.x, -pos.z, pos.y);
   // Silent by default
   Vec3d gains;
   //	Vec3d gainsTemp;

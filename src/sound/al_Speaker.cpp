@@ -18,33 +18,23 @@ void Speaker::posCart2(Vec3d xyz) {
 }
 
 Vec3d Speaker::vec() const {
-  // TODO doxygen style commenting on coordinates like ambisonics
   double cosel = cos(toRad(double(elevation)));
-  double x = cos(toRad(double(azimuth))) * cosel * double(radius);
-  double y = sin(toRad(double(azimuth))) * cosel * double(radius);
+  //  double x = cos(toRad(double(azimuth))) * cosel * double(radius);
+  //  double y = -sin(toRad(double(azimuth))) * cosel * double(radius);
+  double x = sin(toRad(double(azimuth))) * cosel * double(radius);
+  double y = cos(toRad(double(azimuth))) * cosel * double(radius);
   double z = sin(toRad(double(elevation))) * double(radius);
   // Ryan: the standard conversions assume +z is up, these are correct for
   // allocore
-
-  //        double x = sin(toRad(azimuth)) * cosel * radius;
-  //		double y = sin(toRad(elevation)) * radius;
-  //        double z = -1*cos(toRad(azimuth)) * cosel * radius;
   return Vec3d(x, y, z);
 }
 
 Vec3d Speaker::vecGraphics() const {
-  // TODO doxygen style commenting on coordinates like ambisonics
   double cosel = cos(toRad(double(elevation)));
-  double x = cos(toRad(double(azimuth))) * cosel * double(radius);
-  double y = sin(toRad(double(azimuth))) * cosel * double(radius);
-  double z = sin(toRad(double(elevation))) * double(radius);
-  // Ryan: the standard conversions assume +z is up, these are correct for
-  // allocore
-
-  //        double x = sin(toRad(azimuth)) * cosel * radius;
-  //		double y = sin(toRad(elevation)) * radius;
-  //        double z = -1*cos(toRad(azimuth)) * cosel * radius;
-  return Vec3d(-y, z, -x);
+  double x = sin(toRad(double(azimuth))) * cosel * double(radius);
+  double y = sin(toRad(double(elevation))) * double(radius);
+  double z = -cos(toRad(double(azimuth))) * cosel * double(radius);
+  return Vec3d(x, y, z);
 }
 
 // --------------------
@@ -65,23 +55,35 @@ Speakers OctalSpeakerLayout(unsigned int deviceChannelStart, float phase,
   return SpeakerRingLayout<8>(deviceChannelStart, phase, radius, gain);
 }
 
-Speakers CubeLayout(unsigned int deviceChannelStart) {
+Speakers CubeLayout(unsigned int deviceChannelStart, float cubeSide) {
   Speakers mSpeakers;
+
+  float halfSide = 0.5 * cubeSide;
+  float bottomDistance = sqrt(halfSide * halfSide + halfSide * halfSide);
+  float elevationAngle = atan(1.0f / bottomDistance);
+  float topElevationAngle = (elevationAngle * 57.29577951308232); // 360/(2*pi);
+  float bottomElevation = 0.0;
+  float topDistance = sqrt(bottomDistance * bottomDistance + 1);
   mSpeakers.reserve(8);
   // Top square
+
   mSpeakers.emplace_back(
-      Speaker(0 + deviceChannelStart, 45.f, 60, 0, sqrt(5.f)));
-  mSpeakers.emplace_back(
-      Speaker(1 + deviceChannelStart, 45.f + 90, 60, 0, sqrt(5.f)));
-  mSpeakers.emplace_back(
-      Speaker(2 + deviceChannelStart, 45.f + 180, 60, 0, sqrt(5.f)));
-  mSpeakers.emplace_back(
-      Speaker(3 + deviceChannelStart, 45.f + 270, 60, 0, sqrt(5.f)));
-  // bottom sqaure
-  mSpeakers.emplace_back(Speaker(4 + deviceChannelStart, 45.f, 0, 1));
-  mSpeakers.emplace_back(Speaker(5 + deviceChannelStart, 45.f + 90, 0, 1));
-  mSpeakers.emplace_back(Speaker(6 + deviceChannelStart, 45.f + 180, 0, 1));
-  mSpeakers.emplace_back(Speaker(7 + deviceChannelStart, 45.f + 270, 0, 1));
+      Speaker(0 + deviceChannelStart, 45.f, topElevationAngle, 0, topDistance));
+  mSpeakers.emplace_back(Speaker(1 + deviceChannelStart, 45.f + 90,
+                                 topElevationAngle, 0, topDistance));
+  mSpeakers.emplace_back(Speaker(2 + deviceChannelStart, 45.f + 180,
+                                 topElevationAngle, 0, topDistance));
+  mSpeakers.emplace_back(Speaker(3 + deviceChannelStart, 45.f + 270,
+                                 topElevationAngle, 0, topDistance));
+  // bottom square
+  mSpeakers.emplace_back(Speaker(4 + deviceChannelStart, 45.f, bottomElevation,
+                                 1, bottomDistance));
+  mSpeakers.emplace_back(Speaker(5 + deviceChannelStart, 45.f + 90,
+                                 bottomElevation, 1, bottomDistance));
+  mSpeakers.emplace_back(Speaker(6 + deviceChannelStart, 45.f + 180,
+                                 bottomElevation, 1, bottomDistance));
+  mSpeakers.emplace_back(Speaker(7 + deviceChannelStart, 45.f + 270,
+                                 bottomElevation, 1, bottomDistance));
 
   return mSpeakers;
 }

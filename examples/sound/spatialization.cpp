@@ -35,7 +35,7 @@ struct MyApp : public App {
 
   int speakerType = 0;
   int spatializerType = 0;
-  unsigned long counter = 0;  // overall sample counter
+  unsigned long counter = 0; // overall sample counter
 
   void initSpeakers(int type = -1) {
     if (type < 0) {
@@ -52,8 +52,8 @@ struct MyApp : public App {
     if (mPeaks) {
       free(mPeaks);
     }
-    mPeaks = new atomic<float>[speakerLayout.size()];  // Not being freed
-                                                       // in this example
+    mPeaks = new atomic<float>[speakerLayout.size()]; // Not being freed
+                                                      // in this example
   }
 
   void initSpatializer(int type) {
@@ -152,7 +152,7 @@ struct MyApp : public App {
     }
     //    // Spatialize
     spatializer->prepare(io);
-    spatializer->renderBuffer(io, Pose(srcpos.get()), io.busBuffer(0),
+    spatializer->renderBuffer(io, srcpos.get(), io.busBuffer(0),
                               io.framesPerBuffer());
     spatializer->finalize(io);
 

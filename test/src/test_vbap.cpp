@@ -17,7 +17,7 @@ TEST(VBAP, EightSpeakers) {
   Speakers sl = OctalSpeakerLayout();
   Vbap vbapPanner(sl);
 
-  //    vbapPanner.print();
+  vbapPanner.print();
   vbapPanner.compile();
 
   AudioIOData audioData;
@@ -31,10 +31,10 @@ TEST(VBAP, EightSpeakers) {
     samples[i] = i + 0.5;
   }
 
-  Pose pose;
-  pose.pos(0, 0, -4); // Center
+  Vec3f pos;
+  pos = Vec3f(0, 0, -4); // Center
   audioData.zeroOut();
-  vbapPanner.renderBuffer(audioData, pose, samples, fpb);
+  vbapPanner.renderBuffer(audioData, pos, samples, fpb);
 
   audioData.frame(0);
   for (int i = 0; i < fpb; i++) {
@@ -44,42 +44,42 @@ TEST(VBAP, EightSpeakers) {
     }
   }
 
-  pose.pos(-2, 0, 0); // Hard Left
+  pos = Vec3f(-2, 0, 0); // Hard Left
   audioData.zeroOut();
-  vbapPanner.renderBuffer(audioData, pose, samples, fpb);
+  vbapPanner.renderBuffer(audioData, pos, samples, fpb);
 
   audioData.frame(0);
   for (unsigned int i = 0; i < fpb; i++) {
     for (unsigned int chan = 0; chan < 6; chan++) {
-      EXPECT_TRUE(almostEqual(audioData.out(chan, i), 0.0f));
+      EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-6);
     }
-    EXPECT_TRUE(almostEqual(audioData.out(6, i), i + 0.5f));
-    EXPECT_TRUE(almostEqual(audioData.out(7, i), 0.0f));
+    EXPECT_NEAR(audioData.out(6, i), i + 0.5f, 1e-6);
+    EXPECT_NEAR(audioData.out(7, i), 0.0f, 1e-6);
   }
 
-  pose.pos(1, 0, -1); // 45 deg. front right
+  pos = Vec3f(1, 0, -1); // 45 deg. front right
   audioData.zeroOut();
-  vbapPanner.renderBuffer(audioData, pose, samples, fpb);
+  vbapPanner.renderBuffer(audioData, pos, samples, fpb);
 
   audioData.frame(0);
   for (unsigned int i = 0; i < fpb; i++) {
-    EXPECT_TRUE(almostEqual(audioData.out(0, i), 0.0f));
-    EXPECT_TRUE(almostEqual(audioData.out(1, i), i + 0.5));
+    EXPECT_NEAR(audioData.out(0, i), 0.0f, 1e-6);
+    EXPECT_NEAR(audioData.out(1, i), i + 0.5, 1e-6);
     for (unsigned int chan = 2; chan < 8; chan++) {
-      EXPECT_TRUE(almostEqual(audioData.out(chan, i), 0.0f));
+      EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-6);
     }
   }
 
-  pose.pos(1 * tan(M_PI * 0.125), 0, -1); // 22.5 deg. front right
+  pos = Vec3f(1 * tan(M_PI * 0.125), 0, -1); // 22.5 deg. front right
   audioData.zeroOut();
-  vbapPanner.renderBuffer(audioData, pose, samples, fpb);
+  vbapPanner.renderBuffer(audioData, pos, samples, fpb);
 
   audioData.frame(0);
   for (unsigned int i = 0; i < fpb; i++) {
-    EXPECT_TRUE(almostEqual(audioData.out(0, i), (i + 0.5) * sin(M_PI * 0.25)));
-    EXPECT_TRUE(almostEqual(audioData.out(1, i), (i + 0.5) * sin(M_PI * 0.25)));
+    EXPECT_NEAR(audioData.out(0, i), (i + 0.5) * sin(M_PI * 0.25), 1e-6);
+    EXPECT_NEAR(audioData.out(1, i), (i + 0.5) * sin(M_PI * 0.25), 1e-6);
     for (unsigned int chan = 2; chan < 8; chan++) {
-      EXPECT_TRUE(almostEqual(audioData.out(chan, i), 0.0f));
+      EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-6);
     }
   }
 }
@@ -112,29 +112,29 @@ TEST(VBAP, Tetrahedron3D) {
     samples[i] = i + 0.5;
   }
 
-  Pose pose;
-  pose.pos(0, 4 * tan(M_PI / 6.0), -4); // Center
+  Vec3f pos;
+  pos = Vec3f(0, 4 * tan(M_PI / 6.0), -4); // Center
   audioData.zeroOut();
-  vbapPanner.renderBuffer(audioData, pose, samples, fpb);
+  vbapPanner.renderBuffer(audioData, pos, samples, fpb);
   for (unsigned int i = 0; i < fpb; i++) {
-    EXPECT_TRUE(almostEqual(audioData.out(0, i), (i + 0.5) * sin(M_PI * 0.25)));
-    EXPECT_TRUE(almostEqual(audioData.out(3, i), (i + 0.5) * sin(M_PI * 0.25)));
+    EXPECT_NEAR(audioData.out(0, i), (i + 0.5) * sin(M_PI * 0.25), 1e-6);
+    EXPECT_NEAR(audioData.out(3, i), (i + 0.5) * sin(M_PI * 0.25), 1e-6);
     for (unsigned int chan = 1; chan < 2; chan++) {
-      EXPECT_TRUE(almostEqual(audioData.out(chan, i), 0.0f));
+      EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-6);
     }
   }
 
-  pose.pos(cos(M_PI / 6.0), 0.0, -sin(M_PI / 6.0)); // Middle of right face
+  pos = Vec3f(cos(M_PI / 6.0), 0.0, -sin(M_PI / 6.0)); // Middle of right face
   audioData.zeroOut();
-  vbapPanner.renderBuffer(audioData, pose, samples, fpb);
+  vbapPanner.renderBuffer(audioData, pos, samples, fpb);
   for (unsigned int i = 0; i < fpb; i++) {
-    EXPECT_TRUE(almostEqual(audioData.out(0, i), (i + 0.5) * sqrt(1 / 3.0)));
-    EXPECT_TRUE(almostEqual(audioData.out(1, i),
-                            (i + 0.5) * sqrt(1 / 3.0f))); // 0.225427702
-    EXPECT_TRUE(almostEqual(audioData.out(3, i),
-                            (i + 0.5) * sqrt(1 / 3.0))); // 0.323040754
+    EXPECT_NEAR(audioData.out(0, i), (i + 0.5) * sqrt(1 / 3.0), 1e-6);
+    EXPECT_NEAR(audioData.out(1, i), (i + 0.5) * sqrt(1 / 3.0f),
+                1e-6); // 0.225427702
+    EXPECT_NEAR(audioData.out(3, i), (i + 0.5) * sqrt(1 / 3.0),
+                1e-6); // 0.323040754
 
-    EXPECT_TRUE(almostEqual(audioData.out(2, i), 0.0));
+    EXPECT_NEAR(audioData.out(2, i), 0.0, 1e-6);
   }
 }
 
@@ -159,31 +159,31 @@ TEST(VBAP, Allosphere3D) {
   //        samples[i] = i + 0.5;
   //    }
 
-  //    Pose pose;
-  //    pose.pos(0,4*tan(M_PI/6.0),-4); // Center
+  //    Vec3f pos;
+  //    pos = Vec3f(0,4*tan(M_PI/6.0),-4); // Center
   //    audioData.zeroOut();
 
-  //    vbapPanner.renderBuffer(audioData, pose, samples, fpb);
+  //    vbapPanner.renderBuffer(audioData, pos, samples, fpb);
   //    for (int i = 0; i < fpb; i++) {
-  //        EXPECT_TRUE(almostEqual(audioData.out(0,i) , (i + 0.5) *
-  //        sin(M_PI*0.25))); EXPECT_TRUE(almostEqual(audioData.out(3,i) , (i +
+  //        EXPECT_FLOAT_EQ(audioData.out(0,i) , (i + 0.5) *
+  //        sin(M_PI*0.25))); EXPECT_FLOAT_EQ(audioData.out(3,i) , (i +
   //        0.5)
   //        * sin(M_PI*0.25))); for (int chan = 1; chan < 2; chan ++) {
-  //            EXPECT_TRUE(almostEqual(audioData.out(chan,i),0.0f));
+  //            EXPECT_FLOAT_EQ(audioData.out(chan,i),0.0f));
   //        }
   //    }
 
-  //    pose.pos(cos(M_PI/6.0),0.0,-sin(M_PI/6.0)); // Middle of right face
+  //    pos = Vec3f(cos(M_PI/6.0),0.0,-sin(M_PI/6.0)); // Middle of right face
   //    audioData.zeroOut();
-  //    vbapPanner.renderBuffer(audioData, pose, samples, fpb);
+  //    vbapPanner.renderBuffer(audioData, pos, samples, fpb);
   //    for (int i = 0; i < fpb; i++) {
-  //        EXPECT_TRUE(almostEqual(audioData.out(0,i) , (i + 0.5) *
-  //        sqrt(1/3.0))); EXPECT_TRUE(almostEqual(audioData.out(2,i), (i + 0.5)
+  //        EXPECT_FLOAT_EQ(audioData.out(0,i) , (i + 0.5) *
+  //        sqrt(1/3.0))); EXPECT_FLOAT_EQ(audioData.out(2,i), (i + 0.5)
   //        * sqrt(1/3.0)));
-  //        // 0.225427702 EXPECT_TRUE(almostEqual(audioData.out(3,i), (i + 0.5)
+  //        // 0.225427702 EXPECT_FLOAT_EQ(audioData.out(3,i), (i + 0.5)
   //        * sqrt(1/3.0))); // 0.323040754
 
-  //        EXPECT_TRUE(almostEqual(audioData.out(1,i) , 0.0));
+  //        EXPECT_FLOAT_EQ(audioData.out(1,i) , 0.0));
 
   //    }
 }

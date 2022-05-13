@@ -28,12 +28,12 @@ public:
   }
 
   /// Per Sample Processing
-  virtual void renderSample(AudioIOData &io, const Pose &listeningPose,
+  virtual void renderSample(AudioIOData &io, const Vec3f &pos,
                             const float &sample,
                             const unsigned int &frameIndex) override;
 
   /// Per Buffer Processing
-  virtual void renderBuffer(AudioIOData &io, const Pose &listeningPose,
+  virtual void renderBuffer(AudioIOData &io, const Vec3f &pos,
                             const float *samples,
                             const unsigned int &numFrames) override;
 
