@@ -2,6 +2,7 @@
 
 #include "al/io/al_AudioIO.hpp"
 #include "al/math/al_Functions.hpp"
+#include "al/sound/al_DownMixer.hpp"
 #include "al/sound/al_Lbap.hpp"
 #include "al/sphere/al_AlloSphereSpeakerLayout.hpp"
 
@@ -129,4 +130,41 @@ TEST(Speakers, CubeLayout) {
   EXPECT_FLOAT_EQ(vec.x, -halfSide);
   EXPECT_FLOAT_EQ(vec.y, halfSide);
   EXPECT_FLOAT_EQ(vec.z, 0);
+}
+
+TEST(Speakers, DownMixAllosphere) {
+  Speakers sl = AlloSphereSpeakerLayout();
+  AudioIOData io;
+  io.channelsOut(64);
+  DownMixer downMixer;
+  downMixer.layoutToStereo(sl, io);
+  downMixer.setStereoOutput();
+
+  // downmixer should create 2 buses
+  EXPECT_EQ(io.channelsBus(), 2);
+  downMixer.downMix(io);
+  for (int i = 0; i < 64; i++) {
+    io.frame(1);
+    io.zeroOut();
+    io.out(i) = 1.0;
+    downMixer.downMix(io);
+
+    io.frame(1);
+    if (i == 12 || i == 13 || i == 14 || i == 15 || i == 46 || i == 47 ||
+        i == 60 || i == 61 || i == 62 || i == 63) {
+      EXPECT_EQ(io.out(0), 0);
+      EXPECT_EQ(io.out(1), 0);
+    } else {
+      EXPECT_NE(io.out(0), 0);
+      EXPECT_NE(io.out(1), 0);
+      if (i == 23 || i == 38) {
+        EXPECT_FLOAT_EQ(io.out(0), io.out(1));
+      } else if (i < 3 || (i > 8 && i < 24) || (i > 38 && i < 51) ||
+                 (i > 56 && i < 61)) {
+        EXPECT_GT(io.out(0), io.out(1)) << "i = " << i;
+      } else {
+        EXPECT_GT(io.out(1), io.out(0));
+      }
+    }
+  }
 }
