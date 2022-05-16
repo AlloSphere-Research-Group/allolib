@@ -464,7 +464,8 @@ public:
    * not been called. Can return nullptr if the class name and creator have not
    * been registered with registerSynthClass()
    */
-  [[nodiscard]] SynthVoice *getVoice(std::string name, bool forceAlloc = false);
+  /*[[nodiscard]]*/ SynthVoice *getVoice(std::string name,
+                                         bool forceAlloc = false);
 
   /**
    * @brief Get the first available voice with minimal checks
@@ -473,7 +474,7 @@ public:
    * This is a quick function with little overhead for PolySynths that handle
    * only one type of voice.
    */
-  [[nodiscard]] SynthVoice *getFreeVoice();
+  /*[[nodiscard]]*/ SynthVoice *getFreeVoice();
 
   /**
    * @brief render all the active voices into the audio buffers
