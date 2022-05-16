@@ -18,6 +18,7 @@ TEST(LBAP, LBAPCube_Mid) {
   int numSpeakers = sl.size();
 
   lbapPanner.compile();
+  lbapPanner.setDispersionThreshold(0.999);
 
   lbapPanner.print();
 
@@ -150,6 +151,7 @@ TEST(LBAP, LBAPCube_Top) {
   int numSpeakers = sl.size();
 
   lbapPanner.compile();
+  lbapPanner.setDispersionThreshold(0.999);
 
   lbapPanner.print();
 
@@ -268,6 +270,7 @@ TEST(LBAP, LBAPCube_Bottom) {
   int numSpeakers = sl.size();
 
   lbapPanner.compile();
+  lbapPanner.setDispersionThreshold(0.999);
 
   lbapPanner.print();
 
@@ -385,6 +388,8 @@ TEST(LBAP, LBAPAllosphere) {
 
   lbapPanner.compile();
 
+  lbapPanner.setDispersionThreshold(0.999);
+
   lbapPanner.print();
 
   AudioIOData audioData;
@@ -452,6 +457,65 @@ TEST(LBAP, LBAPAllosphere) {
         EXPECT_FLOAT_EQ(audioData.out(chan, i), cos(M_PI * 0.25) * (i + 0.5f));
       } else {
         EXPECT_FLOAT_EQ(audioData.out(chan, i), 0.0f);
+      }
+    }
+  }
+}
+
+TEST(LBAP, LBAPAllosphereDispersion) {
+  const int fpb = 16;
+
+  Speakers sl = AlloSphereSpeakerLayout();
+  Lbap lbapPanner(sl);
+
+  lbapPanner.compile();
+
+  lbapPanner.print();
+
+  AudioIOData audioData;
+  audioData.framesPerBuffer(fpb);
+  audioData.framesPerSecond(44100);
+  audioData.channelsIn(0);
+  audioData.channelsOut(60);
+
+  lbapPanner.prepare(audioData);
+  lbapPanner.setDispersionThreshold(0.5);
+
+  float samples[fpb];
+  for (int i = 0; i < fpb; i++) {
+    samples[i] = i + 0.5f;
+  }
+
+  Vec3f pos;
+
+  // from above
+  pos = Vec3f(0, 20, 0);
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (int i = 0; i < fpb; i++) {
+    for (int chan = 0; chan < 60; chan++) {
+      if (chan == 0 || chan == 1 || chan == 2 || chan == 3 || chan == 4 ||
+          chan == 5 || chan == 6 || chan == 7 || chan == 8 || chan == 9 ||
+          chan == 10 || chan == 11) {
+        EXPECT_NE(audioData.out(chan, i), 0);
+      } else {
+        EXPECT_NEAR(audioData.out(chan, i), 0, 1e-6);
+      }
+    }
+  }
+
+  // from above but under dispersion offset
+  pos = Vec3f(0, 2, -1);
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (int i = 0; i < fpb; i++) {
+    for (int chan = 0; chan < 60; chan++) {
+      if (/*chan == 0 || chan == 1 || */chan == 2 || chan == 3 /*|| chan == 4 ||
+              chan == 5 || chan == 6 || chan == 7 || chan == 8 || chan == 9 ||
+              chan == 10 || chan == 11*/) {
+        EXPECT_NE(audioData.out(chan, i), 0);
+      } else {
+        EXPECT_NEAR(audioData.out(chan, i), 0, 1e-6);
       }
     }
   }

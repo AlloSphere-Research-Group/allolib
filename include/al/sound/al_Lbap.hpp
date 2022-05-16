@@ -60,16 +60,16 @@ namespace al {
 class LdapRing {
 public:
   LdapRing(Speakers &sl) {
-    vbap = std::make_shared<Vbap>(sl);
     elevation = 0;
     for (auto speaker : sl) {
       elevation += speaker.elevation;
     }
     elevation /= sl.size(); // store average elevation
+    vbap = std::make_unique<Vbap>(sl);
     vbap->compile();
   }
 
-  std::shared_ptr<Vbap> vbap;
+  std::unique_ptr<Vbap> vbap;
   float elevation;
 };
 
@@ -96,11 +96,26 @@ public:
 
   void prepare(AudioIOData &io) override;
 
+  /**
+   * @brief setDispersionOffset
+   * @param offset
+   *
+   * When position is above of below edge rings, this value determines how the
+   * signal is dispersed to the other speakers in the ring as the position
+   * approaches the zenith or the nadir.
+   * This offset value is the fraction of the angle between elevation and
+   * zenith/nadir at which dispersion to the other loudspeakers occurs. A value
+   * of >= 1.0 means no dispersion, in which case there is a discontinuity when
+   * corssing the zenith/nadir, or when positioning on the zenith/nadir.
+   * A value of 0 means that as soon as the elevation for the source is higher
+   * than the ring's elevation, dispersion occurs.
+   */
+  void setDispersionThreshold(float offset) { mDispersionOffset = offset; }
+
   void renderSample(AudioIOData &io, const Vec3f &reldir, const float &sample,
                     const unsigned int &frameIndex) override;
 
-  void renderBuffer(AudioIOData &io, const Vec3f &reldir,
-                    const float *samples,
+  void renderBuffer(AudioIOData &io, const Vec3f &reldir, const float *samples,
                     const unsigned int &numFrames) override;
 
   void print(std::ostream &stream = std::cout) override;
@@ -109,6 +124,9 @@ private:
   std::vector<LdapRing> mRings;
   float *buffer{nullptr}; // Two consecutive buffers (non-interleaved)
   int bufferSize{0};
+
+  float mDispersionOffset = 0.5; // fraction of (zenith - elev) angle at which
+                                 // dispersion starts.
 };
 
 } // namespace al

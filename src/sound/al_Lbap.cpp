@@ -7,16 +7,19 @@ using namespace al;
 
 void Lbap::compile() {
   std::map<int, Speakers> speakerRingMap;
+  std::map<int, float> elevation;
+  std::map<int, std::vector<int>> virtualSpeakers;
   for (auto &speaker : mSpeakers) {
     if (speakerRingMap.find(speaker.group) == speakerRingMap.end()) {
-      speakerRingMap[speaker.group] = Speakers();
+      // assumes elevation of ring is elevation of first speaker in ring
+      elevation[speaker.group] = speaker.elevation;
     }
     speakerRingMap[speaker.group].push_back(speaker);
   }
   for (auto speakerRing : speakerRingMap) {
     mRings.push_back(LdapRing(speakerRing.second));
   }
-  // Sort by elevation
+  // Sort by elevation (high to low
   std::sort(mRings.begin(), mRings.end(),
             [](const LdapRing &a, const LdapRing &b) -> bool {
               return a.elevation > b.elevation;
@@ -60,8 +63,67 @@ void Lbap::renderBuffer(AudioIOData &io, const Vec3f &reldir,
   }
   if (it == mRings.begin()) { // Above Top ring
     it->vbap->renderBuffer(io, reldir, samples, numFrames);
+    if (mRings.size() > 1) {
+      // assumes circular ring (all elevations and radii equal)
+      float fraction = (elev - it->vbap->speakerLayout()[0].elevation) /
+                       (90 - it->vbap->speakerLayout()[0].elevation);
+      assert(fraction <= 1.0);
+      if (fraction > mDispersionOffset) {
+        // Adjust fraction to effective fraction (discarding offset
+        fraction = (fraction - mDispersionOffset) / (1.0 - mDispersionOffset);
+        // Using linear adjustment. should other adjustment be used?
+        float dispersionBaseGain = 1.0 / sqrt(it->vbap->speakerLayout().size());
+        float disperseFractionGain = cos(fraction * M_PI_2);
+        float focusedFractionGain = sin(fraction * M_PI_2);
+
+        io.frame(0);
+        while (io()) { // Add dispersion
+
+          for (const auto &spkr : it->vbap->speakerLayout()) {
+            if (io.out(spkr.deviceChannel) == 0.0) {
+              io.out(spkr.deviceChannel) += disperseFractionGain *
+                                            dispersionBaseGain *
+                                            samples[io.frame()];
+            } else {
+              io.out(spkr.deviceChannel) *= focusedFractionGain;
+            }
+          }
+        }
+      }
+    }
   } else if (it == mRings.end()) { // Below Bottom ring
     mRings.back().vbap->renderBuffer(io, reldir, samples, numFrames);
+    if (mRings.size() > 1) {
+      // assumes circular ring (all elevations and radii equal)
+      float fraction =
+          (elev - mRings.back().vbap->speakerLayout()[0].elevation) /
+          (-90 - mRings.back().vbap->speakerLayout()[0].elevation);
+      assert(fraction <= 1.0 && fraction >= 0.0);
+      if (fraction > mDispersionOffset) {
+        // Adjust fraction to effective fraction (discarding offset
+        fraction = (fraction - mDispersionOffset) / (1.0 - mDispersionOffset);
+        // Using linear adjustment. should other adjustment be used?
+        float dispersionBaseGain =
+            1.0 / sqrt(mRings.back().vbap->speakerLayout().size());
+        float disperseFractionGain = cos(fraction * M_PI_2);
+        float focusedFractionGain = sin(fraction * M_PI_2);
+
+        io.frame(0);
+        while (io()) { // Add dispersion
+
+          for (const auto &spkr : mRings.back().vbap->speakerLayout()) {
+            if (io.out(spkr.deviceChannel) == 0.0) {
+              io.out(spkr.deviceChannel) += disperseFractionGain *
+                                            dispersionBaseGain *
+                                            samples[io.frame()];
+            } else {
+              io.out(spkr.deviceChannel) *= focusedFractionGain;
+            }
+          }
+        }
+      }
+    }
+
   } else {                   // Between inner rings
     auto topRingIt = it - 1; // top ring is previous ring
     float fraction = (elev - it->elevation) /
