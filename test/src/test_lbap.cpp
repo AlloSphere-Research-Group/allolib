@@ -9,137 +9,139 @@
 
 using namespace al;
 
-// TEST(LBAP, LBAPRing8_Mid) {
-//  const int fpb = 16;
+TEST(LBAP, LBAPCube_Mid) {
+  const int fpb = 16;
 
-//  Speakers sl = CubeLayout();
-//  Lbap lbapPanner(sl);
+  Speakers sl = CubeLayout();
+  Lbap lbapPanner(sl);
 
-//  int numSpeakers = sl.size();
+  int numSpeakers = sl.size();
 
-//  lbapPanner.compile();
+  lbapPanner.compile();
 
-//  lbapPanner.print();
+  lbapPanner.print();
 
-//  AudioIOData audioData;
-//  audioData.framesPerBuffer(fpb);
-//  audioData.framesPerSecond(44100);
-//  audioData.channelsIn(0);
-//  audioData.channelsOut(8);
+  AudioIOData audioData;
+  audioData.framesPerBuffer(fpb);
+  audioData.framesPerSecond(44100);
+  audioData.channelsIn(0);
+  audioData.channelsOut(8);
 
-//  lbapPanner.prepare(audioData);
+  lbapPanner.prepare(audioData);
 
-//  float samples[fpb];
-//  for (int i = 0; i < fpb; i++) {
-//    samples[i] = i + 0.5f;
-//  }
+  float samples[fpb];
+  for (int i = 0; i < fpb; i++) {
+    samples[i] = i + 0.5f;
+  }
 
-//  Vec3f pos;
+  Vec3f pos;
 
-//  auto elevTopDeg = sl[0].elevation;
-//  auto elevTopMid = atan(2);
+  auto elevTopDeg = sl[0].elevation;
+  float halfSide = 0.5;
+  float bottomDistance = sqrt(halfSide * halfSide + halfSide * halfSide);
+  float elevationAngle = atan(1.0f / bottomDistance);
 
-//  float diag = sl[4].radius;
-//  pos = Vec3f(0, 0.5 * tan(0.5 * elevTopMid), -0.5); // Front Center
-//  audioData.zeroOut();
-//  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
-//  for (unsigned int i = 0; i < fpb; i++) {
-//    for (unsigned int chan = 0; chan < numSpeakers; chan++) {
-//      if (chan == 0 || chan == 3 || chan == 4 || chan == 7) {
-//        EXPECT_FLOAT_EQ(audioData.out(chan, i),
-//                        (i + 0.5f) * cos(M_PI * 0.25) * cos(M_PI * 0.25));
-//      } else {
-//        EXPECT_FLOAT_EQ(audioData.out(chan, i), 0.0f);
-//      }
-//    }
-//  }
+  float diag = sl[4].radius;
+  pos = Vec3f(0, 0.5 * tan(0.5 * elevationAngle), -0.5); // Front Center
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (unsigned int i = 0; i < fpb; i++) {
+    for (unsigned int chan = 0; chan < numSpeakers; chan++) {
+      if (chan == 0 || chan == 3 || chan == 4 || chan == 7) {
+        EXPECT_FLOAT_EQ(audioData.out(chan, i),
+                        (i + 0.5f) * cos(M_PI * 0.25) * cos(M_PI * 0.25));
+      } else {
+        EXPECT_FLOAT_EQ(audioData.out(chan, i), 0.0f);
+      }
+    }
+  }
 
-//  pos = Vec3f(0.5, diag * tan(0.5 * (elevTopDeg * M_2PI / 360.0)),
-//              -0.5); // Front Right
-//  audioData.zeroOut();
-//  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
-//  for (unsigned int i = 0; i < fpb; i++) {
-//    for (unsigned int chan = 0; chan < numSpeakers; chan++) {
-//      if (chan == 0 || chan == 4) {
-//        EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f) * cos(M_PI *
-//        0.25));
-//      } else {
-//        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
-//      }
-//    }
-//  }
+  pos = Vec3f(0.5, diag * tan(0.5 * (elevTopDeg * M_2PI / 360.0)),
+              -0.5); // Front Right
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (unsigned int i = 0; i < fpb; i++) {
+    for (unsigned int chan = 0; chan < numSpeakers; chan++) {
+      if (chan == 0 || chan == 4) {
+        EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f) * cos(M_PI * 0.25));
+      } else {
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
+      }
+    }
+  }
 
-//  pos = Vec3f(-0.5, diag * tan(0.5 * (elevTopDeg * M_2PI / 360.0)),
-//              -0.5); // Front Left
-//  audioData.zeroOut();
-//  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
-//  for (unsigned int i = 0; i < fpb; i++) {
-//    for (unsigned int chan = 0; chan < numSpeakers; chan++) {
-//      if (chan == 3) {
-//        EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
-//      } else {
-//        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
-//      }
-//    }
-//  }
+  pos = Vec3f(-0.5, diag * tan(0.5 * (elevTopDeg * M_2PI / 360.0)),
+              -0.5); // Front Left
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (unsigned int i = 0; i < fpb; i++) {
+    for (unsigned int chan = 0; chan < numSpeakers; chan++) {
+      if (chan == 3 || chan == 7) {
+        EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f) * cos(M_PI * 0.25));
+      } else {
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
+      }
+    }
+  }
 
-//  pos = Vec3f(0.5, diag * tan(0.5 * (elevTopDeg * M_2PI / 360.0)),
-//              0.5); // Back Right
-//  audioData.zeroOut();
-//  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
-//  for (unsigned int i = 0; i < fpb; i++) {
-//    for (unsigned int chan = 0; chan < numSpeakers; chan++) {
-//      if (chan == 1) {
-//        EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
-//      } else {
-//        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
-//      }
-//    }
-//  }
+  pos = Vec3f(0.5, diag * tan(0.5 * (elevTopDeg * M_2PI / 360.0)),
+              0.5); // Back Right
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (unsigned int i = 0; i < fpb; i++) {
+    for (unsigned int chan = 0; chan < numSpeakers; chan++) {
+      if (chan == 1 || chan == 5) {
+        EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f) * cos(M_PI * 0.25));
+      } else {
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
+      }
+    }
+  }
 
-//  pos = Vec3f(-4, 0.5, 1 * cos(M_PI * 0.25)); // Back Left
-//  audioData.zeroOut();
-//  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
-//  for (unsigned int i = 0; i < fpb; i++) {
-//    for (unsigned int chan = 0; chan < numSpeakers; chan++) {
-//      if (chan == 2) {
-//        EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
-//      } else {
-//        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
-//      }
-//    }
-//  }
+  pos = Vec3f(-0.5, diag * tan(0.5 * (elevTopDeg * M_2PI / 360.0)),
+              0.5); // Back Left
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (unsigned int i = 0; i < fpb; i++) {
+    for (unsigned int chan = 0; chan < numSpeakers; chan++) {
+      if (chan == 2 || chan == 6) {
+        EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f) * cos(M_PI * 0.25));
+      } else {
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
+      }
+    }
+  }
 
-//  pos = Vec3f(4, 20, 0); // hard right
-//  audioData.zeroOut();
-//  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
-//  for (int i = 0; i < fpb; i++) {
-//    for (int chan = 0; chan < numSpeakers; chan++) {
-//      if (chan == 0 || chan == 1) {
-//        EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f) * cos(M_PI *
-//        0.25));
-//      } else {
-//        EXPECT_FLOAT_EQ(audioData.out(chan, i), 0.0f);
-//      }
-//    }
-//  }
+  pos = Vec3f(0.5, 0.5 * tan(0.5 * elevationAngle), 0); // hard right
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (int i = 0; i < fpb; i++) {
+    for (int chan = 0; chan < numSpeakers; chan++) {
+      if (chan == 0 || chan == 1 || chan == 4 || chan == 5) {
+        EXPECT_FLOAT_EQ(audioData.out(chan, i),
+                        (i + 0.5f) * cos(M_PI * 0.25) * cos(M_PI * 0.25));
+      } else {
+        EXPECT_FLOAT_EQ(audioData.out(chan, i), 0.0f);
+      }
+    }
+  }
 
-//  pos = Vec3f(-4, 20, 0); // hard left
-//  audioData.zeroOut();
-//  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
-//  for (int i = 0; i < fpb; i++) {
-//    for (int chan = 0; chan < numSpeakers; chan++) {
-//      if (chan == 2 || chan == 3) {
-//        EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f) * cos(M_PI *
-//        0.25));
-//      } else {
-//        EXPECT_FLOAT_EQ(audioData.out(chan, i), 0.0f);
-//      }
-//    }
-//  }
-//}
+  pos = Vec3f(-0.5, 0.5 * tan(0.5 * elevationAngle), 0); // hard left
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (int i = 0; i < fpb; i++) {
+    for (int chan = 0; chan < numSpeakers; chan++) {
+      if (chan == 2 || chan == 3 || chan == 6 || chan == 7) {
+        EXPECT_FLOAT_EQ(audioData.out(chan, i),
+                        (i + 0.5f) * cos(M_PI * 0.25) * cos(M_PI * 0.25));
+      } else {
+        EXPECT_FLOAT_EQ(audioData.out(chan, i), 0.0f);
+      }
+    }
+  }
+}
 
-TEST(LBAP, LBAPRing8_Top) {
+TEST(LBAP, LBAPCube_Top) {
   const int fpb = 16;
 
   Speakers sl = CubeLayout();
@@ -186,7 +188,7 @@ TEST(LBAP, LBAPRing8_Top) {
       if (chan == 0) {
         EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
       } else {
-        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
       }
     }
   }
@@ -199,7 +201,7 @@ TEST(LBAP, LBAPRing8_Top) {
       if (chan == 3) {
         EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
       } else {
-        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
       }
     }
   }
@@ -212,7 +214,7 @@ TEST(LBAP, LBAPRing8_Top) {
       if (chan == 1) {
         EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
       } else {
-        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
       }
     }
   }
@@ -225,7 +227,7 @@ TEST(LBAP, LBAPRing8_Top) {
       if (chan == 2) {
         EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
       } else {
-        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
       }
     }
   }
@@ -257,7 +259,7 @@ TEST(LBAP, LBAPRing8_Top) {
   }
 }
 
-TEST(LBAP, LBAPRing8_Bottom) {
+TEST(LBAP, LBAPCube_Bottom) {
   const int fpb = 16;
 
   Speakers sl = CubeLayout();
@@ -304,7 +306,7 @@ TEST(LBAP, LBAPRing8_Bottom) {
       if (chan == 4) {
         EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
       } else {
-        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
       }
     }
   }
@@ -317,7 +319,7 @@ TEST(LBAP, LBAPRing8_Bottom) {
       if (chan == 7) {
         EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
       } else {
-        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
       }
     }
   }
@@ -330,7 +332,7 @@ TEST(LBAP, LBAPRing8_Bottom) {
       if (chan == 5) {
         EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
       } else {
-        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
       }
     }
   }
@@ -343,7 +345,7 @@ TEST(LBAP, LBAPRing8_Bottom) {
       if (chan == 6) {
         EXPECT_FLOAT_EQ(audioData.out(chan, i), (i + 0.5f));
       } else {
-        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-10);
+        EXPECT_NEAR(audioData.out(chan, i), 0.0f, 1e-7);
       }
     }
   }
