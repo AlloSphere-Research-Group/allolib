@@ -34,6 +34,9 @@ public:
   ParameterServer &parameterServer() { return mParameterServer; }
   ParameterServer const &parameterServer() const { return mParameterServer; }
 
+  // Must be called before calling init()
+  void disableHandshakeServer() { mDoHandshakeServer = false; }
+
   // PacketHandler
   std::function<void(osc::Message &)> onMessage = [](osc::Message &m) {
     std::cout << "Received unhandled message." << std::endl;
@@ -44,6 +47,8 @@ public:
   uint16_t port = 9010;
 
 private:
+  bool mDoHandshakeServer{true};
+
   class Handler : public osc::PacketHandler {
   public:
     OSCDomain *mOscDomain;
