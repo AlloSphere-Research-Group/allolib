@@ -10,9 +10,9 @@ Lance Putnam, Feb. 2012
 Keehong Youn, 2017
 */
 
-#include <iostream>
 #include "al/app/al_App.hpp"
 #include "al/system/al_Time.hpp"
+#include <iostream>
 
 // Drawing on a 2D canvas using pixel coordinates
 
@@ -50,14 +50,14 @@ struct MyApp : public App {
     }
   }
 
-  void onDraw(Graphics& g) {
-    g.clear(0, 0, 0);
+  void onDraw(Graphics &g) {
+    g.clear(0);
 
-    g.camera(Viewpoint::IDENTITY);  // Ortho [-1:1] x [-1:1]
+    g.camera(Viewpoint::IDENTITY); // Ortho [-1:1] x [-1:1]
     g.color(1, 1, 1);
     g.draw(verts);
 
-    g.camera(Viewpoint::ORTHO_FOR_2D);  // Ortho [0:width] x [0:height]
+    g.camera(Viewpoint::ORTHO_FOR_2D); // Ortho [0:width] x [0:height]
     g.meshColor();
     g.draw(verts2);
   }

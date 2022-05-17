@@ -44,12 +44,17 @@
   Graham Wakefield, 2010, grrrwaaa@gmail.com
   Keehong Youn, 2017, younkeehong@gmail.com
 
+    Synchronized to AlloSystem commit:
+    0ddb8ec6594ca66d34dc18849bc2b433e5f67016
+
 */
 
 #include "al/graphics/al_OpenGL.hpp"
 #include "al/math/al_Mat.hpp"
 #include "al/math/al_Vec.hpp"
 #include "al/types/al_Color.hpp"
+
+#include <functional>
 #include <vector>
 
 namespace al {
@@ -109,31 +114,44 @@ public:
   // destructive edits to internal vertices:
 
   /// Generates indices for a set of vertices
-  void compress();
+  Mesh &compress();
 
   /// Convert indices (if any) to flat vertex buffers
-  void decompress();
+  Mesh &decompress();
 
   /// Extend buffers to match number of vertices
 
   /// This will resize all populated buffers to match the size of the vertex
   /// buffer. Buffers are extended by copying their last element.
-  void equalizeBuffers();
+  Mesh &equalizeBuffers();
 
   /// Append buffers from another mesh:
-  void merge(const Mesh &src);
+  Mesh &merge(const Mesh &src);
+
+  template <class T> Mesh &merge(const Mesh &src, const Mat<4, T> &xfm) {
+    return merge(src).transform(xfm, -src.vertices().size());
+  }
 
   /// Convert triangle strip to triangles
-  void toTriangles();
+  Mesh &toTriangles();
 
   /// Reset all buffers
   Mesh &reset();
 
+  /// Scales and translates vertices to lie in sphere
+  Mesh &fitToSphere(float radius = 1);
+
+  /// Scales and translates vertices to lie in cube
+  Mesh &fitToCube(float radius = 1, bool proportional = true);
+
+  Mesh &fitToCubeTransform(Vec3f &center, Vec3f &scale, float radius = 1,
+                           bool proportional = true);
+
   /// Scale all vertices to lie in [-1,1]
-  void unitize(bool proportional = true);
+  Mesh &unitize(bool proportional = true);
 
   /// Scale all vertices
-  Mesh &scale(float x, float y, float z);
+  Mesh &scale(float x, float y, float z = 1.f);
   Mesh &scale(float s) { return scale(s, s, s); }
 
   template <class T> Mesh &scale(const Vec<3, T> &v) {
@@ -141,7 +159,7 @@ public:
   }
 
   /// Translate all vertices
-  Mesh &translate(float x, float y, float z);
+  Mesh &translate(float x, float y, float z = 0.f);
 
   template <class T> Mesh &translate(const Vec<3, T> &v) {
     return translate(v[0], v[1], v[2]);
@@ -152,8 +170,9 @@ public:
   /// Transform vertices by projective transform matrix
 
   /// @param[in] m    projective transform matrix
-  /// @param[in] begin  beginning index of vertices
-  /// @param[in] end    ending index of vertices, negative amounts specify
+  /// @param[in] begin  beginning index of vertices; negative value specifies
+  ///						distance from last element
+  /// @param[in] end    ending index of vertices, negative value specifies
   ///            distance from one past last element
   template <class T>
   Mesh &transform(const Mat<4, T> &m, int begin = 0, int end = -1);
@@ -170,10 +189,10 @@ public:
   /// @param[in] equalWeightPerFace  whether to use an equal weighting of
   ///                  face normals rather than a weighting
   ///                  based on face areas
-  void generateNormals(bool normalize = true, bool equalWeightPerFace = false);
+  Mesh &generateNormals(bool normalize = true, bool equalWeightPerFace = false);
 
   /// Invert direction of normals
-  void invertNormals();
+  Mesh &invertNormals();
 
   /// Creates a mesh filled with lines for each normal of the source
 
@@ -183,6 +202,11 @@ public:
   ///              face rather than per vertex
   void createNormalsMesh(Mesh &mesh, float length = 0.1, bool perFace = false);
 
+  Mesh &normalsMesh(Mesh &mesh, float length = 0.1, bool perFace = false) {
+    createNormalsMesh(mesh, length, perFace);
+    return mesh;
+  }
+
   /// Ribbonize curve
 
   /// This creates a two-dimensional ribbon from a one-dimensional space curve.
@@ -191,8 +215,8 @@ public:
   /// @param[in] faceBinormal    If true, surface faces binormal vector of
   /// curve.
   ///                If false, surface faces normal vector of curve.
-  void ribbonize(float width = 0.04, bool faceBinormal = false) {
-    ribbonize(&width, 0, faceBinormal);
+  Mesh &ribbonize(float width = 0.04, bool faceBinormal = false) {
+    return ribbonize(&width, 0, faceBinormal);
   }
 
   /// Ribbonize curve
@@ -205,8 +229,8 @@ public:
   /// @param[in] faceBinormal    If true, surface faces binormal vector of
   /// curve.
   ///                If false, surface faces normal vector of curve.
-  void ribbonize(float *widths, int widthsStride = 1,
-                 bool faceBinormal = false);
+  Mesh &ribbonize(float *widths, int widthsStride = 1,
+                  bool faceBinormal = false);
 
   /// Smooths a triangle mesh
 
@@ -216,9 +240,13 @@ public:
   /// @param[in] amount    interpolation fraction between original and smoothed
   /// result
   /// @param[in] weighting  0 = equal weight, 1 = inverse distance weight
-  void smooth(float amount = 1, int weighting = 0);
+  Mesh &smooth(float amount = 1, int weighting = 0);
+
+  /// Flip the winding order (of triangles)
+  Mesh &flipWinding();
 
   Primitive primitive() const { return mPrimitive; }
+  float stroke() const { return mStroke; }
   const std::vector<Vertex> &vertices() const { return mVertices; }
   const std::vector<Normal> &normals() const { return mNormals; }
   const std::vector<Color> &colors() const { return mColors; }
@@ -227,10 +255,37 @@ public:
   const std::vector<TexCoord3> &texCoord3s() const { return mTexCoord3s; }
   const std::vector<Index> &indices() const { return mIndices; }
 
+  /// Returns whether mesh has valid data for rendering
+  bool valid() const;
+
   /// Set geometric primitive
   // virtual for graphics lib implementations
   Mesh &primitive(Primitive p) {
     mPrimitive = p;
+    return *this;
+  }
+  Mesh &points();
+  Mesh &points(float stroke);
+  Mesh &lines();
+  Mesh &lines(float stroke);
+  Mesh &lineStrip();
+  Mesh &lineStrip(float stroke);
+  Mesh &triangles();
+  Mesh &triangleStrip();
+
+  bool isPoints() const;
+  bool isLines() const;
+  bool isLineStrip() const;
+  bool isTriangles() const;
+  bool isTriangleStrip() const;
+
+  /// Set stroke size
+
+  /// For line primitives, this is the line width.
+  /// For point primitives, this is the point diameter.
+  /// A negative value uses the current value of the renderer.
+  Mesh &stroke(float v) {
+    mStroke = v;
     return *this;
   }
 
@@ -238,102 +293,179 @@ public:
   Mesh &repeatLast();
 
   /// Append index to index buffer
-  void index(unsigned int i) { indices().push_back(i); }
+  Mesh &index(unsigned int i) {
+    indices().push_back(i);
+    return *this;
+  }
 
   /// Append indices to index buffer
-  template <class Tindex>
-  void index(const Tindex *buf, int size, Tindex indexOffset = 0) {
+  template <class Tindex1, class Tindex2 = Index>
+  Mesh &index(const Tindex1 *buf, int size, Tindex2 indexOffset = 0) {
     for (int i = 0; i < size; ++i)
       index((Index)(buf[i] + indexOffset));
+    return *this;
   }
 
-  template <class... Indices> void index(unsigned i, Indices... indices) {
+  template <class... Indices> Mesh &index(unsigned i, Indices... indices) {
     index(i);
-    index(indices...);
+    return index(indices...);
+  }
+
+  /// Append index to index buffer relative to current number of vertices
+
+  /// This should be called BEFORE adding the relevant vertex positions.
+  ///
+  Mesh &indexRel(unsigned int i) { return index(vertices().size() + i); }
+
+  template <class... Indices> Mesh &indexRel(unsigned i, Indices... indices) {
+    indexRel(i);
+    return indexRel(indices...);
   }
 
   /// Append color to color buffer
-  void color(const Color &v) { colors().push_back(v); }
-
-  /// Append color to color buffer
-  void color(const HSV &v) { colors().push_back(v); }
-
-  /// Append color to color buffer
-  void color(const RGB &v) { colors().push_back(v); }
-
-  /// Append color to color buffer
-  void color(float r, float g, float b, float a = 1) {
-    color(Color(r, g, b, a));
+  Mesh &color(const Color &v) {
+    colors().push_back(v);
+    return *this;
   }
 
   /// Append color to color buffer
-  template <class T> void color(const Vec<4, T> &v) {
-    color(v[0], v[1], v[2], v[3]);
+  Mesh &color(const HSV &v) {
+    colors().push_back(v);
+    return *this;
+  }
+
+  /// Append color to color buffer
+  Mesh &color(const RGB &v) {
+    colors().push_back(v);
+    return *this;
+  }
+
+  /// Append color to color buffer
+  Mesh &color(float r, float g, float b, float a = 1) {
+    return color(Color(r, g, b, a));
+  }
+
+  /// Append color to color buffer
+  template <class T> Mesh &color(const Vec<4, T> &v) {
+    return color(v[0], v[1], v[2], v[3]);
   }
 
   /// Append colors from flat array
-  template <class T> void color(const T *src, int numColors) {
-    for (int i = 0; i < numColors; ++i)
+  template <class T> Mesh &color(const T *src, int numColors) {
+    for (int i = 0; i < numColors; ++i) {
       color(src[4 * i + 0], src[4 * i + 1], src[4 * i + 2], src[4 * i + 3]);
+    }
+    return *this;
+  }
+
+  /// Append copy of last appended color
+  Mesh &repeatColor() {
+    if (colors().size()) {
+      colors().push_back(colors().back());
+    }
+    //    else if (coloris().size())
+    //      coloris().repeatLast();
+    return *this;
+  }
+
+  /// Fill any deficit in color buffer with a color
+  Mesh &colorFill(const Color &v);
+
+  /// Fill any deficit in colori buffer with a color
+  //  Mesh &coloriFill(const Colori &v);
+
+  /// Append normal to normal buffer
+  Mesh &normal(float x, float y, float z = 0) {
+    return normal(Normal(x, y, z));
   }
 
   /// Append normal to normal buffer
-  void normal(float x, float y, float z = 0) { normal(Normal(x, y, z)); }
+  Mesh &normal(const Normal &v) {
+    normals().push_back(v);
+    return *this;
+  }
 
   /// Append normal to normal buffer
-  void normal(const Normal &v) { normals().push_back(v); }
-
-  /// Append normal to normal buffer
-  template <class T> void normal(const Vec<2, T> &v, float z = 0) {
-    normal(v[0], v[1], z);
+  template <class T> Mesh &normal(const Vec<2, T> &v, float z = 0) {
+    return normal(v[0], v[1], z);
   }
 
   /// Append normals from flat array
-  template <class T> void normal(const T *src, int numNormals) {
-    for (int i = 0; i < numNormals; ++i)
+  template <class T> Mesh &normal(const T *src, int numNormals) {
+    for (int i = 0; i < numNormals; ++i) {
       normal(src[3 * i + 0], src[3 * i + 1], src[3 * i + 2]);
+    }
+    return *this;
   }
 
   /// Append texture coordinate to 1D texture coordinate buffer
-  void texCoord(float u) { texCoord1s().push_back(TexCoord1(u)); }
+  Mesh &texCoord(float u) {
+    texCoord1s().push_back(TexCoord1(u));
+    return *this;
+  }
 
   /// Append texture coordinate to 2D texture coordinate buffer
-  void texCoord(float u, float v) { texCoord2s().push_back(TexCoord2(u, v)); }
+  Mesh &texCoord(float u, float v) {
+    texCoord2s().push_back(TexCoord2(u, v));
+    return *this;
+  }
 
   /// Append texture coordinate to 2D texture coordinate buffer
-  template <class T> void texCoord(const Vec<2, T> &v) { texCoord(v[0], v[1]); }
+  template <class T> Mesh &texCoord(const Vec<2, T> &v) {
+    return texCoord(v[0], v[1]);
+  }
 
   /// Append texture coordinate to 3D texture coordinate buffer
-  void texCoord(float u, float v, float w) {
+  Mesh &texCoord(float u, float v, float w) {
     texCoord3s().push_back(TexCoord3(u, v, w));
+    return *this;
   }
 
   /// Append texture coordinate to 3D texture coordinate buffer
-  template <class T> void texCoord(const Vec<3, T> &v) {
-    texCoord(v[0], v[1], v[2]);
+  template <class T> Mesh &texCoord(const Vec<3, T> &v) {
+    return texCoord(v[0], v[1], v[2]);
   }
 
   /// Append vertex to vertex buffer
-  void vertex(float x, float y, float z = 0) { vertex(Vertex(x, y, z)); }
+  Mesh &vertex(float x, float y, float z = 0) {
+    return vertex(Vertex(x, y, z));
+  }
 
   /// Append vertex to vertex buffer
-  void vertex(const Vertex &v) { vertices().push_back(v); }
+  Mesh &vertex(const Vertex &v) {
+    vertices().push_back(v);
+    return *this;
+  }
 
   /// Append vertex to vertex buffer
-  template <class T> void vertex(const Vec<2, T> &v, float z = 0) {
-    vertex(v[0], v[1], z);
+  template <class T> Mesh &vertex(const Vec<2, T> &v, float z = 0) {
+    return vertex(v[0], v[1], z);
   }
 
   /// Append vertices from flat array
-  template <class T> void vertex(const T *src, int numVerts) {
-    for (int i = 0; i < numVerts; ++i)
+  template <class T> Mesh &vertex(const T *src, int numVerts) {
+    for (int i = 0; i < numVerts; ++i) {
       vertex(src[3 * i + 0], src[3 * i + 1], src[3 * i + 2]);
+    }
+    return *this;
   }
 
   /// Append vertices to vertex buffer
-  template <class T> void vertex(const Vec<3, T> *src, int numVerts) {
-    for (int i = 0; i < numVerts; ++i)
+  template <class T> Mesh &vertex(const Vec<3, T> *src, int numVerts) {
+    for (int i = 0; i < numVerts; ++i) {
       vertex(src[i][0], src[i][1], src[i][2]);
+    }
+    return *this;
+  }
+  /// Append 2D vertex
+  template <class T1, class T2> Mesh &vertex2(T1 x1, T2 y1) {
+    return vertex(x1, y1);
+  }
+
+  /// Append 2D vertices
+  template <class T1, class T2, class... Ts>
+  Mesh &vertex2(T1 x1, T2 y1, Ts... xnyn) {
+    return vertex2(x1, y1).vertex2(xnyn...);
   }
 
   Vertices &vertices() { return mVertices; }
@@ -343,6 +475,14 @@ public:
   TexCoord2s &texCoord2s() { return mTexCoord2s; }
   TexCoord3s &texCoord3s() { return mTexCoord3s; }
   Indices &indices() { return mIndices; }
+
+  /// Call function for each face in mesh
+
+  /// If the primitive is points or lines, then the function is called for
+  /// each point or line segment, respectively.
+  const Mesh &
+  forEachFace(const std::function<void(int v1, int v2, int v3)> &onFace) const;
+  Mesh &forEachFace(const std::function<void(int v1, int v2, int v3)> &onFace);
 
   /// Save mesh to file
 
@@ -381,6 +521,12 @@ public:
   /// Print information about Mesh
   void print(FILE *dst = stderr) const;
 
+  /// Debug mesh
+
+  /// @param[in] dst	file to print log to or nullptr for no logging
+  /// \returns whether the mesh is well-formed
+  bool debug(FILE *dst = stderr) const;
+
 protected:
   // Only populated (size>0) buffers will be used
   Vertices mVertices;
@@ -392,15 +538,24 @@ protected:
   Indices mIndices;
 
   Primitive mPrimitive;
+  float mStroke = -1.f;
 };
 
 template <class T>
 Mesh &Mesh::transform(const Mat<4, T> &m, int begin, int end) {
+  if (begin < 0)
+    begin += vertices().size();
   if (end < 0)
     end += vertices().size() + 1; // negative index wraps to end of array
   for (int i = begin; i < end; ++i) {
-    Vertex &v = vertices()[i];
-    v.set(m * Vec<4, T>(v, 1));
+    vertices()[i] = m * Vec<4, T>(vertices()[i], T(1));
+  }
+  if (normals().size() >= vertices().size()) {
+    auto nmat = normalMatrix(m);
+    for (int i = begin; i < end; ++i) {
+      normals()[i] = nmat * normals()[i];
+      normals()[i].normalize(); // since xfm may have scaling
+    }
   }
   return *this;
 }

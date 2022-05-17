@@ -637,7 +637,6 @@ public:
       } else {
         std::cerr << __FUNCTION__ << "Unexpected variant type" << std::endl;
       }
-      assert(fields[0].type() == VariantType::VARIANT_FLOAT);
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
@@ -744,8 +743,11 @@ public:
 
   virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 1) {
-      assert(fields[0].type() == VariantType::VARIANT_INT32);
-      set(fields[0].get<int32_t>());
+      if (fields[0].type() == VariantType::VARIANT_INT32) {
+        set(fields[0].get<int32_t>());
+      } else {
+        set(static_cast<int32_t>(fields[0].toDouble()));
+      }
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
@@ -1679,8 +1681,8 @@ public:
 
   virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 3) {
-      Vec3f vec(fields[0].get<float>(), fields[1].get<float>(),
-                fields[2].get<float>());
+      Vec3f vec(fields[0].toDouble(), fields[1].toDouble(),
+                fields[2].toDouble());
       set(vec);
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
@@ -1779,10 +1781,15 @@ public:
 
   virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 7) {
-      Pose vec(Vec3f(fields[0].get<float>(), fields[1].get<float>(),
-                     fields[2].get<float>()),
-               Quatf(fields[3].get<float>(), fields[4].get<float>(),
-                     fields[5].get<float>(), fields[6].get<float>()));
+      Pose vec(Vec3f(fields[0].toDouble(), fields[1].toDouble(),
+                     fields[2].toDouble()),
+               Quatf(fields[3].toDouble(), fields[4].toDouble(),
+                     fields[5].toDouble(), fields[6].toDouble()));
+      set(vec);
+    } else if (fields.size() == 3) {
+      Pose vec(Vec3f(fields[0].toDouble(), fields[1].toDouble(),
+                     fields[2].toDouble()),
+               mValue.quat());
       set(vec);
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
@@ -2023,9 +2030,43 @@ public:
 
   virtual void setFields(std::vector<VariantValue> &fields) override {
     if (fields.size() == 4) {
-      Color vec(fields[0].get<float>(), fields[1].get<float>(),
-                fields[2].get<float>(), fields[3].get<float>());
-      set(vec);
+      if (fields[0].type() == VariantType::VARIANT_FLOAT) {
+        assert(fields[1].type() == VariantType::VARIANT_FLOAT);
+        assert(fields[2].type() == VariantType::VARIANT_FLOAT);
+        assert(fields[3].type() == VariantType::VARIANT_FLOAT);
+        Color vec(fields[0].get<float>(), fields[1].get<float>(),
+                  fields[2].get<float>(), fields[3].get<float>());
+        set(vec);
+      } else if (fields[0].type() == VariantType::VARIANT_DOUBLE) {
+        assert(fields[1].type() == VariantType::VARIANT_DOUBLE);
+        assert(fields[2].type() == VariantType::VARIANT_DOUBLE);
+        assert(fields[3].type() == VariantType::VARIANT_DOUBLE);
+        Color vec(fields[0].get<double>(), fields[1].get<double>(),
+                  fields[2].get<double>(), fields[3].get<double>());
+        set(vec);
+      } else {
+        std::cout << __FILE__ << ":" << __LINE__
+                  << " ERROR: Unexpected field types for al::Color"
+                  << std::endl;
+      }
+    } else if (fields.size() == 3) {
+      if (fields[0].type() == VariantType::VARIANT_FLOAT) {
+        assert(fields[1].type() == VariantType::VARIANT_FLOAT);
+        assert(fields[2].type() == VariantType::VARIANT_FLOAT);
+        Color vec(fields[0].get<float>(), fields[1].get<float>(),
+                  fields[2].get<float>());
+        set(vec);
+      } else if (fields[0].type() == VariantType::VARIANT_DOUBLE) {
+        assert(fields[1].type() == VariantType::VARIANT_DOUBLE);
+        assert(fields[2].type() == VariantType::VARIANT_DOUBLE);
+        Color vec(fields[0].get<double>(), fields[1].get<double>(),
+                  fields[2].get<double>());
+        set(vec);
+      } else {
+        std::cout << __FILE__ << ":" << __LINE__
+                  << " ERROR: Unexpected field types for al::Color"
+                  << std::endl;
+      }
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;

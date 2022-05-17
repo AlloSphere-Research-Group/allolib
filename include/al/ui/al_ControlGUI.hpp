@@ -313,6 +313,8 @@ public:
     return GUIMarker(GUIMarker::MarkerType::SEPARATOR);
   }
 
+  std::function<void(void)> drawFunction = []() {};
+
 protected:
 private:
   // std::map<std::string, std::vector<Parameter *>> mParameters;
@@ -348,7 +350,7 @@ private:
   bool mFixed{true};
   int mX, mY;
 
-  float mGUIBackgroundAlpha = 0.3;
+  float mGUIBackgroundAlpha = 0.3f;
 
   bool mManageIMGUI{true};
 

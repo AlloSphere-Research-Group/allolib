@@ -95,21 +95,35 @@ DistributedScene::DistributedScene(std::string name, int threadPoolSize,
       });
 }
 
-void al::DistributedScene::allNotesOff() {
-  PolySynth::allNotesOff();
-  osc::Packet p;
-  std::string prefix = "/" + this->name();
-  if (prefix.size() == 1) {
-    prefix = "";
-  }
-  p.beginMessage(prefix + "/allNotesOff");
-  p.endMessage();
+void DistributedScene::registerNotifier(OSCNotifier &notifier) {
+    if (mNotifier) {
+        std::cerr << "ERROR: Notifier has already been set and can't be changed"
+                  << std::endl;
+        return;
+    }
+    mNotifier = &notifier;
+    SynthVoice *voice = mFreeVoices;
+    while (voice) {
+        registerVoiceParameters(voice);
+        voice = voice->next;
+    }
+}
 
-  if (verbose()) {
-    std::cout << "Sending all notes off message" << std::endl;
-  }
-  if (this->mNotifier) {
-    this->mNotifier->send(p);
+void al::DistributedScene::allNotesOff() {
+    PolySynth::allNotesOff();
+    osc::Packet p;
+    std::string prefix = "/" + this->name();
+    if (prefix.size() == 1) {
+        prefix = "";
+    }
+    p.beginMessage(prefix + "/allNotesOff");
+    p.endMessage();
+
+    if (verbose()) {
+        std::cout << "Sending all notes off message" << std::endl;
+    }
+    if (this->mNotifier) {
+        this->mNotifier->send(p);
   }
 }
 
@@ -121,7 +135,8 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
       address = address.substr(rootOSCPath.size() + 1);
     } else {
       if (verbose()) {
-        std::cout << "Prefix " << rootOSCPath << " not matched." << std::endl;
+        //        std::cout << "Prefix " << rootOSCPath << " not matched." <<
+        //        std::endl;
         return false;
       }
     }
@@ -262,165 +277,128 @@ bool al::DistributedScene::consumeMessage(osc::Message &m,
   return false;
 }
 
+void DistributedScene::registerCallbackForParameter(SynthVoice *voice,
+                                                    ParameterMeta *param) {
+  if (Parameter *p = dynamic_cast<Parameter *>(param)) { // Parameter
+    p->registerChangeCallback([&, p, voice](float value) {
+      if (this->mNotifier) {
+        std::string prefix = "/" + this->name() + "/voice";
+        auto previous = p->get();
+        p->setLocking(value); // Force current value to be applied
+        this->mNotifier->notifyListeners(
+            prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(), p,
+            nullptr);
+        p->setLocking(previous); // Force current value to be applied
+      }
+    });
+  } else if (ParameterBool *p =
+                 dynamic_cast<ParameterBool *>(param)) { // Parameter
+    p->registerChangeCallback([&, p, voice](float value) {
+      if (this->mNotifier) {
+        std::string prefix = "/" + this->name() + "/voice";
+        auto previous = p->get();
+        p->setLocking(value); // Force current value to be applied
+        this->mNotifier->notifyListeners(
+            prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(), p,
+            nullptr);
+        p->setLocking(previous); // Force current value to be applied
+      }
+    });
+  } else if (ParameterInt *p =
+                 dynamic_cast<ParameterInt *>(param)) { // Parameter
+    p->registerChangeCallback([&, p, voice](int32_t value) {
+      if (this->mNotifier) {
+        std::string prefix = "/" + this->name() + "/voice";
+        auto previous = p->get();
+        p->setLocking(value); // Force current value to be applied
+        this->mNotifier->notifyListeners(
+            prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(), p,
+            nullptr);
+        p->setLocking(previous); // Force current value to be applied
+      }
+    });
+  } else if (ParameterString *p =
+                 dynamic_cast<ParameterString *>(param)) { // Parameter
+    p->registerChangeCallback([&, p, voice](std::string value) {
+      if (this->mNotifier) {
+        std::string prefix = "/" + this->name() + "/voice";
+        auto previous = p->get();
+        p->setLocking(value); // Force current value to be applied
+        this->mNotifier->notifyListeners(
+            prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(), p,
+            nullptr);
+        p->setLocking(previous); // Force current value to be applied
+      }
+    });
+  } else if (ParameterColor *p =
+                 dynamic_cast<ParameterColor *>(param)) { // Parameter
+    p->registerChangeCallback([&, p, voice](Color value) {
+      if (this->mNotifier) {
+        std::string prefix = "/" + this->name() + "/voice";
+        auto previous = p->get();
+        p->setLocking(value); // Force current value to be applied
+        this->mNotifier->notifyListeners(
+            prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(), p,
+            nullptr);
+        p->setLocking(previous); // Force current value to be applied
+      }
+    });
+  } else if (ParameterVec3 *p =
+                 dynamic_cast<ParameterVec3 *>(param)) { // Parameter
+    p->registerChangeCallback([&, p, voice](Vec3f value) {
+      if (this->mNotifier) {
+        std::string prefix = "/" + this->name() + "/voice";
+        auto previous = p->get();
+        p->setLocking(value); // Force current value to be applied
+        this->mNotifier->notifyListeners(
+            prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(), p,
+            nullptr);
+        p->setLocking(previous); // Force current value to be applied
+      }
+    });
+  } else if (ParameterVec4 *p =
+                 dynamic_cast<ParameterVec4 *>(param)) { // Parameter
+    p->registerChangeCallback([&, p, voice](Vec4f value) {
+      if (this->mNotifier) {
+        std::string prefix = "/" + this->name() + "/voice";
+        auto previous = p->get();
+        p->setLocking(value); // Force current value to be applied
+        this->mNotifier->notifyListeners(
+            prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(), p,
+            nullptr);
+        p->setLocking(previous); // Force current value to be applied
+      }
+    });
+  } else if (ParameterPose *p =
+                 dynamic_cast<ParameterPose *>(param)) { // Parameter
+    p->registerChangeCallback([&, p, voice](Pose value) {
+      if (this->mNotifier) {
+        std::string prefix = "/" + this->name() + "/voice";
+        auto previous = p->get();
+        p->setLocking(value); // Force current value to be applied
+        this->mNotifier->notifyListeners(
+            prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(), p,
+            nullptr);
+        p->setLocking(previous); // Force current value to be applied
+      }
+    });
+  } else {
+    std::cerr << "WARNING: Parameter type not supported in distributed scene. "
+              << typeid(*param).name() << " " << param->getFullAddress()
+              << std::endl;
+  }
+}
+
 void DistributedScene::registerVoiceParameters(SynthVoice *voice) {
   if (!this->mNotifier) {
     return;
   }
-  // TODO add support for all parameter types
+  // register callbacks for trigger parameters
   for (ParameterMeta *param : voice->triggerParameters()) {
-    if (Parameter *p = dynamic_cast<Parameter *>(param)) {
-      p->registerChangeCallback([this, p, voice](float value) {
-        if (this->mNotifier) {
-          std::string prefix = "/" + this->name() + "/voice";
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          auto previous = p->get();
-          p->setLocking(value); // Force current value to be applied
-          this->mNotifier->notifyListeners(
-              prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
-              p, nullptr);
-          p->setLocking(previous); // Force current value to be applied
-        }
-      });
-    } else {
-      std::cerr << "WARNING: Trigger Parameter type not supported in "
-                   "distributed scene."
-                << std::endl;
-    }
+    registerCallbackForParameter(voice, param);
   }
   // register callbacks for internal parameters
   for (auto *param : voice->parameters()) {
-    if (Parameter *p = dynamic_cast<Parameter *>(param)) { // Parameter
-      p->registerChangeCallback([&, p, voice](float value) {
-        if (this->mNotifier) {
-          std::string prefix = "/" + this->name() + "/voice";
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          auto previous = p->get();
-          p->setLocking(value); // Force current value to be applied
-          this->mNotifier->notifyListeners(
-              prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
-              p, nullptr);
-          p->setLocking(previous); // Force current value to be applied
-        }
-      });
-    } else if (ParameterBool *p =
-                   dynamic_cast<ParameterBool *>(param)) { // Parameter
-      p->registerChangeCallback([&, p, voice](float value) {
-        if (this->mNotifier) {
-          std::string prefix = "/" + this->name() + "/voice";
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          auto previous = p->get();
-          p->setLocking(value); // Force current value to be applied
-          this->mNotifier->notifyListeners(
-              prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
-              p, nullptr);
-          p->setLocking(previous); // Force current value to be applied
-        }
-      });
-    } else if (ParameterInt *p =
-                   dynamic_cast<ParameterInt *>(param)) { // Parameter
-      p->registerChangeCallback([&, p, voice](int32_t value) {
-        if (this->mNotifier) {
-          std::string prefix = "/" + this->name() + "/voice";
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          auto previous = p->get();
-          p->setLocking(value); // Force current value to be applied
-          this->mNotifier->notifyListeners(
-              prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
-              p, nullptr);
-          p->setLocking(previous); // Force current value to be applied
-        }
-      });
-    } else if (ParameterString *p =
-                   dynamic_cast<ParameterString *>(param)) { // Parameter
-      p->registerChangeCallback([&, p, voice](std::string value) {
-        if (this->mNotifier) {
-          std::string prefix = "/" + this->name() + "/voice";
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          auto previous = p->get();
-          p->setLocking(value); // Force current value to be applied
-          this->mNotifier->notifyListeners(
-              prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
-              p, nullptr);
-          p->setLocking(previous); // Force current value to be applied
-        }
-      });
-    } else if (ParameterColor *p =
-                   dynamic_cast<ParameterColor *>(param)) { // Parameter
-      p->registerChangeCallback([&, p, voice](Color value) {
-        if (this->mNotifier) {
-          std::string prefix = "/" + this->name() + "/voice";
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          auto previous = p->get();
-          p->setLocking(value); // Force current value to be applied
-          this->mNotifier->notifyListeners(
-              prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
-              p, nullptr);
-          p->setLocking(previous); // Force current value to be applied
-        }
-      });
-    } else if (ParameterVec3 *p =
-                   dynamic_cast<ParameterVec3 *>(param)) { // Parameter
-      p->registerChangeCallback([&, p, voice](Vec3f value) {
-        if (this->mNotifier) {
-          std::string prefix = "/" + this->name() + "/voice";
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          auto previous = p->get();
-          p->setLocking(value); // Force current value to be applied
-          this->mNotifier->notifyListeners(
-              prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
-              p, nullptr);
-          p->setLocking(previous); // Force current value to be applied
-        }
-      });
-    } else if (ParameterVec4 *p =
-                   dynamic_cast<ParameterVec4 *>(param)) { // Parameter
-      p->registerChangeCallback([&, p, voice](Vec4f value) {
-        if (this->mNotifier) {
-          std::string prefix = "/" + this->name() + "/voice";
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          auto previous = p->get();
-          p->setLocking(value); // Force current value to be applied
-          this->mNotifier->notifyListeners(
-              prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
-              p, nullptr);
-          p->setLocking(previous); // Force current value to be applied
-        }
-      });
-    } else if (ParameterPose *p =
-                   dynamic_cast<ParameterPose *>(param)) { // Parameter
-      p->registerChangeCallback([&, p, voice](Pose value) {
-        if (this->mNotifier) {
-          std::string prefix = "/" + this->name() + "/voice";
-          if (prefix.size() == 1) {
-            prefix = "";
-          }
-          auto previous = p->get();
-          p->setLocking(value); // Force current value to be applied
-          this->mNotifier->notifyListeners(
-              prefix + "/" + std::to_string(voice->id()) + p->getFullAddress(),
-              p, nullptr);
-          p->setLocking(previous); // Force current value to be applied
-        }
-      });
-    } else {
-      std::cerr << "WARNING: Parameter type not supported in distributed scene."
-                << std::endl;
-    }
+    registerCallbackForParameter(voice, param);
   }
 }

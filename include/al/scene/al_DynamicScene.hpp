@@ -121,7 +121,7 @@ public:
    * @param pFields std::vector<float> containing the values
    * @return true if able to set the fields
    */
-  virtual bool setTriggerParams(std::vector<float> &pFields,
+  virtual bool setTriggerParams(const std::vector<float> &pFields,
                                 bool noCalls = false) override;
 
   /**
@@ -129,7 +129,7 @@ public:
    * @param pFields std::vector<float> containing the values
    * @return true if able to set the fields
    */
-  virtual bool setTriggerParams(std::vector<VariantValue> pFields,
+  virtual bool setTriggerParams(const std::vector<VariantValue> &pFields,
                                 bool noCalls = false) override;
 
   /**
@@ -232,7 +232,14 @@ public:
    *  If not called, the default is stereo panning over two speakers.
    */
   template <class TSpatializer>
-  std::shared_ptr<TSpatializer> setSpatializer(Speakers &sl) {
+  std::shared_ptr<TSpatializer> setSpatializer(const Speakers &sl) {
+    mSpatializer = std::make_shared<TSpatializer>(sl);
+    mSpatializer->compile();
+    return std::static_pointer_cast<TSpatializer>(mSpatializer);
+  }
+
+  template <class TSpatializer>
+  std::shared_ptr<TSpatializer> setSpatializer(const Speakers &&sl) {
     mSpatializer = std::make_shared<TSpatializer>(sl);
     mSpatializer->compile();
     return std::static_pointer_cast<TSpatializer>(mSpatializer);
@@ -271,7 +278,10 @@ public:
    */
   virtual void update(double dt = 0) final;
 
+  // Set update context to use threading
   void setUpdateThreaded(bool threaded) { mThreadedUpdate = threaded; }
+
+  // Set audio context to use thread pool to render voices
   void setAudioThreaded(bool threaded) { mThreadedAudio = threaded; }
 
   DistAtten<> &distanceAttenuation() { return mDistAtten; }

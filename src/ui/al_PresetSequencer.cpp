@@ -194,6 +194,15 @@ PresetSequencer::registerPresetHandler(PresetHandler &presetHandler) {
   // We need to take over the preset handler timing.
   //  mPresetHandler->setTimeMaster(TimeMasterMode::TIME_MASTER_CPU);
   mDirectory = mPresetHandler->getCurrentPath();
+  if (mVerbose) {
+    for (auto *param : presetHandler.parameters()) {
+      if (std::find(mParameters.begin(), mParameters.end(), param) ==
+          mParameters.end()) {
+        std::cout << "WARNING: Parameter: " << param->getFullAddress()
+                  << " not in sequencer. Will be ignored" << std::endl;
+      }
+    }
+  }
   //		std::cout << "Path set to:" << mDirectory << std::endl;
   return *this;
 }
@@ -215,16 +224,18 @@ PresetSequencer::loadSequence(std::string sequenceName, double timeScale) {
     }
     // FIXME here and in other sequencers white space should be stripped out
     std::stringstream ss(line);
-    std::string name, delta, duration;
-    std::getline(ss, name, ':');
-    std::getline(ss, delta, ':');
-    std::getline(ss, duration, ':');
-    if (name.size() > 0 && name[0] == '@') {
+    std::string p1, p2, p3, p4, p5;
+    std::getline(ss, p1, ':');
+    std::getline(ss, p2, ':');
+    std::getline(ss, p3, ':');
+    std::getline(ss, p4, ':');
+    //    std::getline(ss, p5, ':'); // for morphShape
+    if (p1.size() > 0 && p1[0] == '@') {
       Step step;
       step.type = EVENT;
-      step.name = name.substr(1); // chop initial '@'
-      step.morphTime = std::stof(delta) * timeScale;
-      step.waitTime = std::stof(duration) * timeScale;
+      step.name = p1.substr(1); // chop initial '@'
+      step.morphTime = std::stof(p2) * timeScale;
+      step.waitTime = std::stof(p3) * timeScale;
 
       // FIXME allow any number or parameters
       std::string next;
@@ -233,20 +244,44 @@ PresetSequencer::loadSequence(std::string sequenceName, double timeScale) {
       steps.push_back(step);
       //			 std::cout << name  << ":" << delta << ":" <<
       // duration << std::endl;
-    } else if (name.size() > 0 && name[0] == '+') {
+    } else if (p1.size() > 0 && p1[0] == '+') {
       Step step;
       step.type = PARAMETER;
-      step.name = delta;
-      step.waitTime = std::stof(name.substr(1)) * timeScale;
-      step.params = {float(std::stod(duration) * timeScale)};
-      steps.push_back(step);
-      // std::cout << name  << ":" << delta << ":" << duration << std::endl;
-    } else if (name.size() > 0 && name[0] != '#' && name[0] != '\r') {
+      step.name = p2;
+      if (p1.size() > 1) {
+        step.waitTime = std::stof(p1.substr(1)) * timeScale;
+        step.morphTime = 0;
+        if (p4.size() > 0) {
+          try {
+            step.morphTime = std::stof(p4) * timeScale;
+          } catch (std::invalid_argument &) {
+            std::cerr << "ERROR converting value fo morph time" << std::endl;
+          }
+        }
+        std::string field;
+        for (const auto &c : p3) {
+          if (c == ',') {
+            step.params.push_back(std::stod(field));
+            field.clear();
+          } else {
+            field += c;
+          }
+        }
+        if (field.size() > 0) {
+          step.params.push_back(std::stod(field));
+        }
+        //      step.params = {float(std::stod(duration) * timeScale)};
+        steps.push_back(step);
+      } else {
+        std::cerr << __FUNCTION__ << " ERROR, expecting time value after +"
+                  << std::endl;
+      }
+    } else if (p1.size() > 0 && p1[0] != '#' && p1[0] != '\r') {
       Step step;
       step.type = PRESET;
-      step.name = name;
-      step.morphTime = std::stof(delta) * timeScale;
-      step.waitTime = std::stof(duration) * timeScale;
+      step.name = p1;
+      step.morphTime = std::stof(p2) * timeScale;
+      step.waitTime = std::stof(p3) * timeScale;
       steps.push_back(step);
       // std::cout << name  << ":" << delta << ":" << duration << std::endl;
     }
@@ -383,46 +418,51 @@ void PresetSequencer::updateTime(double time) {
     }
 
     // Queue parameter and event steps before first preset.
+    // FIXME allow paramter events without an initial preset.
+    if (mSteps[mCurrentStep].type != StepType::PRESET) {
+      mParameterTargetTime = mCurrentTime + mSteps[mCurrentStep].waitTime;
+      mLastTimeUpdate = mParameterTargetTime;
+    }
     while ((mSteps.size() > mCurrentStep) &&
-           (mSteps[mCurrentStep].type != PRESET)) {
+           (mSteps[mCurrentStep].type != StepType::PRESET)) {
       mParameterList.push(mSteps[mCurrentStep]);
       // Move current time back to accomodate these steps
-      mCurrentTime -= mSteps[mCurrentStep].waitTime;
-      mLastPresetTime = mCurrentTime;
-      mParameterTargetTime = mLastPresetTime;
-      mLastTimeUpdate = mParameterTargetTime;
+      //      mCurrentTime -= mSteps[mCurrentStep].waitTime;
+      //      mLastPresetTime = mCurrentTime;
       mCurrentStep++;
     }
 
     updateSequencer();
     if (mSteps.size() > (mCurrentStep - 1) && mCurrentStep > 1) {
       Step step = mSteps[mCurrentStep - 1];
-      std::string previousPreset = mSteps[mCurrentStep - 2].name;
-      if (time > (mTargetTime - step.waitTime)) {
-        // We only need to wait, morphing is done
-        if (mPresetHandler) {
-          mPresetHandler->recallPresetSynchronous(step.name);
-          // Just set morph time so it has the expected last value
-          mPresetHandler->setMorphTime(step.morphTime);
-        }
-      } else {
-        // In the middle of morphing
-        if (mPresetHandler) {
-          double remainingMorphTime =
-              mTargetTime - time - double(step.waitTime);
-          if (previousPreset.size() > 0) {
-            mPresetHandler->setInterpolatedPreset(
-                previousPreset, step.name,
-                1.0 - (remainingMorphTime / step.morphTime));
+      if (step.type == StepType::PRESET) {
+        std::string previousPreset = mSteps[mCurrentStep - 2].name;
+        if (time > (mTargetTime - step.waitTime)) {
+          // We only need to wait, morphing is done
+          if (mPresetHandler) {
+            mPresetHandler->recallPresetSynchronous(step.name);
+            // Just set morph time so it has the expected last value
+            mPresetHandler->setMorphTime(step.morphTime);
           }
-          if (mRunning || mStartRunning) {
-            mPresetHandler->morphTo(step.name, remainingMorphTime);
+        } else {
+          // In the middle of morphing
+          if (mPresetHandler) {
+            double remainingMorphTime =
+                mTargetTime - time - double(step.waitTime);
+            if (previousPreset.size() > 0) {
+              mPresetHandler->setInterpolatedPreset(
+                  previousPreset, step.name,
+                  1.0 - (remainingMorphTime / step.morphTime));
+            }
+            if (mRunning || mStartRunning) {
+              mPresetHandler->morphTo(step.name, remainingMorphTime);
+            }
           }
         }
       }
     }
 
-    for (auto cb : mTimeChangeCallbacks) {
+    for (const auto &cb : mTimeChangeCallbacks) {
       cb(time);
     }
   }
@@ -434,7 +474,7 @@ void PresetSequencer::updateSequencer() {
   while (mTargetTime <= mCurrentTime && (mSteps.size() > mCurrentStep)) {
     // Reached target time. Process step
     Step step = mSteps[mCurrentStep];
-    assert(step.type == PRESET);
+    assert(step.type == StepType::PRESET);
 
     if (mPresetHandler && (mRunning || mStartRunning)) {
       mPresetHandler->morphTo(step.name, step.morphTime);
@@ -446,8 +486,12 @@ void PresetSequencer::updateSequencer() {
     mTargetTime += step.morphTime + step.waitTime;
     mCurrentStep++;
     // Now gather all parameter and event steps until next preset
+    if ((mSteps.size() > mCurrentStep) &&
+        mSteps[mCurrentStep].type == StepType::PARAMETER) {
+      mParameterTargetTime += mSteps[mCurrentStep].waitTime;
+    }
     while ((mSteps.size() > mCurrentStep) &&
-           mSteps[mCurrentStep].type != PRESET) {
+           mSteps[mCurrentStep].type != StepType::PRESET) {
       mParameterList.push(mSteps[mCurrentStep]);
       mCurrentStep++;
     }
@@ -456,16 +500,23 @@ void PresetSequencer::updateSequencer() {
   while (!mParameterList.empty()) {
     auto &step = mParameterList.front();
     if (mParameterTargetTime <= mCurrentTime) {
-      if (step.type == PARAMETER) {
-        //          std::cout << "set parameter " << step.presetName <<
-        //          std::endl;
+      if (step.type == StepType::PARAMETER) {
+        //        std::cout << mCurrentTime << " set parameter " << step.name
+        //                  << std::endl;
         for (auto *param : mParameters) {
           if (param->getFullAddress() == step.name) {
-            param->setFields(step.params);
+            if (step.morphTime == 0.0) {
+              param->setFields(step.params);
+            } else {
+              PresetHandler::ParameterStates states;
+              states[param->getFullAddress()] = step.params;
+              assert(mPresetHandler);
+              mPresetHandler->morphTo(states, step.morphTime);
+            }
             break;
           }
         }
-      } else if (step.type == EVENT) {
+      } else if (step.type == StepType::EVENT) {
         for (auto &eventCallback : mEventCallbacks) {
           if (eventCallback.eventName == step.name) {
             eventCallback.callback(eventCallback.callbackData, step.params);
@@ -473,7 +524,7 @@ void PresetSequencer::updateSequencer() {
         }
       }
       mParameterList.pop();
-      if (!mParameterList.empty()) {
+      if (mParameterList.size() > 0) {
         mParameterTargetTime += mParameterList.front().waitTime;
       }
     } else {
@@ -495,7 +546,7 @@ void PresetSequencer::stepSequencer(double dt) {
     // Process time callback
     if ((mCurrentTime - mLastTimeUpdate) >= mTimeChangeMinTimeDelta) {
       mLastTimeUpdate = mCurrentTime + mTimeChangeMinTimeDelta;
-      for (auto cb : mTimeChangeCallbacks) {
+      for (const auto &cb : mTimeChangeCallbacks) {
         cb(float(mCurrentTime));
       }
     }
@@ -565,4 +616,9 @@ void PresetSequencer::stopCpuThread() {
     mSequencerThread->join();
     mSequencerThread = nullptr;
   }
+}
+
+void PresetSequencer::setVerbose(bool newVerbose)
+{
+    mVerbose = newVerbose;
 }

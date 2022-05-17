@@ -87,15 +87,18 @@ class Composition;
  *
  * The first element in each line specifies the preset name that the
  * PresetHandler should load (i.e. a file called "preset1.preset" in the current
- * directory). The second element determines the time to get to the preset from
- * the current state, i.e. the morph time to reach the preset. The third element
- * determines the time the preset should be held after reaching it.
+ * preset directory, see PresetHandler::getCurrentPath() ). The second element
+ * determines the time to get to the preset from the current state, i.e. the
+ * "morph time" to reach the preset. The third element determines the time the
+ * preset should be held after reaching it, the "wait time".
  *
- * The file should end with two colons (::).
+ * The file should end with two colons (::). Everything after this will be
+ * ignored
  *
  * Individual parameters can also be sequenced through the preset sequencer.
- * They must be registered through registerParameter() or the streaming (<<)
- * operator.
+ * They must be registered with the PresetSequencer through registerParameter()
+ * or the streaming (<<) operator, even if they are registered with the
+ * PresetHandler.
  *
  * The line should start with the '+' character followed by the delta time to
  * the previous line. Note that parameters have delta times relative to both
@@ -118,7 +121,7 @@ class Composition;
 class PresetSequencer : public osc::MessageConsumer {
   friend class Composition;
 
- public:
+public:
   PresetSequencer(
       TimeMasterMode timeMasterMode = TimeMasterMode::TIME_MASTER_CPU);
   ~PresetSequencer() override;
@@ -128,15 +131,15 @@ class PresetSequencer : public osc::MessageConsumer {
   struct Step {
     StepType type = PRESET;
     std::string name;
-    float morphTime;  // The time to get to the preset
-    float waitTime;   // The time to stay in the preset before the next step
+    float morphTime; // The time to get to the preset
+    float waitTime;  // The time to stay in the preset before the next step
+                     //    float morphShape; // Shape of interpolation
     std::vector<VariantValue> params;
   };
 
   typedef struct {
     std::string eventName;
-    std::function<void(void *data, std::vector<VariantValue> &params)>
-        callback;
+    std::function<void(void *data, std::vector<VariantValue> &params)> callback;
     void *callbackData;
   } EventCallback;
 
@@ -319,9 +322,15 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   void stepSequencer();
 
+  /**
+   * @brief setSequencerStepTime
+   * @param stepTime in seconds
+   */
   void setSequencerStepTime(double stepTime) { mGranularity = stepTime * 1e9; }
 
- protected:
+  void setVerbose(bool newVerbose);
+
+protected:
   virtual bool consumeMessage(osc::Message &m,
                               std::string rootOSCPath) override;
 
@@ -330,7 +339,7 @@ class PresetSequencer : public osc::MessageConsumer {
 
   void updateSequencer();
 
- private:
+private:
   static void sequencerFunction(PresetSequencer *sequencer);
 
   std::string buildFullPath(std::string sequenceName);
@@ -344,9 +353,10 @@ class PresetSequencer : public osc::MessageConsumer {
   std::vector<ParameterMeta *> mParameters;
   std::string mOSCsubPath;
   std::string mCurrentSequence;
+  bool mVerbose{false};
 
-  std::atomic<float> mTimeRequest{-1.0f};  // Request setting the current time.
-                                           // Passes info to playback thread
+  std::atomic<float> mTimeRequest{-1.0f}; // Request setting the current time.
+                                          // Passes info to playback thread
 
   TimeMasterMode mTimeMasterMode;
 
@@ -354,14 +364,13 @@ class PresetSequencer : public osc::MessageConsumer {
   bool mRunning;
   bool mStartRunning;
   std::queue<Step> mParameterList;
-  double mCurrentTime = 0.0;  // Current time (in seconds)
+  double mCurrentTime = 0.0; // Current time (in seconds)
   double mTargetTime;
-  double mLastPresetTime;  // To anchor parameter deltas
-  double mParameterTargetTime;
+  double mLastPresetTime; // To anchor parameter deltas
+  double mParameterTargetTime{0};
   double mLastTimeUpdate = 0.0;
-  double mStepTime;
 
-  uint64_t mGranularity = 10e6;  // nanoseconds
+  uint64_t mGranularity = 10e6; // nanoseconds time for default step size
   bool mBeginCallbackEnabled;
   std::function<void(PresetSequencer *)> mBeginCallback;
   bool mEndCallbackEnabled;
@@ -371,20 +380,15 @@ class PresetSequencer : public osc::MessageConsumer {
   float mTimeChangeMinTimeDelta = 0.05f;
 
   // CPU thread
-
-  //  std::chrono::high_resolution_clock::time_point mSequenceStart =
-  //      std::chrono::high_resolution_clock::now();
   std::unique_ptr<std::thread> mSequencerThread;
   std::mutex mSequenceLock;
   uint64_t mCurrentStep;
   PresetHandler::ParameterStates mStartValues;
   std::mutex mPlayWaitLock;
   std::condition_variable mPlayWaitVariable;
-  //  std::mutex mPlayStartedLock;
-  //  std::condition_variable mPlayStartedVariable;
   std::shared_ptr<std::promise<void>> mPlayPromiseObj;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_PRESETSEQUENCER_H
+#endif // AL_PRESETSEQUENCER_H

@@ -64,9 +64,9 @@ void AudioDomain::AppAudioCB(AudioIOData &io) {
 // -----
 bool GammaAudioDomain::start() {
   bool ret = true;
-  if (audioIO().channelsIn() > 0 && audioIO().channelsOut() > 0) {
+  if (audioIO().channelsIn() > 0 || audioIO().channelsOut() > 0) {
     ret &= audioIO().open();
-    gam::Domain::spu(audioIO().framesPerSecond());
+    gam::Domain::spu(audioIO().framesPerSecond()); // Set for this object
     gam::sampleRate(audioIO().framesPerSecond());
     ret &= audioIO().start();
   }

@@ -50,6 +50,9 @@ private:
   AudioIO mAudioIO;
 };
 
+/**
+ * @brief Convenience class that synchronizes hardware fps to Gamma objects
+ */
 class GammaAudioDomain : public AudioDomain, public gam::Domain {
 public:
   bool start() override;

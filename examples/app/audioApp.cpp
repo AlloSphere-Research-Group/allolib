@@ -15,7 +15,7 @@
 using namespace al;
 
 class MyAudioApp {
- public:
+public:
   // The app will run an "AudioDomain"
   AudioDomain audioDomain;
   ConsoleDomain consoleDomain;
@@ -51,6 +51,8 @@ class MyAudioApp {
       return true;
     };
     // Set sample rate of Gamma from rate configured in audio domain
+    // al::App will do this for you automatically, but you have to do it
+    // manuall
     gam::sampleRate(audioDomain.audioIO().framesPerSecond());
     audioDomain.audioIO().print();
     // start audio domain. This domain is non blocking, so we will keep the
@@ -59,7 +61,7 @@ class MyAudioApp {
 
     std::cout << "Enter a number to set the frequency. Press enter to quit."
               << std::endl;
-    consoleDomain.start();  // Console Domain is a blocking domain
+    consoleDomain.start(); // Console Domain is a blocking domain
 
     // stop and cleanup domains
     audioDomain.stop();

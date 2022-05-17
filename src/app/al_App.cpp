@@ -314,27 +314,19 @@ void App::createDomains() {
 }
 
 void App::initializeDomains() {
-  for (auto domain : mDomainList) {
-    auto domainPtr = domain.get();
-    if (strcmp(typeid(*domainPtr).name(),
-               typeid(OpenGLGraphicsDomain).name()) == 0) {
-      dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)->onCreate =
-          std::bind(&App::onCreate, this);
-
+  for (const auto &domain : mDomainList) {
+    auto *domainPtr = domain.get();
+    if (auto d = dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)) {
+      d->onCreate = std::bind(&App::onCreate, this);
+      assert(mSimulationDomain);
       mSimulationDomain->simulationFunction =
           std::bind(&App::onAnimate, this, std::placeholders::_1);
-    } else if (strcmp(typeid(*domainPtr).name(),
-                      typeid(GammaAudioDomain).name()) == 0) {
-      dynamic_cast<GammaAudioDomain *>(domainPtr)->onSound =
-          std::bind(&App::onSound, this, std::placeholders::_1);
-    } else if (strcmp(typeid(*domainPtr).name(), typeid(AudioDomain).name()) ==
-               0) {
-      dynamic_cast<AudioDomain *>(domainPtr)->onSound =
-          std::bind(&App::onSound, this, std::placeholders::_1);
-    } else if (strcmp(typeid(*domainPtr).name(), typeid(OSCDomain).name()) ==
-               0) {
-      dynamic_cast<OSCDomain *>(domainPtr)->onMessage =
-          std::bind(&App::onMessage, this, std::placeholders::_1);
+    } else if (auto d = dynamic_cast<GammaAudioDomain *>(domainPtr)) {
+      d->onSound = std::bind(&App::onSound, this, std::placeholders::_1);
+    } else if (auto d = dynamic_cast<AudioDomain *>(domainPtr)) {
+      d->onSound = std::bind(&App::onSound, this, std::placeholders::_1);
+    } else if (auto d = dynamic_cast<OSCDomain *>(domainPtr)) {
+      d->onMessage = std::bind(&App::onMessage, this, std::placeholders::_1);
     } else {
       std::cout << "WARNING: Domain unknown for auto connection" << std::endl;
     }

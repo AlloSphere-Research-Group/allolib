@@ -6,6 +6,9 @@
 #include <cctype>
 #include <cstring>
 
+constexpr int handshakeServerPort = 16987;
+constexpr int listenerFirstPort = 14000;
+
 using namespace al;
 
 // OSCNotifier implementation -------------------------------------------------
@@ -182,6 +185,7 @@ void OSCNotifier::startHandshakeServer(std::string address) {
   }
   for (int i = 0; i < 100;
        i++) { // Check to see if there are any listeners already running
+    // Should we use broadcast here instead?
     osc::Send handshake(listenerFirstPort + i, "127.0.0.1");
     handshake.send("/requestHandshake", handshakeServerPort);
   }
@@ -189,15 +193,15 @@ void OSCNotifier::startHandshakeServer(std::string address) {
 
 // ParameterServer ------------------------------------------------------------
 
-ParameterServer::ParameterServer(std::string oscAddress, int oscPort,
+ParameterServer::ParameterServer(std::string address, int oscPort,
                                  bool autoStart)
     : mServer(nullptr) {
-  mOscAddress = oscAddress;
+  mOscAddress = address;
   mOscPort = oscPort;
   OSCNotifier::mHandshakeHandler.mParameterServer = this;
 
   if (autoStart) {
-    listen(oscPort, oscAddress);
+    listen(oscPort, address);
   }
 }
 
@@ -211,7 +215,7 @@ ParameterServer::~ParameterServer() {
   }
 }
 
-bool ParameterServer::listen(int oscPort, std::string oscAddress) {
+bool ParameterServer::listen(int oscPort, std::string address) {
   std::unique_lock<std::mutex> lk(mServerLock);
   if (mServer) {
     mServer->stop();
@@ -223,14 +227,14 @@ bool ParameterServer::listen(int oscPort, std::string oscAddress) {
   } else {
     mOscPort = oscPort;
   }
-  if (oscAddress.size() == 0) {
-    oscAddress = mOscAddress;
+  if (address.size() == 0) {
+    address = mOscAddress;
   } else {
-    mOscAddress = oscAddress;
+    mOscAddress = address;
   }
   mServer = new osc::Recv();
   if (mServer) {
-    if (mServer->open(oscPort, oscAddress.c_str())) {
+    if (mServer->open(oscPort, address.c_str())) {
       mServer->handler(*this);
       mServer->start();
     } else {
@@ -743,8 +747,10 @@ void ParameterServer::runCommand(osc::Message &m) {
       int port;
       m >> port;
       //        mNotifiers.push_back({addr, port});
-      std::cout << "Sending listener info to: " << addr << ":" << port
-                << std::endl;
+      if (mVerbose) {
+        std::cout << "Sending listener info to: " << addr << ":" << port
+                  << std::endl;
+      }
       std::string serverAddress = mServer->address();
       if (serverAddress == "0.0.0.0" || serverAddress.size() == 0) {
         // FIXME this should be solved on the other end
@@ -846,17 +852,19 @@ void OSCNotifier::HandshakeHandler::onMessage(osc::Message &m) {
     std::unique_lock<std::mutex> lk(notifier->mNodeLock);
     int commandPort;
     m >> commandPort;
-    for (auto node : notifier->mNodes) {
+    for (const auto &node : notifier->mNodes) {
       if (node.first == m.senderAddress() && node.second == commandPort) {
-        std::cout << "Received unnecessary handshake from " << m.senderAddress()
+        std::cout << "Received duplicate handshake from " << m.senderAddress()
                   << ":" << commandPort << std::endl;
         return;
       }
     }
     notifier->mNodes.push_back({m.senderAddress(), commandPort});
+
     std::cout << "ParameterServer handshake from " << m.senderAddress() << ":"
               << commandPort << std::endl;
 
+    // Request listener info to get address and port for OSC forwarding
     osc::Send listenerRequest(commandPort, m.senderAddress().c_str());
     listenerRequest.send("/requestListenerInfo",
                          notifier->mHandshakeServer.address(),

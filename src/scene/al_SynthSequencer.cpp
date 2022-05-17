@@ -50,6 +50,9 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   //        synth().allNotesOff();
   // Add an offset of 0.1 to make sure the allNotesOff message gets processed
   // before the sequence
+  if (playing()) {
+    stopSequence();
+  }
   mMasterTime = startTime;
   double currentMasterTime = mMasterTime;
   const double startPad = 0.0;
@@ -64,7 +67,7 @@ bool SynthSequencer::playSequence(std::string sequenceName, float startTime) {
   }
   mPlaybackStartTime = currentMasterTime + startPad;
   mPlaying = true;
-  for (auto cb : mSequenceBeginCallbacks) {
+  for (const auto &cb : mSequenceBeginCallbacks) {
     cb(mLastSequencePlayed);
   }
   if (mMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
@@ -435,6 +438,11 @@ SynthSequencer::loadSequence(std::string sequenceName, double timeOffset,
       std::string tempo;
       std::getline(ss, tempo);
       tempoFactor = 60.0 / std::stod(tempo);
+    } else if (command == '#') {
+      // Ignore comment
+      if (verbose()) {
+        std::cout << "Comment: " << line << std::endl;
+      }
     } else {
       if (command > 0) {
         if (verbose()) {
@@ -516,7 +524,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
   if (mEventLock.try_lock()) {
     if (mNextEvent < mEvents.size()) {
       int i = 0;
-      for (auto cb : mTimeChangeCallbacks) {
+      for (const auto &cb : mTimeChangeCallbacks) {
         mTimeAccumCallbackNs[i] += (mMasterTime - blockStartTime) * 1.0e9;
         //        std::cout << mTimeAccumCallbackNs[i] << std::endl;
         if (mTimeAccumCallbackNs[i] * 1.0e-9 > cb.second) {
@@ -541,18 +549,20 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
           event->voice = nullptr; // Voice has been consumed, all voices
                                   // reamining in the event list are put back
                                   // in the synth's free voice pool
+          if (verbose()) {
+            std::cout << " ++ trigger on EVENT_VOICE " << event->voice->id()
+                      << " " << mMasterTime << std::endl;
+          }
         } else if (event->type == SynthSequencerEvent::EVENT_PFIELDS) {
           auto *voice = mPolySynth->getVoice(event->fields.name);
           if (voice) {
             voice->setTriggerParams(event->fields.pFields);
 
             event->voiceId = mPolySynth->triggerOn(voice, event->offsetCounter);
-
-            //            std::cout << " ++ trigger ON " << voice->id() << " "
-            //            << mMasterTime
-            //                      << "   " <<
-            //                      event->fields.pFields[0].get<float>()
-            //                      << std::endl;
+            if (verbose()) {
+              std::cout << " ++ trigger ON EVENT_PFIELDS " << voice->id() << " "
+                        << mMasterTime << std::endl;
+            }
             //            event->voice = voice;
           } else {
             std::cerr
@@ -561,10 +571,10 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
           }
         } else if (event->type == SynthSequencerEvent::EVENT_TEMPO) {
           // TODO support tempo events
+          if (verbose()) {
+            std::cout << " ++ EVENT_TEMPO not implemented" << std::endl;
+          }
         }
-        //                std::cout << "Event " << mNextEvent << " " <<
-        //                event->startTime << " " <<
-        //                typeid(*event->voice).name() << std::endl;
         mNextEvent++;
         iter++;
         if (iter == mEvents.end()) {
@@ -582,12 +592,13 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
       double eventTermination = event.startTime + event.duration;
       if (event.voiceId >= 0 && eventTermination <= mMasterTime) {
         mPolySynth->triggerOff(event.voiceId);
-        //        std::cout << "trigger off " << event.voiceId << " " <<
-        //        eventTermination
-        //                  << " " << mMasterTime << std::endl;
+        if (verbose()) {
+          std::cout << "trigger off " << event.voiceId << " "
+                    << eventTermination << " " << mMasterTime << std::endl;
+        }
         event.voiceId = -1;
-        event.voice = nullptr; // When an event gives up a voice, it
-        //        is done.
+        // When an event gives up a voice, it is done
+        event.voice = nullptr;
         triggerOffThisBlock = true;
       }
       if (eventTermination > mMasterTime) {
@@ -597,7 +608,11 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
     if (allEventsDone &&
         triggerOffThisBlock) { // This block marks the end of the sequence
       mPlaying = false;
-      for (auto cb : mSequenceEndCallbacks) {
+      if (verbose()) {
+        std::cout << "Events done. Calling end callback " << mMasterTime
+                  << std::endl;
+      }
+      for (const auto &cb : mSequenceEndCallbacks) {
         cb(mLastSequencePlayed);
       }
     }

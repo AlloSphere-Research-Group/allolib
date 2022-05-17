@@ -41,6 +41,8 @@ public:
     return newDomain;
   }
 
+  virtual void start();
+
   virtual void onInit() {}
   virtual void onCreate() {}
   virtual void onAnimate(double dt) { (void)dt; }
@@ -146,8 +148,6 @@ public:
   // Access to OSC domain
   ParameterServer &parameterServer();
 
-  virtual void start();
-
   // Domain access
   std::shared_ptr<OSCDomain> oscDomain() { return mOSCDomain; }
   std::shared_ptr<AudioDomain> audioDomain() { return mAudioDomain; }
@@ -165,6 +165,7 @@ public:
     bool keyDown(const Keyboard &k);
     App *app;
   };
+
   StandardWindowAppKeyControls stdControls;
 
   // Modify these with care

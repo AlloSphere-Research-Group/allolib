@@ -24,7 +24,7 @@ public:
 
   std::string name() { return mName; }
 
-  void registerNotifier(OSCNotifier &notifier) { mNotifier = &notifier; }
+  void registerNotifier(OSCNotifier &notifier);
 
   virtual void allNotesOff() override;
 
@@ -43,6 +43,8 @@ public:
   void registerVoiceParameters(SynthVoice *voice);
 
 protected:
+  void registerCallbackForParameter(SynthVoice *voice, ParameterMeta *param);
+
 private:
   OSCNotifier *mNotifier{nullptr};
   std::string mName;

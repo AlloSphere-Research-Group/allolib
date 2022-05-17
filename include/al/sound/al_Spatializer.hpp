@@ -70,12 +70,12 @@ public:
   virtual void prepare(AudioIOData &io) {}
 
   /// Render audio buffer in position
-  virtual void renderBuffer(AudioIOData &io, const Pose &listeningPose,
+  virtual void renderBuffer(AudioIOData &io, const Vec3f &pos,
                             const float *samples,
                             const unsigned int &numFrames) = 0;
 
   /// Render audio sample in position
-  virtual void renderSample(AudioIOData &io, const Pose &listeningPose,
+  virtual void renderSample(AudioIOData &io, const Vec3f &pos,
                             const float &sample,
                             const unsigned int &frameIndex) = 0;
 
@@ -88,6 +88,9 @@ public:
 
   /// Get number of speakers
   int numSpeakers() const { return int(mSpeakers.size()); }
+
+  // Get speaker layout
+  const Speakers &speakerLayout() { return mSpeakers; }
 
   /// Set number of frames
   virtual void numFrames(unsigned int v) { mNumFrames = v; }

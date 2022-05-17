@@ -208,8 +208,6 @@ void DynamicScene::render(AudioIOData &io) {
             // Rotate vector according to listener-rotation
             Quatd srcRot = mListenerPose.quat();
             listeningDir = srcRot.rotate(direction);
-            // FIXME horrible hack!!!
-            listeningDir.y = -listeningDir.y;
             posOffsets = posVoice->audioOutOffsets();
             assert(posOffsets.size() == 0 ||
                    posOffsets.size() == posVoice->numOutChannels());
@@ -245,13 +243,15 @@ void DynamicScene::render(AudioIOData &io) {
             io.frame(offset);
             internalAudioIO.frame(offset);
             Pose offsetPose = listeningDir;
+            // FIXME rotate according to listener orientation
             if (posOffsets.size() > 0) {
               // Is there need to rotate the position according to the quat()?
               // It would only really be useful if the source has a direction
               // dependent dispersion model...
               offsetPose.vec() += posOffsets[i];
             }
-            mSpatializer->renderBuffer(io, offsetPose,
+            Vec3f adjustedPos = offsetPose.vec();
+            mSpatializer->renderBuffer(io, adjustedPos,
                                        internalAudioIO.outBuffer(i), fpb);
           }
         }
@@ -437,8 +437,9 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
             if (posOffsets.size() > 0) {
               offsetPose.vec() += posOffsets[i];
             }
+            Vec3f adjustedPos = offsetPose.vec();
             scene->mSpatializer->renderBuffer(
-                io, offsetPose, internalAudioIO.outBuffer(i), fpb);
+                io, adjustedPos, internalAudioIO.outBuffer(i), fpb);
           }
           scene->mSpatializerLock.unlock();
         }
@@ -472,7 +473,7 @@ bool PositionedVoice::setTriggerParams(float *pFields, int numFields) {
   return ok;
 }
 
-bool PositionedVoice::setTriggerParams(std::vector<float> &pFields,
+bool PositionedVoice::setTriggerParams(const std::vector<float> &pFields,
                                        bool noCalls) {
   bool ok = SynthVoice::setTriggerParams(pFields, noCalls);
   if (pFields.size() ==
@@ -501,7 +502,7 @@ bool PositionedVoice::setTriggerParams(std::vector<float> &pFields,
   //  return setTriggerParams(pFields.data(), pFields.size(), noCalls);
 }
 
-bool PositionedVoice::setTriggerParams(std::vector<VariantValue> pFields,
+bool PositionedVoice::setTriggerParams(const std::vector<VariantValue> &pFields,
                                        bool noCalls) {
   bool ok = SynthVoice::setTriggerParams(pFields);
   if (pFields.size() ==

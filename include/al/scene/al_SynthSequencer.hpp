@@ -171,6 +171,8 @@ struct SynthEvent {
  Negative numbers are allowed.
  *
  *
+ * When SynthSequencer controls a DynamicScene, 8 additional values are appended
+ * corresponding to position(x,y,z), quaternion (w, x,y,z) and size.
  */
 
 class SynthSequencer {

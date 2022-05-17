@@ -119,10 +119,10 @@ void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix,
   auto spinDecimals = param->getHint("input", &isSpinBox);
   if (isSpinBox) {
     std::string format = "%." + std::to_string(int(spinDecimals)) + "f";
-    changed = ImGui::InputFloat((param->displayName() + suffix).c_str(), &value,
-                                pow(10, -spinDecimals),
-                                pow(10, -(spinDecimals - 1.0)), format.c_str(),
-                                ImGuiInputTextFlags_EnterReturnsTrue);
+    changed = ImGui::InputFloat(
+        (param->displayName() + suffix).c_str(), &value,
+        std::pow(10, -spinDecimals), std::pow(10, -(spinDecimals - 1.0)),
+        format.c_str(), ImGuiInputTextFlags_EnterReturnsTrue);
   } else {
     changed = ImGui::SliderFloat((param->displayName() + suffix).c_str(),
                                  &value, param->min(), param->max());
@@ -1193,7 +1193,8 @@ void ParameterGUI::drawMIDIIn(RtMidiIn *midiIn) {
   ImGui::PopID();
 }
 
-void ParameterGUI::drawAudioIO(AudioIO *io) {
+bool ParameterGUI::drawAudioIO(AudioIO *io) {
+  bool ret = false;
   struct AudioIOState {
     int currentSr = 0;
     int currentBufSize = 0;
@@ -1252,10 +1253,12 @@ void ParameterGUI::drawAudioIO(AudioIO *io) {
         io->device(AudioDevice(state.currentDevice));
         io->open();
         io->start();
+        ret = true;
       }
     }
   }
   ImGui::PopID();
+  return ret;
 }
 
 void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,

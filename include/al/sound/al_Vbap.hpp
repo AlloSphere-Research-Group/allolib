@@ -78,21 +78,21 @@ struct SpeakerTriple {
   unsigned int s2Chan;
   unsigned int s3Chan;
 
-  bool loadVectors(const std::vector<Speaker>& spkrs);
+  bool loadVectors(const std::vector<Speaker> &spkrs);
 };
 
 /// Vector-based amplitude panner
 ///
 /// @ingroup Sound
 class Vbap : public Spatializer {
- public:
+public:
   typedef enum {
     KEEP_SAME_ELEVATION =
-        0x1,  // Don't discard triplets that have the same elevation
+        0x1, // Don't discard triplets that have the same elevation
   } VbapOptions;
 
   /// @param[in] sl	A speaker layout
-  Vbap(const Speakers& sl, bool is3D = false);
+  Vbap(const Speakers &sl, bool is3D = false);
 
   void setOptions(VbapOptions options) { mOptions = options; }
 
@@ -117,14 +117,14 @@ class Vbap : public Spatializer {
   /// recomputed
   void set3D(bool is3D) { mIs3D = is3D; }
 
-  virtual void renderSample(AudioIOData& io, const Pose& reldir,
-                            const float& sample,
-                            const unsigned int& frameIndex) override;
-  virtual void renderBuffer(AudioIOData& io, const Pose& reldir,
-                            const float* samples,
-                            const unsigned int& numFrames) override;
+  virtual void renderSample(AudioIOData &io, const Vec3f &reldir,
+                            const float &sample,
+                            const unsigned int &frameIndex) override;
+  virtual void renderBuffer(AudioIOData &io, const Vec3f &pos,
+                            const float *samples,
+                            const unsigned int &numFrames) override;
 
-  virtual void print(std::ostream& stream = std::cout) override;
+  virtual void print(std::ostream &stream = std::cout) override;
 
   /// Manually add a triple from indeces to speakers
   void makeTriple(int s1, int s2, int s3 = -1);
@@ -132,26 +132,26 @@ class Vbap : public Spatializer {
   // Returns vector of triplets
   std::vector<SpeakerTriple> triplets() const;
 
- private:
+private:
   std::vector<SpeakerTriple> mTriplets;
-  std::map<unsigned int, std::vector<unsigned int> > mPhantomChannels;
+  std::map<unsigned int, std::vector<unsigned int>> mPhantomChannels;
   //	Listener* mListener;
   bool mIs3D;
   VbapOptions mOptions;
 
-  Vec3d computeGains(const Vec3d& vecA, const SpeakerTriple& speak);
+  Vec3d computeGains(const Vec3d &vecA, const SpeakerTriple &speak);
 
   /// 2D VBAP, Build internal list of speaker pairs
-  void findSpeakerPairs(const Speakers& spkrs);
+  void findSpeakerPairs(const Speakers &spkrs);
 
   /// 3D VBAP, build list of internal speaker triplets
-  void findSpeakerTriplets(const Speakers& spkrs);
+  void findSpeakerTriplets(const Speakers &spkrs);
 
   bool isCrossing(Vec3d c, Vec3d li, Vec3d lj, Vec3d ln, Vec3d lm);
 
   /// Manually add triplet of speakers, in case not set automatically
-  void addTriple(const SpeakerTriple& st);
+  void addTriple(const SpeakerTriple &st);
 };
 
-}  // namespace al
+} // namespace al
 #endif

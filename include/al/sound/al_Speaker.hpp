@@ -98,7 +98,7 @@ public:
 };
 
 /// A set of speakers
-typedef std::vector<Speaker> Speakers;
+using Speakers = std::vector<Speaker>;
 
 /// Generic layout of N speakers spaced equidistantly in a ring
 ///
@@ -145,7 +145,7 @@ Speakers OctalSpeakerLayout(unsigned int deviceChannelStart = 0,
 /// Generic layout of 8 speakers arranged in a cube with listener in the middle
 ///
 /// @ingroup allocore
-Speakers CubeLayout(unsigned int deviceChannelStart = 0);
+Speakers CubeLayout(unsigned int deviceChannelStart = 0, float cubeSide = 1.0);
 
 } // namespace al
 #endif

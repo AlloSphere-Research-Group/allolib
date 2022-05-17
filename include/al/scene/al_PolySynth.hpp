@@ -90,16 +90,7 @@ public:
 the other
 +    * setTriggerParams() that take an argument determine this.
      */
-  virtual bool setTriggerParams(float *pFields, int numFields = -1) {
-    if (numFields < (int)mTriggerParams.size()) {
-      // std::cout << "Pfield size mismatch. Ignoring all." << std::endl;
-      return false;
-    }
-    for (auto &param : mTriggerParams) {
-      param->fromFloat(*pFields++);
-    }
-    return true;
-  }
+  virtual bool setTriggerParams(float *pFields, int numFields = -1);
 
   /**
    * @brief Set trigger parameter values
@@ -109,31 +100,15 @@ the other
    * Trigger parameters are parameters meant to be set at triggering,
    * but that then stay constant throughout the duration of the instance.
    */
-  virtual bool setTriggerParams(std::vector<float> &pFields,
-                                bool noCalls = false) {
-    if (pFields.size() < mTriggerParams.size()) {
-      // std::cout << "pField count mismatch. Ignoring." << std::endl;
-      return false;
-    }
-    auto it = pFields.begin();
-    if (noCalls) {
-      for (auto &param : mTriggerParams) {
-        static_cast<Parameter *>(param)->setNoCalls(*it++);
-      }
-    } else {
-      for (auto &param : mTriggerParams) {
-        static_cast<Parameter *>(param)->set(*it++);
-      }
-    }
-    return true;
-  }
+  virtual bool setTriggerParams(const std::vector<float> &pFields,
+                                bool noCalls = false);
 
   /**
    * @brief Set parameter values
    * @param pFields std::vector<float> containing the values
    * @return true if able to set the fields
    */
-  virtual bool setTriggerParams(std::vector<VariantValue> pFields,
+  virtual bool setTriggerParams(const std::vector<VariantValue> &pFields,
                                 bool noCalls = false);
 
   /**
@@ -485,21 +460,21 @@ public:
    * @return
    *
    * Returns a free voice from the internal dynamic allocated pool.
-   * If voice is not available. It will be allocated. Can return
-   * nullptr if the class name and creator have not been registered
-   * with registerSynthClass()
+   * If voice is not available, it will be allocated if disableAllocation() has
+   * not been called. Can return nullptr if the class name and creator have not
+   * been registered with registerSynthClass()
    */
-  SynthVoice *getVoice(std::string name, bool forceAlloc = false);
+  /*[[nodiscard]]*/ SynthVoice *getVoice(std::string name,
+                                         bool forceAlloc = false);
 
   /**
    * @brief Get the first available voice with minimal checks
-   * @param forceAlloc
    * @return
    *
-   * This is a quick function with littl eoverhead for PolySynths that handle
+   * This is a quick function with little overhead for PolySynths that handle
    * only one type of voice.
    */
-  SynthVoice *getFreeVoice();
+  /*[[nodiscard]]*/ SynthVoice *getFreeVoice();
 
   /**
    * @brief render all the active voices into the audio buffers

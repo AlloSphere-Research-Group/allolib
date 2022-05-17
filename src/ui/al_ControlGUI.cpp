@@ -6,7 +6,7 @@
 using namespace al;
 using namespace std;
 
-void ControlGUI::draw(Graphics & /*g*/) {
+void ControlGUI::draw(Graphics &g) {
 
   if (mManageIMGUI) {
     begin();
@@ -119,6 +119,7 @@ void ControlGUI::drawWidgets() {
       }
     }
   }
+  drawFunction();
   ImGui::PopID();
 }
 

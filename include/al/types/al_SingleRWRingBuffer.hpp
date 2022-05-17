@@ -96,8 +96,8 @@ public:
   void clear() { mRead = mWrite; }
 
 protected:
-  size_t mSize, mWrap;
-  size_t mRead, mWrite;
+  size_t mSize{0}, mWrap{0};
+  size_t mRead{0}, mWrite{0};
   std::vector<char> mData;
 };
 
