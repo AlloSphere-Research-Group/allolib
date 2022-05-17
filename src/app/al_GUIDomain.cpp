@@ -15,16 +15,18 @@ bool GUIPanelDomain::tick() {
   tickSubdomains(true);
   // TODO add option for fixed position
 
+  guiConfigurationCode();
   if (gui.mFixed) {
     ImGui::SetNextWindowPos(ImVec2(mx, my), ImGuiCond_Always);
   } else {
     ImGui::SetNextWindowPos(ImVec2(mx, my), ImGuiCond_FirstUseEver);
   }
-  //  ImGui::SetNextWindowSize(ImVec2(width(), height()));
+  if (mw != -1 && mh != -1) {
+    ImGui::SetNextWindowSize(ImVec2(mw, mh));
+  }
   ImGui::SetNextWindowBgAlpha(gui.mGUIBackgroundAlpha);
-  ImGui::Begin(gui.mName.c_str(), nullptr, ImGuiWindowFlags_None);
+  ImGui::Begin(gui.mName.c_str(), nullptr, mFlags);
 
-  guiConfigurationCode();
   guiCode();
   gui.drawWidgets();
 
@@ -34,19 +36,23 @@ bool GUIPanelDomain::tick() {
   return true;
 }
 
-void GUIPanelDomain::configure(int initalx, int initialy, std::string name) {
+void GUIPanelDomain::configure(int initialx, int initialy, std::string name) {
+  mx = initialx;
+  my = initialy;
   gui.setTitle(name);
 }
 
 void GUIPanelDomain::fixedPosition(bool fixed) { gui.fixedPosition(fixed); }
 
 void GUIPanelDomain::setBackgroundAlpha(float alpha) {
-    gui.backgroundAlpha(alpha);
+  gui.backgroundAlpha(alpha);
 }
 
+void GUIPanelDomain::setFlags(int flags) { mFlags = flags; }
+
 bool GUIDomain::init(ComputationDomain *parent) {
-    initializeSubdomains(true);
-    if (!mInitialized) {
+  initializeSubdomains(true);
+  if (!mInitialized) {
     imguiInit();
     mInitialized = true;
   }
