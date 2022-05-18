@@ -73,8 +73,8 @@ void Lbap::renderBuffer(AudioIOData &io, const Vec3f &reldir,
         fraction = (fraction - mDispersionOffset) / (1.0 - mDispersionOffset);
         // Using linear adjustment. should other adjustment be used?
         float dispersionBaseGain = 1.0 / sqrt(it->vbap->speakerLayout().size());
-        float disperseFractionGain = cos(fraction * M_PI_2);
-        float focusedFractionGain = sin(fraction * M_PI_2);
+        float disperseFractionGain = sin(fraction * M_PI_2);
+        float focusedFractionGain = cos(fraction * M_PI_2);
 
         io.frame(0);
         while (io()) { // Add dispersion
@@ -85,7 +85,9 @@ void Lbap::renderBuffer(AudioIOData &io, const Vec3f &reldir,
                                             dispersionBaseGain *
                                             samples[io.frame()];
             } else {
-              io.out(spkr.deviceChannel) *= focusedFractionGain;
+              io.out(spkr.deviceChannel) *=
+                  dispersionBaseGain +
+                  focusedFractionGain * (1 - dispersionBaseGain);
             }
           }
         }
@@ -136,6 +138,7 @@ void Lbap::renderBuffer(AudioIOData &io, const Vec3f &reldir,
       buffer[i + bufferSize] = samples[i] * gainBottom;
     }
 
+    // TODO we should do dispersion on inner rings too
     if (gainTop != 0) {
       topRingIt->vbap->renderBuffer(io, reldir, buffer, bufferSize);
     }

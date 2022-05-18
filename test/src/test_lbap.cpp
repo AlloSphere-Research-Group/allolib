@@ -489,7 +489,7 @@ TEST(LBAP, LBAPAllosphereDispersion) {
   Vec3f pos;
 
   // from above
-  pos = Vec3f(0, 20, 0);
+  pos = Vec3f(0, 5, 0);
   audioData.zeroOut();
   lbapPanner.renderBuffer(audioData, pos, samples, fpb);
   for (int i = 0; i < fpb; i++) {
@@ -497,7 +497,9 @@ TEST(LBAP, LBAPAllosphereDispersion) {
       if (chan == 0 || chan == 1 || chan == 2 || chan == 3 || chan == 4 ||
           chan == 5 || chan == 6 || chan == 7 || chan == 8 || chan == 9 ||
           chan == 10 || chan == 11) {
-        EXPECT_NE(audioData.out(chan, i), 0);
+        EXPECT_GT(audioData.out(chan, i), 1e-6);
+        EXPECT_FLOAT_EQ(audioData.out(chan, i), audioData.out(0, i));
+        //        std::cout << audioData.out(0, i) << std::endl;
       } else {
         EXPECT_NEAR(audioData.out(chan, i), 0, 1e-6);
       }
@@ -510,12 +512,64 @@ TEST(LBAP, LBAPAllosphereDispersion) {
   lbapPanner.renderBuffer(audioData, pos, samples, fpb);
   for (int i = 0; i < fpb; i++) {
     for (int chan = 0; chan < 60; chan++) {
-      if (/*chan == 0 || chan == 1 || */chan == 2 || chan == 3 /*|| chan == 4 ||
-              chan == 5 || chan == 6 || chan == 7 || chan == 8 || chan == 9 ||
-              chan == 10 || chan == 11*/) {
-        EXPECT_NE(audioData.out(chan, i), 0);
+      if (chan == 2 || chan == 3) {
+        EXPECT_GT(audioData.out(chan, i), 1e-6);
       } else {
         EXPECT_NEAR(audioData.out(chan, i), 0, 1e-6);
+      }
+    }
+  }
+
+  // at speaker elevation (no dispersion)
+  float highElev = sl[0].elevation;
+  pos = Vec3f(0, 1 / cos(highElev * M_2PI / 360.0), -1);
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (int i = 0; i < fpb; i++) {
+    for (int chan = 0; chan < 60; chan++) {
+      if (chan == 2 || chan == 3) {
+        EXPECT_GT(audioData.out(chan, i), 1e-6);
+      } else {
+        EXPECT_NEAR(audioData.out(chan, i), 0, 1e-6);
+      }
+    }
+  }
+
+  // at dispersion threshold
+  float dispThreshold = 0.5 * (90 + sl[0].elevation);
+  pos = Vec3f(0, tan(dispThreshold * M_2PI / 360.0), -1);
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (int i = 0; i < fpb; i++) {
+    for (int chan = 0; chan < 60; chan++) {
+      if (chan == 2 || chan == 3) {
+        EXPECT_GT(audioData.out(chan, i), 1e-6);
+      } else {
+        EXPECT_NEAR(audioData.out(chan, i), 0, 1e-6);
+      }
+    }
+  }
+
+  // at half dispersion
+  float halfDispersion = 0.75 * (90 - sl[0].elevation) + sl[0].elevation;
+  pos = Vec3f(0, tan(halfDispersion * M_2PI / 360.0), -1);
+  audioData.zeroOut();
+  lbapPanner.renderBuffer(audioData, pos, samples, fpb);
+  for (int i = 0; i < fpb; i++) {
+    for (int chan = 0; chan < 60; chan++) {
+      if (chan == 2 || chan == 3) {
+        EXPECT_NEAR(
+            audioData.out(chan, i),
+            (i + 0.5) * cos(0.25 * M_PI) *        // spread between 2 speakers
+                ((1.0 / sqrt(12))                 // base gain
+                 + cos(0.25 * M_PI)               // half dispersion
+                       * (1 - (1.0 / sqrt(12)))), // range between base and 1
+            1e-6);
+      } else if (chan < 12) {
+        EXPECT_NEAR(audioData.out(chan, i),
+                    (i + 0.5) * cos(0.25 * M_PI) / sqrt(12), 1e-6);
+      } else {
+        EXPECT_LT(audioData.out(chan, i), 1e-6);
       }
     }
   }
