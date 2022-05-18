@@ -62,6 +62,15 @@ namespace al {
  * @ingroup UI
  *
  * Presets are saved by name with the ".preset" suffix.
+ * These files are read and written in a simple text format that mirrors OSC
+ * messages. A line setting parameter "param" to 0.5 would look like:
+ *
+ * @code
+/param f 0.5
+ * @endcode
+ *
+ * Comments can be added with '#' and everything after a line starting with '::'
+ * will be ignored.
  */
 class PresetHandler {
 public:
@@ -401,12 +410,9 @@ private:
 
   std::atomic<uint64_t> mMorphStepCount{0};
   std::atomic<uint64_t> mTotalSteps{0};
-  //  std::atomic<float> mCurrentMorphIndex;
   bool mCpuThreadRunning{false}; // To keep the morphing thread alive
   std::unique_ptr<std::thread> mMorphingThread;
-  //  std::condition_variable mMorphConditionVar;
   double mMorphInterval{0.02};
-  //  std::atomic<bool> mMorphing;
 
   std::vector<std::function<void(int index, void *sender, void *userData)>>
       mCallbacks;

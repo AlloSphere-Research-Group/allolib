@@ -13,9 +13,11 @@ bool OSCDomain::init(ComputationDomain *parent) {
 
 bool OSCDomain::start() {
   if (parameterServer().listen(port, interfaceIP)) {
-    parameterServer().startHandshakeServer();
-    std::cout << "Parameter Server OSC port (primary): " << interfaceIP << ":"
-              << parameterServer().serverPort() << std::endl;
+    if (mDoHandshakeServer) {
+      parameterServer().startHandshakeServer();
+      std::cout << "Parameter Server OSC port (primary): " << interfaceIP << ":"
+                << parameterServer().serverPort() << std::endl;
+    }
     return true;
   } else {
     uint16_t primaryPort = port;

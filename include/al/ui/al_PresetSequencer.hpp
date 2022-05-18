@@ -87,15 +87,18 @@ class Composition;
  *
  * The first element in each line specifies the preset name that the
  * PresetHandler should load (i.e. a file called "preset1.preset" in the current
- * directory). The second element determines the time to get to the preset from
- * the current state, i.e. the morph time to reach the preset. The third element
- * determines the time the preset should be held after reaching it.
+ * preset directory, see PresetHandler::getCurrentPath() ). The second element
+ * determines the time to get to the preset from the current state, i.e. the
+ * "morph time" to reach the preset. The third element determines the time the
+ * preset should be held after reaching it, the "wait time".
  *
- * The file should end with two colons (::).
+ * The file should end with two colons (::). Everything after this will be
+ * ignored
  *
  * Individual parameters can also be sequenced through the preset sequencer.
- * They must be registered through registerParameter() or the streaming (<<)
- * operator.
+ * They must be registered with the PresetSequencer through registerParameter()
+ * or the streaming (<<) operator, even if they are registered with the
+ * PresetHandler.
  *
  * The line should start with the '+' character followed by the delta time to
  * the previous line. Note that parameters have delta times relative to both
@@ -319,7 +322,13 @@ public:
    */
   void stepSequencer();
 
+  /**
+   * @brief setSequencerStepTime
+   * @param stepTime in seconds
+   */
   void setSequencerStepTime(double stepTime) { mGranularity = stepTime * 1e9; }
+
+  void setVerbose(bool newVerbose);
 
 protected:
   virtual bool consumeMessage(osc::Message &m,
@@ -344,6 +353,7 @@ private:
   std::vector<ParameterMeta *> mParameters;
   std::string mOSCsubPath;
   std::string mCurrentSequence;
+  bool mVerbose{false};
 
   std::atomic<float> mTimeRequest{-1.0f}; // Request setting the current time.
                                           // Passes info to playback thread
@@ -359,9 +369,8 @@ private:
   double mLastPresetTime; // To anchor parameter deltas
   double mParameterTargetTime{0};
   double mLastTimeUpdate = 0.0;
-  double mStepTime;
 
-  uint64_t mGranularity = 10e6; // nanoseconds
+  uint64_t mGranularity = 10e6; // nanoseconds time for default step size
   bool mBeginCallbackEnabled;
   std::function<void(PresetSequencer *)> mBeginCallback;
   bool mEndCallbackEnabled;
@@ -371,17 +380,12 @@ private:
   float mTimeChangeMinTimeDelta = 0.05f;
 
   // CPU thread
-
-  //  std::chrono::high_resolution_clock::time_point mSequenceStart =
-  //      std::chrono::high_resolution_clock::now();
   std::unique_ptr<std::thread> mSequencerThread;
   std::mutex mSequenceLock;
   uint64_t mCurrentStep;
   PresetHandler::ParameterStates mStartValues;
   std::mutex mPlayWaitLock;
   std::condition_variable mPlayWaitVariable;
-  //  std::mutex mPlayStartedLock;
-  //  std::condition_variable mPlayStartedVariable;
   std::shared_ptr<std::promise<void>> mPlayPromiseObj;
 };
 

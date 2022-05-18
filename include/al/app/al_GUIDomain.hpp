@@ -18,11 +18,13 @@ public:
   bool init(ComputationDomain *parent = nullptr) override;
   bool tick() override;
 
-  void configure(int initalx, int initialy, std::string name);
+  void configure(int initialx, int initialy, std::string name);
 
   // Put your gui widget code here
   std::function<void()> guiCode = []() {};
-  // Put your gui widget code here
+
+  // Put your gui configuration code here
+  // This is called before creating panels
   std::function<void()> guiConfigurationCode = []() {
     ImGuiStyle &style = ImGui::GetStyle();
     style.Colors[ImGuiCol_Header] = ImVec4(0.80f, 0.69f, 0.00f, 0.53f);
@@ -30,13 +32,25 @@ public:
   };
 
   void fixedPosition(bool fixed);
+  void setDimensions(int w, int h) {
+    if (w < 0 || h < 0) {
+      std::cerr << "Invalid dimensions. Ignoring. " << w << "," << h
+                << std::endl;
+      return;
+    }
+    mw = w;
+    mh = h;
+  }
 
   void setBackgroundAlpha(float alpha);
+
+  void setFlags(int flags);
 
   ControlGUI gui;
 
 private:
-  int mx{0}, my{0};
+  int mx{-1}, my{-1}, mw{-1}, mh{-1};
+  int mFlags{ImGuiWindowFlags_None};
 };
 
 /**

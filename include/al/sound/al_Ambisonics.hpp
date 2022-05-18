@@ -323,7 +323,7 @@ public:
 class AmbisonicsSpatializer : public Spatializer {
 public:
   AmbisonicsSpatializer();
-  AmbisonicsSpatializer(Speakers &sl, int dim = 2, int order = 1,
+  AmbisonicsSpatializer(const Speakers &sl, int dim = 2, int order = 1,
                         int flavor = 1);
 
   void zeroAmbi();
@@ -342,11 +342,11 @@ public:
 
   virtual void prepare(AudioIOData &io) override;
 
-  virtual void renderBuffer(AudioIOData &io, const Pose &listeningPose,
+  virtual void renderBuffer(AudioIOData &io, const Vec3f &pos,
                             const float *samples,
                             const unsigned int &numFrames) override;
 
-  virtual void renderSample(AudioIOData &io, const Pose &listeningPose,
+  virtual void renderSample(AudioIOData &io, const Vec3f &pos,
                             const float &sample,
                             const unsigned int &frameIndex) override;
 
@@ -472,8 +472,8 @@ inline void AmbiEncode::encode(float *ambiChans, int numFrames, int timeIndex,
     CS(14)
     CS(13)
     CS(12)
-    CS(11) CS(10) CS(9) CS(8) CS(7) CS(6) CS(5) CS(4) CS(3) CS(2) CS(1)
-        CS(0) default:;
+    CS(11)
+    CS(10) CS(9) CS(8) CS(7) CS(6) CS(5) CS(4) CS(3) CS(2) CS(1) CS(0) default:;
   }
 #undef CS
 }

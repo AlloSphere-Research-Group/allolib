@@ -129,6 +129,7 @@ set(headers
   include/al/sound/al_Biquad.hpp
   include/al/sound/al_Crossover.hpp
   include/al/sound/al_Dbap.hpp
+  include/al/sound/al_DownMixer.hpp
   include/al/sound/al_Lbap.hpp
   include/al/sound/al_Reverb.hpp
   include/al/sound/al_Spatializer.hpp
@@ -249,6 +250,7 @@ set(sources
   src/sound/al_Ambisonics.cpp
   src/sound/al_Biquad.cpp
   src/sound/al_Dbap.cpp
+  src/sound/al_DownMixer.cpp
   src/sound/al_Lbap.cpp
   src/sound/al_Spatializer.cpp
   src/sound/al_Speaker.cpp

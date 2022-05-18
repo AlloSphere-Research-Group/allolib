@@ -194,6 +194,15 @@ PresetSequencer::registerPresetHandler(PresetHandler &presetHandler) {
   // We need to take over the preset handler timing.
   //  mPresetHandler->setTimeMaster(TimeMasterMode::TIME_MASTER_CPU);
   mDirectory = mPresetHandler->getCurrentPath();
+  if (mVerbose) {
+    for (auto *param : presetHandler.parameters()) {
+      if (std::find(mParameters.begin(), mParameters.end(), param) ==
+          mParameters.end()) {
+        std::cout << "WARNING: Parameter: " << param->getFullAddress()
+                  << " not in sequencer. Will be ignored" << std::endl;
+      }
+    }
+  }
   //		std::cout << "Path set to:" << mDirectory << std::endl;
   return *this;
 }
@@ -410,21 +419,23 @@ void PresetSequencer::updateTime(double time) {
 
     // Queue parameter and event steps before first preset.
     // FIXME allow paramter events without an initial preset.
+    if (mSteps[mCurrentStep].type != StepType::PRESET) {
+      mParameterTargetTime = mCurrentTime + mSteps[mCurrentStep].waitTime;
+      mLastTimeUpdate = mParameterTargetTime;
+    }
     while ((mSteps.size() > mCurrentStep) &&
-           (mSteps[mCurrentStep].type != PRESET)) {
+           (mSteps[mCurrentStep].type != StepType::PRESET)) {
       mParameterList.push(mSteps[mCurrentStep]);
       // Move current time back to accomodate these steps
-      mCurrentTime -= mSteps[mCurrentStep].waitTime;
-      mLastPresetTime = mCurrentTime;
-      mParameterTargetTime = mLastPresetTime;
-      mLastTimeUpdate = mParameterTargetTime;
+      //      mCurrentTime -= mSteps[mCurrentStep].waitTime;
+      //      mLastPresetTime = mCurrentTime;
       mCurrentStep++;
     }
 
     updateSequencer();
     if (mSteps.size() > (mCurrentStep - 1) && mCurrentStep > 1) {
       Step step = mSteps[mCurrentStep - 1];
-      if (step.type == PRESET) {
+      if (step.type == StepType::PRESET) {
         std::string previousPreset = mSteps[mCurrentStep - 2].name;
         if (time > (mTargetTime - step.waitTime)) {
           // We only need to wait, morphing is done
@@ -463,7 +474,7 @@ void PresetSequencer::updateSequencer() {
   while (mTargetTime <= mCurrentTime && (mSteps.size() > mCurrentStep)) {
     // Reached target time. Process step
     Step step = mSteps[mCurrentStep];
-    assert(step.type == PRESET);
+    assert(step.type == StepType::PRESET);
 
     if (mPresetHandler && (mRunning || mStartRunning)) {
       mPresetHandler->morphTo(step.name, step.morphTime);
@@ -475,8 +486,12 @@ void PresetSequencer::updateSequencer() {
     mTargetTime += step.morphTime + step.waitTime;
     mCurrentStep++;
     // Now gather all parameter and event steps until next preset
+    if ((mSteps.size() > mCurrentStep) &&
+        mSteps[mCurrentStep].type == StepType::PARAMETER) {
+      mParameterTargetTime += mSteps[mCurrentStep].waitTime;
+    }
     while ((mSteps.size() > mCurrentStep) &&
-           mSteps[mCurrentStep].type != PRESET) {
+           mSteps[mCurrentStep].type != StepType::PRESET) {
       mParameterList.push(mSteps[mCurrentStep]);
       mCurrentStep++;
     }
@@ -485,7 +500,7 @@ void PresetSequencer::updateSequencer() {
   while (!mParameterList.empty()) {
     auto &step = mParameterList.front();
     if (mParameterTargetTime <= mCurrentTime) {
-      if (step.type == PARAMETER) {
+      if (step.type == StepType::PARAMETER) {
         //        std::cout << mCurrentTime << " set parameter " << step.name
         //                  << std::endl;
         for (auto *param : mParameters) {
@@ -501,15 +516,17 @@ void PresetSequencer::updateSequencer() {
             break;
           }
         }
-      } else if (step.type == EVENT) {
+      } else if (step.type == StepType::EVENT) {
         for (auto &eventCallback : mEventCallbacks) {
           if (eventCallback.eventName == step.name) {
             eventCallback.callback(eventCallback.callbackData, step.params);
           }
         }
       }
-      mParameterTargetTime += step.waitTime;
       mParameterList.pop();
+      if (mParameterList.size() > 0) {
+        mParameterTargetTime += mParameterList.front().waitTime;
+      }
     } else {
       break;
     }
@@ -599,4 +616,9 @@ void PresetSequencer::stopCpuThread() {
     mSequencerThread->join();
     mSequencerThread = nullptr;
   }
+}
+
+void PresetSequencer::setVerbose(bool newVerbose)
+{
+    mVerbose = newVerbose;
 }
