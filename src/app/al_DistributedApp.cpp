@@ -254,16 +254,12 @@ void DistributedApp::start() {
   onInit();
 
   for (auto &domain : mDomainList) {
-    mRunningDomains.push(domain);
     if (!domain->start()) {
-      std::cerr << "ERROR starting domain " << std::endl;
-      break;
+      std::cerr << "ERROR starting domain " << typeid(domain.get()).name()
+                << std::endl;
+    } else {
+      mRunningDomains.push(domain);
     }
-  }
-
-  std::future<bool> &domainReturn = graphicsDomain()->waitForDomain();
-  if (!domainReturn.get()) {
-    std::cerr << "Graphics domain returned false on exit." << std::endl;
   }
 
   while (mRunningDomains.size() > 0) {

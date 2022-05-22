@@ -94,6 +94,11 @@ public:
    * the end of calls to tickSubdomains().
    * It may block indefinitely if the parent domain does not release the
    * sub domain locks.
+   *
+   * Subdomain initialization and cleanup will be handled by the parent domain.
+   * Initialization will occur on parent initialization if parent is
+   * asynchronous, or when inserted if parent is running.
+   * If parent is Synchronous, initialization occurs immediately.
    */
   virtual bool addSubDomain(std::shared_ptr<SynchronousDomain> subDomain,
                             bool prepend = false);
@@ -250,7 +255,11 @@ public:
    * @brief start the asyncrhonous execution of the domain
    * @return true if start was successful
    *
-   * Assumes that init() has already been called.
+   * Assumes that init() has already been called. When start exits, the domain
+   * is considered stopped, but still initialized. Domains must ensure that this
+   * is done internally. In cases where this domain blocks, the stop function
+   * can only be called from a separate thread and must be thread safe.
+   *
    */
   virtual bool start() = 0;
 
@@ -258,7 +267,7 @@ public:
    * @brief stop the asyncrhonous execution of the domain
    * @return true if stop was successful
    *
-   * Domains should be written so that either start() or cleanup()
+   * Domains should be written so that both start() or cleanup()
    * work after calling stop()
    */
   virtual bool stop() = 0;
@@ -308,10 +317,11 @@ public:
   virtual bool stop() = 0;
 
 protected:
-  std::promise<bool> mDomainAsyncResultPromise;
-  std::future<bool> mDomainAsyncResult;
   std::promise<bool> mDomainAsyncInitPromise;
   std::future<bool> mDomainAsyncInit;
+
+  std::promise<bool> mDomainAsyncResultPromise;
+  std::future<bool> mDomainAsyncResult;
 
 private:
   std::unique_ptr<std::thread> mAsyncThread;

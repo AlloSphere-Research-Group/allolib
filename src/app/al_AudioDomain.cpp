@@ -12,11 +12,13 @@ AudioDomain::AudioDomain() {
 bool AudioDomain::init(ComputationDomain *parent) {
   (void)parent;
   bool ret = true;
-  if (audioIO().callback == nullptr) {
-    audioIO().callback = AudioDomain::AppAudioCB;
-    audioIO().user(this);
+  if (!mInitialized) {
+    if (audioIO().callback == nullptr) {
+      audioIO().callback = AudioDomain::AppAudioCB;
+      audioIO().user(this);
+    }
+    callInitializeCallbacks();
   }
-  callInitializeCallbacks();
   return ret;
 }
 

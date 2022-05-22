@@ -124,6 +124,10 @@ bool ComputationDomain::cleanup(ComputationDomain *parent) {
 bool ComputationDomain::addSubDomain(
     std::shared_ptr<SynchronousDomain> subDomain, bool prepend) {
   std::lock_guard<std::mutex> lk(mSubdomainLock);
+  // TODO follow initialization rules. See docs.
+  if (mInitialized) {
+    subDomain->init(this);
+  }
   mSubDomainList.push_back({subDomain, prepend});
   return true;
 }

@@ -4,10 +4,13 @@ using namespace al;
 
 bool OSCDomain::init(ComputationDomain *parent) {
   (void)parent;
-  mHandler.mOscDomain = this;
-  mParameterServer.registerOSCListener(
-      &mHandler); // Have the parameter server pass unhandled messages to this
-                  // app's onMessage virtual function
+  if (!mInitialized) {
+    mHandler.mOscDomain = this;
+    mParameterServer.registerOSCListener(
+        &mHandler); // Have the parameter server pass unhandled messages to this
+    // app's onMessage virtual function
+    mInitialized = true;
+  }
   return true;
 }
 

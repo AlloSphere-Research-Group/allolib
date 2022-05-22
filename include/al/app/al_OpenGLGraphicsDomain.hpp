@@ -25,7 +25,7 @@ class GLFWOpenGLWindowDomain;
  *
  * This domain prepares a GLFW OpenGL domain.
  */
-class OpenGLGraphicsDomain : public AsynchronousThreadDomain, public FPS {
+class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
 public:
   OpenGLGraphicsDomain();
 
@@ -87,20 +87,33 @@ protected:
   static void domainThreadFunction(OpenGLGraphicsDomain *domain);
 
 private:
-  bool initPrivate();
-  bool startPrivate();
-  bool tick();
-  bool stopPrivate();
-  bool cleanupPrivate();
+  //  bool startPrivate();
+  //  bool tick();
+  //  bool stopPrivate();
+  //  bool cleanupPrivate();
+
+  struct SubDomainToInsert {
+    std::shared_ptr<SynchronousDomain> subDomain;
+    bool prepend;
+    std::shared_ptr<std::promise<bool>> subDomainInsertStatus;
+  };
 
   std::mutex mSubDomainInsertLock;
-  std::condition_variable mSubDomainInsertSignal;
-  std::vector<std::pair<std::shared_ptr<SynchronousDomain>, bool>>
-      mSubdomainsToInsert;
+  std::vector<SubDomainToInsert> mSubdomainsToInsert;
+
+  bool addSubDomainAsync(std::shared_ptr<SynchronousDomain> subDomain,
+                         bool prepend, uint32_t timeoutMs = 5000);
+
+  struct SubDomainToRemove {
+    std::shared_ptr<SynchronousDomain> subDomain;
+    std::shared_ptr<std::promise<bool>> subDomainRemoveStatus;
+  };
+
+  bool removeSubDomainAsync(std::shared_ptr<SynchronousDomain> subDomain,
+                            uint32_t timeoutMs = 5000);
 
   std::mutex mSubDomainRemoveLock;
-  std::condition_variable mSubDomainRemoveSignal;
-  std::vector<std::shared_ptr<SynchronousDomain>> mSubdomainsToRemove;
+  std::vector<SubDomainToRemove> mSubdomainsToRemove;
 
   enum class CommandType { START, STOP, CLEANUP, NONE };
   std::mutex mDomainSignalLock;
