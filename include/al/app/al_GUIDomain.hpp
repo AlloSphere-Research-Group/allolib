@@ -61,7 +61,7 @@ class GUIDomain : public SynchronousDomain {
 public:
   virtual ~GUIDomain() {}
   // Domain management functions
-  bool init(ComputationDomain *parent = nullptr) override;
+  //  bool init(ComputationDomain *parent = nullptr) override;
   bool tick() override;
   bool cleanup(ComputationDomain *parent = nullptr) override;
 

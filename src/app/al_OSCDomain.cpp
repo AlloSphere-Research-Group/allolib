@@ -5,10 +5,13 @@ using namespace al;
 bool OSCDomain::init(ComputationDomain *parent) {
   (void)parent;
   if (!mInitialized) {
+    initializeSubdomains(true);
     mHandler.mOscDomain = this;
     mParameterServer.registerOSCListener(
         &mHandler); // Have the parameter server pass unhandled messages to this
     // app's onMessage virtual function
+    callInitializeCallbacks();
+    initializeSubdomains(false);
     mInitialized = true;
   }
   return true;

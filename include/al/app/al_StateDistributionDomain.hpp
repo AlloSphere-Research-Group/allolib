@@ -155,26 +155,29 @@ private:
 
 template <class TSharedState>
 bool StateReceiveDomain<TSharedState>::init(ComputationDomain *parent) {
-  initializeSubdomains(true);
-  assert(parent != nullptr);
+  if (!mInitialized) {
+    initializeSubdomains(true);
+    assert(parent != nullptr);
 
-  buf = std::make_unique<unsigned char[]>(sizeof(TSharedState));
-  mRecv = std::make_unique<osc::Recv>();
-  if (!mRecv || !mRecv->open(mPort, mAddress.c_str())) {
-    std::cerr << "Error opening server" << std::endl;
-    return false;
+    buf = std::make_unique<unsigned char[]>(sizeof(TSharedState));
+    mRecv = std::make_unique<osc::Recv>();
+    if (!mRecv || !mRecv->open(mPort, mAddress.c_str())) {
+      std::cerr << "Error opening server" << std::endl;
+      return false;
+    }
+    mHandler.mOscDomain = this;
+    mRecv->handler(mHandler);
+    if (!mRecv->start()) {
+      std::cerr << "Failed to start receiver. " << std::endl;
+      return false;
+    }
+    callInitializeCallbacks();
+    std::cout << "StateReceiveDomain: Using OSC for shared state " << mAddress
+              << ":" << mPort << std::endl;
+
+    initializeSubdomains(false);
+    mInitialized = true;
   }
-  mHandler.mOscDomain = this;
-  mRecv->handler(mHandler);
-  if (!mRecv->start()) {
-    std::cerr << "Failed to start receiver. " << std::endl;
-    return false;
-  }
-
-  std::cout << "StateReceiveDomain: Using OSC for shared state " << mAddress
-            << ":" << mPort << std::endl;
-
-  initializeSubdomains(false);
   return true;
 }
 
@@ -182,12 +185,15 @@ template <class TSharedState = DefaultState>
 class StateSendDomain : public SynchronousDomain {
 public:
   bool init(ComputationDomain *parent = nullptr) override {
-    initializeSubdomains(true);
+    if (!mInitialized) {
 
-    initializeSubdomains(false);
-
-    std::cout << "StateSendDomain: Using OSC for shared state " << mAddress
-              << ":" << mPort << std::endl;
+      initializeSubdomains(true);
+      callInitializeCallbacks();
+      initializeSubdomains(false);
+      mInitialized = true;
+      std::cout << "StateSendDomain: Using OSC for shared state " << mAddress
+                << ":" << mPort << std::endl;
+    }
     return true;
   }
 

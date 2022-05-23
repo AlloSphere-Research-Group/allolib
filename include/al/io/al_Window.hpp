@@ -527,7 +527,7 @@ inline Window::DisplayMode operator&(const Window::DisplayMode &a,
   return Window::DisplayMode(+a & +b);
 }
 
-void initializeWindowManager();
+bool initializeWindowManager();
 void terminateWindowManager();
 float getCurrentWindowPixelDensity();
 

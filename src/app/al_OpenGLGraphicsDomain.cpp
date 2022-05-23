@@ -13,19 +13,20 @@ OpenGLGraphicsDomain::OpenGLGraphicsDomain() {
 
 bool OpenGLGraphicsDomain::init(ComputationDomain *parent) {
   if (!mInitialized) {
-    bool ret = true;
-    ret &= initializeSubdomains(true);
     initializeWindowManager();
+    bool ret = initializeSubdomains(true);
     callInitializeCallbacks();
     ret &= initializeSubdomains(false);
     mInitialized = true;
     return ret;
+  } else {
+    std::cout << "OpenGLGraphicsDomain already initialized" << std::endl;
   }
-  std::cout << "OpenGLGraphicsDomain already initialized" << std::endl;
   return true;
 }
 
 bool OpenGLGraphicsDomain::start() {
+
   mRunning = true;
   bool ret = true;
   startFPS();
@@ -67,10 +68,10 @@ bool OpenGLGraphicsDomain::stop() {
 bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {
   bool ret = true;
   if (mInitialized) {
+    ret &= cleanupSubdomains(true);
     for (GPUObject *obj : mObjects) {
       obj->destroy();
     }
-    ret &= cleanupSubdomains(true);
     ret &= cleanupSubdomains(false);
     callCleanupCallbacks();
     terminateWindowManager();
@@ -216,16 +217,16 @@ bool GLFWOpenGLWindowDomain::init(ComputationDomain *parent) {
   //  }
   bool ret = true;
   assert(dynamic_cast<OpenGLGraphicsDomain *>(parent));
+  mParent = static_cast<OpenGLGraphicsDomain *>(parent);
   if (!mGraphics) {
     mGraphics = std::make_unique<Graphics>();
   }
   ret &= initializeSubdomains(true);
-  mParent = static_cast<OpenGLGraphicsDomain *>(parent);
   if (!mWindow) {
     mWindow = std::make_unique<Window>();
   }
-  mWindow->mWindowProperties =
-      dynamic_cast<OpenGLGraphicsDomain *>(parent)->nextWindowProperties;
+  mWindow->mWindowProperties = mParent->nextWindowProperties;
+  mParent->createObjects();
   if (!mWindow->created()) {
     ret &= mWindow->create();
     mGraphics->init();

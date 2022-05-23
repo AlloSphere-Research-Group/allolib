@@ -3,11 +3,21 @@
 using namespace al;
 
 bool GUIPanelDomain::init(ComputationDomain *parent) {
-  gui.setTitle("ControlGUI");
-  gui.init(mx, my, false);
-  gui.fixedPosition(false);
-  auto ret = SynchronousDomain::init(this);
-  return ret;
+  if (!mInitialized) {
+
+    bool ret = this->initializeSubdomains(true);
+    gui.setTitle("ControlGUI");
+    gui.init(mx, my, false);
+    gui.fixedPosition(false);
+    ret &= SynchronousDomain::init(this);
+
+    callInitializeCallbacks();
+
+    ret = this->initializeSubdomains(true);
+    mInitialized = true;
+    return ret;
+  }
+  return true;
 }
 
 bool GUIPanelDomain::tick() {
@@ -49,16 +59,6 @@ void GUIPanelDomain::setBackgroundAlpha(float alpha) {
 }
 
 void GUIPanelDomain::setFlags(int flags) { mFlags = flags; }
-
-bool GUIDomain::init(ComputationDomain *parent) {
-  initializeSubdomains(true);
-  if (!mInitialized) {
-    imguiInit();
-    mInitialized = true;
-  }
-  initializeSubdomains(false);
-  return true;
-}
 
 bool GUIDomain::tick() {
   imguiBeginFrame();

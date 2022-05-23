@@ -24,12 +24,13 @@ static void cbError(int code, const char *description) {
 
 namespace al {
 
-void initializeWindowManager() {
+bool initializeWindowManager() {
   if (!glfwInit()) {
     std::cout << "ERROR: could not initialize GLFW\n";
-    exit(EXIT_FAILURE);
+    return false;
   }
   glfwSetErrorCallback(cbError);
+  return true;
 }
 
 void terminateWindowManager() { glfwTerminate(); }

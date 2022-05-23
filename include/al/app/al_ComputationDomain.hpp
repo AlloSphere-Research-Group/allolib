@@ -41,9 +41,12 @@ public:
    * @param parent
    * @return true if init succeeded
    *
-   * Multiple calls to init() should be allowed.
-   * You should always call this function within child classes to esnure
-   * internal state is correct
+   * Must be called to ensure running the submodule succeeds. If start() or
+   * tick() are called before calling init() or if init() failed cause undefined
+   * behavior, with crashing in the worst case. Will return false is submodules
+   * initialized here fail. In this case, the domain will be initialized, which
+   * might lead to issues when ticking the failed subdomain. Multiple calls to
+   * init() should be allowed.
    */
   virtual bool init(ComputationDomain *parent = nullptr);
 
@@ -95,10 +98,10 @@ public:
    * It may block indefinitely if the parent domain does not release the
    * sub domain locks.
    *
-   * Subdomain initialization and cleanup will be handled by the parent domain.
-   * Initialization will occur on parent initialization if parent is
-   * asynchronous, or when inserted if parent is running.
-   * If parent is Synchronous, initialization occurs immediately.
+   * Subdomain initialization and cleanup will be handled by the parent domain
+   * if parent domain has not been initialized. Initialization will occur on
+   * parent initialization and if parent is asynchronous when inserted if parent
+   * is running.
    */
   virtual bool addSubDomain(std::shared_ptr<SynchronousDomain> subDomain,
                             bool prepend = false);

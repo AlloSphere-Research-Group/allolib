@@ -20,7 +20,7 @@ namespace al {
  */
 class ConsoleDomain : public AsynchronousDomain {
 public:
-  bool init(ComputationDomain *parent = nullptr) override { return true; }
+  //  bool init(ComputationDomain *parent = nullptr) override { return true; }
 
   bool start() override {
     std::string line;

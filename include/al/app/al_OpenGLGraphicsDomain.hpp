@@ -82,6 +82,12 @@ public:
 
   bool unregisterObject(void *object) override;
 
+  void createObjects() {
+    for (GPUObject *obj : mObjects) {
+      obj->create();
+    }
+  }
+
 protected:
   static void processDomainAddRemoveQueues(OpenGLGraphicsDomain *domain);
   static void domainThreadFunction(OpenGLGraphicsDomain *domain);

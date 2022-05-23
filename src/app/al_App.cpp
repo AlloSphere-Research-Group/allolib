@@ -308,12 +308,13 @@ void App::initializeDomains() {
     }
   }
 
+  mDefaultWindowDomain = graphicsDomain()->newWindow();
+
   for (const auto &domain : mDomainList) {
     if (!domain->init()) {
       std::cerr << "ERROR initializing domain " << std::endl;
     }
   }
-  mDefaultWindowDomain = graphicsDomain()->newWindow();
 
   mDefaultWindowDomain->onDraw =
       std::bind(&App::onDraw, this, std::placeholders::_1);
