@@ -5,29 +5,29 @@
 /*	Allocore --
         Multimedia / virtual environment application class library
 
-        Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
-   UCSB. Copyright (C) 2012-2018. The Regents of the University of California.
+   Copyright (C) 2009. AlloSphere Research Group, Media Arts & Technology,
+   UCSB. Copyright (C) 2012-2022. The Regents of the University of California.
         All rights reserved.
 
-        Redistribution and use in source and binary forms, with or without
-        modification, are permitted provided that the following conditions are
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
    met:
 
-                Redistributions of source code must retain the above copyright
+   Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
 
-                Redistributions in binary form must reproduce the above
+   Redistributions in binary form must reproduce the above
    copyright notice, this list of conditions and the following disclaimer in the
-                documentation and/or other materials provided with the
+   documentation and/or other materials provided with the
    distribution.
 
-                Neither the name of the University of California nor the names
+   Neither the name of the University of California nor the names
    of its contributors may be used to endorse or promote products derived from
-                this software without specific prior written permission.
+   this software without specific prior written permission.
 
-        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
    IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
@@ -57,121 +57,6 @@
 #include "al/spatial/al_Pose.hpp"
 
 namespace al {
-/**
-@defgroup Scene Dynamic Scene
-*/
-
-/**
- * @brief A PositionedVoice is a rendering class that can have a position and
- * size.
- * @ingroup Scene
- *
- */
-class PositionedVoice : public SynthVoice {
-public:
-  const Pose pose() { return mPose.get(); }
-
-  float size() { return mSize.get(); }
-
-  void setPose(Pose pose) { mPose.set(pose); }
-
-  void setSize(float size) { mSize.set(size); }
-
-  ParameterPose &parameterPose() { return mPose; }
-
-  Parameter &parameterSize() { return mSize; }
-
-  bool useDistanceAttenuation() { return mUseDistAtten; }
-  void useDistanceAttenuation(bool atten) { mUseDistAtten = atten; }
-
-  std::vector<Vec3f> &audioOutOffsets() { return mAudioOutPositionOffsets; }
-
-  /**
-   * @brief Test whether voice is primary or a replica
-   *
-   * Replica voices should not perform certain update computation, and should
-   * get state and values from primary node. This test allows writing code
-   * specific to one or the other type of voices. Only really important if using
-   * DistributedScene.
-   */
-  bool isPrimary() { return !mIsReplica; }
-
-  /**
-   * @brief Set the position offset for each of the audio outputs for this voice
-   * @param offsets The size of offsets must be equal to the number of outputs
-   */
-  void audioOutOffsets(const std::vector<Vec3f> &offsets) {
-    mAudioOutPositionOffsets = offsets;
-  }
-
-  /**
-   * @brief Override this function to apply transformations after the internal
-   * transformations of the voice has been applied
-   */
-  virtual void preProcess(Graphics & /*g*/) {}
-
-  /**
-   * @brief For PositionedVoice, the pose (7 floats) and the size are appended
-   * to the pfields
-   */
-  virtual bool setTriggerParams(float *pFields, int numFields = -1) override;
-
-  /**
-   * @brief Set parameter values
-   * @param pFields std::vector<float> containing the values
-   * @return true if able to set the fields
-   */
-  virtual bool setTriggerParams(const std::vector<float> &pFields,
-                                bool noCalls = false) override;
-
-  /**
-   * @brief Set parameter values
-   * @param pFields std::vector<float> containing the values
-   * @return true if able to set the fields
-   */
-  virtual bool setTriggerParams(const std::vector<VariantValue> &pFields,
-                                bool noCalls = false) override;
-
-  /**
-   * @brief For PositionedVoice, the pose (7 floats) and the size are appended
-   * to the pfields
-   */
-  virtual std::vector<VariantValue> getTriggerParams() override {
-    std::vector<VariantValue> pFields = SynthVoice::getTriggerParams();
-    pFields.reserve(pFields.size() + 8);
-    Pose currentPose = pose();
-    pFields.insert(pFields.end(), currentPose.vec().begin(),
-                   currentPose.vec().end());
-
-    auto *comps = currentPose.quat().components;
-
-    pFields.push_back(*comps++);
-    pFields.push_back(*comps++);
-    pFields.push_back(*comps++);
-    pFields.push_back(*comps);
-
-    pFields.push_back(mSize.get());
-    return pFields;
-  }
-
-  /**
-   * @brief Apply translation, rotation and scaling for this PositionedVoice
-   * @param g
-   */
-  virtual void applyTransformations(Graphics &g);
-
-protected:
-  ParameterPose mPose{"_pose"};
-  Parameter mSize{"_size", "", 1.0};
-  //    ParameterPose mPose {"_pose"};
-  //    Parameter mSize {"_size", "", 1.0};
-  std::vector<Vec3f>
-      mAudioOutPositionOffsets; // This vector is added to the voice's position
-                                // to determine the specific position of the
-                                // audio out
-
-  bool mUseDistAtten{true};
-};
 
 struct UpdateThreadFuncData {
   SynthVoice *voice;
@@ -216,6 +101,9 @@ template <class F> void ThreadPool::enqueue(F &&f, UpdateThreadFuncData &data) {
 /**
  * @brief The DynamicScene class
  * @ingroup Scene
+ *
+ * A voice manager that includes positional data for graphics and audio
+ * rendering.
  */
 class DynamicScene : public PolySynth {
 public:
@@ -264,10 +152,19 @@ public:
    * audio spatialization
    * @return
    */
-  Pose &listenerPose() { return mListenerPose; }
-  void listenerPose(Pose &pose) { mListenerPose = pose; }
+  Pose &listenerPose();
+  void listenerPose(Pose &pose);
 
+  /**
+   * @brief Render graphics context
+   * @param g
+   */
   virtual void render(Graphics &g) final;
+
+  /**
+   * @brief Render audio context
+   * @param io
+   */
   virtual void render(AudioIOData &io) final;
 
   /**
@@ -278,16 +175,30 @@ public:
    */
   virtual void update(double dt = 0) final;
 
-  // Set update context to use threading
-  void setUpdateThreaded(bool threaded) { mThreadedUpdate = threaded; }
+  /**
+   * @brief Set update context to use threading
+   * @param threaded
+   */
+  void setUpdateThreaded(bool threaded);
 
-  // Set audio context to use thread pool to render voices
-  void setAudioThreaded(bool threaded) { mThreadedAudio = threaded; }
+  /**
+   * @brief Set audio context to use thread pool to render voices
+   * @param threaded
+   */
+  void setAudioThreaded(bool threaded);
 
-  DistAtten<> &distanceAttenuation() { return mDistAtten; }
+  /**
+   * @brief Get distance attenuation object for query or modification
+   * @return
+   */
+  DistAtten<> &distanceAttenuation();
 
   void print(std::ostream &stream = std::cout);
 
+  /**
+   * @brief Show a visual marker in the origin
+   * @param show
+   */
   void showWorldMarker(bool show = true) { mDrawWorldMarker = show; }
 
   /**
@@ -299,17 +210,11 @@ public:
    * @brief Stop all audio threads. No processing is possible after calling this
    * function
    *
-   * You might need to close all threads to have applications close neatly. Will
-   * only have effect if threading is enabled for simulation or audio
+   * You might need to close all threads by calling this function to have
+   * applications close neatly. Will only have effect if threading is enabled
+   * for simulation or audio
    */
-  void stopAudioThreads() {
-    mSynthRunning = false;
-    mThreadTrigger.notify_all();
-    for (auto &thr : mAudioThreads) {
-      thr.join();
-    }
-    mAudioThreads.clear();
-  }
+  void stopAudioThreads();
 
 protected:
 private:

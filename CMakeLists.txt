@@ -122,8 +122,10 @@ set(headers
   include/al/scene/al_DynamicScene.hpp
   include/al/scene/al_SynthRecorder.hpp
   include/al/scene/al_PolySynth.hpp
+  include/al/scene/al_PositionedVoice.hpp
   include/al/scene/al_SequencerMIDI.hpp
   include/al/scene/al_SynthSequencer.hpp
+  include/al/scene/al_SynthVoice.hpp
 
   include/al/sound/al_Ambisonics.hpp
   include/al/sound/al_Biquad.hpp
@@ -244,8 +246,10 @@ set(sources
   src/scene/al_DynamicScene.cpp
   src/scene/al_SynthRecorder.cpp
   src/scene/al_PolySynth.cpp
+  src/scene/al_PositionedVoice.cpp
   src/scene/al_SequencerMIDI.cpp
   src/scene/al_SynthSequencer.cpp
+  src/scene/al_SynthVoice.cpp
 
   src/sound/al_Ambisonics.cpp
   src/sound/al_Biquad.cpp

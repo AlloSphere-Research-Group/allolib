@@ -1,6 +1,7 @@
 #include "al/scene/al_DynamicScene.hpp"
 
 #include "al/graphics/al_Shapes.hpp"
+#include "al/scene/al_PositionedVoice.hpp"
 
 #include <algorithm>
 
@@ -119,9 +120,13 @@ void DynamicScene::prepare(AudioIOData &io) {
   m_internalAudioConfigured = true;
 }
 
+Pose &DynamicScene::listenerPose() { return mListenerPose; }
+
+void DynamicScene::listenerPose(Pose &pose) { mListenerPose = pose; }
+
 void DynamicScene::render(Graphics &g) {
-  if (mDrawWorldMarker) {
-    g.color(0.7);
+    if (mDrawWorldMarker) {
+        g.color(0.7);
     g.draw(mWorldMarker);
   }
 
@@ -324,8 +329,14 @@ void DynamicScene::update(double dt) {
   }
 }
 
+void DynamicScene::setUpdateThreaded(bool threaded) { mThreadedUpdate = threaded; }
+
+void DynamicScene::setAudioThreaded(bool threaded) { mThreadedAudio = threaded; }
+
+DistAtten<> &DynamicScene::distanceAttenuation() { return mDistAtten; }
+
 void DynamicScene::print(ostream &stream) {
-  stream << "Audio Distance Attenuation:";
+    stream << "Audio Distance Attenuation:";
   const char *s = nullptr;
 #define PROCESS_VAL(p)                                                         \
   case (p):                                                                    \
@@ -352,9 +363,18 @@ void DynamicScene::sortDrawingByDistance(bool sort) {
   mSortDrawingByDistance = sort;
 }
 
+void DynamicScene::stopAudioThreads() {
+    mSynthRunning = false;
+    mThreadTrigger.notify_all();
+    for (auto &thr : mAudioThreads) {
+        thr.join();
+    }
+    mAudioThreads.clear();
+}
+
 void DynamicScene::updateThreadFunc(UpdateThreadFuncData data) {
-  //        UpdateThreadFuncData *data = (UpdateThreadFuncData *) ud;
-  //        std::cout << "eq " << data.voice << "  " << data.dt << std::endl;
+    //        UpdateThreadFuncData *data = (UpdateThreadFuncData *) ud;
+    //        std::cout << "eq " << data.voice << "  " << data.dt << std::endl;
   SynthVoice *voice = data.voice;
   double &dt = data.dt;
   voice->update(dt);
@@ -450,126 +470,4 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
     scene->mAudioThreadDone.notify_one();
   }
   //  std::cout << "Audio thread " << id << " done" << std::endl;
-}
-
-bool PositionedVoice::setTriggerParams(float *pFields, int numFields) {
-  bool ok = SynthVoice::setTriggerParams(pFields, numFields);
-  if (numFields ==
-      (int)mTriggerParams.size() +
-          8) { // If seven extra, it means pose and size are there too
-    pFields += mTriggerParams.size();
-    double x = *pFields++;
-    double y = *pFields++;
-    double z = *pFields++;
-    double qw = *pFields++;
-    double qx = *pFields++;
-    double qy = *pFields++;
-    double qz = *pFields++;
-    mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
-    mSize.set(*pFields);
-  } else {
-    ok = false;
-  }
-  return ok;
-}
-
-bool PositionedVoice::setTriggerParams(const std::vector<float> &pFields,
-                                       bool noCalls) {
-  bool ok = SynthVoice::setTriggerParams(pFields, noCalls);
-  if (pFields.size() ==
-      mTriggerParams.size() +
-          8) { // If seven extra, it means pose and size are there too
-    size_t index = mTriggerParams.size();
-    double x = pFields[index++];
-    double y = pFields[index++];
-    double z = pFields[index++];
-    double qw = pFields[index++];
-    double qx = pFields[index++];
-    double qy = pFields[index++];
-    double qz = pFields[index++];
-    if (noCalls) {
-      mPose.setNoCalls({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
-      mSize.setNoCalls(pFields[index++]);
-    } else {
-      mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
-      mSize.set(pFields[index++]);
-    }
-  } else {
-    //            std::cout << "Not setting position for voice" << std::endl;
-    ok = false;
-  }
-  return ok;
-  //  return setTriggerParams(pFields.data(), pFields.size(), noCalls);
-}
-
-bool PositionedVoice::setTriggerParams(const std::vector<VariantValue> &pFields,
-                                       bool noCalls) {
-  bool ok = SynthVoice::setTriggerParams(pFields);
-  if (pFields.size() ==
-      mTriggerParams.size() +
-          8) { // If eight extra, it means pose and size are there too
-    size_t index = mTriggerParams.size();
-
-    double x;
-    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
-      x = pFields[index++].get<double>();
-    } else {
-      x = pFields[index++].get<float>();
-    }
-    double y;
-
-    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
-      y = pFields[index++].get<double>();
-    } else {
-      y = pFields[index++].get<float>();
-    }
-    double z;
-    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
-      z = pFields[index++].get<double>();
-    } else {
-      z = pFields[index++].get<float>();
-    }
-    double qw;
-    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
-      qw = pFields[index++].get<double>();
-    } else {
-      qw = pFields[index++].get<float>();
-    }
-    double qx;
-    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
-      qx = pFields[index++].get<double>();
-    } else {
-      qx = pFields[index++].get<float>();
-    }
-    double qy;
-    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
-      qy = pFields[index++].get<double>();
-    } else {
-      qy = pFields[index++].get<float>();
-    }
-    double qz;
-    if (pFields[index].type() == VariantType::VARIANT_DOUBLE) {
-      qz = pFields[index++].get<double>();
-    } else {
-      qz = pFields[index++].get<float>();
-    }
-    if (noCalls) {
-      mPose.setNoCalls({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
-      mSize.setNoCalls(pFields[index++].get<float>());
-    } else {
-      mPose.set({Vec3d(x, y, z), Quatd(qw, qx, qy, qz)});
-      mSize.set(pFields[index++].get<float>());
-    }
-  } else {
-    //            std::cout << "Not setting position for voice" << std::endl;
-    ok = false;
-  }
-  return ok;
-}
-
-void PositionedVoice::applyTransformations(Graphics &g) {
-  auto pose = mPose.get();
-  g.translate(pose.x(), pose.y(), pose.z());
-  g.rotate(pose.quat());
-  g.scale(size());
 }
