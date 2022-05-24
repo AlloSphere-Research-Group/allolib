@@ -56,6 +56,8 @@
 #include "al/spatial/al_DistAtten.hpp"
 #include "al/spatial/al_Pose.hpp"
 
+#include "al/scene/al_PositionedVoice.hpp"
+
 namespace al {
 
 struct UpdateThreadFuncData {
