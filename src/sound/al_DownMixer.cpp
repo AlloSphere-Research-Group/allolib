@@ -45,8 +45,8 @@ void DownMixer::set5_1toStereo(AudioIOData &io) {
   uint32_t rightChannel = 1;
   mRoutingMap.clear();
 
-  const float threeDbDown = std::powf(10, -3.0f / 20.0f);
-  const float sixDbDown = std::powf(10, -6.0f / 20.0f);
+  const float threeDbDown = ::powf(10, -3.0f / 20.0f);
+  const float sixDbDown = ::powf(10, -6.0f / 20.0f);
   // L C R Ls Rs LFE
   mRoutingMap[0] = {{leftChannel, 1.0}};
   mRoutingMap[1] = {{leftChannel, threeDbDown}, {rightChannel, threeDbDown}};

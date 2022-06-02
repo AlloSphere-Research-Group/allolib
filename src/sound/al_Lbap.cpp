@@ -56,7 +56,7 @@ void Lbap::renderBuffer(AudioIOData &io, const Vec3f &reldir,
 
   float elev =
       RAD_2_DEG_SCALE *
-      std::atan2f(reldir.y, sqrt(reldir.x * reldir.x + reldir.z * reldir.z));
+      ::atan2f(reldir.y, sqrt(reldir.x * reldir.x + reldir.z * reldir.z));
 
   auto it = mRings.begin();
   while (it != mRings.end() && it->elevation > elev) {
