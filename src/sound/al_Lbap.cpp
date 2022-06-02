@@ -2,6 +2,7 @@
 #include "al/sound/al_Lbap.hpp"
 
 #include <algorithm>
+#include <cmath>
 
 using namespace al;
 

@@ -1192,7 +1192,7 @@ template <int N, class T> Vec<N, T> &Vec<N, T>::mag(T v) {
 
 // template <typename T> const char *typeString();
 
-//#define TypeString(A)                                                          \
+//#define TypeString(A)
 //  template <> inline const char *typeString<A>() { return #A; }
 
 // TypeString(char);

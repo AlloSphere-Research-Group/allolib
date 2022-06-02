@@ -159,6 +159,7 @@ public:
   }
 
   std::shared_ptr<GLFWOpenGLWindowDomain> defaultWindowDomain() {
+    assert(mDefaultWindowDomain);
     return mDefaultWindowDomain;
   }
   struct StandardWindowAppKeyControls : WindowEventHandler {
