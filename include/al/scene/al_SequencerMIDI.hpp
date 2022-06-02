@@ -63,14 +63,14 @@ seq.connectNoteOnToFunction(
     if (chan != 1) {
         return;
     }
-    auto voicePtr = mSynth->getVoice<Voice1>();
+    auto voicePtr = synth.getVoice<Voice1>();
 
     if (voicePtr) {
         // Set voice params from MIDI data
         voice->note = note;
         voice->vel = vel;
         // then trigger note
-        mScene.triggerOn(voice, 0);
+        synth.triggerOn(voice, 0);
     }
 });
 @endcode
