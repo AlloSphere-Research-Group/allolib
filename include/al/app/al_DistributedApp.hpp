@@ -159,9 +159,6 @@ public:
             mSimulationDomain);
     if (isPrimary()) {
       if (hasCapability(CAP_STATE_SEND)) {
-        std::cout << "DistributedApp: state SEND "
-                  << additionalConfig["broadcastAddress"] << ":" << mPortToSet
-                  << std::endl;
         auto sender =
             distDomain->addStateSender("state", distDomain->statePtr());
         sender->configure(mPortToSet, "state",
@@ -171,7 +168,6 @@ public:
       }
     } else {
       if (hasCapability(CAP_STATE_RECEIVE)) {
-        std::cout << "DistributedApp: state RECV " << mPortToSet << std::endl;
         auto receiver =
             distDomain->addStateReceiver("state", distDomain->statePtr());
         receiver->configure(mPortToSet, "state",

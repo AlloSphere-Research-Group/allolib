@@ -363,7 +363,17 @@ public:
   bool verbose() { return mVerbose; }
   void verbose(bool verbose) { mVerbose = verbose; }
 
-  // Use this function with care as there are no memory protections
+  /**
+   * @brief getActiveVoices
+   * @return
+   *
+   * This function must be used with care as there is no guarantee that the
+   * list is not modified while it is being used. You should only use this
+   * function in the same context determined by the time master setting.
+   * For example, if TimeMasterMode::TIME_MASTER_AUDIO you should only call
+   * this function within the audio context (i.e. the context that calls
+   * render(AudioIOData &io) )
+   */
   SynthVoice *getActiveVoices() { return mActiveVoices; }
 
   /**

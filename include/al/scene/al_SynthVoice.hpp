@@ -177,7 +177,7 @@ the other
    * Define this function to determine what needs to be done when note/event
    * ends. e.g. trigger release in envelopes, etc.
    * */
-  virtual void onTriggerOff() {}
+  virtual void onTriggerOff() { free(); }
 
   /**
    * @brief This function gets called after the voice is taken out of the
@@ -390,7 +390,7 @@ protected:
 
   std::vector<ParameterMeta *> mContinuousParameters;
 
-  std::vector<std::shared_ptr<Parameter>> mInternalParameters;
+  std::map<std::string, std::shared_ptr<Parameter>> mInternalParameters;
 
   bool mIsReplica{false}; // If voice is replica, it should not send its
                           // internal state but listen for changes.
