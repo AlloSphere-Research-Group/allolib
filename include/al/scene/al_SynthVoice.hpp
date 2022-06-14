@@ -64,6 +64,29 @@ namespace al {
  * the onProcess() functions.
  * When inheriting this class you must provide a default construct that takes no
  * arguments.
+ *
+ * The "internal" parameters are a convenience function to save the user
+ * management of parameters, so they are created and stored internally. The main
+ * drawback is that they can only be "float" parameters. Internal parameters are
+ * always "trigger" parameters. "Trigger" parameters registered with a voice
+ * using SynthVoice::registerTriggerParameter(ParameterMeta &param)
+ * SynthVoice::registerTriggerParameters(Args &...paramsArgs)
+ * or the << operator.
+ *
+ * Trigger parameters are parameters that are meant to be set when the voice is
+ * triggered, as their initial value needs to be set before any processing
+ * begins, so their values will be stored and set when the note is triggered
+ * from a SynthSequencer or when set by a remote node with DistributedScene (the
+ * distributed version of PolySynth).
+ *
+ * When there is no need to set the parameters when triggering, you can register
+ * parameters as regular/non-trigger parameters with registerParameter() or
+ * registerParameters(). You will want to use these when you don't need to send
+ * the initial values, as they are know at trigger time, and the values will be
+ * updated continuously as the voice runs. Another reason to use these is for
+ * parameter types that don't yet have support as trigger parameters, like
+ * multivalue parameters like ParameterColor or ParameterVec.
+ *
  */
 class SynthVoice {
   friend class PolySynth; // PolySynth needs to access private members like
@@ -256,6 +279,8 @@ the other
    * automatically, so they will be used in automatic GUIs and with the
    * SynthSequencer.
    *
+   * Internal parameters for voices are a convenience function to save the user
+   * from managing parameters, but they are limited to float parameters only.
    */
   std::shared_ptr<Parameter>
   createInternalTriggerParameter(std::string name, float defaultValue = 0.0,
@@ -276,11 +301,19 @@ the other
    * @brief Get value for internal trigger parameter
    * @param name name of the parameter
    * @return current float value of the parameter
+   *
+   * Convenience function to get the value directly from an internal parameter
+   * created by createInternalTriggerParameter()
    */
   float getInternalParameterValue(std::string name);
 
   /**
    * @brief Set value for internal trigger parameter
+   * @param name name of the parameter
+   * @param value new value for the parameter
+   *
+   * Convenience function to get the value directly from an internal parameter
+   * created by createInternalTriggerParameter()
    */
   void setInternalParameterValue(std::string name, float value);
 
