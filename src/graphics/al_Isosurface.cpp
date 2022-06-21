@@ -63,7 +63,7 @@ static const short sEdgeTable[256] = {
 // The second index is an array of triangle indices making up the isosurface
 // according to the first index. The first element of the array is its size and
 // the following elements are the indices of the triangle in term of edge ID.
-static const char sTriTable[256][16] = {
+static const signed char sTriTable[256][16] = {
     {0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {3, 0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {3, 0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
