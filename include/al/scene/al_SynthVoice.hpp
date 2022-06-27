@@ -46,6 +46,7 @@
 #include <string>
 #include <thread>
 #include <typeindex>
+#include <unordered_map>
 #include <vector>
 
 #include "al/graphics/al_Graphics.hpp"
@@ -423,7 +424,8 @@ protected:
 
   std::vector<ParameterMeta *> mContinuousParameters;
 
-  std::map<std::string, std::shared_ptr<Parameter>> mInternalParameters;
+  std::unordered_map<std::string, std::shared_ptr<Parameter>>
+      mInternalParameters;
 
   bool mIsReplica{false}; // If voice is replica, it should not send its
                           // internal state but listen for changes.
