@@ -546,10 +546,10 @@ Mesh &Mesh::smooth(float amount, int weighting) {
 Mesh &Mesh::flipWinding() {
   if (isTriangles()) {
     if (mIndices.size()) {
-      for (int i = 0; i < mIndices.size(); i += 3)
+      for (size_t i = 0; i < mIndices.size(); i += 3)
         std::swap(mIndices[i], mIndices[i + 2]);
     } else {
-      for (int i = 0; i < mVertices.size(); i += 3)
+      for (size_t i = 0; i < mVertices.size(); i += 3)
         std::swap(mVertices[i], mVertices[i + 2]);
     }
   }
@@ -781,39 +781,39 @@ Mesh &
 Mesh::forEachFace(const std::function<void(int v1, int v2, int v3)> &onFace) {
   if (mIndices.size()) {
     if (isTriangles()) {
-      for (int i = 2; i < mIndices.size(); i += 3) {
+      for (size_t i = 2; i < mIndices.size(); i += 3) {
         onFace(mIndices[i - 2], mIndices[i - 1], mIndices[i]);
       }
     } else if (isTriangleStrip()) {
-      for (int i = 0; i < mIndices.size() - 2; i++) {
+      for (size_t i = 0; i < mIndices.size() - 2; i++) {
         int w = i & 1; // winding: 0=ccw, 1=cw
         onFace(mIndices[i + w], mIndices[i + 1 - w], mIndices[i + 2]);
       }
     } else if (isLines()) {
-      for (int i = 1; i < mIndices.size(); i += 2) {
+      for (size_t i = 1; i < mIndices.size(); i += 2) {
         onFace(mIndices[i - 1], mIndices[i], mIndices[i - 1]);
       }
     } else if (isPoints()) {
-      for (int i = 0; i < mIndices.size(); i++) {
+      for (size_t i = 0; i < mIndices.size(); i++) {
         onFace(mIndices[i], mIndices[i], mIndices[i]);
       }
     }
   } else {
     if (isTriangles()) {
-      for (int i = 2; i < mVertices.size(); i += 3) {
+      for (size_t i = 2; i < mVertices.size(); i += 3) {
         onFace(i - 2, i - 1, i);
       }
     } else if (isTriangleStrip()) {
-      for (int i = 0; i < mVertices.size() - 2; i++) {
+      for (size_t i = 0; i < mVertices.size() - 2; i++) {
         int w = i & 1; // winding: 0=ccw, 1=cw
         onFace(i + w, i + 1 - w, i + 2);
       }
     } else if (isLines()) {
-      for (int i = 1; i < mVertices.size(); i += 2) {
+      for (size_t i = 1; i < mVertices.size(); i += 2) {
         onFace(i - 1, i, i - 1);
       }
     } else if (isPoints()) {
-      for (int i = 0; i < mVertices.size(); i++) {
+      for (size_t i = 0; i < mVertices.size(); i++) {
         onFace(i, i, i);
       }
     }
@@ -1094,7 +1094,7 @@ bool Mesh::debug(FILE *dst) const {
   }
 
   bool ok = true;
-  int Nv = vertices().size();
+  size_t Nv = vertices().size();
   if (!Nv) {
     DPRINTF("No vertices\n");
     ok = false;

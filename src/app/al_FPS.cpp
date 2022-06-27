@@ -1,6 +1,7 @@
 #include "al/app/al_FPS.hpp"
 
-#include <algorithm>  // max
+#include <algorithm> // max
+#include <iostream>
 
 using namespace al;
 
@@ -19,11 +20,12 @@ double FPS::msec() { return al_steady_time_nsec() * 1.0e-6; }
 
 double FPS::dt() { return static_cast<double>(deltaTime); }
 
-double FPS::dt_sec() { return static_cast<double>(deltaTime) / 1000000000.0; }
+double FPS::dt_sec() { return static_cast<double>(deltaTime) * 1.0e-9; }
 
 void FPS::startFPS() {
   deltaTime = interval;
   al_start_steady_clock();
+  start_of_loop = 0;
 }
 
 void FPS::tickFPS() {

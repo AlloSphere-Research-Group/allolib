@@ -13,23 +13,26 @@ namespace al {
  * @ingroup App
  */
 class FPS {
- public:
-  al_nsec interval = 16666666ll;  // 60 fps by default
+public:
+  void fps(double f); // set target fps
+  double fpsWanted(); // target fps
+  double fps();       // effective fps
+  // get time
+  double sec();    // elapsed seconds
+  double msec();   // elapsed millis
+  double dt();     // in nanos
+  double dt_sec(); // in seconds
+
+  void startFPS();
+  void tickFPS();
+
+private:
+  al_nsec interval = 16666666ll; // 60 fps by default
   al_nsec deltaTime;
   al_nsec start_of_loop = 0;
   double mFPSWanted = 60;
-  void fps(double f);
-  double fpsWanted();
-  double fps();
-  // get time
-  double sec();
-  double msec();    // millis
-  double dt();      // in nanos
-  double dt_sec();  // in seconds
-  void startFPS();
-  void tickFPS();
 };
 
-}  // namespace al
+} // namespace al
 
 #endif

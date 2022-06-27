@@ -8,7 +8,7 @@ bool SimulationDomain::tick() {
     simulationFunction(timeDelta());
   }
   ret &= tickSubdomains(false);
-  return true;
+  return ret;
 }
 
 void SimulationDomain::disableProcessingCallback() { mUseCallback = false; }

@@ -10,7 +10,13 @@ bool App::shouldQuit() {
   return graphicsDomain()->shouldQuit(); /*|| graphicsDomain()->shouldClose();*/
 }
 
-void App::fps(double f) { graphicsDomain()->fps(f); }
+void App::fps(double f) {
+  graphicsDomain()->fps(f);
+  if (graphicsDomain()->running()) {
+    std::cout << "WARNING: fps will be applied after graphics domain restarts"
+              << std::endl;
+  }
+}
 
 Window &App::defaultWindow() {
   if (!mDefaultWindowDomain) {
