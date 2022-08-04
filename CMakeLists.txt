@@ -147,6 +147,7 @@ set(headers
 
   include/al/sphere/al_SphereUtils.hpp
   include/al/sphere/al_PerProjection.hpp
+  include/al/sphere/al_Meter.hpp
 
   include/al/system/al_PeriodicThread.hpp
   include/al/system/al_Printing.hpp
@@ -269,6 +270,7 @@ set(sources
   src/sphere/al_AlloSphereSpeakerLayout.cpp
   src/sphere/al_SphereUtils.cpp
   src/sphere/al_PerProjection.cpp
+  src/sphere/al_Meter.cpp
 
   src/system/al_PeriodicThread.cpp
   src/system/al_Printing.cpp
