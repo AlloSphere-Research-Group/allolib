@@ -57,7 +57,7 @@ namespace al {
 */
 
 // VariantType enum is equivalent to NC_* types
-enum class VariantType {
+enum class VariantType : int16_t {
   VARIANT_NONE = 0,
   VARIANT_INT64 = 10,
   VARIANT_INT32 = 4,
