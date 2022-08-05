@@ -46,6 +46,7 @@
         Keehong Youn, 2017, younkeehong@gmail.com
 */
 
+#include <atomic>
 #include <cinttypes>
 #include <condition_variable>
 #include <iostream>
