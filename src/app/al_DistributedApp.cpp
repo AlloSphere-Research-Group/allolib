@@ -36,7 +36,7 @@ void DistributedApp::prepare() {
       configfile << "host = \"ar01.1g\"\n";
       configfile << "rank = 0\n";
       configfile << "group = 0\n";
-      configfile << "role = \"desktop\"\n\n";
+      configfile << "role = \"simulator\"\n\n";
       for (uint16_t i = 1; i <= 14; i++) {
         configfile << "[[node]]" << std::endl;
         char str[3];
@@ -104,12 +104,14 @@ void DistributedApp::prepare() {
       group = 0;
       oscDomain()->interfaceIP = "127.0.0.1";
     }
-  } else { // No nodes table in config file. Use desktop role
+  } else { // No nodes table in config file. Use desktop role or sphere roles
     auto defaultCapabilities = al::sphere::getSphereNodes();
     if (defaultCapabilities.find(name()) != defaultCapabilities.end()) {
       mCapabilites = defaultCapabilities[name()].mCapabilites;
       group = defaultCapabilities[name()].group;
       rank = defaultCapabilities[name()].rank;
+
+      mRoleMap["ar01.1g"] = "simulator";
     } else {
       setRole("desktop");
       rank = 0;
