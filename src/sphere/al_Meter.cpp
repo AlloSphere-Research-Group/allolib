@@ -1,3 +1,5 @@
+#include <cfloat>
+
 #include "al/sphere/al_Meter.hpp"
 
 void Meter::init(const Speakers &sl) {
