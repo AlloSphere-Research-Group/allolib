@@ -24,6 +24,7 @@ option(ALLOLIB_BUILD_TESTS "" OFF)
 option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF)
 option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF)
 option(ALLOLIB_BUILD_SHARED "Build all libraries as shared libraries" OFF)
+option(ALLOLIB_BUILD_CORE "Build additional 'core' library" OFF)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(AL_MACOS 1 CACHE BOOL "Building on OS X")
@@ -54,6 +55,117 @@ endif()
 
 find_package(OpenGL REQUIRED)
 add_subdirectory(external)
+
+set (headers_core
+
+    include/al/io/al_AudioIOData.hpp
+
+    include/al/math/al_Constants.hpp
+    include/al/math/al_Mat.hpp
+    include/al/math/al_Matrix4.hpp
+    include/al/math/al_Quat.hpp
+    include/al/math/al_StdRandom.hpp
+    include/al/math/al_Vec.hpp
+
+    include/al/scene/al_DynamicScene.hpp
+    include/al/scene/al_SynthRecorder.hpp
+    include/al/scene/al_PolySynth.hpp
+    include/al/scene/al_PositionedVoice.hpp
+    include/al/scene/al_SynthSequencer.hpp
+    include/al/scene/al_SynthVoice.hpp
+
+    include/al/sound/al_Ambisonics.hpp
+    include/al/sound/al_Biquad.hpp
+    include/al/sound/al_Crossover.hpp
+    include/al/sound/al_Dbap.hpp
+    include/al/sound/al_DownMixer.hpp
+    include/al/sound/al_Lbap.hpp
+    include/al/sound/al_Reverb.hpp
+    include/al/sound/al_Spatializer.hpp
+    include/al/sound/al_Speaker.hpp
+    include/al/sound/al_SpeakerAdjustment.hpp
+    include/al/sound/al_StereoPanner.hpp
+    include/al/sound/al_Vbap.hpp
+
+    include/al/spatial/al_HashSpace.hpp
+    include/al/spatial/al_Pose.hpp
+    include/al/spatial/al_Curve.hpp
+
+    include/al/sphere/al_AllosphereSpeakerLayout.hpp
+    include/al/sphere/al_SphereUtils.hpp
+
+    include/al/system/al_PeriodicThread.hpp
+    include/al/system/al_Printing.hpp
+    include/al/system/al_Thread.hpp
+    include/al/system/al_Time.hpp
+
+    include/al/types/al_Color.hpp
+    include/al/types/al_VariantValue.hpp
+
+    include/al/ui/al_BoundingBoxData.hpp
+    include/al/ui/al_Composition.hpp
+    include/al/ui/al_DiscreteParameterValues.hpp
+    include/al/ui/al_Parameter.hpp
+    include/al/ui/al_ParameterBundle.hpp
+    include/al/ui/al_Pickable.hpp
+    include/al/ui/al_PickableManager.hpp
+    include/al/ui/al_PickableRotateHandle.hpp
+    include/al/ui/al_PresetHandler.hpp
+    include/al/ui/al_PresetMapper.hpp
+    include/al/ui/al_PresetSequencer.hpp
+    include/al/ui/al_SequenceRecorder.hpp
+)
+
+set(sources_core
+    src/io/al_AudioIOData.cpp
+
+    src/math/al_StdRandom.cpp
+
+    src/scene/al_DynamicScene.cpp
+    src/scene/al_SynthRecorder.cpp
+    src/scene/al_PolySynth.cpp
+    src/scene/al_PositionedVoice.cpp
+    src/scene/al_SynthSequencer.cpp
+    src/scene/al_SynthVoice.cpp
+
+    src/sound/al_Ambisonics.cpp
+    src/sound/al_Biquad.cpp
+    src/sound/al_Dbap.cpp
+    src/sound/al_DownMixer.cpp
+    src/sound/al_Lbap.cpp
+    src/sound/al_Spatializer.cpp
+    src/sound/al_Speaker.cpp
+    src/sound/al_SpeakerAdjustment.cpp
+    src/sound/al_StereoPanner.cpp
+    src/sound/al_Vbap.cpp
+
+    src/spatial/al_HashSpace.cpp
+    src/spatial/al_Pose.cpp
+
+    src/sphere/al_AlloSphereSpeakerLayout.cpp
+    src/sphere/al_SphereUtils.cpp
+
+    src/system/al_Printing.cpp
+    src/system/al_PeriodicThread.cpp
+    src/system/al_ThreadNative.cpp
+    src/system/al_Time.cpp
+
+    src/types/al_Color.cpp
+    src/types/al_VariantValue.cpp
+
+    src/ui/al_BoundingBoxData.cpp
+    src/ui/al_Composition.cpp
+    src/ui/al_DiscreteParameterValues.cpp
+    src/ui/al_Parameter.cpp
+    src/ui/al_ParameterBundle.cpp
+    src/ui/al_Pickable.cpp
+    src/ui/al_PickableManager.cpp
+    src/ui/al_PresetHandler.cpp
+    src/ui/al_PresetMapper.cpp
+    src/ui/al_PresetSequencer.cpp
+    src/ui/al_ParameterServer.cpp
+    src/ui/al_SequenceRecorder.cpp
+)
 
 set(headers
   include/al/app/al_App.hpp
@@ -97,7 +209,6 @@ set(headers
 
   include/al/io/al_Arduino.hpp
   include/al/io/al_AudioIO.hpp
-  include/al/io/al_AudioIOData.hpp
   include/al/io/al_ControlNav.hpp
   include/al/io/al_CSVReader.hpp
   include/al/io/al_File.hpp
@@ -108,76 +219,27 @@ set(headers
   include/al/io/al_Toml.hpp
   include/al/io/al_Window.hpp
 
-  include/al/math/al_Constants.hpp
-  include/al/math/al_Mat.hpp
-  include/al/math/al_Matrix4.hpp
-  include/al/math/al_Quat.hpp
-  include/al/math/al_StdRandom.hpp
-  include/al/math/al_Vec.hpp
-
   include/al/protocol/al_OSC.hpp
   include/al/protocol/al_CommandConnection.hpp
 
   include/al/scene/al_DistributedScene.hpp
-  include/al/scene/al_DynamicScene.hpp
-  include/al/scene/al_SynthRecorder.hpp
-  include/al/scene/al_PolySynth.hpp
-  include/al/scene/al_PositionedVoice.hpp
   include/al/scene/al_SequencerMIDI.hpp
-  include/al/scene/al_SynthSequencer.hpp
-  include/al/scene/al_SynthVoice.hpp
 
-  include/al/sound/al_Ambisonics.hpp
-  include/al/sound/al_Biquad.hpp
-  include/al/sound/al_Crossover.hpp
-  include/al/sound/al_Dbap.hpp
-  include/al/sound/al_DownMixer.hpp
-  include/al/sound/al_Lbap.hpp
-  include/al/sound/al_Reverb.hpp
-  include/al/sound/al_Spatializer.hpp
-  include/al/sound/al_Speaker.hpp
-  include/al/sound/al_SpeakerAdjustment.hpp
-  include/al/sound/al_StereoPanner.hpp
-  include/al/sound/al_Vbap.hpp
   include/al/sound/al_SoundFile.hpp
 
-  include/al/spatial/al_HashSpace.hpp
-  include/al/spatial/al_Pose.hpp
-  include/al/spatial/al_Curve.hpp
-
-  include/al/sphere/al_SphereUtils.hpp
   include/al/sphere/al_PerProjection.hpp
   include/al/sphere/al_Meter.hpp
 
-  include/al/system/al_PeriodicThread.hpp
-  include/al/system/al_Printing.hpp
-  include/al/system/al_Thread.hpp
-  include/al/system/al_Time.hpp
-
-  include/al/types/al_Color.hpp
-  include/al/types/al_VariantValue.hpp
-
   include/al/ui/al_BoundingBox.hpp
-  include/al/ui/al_Composition.hpp
   include/al/ui/al_ControlGUI.hpp
   include/al/ui/al_Dialog.hpp
-  include/al/ui/al_DiscreteParameterValues.hpp
   include/al/ui/al_FileSelector.hpp
   include/al/ui/al_Gnomon.hpp
   include/al/ui/al_HtmlInterfaceServer.hpp
-  include/al/ui/al_Parameter.hpp
-  include/al/ui/al_ParameterBundle.hpp
   include/al/ui/al_ParameterGUI.hpp
   include/al/ui/al_ParameterMIDI.hpp
   include/al/ui/al_ParameterServer.hpp
-  include/al/ui/al_Pickable.hpp
-  include/al/ui/al_PickableManager.hpp
-  include/al/ui/al_PickableRotateHandle.hpp
-  include/al/ui/al_PresetHandler.hpp
-  include/al/ui/al_PresetMapper.hpp
   include/al/ui/al_PresetMIDI.hpp
-  include/al/ui/al_PresetSequencer.hpp
-  include/al/ui/al_SequenceRecorder.hpp
   include/al/ui/al_SequenceServer.hpp
 )
 
@@ -224,7 +286,6 @@ set(sources
 
   src/io/al_Arduino.cpp
   src/io/al_AudioIO.cpp
-  src/io/al_AudioIOData.cpp
   src/io/al_ControlNav.cpp
   src/io/al_CSVReader.cpp
   src/io/al_File.cpp
@@ -238,74 +299,32 @@ set(sources
   src/io/al_WindowGLFW.cpp
   src/io/al_imgui_impl.cpp
 
-  src/math/al_StdRandom.cpp
-
   src/protocol/al_OSC.cpp
   src/protocol/al_CommandConnection.cpp
 
   src/scene/al_DistributedScene.cpp
-  src/scene/al_DynamicScene.cpp
-  src/scene/al_SynthRecorder.cpp
-  src/scene/al_PolySynth.cpp
-  src/scene/al_PositionedVoice.cpp
   src/scene/al_SequencerMIDI.cpp
-  src/scene/al_SynthSequencer.cpp
-  src/scene/al_SynthVoice.cpp
 
-  src/sound/al_Ambisonics.cpp
-  src/sound/al_Biquad.cpp
-  src/sound/al_Dbap.cpp
-  src/sound/al_DownMixer.cpp
-  src/sound/al_Lbap.cpp
-  src/sound/al_Spatializer.cpp
-  src/sound/al_Speaker.cpp
-  src/sound/al_SpeakerAdjustment.cpp
-  src/sound/al_StereoPanner.cpp
-  src/sound/al_Vbap.cpp
   src/sound/al_SoundFile.cpp
 
-  src/spatial/al_HashSpace.cpp
-  src/spatial/al_Pose.cpp
-
-  src/sphere/al_AlloSphereSpeakerLayout.cpp
-  src/sphere/al_SphereUtils.cpp
   src/sphere/al_PerProjection.cpp
   src/sphere/al_Meter.cpp
 
-  src/system/al_PeriodicThread.cpp
-  src/system/al_Printing.cpp
-  src/system/al_ThreadNative.cpp
-  src/system/al_Time.cpp
-
-  src/types/al_Color.cpp
-  src/types/al_VariantValue.cpp
-
   src/ui/al_BoundingBox.cpp
-  src/ui/al_Composition.cpp
   src/ui/al_ControlGUI.cpp
   src/ui/al_Dialog.cpp
-  src/ui/al_DiscreteParameterValues.cpp
   src/ui/al_FileSelector.cpp
   src/ui/al_Gnomon.cpp
   src/ui/al_HtmlInterfaceServer.cpp
-  src/ui/al_ParameterBundle.cpp
   src/ui/al_PresetMIDI.cpp
   src/ui/al_ParameterGUI.cpp
   src/ui/al_ParameterMIDI.cpp
-  src/ui/al_PresetSequencer.cpp
-  src/ui/al_ParameterServer.cpp
-  src/ui/al_SequenceRecorder.cpp
-  src/ui/al_SequenceServer.cpp
-  src/ui/al_PresetHandler.cpp
   src/ui/al_PresetServer.cpp
-  src/ui/al_Parameter.cpp
-  src/ui/al_Pickable.cpp
-  src/ui/al_PickableManager.cpp
-  src/ui/al_PresetMapper.cpp
-
+  src/ui/al_SequenceServer.cpp
 )
 
-add_library(al ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al ${AL_LIBRARY_TYPE} ${headers_core} ${headers} ${sources_core} ${sources})
+
 
 set_target_properties(al PROPERTIES
   DEBUG_POSTFIX d
@@ -367,6 +386,27 @@ target_link_libraries(al PUBLIC
   ${OPENGL_gl_LIBRARY}
   Gamma glfw glad rtmidi cpptoml dr_libs
   nlohmann_json::nlohmann_json imgui oscpack stb serial)
+
+
+if(ALLOLIB_BUILD_CORE)
+    add_library(al_core ${AL_LIBRARY_TYPE} ${headers_core} ${headers} ${sources_core} ${sources})
+
+    set_target_properties(al_core PROPERTIES
+      DEBUG_POSTFIX d
+      CXX_STANDARD 14
+      CXX_STANDARD_REQUIRED ON
+    )
+
+    target_include_directories(al_core PUBLIC
+      include
+    )
+    target_link_libraries(al_core PUBLIC pthread)
+    if (AL_WINDOWS)
+      target_compile_definitions(al_core PUBLIC NOMINMAX)
+    else()
+      target_compile_options(al_core PRIVATE "-Wall")
+    endif (AL_WINDOWS)
+endif()
 
 macro(Copy_dlls dest_path target DLLS_TO_COPY)
   if (DLLS_TO_COPY)
