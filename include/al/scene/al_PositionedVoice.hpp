@@ -46,11 +46,6 @@
         Andrés Cabrera mantaraya36@gmail.com
 */
 
-//#include <condition_variable>
-//#include <memory>
-//#include <queue>
-//#include <thread>
-
 #include "al/math/al_Vec.hpp"
 #include "al/scene/al_SynthSequencer.hpp"
 #include "al/sound/al_Speaker.hpp"
