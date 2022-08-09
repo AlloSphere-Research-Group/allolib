@@ -25,7 +25,7 @@ using namespace std;
 // Sound source
 struct Source : public PositionedVoice {
   Mesh mMarker;
-  unsigned long counter = 0;  // overall sample counter
+  unsigned long counter = 0; // overall sample counter
 
   void init() override { addDodecahedron(mMarker); }
 
@@ -78,7 +78,7 @@ struct MyApp : public App {
       type = (speakerType + 1) % 3;
     }
     if (type == 0) {
-      speakerLayout = AlloSphereSpeakerLayout();
+      speakerLayout = AlloSphereSpeakerLayoutCompensated();
     } else if (type == 1) {
       speakerLayout = SpeakerRingLayout<8>(0, 0, 5);
     } else if (type == 2) {
@@ -88,14 +88,15 @@ struct MyApp : public App {
     if (mPeaks) {
       free(mPeaks);
     }
-    mPeaks = new atomic<float>[speakerLayout.size()];  // Not being freed
-                                                       // in this example
+    mPeaks = new atomic<float>[speakerLayout.size()]; // Not being freed
+                                                      // in this example
   }
 
   void initSpatializer(int type = -1) {
     if (type == -1) {
       type = spatializerType + 1;
-      if (type == 7) type = 1;
+      if (type == 7)
+        type = 1;
     }
     spatializerType = type;
     if (type == 1) {

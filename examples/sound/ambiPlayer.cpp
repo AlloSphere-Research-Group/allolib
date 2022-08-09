@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
   MyApp app;
 
-  app.speakerLayout = AlloSphereSpeakerLayout();
+  app.speakerLayout = AlloSphereSpeakerLayoutCompensated();
 
   app.audioDomain()->configure(sr, 256, 60);
 

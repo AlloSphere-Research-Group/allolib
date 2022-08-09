@@ -42,7 +42,7 @@ struct MyApp : public App {
       type = (speakerType + 1) % 3;
     }
     if (type == 0) {
-      speakerLayout = AlloSphereSpeakerLayout();
+      speakerLayout = AlloSphereSpeakerLayoutCompensated();
     } else if (type == 1) {
       speakerLayout = SpeakerRingLayout<8>(0, 0, 5);
     } else if (type == 2) {

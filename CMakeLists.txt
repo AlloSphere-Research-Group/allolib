@@ -145,6 +145,7 @@ set(headers
   include/al/spatial/al_Pose.hpp
   include/al/spatial/al_Curve.hpp
 
+  include/al/sphere/al_AlloSphereSpeakerLayout.hpp
   include/al/sphere/al_SphereUtils.hpp
   include/al/sphere/al_PerProjection.hpp
   include/al/sphere/al_Meter.hpp
