@@ -158,6 +158,7 @@ set(headers
   include/al/types/al_VariantValue.hpp
 
   include/al/ui/al_BoundingBox.hpp
+  include/al/ui/al_BoundingBoxData.hpp
   include/al/ui/al_Composition.hpp
   include/al/ui/al_ControlGUI.hpp
   include/al/ui/al_Dialog.hpp
@@ -281,6 +282,7 @@ set(sources
   src/types/al_VariantValue.cpp
 
   src/ui/al_BoundingBox.cpp
+  src/ui/al_BoundingBoxData.cpp
   src/ui/al_Composition.cpp
   src/ui/al_ControlGUI.cpp
   src/ui/al_Dialog.cpp
