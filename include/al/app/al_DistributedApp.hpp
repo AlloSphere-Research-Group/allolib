@@ -95,6 +95,8 @@ public:
   Nav &nav() override;
   NavInputControl &navControl() override;
 
+  void printCapabilities();
+
   std::shared_ptr<GLFWOpenGLOmniRendererDomain> omniRendering;
   std::map<std::string, std::string> additionalConfig;
 

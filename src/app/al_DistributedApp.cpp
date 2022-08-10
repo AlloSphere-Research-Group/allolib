@@ -111,7 +111,7 @@ void DistributedApp::prepare() {
       group = defaultCapabilities[name()].group;
       rank = defaultCapabilities[name()].rank;
 
-      mRoleMap["ar01.1g"] = "simulator";
+      //      mRoleMap["ar01.1g"] = "simulator";
     } else {
       setRole("desktop");
       rank = 0;
@@ -340,5 +340,35 @@ NavInputControl &DistributedApp::navControl() {
     return omniRendering->navControl();
   } else {
     return mDefaultWindowDomain->navControl();
+  }
+}
+
+void DistributedApp::printCapabilities() {
+  if (hasCapability(CAP_SIMULATOR)) {
+    std::cout << "SIMULATOR" << std::endl;
+  }
+  if (hasCapability(CAP_RENDERING)) {
+    std::cout << "RENDERING" << std::endl;
+  }
+  if (hasCapability(CAP_OMNIRENDERING)) {
+    std::cout << "OMNIRENDERING" << std::endl;
+  }
+  if (hasCapability(CAP_AUDIO_IO)) {
+    std::cout << "AUDIOIO" << std::endl;
+  }
+  if (hasCapability(CAP_OSC)) {
+    std::cout << "OSC" << std::endl;
+  }
+  if (hasCapability(CAP_CONSOLE_IO)) {
+    std::cout << "CONSOLEIO" << std::endl;
+  }
+  if (hasCapability(CAP_2DGUI)) {
+    std::cout << "2DGUI" << std::endl;
+  }
+  if (hasCapability(CAP_STATE_SEND)) {
+    std::cout << "STATE_SEND" << std::endl;
+  }
+  if (hasCapability(CAP_STATE_RECEIVE)) {
+    std::cout << "STATE_RECEIVE" << std::endl;
   }
 }
