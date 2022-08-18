@@ -43,6 +43,10 @@ set(BUILD_UTILS OFF CACHE BOOL "no utils for glew" FORCE)
 add_subdirectory(Gamma)
 add_subdirectory(glfw)
 add_subdirectory(glad)
+
+# Required for RtAudio 5.2.0
+set (RTAUDIO_STATIC_MSVCRT OFF)
+
 add_subdirectory(rtaudio)
 add_subdirectory(rtmidi)
 add_subdirectory(cpptoml)
