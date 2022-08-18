@@ -23,6 +23,8 @@ The API documentation can be found at: https://allosphere-research-group.github.
 
 Allolib depends on Cmake version 3.8 (as the build tool), OpenGL and glew. See platform specific instructions below.
 
+To clone the media required for some examples, you will need git-lfs. Installation of git-lfs is described below, but it is important that you install git-lfs before cloning this repo.
+
 ### Windows
 
 There are two paths for Windows installation. One through Visual Studio and one through the Chocolatey package manager.
