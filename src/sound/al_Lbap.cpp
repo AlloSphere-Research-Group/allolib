@@ -101,7 +101,11 @@ void Lbap::renderBuffer(AudioIOData &io, const Vec3f &reldir,
       float fraction =
           (elev - mRings.back().vbap->speakerLayout()[0].elevation) /
           (-90 - mRings.back().vbap->speakerLayout()[0].elevation);
-      assert(fraction <= 1.0 && fraction >= 0.0);
+      if (fraction > 1.0) {
+        fraction = 1.0;
+      } else if (fraction < 0.0) {
+        fraction = 0.0;
+      }
       if (fraction > mDispersionOffset) {
         // Adjust fraction to effective fraction (discarding offset
         fraction = (fraction - mDispersionOffset) / (1.0 - mDispersionOffset);
