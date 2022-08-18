@@ -540,7 +540,7 @@ void SynthSequencer::processEvents(double blockStartTime, double fpsAdjusted) {
         event++;
         mNextEvent++;
       }
-      while (event->startTime <= mMasterTime) {
+      while (event != mEvents.end() && event->startTime <= mMasterTime) {
         event->offsetCounter =
             (event->startTime - blockStartTime) * fpsAdjusted;
         if (event->type == SynthSequencerEvent::EVENT_VOICE && event->voice) {
