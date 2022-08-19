@@ -83,9 +83,10 @@ void DownMixer::downMixToBus(AudioIOData &io) {
 }
 
 void DownMixer::copyBusToOuts(AudioIOData &io) {
+  int offset = io.channelsBus() - mOuts.size();
   for (size_t i = 0; i < mOuts.size(); i++) {
     if (mOuts[i] != UINT32_MAX) {
-      memcpy(io.outBuffer(mOuts[i]), io.busBuffer(i),
+      memcpy(io.outBuffer(mOuts[i]), io.busBuffer(offset + i),
              io.framesPerBuffer() * sizeof(float));
     }
   }
