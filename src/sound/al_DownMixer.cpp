@@ -67,7 +67,7 @@ void DownMixer::setStereoOutput() { setOutputs({0, 1}); }
 
 void DownMixer::setOutputs(std::vector<uint32_t> outs) { mOuts = outs; }
 
-void DownMixer::downMix(AudioIOData &io) {
+void DownMixer::downMixToBus(AudioIOData &io) {
   // Zero bus buffers
   for (int i = mBusStartNumber; i < io.channelsBus(); i++) {
     memset(io.busBuffer(i), 0, io.framesPerBuffer() * sizeof(float));
@@ -80,10 +80,18 @@ void DownMixer::downMix(AudioIOData &io) {
       }
     }
   }
+}
+
+void DownMixer::copyBusToOuts(AudioIOData &io) {
   for (size_t i = 0; i < mOuts.size(); i++) {
     if (mOuts[i] != UINT32_MAX) {
       memcpy(io.outBuffer(mOuts[i]), io.busBuffer(i),
              io.framesPerBuffer() * sizeof(float));
     }
   }
+}
+
+void DownMixer::downMix(AudioIOData &io) {
+  downMixToBus(io);
+  copyBusToOuts(io);
 }

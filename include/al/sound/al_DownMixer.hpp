@@ -31,6 +31,8 @@ public:
 
   // process
   void downMix(AudioIOData &io);
+  void downMixToBus(AudioIOData &io);
+  void copyBusToOuts(AudioIOData &io);
 
 private:
   std::map<uint32_t, std::vector<std::pair<uint32_t, float>>> mRoutingMap;
