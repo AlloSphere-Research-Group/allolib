@@ -25,7 +25,6 @@ public:
   void layoutToStereo(const Speakers &sl, AudioIOData &io);
   void set5_1toStereo(AudioIOData &io);
 
-  // Copy bus to outputs
   void setStereoOutput();
   void setOutputs(std::vector<uint32_t> outs);
 
