@@ -610,7 +610,10 @@ void PresetHandler::stepMorphing(double stepTime) {
 }
 
 std::string PresetHandler::getCurrentPath() {
-  std::string relPath = File::conformPathToOS(getRootPath() + mSubDir);
+  std::string relPath = getRootPath() + mSubDir;
+  if (relPath.size() > 0) {
+    relPath = File::conformPathToOS(relPath);
+  }
   return relPath;
 }
 
@@ -630,7 +633,10 @@ void PresetHandler::setRootPath(std::string path) {
 }
 
 std::string al::PresetHandler::getRootPath() {
-  std::string relPath = File::conformDirectory(mRootDir);
+  std::string relPath;
+  if (mRootDir.size() > 0) {
+    relPath = File::conformDirectory(mRootDir);
+  }
   return relPath;
 }
 

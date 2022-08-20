@@ -576,9 +576,16 @@ bool PresetSequencer::consumeMessage(osc::Message &m, std::string rootOSCPath) {
 }
 
 std::string PresetSequencer::buildFullPath(std::string sequenceName) {
-  std::string fullName = File::conformDirectory(mDirectory);
+  std::string fullName;
+  if (mDirectory.size() > 0) {
+    fullName = File::conformDirectory(mDirectory);
+  }
   if (mPresetHandler) {
-    fullName = File::conformDirectory(mPresetHandler->getCurrentPath());
+    auto presetPath = mPresetHandler->getCurrentPath();
+    std::cout << presetPath << std::endl;
+    if (presetPath.size() > 0) {
+      fullName = File::conformDirectory(presetPath);
+    }
   }
   if (sequenceName.size() < 9 ||
       sequenceName.substr(sequenceName.size() - 9) != ".sequence") {
@@ -618,7 +625,4 @@ void PresetSequencer::stopCpuThread() {
   }
 }
 
-void PresetSequencer::setVerbose(bool newVerbose)
-{
-    mVerbose = newVerbose;
-}
+void PresetSequencer::setVerbose(bool newVerbose) { mVerbose = newVerbose; }
