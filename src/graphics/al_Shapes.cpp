@@ -411,7 +411,9 @@ int addSphereWithTexcoords(Mesh &m, double radius, int bands, bool isSkybox) {
       double y = cosTheta;
       double z = cosPhi * sinTheta;
 
-      double u = 1.0 - ((double)lon / bands);
+      double u = (double)lon / bands;
+      if (isSkybox)
+        u = 1.0 - u;
       double v = (double)lat / bands;
 
       m.vertex(r * x, r * y, r * z);
@@ -430,15 +432,24 @@ int addSphereWithTexcoords(Mesh &m, double radius, int bands, bool isSkybox) {
     for (int lon = 0; lon < bands; ++lon) {
       int first = (lat * (bands + 1)) + lon;
       int second = first + bands + 1;
-      m.index(first);
-      // m.index(second);
-      m.index((first + 1));
-      m.index(second);
 
-      m.index(second);
-      // m.index((second + 1));
-      m.index((first + 1));
-      m.index((second + 1));
+      if (!isSkybox) {
+        m.index(first);
+        m.index(second);
+        m.index((first + 1));
+
+        m.index(second);
+        m.index((second + 1));
+        m.index((first + 1));
+      } else {
+        m.index(first);
+        m.index((first + 1));
+        m.index(second);
+
+        m.index(second);
+        m.index((first + 1));
+        m.index((second + 1));
+      }
     }
   }
 
