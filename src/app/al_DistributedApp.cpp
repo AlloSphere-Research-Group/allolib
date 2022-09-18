@@ -36,7 +36,7 @@ void DistributedApp::prepare() {
       configfile << "host = \"ar01.1g\"\n";
       configfile << "rank = 0\n";
       configfile << "group = 0\n";
-      configfile << "role = \"simulator\"\n\n";
+      configfile << "role = \"desktop\"\n\n";
       for (uint16_t i = 1; i <= 14; i++) {
         configfile << "[[node]]" << std::endl;
         char str[3];
