@@ -1,9 +1,17 @@
 #include <cfloat>
 
 #include "al/sphere/al_Meter.hpp"
+#include "al/math/al_Random.hpp"
 
+Vec3f spin;
+float vspin[60];
 void Meter::init(const Speakers &sl) {
   addCube(mMesh);
+  // addPrism(mMesh,1,1,1,30);
+  // mMesh.primitive(Mesh::LINES);
+  // mMesh.vertex(1,1,1);
+  // mMesh.color(HSV(1,1,1));
+  // mMesh.texCoord(0.5, 0.0);
   mSl = sl;
 }
 
@@ -44,19 +52,27 @@ void Meter::processSound(AudioIOData &io) {
 }
 
 void Meter::draw(Graphics &g) {
-  g.polygonLine();
+  // g.polygonLine();
   int index = 0;
   auto spkrIt = mSl.begin();
   g.color(1);
+  g.lighting(true);
   for (const auto &v : values) {
     if (spkrIt != mSl.end()) {
       // FIXME assumes speakers are sorted by device channel index
       // Should sort inside init()
       if (spkrIt->deviceChannel == index) {
+        vspin[spkrIt->deviceChannel] +=v*100;
+        spin = Vec3f(spkrIt->vecGraphics());
         g.pushMatrix();
         g.scale(1 / 5.0f);
-        g.translate(spkrIt->vecGraphics());
-        g.scale(0.1 + v * 5);
+        g.translate(spkrIt->vecGraphics()+ Vec3f(rnd::gaussian()*v));
+        g.scale(0.1 + v * 2);
+        g.color(HSV(v*10,v*10,v*30));
+        // std::cout << v * 10000 << std::endl;
+        // g.rotate(al::rnd::uniform(v*3000), spin);
+        g.rotate(vspin[spkrIt->deviceChannel], spin);
+        g.scale(0.1, 10 ,0.1);
         g.draw(mMesh);
         g.popMatrix();
         spkrIt++;
@@ -64,6 +80,9 @@ void Meter::draw(Graphics &g) {
     } else {
       spkrIt = mSl.begin();
     }
+    for (int i=0; i<60; i++){
+      // vspin[i] *=vspin[i];
+    }    
     index++;
   }
 }
