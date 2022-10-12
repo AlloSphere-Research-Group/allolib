@@ -73,7 +73,7 @@ void Meter::draw(Graphics &g) {
         // std::cout << v * 10000 << std::endl;
         // g.rotate(al::rnd::uniform(v*3000), spin);
         g.rotate(vspin[spkrIt->deviceChannel], spin);
-        g.scale(0.1, 100 ,0.1);
+        g.scale(10, 100 ,10);
         g.draw(mMesh);
         g.popMatrix();
         spkrIt++;
