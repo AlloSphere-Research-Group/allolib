@@ -68,11 +68,11 @@ void Meter::draw(Graphics &g) {
         g.scale(1 / 5.0f);
         g.translate(spkrIt->vecGraphics()+ Vec3f(rnd::gaussian()*v*10));
         g.scale(0.1 + v * 2);
-        g.color(HSV(v*10+al::rnd::uniform(v*5)+0.3,v*10,v*100));
+        g.color(HSV(v*10+al::rnd::uniform(v*5)+0.3,v,v*100+0.3));
         // std::cout << v * 10000 << std::endl;
         // g.rotate(al::rnd::uniform(v*3000), spin);
         g.rotate(vspin[spkrIt->deviceChannel], spin);
-        g.scale(0.1, 10 ,0.1);
+        g.scale(0.1, 100 ,0.1);
         g.draw(mMesh);
         g.popMatrix();
         spkrIt++;
