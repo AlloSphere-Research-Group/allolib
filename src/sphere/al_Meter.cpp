@@ -56,20 +56,23 @@ void Meter::draw(Graphics &g) {
   int index = 0;
   auto spkrIt = mSl.begin();
   g.color(1);
+  g.blendAdd();
   g.lighting(true);
+  gl::depthTesting(true);
   for (const auto &v : values) {
     if (spkrIt != mSl.end()) {
       // FIXME assumes speakers are sorted by device channel index
       // Should sort inside init()
       if (spkrIt->deviceChannel == index) {
-        vspin[spkrIt->deviceChannel] +=v*100;
+        vspin[spkrIt->deviceChannel] +=v*30;
         spin = Vec3f(spkrIt->vecGraphics());
         g.pushMatrix();
         g.scale(1 / 5.0f);
-        g.translate(spkrIt->vecGraphics()+ Vec3f(rnd::gaussian()*v*10));
+        // g.translate(spkrIt->vecGraphics()+ Vec3f(rnd::gaussian()*v*10));
+        g.translate(spkrIt->vecGraphics()*3);
         g.scale(0.1 + v * 2);
         // g.color(HSV(v*10+al::rnd::uniform(v*5)+0.3, v*10+al::rnd::uniform(v*5) ,v*30+0.3));
-        g.color(HSV(v*30+al::rnd::uniform(v*5), 1000*v+al::rnd::uniform(v*5) ,v*1000+0.4));
+        g.color(HSV(v*20+al::rnd::uniform(v*5), 300*v+al::rnd::uniform(v*5) ,v*300+0.4));
         // std::cout << v * 10000 << std::endl;
         // g.rotate(al::rnd::uniform(v*3000), spin);
         g.rotate(vspin[spkrIt->deviceChannel], spin);
