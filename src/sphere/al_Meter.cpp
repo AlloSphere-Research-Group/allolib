@@ -69,7 +69,7 @@ void Meter::draw(Graphics &g) {
         g.translate(spkrIt->vecGraphics()+ Vec3f(rnd::gaussian()*v*10));
         g.scale(0.1 + v * 2);
         // g.color(HSV(v*10+al::rnd::uniform(v*5)+0.3, v*10+al::rnd::uniform(v*5) ,v*30+0.3));
-        g.color(HSV(v+al::rnd::uniform(v*5)+0.4, v+al::rnd::uniform(v) ,v*30+0.4));
+        g.color(HSV(v+al::rnd::uniform(v*5)+0.4, 10*v+al::rnd::uniform(v*5) ,v*30+0.4));
         // std::cout << v * 10000 << std::endl;
         // g.rotate(al::rnd::uniform(v*3000), spin);
         g.rotate(vspin[spkrIt->deviceChannel], spin);
