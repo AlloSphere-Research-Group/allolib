@@ -65,14 +65,14 @@ void Meter::draw(Graphics &g) {
       // Should sort inside init()
       if (spkrIt->deviceChannel == index) {
         vspin[spkrIt->deviceChannel] +=v*30;
-        spin = Vec3f(spkrIt->vecGraphics());
+        spin = Vec3f(spkrIt->vecGraphics()) + Vec3f(0,spkrIt->deviceChannel, 0);
         g.pushMatrix();
         g.scale(1 / 5.0f);
         // g.translate(spkrIt->vecGraphics()+ Vec3f(rnd::gaussian()*v*10));
         g.translate(spkrIt->vecGraphics()*3);
         g.scale(0.1 + v * 2);
         // g.color(HSV(v*10+al::rnd::uniform(v*5)+0.3, v*10+al::rnd::uniform(v*5) ,v*30+0.3));
-        g.color(HSV(v*20+al::rnd::uniform(v*5), 300*v+al::rnd::uniform(v*5) ,v*300+0.4));
+        g.color(HSV(v*10+al::rnd::uniform(v*5), 300*v+al::rnd::uniform(v*5) ,v*300+0.4));
         // std::cout << v * 10000 << std::endl;
         // g.rotate(al::rnd::uniform(v*3000), spin);
         g.rotate(vspin[spkrIt->deviceChannel], spin);
