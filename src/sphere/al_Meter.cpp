@@ -2,25 +2,52 @@
 
 #include "al/sphere/al_Meter.hpp"
 #include "al/math/al_Random.hpp"
-#include "shader.hpp"
+#include <fstream>
+
+using namespace std;
 
 Vec3f spin;
 float vspin[60];
-ShaderProgram shader;
-Texture texture;
-float halfsize;
+ShaderProgram pointShader;
+Texture pointTexture;
+FBO renderTarget;
+Texture rendered;
+
+void updateFBO() {
+  rendered.create2D(1280, 640);
+  renderTarget.bind();
+  renderTarget.attachTexture2D(rendered);
+  renderTarget.unbind();
+}
+
+string slurp(string fileName)
+{
+  fstream file(fileName);
+  string returnValue = "";
+  while (file.good())
+  {
+    string line;
+    getline(file, line);
+    returnValue += line + "\n";
+  }
+  return returnValue;
+}
+
+void onResize() {
+  updateFBO();
+  //
+}
 
 void Meter::init(const Speakers &sl)
 {
-  mMesh.vertex(0,0,0);
+  mMesh.vertex(0, 0, 0);
   mMesh.primitive(Mesh::POINTS);
   mMesh.color(HSV(0.67, 10., 10.));
   mSl = sl;
-  halfsize = 0.3;
-  // Texture & Shader 
-  texture.create2D(500, 500, Texture::R8, Texture::RED, Texture::SHORT);
-  int Nx = texture.width();
-  int Ny = texture.height();
+  // Texture & Shader
+  pointTexture.create2D(256, 256, Texture::R8, Texture::RED, Texture::SHORT);
+  int Nx = pointTexture.width();
+  int Ny = pointTexture.height();
   std::vector<short> alpha;
   alpha.resize(Nx * Ny);
   for (int j = 0; j < Ny; ++j)
@@ -34,8 +61,11 @@ void Meter::init(const Speakers &sl)
       alpha[j * Nx + i] = m;
     }
   }
-  texture.submit(&alpha[0]);
-  shader.compile(vertex, fragment, geometry);
+  pointTexture.submit(&alpha[0]);
+  pointShader.compile(slurp("point-vertex.glsl"),
+                      slurp("point-fragment.glsl"),
+                      slurp("point-geometry.glsl"));
+  updateFBO();
 }
 
 void Meter::processSound(AudioIOData &io)
@@ -92,13 +122,12 @@ void Meter::draw(Graphics &g)
 {
   int index = 0;
   auto spkrIt = mSl.begin();
-  g.lighting(true);
+  // g.lighting(true);
   g.depthTesting(true);
   g.blending(true);
+  g.blendAdd();
   g.blendTrans();
   g.meshColor();
-  g.texture(); // use texture
-
   for (const auto &v : values)
   {
     if (spkrIt != mSl.end())
@@ -108,15 +137,14 @@ void Meter::draw(Graphics &g)
       if (spkrIt->deviceChannel == index)
       {
         g.pushMatrix();
-        texture.bind();
-        g.shader(shader);
-        g.color(HSV(0.67, 10., 10.));
-        g.pointSize(10.);
-        g.shader().uniform("halfSize", 1.5);
-        g.scale(1 / 5.0f);
+        // pointTexture.bind();
+        // g.shader(pointShader);
         g.translate(spkrIt->vecGraphics());
-        g.rotate(al::rnd::uniform(720), Vec3f(al::rnd::uniform(),al::rnd::uniform(),al::rnd::uniform()));
+        g.pointSize(3. +  30* v);
+        g.color(HSV(0.67 + v, v*10, 0.3 + v*10));
+        // g.scale(1 + 10* v);
         g.draw(mMesh);
+        // pointTexture.unbind();
         g.popMatrix();
         spkrIt++;
       }
@@ -127,7 +155,6 @@ void Meter::draw(Graphics &g)
     }
     index++;
   }
-  texture.unbind();
 }
 
 void Meter::setMeterValues(float *newValues, size_t count)
