@@ -8,12 +8,15 @@ Vec3f spin;
 float vspin[60];
 ShaderProgram shader;
 Texture texture;
+float halfsize;
 
 void Meter::init(const Speakers &sl)
 {
+  // addCube(mMesh);
   mMesh.primitive(Mesh::POINTS);
-  mMesh.color(HSV(0.67, 1., 1.));
+  // mMesh.color(HSV(0.67, 10., 10.));
   mSl = sl;
+  halfsize = 0.3;
   // Texture & Shader 
   texture.create2D(500, 500, Texture::R8, Texture::RED, Texture::SHORT);
   int Nx = texture.width();
@@ -87,11 +90,15 @@ void Meter::processSound(AudioIOData &io)
 
 void Meter::draw(Graphics &g)
 {
-  // g.polygonLine();
   int index = 0;
   auto spkrIt = mSl.begin();
-  g.color(1);
   g.lighting(true);
+  g.depthTesting(true);
+  g.blending(true);
+  g.blendTrans();
+  g.meshColor();
+  g.texture(); // use texture
+
   for (const auto &v : values)
   {
     if (spkrIt != mSl.end())
@@ -101,13 +108,15 @@ void Meter::draw(Graphics &g)
       if (spkrIt->deviceChannel == index)
       {
         g.pushMatrix();
-        // texture.bind();
+        texture.bind();
+        g.color(HSV(0.67, 10., 10.));
+        // g.pointSize(3.);
         g.shader(shader);
-        g.shader().uniform("halfSize", 5.5);
+        g.shader().uniform("halfSize", halfsize);
         // g.scale(1 / 5.0f);
         g.translate(spkrIt->vecGraphics());
         g.draw(mMesh);
-        // texture.unbind();
+        texture.unbind();
         g.popMatrix();
         spkrIt++;
       }
