@@ -12,9 +12,9 @@ float halfsize;
 
 void Meter::init(const Speakers &sl)
 {
-  // addCube(mMesh);
+  mMesh.vertex(0,0,0);
   mMesh.primitive(Mesh::POINTS);
-  // mMesh.color(HSV(0.67, 10., 10.));
+  mMesh.color(HSV(0.67, 10., 10.));
   mSl = sl;
   halfsize = 0.3;
   // Texture & Shader 
@@ -109,14 +109,14 @@ void Meter::draw(Graphics &g)
       {
         g.pushMatrix();
         texture.bind();
-        g.color(HSV(0.67, 10., 10.));
-        // g.pointSize(3.);
         g.shader(shader);
-        g.shader().uniform("halfSize", halfsize);
-        // g.scale(1 / 5.0f);
+        g.color(HSV(0.67, 10., 10.));
+        g.pointSize(10.);
+        g.shader().uniform("halfSize", 1.5);
+        g.scale(1 / 5.0f);
         g.translate(spkrIt->vecGraphics());
+        g.rotate(al::rnd::uniform(720), Vec3f(al::rnd::uniform(),al::rnd::uniform(),al::rnd::uniform()));
         g.draw(mMesh);
-        texture.unbind();
         g.popMatrix();
         spkrIt++;
       }
@@ -127,6 +127,7 @@ void Meter::draw(Graphics &g)
     }
     index++;
   }
+  texture.unbind();
 }
 
 void Meter::setMeterValues(float *newValues, size_t count)
