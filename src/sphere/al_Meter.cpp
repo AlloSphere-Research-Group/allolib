@@ -140,7 +140,7 @@ void Meter::draw(Graphics &g)
         // pointTexture.bind();
         // g.shader(pointShader);
         g.translate(spkrIt->vecGraphics());
-        g.pointSize(5. +  40* v);
+        g.pointSize(5. +  120* v);
         g.color(HSV(0.67 + v, 0.2 + v*20, 0.2 + v*30));
         // g.scale(1 + 10* v);
         g.draw(mMesh);
