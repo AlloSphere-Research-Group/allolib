@@ -119,10 +119,15 @@ void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix,
   auto spinDecimals = param->getHint("input", &isSpinBox);
   if (isSpinBox) {
     std::string format = "%." + std::to_string(int(spinDecimals)) + "f";
-    changed = ImGui::InputFloat(
-        (param->displayName() + suffix).c_str(), &value,
-        std::pow(10, -spinDecimals), std::pow(10, -(spinDecimals - 1.0)),
-        format.c_str(), ImGuiInputTextFlags_EnterReturnsTrue);
+    if (spinDecimals < 0) { // wrong value, instead force to integer
+      changed = ImGui::SliderFloat((param->displayName() + suffix).c_str(),
+                                   &value, param->min(), param->max(), "%.0f");
+    } else {
+      changed = ImGui::InputFloat(
+          (param->displayName() + suffix).c_str(), &value,
+          std::pow(10, -spinDecimals), std::pow(10, -(spinDecimals - 1.0)),
+          format.c_str(), ImGuiInputTextFlags_EnterReturnsTrue);
+    }
   } else {
     changed = ImGui::SliderFloat((param->displayName() + suffix).c_str(),
                                  &value, param->min(), param->max());

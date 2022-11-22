@@ -162,6 +162,11 @@ public:
     return value;
   }
 
+  bool removeHint(std::string hintName) {
+    mHints.erase(hintName);
+    return false;
+  }
+
   virtual void getFields(std::vector<VariantValue> & /*fields*/) {
     std::cout
         << "get(std::vector<ParameteterField> &fields) not implemented for "
