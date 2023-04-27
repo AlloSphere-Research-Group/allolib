@@ -129,7 +129,12 @@ void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix,
           format.c_str(), ImGuiInputTextFlags_EnterReturnsTrue);
     }
   } else {
-    changed = ImGui::SliderFloat((param->displayName() + suffix).c_str(),
+    float dragSpeed = param->getHint("drag");
+    if(dragSpeed)
+      changed = ImGui::DragFloat((param->displayName() + suffix).c_str(),
+                                 &value, dragSpeed, param->min(), param->max(), "%.06f");
+    else
+      changed = ImGui::SliderFloat((param->displayName() + suffix).c_str(),
                                  &value, param->min(), param->max());
   }
   if (changed) {
