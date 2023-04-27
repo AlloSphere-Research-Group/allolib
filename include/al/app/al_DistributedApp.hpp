@@ -154,7 +154,7 @@ public:
     mPortToSet = port;
   }
 
-  void start(uint16_t packetSize = 1400) override {
+  void start(uint16_t packetSize = 1400) {
     prepare();
     auto distDomain =
         std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
