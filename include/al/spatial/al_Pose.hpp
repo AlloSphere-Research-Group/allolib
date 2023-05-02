@@ -99,6 +99,10 @@ public:
   /// vector
   void faceToward(const Vec3d &point, const Vec3d &up, double amt = 1.);
 
+  /// Turn to face a given world-coordinate line defined by point and dir
+  /// while maintaining dir as up vector
+  void faceTowardLine(const Vec3d& point, const Vec3d& dir, double amt);
+
   /// Get "position" vector
   Vec3d &pos() { return mVec; }
   const Vec3d &pos() const { return mVec; }

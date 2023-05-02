@@ -101,6 +101,10 @@ public:
   /// vector
   void faceToward(const Vec3d &point, const Vec3d &up, double amt = 1.);
 
+  /// Turn to face a given world-coordinate line defined by point and dir
+  /// while maintaining dir as up vector
+  void faceTowardLine(const Vec3d &point, const Vec3d &dir, double amt = 1.);
+
   /// Move toward a given world-coordinate point
   void nudgeToward(const Vec3d &p, double amt = 1.);
 

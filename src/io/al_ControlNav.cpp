@@ -55,6 +55,11 @@ void Nav::faceToward(const Vec3d& point, const Vec3d& up, double amt) {
   updateDirectionVectors();
 }
 
+void Nav::faceTowardLine(const Vec3d& point, const Vec3d& dir, double amt) {
+  Pose::faceTowardLine(point, dir, amt);
+  updateDirectionVectors();
+}
+
 void Nav::nudgeToward(const Vec3d& p, double amt) {
   Vec3d rotEuler;
   Vec3d target(p - pos());
