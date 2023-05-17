@@ -187,8 +187,10 @@ class Texture : public GPUObject {
   void create2DArray(unsigned int width, unsigned int height, unsigned int depth,  
                 int internal = GL_RGBA8, unsigned int format = GL_RGBA, 
                 unsigned int type = GL_UNSIGNED_BYTE);
-  // TODO
-  // void create3D();
+  
+  void create3D(unsigned int width, unsigned int height, unsigned int depth,  
+                int internal = GL_RGBA8, unsigned int format = GL_RGBA, 
+                unsigned int type = GL_UNSIGNED_BYTE);
 
   void createCubemap(
       unsigned int size, int internal = GL_RGBA8, unsigned int format = GL_RGBA,

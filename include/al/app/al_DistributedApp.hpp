@@ -154,7 +154,7 @@ public:
     mPortToSet = port;
   }
 
-  void start() override {
+  void start(uint16_t packetSize = 1400) {
     prepare();
     auto distDomain =
         std::static_pointer_cast<StateDistributionDomain<TSharedState>>(
@@ -164,7 +164,7 @@ public:
         auto sender =
             distDomain->addStateSender("state", distDomain->statePtr());
         sender->configure(mPortToSet, "state",
-                          additionalConfig["broadcastAddress"]);
+                          additionalConfig["broadcastAddress"], packetSize);
       } else {
         std::cout << "Not enabling state sending for primary." << std::endl;
       }
@@ -173,7 +173,7 @@ public:
         auto receiver =
             distDomain->addStateReceiver("state", distDomain->statePtr());
         receiver->configure(mPortToSet, "state",
-                            additionalConfig["broadcastAddress"]);
+                            additionalConfig["broadcastAddress"], packetSize);
       }
     }
     DistributedApp::start();

@@ -91,13 +91,13 @@ void Gnomon::drawArrows(Graphics &g) {
     g.translate(gnomonMesh.vertices()[(i * 2) + 1]);
     switch (i) {
     case 0:
-      q.fromEuler((float)M_PI * 0.5f, 0, 0);
+      q.fromEuler((float)M_PI * -0.5f, 0, 0);
       break;
     case 1:
-      q.fromEuler(0, (float)-M_PI * 0.5f, 0);
+      q.fromEuler(0, (float)M_PI * 0.5f, 0);
       break;
     case 2:
-      q.fromEuler(0, 0, 0);
+      q.fromEuler(M_PI, 0, 0);
       break;
     }
     g.rotate(q);

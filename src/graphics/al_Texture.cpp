@@ -95,6 +95,34 @@ void Texture::create2DArray(unsigned int width, unsigned int height, unsigned in
   unbind_temp();
 }
 
+void Texture::create3D(unsigned int width, unsigned int height, unsigned int depth,  
+                            int internal, unsigned int format, unsigned int type) {
+
+  mTarget = GL_TEXTURE_3D,
+  mInternalFormat = internal;
+  mWidth = width;
+  mHeight = height;
+  mDepth = depth;
+  mFormat = format;
+  mType = type;
+
+  // force sending params
+  mFilterUpdated = true;
+  mWrapUpdated = true;
+  mUsingMipmapUpdated = true;
+
+  create();
+  bind_temp();
+  glTexImage3D(mTarget,
+             0,  // level
+             mInternalFormat, mWidth, mHeight, mDepth,
+             0,  // border
+             mFormat, mType, nullptr);
+  update_filter();
+  update_wrap();
+  unbind_temp();
+}
+
 void Texture::createCubemap(unsigned int size, int internal,
                             unsigned int format, unsigned int type) {
   mTarget = GL_TEXTURE_CUBE_MAP;

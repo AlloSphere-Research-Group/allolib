@@ -44,6 +44,19 @@ void Pose::faceToward(const Vec3d& point, const Vec3d& up, double amt) {
                  amt);
 }
 
+void Pose::faceTowardLine(const Vec3d& point, const Vec3d& dir, double amt) {
+  // Face the closest point on the line
+  // And use the line as up vector
+
+  // get point on line to face
+  Vec3d t = dir.normalized();
+  Vec3d v = pos() - point;
+  Vec3d d = v.dot(t);
+  Vec3d pp = point + t * d;
+  quat().slerpTo(Quatd::getBillboardRotation((pos()-pp).normalize(), t),
+                 amt);
+}
+
 Mat4d Pose::matrix() const {
   Mat4d m;
   quat().toMatrix(&m[0]);
