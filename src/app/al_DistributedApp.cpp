@@ -160,6 +160,16 @@ void DistributedApp::prepare() {
         std::find(mDomainList.begin(), mDomainList.end(), mAudioDomain));
   }
   parameterServer() << mAudioControl.gain;
+  parameterServer() << setPose << mx << my << mz << tx << ty << tz;
+
+  setPose.registerChangeCallback([&](Pose p) { pose().set(p); });
+  mx.registerChangeCallback([&](float v) { nav().moveR(v); });
+  my.registerChangeCallback([&](float v) { nav().moveU(v); });
+  mz.registerChangeCallback([&](float v) { nav().moveF(v); });
+  tx.registerChangeCallback([&](float v) { nav().spinR(v); });
+  ty.registerChangeCallback([&](float v) { nav().spinU(v); });
+  tz.registerChangeCallback([&](float v) { nav().spinF(v); });
+
 
   initializeDomains();
   initialized = true;
