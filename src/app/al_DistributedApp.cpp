@@ -169,7 +169,10 @@ void DistributedApp::prepare() {
   tx.registerChangeCallback([&](float v) { nav().spinR(v); });
   ty.registerChangeCallback([&](float v) { nav().spinU(v); });
   tz.registerChangeCallback([&](float v) { nav().spinF(v); });
-
+  nearClip.registerChangeCallback([&](float v) { lens().near(v); });
+  farClip.registerChangeCallback([&](float v) { lens().far(v); });
+  eyeSep.registerChangeCallback([&](float v) { lens().eyeSep(v); });
+  focalLength.registerChangeCallback([&](float v) { lens().focalLength(v); });
 
   initializeDomains();
   initialized = true;

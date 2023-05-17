@@ -107,8 +107,10 @@ public:
   Parameter tx{"tx", "camera", 0.0, -1, 1};
   Parameter ty{"ty", "camera", 0.0, -1, 1};
   Parameter tz{"tz", "camera", 0.0, -1, 1};
-  // Parameter eyesep{"eyesep", "camera", 0.02, 0.0, 0.5};
-  // Parameter focalLength{"focalLength", "camera", 0.02, 0.0, 0.5};
+  Parameter nearClip{"nearClip", "lens", 0.1, 0.0, 1.0};
+  Parameter farClip{"farClip", "lens", 100.0, 10.0, 1000.0};
+  Parameter eyeSep{"eyeSep", "lens", 0.02, 0.0, 0.5};
+  Parameter focalLength{"focalLength", "lens", 6.0, 0.0, 20.0};
 
 private:
   AudioControl mAudioControl;
