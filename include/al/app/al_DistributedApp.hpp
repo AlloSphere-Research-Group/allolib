@@ -100,6 +100,16 @@ public:
   std::shared_ptr<GLFWOpenGLOmniRendererDomain> omniRendering;
   std::map<std::string, std::string> additionalConfig;
 
+  ParameterPose setPose{"setPose", "camera"};
+  Parameter mx{"mx", "camera", 0.0, -1, 1};
+  Parameter my{"my", "camera", 0.0, -1, 1};
+  Parameter mz{"mz", "camera", 0.0, -1, 1};
+  Parameter tx{"tx", "camera", 0.0, -1, 1};
+  Parameter ty{"ty", "camera", 0.0, -1, 1};
+  Parameter tz{"tz", "camera", 0.0, -1, 1};
+  // Parameter eyesep{"eyesep", "camera", 0.02, 0.0, 0.5};
+  // Parameter focalLength{"focalLength", "camera", 0.02, 0.0, 0.5};
+
 private:
   AudioControl mAudioControl;
 
