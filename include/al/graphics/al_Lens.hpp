@@ -58,7 +58,7 @@ namespace al {
 /// Stores optics settings important for rendering
 /// @ingroup Graphics
 class Lens {
- public:
+public:
   /// @param[in] fovy      vertical field of view, in degrees
   /// @param[in] nearClip    frustum near plane distance
   /// @param[in] farClip    frustum far plane distance
@@ -68,36 +68,36 @@ class Lens {
        double focalLength = 6, double eyeSep = 0.02);
 
   // setters
-  Lens& fovy(double v);  ///< Set vertical field of view, in degrees
-  Lens& fovx(double v,
-             double aspect);  ///< Set horizontal field of view, in degrees
-  Lens& near(double v) {
+  Lens &fovy(double v); ///< Set vertical field of view, in degrees
+  Lens &fovx(double v,
+             double aspect); ///< Set horizontal field of view, in degrees
+  Lens &near(double v) {
     mNear = v;
     return *this;
-  }  ///< Set frustum near plane distance
-  Lens& far(double v) {
+  } ///< Set frustum near plane distance
+  Lens &far(double v) {
     mFar = v;
     return *this;
-  }  ///< Set frustum far plane distance
-  Lens& focalLength(double v) {
+  } ///< Set frustum far plane distance
+  Lens &focalLength(double v) {
     mFocalLength = v;
     return *this;
-  }  ///< Set focal length
-  Lens& eyeSep(double v) {
+  } ///< Set focal length
+  Lens &eyeSep(double v) {
     mEyeSep = v;
     return *this;
-  }  ///< Set eye separation
+  } ///< Set eye separation
 
   double fovy() const {
     return mFovy;
-  }  ///< Get vertical field of view, in degrees
-  double near() const { return mNear; }  ///< Get frustum near plane distance
-  double far() const { return mFar; }    ///< Get frustum far plane distance
-  double focalLength() const { return mFocalLength; }  ///< Get focal length
-  double eyeSep() const { return mEyeSep; }            ///< Get eye separation
+  } ///< Get vertical field of view, in degrees
+  double near() const { return mNear; } ///< Get frustum near plane distance
+  double far() const { return mFar; }   ///< Get frustum far plane distance
+  double focalLength() const { return mFocalLength; } ///< Get focal length
+  double eyeSep() const { return mEyeSep; }           ///< Get eye separation
   double eyeSepAuto() const {
     return focalLength() / 30.0;
-  }  ///< Get automatic inter-ocular distance
+  } ///< Get automatic inter-ocular distance
 
   /// Returns half the height of the frustum at a given depth
 
@@ -119,16 +119,16 @@ class Lens {
   /// @return field-of-view in Y axis, usable by Lens::fovy()
   static double getFovyForFovX(double fovx, double aspect);
 
- protected:
-  double mFovy;         // Lens aperture (degrees)
-  double mTanFOV;       // Cached factor for computing frustum dimensions
-  double mNear, mFar;   // Cutting plane distances
-  double mFocalLength;  // Focal length along vd
-  double mEyeSep;       // Eye separation
+protected:
+  double mFovy;        // Lens aperture (degrees)
+  double mTanFOV;      // Cached factor for computing frustum dimensions
+  double mNear, mFar;  // Cutting plane distances
+  double mFocalLength; // Focal length along vd
+  double mEyeSep;      // Eye separation
   //  Vec3d mStereoOffset;    // eye offset vector (right eye; left eye is
   //  inverse), usually (1, 0, 0)
 };
 
-}  // namespace al
+} // namespace al
 
 #endif

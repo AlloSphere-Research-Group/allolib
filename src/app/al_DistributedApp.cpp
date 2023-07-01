@@ -3,8 +3,10 @@
 #include "al/sphere/al_SphereUtils.hpp"
 
 #ifdef AL_WINDOWS
-//#include <Windows.h>
+// #include <Windows.h>
 #include <WinSock2.h>
+#undef near
+#undef far
 #endif
 
 using namespace al;
