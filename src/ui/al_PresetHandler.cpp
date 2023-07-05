@@ -1288,7 +1288,7 @@ bool PresetHandler::savePresetValues(const ParameterStates &values,
   std::ofstream f(fileName);
   if (!f.is_open()) {
     if (mVerbose) {
-      std::cout << "Error while opening preset file fro write: " << fileName
+      std::cout << "Error while opening preset file for write: " << fileName
                 << std::endl;
     }
     return false;
