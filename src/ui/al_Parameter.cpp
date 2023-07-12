@@ -540,29 +540,35 @@ void ParameterMeta::set(ParameterMeta *p) {
     assert(strcmp(typeid(*this).name(), typeid(ParameterPose).name()) == 0);
     dynamic_cast<ParameterPose *>(this)->set(param->get());
   } else if (strcmp(typeid(*p).name(), typeid(ParameterMenu).name()) ==
-             0) { // Parameter
+             0) { // Parameter menu
     ParameterMenu *param = dynamic_cast<ParameterMenu *>(p);
     // Check that incoming parameter is the same type as this
     assert(strcmp(typeid(*this).name(), typeid(ParameterMenu).name()) == 0);
     dynamic_cast<ParameterMenu *>(this)->set(param->get());
   } else if (strcmp(typeid(*p).name(), typeid(ParameterChoice).name()) ==
-             0) { // Parameter
+             0) { // Parameter choice
     ParameterChoice *param = dynamic_cast<ParameterChoice *>(p);
     // Check that incoming parameter is the same type as this
     assert(strcmp(typeid(*this).name(), typeid(ParameterChoice).name()) == 0);
     dynamic_cast<ParameterChoice *>(this)->set(param->get());
   } else if (strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) ==
-             0) { // Parameter
+             0) { // Parameter vec3
     ParameterVec3 *param = dynamic_cast<ParameterVec3 *>(p);
     // Check that incoming parameter is the same type as this
     assert(strcmp(typeid(*this).name(), typeid(ParameterVec3).name()) == 0);
     dynamic_cast<ParameterVec3 *>(this)->set(param->get());
   } else if (strcmp(typeid(*p).name(), typeid(ParameterVec4).name()) ==
-             0) { // Parameter
+             0) { // Parameter vec4
     ParameterVec4 *param = dynamic_cast<ParameterVec4 *>(p);
     // Check that incoming parameter is the same type as this
     assert(strcmp(typeid(*this).name(), typeid(ParameterVec4).name()) == 0);
     dynamic_cast<ParameterVec4 *>(this)->set(param->get());
+  } else if (strcmp(typeid(*p).name(), typeid(ParameterVec5).name()) ==
+             0) { // Parameter vec5
+    ParameterVec5 *param = dynamic_cast<ParameterVec5 *>(p);
+    // Check that incoming parameter is the same type as this
+    assert(strcmp(typeid(*this).name(), typeid(ParameterVec5).name()) == 0);
+    dynamic_cast<ParameterVec5 *>(this)->set(param->get());
   } else if (strcmp(typeid(*p).name(), typeid(ParameterColor).name()) ==
              0) { // Parameter
     ParameterColor *param = dynamic_cast<ParameterColor *>(p);

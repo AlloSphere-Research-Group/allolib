@@ -1765,6 +1765,60 @@ public:
   }
 };
 
+/// ParameterVec5
+/// @ingroup UI
+class ParameterVec5 : public ParameterWrapper<al::Vec5f> {
+public:
+  using ParameterWrapper<al::Vec5f>::get;
+  using ParameterWrapper<al::Vec5f>::set;
+
+  ParameterVec5(std::string parameterName, std::string Group = "",
+                al::Vec5f defaultValue = al::Vec5f())
+      : ParameterWrapper<al::Vec5f>(parameterName, Group, defaultValue) {}
+
+  ParameterVec5(const al::ParameterVec5 &param)
+      : ParameterWrapper<al::Vec5f>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  ParameterVec5 operator=(const Vec5f vec) {
+    this->set(vec);
+    return *this;
+  }
+
+  float operator[](size_t index) {
+    Vec5f vec = this->get();
+    return vec[index];
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    Vec5f vec = get();
+    sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z, vec.w, vec[4]);
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    Vec5f vec = this->get();
+    fields.emplace_back(VariantValue(vec.x));
+    fields.emplace_back(VariantValue(vec.y));
+    fields.emplace_back(VariantValue(vec.z));
+    fields.emplace_back(VariantValue(vec.w));
+    fields.emplace_back(VariantValue(vec[4]));
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    if (fields.size() == 5) {
+      Vec5f vec(fields[0].get<float>(), fields[1].get<float>(),
+                fields[2].get<float>(), fields[3].get<float>(),
+                fields[4].get<float>());
+      set(vec);
+    } else {
+      std::cout << "Wrong number of parameters for " << getFullAddress()
+                << std::endl;
+    }
+  }
+};
+
 /// ParameterPose
 /// @ingroup UI
 class ParameterPose : public ParameterWrapper<al::Pose> {

@@ -67,6 +67,9 @@ typedef Vec<3, int> Vec3i;    ///< integer 3-vector
 typedef Vec<4, float> Vec4f;  ///< float 4-vector
 typedef Vec<4, double> Vec4d; ///< double 4-vector
 typedef Vec<4, int> Vec4i;    ///< integer 4-vector
+typedef Vec<5, float> Vec5f;  ///< float 5-vector
+typedef Vec<5, double> Vec5d; ///< double 5-vector
+typedef Vec<5, int> Vec5i;    ///< integer 5-vector
 
 // Forward iterates from 0 to n-1. Current index is 'i'.
 #define IT(n) for (int i = 0; i < (n); ++i)
@@ -78,11 +81,17 @@ private:
   T data[N - 4];
 };
 
-template <class T> struct VecElems<0, T> { static T x; };
+template <class T> struct VecElems<0, T> {
+  static T x;
+};
 template <class T> T VecElems<0, T>::x = 0;
 
-template <class T> struct VecElems<1, T> { T x; };
-template <class T> struct VecElems<2, T> { T x, y; };
+template <class T> struct VecElems<1, T> {
+  T x;
+};
+template <class T> struct VecElems<2, T> {
+  T x, y;
+};
 template <class T> struct VecElems<3, T> {
   T x, y, z;
 
@@ -145,6 +154,15 @@ public:
   /// @param[in] v4    value to initialize fourth element
   Vec(const T &v1, const T &v2, const T &v3, const T &v4) {
     set(v1, v2, v3, v4);
+  }
+
+  /// @param[in] v1    value to initialize first element
+  /// @param[in] v2    value to initialize second element
+  /// @param[in] v3    value to initialize third element
+  /// @param[in] v4    value to initialize fourth element
+  /// @param[in] v5    value to initialize fifth element
+  Vec(const T &v1, const T &v2, const T &v3, const T &v4, const T &v5) {
+    set(v1, v2, v3, v4, v5);
   }
 
   /// @param[in] v		values to initialize elements to
@@ -428,6 +446,12 @@ public:
   /// Get a vector comprised of indexed elements
   Vec<4, T> get(int i0, int i1, int i2, int i3) const {
     return Vec<4, T>((*this)[i0], (*this)[i1], (*this)[i2], (*this)[i3]);
+  }
+
+  /// Get a vector comprised of indexed elements
+  Vec<5, T> get(int i0, int i1, int i2, int i3, int i4) const {
+    return Vec<5, T>((*this)[i0], (*this)[i1], (*this)[i2], (*this)[i3],
+                     (*this)[i4]);
   }
 
   /// Get a vector comprised of indexed elements (compile-time checked)
@@ -1192,8 +1216,8 @@ template <int N, class T> Vec<N, T> &Vec<N, T>::mag(T v) {
 
 // template <typename T> const char *typeString();
 
-//#define TypeString(A)
-//  template <> inline const char *typeString<A>() { return #A; }
+// #define TypeString(A)
+//   template <> inline const char *typeString<A>() { return #A; }
 
 // TypeString(char);
 // TypeString(unsigned char);
@@ -1202,7 +1226,7 @@ template <int N, class T> Vec<N, T> &Vec<N, T>::mag(T v) {
 // TypeString(float);
 // TypeString(double);
 // TypeString(long double);
-//#undef TypeString
+// #undef TypeString
 
 template <int N, class T>
 void Vec<N, T>::print(FILE *out, const char *append) const {
