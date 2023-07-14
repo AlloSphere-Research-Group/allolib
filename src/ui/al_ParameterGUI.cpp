@@ -126,7 +126,7 @@ void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix,
   auto spinDecimals = param->getHint("input", &isSpinBox);
   if (isSpinBox) {
     std::string format = "%." + std::to_string(int(spinDecimals)) + "f";
-    if (spinDecimals < 0) { // wrong value, instead force to integer
+    if (spinDecimals < 0) { // force to integer
       changed = ImGui::SliderFloat((param->displayName() + suffix).c_str(),
                                    &value, param->min(), param->max(), "%.0f");
     } else {
@@ -518,22 +518,32 @@ void ParameterGUI::drawVec5(std::vector<ParameterVec5 *> params, string suffix,
     Vec5f currentValue = param->get();
     float v0 = currentValue.elems()[0];
     bool updated = false;
-    bool changed = ImGui::SliderFloat(
-        ("v0" + suffix + param->getName()).c_str(), &v0, -10, 10);
+
+    // TODO: adjust name input, consider additional flags
+    bool hasFormat = false;
+    float decimal = param->getHint("format", &hasFormat);
+    std::string format = "%.3f";
+    if (hasFormat) {
+      format = "%." + std::to_string(int(decimal)) + "f";
+    }
+
+    bool changed =
+        ImGui::SliderFloat(("v0" + suffix + param->getName()).c_str(), &v0, -10,
+                           10, format.c_str());
     if (changed) {
       currentValue[0] = v0;
       updated = true;
     }
     float v1 = currentValue.elems()[1];
     changed = ImGui::SliderFloat(("v1" + suffix + param->getName()).c_str(),
-                                 &v1, -10, 10);
+                                 &v1, -10, 10, format.c_str());
     if (changed) {
       currentValue[1] = v1;
       updated = true;
     }
     float v2 = currentValue.elems()[2];
     changed = ImGui::SliderFloat(("v2" + suffix + param->getName()).c_str(),
-                                 &v2, -10, 10);
+                                 &v2, -10, 10, format.c_str());
     if (changed) {
       currentValue[2] = v2;
       updated = true;
@@ -545,7 +555,7 @@ void ParameterGUI::drawVec5(std::vector<ParameterVec5 *> params, string suffix,
     if (!exists || value > 3.f) {
       float v3 = currentValue.elems()[3];
       changed = ImGui::SliderFloat(("v3" + suffix + param->getName()).c_str(),
-                                   &v3, -10, 10);
+                                   &v3, -10, 10, format.c_str());
       if (changed) {
         currentValue[3] = v3;
         updated = true;
@@ -553,7 +563,7 @@ void ParameterGUI::drawVec5(std::vector<ParameterVec5 *> params, string suffix,
       if (!exists || value > 4.f) {
         float v4 = currentValue.elems()[4];
         changed = ImGui::SliderFloat(("v4" + suffix + param->getName()).c_str(),
-                                     &v4, -10, 10);
+                                     &v4, -10, 10, format.c_str());
         if (changed) {
           currentValue[4] = v4;
           updated = true;
