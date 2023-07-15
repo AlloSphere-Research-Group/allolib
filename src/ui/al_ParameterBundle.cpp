@@ -128,6 +128,14 @@ void ParameterBundle::addParameter(ParameterMeta *parameter) {
         n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
       }
     });
+  } else if (strcmp(typeid(*parameter).name(), typeid(ParameterVec5).name()) ==
+             0) { // ParameterVec5
+    ParameterVec5 *p = dynamic_cast<ParameterVec5 *>(parameter);
+    p->registerChangeCallback([this, p](al::Vec5f value, ValueSource *src) {
+      for (OSCNotifier *n : mNotifiers) {
+        n->notifyListeners(bundlePrefix() + p->getFullAddress(), value, src);
+      }
+    });
   } else if (strcmp(typeid(*parameter).name(), typeid(ParameterColor).name()) ==
              0) { // ParameterColor
     ParameterColor *p = dynamic_cast<ParameterColor *>(parameter);

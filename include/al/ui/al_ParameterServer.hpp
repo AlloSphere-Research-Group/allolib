@@ -140,6 +140,8 @@ public:
                        ValueSource *src = nullptr);
   void notifyListeners(std::string OSCaddress, Vec4f value,
                        ValueSource *src = nullptr);
+  void notifyListeners(std::string OSCaddress, Vec5f value,
+                       ValueSource *src = nullptr);
   void notifyListeners(std::string OSCaddress, Pose value,
                        ValueSource *src = nullptr);
   void notifyListeners(std::string OSCaddress, Color value,
@@ -269,6 +271,7 @@ public:
   std::vector<ParameterString *> stringParameters();
   std::vector<ParameterVec3 *> vec3Parameters();
   std::vector<ParameterVec4 *> vec4Parameters();
+  std::vector<ParameterVec5 *> vec5Parameters();
   std::vector<ParameterPose *> poseParameters();
 
   /// Register parameter using the streaming operator
@@ -336,6 +339,8 @@ protected:
   static void changeVec3Callback(Vec3f value, void *sender, void *userData,
                                  void *blockThis);
   static void changeVec4Callback(Vec4f value, void *sender, void *userData,
+                                 void *blockThis);
+  static void changeVec5Callback(Vec5f value, void *sender, void *userData,
                                  void *blockThis);
   static void changePoseCallback(Pose value, void *sender, void *userData,
                                  void *blockThis);

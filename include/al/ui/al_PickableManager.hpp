@@ -22,7 +22,9 @@ public:
   PickableManager &operator<<(Pickable &p) { return registerPickable(p); }
   PickableManager &operator<<(Pickable *p) { return registerPickable(*p); }
 
-  std::vector<Pickable *> pickables() { return mPickables; }
+  std::vector<Pickable *>& pickables() { return mPickables; }
+
+  void clear() { mPickables.clear(); }
 
   Hit intersect(Rayd r);
 

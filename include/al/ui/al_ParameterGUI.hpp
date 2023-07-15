@@ -85,6 +85,7 @@ public:
   static void drawChoice(ParameterChoice *param, std::string suffix = "");
   static void drawVec3(ParameterVec3 *param, std::string suffix = "");
   static void drawVec4(ParameterVec4 *param, std::string suffix = "");
+  static void drawVec5(ParameterVec5 *param, std::string suffix = "");
   static void drawTrigger(Trigger *param, std::string suffix = "");
 
   static void drawSynthController(PolySynth *param, std::string suffix = "");
@@ -116,6 +117,8 @@ public:
   static void drawVec3(std::vector<ParameterVec3 *> params, std::string suffix,
                        int index = 0);
   static void drawVec4(std::vector<ParameterVec4 *> params, std::string suffix,
+                       int index = 0);
+  static void drawVec5(std::vector<ParameterVec5 *> params, std::string suffix,
                        int index = 0);
   static void drawTrigger(std::vector<Trigger *> params, std::string suffix,
                           int index = 0);

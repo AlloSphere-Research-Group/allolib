@@ -102,6 +102,23 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, Vec4f value,
   mListenerLock.unlock();
 }
 
+void OSCNotifier::notifyListeners(std::string OSCaddress, Vec5f value,
+                                  ValueSource *src) {
+  mListenerLock.lock();
+  for (osc::Send *sender : mOSCSenders) {
+    auto ip = Socket::nameToIp(sender->address());
+
+    if (!src || (src->port == 0 && src->ipAddr != ip) ||
+        (src->port != sender->port() && src->ipAddr != ip)) {
+      sender->send(OSCaddress, value[0], value[1], value[2], value[3],
+                   value[4]);
+    }
+    //		std::cout << "Notifying " << sender->address() << ":" <<
+    // sender->port() << " -- " << OSCaddress << std::endl;
+  }
+  mListenerLock.unlock();
+}
+
 void OSCNotifier::notifyListeners(std::string OSCaddress, Pose value,
                                   ValueSource *src) {
   mListenerLock.lock();
@@ -161,6 +178,9 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, ParameterMeta *param,
     notifyListeners(OSCaddress, p->get(), src);
   } else if (ParameterVec4 *p =
                  dynamic_cast<ParameterVec4 *>(param)) { // ParameterVec4
+    notifyListeners(OSCaddress, p->get(), src);
+  } else if (ParameterVec5 *p =
+                 dynamic_cast<ParameterVec5 *>(param)) { // ParameterVec5
     notifyListeners(OSCaddress, p->get(), src);
   } else if (ParameterColor *p =
                  dynamic_cast<ParameterColor *>(param)) { // ParameterColor
@@ -296,6 +316,11 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param) {
   } else if (ParameterVec4 *p =
                  dynamic_cast<ParameterVec4 *>(&param)) { // ParameterVec4
     p->registerChangeCallback([this, p](al::Vec4f value, ValueSource *src) {
+      notifyListeners(p->getFullAddress(), value, src);
+    });
+  } else if (ParameterVec5 *p =
+                 dynamic_cast<ParameterVec5 *>(&param)) { // ParameterVec5
+    p->registerChangeCallback([this, p](al::Vec5f value, ValueSource *src) {
       notifyListeners(p->getFullAddress(), value, src);
     });
   } else if (ParameterColor *p =
@@ -459,6 +484,16 @@ std::vector<ParameterVec4 *> ParameterServer::vec4Parameters() {
   return params;
 }
 
+std::vector<ParameterVec5 *> ParameterServer::vec5Parameters() {
+  std::vector<ParameterVec5 *> params;
+  for (auto *p : mParameters) {
+    if ((strcmp(typeid(*p).name(), typeid(ParameterVec5).name()) == 0)) {
+      params.push_back(static_cast<ParameterVec5 *>(p));
+    }
+  }
+  return params;
+}
+
 std::vector<ParameterPose *> ParameterServer::poseParameters() {
   std::vector<ParameterPose *> params;
   for (auto *p : mParameters) {
@@ -564,6 +599,13 @@ void ParameterServer::changeVec4Callback(Vec4f value, void *sender,
                                          void *userData, void *blockThis) {
   ParameterServer *server = static_cast<ParameterServer *>(userData);
   ParameterVec4 *parameter = static_cast<ParameterVec4 *>(sender);
+  server->notifyListeners(parameter->getFullAddress(), value);
+}
+
+void ParameterServer::changeVec5Callback(Vec5f value, void *sender,
+                                         void *userData, void *blockThis) {
+  ParameterServer *server = static_cast<ParameterServer *>(userData);
+  ParameterVec5 *parameter = static_cast<ParameterVec5 *>(sender);
   server->notifyListeners(parameter->getFullAddress(), value);
 }
 
@@ -702,6 +744,15 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
       float a, b, c, d;
       m >> a >> b >> c >> d;
       p->set(Vec4f(a, b, c, d), &s);
+    }
+    return true;
+  } else if (strcmp(typeid(*param).name(), typeid(ParameterVec5).name()) ==
+             0) { // ParameterVec5
+    ParameterVec5 *p = dynamic_cast<ParameterVec5 *>(param);
+    if (address == p->getFullAddress() && m.typeTags() == "fffff") {
+      float a, b, c, d, e;
+      m >> a >> b >> c >> d >> e;
+      p->set(Vec5f(a, b, c, d, e), &s);
     }
     return true;
   } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) ==

@@ -1520,6 +1520,11 @@ public:
       std::string parameterName, std::string Group, float defaultValue,
       std::string prefix, float min = 0, float max = 1.0);
 
+  ParameterBool(const al::ParameterBool &param) : Parameter(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
   bool operator=(bool value) {
     this->set(value ? 1.0f : 0.0f);
     return value == 1.0;
@@ -1608,6 +1613,12 @@ public:
                                                       std::string /*prefix*/)
       : ParameterWrapper<std::string>(parameterName, Group, defaultValue) {}
 
+  ParameterString(const al::ParameterString &param)
+      : ParameterWrapper<std::string>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
   virtual float toFloat() override {
     float value = 0.0;
     try {
@@ -1661,6 +1672,12 @@ public:
                 al::Vec3f defaultValue = al::Vec3f())
       : ParameterWrapper<al::Vec3f>(parameterName, Group, defaultValue) {}
 
+  ParameterVec3(const al::ParameterVec3 &param)
+      : ParameterWrapper<al::Vec3f>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
   ParameterVec3 operator=(const Vec3f vec) {
     this->set(vec);
     return *this;
@@ -1707,6 +1724,12 @@ public:
                 al::Vec4f defaultValue = al::Vec4f())
       : ParameterWrapper<al::Vec4f>(parameterName, Group, defaultValue) {}
 
+  ParameterVec4(const al::ParameterVec4 &param)
+      : ParameterWrapper<al::Vec4f>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
   ParameterVec4 operator=(const Vec4f vec) {
     this->set(vec);
     return *this;
@@ -1742,6 +1765,60 @@ public:
   }
 };
 
+/// ParameterVec5
+/// @ingroup UI
+class ParameterVec5 : public ParameterWrapper<al::Vec5f> {
+public:
+  using ParameterWrapper<al::Vec5f>::get;
+  using ParameterWrapper<al::Vec5f>::set;
+
+  ParameterVec5(std::string parameterName, std::string Group = "",
+                al::Vec5f defaultValue = al::Vec5f())
+      : ParameterWrapper<al::Vec5f>(parameterName, Group, defaultValue) {}
+
+  ParameterVec5(const al::ParameterVec5 &param)
+      : ParameterWrapper<al::Vec5f>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  ParameterVec5 operator=(const Vec5f vec) {
+    this->set(vec);
+    return *this;
+  }
+
+  float operator[](size_t index) {
+    Vec5f vec = this->get();
+    return vec[index];
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    Vec5f vec = get();
+    sender.send(prefix + getFullAddress(), vec.x, vec.y, vec.z, vec.w, vec[4]);
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    Vec5f vec = this->get();
+    fields.emplace_back(VariantValue(vec.x));
+    fields.emplace_back(VariantValue(vec.y));
+    fields.emplace_back(VariantValue(vec.z));
+    fields.emplace_back(VariantValue(vec.w));
+    fields.emplace_back(VariantValue(vec[4]));
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    if (fields.size() == 5) {
+      Vec5f vec(fields[0].get<float>(), fields[1].get<float>(),
+                fields[2].get<float>(), fields[3].get<float>(),
+                fields[4].get<float>());
+      set(vec);
+    } else {
+      std::cout << "Wrong number of parameters for " << getFullAddress()
+                << std::endl;
+    }
+  }
+};
+
 /// ParameterPose
 /// @ingroup UI
 class ParameterPose : public ParameterWrapper<al::Pose> {
@@ -1752,6 +1829,12 @@ public:
   ParameterPose(std::string parameterName, std::string Group = "",
                 al::Pose defaultValue = al::Pose())
       : ParameterWrapper<al::Pose>(parameterName, Group, defaultValue) {}
+
+  ParameterPose(const al::ParameterPose &param)
+      : ParameterWrapper<al::Pose>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
 
   al::Pose operator=(const al::Pose vec) {
     this->set(vec);
@@ -1813,6 +1896,12 @@ public:
   ParameterMenu(std::string parameterName, std::string Group = "",
                 int defaultValue = 0)
       : ParameterWrapper<int>(parameterName, Group, defaultValue) {}
+
+  ParameterMenu(const al::ParameterMenu &param)
+      : ParameterWrapper<int32_t>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
 
   int operator=(const int32_t value) {
     this->set(value);
@@ -1907,6 +1996,12 @@ public:
   ParameterChoice(std::string parameterName, std::string Group = "",
                   uint64_t defaultValue = 0)
       : ParameterWrapper<uint64_t>(parameterName, Group, defaultValue) {}
+
+  ParameterChoice(const al::ParameterChoice &param)
+      : ParameterWrapper<uint64_t>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
 
   ParameterChoice &operator=(const uint64_t value) {
     this->set(value);
@@ -2014,6 +2109,12 @@ public:
   ParameterColor(std::string parameterName, std::string Group = "",
                  al::Color defaultValue = al::Color())
       : ParameterWrapper<al::Color>(parameterName, Group, defaultValue) {}
+
+  ParameterColor(const al::ParameterColor &param)
+      : ParameterWrapper<al::Color>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
 
   ParameterColor operator=(const al::Color vec) {
     this->set(vec);

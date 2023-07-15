@@ -57,6 +57,10 @@ void ParameterGUI::drawVec4(ParameterVec4 *param, string suffix) {
   drawVec4(std::vector<ParameterVec4 *>{param}, suffix);
 }
 
+void ParameterGUI::drawVec5(ParameterVec5 *param, string suffix) {
+  drawVec5(std::vector<ParameterVec5 *>{param}, suffix);
+}
+
 void ParameterGUI::drawTrigger(Trigger *param, string suffix) {
   drawTrigger(std::vector<Trigger *>{param}, suffix);
 }
@@ -94,6 +98,9 @@ void ParameterGUI::drawParameterMeta(std::vector<ParameterMeta *> params,
                     typeid(ParameterVec4).name()) == 0) { // ParameterVec4
     drawVec4(dynamic_cast<ParameterVec4 *>(&param), suffix);
   } else if (strcmp(typeid(param).name(),
+                    typeid(ParameterVec5).name()) == 0) { // ParameterVec5
+    drawVec5(dynamic_cast<ParameterVec5 *>(&param), suffix);
+  } else if (strcmp(typeid(param).name(),
                     typeid(ParameterColor).name()) == 0) { // ParameterColor
     drawParameterColor(dynamic_cast<ParameterColor *>(&param), suffix);
   } else if (strcmp(typeid(param).name(), typeid(Trigger).name()) ==
@@ -119,7 +126,7 @@ void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix,
   auto spinDecimals = param->getHint("input", &isSpinBox);
   if (isSpinBox) {
     std::string format = "%." + std::to_string(int(spinDecimals)) + "f";
-    if (spinDecimals < 0) { // wrong value, instead force to integer
+    if (spinDecimals < 0) { // force to integer
       changed = ImGui::SliderFloat((param->displayName() + suffix).c_str(),
                                    &value, param->min(), param->max(), "%.0f");
     } else {
@@ -130,12 +137,13 @@ void ParameterGUI::drawParameter(std::vector<Parameter *> params, string suffix,
     }
   } else {
     float dragSpeed = param->getHint("drag");
-    if(dragSpeed)
-      changed = ImGui::DragFloat((param->displayName() + suffix).c_str(),
-                                 &value, dragSpeed, param->min(), param->max(), "%.06f");
+    if (dragSpeed)
+      changed =
+          ImGui::DragFloat((param->displayName() + suffix).c_str(), &value,
+                           dragSpeed, param->min(), param->max(), "%.06f");
     else
       changed = ImGui::SliderFloat((param->displayName() + suffix).c_str(),
-                                 &value, param->min(), param->max());
+                                   &value, param->min(), param->max());
   }
   if (changed) {
     for (auto *p : params) {
@@ -479,16 +487,90 @@ void ParameterGUI::drawVec4(std::vector<ParameterVec4 *> params, string suffix,
       currentValue.z = z;
       updated = true;
     }
-    if (updated) {
-      param->set(currentValue);
-    }
     float w = currentValue.elems()[3];
-    changed = ImGui::SliderFloat(("W" + suffix + param->getName()).c_str(), &z,
+    changed = ImGui::SliderFloat(("W" + suffix + param->getName()).c_str(), &w,
                                  -10, 10);
     if (changed) {
       currentValue.w = w;
       updated = true;
     }
+    if (updated) {
+      for (auto *p : params) {
+        p->set(currentValue);
+      }
+    }
+    ImGui::Unindent();
+  }
+}
+
+void ParameterGUI::drawVec5(std::vector<ParameterVec5 *> params, string suffix,
+                            int index) {
+  if (params.size() == 0)
+    return;
+  assert(index < (int)params.size());
+  auto &param = params[index];
+  if (param->getHint("hide") == 1.0)
+    return;
+  if (ImGui::CollapsingHeader((param->displayName() + suffix).c_str(),
+                              ImGuiTreeNodeFlags_CollapsingHeader |
+                                  ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Indent();
+    Vec5f currentValue = param->get();
+    float v0 = currentValue.elems()[0];
+    bool updated = false;
+
+    // TODO: adjust name input, consider additional flags
+    bool hasFormat = false;
+    float decimal = param->getHint("format", &hasFormat);
+    std::string format = "%.3f";
+    if (hasFormat) {
+      format = "%." + std::to_string(int(decimal)) + "f";
+    }
+
+    bool changed =
+        ImGui::SliderFloat(("v0" + suffix + param->getName()).c_str(), &v0, -10,
+                           10, format.c_str());
+    if (changed) {
+      currentValue[0] = v0;
+      updated = true;
+    }
+    float v1 = currentValue.elems()[1];
+    changed = ImGui::SliderFloat(("v1" + suffix + param->getName()).c_str(),
+                                 &v1, -10, 10, format.c_str());
+    if (changed) {
+      currentValue[1] = v1;
+      updated = true;
+    }
+    float v2 = currentValue.elems()[2];
+    changed = ImGui::SliderFloat(("v2" + suffix + param->getName()).c_str(),
+                                 &v2, -10, 10, format.c_str());
+    if (changed) {
+      currentValue[2] = v2;
+      updated = true;
+    }
+    bool exists;
+    float value;
+    // value defaults to 0 when hint doesn't exist
+    value = param->getHint("dimension", &exists);
+    if (!exists || value > 3.f) {
+      float v3 = currentValue.elems()[3];
+      changed = ImGui::SliderFloat(("v3" + suffix + param->getName()).c_str(),
+                                   &v3, -10, 10, format.c_str());
+      if (changed) {
+        currentValue[3] = v3;
+        updated = true;
+      }
+      if (!exists || value > 4.f) {
+        float v4 = currentValue.elems()[4];
+        changed = ImGui::SliderFloat(("v4" + suffix + param->getName()).c_str(),
+                                     &v4, -10, 10, format.c_str());
+        if (changed) {
+          currentValue[4] = v4;
+          updated = true;
+        }
+      }
+    }
+
     if (updated) {
       for (auto *p : params) {
         p->set(currentValue);

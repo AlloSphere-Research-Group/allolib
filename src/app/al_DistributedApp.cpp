@@ -3,8 +3,10 @@
 #include "al/sphere/al_SphereUtils.hpp"
 
 #ifdef AL_WINDOWS
-//#include <Windows.h>
+// #include <Windows.h>
 #include <WinSock2.h>
+#undef near
+#undef far
 #endif
 
 using namespace al;
@@ -160,6 +162,19 @@ void DistributedApp::prepare() {
         std::find(mDomainList.begin(), mDomainList.end(), mAudioDomain));
   }
   parameterServer() << mAudioControl.gain;
+  parameterServer() << setPose << mx << my << mz << tx << ty << tz;
+
+  setPose.registerChangeCallback([&](Pose p) { pose().set(p); });
+  mx.registerChangeCallback([&](float v) { nav().moveR(v); });
+  my.registerChangeCallback([&](float v) { nav().moveU(v); });
+  mz.registerChangeCallback([&](float v) { nav().moveF(v); });
+  tx.registerChangeCallback([&](float v) { nav().spinR(v); });
+  ty.registerChangeCallback([&](float v) { nav().spinU(v); });
+  tz.registerChangeCallback([&](float v) { nav().spinF(v); });
+  nearClip.registerChangeCallback([&](float v) { lens().near(v); });
+  farClip.registerChangeCallback([&](float v) { lens().far(v); });
+  eyeSep.registerChangeCallback([&](float v) { lens().eyeSep(v); });
+  focalLength.registerChangeCallback([&](float v) { lens().focalLength(v); });
 
   initializeDomains();
   initialized = true;
