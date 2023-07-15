@@ -1,35 +1,5 @@
 #include "al/sphere/al_PerProjection.hpp"
 
-al::Mat4f al::get_cube_mat(int face) {
-  switch (face) {
-  // GL_TEXTURE_CUBE_MAP_POSITIVE_X
-  // vertex.xyz = vec3(-vertex.z, -vertex.y, -vertex.x);
-  case 0:
-    return Mat4f{0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1};
-    // GL_TEXTURE_CUBE_MAP_NEGATIVE_X
-    // vertex.xyz = vec3(vertex.z, -vertex.y, vertex.x);
-  case 1:
-    return Mat4f{0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1};
-    // GL_TEXTURE_CUBE_MAP_POSITIVE_Y
-    // vertex.xyz = vec3(vertex.x, vertex.z, -vertex.y);
-  case 2:
-    return Mat4f{1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
-    // GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
-    // vertex.xyz = vec3(vertex.x, -vertex.z, vertex.y);
-  case 3:
-    return Mat4f{1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
-    // GL_TEXTURE_CUBE_MAP_POSITIVE_Z
-    // vertex.xyz = vec3(vertex.x, -vertex.y, -vertex.z);
-  case 4:
-    return Mat4f{1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1};
-    // GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-    // vertex.xyz = vec3(-vertex.x, -vertex.y, vertex.z);
-  case 5:
-    return Mat4f{-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-  }
-  return Mat4f::identity();
-}
-
 al::bhlw al::viewport_for_cubemap_face(int idx) {
   /*
     _________
@@ -333,7 +303,7 @@ void al::PerProjectionRender::load_and_init_as_desktop_config(
     info.texture[1]->create2D(res_, res_, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
 
     float fov = 3.1415926535f / 2.f;
-    Mat4f rmat = get_cube_mat(index);
+    Mat4f rmat = cubemapTransformMat<float>(index);
     Mat4f proj;
     proj.set(1.0f / std::tan(fov / 2.0f), 0, 0, 0, 0,
              1.0f / std::tan(fov / 2.0f), 0, 0, 0, 0,

@@ -50,18 +50,16 @@
 
 namespace al {
 
-template <class T>
-class Matrix4;
+template <class T> class Matrix4;
 
-typedef Matrix4<double> Matrix4d;  ///< Double-precision 4-by-4 matrix
-typedef Matrix4<float> Matrix4f;   ///< Single-precision 4-by-4 matrix
+typedef Matrix4<double> Matrix4d; ///< Double-precision 4-by-4 matrix
+typedef Matrix4<float> Matrix4f;  ///< Single-precision 4-by-4 matrix
 
 /// 4x4 Matrix (Homogenous Transform)
 ///
 /// @ingroup Math
-template <typename T = double>
-class Matrix4 : public Mat<4, T> {
- public:
+template <typename T = double> class Matrix4 : public Mat<4, T> {
+public:
   typedef Mat<4, T> Base;
 
   /// Default constructor creates an identity matrix
@@ -82,34 +80,34 @@ class Matrix4 : public Mat<4, T> {
         r3c1, r3c2, r3c3, r3c4,
         r4c1, r4c2, r4c3, r4c4)
   */
-  Matrix4(const T& r1c1, const T& r1c2, const T& r1c3, const T& r1c4,
-          const T& r2c1, const T& r2c2, const T& r2c3, const T& r2c4,
-          const T& r3c1, const T& r3c2, const T& r3c3, const T& r3c4,
-          const T& r4c1, const T& r4c2, const T& r4c3, const T& r4c4)
+  Matrix4(const T &r1c1, const T &r1c2, const T &r1c3, const T &r1c4,
+          const T &r2c1, const T &r2c2, const T &r2c3, const T &r2c4,
+          const T &r3c1, const T &r3c2, const T &r3c3, const T &r3c4,
+          const T &r4c1, const T &r4c2, const T &r4c3, const T &r4c4)
       : Base(r1c1, r1c2, r1c3, r1c4, r2c1, r2c2, r2c3, r2c4, r3c1, r3c2, r3c3,
              r3c4, r4c1, r4c2, r4c3, r4c4) {}
 
-  Matrix4(const Vec<3, T>& xaxis, const Vec<3, T>& yaxis,
-          const Vec<3, T>& zaxis, const Vec<3, T>& position)
+  Matrix4(const Vec<3, T> &xaxis, const Vec<3, T> &yaxis,
+          const Vec<3, T> &zaxis, const Vec<3, T> &position)
       : Base(xaxis[0], yaxis[0], zaxis[0], position[0], xaxis[1], yaxis[1],
              zaxis[1], position[1], xaxis[2], yaxis[2], zaxis[2], position[2],
              0, 0, 0, 1) {}
 
   /// @param[in] src    C-array to copy values from
-  Matrix4(const T* src) : Base(src) {}
+  Matrix4(const T *src) : Base(src) {}
 
   /// @param[in] src    matrix to copy values from
-  Matrix4(const Mat<4, T>& src) : Base(src) {}
+  Matrix4(const Mat<4, T> &src) : Base(src) {}
 
   /// Get a quaternion representation
   Quat<T> toQuat() const { return Quat<T>().fromMatrix(Base::elems()); }
 
   /// Set from quaternion
-  Matrix4& fromQuat(Quat<T>& q) {
+  Matrix4 &fromQuat(Quat<T> &q) {
     q.toMatrix(Base::elems());
     return *this;
   }
-  Matrix4& fromQuatTransposed(Quat<T>& q) {
+  Matrix4 &fromQuatTransposed(Quat<T> &q) {
     q.toMatrixTransposed(Base::elems());
     return *this;
   }
@@ -118,7 +116,7 @@ class Matrix4 : public Mat<4, T> {
     return Matrix4::rotate(angle, Vec3d(x, y, z));
   }
 
-  static Matrix4 rotate(float angle, const Vec<3, T>& v) {
+  static Matrix4 rotate(float angle, const Vec<3, T> &v) {
     Vec<3, T> axis(v);
     axis.normalize();
 
@@ -205,17 +203,17 @@ class Matrix4 : public Mat<4, T> {
   /// @param[in] eye    eye coordinate (world-space)
   /// @param[in] near    near plane distance from eye
   /// @param[in] far    far plane distance from eye
-  static Matrix4 perspective(const Vec<3, T>& nearBL, const Vec<3, T>& nearBR,
-                             const Vec<3, T>& nearTL, const Vec<3, T>& eye,
+  static Matrix4 perspective(const Vec<3, T> &nearBL, const Vec<3, T> &nearBR,
+                             const Vec<3, T> &nearTL, const Vec<3, T> &eye,
                              T near, T far) {
     Vec<3, T> va, vb, vc;
     Vec<3, T> vr, vu, vn;
     T l, r, b, t, d;
 
     // compute orthonormal basis for the screen
-    vr = (nearBR - nearBL).normalize();  // right vector
-    vu = (nearTL - nearBL).normalize();  // up vector
-    cross(vn, vr, vu);  // normal(forward) vector (out from screen)
+    vr = (nearBR - nearBL).normalize(); // right vector
+    vu = (nearTL - nearBL).normalize(); // up vector
+    cross(vn, vr, vu); // normal(forward) vector (out from screen)
     vn.normalize();
 
     // compute vectors from eye to screen corners:
@@ -231,7 +229,7 @@ class Matrix4 : public Mat<4, T> {
     T nbyd = near / d;
     l = vr.dot(va) * nbyd;
     r = vr.dot(vb) * nbyd;
-    b = vu.dot(va) * nbyd;  // not vd?
+    b = vu.dot(va) * nbyd; // not vd?
     t = vu.dot(vc) * nbyd;
 
     return perspective(l, r, b, t, near, far);
@@ -252,8 +250,8 @@ class Matrix4 : public Mat<4, T> {
   /// Get an off-axis perspective projection matrix (for stereographics)
   static Matrix4 perspectiveOffAxis(T fovy, T aspect, T near, T far, T xShift,
                                     T focal) {
-    T top = near *
-            tan(fovy * M_DEG2RAD * 0.5);  // height of view at distance = near
+    T top =
+        near * tan(fovy * M_DEG2RAD * 0.5); // height of view at distance = near
     T bottom = -top;
     T shift = -xShift * near / focal;
     T left = -aspect * top + shift;
@@ -273,7 +271,7 @@ class Matrix4 : public Mat<4, T> {
   static Matrix4 perspectiveOffAxis(T fovy, T aspect, T near, T far, T xShift,
                                     T yShift, T focal) {
     double tanfovy = tan(fovy * M_DEG2RAD / 2.);
-    T t = near * tanfovy;  // height of view at distance = near
+    T t = near * tanfovy; // height of view at distance = near
     T b = -t;
     T l = -aspect * t;
     T r = aspect * t;
@@ -353,8 +351,8 @@ class Matrix4 : public Mat<4, T> {
   /// @param[in] uu    eye up unit direction vector
   /// @param[in] uf    eye forward unit direction vector
   /// @param[in] eyePos  eye position
-  static Matrix4 lookAt(const Vec<3, T>& ur, const Vec<3, T>& uu,
-                        const Vec<3, T>& uf, const Vec<3, T>& eyePos) {
+  static Matrix4 lookAt(const Vec<3, T> &ur, const Vec<3, T> &uu,
+                        const Vec<3, T> &uf, const Vec<3, T> &eyePos) {
     return Matrix4(ur[0], ur[1], ur[2], -(ur.dot(eyePos)), uu[0], uu[1], uu[2],
                    -(uu.dot(eyePos)), uf[0], uf[1], uf[2], -(uf.dot(eyePos)), 0,
                    0, 0, 1);
@@ -365,8 +363,8 @@ class Matrix4 : public Mat<4, T> {
   /// @param[in] eyePos  eye position
   /// @param[in] at    point being looked at
   /// @param[in] up    up vector
-  static Matrix4 lookAt(const Vec<3, T>& eyePos, const Vec<3, T>& at,
-                        const Vec<3, T>& up) {
+  static Matrix4 lookAt(const Vec<3, T> &eyePos, const Vec<3, T> &at,
+                        const Vec<3, T> &up) {
     Vec<3, T> z = (at - eyePos).normalize();
     Vec<3, T> y = up;
     y.normalize();
@@ -393,22 +391,22 @@ class Matrix4 : public Mat<4, T> {
   //  }
 
   /// Get a left-eye viewing matrix
-  static Matrix4 lookAtLeft(const Vec<3, T>& ux, const Vec<3, T>& uy,
-                            const Vec<3, T>& uz, const Vec<3, T>& pos,
+  static Matrix4 lookAtLeft(const Vec<3, T> &ux, const Vec<3, T> &uy,
+                            const Vec<3, T> &uz, const Vec<3, T> &pos,
                             double eyeSep) {
     return lookAtOffAxis(ux, uy, uz, pos, -0.5 * eyeSep);
   }
 
   /// Get a right-eye viewing matrix
-  static Matrix4 lookAtRight(const Vec<3, T>& ux, const Vec<3, T>& uy,
-                             const Vec<3, T>& uz, const Vec<3, T>& pos,
+  static Matrix4 lookAtRight(const Vec<3, T> &ux, const Vec<3, T> &uy,
+                             const Vec<3, T> &uz, const Vec<3, T> &pos,
                              double eyeSep) {
     return lookAtOffAxis(ux, uy, uz, pos, 0.5 * eyeSep);
   }
 
   /// Get an off-axis viewing matrix
-  static Matrix4 lookAtOffAxis(const Vec<3, T>& ux, const Vec<3, T>& uy,
-                               const Vec<3, T>& uz, const Vec<3, T>& pos,
+  static Matrix4 lookAtOffAxis(const Vec<3, T> &ux, const Vec<3, T> &uy,
+                               const Vec<3, T> &uz, const Vec<3, T> &pos,
                                double eyeShift) {
     return lookAt(ux, uy, uz, pos + (ux * -eyeShift));
   }
@@ -417,15 +415,15 @@ class Matrix4 : public Mat<4, T> {
 
   /// This is typically what is required to project a vertex through a
   /// transform. For a better explanation, @see http://xkcd.com/184/ -g
-  Vec<4, T> transform(const Vec<4, T>& vCol) const { return *this * vCol; }
+  Vec<4, T> transform(const Vec<4, T> &vCol) const { return *this * vCol; }
 
   /// Computes product of matrix multiplied by column vector, r = m * vCol
-  Vec<4, T> transform(const Vec<3, T>& vCol) const {
+  Vec<4, T> transform(const Vec<3, T> &vCol) const {
     return transform(Vec<4, T>(vCol, T(1)));
   }
 
   /// Get the inverse of a matrix
-  static Matrix4 inverse(const Mat<4, T>& m) {
+  static Matrix4 inverse(const Mat<4, T> &m) {
     Matrix4 res(m);
     invert(res);
     return res;
@@ -436,22 +434,17 @@ class Matrix4 : public Mat<4, T> {
     return translation(Vec<3, T>(x, y, z));
   }
   // \deprecated Use Mat::translation
-  template <typename V>
-  static Matrix4 translate(const Vec<3, V>& v) {
+  template <typename V> static Matrix4 translate(const Vec<3, V> &v) {
     return translation(v);
   }
   // \deprecated Use Mat::scaling
   static Matrix4 scale(T x, T y, T z) { return scaling(x, y, z); }
   // \deprecated Use Mat::scaling
-  template <typename V>
-  static Matrix4 scale(const Vec<3, V>& v) {
+  template <typename V> static Matrix4 scale(const Vec<3, V> &v) {
     return scaling(v);
   }
   // \deprecated Use Mat::scaling
-  template <typename V>
-  static Matrix4 scale(const V& v) {
-    return scaling(v);
-  }
+  template <typename V> static Matrix4 scale(const V &v) { return scaling(v); }
   // \deprecated Use Mat::rotation
   static Matrix4 rotateXY(T theta) { return rotation(theta, 0, 1); }
   static Matrix4 rotateYZ(T theta) { return rotation(theta, 1, 2); }
@@ -459,29 +452,56 @@ class Matrix4 : public Mat<4, T> {
 };
 
 /// Get frustum far plane distance from a projection matrix
-template <class T>
-inline T frustumFar(const Mat<4, T>& proj) {
+template <class T> inline T frustumFar(const Mat<4, T> &proj) {
   return proj[14] / (proj[10] + T(1));
 }
 
 /// Get frustum near plane distance from a projection matrix
-template <class T>
-inline T frustumNear(const Mat<4, T>& proj) {
+template <class T> inline T frustumNear(const Mat<4, T> &proj) {
   return proj[14] / (proj[10] - T(1));
 }
 
 /// Get frustum depth from a projection matrix
-template <class T>
-inline T frustumDepth(const Mat<4, T>& proj) {
+template <class T> inline T frustumDepth(const Mat<4, T> &proj) {
   return (T(-2) * proj[14]) / (proj[10] * proj[10] - T(1));
 }
 
 /// Get frustum aspect ratio from a projection matrix
-template <class T>
-inline T frustumAspect(const Mat<4, T>& proj) {
+template <class T> inline T frustumAspect(const Mat<4, T> &proj) {
   return proj[5] / proj[0];
 }
 
-}  // namespace al
+/// Get transformation matrix to cubemap faces
+template <class T> inline Mat<4, T> cubemapTransformMat(const int face) {
+  switch (face) {
+  // GL_TEXTURE_CUBE_MAP_POSITIVE_X
+  // vertex.xyz = vec3(-vertex.z, -vertex.y, -vertex.x);
+  case 0:
+    return Mat<4, T>{0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1};
+    // GL_TEXTURE_CUBE_MAP_NEGATIVE_X
+    // vertex.xyz = vec3(vertex.z, -vertex.y, vertex.x);
+  case 1:
+    return Mat<4, T>{0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1};
+    // GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+    // vertex.xyz = vec3(vertex.x, vertex.z, -vertex.y);
+  case 2:
+    return Mat<4, T>{1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
+    // GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+    // vertex.xyz = vec3(vertex.x, -vertex.z, vertex.y);
+  case 3:
+    return Mat<4, T>{1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+    // GL_TEXTURE_CUBE_MAP_POSITIVE_Z
+    // vertex.xyz = vec3(vertex.x, -vertex.y, -vertex.z);
+  case 4:
+    return Mat<4, T>{1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1};
+    // GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+    // vertex.xyz = vec3(-vertex.x, -vertex.y, vertex.z);
+  case 5:
+    return Mat<4, T>{-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+  }
+  return Mat<4, T>::identity();
+}
+
+} // namespace al
 
 #endif /* include guard */
