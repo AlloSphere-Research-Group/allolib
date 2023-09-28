@@ -101,6 +101,8 @@ class ParameterBundle {
   void clear() { mParameters.clear(); }
 
   std::vector<ParameterMeta *> &parameters() { return mParameters; }
+  
+  std::vector<std::string> &bundleOrder() { return mBundleIdOrder; }
 
   std::map<std::string, std::vector<ParameterBundle *>> &bundles() {
     return mBundles;
@@ -121,6 +123,7 @@ class ParameterBundle {
 
   std::vector<ParameterMeta *> mParameters;
   std::map<std::string, std::vector<ParameterBundle *>> mBundles;
+  std::vector<std::string> mBundleIdOrder;
   std::vector<OSCNotifier *> mNotifiers;
 };
 
