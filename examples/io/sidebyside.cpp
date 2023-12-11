@@ -8,6 +8,7 @@ using namespace al;
 struct MyApp : App {
   Mesh mesh;
   double phase = 0;
+  double eyesep = 0.01f;
 
   void onCreate() override {
     addTetrahedron(mesh);
@@ -17,7 +18,7 @@ struct MyApp : App {
   }
 
   void onAnimate(double dt) override {
-    double period = 10000;
+    double period = 10;
     phase += dt / period;
     if (phase >= 1.) phase -= 1.;
   }
@@ -29,7 +30,9 @@ struct MyApp : App {
     g.scissorTest(true);
     g.scissorArea(0, 0, fbWidth() / 2, fbHeight());
 
-    g.clear(1, 0, 0);
+    auto p = nav().pos();
+    nav().pos() = p - nav().ur() * eyesep;
+    g.clear(0, 0, 0);
     g.polygonLine();
     g.pushMatrix();
     g.rotate(phase * 360, 0, 1, 0);
@@ -43,7 +46,8 @@ struct MyApp : App {
     g.scissorTest(true);
     g.scissorArea(fbWidth() / 2, 0, fbWidth() / 2, fbHeight());
 
-    g.clear(0, 0, 1);
+    nav().pos() = p + nav().ur() * eyesep;
+    g.clear(0, 0, 0);
     g.polygonLine();
     g.pushMatrix();
     g.rotate(phase * 360, 0, 1, 0);
@@ -55,6 +59,7 @@ struct MyApp : App {
      */
     g.viewport(0, 0, fbWidth(), fbHeight());
     g.scissorTest(false);
+    nav().pos() = p;
   }
 };
 

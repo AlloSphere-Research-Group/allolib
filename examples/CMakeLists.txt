@@ -27,12 +27,14 @@ macro(BuildExample example_src dir)
     DEBUG_POSTFIX d
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
+    EXCLUDE_FROM_ALL ${ALLOLIB_BUILD_EXAMPLES}
+    EXCLUDE_FROM_DEFAULT_BUILD ${ALLOLIB_BUILD_EXAMPLES}
 
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${example_directory}/${dir}/bin
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${example_directory}/${dir}/bin
+    # RUNTIME_OUTPUT_DIRECTORY_DEBUG ${example_directory}/${dir}/bin
+    # RUNTIME_OUTPUT_DIRECTORY_RELEASE ${example_directory}/${dir}/bin
     )
 
-  target_link_libraries(${EXAMPLE_TARGET} al)
+  target_link_libraries(${EXAMPLE_TARGET} alapp alserial)
 
   #get_target_property(DLLS_TO_COPY al AL_DLL_LIBRARIES)
   #Copy_dlls("${EXAMPLE_DIRECTORY}/bin" "${EXAMPLE_TARGET}" "${EXTENSIONS_DLLS}")
