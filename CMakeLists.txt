@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
-project(allo)
+project(allolib)
 
 # option(AL_VERBOSE_OUTPUT "" OFF)
-option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build by default
+option(ALLOLIB_ADD_EXAMPLES "" OFF) # add example targets, but do not build by default
 option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built by default
+option(ALLOLIB_ADD_EXTENSIONS "" ON) # extension libraries will be added as targets
 option(ALLOLIB_BUILD_TESTS "" OFF)
 # option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF) # TODO remove see below
 # option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF) # TODO remove see below
@@ -61,8 +62,16 @@ add_subdirectory(modules/config)
 add_subdirectory(modules/app) # and sphere (interdependencies)
 
 
+if (ALLOLIB_ADD_EXTENSIONS)
+  message("including allolib extensions")
+  add_subdirectory(extensions)
+endif()
+
+
 # no longer have single library for allolib, but we could use something like libtool to pack them all together if needed
 # add_library(al ${AL_LIBRARY_TYPE} ${headers} ${sources})
+# add_library(al STATIC dummy.cpp)
+# target_link_libraries(al PUBLIC almath alspatial alsystem altypes algraphics alaudio alsound alio almidi alserial alprotocol alimgui alui alconfig alapp)
 
 # set_target_properties(al PROPERTIES
 #   DEBUG_POSTFIX d

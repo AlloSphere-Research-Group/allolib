@@ -10,9 +10,16 @@ MACRO(SUBDIRLIST result curdir)
   SET(${result} ${dirlist})
 ENDMACRO()
 
+# exclude form default build unless set
+if(ALLOLIB_BUILD_EXAMPLES)
+  set(exclude OFF)
+else()
+  set(exclude ON)
+endif()
+
 macro(BuildExample example_src dir)
   get_filename_component(EXAMPLE_NAME ${example_src} NAME_WE) # Get name w/o extension
-  set(example_directory ${CMAKE_CURRENT_LIST_DIR})
+  # set(example_directory ${CMAKE_CURRENT_LIST_DIR})
 
   if ("${dir}" STREQUAL ".")
     set(EXAMPLE_TARGET example_${EXAMPLE_NAME})
@@ -27,8 +34,8 @@ macro(BuildExample example_src dir)
     DEBUG_POSTFIX d
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
-    EXCLUDE_FROM_ALL ${ALLOLIB_BUILD_EXAMPLES}
-    EXCLUDE_FROM_DEFAULT_BUILD ${ALLOLIB_BUILD_EXAMPLES}
+    EXCLUDE_FROM_ALL ${exclude}
+    EXCLUDE_FROM_DEFAULT_BUILD ${exclude}
 
     # RUNTIME_OUTPUT_DIRECTORY_DEBUG ${example_directory}/${dir}/bin
     # RUNTIME_OUTPUT_DIRECTORY_RELEASE ${example_directory}/${dir}/bin

@@ -1,8 +1,6 @@
 
 add_subdirectory(external/cpptoml)
 
-# find_package(cpptoml REQUIRED)
-
 set(headers
   include/al/io/al_PersistentConfig.hpp
   include/al/io/al_Toml.hpp
