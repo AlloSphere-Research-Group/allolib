@@ -64,7 +64,7 @@ add_subdirectory(modules/app) # and sphere (interdependencies)
 
 if (ALLOLIB_ADD_EXTENSIONS)
   message("including allolib extensions")
-  add_subdirectory(extensions)
+  add_subdirectory(../al_ext ../al_ext)
 endif()
 
 

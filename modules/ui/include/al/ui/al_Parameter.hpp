@@ -1589,6 +1589,20 @@ public:
   }
 
   void trigger() { set(true); }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    trigger();
+    // if (fields.size() == 1) {
+    //   if (fields[0].type() == VariantType::VARIANT_INT32) {
+    //     set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
+    //   } else if (fields[0].type() == VariantType::VARIANT_FLOAT) {
+    //     set(fields[0].get<float>());
+    //   }
+    // } else {
+    //   std::cout << "Wrong number of parameters for " << getFullAddress()
+    //             << std::endl;
+    // }
+  }
 };
 
 // These three types are blocking, should not be used in time-critical
