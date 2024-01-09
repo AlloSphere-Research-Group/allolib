@@ -1545,9 +1545,19 @@ public:
     if (fields.size() == 1) {
       if (fields[0].type() == VariantType::VARIANT_INT32) {
         set(fields[0].get<int32_t>() == 1 ? 1.0f : 0.0f);
+        // std::cout << "Set Fields int " << fields[0].get<int32_t>() << " " << getFullAddress() << std::endl;
       } else if (fields[0].type() == VariantType::VARIANT_FLOAT) {
         set(fields[0].get<float>());
+        // std::cout << "Set Fields float " << fields[0].get<float>() << " " << getFullAddress() << std::endl;
+
+      } else if (fields[0].type() == VariantType::VARIANT_DOUBLE) {
+        set(fields[0].get<double>());
+        // std::cout << "Set Fields doouble " << fields[0].get<double>() << " " << getFullAddress() << std::endl;
+
+      }else {
+      std::cout << "Set Fields no matching type: " << getFullAddress() << std::endl;
       }
+
     } else {
       std::cout << "Wrong number of parameters for " << getFullAddress()
                 << std::endl;
