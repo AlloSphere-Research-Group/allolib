@@ -1,5 +1,5 @@
 [submodule "external/rtaudio"]
-	path = modules/audio-rtaudio/external/rtaudio
+	path = modules/audio-backend-rtaudio/external/rtaudio
 	url = https://github.com/thestk/rtaudio.git
 [submodule "external/rtmidi"]
 	path = modules/midi/external/rtmidi
