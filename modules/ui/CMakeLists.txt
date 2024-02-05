@@ -89,5 +89,4 @@ target_link_libraries(alui PUBLIC
   alprotocol
   alimgui
   almidi
-  alsound
 )

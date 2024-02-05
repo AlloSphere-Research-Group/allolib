@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 project(allolib)
 
 # option(AL_VERBOSE_OUTPUT "" OFF)
-option(ALLOLIB_ADD_EXAMPLES "" OFF) # add example targets, but do not build by default
-option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built by default
+option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build in default build
+option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built during default build
 option(ALLOLIB_ADD_EXTENSIONS "" ON) # extension libraries will be added as targets
 option(ALLOLIB_BUILD_TESTS "" OFF)
 # option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF) # TODO remove see below
@@ -50,8 +50,9 @@ add_subdirectory(modules/spatial)
 add_subdirectory(modules/types)
 add_subdirectory(modules/system)
 add_subdirectory(modules/graphics)
-add_subdirectory(modules/audio-rtaudio) # TODO separate audioio interface from rtaudio/portaudio implementation
-add_subdirectory(modules/sound)
+add_subdirectory(modules/audio)
+add_subdirectory(modules/audio-backend-rtaudio) # TODO separate audioio interface from rtaudio/portaudio implementation
+# add_subdirectory(modules/sound)
 add_subdirectory(modules/io)
 add_subdirectory(modules/midi)
 add_subdirectory(modules/serial) 
@@ -64,7 +65,8 @@ add_subdirectory(modules/app) # and sphere (interdependencies)
 
 if (ALLOLIB_ADD_EXTENSIONS)
   message("including allolib extensions")
-  add_subdirectory(../al_ext ../al_ext)
+  add_subdirectory(extensions)
+  # add_subdirectory(../al_ext ../al_ext)
 endif()
 
 

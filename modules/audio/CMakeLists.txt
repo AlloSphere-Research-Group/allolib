@@ -3,6 +3,9 @@ add_subdirectory(external/dr_libs)
 
 ## alsound ##
 set(headers
+  include/al/io/al_AudioIO.hpp
+  include/al/io/al_AudioIOData.hpp
+
   include/al/sound/al_Ambisonics.hpp
   include/al/sound/al_Biquad.hpp
   include/al/sound/al_Crossover.hpp
@@ -19,6 +22,8 @@ set(headers
 )
 
 set(sources
+  src/io/al_AudioIO.cpp
+  src/io/al_AudioIOData.cpp
   src/sound/al_Ambisonics.cpp
   src/sound/al_Biquad.cpp
   src/sound/al_Dbap.cpp
@@ -32,21 +37,20 @@ set(sources
   src/sound/al_SoundFile.cpp
 )
 
-add_library(alsound ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(alaudio ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
-set_target_properties(alsound PROPERTIES
+set_target_properties(alaudio PROPERTIES
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON
 )
 
-target_include_directories(alsound PUBLIC
+target_include_directories(alaudio PUBLIC
   include
 )
 
-target_link_libraries(alsound PUBLIC
+target_link_libraries(alaudio PUBLIC
   almath
   alspatial
-  alaudio
   dr_libs
 )
