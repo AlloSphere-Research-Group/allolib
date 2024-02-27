@@ -145,6 +145,10 @@ public:
                       int audioBlockSize = 512, int audioOutputs = -1,
                       int audioInputs = -1);
 
+  void configureAudio(AudioDevice &devIn, AudioDevice &devOut, double audioRate = -1,
+                      int audioBlockSize = 512, int audioOutputs = -1,
+                      int audioInputs = -1);
+
   // Access to OSC domain
   ParameterServer &parameterServer();
 

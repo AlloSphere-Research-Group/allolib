@@ -252,6 +252,15 @@ void App::configureAudio(AudioDevice &dev, double audioRate, int audioBlockSize,
                            audioInputs);
 }
 
+void App::configureAudio(AudioDevice &devIn, AudioDevice &devOut, double audioRate, int audioBlockSize,
+                         int audioOutputs, int audioInputs) {
+  if (audioRate < 0) {
+    audioRate = AudioBackend::devicePreferredSamplingRate(devIn.id());
+  }
+  audioDomain()->configure(devIn, devOut, audioRate, audioBlockSize, audioOutputs,
+                           audioInputs);
+}
+
 ParameterServer &App::parameterServer() {
   return oscDomain()->parameterServer();
 }

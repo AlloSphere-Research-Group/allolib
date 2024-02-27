@@ -40,8 +40,9 @@ bool AudioDomain::cleanup(ComputationDomain * /*parent*/) {
 
 void AudioDomain::configure(double audioRate, int audioBlockSize,
                             int audioOutputs, int audioInputs) {
-  AudioDevice dev = AudioDevice::defaultOutput();
-  configure(dev, audioRate, audioBlockSize, audioOutputs, audioInputs);
+  AudioDevice devIn = AudioDevice::defaultInput();
+  AudioDevice devOut = AudioDevice::defaultOutput();
+  configure(devIn, devOut, audioRate, audioBlockSize, audioOutputs, audioInputs);
 }
 
 void AudioDomain::configure(AudioDevice &dev, double audioRate,
@@ -50,6 +51,19 @@ void AudioDomain::configure(AudioDevice &dev, double audioRate,
   audioIO().init(AudioDomain::AppAudioCB, this, audioBlockSize, audioRate,
                  audioOutputs, audioInputs);
   audioIO().device(dev);
+  // mAudioIO.device() resets the channels to the device default number
+  audioIO().channelsIn(audioInputs);
+  audioIO().channelsOut(audioOutputs);
+}
+
+void AudioDomain::configure(AudioDevice &devIn, AudioDevice &devOut, double audioRate,
+                            int audioBlockSize, int audioOutputs,
+                            int audioInputs) {
+  audioIO().init(AudioDomain::AppAudioCB, this, audioBlockSize, audioRate,
+                 audioOutputs, audioInputs);
+  audioIO().deviceIn(devIn);
+  audioIO().deviceOut(devOut);
+
   // mAudioIO.device() resets the channels to the device default number
   audioIO().channelsIn(audioInputs);
   audioIO().channelsOut(audioOutputs);
