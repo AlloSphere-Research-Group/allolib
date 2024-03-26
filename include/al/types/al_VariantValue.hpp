@@ -236,7 +236,7 @@ struct VariantValue {
       }
     } else if (std::is_same<type, bool>::value) {
       if (mType == VariantType::VARIANT_BOOL) {
-        *static_cast<bool *>(mData) = value;
+        *static_cast<type *>(mData) = value;
       } else {
         std::cerr
             << "ERROR: Unexpected type for parameter field set(). Ignoring."
