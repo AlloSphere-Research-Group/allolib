@@ -84,7 +84,7 @@ struct VariantValue {
   VariantValue();
 
   VariantValue(const std::string value);
-  VariantValue(const char *value);
+  VariantValue(const char value);
   VariantValue(const int64_t value);
   VariantValue(const int32_t value);
   VariantValue(const int16_t value);
@@ -162,7 +162,7 @@ struct VariantValue {
             << "ERROR: Unexpected type for parameter field set(). Ignoring."
             << std::endl;
       }
-    } else if (std::is_same<type, char *>::value) {
+    } else if (std::is_same<type, char>::value) {
       if (mType == VariantType::VARIANT_CHAR) {
         *static_cast<type *>(mData) = value;
       } else {
