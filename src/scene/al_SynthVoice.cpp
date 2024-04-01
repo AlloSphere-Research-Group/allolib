@@ -213,6 +213,24 @@ bool SynthVoice::setTriggerParams(const std::vector<VariantValue> &pFields,
                        "parameter type for parameter "
                     << param->getFullAddress() << std::endl;
         }
+      } else if (it->type() == VariantType::VARIANT_INT32) {
+        if (strcmp(typeid(*param).name(), typeid(Parameter).name()) == 0) {
+          static_cast<Parameter *>(param)->set(it->get<int32_t>());
+        } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name()) ==
+                   0) {
+          static_cast<ParameterInt *>(param)->set(it->get<int32_t>());
+        } else if (strcmp(typeid(*param).name(),
+                          typeid(ParameterMenu).name()) == 0) {
+          static_cast<ParameterMenu *>(param)->set(it->get<int32_t>());
+        } else if (strcmp(typeid(*param).name(),
+                          typeid(ParameterString).name()) == 0) {
+          static_cast<ParameterString *>(param)->set(
+              std::to_string(it->get<int32_t>()));
+        } else {
+          std::cerr << "ERROR: p-field string not setting parameter. Invalid "
+                       "parameter type for parameter "
+                    << param->getFullAddress() << std::endl;
+        }
       } else {
         std::cerr << "ERROR: Unexpected parameter field value type"
                   << std::endl;

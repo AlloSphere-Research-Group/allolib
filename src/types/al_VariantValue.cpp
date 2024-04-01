@@ -17,6 +17,12 @@ VariantValue::VariantValue(const std::string value) {
   *static_cast<std::string *>(mData) = value;
 }
 
+VariantValue::VariantValue(const char *value) {
+  mType = VariantType::VARIANT_STRING;
+  mData = new std::string;
+  *static_cast<std::string *>(mData) = value;
+}
+
 VariantValue::VariantValue(const char value) {
   mType = VariantType::VARIANT_CHAR;
   mData = new char;
