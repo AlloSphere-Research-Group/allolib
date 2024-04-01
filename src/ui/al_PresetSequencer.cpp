@@ -211,9 +211,12 @@ std::vector<PresetSequencer::Step>
 PresetSequencer::loadSequence(std::string sequenceName, double timeScale) {
   std::vector<Step> steps;
   std::string fullName = buildFullPath(sequenceName);
+  if (mVerbose) {
+    std::cout << "Reading Sequence: " << fullName << std::endl;
+  }
   std::ifstream f(fullName);
   if (!f.is_open()) {
-    std::cout << "Could not open:" << fullName << std::endl;
+    std::cout << "Could not open: " << fullName << std::endl;
     return steps;
   }
 
@@ -582,7 +585,6 @@ std::string PresetSequencer::buildFullPath(std::string sequenceName) {
   }
   if (mPresetHandler) {
     auto presetPath = mPresetHandler->getCurrentPath();
-    std::cout << presetPath << std::endl;
     if (presetPath.size() > 0) {
       fullName = File::conformDirectory(presetPath);
     }
