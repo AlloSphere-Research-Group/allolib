@@ -289,8 +289,11 @@ PresetSequencer::loadSequence(std::string sequenceName, double timeScale) {
       // std::cout << name  << ":" << delta << ":" << duration << std::endl;
     }
   }
+
   if (f.bad()) {
     std::cout << "Error reading:" << sequenceName << std::endl;
+  } else if (mVerbose) {
+    std::cout << " Finished Sequence: " << fullName << std::endl;
   }
   return steps;
 }
