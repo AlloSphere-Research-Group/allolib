@@ -474,29 +474,23 @@ template <class T> inline T frustumAspect(const Mat<4, T> &proj) {
 /// Get transformation matrix to cubemap faces
 template <class T> inline Mat<4, T> cubemapTransformMat(const int face) {
   switch (face) {
-  // GL_TEXTURE_CUBE_MAP_POSITIVE_X
-  // vertex.xyz = vec3(-vertex.z, -vertex.y, -vertex.x);
-  case 0:
+  case 0: // GL_TEXTURE_CUBE_MAP_POSITIVE_X
+          // vertex.xyz = vec3(-vertex.z, -vertex.y, -vertex.x);
     return Mat<4, T>{0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1};
-    // GL_TEXTURE_CUBE_MAP_NEGATIVE_X
-    // vertex.xyz = vec3(vertex.z, -vertex.y, vertex.x);
-  case 1:
+  case 1: // GL_TEXTURE_CUBE_MAP_NEGATIVE_X
+          // vertex.xyz = vec3(vertex.z, -vertex.y, vertex.x);
     return Mat<4, T>{0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1};
-    // GL_TEXTURE_CUBE_MAP_POSITIVE_Y
-    // vertex.xyz = vec3(vertex.x, vertex.z, -vertex.y);
-  case 2:
+  case 2: // GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+          // vertex.xyz = vec3(vertex.x, vertex.z, -vertex.y);
     return Mat<4, T>{1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
-    // GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
-    // vertex.xyz = vec3(vertex.x, -vertex.z, vertex.y);
-  case 3:
+  case 3: // GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+          // vertex.xyz = vec3(vertex.x, -vertex.z, vertex.y);
     return Mat<4, T>{1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
-    // GL_TEXTURE_CUBE_MAP_POSITIVE_Z
-    // vertex.xyz = vec3(vertex.x, -vertex.y, -vertex.z);
-  case 4:
+  case 4: // GL_TEXTURE_CUBE_MAP_POSITIVE_Z
+          // vertex.xyz = vec3(vertex.x, -vertex.y, -vertex.z);
     return Mat<4, T>{1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1};
-    // GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-    // vertex.xyz = vec3(-vertex.x, -vertex.y, vertex.z);
-  case 5:
+  case 5: // GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+          // vertex.xyz = vec3(-vertex.x, -vertex.y, vertex.z);
     return Mat<4, T>{-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
   }
   return Mat<4, T>::identity();

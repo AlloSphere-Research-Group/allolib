@@ -371,6 +371,14 @@ target_link_libraries(al PUBLIC
   Gamma glfw glad rtmidi cpptoml dr_libs
   nlohmann_json::nlohmann_json imgui oscpack stb serial)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    # On macOS if jack is present, RtMidi will link to jack but not provide the
+    # /usr/local/lib location as link directory. This statement only serves the
+    # purpose of working around that bug. Perhaps can be removed on future
+    # updates of RtMidi
+    link_directories("/usr/local/lib")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 macro(Copy_dlls dest_path target DLLS_TO_COPY)
   if (DLLS_TO_COPY)
     foreach(LIBRARY ${DLLS_TO_COPY})

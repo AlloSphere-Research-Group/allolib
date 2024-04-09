@@ -161,6 +161,9 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, ParameterMeta *param,
     notifyListeners(OSCaddress, p->get(), src);
   } else if (Parameter *p = dynamic_cast<Parameter *>(param)) { // Parameter
     notifyListeners(OSCaddress, p->get(), src);
+  } else if (ParameterInt *p =
+                 dynamic_cast<ParameterInt *>(param)) { // ParameterInt
+    notifyListeners(OSCaddress, p->get(), src);
   } else if (ParameterString *p =
                  dynamic_cast<ParameterString *>(param)) { // ParameterString
     notifyListeners(OSCaddress, p->get(), src);

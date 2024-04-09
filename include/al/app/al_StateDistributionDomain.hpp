@@ -85,7 +85,7 @@ public:
     mRecv = nullptr;
     mState = nullptr;
 
-    //    std::cerr << "Not using Cuttlebone. Ignoring" << std::endl;
+    std::cout << "StateReceiveDomain: cleanup called." << std::endl;
     cleanupSubdomains(false);
     return true;
   }
@@ -138,6 +138,8 @@ private:
             memcpy(mOscDomain->buf.get(), inBlob.data, sizeof(TSharedState));
             mOscDomain->newMessages++;
             mOscDomain->mRecvLock.unlock();
+            // std::cerr << "OSC State Received: " << inBlob.size << std::endl;
+
           } else {
             std::cerr << "ERROR: received state size mismatch" << std::endl;
           }
@@ -171,7 +173,7 @@ bool StateReceiveDomain<TSharedState>::init(ComputationDomain *parent) {
     return false;
   }
 
-  std::cout << "StateReceiveDomain: Using OSC for shared state " << mAddress
+  std::cout << "StateReceiveDomain: init called using " << mAddress
             << ":" << mPort << std::endl;
 
   initializeSubdomains(false);
@@ -186,7 +188,7 @@ public:
 
     initializeSubdomains(false);
 
-    std::cout << "StateSendDomain: Using OSC for shared state " << mAddress
+    std::cout << "StateSendDomain: init called using " << mAddress
               << ":" << mPort << std::endl;
     return true;
   }
@@ -203,10 +205,12 @@ public:
     mStateLock.lock();
     osc::Blob b(mState.get(), sizeof(TSharedState));
     osc::Send s(mPort, mAddress.c_str());
-    //    std::cout << mAddress << ":" << mPort << std::endl;
+      //  std::cout << mAddress << ":" << mPort << std::endl;
     s.send("/_state", mId, b);
 
     mStateLock.unlock();
+    // std::cout << "StateSendDomain sent state to " << mAddress << ":" << mPort << std::endl;
+
 
     tickSubdomains(false);
     return true;
@@ -215,7 +219,7 @@ public:
   bool cleanup(ComputationDomain *parent = nullptr) override {
     cleanupSubdomains(true);
     mState = nullptr;
-    //    std::cerr << "Not using Cuttlebone. Ignoring" << std::endl;
+    std::cout << "StateSendDomain: cleanup called." << std::endl;
     cleanupSubdomains(false);
     return true;
   }

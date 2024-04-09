@@ -163,6 +163,7 @@ void ParameterBundle::addBundle(ParameterBundle &bundle, std::string id) {
   }
   if (mBundles.find(id) != mBundles.end()) {
     mBundles[id] = std::vector<ParameterBundle *>();
+    mBundleIdOrder.push_back(id);
   }
   mBundles[id].push_back(&bundle);
   bundle.mBundleId = id;

@@ -40,6 +40,9 @@ public:
   void configure(AudioDevice &dev, double audioRate, int audioBlockSize,
                  int audioOutputs, int audioInputs);
 
+  void configure(AudioDevice &devIn, AudioDevice &devOut, double audioRate, int audioBlockSize,
+                 int audioOutputs, int audioInputs);
+
   std::function<void(AudioIOData &io)> onSound = [](AudioIOData &) {};
 
 protected:

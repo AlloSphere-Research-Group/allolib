@@ -384,22 +384,23 @@ int addQuad(Mesh &m, const Vec &a, const Vec &b, const Vec &c, const Vec &d) {
                  d[1], d[2]);
 }
 
+struct RSin {
+  float mul, val, val2;
+  RSin(float f = 1, float a = 1, float p = 0) {
+    static const float twoPi = 6.283185307179586476925286766559;
+    f *= twoPi, p *= twoPi;
+    mul = 2. * std::cos(f);
+    val2 = std::sin(p - f * 2.) * a;
+    val = std::sin(p - f) * a;
+  }
+  float operator()() {
+    auto v0 = mul * val - val2;
+    val2 = val;
+    return val = v0;
+  }
+};
+
 template <class Vec2> void ellipse(Vec2 *dst, int len, float radx, float rady) {
-  struct RSin {
-    float mul, val, val2;
-    RSin(float f = 1, float a = 1, float p = 0) {
-      static const float twoPi = 6.283185307179586476925286766559;
-      f *= twoPi, p *= twoPi;
-      mul = 2. * std::cos(f);
-      val2 = std::sin(p - f * 2.) * a;
-      val = std::sin(p - f) * a;
-    }
-    float operator()() {
-      auto v0 = mul * val - val2;
-      val2 = val;
-      return val = v0;
-    }
-  };
   RSin x(1. / len, radx, 0.25), y(1. / len, rady);
   for (int i = 0; i < len; ++i) {
     dst[i][0] = x();

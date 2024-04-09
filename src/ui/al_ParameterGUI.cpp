@@ -195,8 +195,13 @@ void ParameterGUI::drawParameterBool(std::vector<ParameterBool *> params,
   //    if (param->getHint("latch") == 1.0) {
   bool value = param->get() == 1.0;
   changed = ImGui::Checkbox((param->displayName() + suffix).c_str(), &value);
+  // if (changed) {
+  //   param->set(value ? 1.0 : 0.0);
+  // }
   if (changed) {
-    param->set(value ? 1.0 : 0.0);
+    for (auto *p : params) {
+      p->set(value ? 1.0 : 0.0);
+    }
   }
 }
 
@@ -1387,6 +1392,7 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
       for (unsigned int i = 0; i < bundleGroup[0]->parameters().size(); i++) {
         std::vector<Parameter *> params;
         std::vector<ParameterBool *> boolParams;
+        std::vector<ParameterColor *> colorParams;
         std::string paramName = bundleGroup[0]->parameters()[i]->getName();
         for (auto *bundle : bundleGroup) {
           auto &parameters = bundle->parameters();
@@ -1397,11 +1403,15 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
             } else if (strcmp(typeid(param).name(),
                               typeid(ParameterBool).name()) == 0) {
               boolParams.push_back(dynamic_cast<ParameterBool *>(&param));
+            }else if (strcmp(typeid(param).name(),
+                              typeid(ParameterColor).name()) == 0) {
+              colorParams.push_back(dynamic_cast<ParameterColor *>(&param));
             }
           }
         }
         drawParameter(params, suffix, index);
         drawParameterBool(boolParams, suffix, index);
+        drawParameterColor(colorParams, suffix, index);
       }
 
     } else {
@@ -1409,11 +1419,16 @@ void ParameterGUI::drawBundleGroup(std::vector<ParameterBundle *> bundleGroup,
         drawParameterMeta(param, suffix);
       }
       for (auto subbundleGroup : bundleGroup[currentBundle]->bundles()) {
+      // for (auto id : bundleGroup[currentBundle]->bundleOrder()) {
+        // auto subbundleGroup = bundleGroup[currentBundle]->bundles()[id];
+
         std::string subBundleName = subbundleGroup.first;
+        // std::string subBundleName = subbundleGroup;
         if (ImGui::CollapsingHeader(
                 (subBundleName + "##" + name + subBundleName).c_str(),
                 ImGuiTreeNodeFlags_CollapsingHeader)) {
           for (auto *bundle : subbundleGroup.second) {
+          // for (auto *bundle : subbundleGroup) {
             for (auto *param : bundle->parameters()) {
               drawParameterMeta({param}, suffix + subBundleName, 0);
             }
@@ -1435,11 +1450,15 @@ void ParameterGUI::drawBundle(ParameterBundle *bundle) {
       drawParameterMeta(param);
     }
     for (auto innerBundle : bundle->bundles()) {
+    // for (auto id : bundle->bundleOrder()) {
+      // auto innerBundle = bundle->bundles()[id];
       std::string subBundleName = innerBundle.first;
+      // std::string subBundleName = id;
       ImGui::PushID(subBundleName.c_str());
       if (ImGui::CollapsingHeader(subBundleName.c_str(),
                                   ImGuiTreeNodeFlags_CollapsingHeader)) {
         for (auto *bundle : innerBundle.second) {
+        // for (auto *bundle : innerBundle) {
           for (auto *param : bundle->parameters()) {
             drawParameterMeta({param}, subBundleName, 0);
           }

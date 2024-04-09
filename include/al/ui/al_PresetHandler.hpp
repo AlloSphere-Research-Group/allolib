@@ -313,7 +313,7 @@ public:
   std::map<int, std::string> readPresetMap(std::string mapName = "default");
 
   void setCurrentPresetMap(std::string mapName = "default",
-                           bool autoCreate = false);
+                           bool autoCreate = true);
 
   void setPresetMap(std::map<int, std::string> presetsMap) {
     mPresetsMap = presetsMap;

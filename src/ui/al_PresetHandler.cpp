@@ -22,7 +22,7 @@ PresetHandler::PresetHandler(TimeMasterMode timeMasterMode,
                              std::string rootDirectory, bool verbose)
     : mVerbose(verbose), mRootDir(rootDirectory),
       mTimeMasterMode(timeMasterMode) {
-  setCurrentPresetMap("default");
+  // setCurrentPresetMap("default");
   setRootPath(rootDirectory);
   if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
     startCpuThread();
