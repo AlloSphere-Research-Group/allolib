@@ -276,7 +276,7 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
           std::advance(copyStart, targetValues.size());
           targetValues.insert(targetValues.end(), copyStart,
                               mStartValues[address].end());
-        } else if (targetValues.size() > mStartValues.size()) {
+        } else if (targetValues.size() > mStartValues[address].size()) {
           std::cout << "morphTo() too many values. Discarding values"
                     << std::endl;
         }
