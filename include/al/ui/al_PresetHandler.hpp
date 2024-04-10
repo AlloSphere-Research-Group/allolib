@@ -232,6 +232,7 @@ public:
   void setMorphTime(float time);
   void setMaxMorphTime(float time);
   void stopMorphing() { mTotalSteps.store(0); }
+  bool morphingActive() { return mMorphingActive.load(); }
   void morphTo(ParameterStates &parameterStates, float morphTime);
   void morphTo(const std::string &presetName, float morphTime);
 
@@ -410,6 +411,7 @@ private:
 
   std::atomic<uint64_t> mMorphStepCount{0};
   std::atomic<uint64_t> mTotalSteps{0};
+  std::atomic<bool> mMorphingActive{false};
   bool mCpuThreadRunning{false}; // To keep the morphing thread alive
   std::unique_ptr<std::thread> mMorphingThread;
   double mMorphInterval{0.02};
