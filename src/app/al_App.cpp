@@ -21,7 +21,7 @@ void App::fps(double f) {
 Window &App::defaultWindow() {
   if (!mDefaultWindowDomain) {
     std::cerr
-        << "ERROR: calling function for Window before window is available!"
+        << "ERROR: calling function " << __FUNCTION__ << " for Window before window is available!"
         << std::endl;
     throw std::runtime_error(
         "calling function for Window before window is available");
@@ -32,7 +32,7 @@ Window &App::defaultWindow() {
 Graphics &App::graphics() {
   if (!mDefaultWindowDomain) {
     std::cerr
-        << "ERROR: calling function for Window before window is available!"
+        << "ERROR: calling function " << __FUNCTION__ << " for Window before window is available!"
         << std::endl;
     throw std::runtime_error(
         "calling function for Window before window is available");
@@ -43,7 +43,7 @@ Graphics &App::graphics() {
 Viewpoint &App::view() {
   if (!mDefaultWindowDomain) {
     std::cerr
-        << "ERROR: calling function for Window before window is available!"
+        << "ERROR: calling function " << __FUNCTION__ << " for Window before window is available!"
         << std::endl;
     throw std::runtime_error(
         "calling function for Window before window is available");
@@ -54,7 +54,7 @@ Viewpoint &App::view() {
 Nav &App::nav() {
   if (!mDefaultWindowDomain) {
     std::cerr
-        << "ERROR: calling function for Window before window is available!"
+        << "ERROR: calling function " << __FUNCTION__ << " for Window before window is available!"
         << std::endl;
     throw std::runtime_error(
         "calling function for Window before window is available");
@@ -65,7 +65,7 @@ Nav &App::nav() {
 Pose &App::pose() {
   if (!mDefaultWindowDomain) {
     std::cerr
-        << "ERROR: calling function for Window before window is available!"
+        << "ERROR: calling function " << __FUNCTION__ << " for Window before window is available!"
         << std::endl;
     throw std::runtime_error(
         "calling function for Window before window is available");
@@ -76,7 +76,7 @@ Pose &App::pose() {
 NavInputControl &App::navControl() {
   if (!mDefaultWindowDomain) {
     std::cerr
-        << "ERROR: calling function for Window before window is available!"
+        << "ERROR: calling function " << __FUNCTION__ << " for Window before window is available!"
         << std::endl;
     throw std::runtime_error(
         "calling function for Window before window is available");
@@ -87,7 +87,7 @@ NavInputControl &App::navControl() {
 Lens &App::lens() {
   if (!mDefaultWindowDomain) {
     std::cerr
-        << "ERROR: calling function for Window before window is available!"
+        << "ERROR: calling function " << __FUNCTION__ << " for Window before window is available!"
         << std::endl;
     throw std::runtime_error(
         "calling function for Window before window is available");
