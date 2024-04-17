@@ -103,7 +103,7 @@ struct SoundFilePlayerTS {
   std::atomic<bool> pauseSignal;
   std::atomic<bool> loopSignal;
   std::atomic<bool> rewindSignal;
-  std::atomic<bool> isPlaying{false};
+  std::atomic<bool> playingState{false};
   // TODO - volume and fading
 
   // In case of adding some constructor other than default constructor,
@@ -134,7 +134,7 @@ struct SoundFilePlayerTS {
   void setLoop() { loopSignal.store(true); }
   void setNoLoop() { loopSignal.store(false); }
 
-  bool isPlaying() { return isPlaying.load(); }
+  bool isPlaying() { return playingState.load(); }
 
   void getFrames(int numFrames, float *buffer, int bufferLength) {
     player.pause = pauseSignal.load();
@@ -143,7 +143,7 @@ struct SoundFilePlayerTS {
       player.frame = 0;
     }
     player.getFrames(numFrames, buffer, bufferLength);
-    isPlaying.store(player.pause);
+    playingState.store(player.pause);
   }
 };
 
