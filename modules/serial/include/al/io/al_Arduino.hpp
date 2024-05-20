@@ -19,7 +19,7 @@ namespace al {
 @ingroup IO
 */
 class Arduino {
- public:
+public:
   Arduino(size_t ringBufferSize = 256) : mRingBuffer(ringBufferSize) {}
 
   /**
@@ -34,7 +34,7 @@ class Arduino {
    */
 
   bool init(std::string port = "", unsigned long baud = 9600,
-                  uint32_t granularity = 50);
+            uint32_t granularity = 50);
 
   void cleanup();
 
@@ -46,9 +46,11 @@ class Arduino {
    */
   std::vector<std::string> getLines();
 
+  bool write(const std::string &data);
+
   std::function<void(uint8_t *, size_t)> onInput = [](uint8_t *, size_t) {};
 
- private:
+private:
   void readFunction();
 
   std::unique_ptr<serial::Serial> serialPort;
@@ -61,6 +63,6 @@ class Arduino {
   uint32_t mGranularity;
 };
 
-}  // namespace al
+} // namespace al
 
-#endif  // AL_SERIAL_HPP
+#endif // AL_SERIAL_HPP

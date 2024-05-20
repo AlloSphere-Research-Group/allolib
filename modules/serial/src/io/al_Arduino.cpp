@@ -77,6 +77,15 @@ std::vector<std::string> Arduino::getLines() {
   return lines;
 }
 
+bool Arduino::write(const std::string& data) {
+  size_t count = serialPort->write(data);
+  if(count != data.size()) {
+    std::cerr << "Serial write failed: " << count << " / " << data.size() << std::endl;
+    return false;
+  }
+  return true;
+}
+
 void Arduino::readFunction() {
   const unsigned int bufferSize = 4096;
   uint8_t buffer[bufferSize];

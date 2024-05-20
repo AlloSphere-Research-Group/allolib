@@ -85,6 +85,21 @@ endif()
 #     target_compile_options(al PRIVATE "-Wall")
 # endif (AL_WINDOWS)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    # On macOS if jack is present, RtMidi will link to jack but not provide the
+    # /usr/local/lib location as link directory. This statement only serves the
+    # purpose of working around that bug. Perhaps can be removed on future
+    # updates of RtMidi
+    link_directories("/usr/local/lib")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+macro(Copy_dlls dest_path target DLLS_TO_COPY)
+  if (DLLS_TO_COPY)
+    foreach(LIBRARY ${DLLS_TO_COPY})
+      get_filename_component(LIBRARY_DIR "${LIBRARY}" DIRECTORY)
+      get_filename_component(LIBRARY_NAME "${LIBRARY}" NAME)
+      list(APPEND post_build_command robocopy "${LIBRARY_DIR}" "${app_path}" "${LIBRARY_NAME}" &)
+    endforeach(LIBRARY IN "${DLLS_TO_COPY}")
 
 # TODO remove this by making separate modules for rtaudio / portaudio that supply audio domains
 # if (ALLOLIB_USE_PORTAUDIO)

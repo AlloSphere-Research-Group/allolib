@@ -1,5 +1,8 @@
 
 # Allolib C/C++ Libraries  {#mainpage}
+
+Library for interactive multimedia application development
+
 Developed by:
 
 AlloSphere Research Group
