@@ -1103,7 +1103,7 @@ bool Mesh::debug(FILE *dst) const {
 #define CHECK_ARR(arr, oneOkay)                                                \
   if (arr.size() && arr.size() != Nv) {                                        \
     if (!oneOkay || arr.size() != 1) {                                         \
-      DPRINTF("%d " #arr ", but %d vertices\n", (int)arr.size(), Nv);          \
+      DPRINTF("%d " #arr ", but %zu vertices\n", (int)arr.size(), Nv);          \
       ok = false;                                                              \
     }                                                                          \
   }
@@ -1128,7 +1128,7 @@ bool Mesh::debug(FILE *dst) const {
   if (indices().size()) {
     for (auto i : indices()) {
       if (i > Nv) {
-        DPRINTF("Index out of bounds: %d (%d max)\n", i, Nv);
+        DPRINTF("Index out of bounds: %d (%zu max)\n", i, Nv);
         ok = false;
         break;
       }

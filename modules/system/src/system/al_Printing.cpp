@@ -80,7 +80,7 @@ void _warnOnce(const char *fileName, int lineNumber, const char *fmt, ...) {
 
   va_list arg;
   va_start(arg, fmt);
-  vsprintf(buf, fmt, arg);
+  vsnprintf(buf, 256, fmt, arg);
   va_end(arg);
 
   msg = buf;

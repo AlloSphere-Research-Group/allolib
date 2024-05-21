@@ -39,6 +39,10 @@ DiscreteParameterValues::DiscreteParameterValues(VariantType datatype)
   case VariantType::VARIANT_NONE:
     mDataSize = 0;
     break;
+  case VariantType::VARIANT_VECTOR_OFFSET:
+  case VariantType::VARIANT_VARIANT_VECTOR:
+    // mDataSize = 0;
+    break;
   }
 }
 
