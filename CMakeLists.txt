@@ -4,10 +4,11 @@ project(allolib)
 # option(AL_VERBOSE_OUTPUT "" OFF)
 option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build by default
 option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built by default
-option(ALLOLIB_ADD_EXTENSIONS "" OFF) # extension libraries will be added as targets
+# option(ALLOLIB_ADD_EXTENSIONS "" OFF) # extension libraries will be added as targets
 option(ALLOLIB_BUILD_TESTS "" OFF)
-# option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF) # TODO remove see below
-# option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF) # TODO remove see below
+option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF) # TODO remove see below
+option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF) # TODO remove see below
+
 option(ALLOLIB_BUILD_SHARED "Build all libraries as shared libraries" OFF)
 # option(TRAVIS_BUILD "" OFF)
 # option(APPVEYOR_BUILD "" OFF)
@@ -55,7 +56,13 @@ add_subdirectory(modules/system)
 add_subdirectory(modules/graphics)
 
 add_subdirectory(modules/audio)
-add_subdirectory(modules/audio-backend-rtaudio) # TODO better way to select audio backend rtaudio/portaudio/dummy?
+if(ALLOLIB_USE_DUMMY_AUDIO) # TODO better way to select audio backend rtaudio/portaudio/dummy
+  add_subdirectory(modules/audio-backend-dummy) 
+elseif(ALLOLIB_USE_PORTAUDIO)
+  add_subdirectory(modules/audio-backend-rtaudio) 
+else()  
+  add_subdirectory(modules/audio-backend-portaudio) 
+endif()
 
 add_subdirectory(modules/io)
 add_subdirectory(modules/midi) # move to extension?
@@ -69,11 +76,11 @@ add_subdirectory(modules/app) # and sphere (interdependencies)
 
 
 ## allolib extension modules ##
-if (ALLOLIB_ADD_EXTENSIONS)
-  message("including allolib extensions")
-  add_subdirectory(extensions)
+# if (ALLOLIB_ADD_EXTENSIONS)
+  # message("including allolib extensions")
+  # add_subdirectory(extensions)
   # add_subdirectory(../al_ext ../al_ext)
-endif()
+# endif()
 
 
 # no longer have single library for allolib, but we could use something like libtool to pack them all together if needed

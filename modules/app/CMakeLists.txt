@@ -57,7 +57,7 @@ target_include_directories(alapp PUBLIC
 )
 
 target_link_libraries(alapp PUBLIC
-  # alaudio
+  alaudiobackend
   alui
   alconfig
   Gamma

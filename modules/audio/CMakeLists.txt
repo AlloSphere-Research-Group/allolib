@@ -1,7 +1,7 @@
 ## dependency dr_libs ##
 add_subdirectory(external/dr_libs)
 
-## alsound ##
+## alaudio ##
 set(headers
   include/al/io/al_AudioIO.hpp
   include/al/io/al_AudioIOData.hpp

@@ -16,7 +16,7 @@ set (RTAUDIO_STATIC_MSVCRT OFF)
 
 add_subdirectory(external/rtaudio)
 
-## alaudiobackend
+## alaudiobackend_rtaudio
 
 set(headers
 
@@ -35,9 +35,8 @@ set_target_properties(alaudiobackend PROPERTIES
   CXX_STANDARD_REQUIRED ON
 )
 
-target_include_directories(alaudiobackend PUBLIC
-  include
-)
+# target_include_directories(alaudiobackend PUBLIC
+# )
 
 target_link_libraries(alaudiobackend PUBLIC
   rtaudio

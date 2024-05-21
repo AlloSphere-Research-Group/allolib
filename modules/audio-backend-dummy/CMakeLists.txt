@@ -1,7 +1,4 @@
-## alaudiobackend_portaudio
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
-find_package(Portaudio REQUIRED)
+## alaudiobackend_dummy
 
 set(headers
 
@@ -19,11 +16,9 @@ set_target_properties(alaudiobackend PROPERTIES
   CXX_STANDARD_REQUIRED ON
 )
 
-target_include_directories(alaudiobackend PUBLIC
-  ${PORTAUDIO_INCLUDE_DIR}
-)
+# target_include_directories(alaudiobackend PUBLIC
+# )
 
 target_link_libraries(alaudiobackend PUBLIC
   alaudio
-  ${PORTAUDIO_LIBRARY}
 )
