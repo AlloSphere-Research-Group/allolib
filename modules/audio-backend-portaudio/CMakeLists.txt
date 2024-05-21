@@ -1,0 +1,55 @@
+if(ALLOLIB_BUILD_SHARED)
+    set(RTAUDIO_BUILD_STATIC_LIBS OFF  CACHE BOOL "" FORCE)
+    set(RTAUDIO_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+    set(RTMIDI_BUILD_STATIC_LIBS OFF  CACHE BOOL "" FORCE)
+    set(RTMIDI_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+    set(GAMMA_BUILD_SHARED ON CACHE BOOL "" FORCE)
+    set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+else(ALLOLIB_BUILD_SHARED)
+    set(RTAUDIO_BUILD_STATIC_LIBS ON  CACHE BOOL "" FORCE)
+    set(RTAUDIO_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(RTMIDI_BUILD_STATIC_LIBS ON  CACHE BOOL "" FORCE)
+    set(RTMIDI_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(GAMMA_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+endif(ALLOLIB_BUILD_SHARED)
+
+set(RTAUDIO_BUILD_TESTING     OFF CACHE BOOL "" FORCE)
+set(RTAUDIO_TARGETNAME_UNINSTALL RTAUDIO_UNINSTALL CACHE STRING "" FORCE)
+
+set(RTMIDI_BUILD_TESTING     OFF CACHE BOOL "" FORCE)
+set(RTMIDI_TARGETNAME_UNINSTALL RTMIDI_UNINSTALL CACHE STRING "" FORCE)
+
+# Required for RtAudio 5.2.0
+set (RTAUDIO_STATIC_MSVCRT OFF)
+
+add_subdirectory(rtaudio)
+# add_subdirectory(rtmidi)
+
+## alaudio
+
+set(headers
+  include/al/io/al_AudioIO.hpp
+  include/al/io/al_AudioIOData.hpp
+)
+
+set(sources
+  src/io/al_AudioIO.cpp
+  src/io/al_AudioIOData.cpp
+)
+
+add_library(alaudio ${AL_LIBRARY_TYPE} ${headers} ${sources})
+
+set_target_properties(alaudio PROPERTIES
+  DEBUG_POSTFIX d
+  CXX_STANDARD 14
+  CXX_STANDARD_REQUIRED ON
+)
+
+target_include_directories(alaudio PUBLIC
+  include
+)
+
+target_link_libraries(alaudio PUBLIC
+  rtaudio
+)

@@ -34,6 +34,7 @@ else()
     set(AL_LIBRARY_TYPE "STATIC")
 endif()
 
+
 ## Gamma ##
 if(ALLOLIB_BUILD_SHARED)
     set(GAMMA_BUILD_SHARED ON CACHE BOOL "" FORCE)
@@ -42,27 +43,32 @@ else(ALLOLIB_BUILD_SHARED)
     set(GAMMA_BUILD_SHARED OFF CACHE BOOL "" FORCE)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 endif(ALLOLIB_BUILD_SHARED)
+
 add_subdirectory(modules/external/Gamma)
 
-
+## allolib core modules ##
 add_subdirectory(modules/math)
 add_subdirectory(modules/spatial)
 add_subdirectory(modules/types)
 add_subdirectory(modules/system)
+
 add_subdirectory(modules/graphics)
+
 add_subdirectory(modules/audio)
-add_subdirectory(modules/audio-backend-rtaudio) # TODO separate audioio interface from rtaudio/portaudio implementation
-# add_subdirectory(modules/sound)
+add_subdirectory(modules/audio-backend-rtaudio) # TODO better way to select audio backend rtaudio/portaudio/dummy?
+
 add_subdirectory(modules/io)
-add_subdirectory(modules/midi)
-add_subdirectory(modules/serial) 
+add_subdirectory(modules/midi) # move to extension?
+add_subdirectory(modules/serial) # move to extension?
 add_subdirectory(modules/protocol)
+
 add_subdirectory(modules/imgui)
 add_subdirectory(modules/ui) # and scene (interdependent, TODO split up)
 add_subdirectory(modules/config)
 add_subdirectory(modules/app) # and sphere (interdependencies)
 
 
+## allolib extension modules ##
 if (ALLOLIB_ADD_EXTENSIONS)
   message("including allolib extensions")
   add_subdirectory(extensions)
