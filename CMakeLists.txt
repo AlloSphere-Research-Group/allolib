@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 project(allolib)
 
 # option(AL_VERBOSE_OUTPUT "" OFF)
-option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build in default build
-option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built during default build
-option(ALLOLIB_ADD_EXTENSIONS "" ON) # extension libraries will be added as targets
+option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build by default
+option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built by default
+option(ALLOLIB_ADD_EXTENSIONS "" OFF) # extension libraries will be added as targets
 option(ALLOLIB_BUILD_TESTS "" OFF)
 # option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF) # TODO remove see below
 # option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF) # TODO remove see below
@@ -86,7 +86,6 @@ endif()
 # else()
 #     target_compile_options(al PRIVATE "-Wall")
 # endif (AL_WINDOWS)
-
 
 # TODO remove this by making separate modules for rtaudio / portaudio that supply audio domains
 # if (ALLOLIB_USE_PORTAUDIO)

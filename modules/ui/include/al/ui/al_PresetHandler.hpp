@@ -232,6 +232,7 @@ public:
   void setMorphTime(float time);
   void setMaxMorphTime(float time);
   void stopMorphing() { mTotalSteps.store(0); }
+  bool morphingActive() { return mMorphingActive.load(); }
   void morphTo(ParameterStates &parameterStates, float morphTime);
   void morphTo(const std::string &presetName, float morphTime);
 
@@ -313,7 +314,7 @@ public:
   std::map<int, std::string> readPresetMap(std::string mapName = "default");
 
   void setCurrentPresetMap(std::string mapName = "default",
-                           bool autoCreate = false);
+                           bool autoCreate = true);
 
   void setPresetMap(std::map<int, std::string> presetsMap) {
     mPresetsMap = presetsMap;
@@ -410,6 +411,7 @@ private:
 
   std::atomic<uint64_t> mMorphStepCount{0};
   std::atomic<uint64_t> mTotalSteps{0};
+  std::atomic<bool> mMorphingActive{false};
   bool mCpuThreadRunning{false}; // To keep the morphing thread alive
   std::unique_ptr<std::thread> mMorphingThread;
   double mMorphInterval{0.02};
