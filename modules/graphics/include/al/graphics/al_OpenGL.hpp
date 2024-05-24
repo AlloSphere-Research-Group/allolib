@@ -57,6 +57,9 @@ void depthTesting(bool testDepth);
 /// Turn the depth mask on/off
 void depthMask(bool maskDepth);
 
+/// Turn the depth mask on/off
+void depthFunc(unsigned int depthFunc);
+
 /// Turn scissor testing on/off
 void scissorTest(bool testScissor);
 void scissorArea(int left, int bottom, int width, int height);

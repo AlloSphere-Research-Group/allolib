@@ -162,6 +162,8 @@ void depthTesting(bool testDepth) {
 }
 void depthMask(bool maskDepth) { glDepthMask(maskDepth ? GL_TRUE : GL_FALSE); }
 
+void depthFunc(unsigned int depthFunc) { glDepthFunc(depthFunc); }
+
 void scissorTest(bool testScissor) {
   if (testScissor)
     glEnable(GL_SCISSOR_TEST);
