@@ -5,6 +5,7 @@
 #include <iostream>
 #include <regex>
 #include <sstream>
+#include <cstring>
 
 #include "al/io/al_File.hpp"
 
