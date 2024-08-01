@@ -11,7 +11,7 @@ Windows	COM6
 
 #include "al/app/al_App.hpp"
 #include "al/graphics/al_Shapes.hpp"
-#include "al/io/al_Arduino.hpp"
+#include "al/io/al_SerialIO.hpp"
 
 using namespace al;
 
@@ -34,8 +34,8 @@ void loop() {
 */
 
 class MyApp : public App {
- public:
-  Arduino arduino;
+public:
+  SerialIO serialIO;
 
   float x = 0;
   float y = 0;
@@ -53,12 +53,12 @@ class MyApp : public App {
     // Use last port, likely the right one on Windows
     auto lastPort = ports.back().port;
     // Initialize serial port
-    arduino.init(lastPort, 9600);
+    serialIO.init(lastPort, 9600);
   }
 
   void onAnimate(double dt) {
     // Read lines from Arduino serial port
-    auto lines = arduino.getLines();
+    auto lines = serialIO.getLines();
     for (auto line : lines) {
       auto separatorIndex = line.find(":");
       std::string id = line.substr(0, separatorIndex);
@@ -84,7 +84,7 @@ class MyApp : public App {
 
   void onExit() {
     // Remember to cleanup or your app will crash on exit
-    arduino.cleanup();
+    serialIO.cleanup();
   }
 };
 

@@ -89,21 +89,23 @@ set(headers
   include/al/graphics/al_OpenGL.hpp
   include/al/graphics/al_RenderManager.hpp
   include/al/graphics/al_Shader.hpp
+  include/al/graphics/al_ShaderManager.hpp
   include/al/graphics/al_Shapes.hpp
   include/al/graphics/al_Texture.hpp
   include/al/graphics/al_VAO.hpp
   include/al/graphics/al_VAOMesh.hpp
   include/al/graphics/al_Viewpoint.hpp
 
-  include/al/io/al_Arduino.hpp
   include/al/io/al_AudioIO.hpp
   include/al/io/al_AudioIOData.hpp
   include/al/io/al_ControlNav.hpp
   include/al/io/al_CSVReader.hpp
   include/al/io/al_File.hpp
+  include/al/io/al_FileWatcher.hpp
   include/al/io/al_Imgui.hpp
   include/al/io/al_MIDI.hpp
   include/al/io/al_PersistentConfig.hpp
+  include/al/io/al_SerialIO.hpp
   include/al/io/al_Socket.hpp
   include/al/io/al_Toml.hpp
   include/al/io/al_Window.hpp
@@ -215,6 +217,7 @@ set(sources
   src/graphics/al_OpenGL.cpp
   src/graphics/al_RenderManager.cpp
   src/graphics/al_Shader.cpp
+  src/graphics/al_ShaderManager.cpp
   src/graphics/al_Shapes.cpp
   src/graphics/al_Texture.cpp
   src/graphics/al_VAO.cpp
@@ -224,15 +227,16 @@ set(sources
   src/graphics/al_stb_image.cpp
   src/graphics/al_stb_font.cpp
 
-  src/io/al_Arduino.cpp
   src/io/al_AudioIO.cpp
   src/io/al_AudioIOData.cpp
   src/io/al_ControlNav.cpp
   src/io/al_CSVReader.cpp
   src/io/al_File.cpp
+  src/io/al_FileWatcher.cpp
   src/io/al_Imgui.cpp
   src/io/al_MIDI.cpp
   src/io/al_PersistentConfig.cpp
+  src/io/al_SerialIO.cpp
   src/io/al_Socket.cpp
   src/io/al_Toml.cpp
   src/io/al_Window.cpp
@@ -312,7 +316,7 @@ add_library(al ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
 set_target_properties(al PROPERTIES
   DEBUG_POSTFIX d
-  CXX_STANDARD 14
+  CXX_STANDARD 20
   CXX_STANDARD_REQUIRED ON
 )
 

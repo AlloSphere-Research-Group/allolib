@@ -1,16 +1,16 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
-//#include <functional>
+// #include <functional>
 
-#include "al/io/al_Arduino.hpp"
+#include "al/io/al_SerialIO.hpp"
 
 #include "al/system/al_Time.hpp"
 
 using namespace al;
 
-bool Arduino::init(std::string port, unsigned long baud,
-                         uint32_t granularity) {
+bool SerialIO::init(std::string port, unsigned long baud,
+                    uint32_t granularity) {
   mGranularity = granularity;
   try {
     serialPort = std::make_unique<serial::Serial>(
@@ -31,12 +31,12 @@ bool Arduino::init(std::string port, unsigned long baud,
   serialPort->flush();
   mRunning = true;
   mReaderThread =
-      std::make_unique<std::thread>(std::bind(&Arduino::readFunction, this));
+      std::make_unique<std::thread>(std::bind(&SerialIO::readFunction, this));
 
   return true;
 }
 
-void Arduino::cleanup() {
+void SerialIO::cleanup() {
   if (mReaderThread) {
     mRunning = false;
     mReaderThread->join();
@@ -45,7 +45,7 @@ void Arduino::cleanup() {
   mRingBuffer.clear();
 }
 
-std::vector<std::string> Arduino::getLines() {
+std::vector<std::string> SerialIO::getLines() {
   std::vector<std::string> lines;
   const unsigned int bufferSize = 4096;
   char buffer[bufferSize];
@@ -77,16 +77,17 @@ std::vector<std::string> Arduino::getLines() {
   return lines;
 }
 
-bool Arduino::write(const std::string& data) {
+bool SerialIO::write(const std::string &data) {
   size_t count = serialPort->write(data);
-  if(count != data.size()) {
-    std::cerr << "Serial write failed: " << count << " / " << data.size() << std::endl;
+  if (count != data.size()) {
+    std::cerr << "Serial write failed: " << count << " / " << data.size()
+              << std::endl;
     return false;
   }
   return true;
 }
 
-void Arduino::readFunction() {
+void SerialIO::readFunction() {
   const unsigned int bufferSize = 4096;
   uint8_t buffer[bufferSize];
   while (mRunning) {
