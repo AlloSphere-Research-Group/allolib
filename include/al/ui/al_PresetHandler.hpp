@@ -58,16 +58,14 @@
 namespace al {
 
 /**
- * @brief The PresetHandler class handles sorting and recalling of presets.
  * @ingroup UI
+ * @brief The PresetHandler class handles sorting and recalling of presets.
  *
  * Presets are saved by name with the ".preset" suffix.
  * These files are read and written in a simple text format that mirrors OSC
  * messages. A line setting parameter "param" to 0.5 would look like:
  *
- * @code
-/param f 0.5
- * @endcode
+ * @code \/param f 0.5 @endcode
  *
  * Comments can be added with '#' and everything after a line starting with '::'
  * will be ignored.
@@ -87,7 +85,7 @@ public:
 
   /**
    * @brief Constructor with option to set time master mode
-   * @param timeMasterMode
+   * @param timeMasterMode desired time master mode
    *
    * Only two modes are currently valid for PresetHandler:
    * TIME_MASTER_CPU and TIME_MASTER_ASYNC. The first will start a CPU
