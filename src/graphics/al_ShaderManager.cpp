@@ -12,9 +12,10 @@ void ShaderManager::setPollInterval(const al_sec interval) {
 
 std::string ShaderManager::loadGLSL(const std::string &filePath) {
   std::string code = File::read(filePath);
-  size_t from = code.find("#include \"");
+  std::string include_code{"#include \""};
+  size_t from = code.find(include_code);
   if (from != std::string::npos) {
-    size_t capture = from + strlen("#include \"");
+    size_t capture = from + include_code.size();
     size_t to = code.find("\"", capture);
     std::string include_filename = code.substr(capture, to - capture);
     std::string replacement =
