@@ -29,3 +29,5 @@ target_include_directories(alsystem PUBLIC
 target_link_libraries(alsystem PUBLIC
   almath
 )
+
+target_compile_definitions(alsystem PUBLIC ${PLATFORM_DEFINITION})

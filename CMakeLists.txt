@@ -59,9 +59,9 @@ add_subdirectory(modules/audio)
 if(ALLOLIB_USE_DUMMY_AUDIO) # TODO better way to select audio backend rtaudio/portaudio/dummy
   add_subdirectory(modules/audio-backend-dummy) 
 elseif(ALLOLIB_USE_PORTAUDIO)
-  add_subdirectory(modules/audio-backend-rtaudio) 
-else()  
   add_subdirectory(modules/audio-backend-portaudio) 
+else()  
+  add_subdirectory(modules/audio-backend-rtaudio) 
 endif()
 
 add_subdirectory(modules/io)
@@ -117,7 +117,6 @@ add_subdirectory(modules/app) # and sphere (interdependencies)
 #         target_link_libraries(al PUBLIC rtaudio)
 #     endif(ALLOLIB_USE_DUMMY_AUDIO)
 # endif()
-
 
 ## only used by AppRecorder.cpp? TODO Remove this.
 # if(SNDFILE_LIBRARY)
