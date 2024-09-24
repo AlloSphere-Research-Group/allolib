@@ -41,13 +41,13 @@ public:
   /// @param programName name of the shader program
   /// @return Reference to the ShaderProgram
   inline ShaderProgram &get(const std::string &programName) {
-    return *shaders[programName].program;
+    return *shaders.at(programName).program;
   }
 
   /// @brief Use the shader program of the name: glUseProgram(ID)
   /// @param programName Name of the shader program
   inline void use(const std::string &programName) {
-    shaders[programName].program->use();
+    shaders.at(programName).program->use();
   }
 
   /// @brief Add new shader program to the shader manager
@@ -82,10 +82,10 @@ private:
 
   /// @brief Map of shader names to program and info
   std::map<std::string, ManagedShaderProgram> shaders;
-  
+
   /// @brief Internal searchPath object for handling includes
   SearchPaths searchPaths;
-  
+
   /// @brief Polling interval in seconds
   al_sec pollInterval{0};
 };
