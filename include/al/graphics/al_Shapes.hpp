@@ -135,8 +135,8 @@ int addIcosphere(Mesh &m, double radius = 1, int divisions = 2);
 /// @param[in]    stacks  Number of stacks on xy plane
 /// \returns number of vertices added
 int addSphere(Mesh &m, double radius = 1, int slices = 16, int stacks = 16);
-int addSphereWithTexcoords(Mesh &m, double radius = 1, int bands = 16,
-                           bool isSkybox = false);
+int addTexSphere(Mesh &m, double radius = 1, int bands = 16,
+                 bool isSkybox = false);
 
 /// Add wireframe box as indexed lines
 ///
@@ -261,6 +261,8 @@ int addQuad(Mesh &m, float x1, float y1, float z1, float x2, float y2, float z2,
 int addPrism(Mesh &m, float btmRadius = 1, float topRadius = 1,
              float height = 2, unsigned slices = 16, float twist = 0,
              bool caps = true);
+int addTexPrism(Mesh &m, float btmRadius = 1, float topRadius = 1,
+                float height = 2, unsigned slices = 16, bool flip = false);
 
 /// Add an annulus ("little ring") as an indexed triangles
 
@@ -286,6 +288,8 @@ int addAnnulus(Mesh &m, float inRadius = 0.5, float outRadius = 1,
 /// \returns number of vertices added
 int addCylinder(Mesh &m, float radius = 1, float height = 2,
                 unsigned slices = 16, float twist = 0, bool caps = true);
+int addTexCylinder(Mesh &m, float radius = 1, float height = 2,
+                   unsigned slices = 16, bool flip = false);
 
 /// Add a tessellated rectangular surface as an indexed triangle strip
 
