@@ -51,12 +51,11 @@ endif()
 ### alserial ###
 
 set(headers
-  include/al/io/al_Arduino.hpp
+  include/al/io/al_SerialIO.hpp
 )
 
 set(sources
-  src/io/al_Arduino.cpp
-  # src/io/al_Serial.cpp
+  src/io/al_SerialIO.cpp
 )
 
 add_library(alserial ${AL_LIBRARY_TYPE} ${headers} ${sources})

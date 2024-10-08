@@ -36,6 +36,7 @@ set(headers
   include/al/graphics/al_OpenGL.hpp
   include/al/graphics/al_RenderManager.hpp
   include/al/graphics/al_Shader.hpp
+  include/al/graphics/al_ShaderManager.hpp
   include/al/graphics/al_Shapes.hpp
   include/al/graphics/al_Texture.hpp
   include/al/graphics/al_VAO.hpp
@@ -64,6 +65,7 @@ set(sources
   src/graphics/al_OpenGL.cpp
   src/graphics/al_RenderManager.cpp
   src/graphics/al_Shader.cpp
+  src/graphics/al_ShaderManager.cpp
   src/graphics/al_Shapes.cpp
   src/graphics/al_Texture.cpp
   src/graphics/al_VAO.cpp
@@ -95,6 +97,7 @@ target_link_libraries(algraphics PUBLIC
   altypes
   alspatial
   alsystem
+  alio
   ${OPENGL_gl_LIBRARY}
   glad
   stb

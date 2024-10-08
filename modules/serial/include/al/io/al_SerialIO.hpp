@@ -1,5 +1,5 @@
-#ifndef AL_ARDUINO_HPP
-#define AL_ARDUINO_HPP
+#ifndef AL_SERIAL_IO_HPP
+#define AL_SERIAL_IO_HPP
 
 #include <functional>
 #include <thread>
@@ -15,12 +15,12 @@ namespace al {
 @defgroup IO I/O
 */
 /**
-@brief Arduino class
+@brief Serial IO class
 @ingroup IO
 */
-class Arduino {
+class SerialIO {
 public:
-  Arduino(size_t ringBufferSize = 256) : mRingBuffer(ringBufferSize) {}
+  SerialIO(size_t ringBufferSize = 256) : mRingBuffer(ringBufferSize) {}
 
   /**
    * @brief initialize serial port and reader thread
@@ -65,4 +65,4 @@ private:
 
 } // namespace al
 
-#endif // AL_SERIAL_HPP
+#endif // AL_SERIAL_IO_HPP
