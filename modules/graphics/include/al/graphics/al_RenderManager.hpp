@@ -186,6 +186,8 @@ public:
   /// Set current matrix to identity
   void loadIdentity() { mModelStack.setIdentity(); }
 
+  void transform(Mat4f &m);
+
   /// Translate current matrix
   void translate(float x, float y, float z = 0.);
   /// Translate current matrix

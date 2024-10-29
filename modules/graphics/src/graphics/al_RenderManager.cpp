@@ -64,6 +64,11 @@ void FBOStack::set(unsigned int id) { stack.back() = id; }
 
 //______________________________________________________________________________
 
+void RenderManager::transform(Mat4f &m) {
+  mModelStack.mult(m);
+  mMatChanged = true;
+}
+
 void RenderManager::translate(float x, float y, float z) {
   mModelStack.mult(Matrix4f::translation(x, y, z));
   mMatChanged = true;
