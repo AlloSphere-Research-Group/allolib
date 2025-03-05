@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.5)
-project(allolib)
+# allolib/CMakeLists.txt
+cmake_minimum_required(VERSION 3.15)
+project(allolib VERSION 0.1.0)
 
 # option(AL_VERBOSE_OUTPUT "" OFF)
 option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build by default
@@ -45,34 +46,37 @@ else(ALLOLIB_BUILD_SHARED)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 endif(ALLOLIB_BUILD_SHARED)
 
-add_subdirectory(modules/external/Gamma)
+add_subdirectory(modules/audio/gamma/external/Gamma)
 
 ## allolib core modules ##
-add_subdirectory(modules/math)
-add_subdirectory(modules/spatial)
-add_subdirectory(modules/types)
-add_subdirectory(modules/system)
+add_subdirectory(modules/core/math)
+add_subdirectory(modules/core/spatial)
+add_subdirectory(modules/core/types)
+add_subdirectory(modules/core/system)
 
 add_subdirectory(modules/graphics)
 
-add_subdirectory(modules/audio)
+add_subdirectory(modules/audio/core)
 if(ALLOLIB_USE_DUMMY_AUDIO) # TODO better way to select audio backend rtaudio/portaudio/dummy
-  add_subdirectory(modules/audio-backend-dummy) 
+  add_subdirectory(modules/audio/backend/dummy) 
 elseif(ALLOLIB_USE_PORTAUDIO)
-  add_subdirectory(modules/audio-backend-portaudio) 
+  add_subdirectory(modules/audio/backend/portaudio) 
 else()  
-  add_subdirectory(modules/audio-backend-rtaudio) 
+  add_subdirectory(modules/audio/backend/rtaudio) 
 endif()
 
 add_subdirectory(modules/io)
-add_subdirectory(modules/midi) # move to extension?
-add_subdirectory(modules/serial) # move to extension?
-add_subdirectory(modules/protocol)
+add_subdirectory(modules/protocol/midi)
+add_subdirectory(modules/protocol/osc)
 
-add_subdirectory(modules/imgui)
-add_subdirectory(modules/ui) # and scene (interdependent, TODO split up)
-add_subdirectory(modules/config)
-add_subdirectory(modules/app) # and sphere (interdependencies)
+add_subdirectory(modules/ui/imgui)
+add_subdirectory(modules/ui/ui) # and scene (interdependent, TODO split up)
+
+add_subdirectory(modules/util/config)
+
+add_subdirectory(modules/app)
+
+add_subdirectory(modules/extensions/serial)
 
 
 ## allolib extension modules ##
