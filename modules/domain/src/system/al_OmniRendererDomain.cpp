@@ -1,4 +1,4 @@
-#include "al/app/al_OmniRendererDomain.hpp"
+#include "al/domain/al_OmniRendererDomain.hpp"
 
 #include <cstring>
 

@@ -9,7 +9,7 @@
 #include <stack>
 #include <vector>
 
-#include "al/app/al_ComputationDomain.hpp"
+#include "al/domain/al_ComputationDomain.hpp"
 
 namespace al {
 

@@ -1,7 +1,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "al/app/al_ComputationDomain.hpp"
+#include "al/domain/al_ComputationDomain.hpp"
 
 using namespace al;
 

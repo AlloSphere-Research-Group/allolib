@@ -75,6 +75,7 @@ add_subdirectory(modules/ui/ui) # and scene (interdependent, TODO split up)
 add_subdirectory(modules/util/config)
 add_subdirectory(modules/util/sphere)
 
+add_subdirectory(modules/domain)
 add_subdirectory(modules/app)
 
 add_subdirectory(modules/extensions/serial)

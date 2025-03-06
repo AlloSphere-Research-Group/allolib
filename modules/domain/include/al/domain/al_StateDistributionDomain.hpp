@@ -10,7 +10,7 @@
 #include <stack>
 #include <vector>
 
-#include "al/app/al_SimulationDomain.hpp"
+#include "al/domain/al_SimulationDomain.hpp"
 #include "al/protocol/al_OSC.hpp"
 #include "al/spatial/al_Pose.hpp"
 

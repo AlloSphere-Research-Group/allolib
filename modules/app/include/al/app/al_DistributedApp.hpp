@@ -10,8 +10,8 @@
 
 #include "al/app/al_App.hpp"
 #include "al/app/al_NodeConfiguration.hpp"
-#include "al/app/al_OmniRendererDomain.hpp"
-#include "al/app/al_StateDistributionDomain.hpp"
+#include "al/domain/al_OmniRendererDomain.hpp"
+#include "al/domain/al_StateDistributionDomain.hpp"
 #include "al/io/al_PersistentConfig.hpp"
 #include "al/io/al_Socket.hpp"
 #include "al/io/al_Toml.hpp"

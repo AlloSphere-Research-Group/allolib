@@ -1,4 +1,4 @@
-#include "al/app/al_OpenGLGraphicsDomain.hpp"
+#include "al/domain/al_OpenGLGraphicsDomain.hpp"
 
 #include <cstring>
 #include <iostream>

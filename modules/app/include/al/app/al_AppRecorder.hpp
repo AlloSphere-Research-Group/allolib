@@ -4,10 +4,10 @@
 // Author: Andres Cabrera and Lance Putnam
 
 #include "al/app/al_App.hpp"
-#include "al/app/al_AudioDomain.hpp"
-#include "al/app/al_ComputationDomain.hpp"
-#include "al/app/al_OpenGLGraphicsDomain.hpp"
-#include "al/app/al_SimulationDomain.hpp"
+#include "al/domain/al_AudioDomain.hpp"
+#include "al/domain/al_ComputationDomain.hpp"
+#include "al/domain/al_OpenGLGraphicsDomain.hpp"
+#include "al/domain/al_SimulationDomain.hpp"
 #include "al/io/al_File.hpp"
 
 /** @defgroup App Tools for recording audio and video from an App

@@ -8,7 +8,7 @@
 #include <stack>
 #include <vector>
 
-#include "al/app/al_ComputationDomain.hpp"
+#include "al/domain/al_ComputationDomain.hpp"
 #include "al/app/al_FPS.hpp"
 #include "al/graphics/al_Graphics.hpp"
 #include "al/io/al_ControlNav.hpp"

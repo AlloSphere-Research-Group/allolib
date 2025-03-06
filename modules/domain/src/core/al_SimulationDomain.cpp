@@ -1,4 +1,4 @@
-#include "al/app/al_SimulationDomain.hpp"
+#include "al/domain/al_SimulationDomain.hpp"
 
 using namespace al;
 

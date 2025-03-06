@@ -9,11 +9,11 @@
 #include <stack>
 #include <vector>
 
-#include "al/app/al_AudioDomain.hpp"
-#include "al/app/al_ComputationDomain.hpp"
-#include "al/app/al_OSCDomain.hpp"
-#include "al/app/al_OpenGLGraphicsDomain.hpp"
-#include "al/app/al_SimulationDomain.hpp"
+#include "al/domain/al_AudioDomain.hpp"
+#include "al/domain/al_ComputationDomain.hpp"
+#include "al/domain/al_OSCDomain.hpp"
+#include "al/domain/al_OpenGLGraphicsDomain.hpp"
+#include "al/domain/al_SimulationDomain.hpp"
 #include "al/graphics/al_Graphics.hpp"
 
 /** @defgroup App Application building tools

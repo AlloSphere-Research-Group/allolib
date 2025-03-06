@@ -1,4 +1,4 @@
-#include "al/app/al_GUIDomain.hpp"
+#include "al/domain/al_GUIDomain.hpp"
 
 using namespace al;
 

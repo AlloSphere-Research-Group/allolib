@@ -1,4 +1,4 @@
-#include "al/app/al_AudioDomain.hpp"
+#include "al/domain/al_AudioDomain.hpp"
 
 using namespace al;
 
