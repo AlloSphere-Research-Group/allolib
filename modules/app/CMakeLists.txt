@@ -17,10 +17,10 @@ set(headers
   include/al/app/al_OmniRendererDomain.hpp
   include/al/app/al_StateDistributionDomain.hpp
 
-  include/al/sphere/al_AlloSphereSpeakerLayout.hpp
-  include/al/sphere/al_SphereUtils.hpp
-  include/al/sphere/al_PerProjection.hpp
-  include/al/sphere/al_Meter.hpp
+  # include/al/sphere/al_AlloSphereSpeakerLayout.hpp
+  # include/al/sphere/al_SphereUtils.hpp
+  # include/al/sphere/al_PerProjection.hpp
+  # include/al/sphere/al_Meter.hpp
 )
 
 set(sources
@@ -38,10 +38,10 @@ set(sources
   src/app/al_SimulationDomain.cpp
   src/app/al_StateDistributionDomain.cpp
 
-  src/sphere/al_AlloSphereSpeakerLayout.cpp
-  src/sphere/al_SphereUtils.cpp
-  src/sphere/al_PerProjection.cpp
-  src/sphere/al_Meter.cpp
+  # src/sphere/al_AlloSphereSpeakerLayout.cpp
+  # src/sphere/al_SphereUtils.cpp
+  # src/sphere/al_PerProjection.cpp
+  # src/sphere/al_Meter.cpp
 )
 
 add_library(alapp ${AL_LIBRARY_TYPE} ${headers} ${sources})
@@ -60,5 +60,6 @@ target_link_libraries(alapp PUBLIC
   alaudiobackend
   alui
   alconfig
+  alsphere
   Gamma
 )

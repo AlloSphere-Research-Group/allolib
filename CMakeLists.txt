@@ -73,6 +73,7 @@ add_subdirectory(modules/ui/imgui)
 add_subdirectory(modules/ui/ui) # and scene (interdependent, TODO split up)
 
 add_subdirectory(modules/util/config)
+add_subdirectory(modules/util/sphere)
 
 add_subdirectory(modules/app)
 
