@@ -14,6 +14,11 @@ set(RTAUDIO_TARGETNAME_UNINSTALL RTAUDIO_UNINSTALL CACHE STRING "" FORCE)
 # Required for RtAudio 5.2.0
 set (RTAUDIO_STATIC_MSVCRT OFF)
 
+if(APPLE)
+    set(RTAUDIO_API_CORE ON CACHE BOOL "Build CoreAudio API support" FORCE)
+    set(RTAUDIO_API_JACK OFF CACHE BOOL "Build JACK API support" FORCE)
+endif()
+
 add_subdirectory(external/rtaudio)
 
 ## alaudiobackend_rtaudio
