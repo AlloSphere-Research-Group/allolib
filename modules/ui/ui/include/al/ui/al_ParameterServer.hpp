@@ -267,7 +267,9 @@ public:
   /**
    * @brief Get the list of registered parameters.
    */
+  std::vector<ParameterMeta *> meta();
   std::vector<Parameter *> parameters();
+  std::vector<ParameterInt *> intParameters();
   std::vector<ParameterString *> stringParameters();
   std::vector<ParameterVec3 *> vec3Parameters();
   std::vector<ParameterVec4 *> vec4Parameters();

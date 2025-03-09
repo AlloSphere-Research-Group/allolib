@@ -447,11 +447,23 @@ bool ParameterServer::serverRunning() {
   }
 }
 
+std::vector<ParameterMeta *> ParameterServer::meta() { return mParameters; }
+
 std::vector<Parameter *> ParameterServer::parameters() {
   std::vector<Parameter *> params;
   for (auto *p : mParameters) {
     if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {
       params.push_back(static_cast<Parameter *>(p));
+    }
+  }
+  return params;
+}
+
+std::vector<ParameterInt *> ParameterServer::intParameters() {
+  std::vector<ParameterInt *> params;
+  for (auto *p : mParameters) {
+    if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) == 0) {
+      params.push_back(static_cast<ParameterInt *>(p));
     }
   }
   return params;
