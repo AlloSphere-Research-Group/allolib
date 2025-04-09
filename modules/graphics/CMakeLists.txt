@@ -4,16 +4,16 @@ add_subdirectory(external/glad)
 add_subdirectory(external/stb)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries (general)" FORCE)
-set(BUILD_TESTING     OFF CACHE BOOL "Build test targets (general)" FORCE)
+set(BUILD_TESTING OFF CACHE BOOL "Build test targets (general)" FORCE)
 
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs" FORCE)
-set(GLFW_BUILD_TESTS    OFF CACHE BOOL "Build the GLFW test programs" FORCE)
-set(GLFW_BUILD_DOCS     OFF CACHE BOOL "Build the GLFW documentation" FORCE)
-set(GLFW_INSTALL        OFF CACHE BOOL "Generate installation target" FORCE)
-set(GLFW_VULKAN_STATIC  OFF CACHE BOOL "Assume Vulkan loader linked with app" FORCE)
-set(GLFW_USE_OSMESA     OFF CACHE BOOL "OSMesa for offscreen context" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "Generate installation target" FORCE)
+set(GLFW_VULKAN_STATIC OFF CACHE BOOL "Assume Vulkan loader linked with app" FORCE)
+set(GLFW_USE_OSMESA OFF CACHE BOOL "OSMesa for offscreen context" FORCE)
 set(GLFW_USE_HYBRID_HPG OFF CACHE BOOL "Force high-performance GPU" FORCE)
-set(GLFW_USE_WAYLAND    OFF CACHE BOOL "Use Wayland for window creation" FORCE)
+set(GLFW_USE_WAYLAND OFF CACHE BOOL "Use Wayland for window creation" FORCE)
 set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "MSVC runtime library DLL" FORCE)
 
 add_subdirectory(external/glfw)
@@ -36,7 +36,7 @@ set(headers
   include/al/graphics/al_OpenGL.hpp
   include/al/graphics/al_RenderManager.hpp
   include/al/graphics/al_Shader.hpp
-  # include/al/graphics/al_ShaderManager.hpp
+  include/al/graphics/al_ShaderManager.hpp
   include/al/graphics/al_Shapes.hpp
   include/al/graphics/al_Texture.hpp
   include/al/graphics/al_VAO.hpp
@@ -65,7 +65,7 @@ set(sources
   src/graphics/al_OpenGL.cpp
   src/graphics/al_RenderManager.cpp
   src/graphics/al_Shader.cpp
-  # src/graphics/al_ShaderManager.cpp
+  src/graphics/al_ShaderManager.cpp
   src/graphics/al_Shapes.cpp
   src/graphics/al_Texture.cpp
   src/graphics/al_VAO.cpp

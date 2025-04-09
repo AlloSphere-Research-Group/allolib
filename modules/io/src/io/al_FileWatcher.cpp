@@ -2,9 +2,10 @@
 
 namespace al {
 
-bool FileWatcher::watch(File &file) {
-  if (auto search = watchedFiles.find(file.path());
-      search != watchedFiles.end()) {
+bool FileWatcher::watch(File& file)
+{
+  auto search = watchedFiles.find(file.path());
+  if (search != watchedFiles.end()) {
     std::cerr << "File is already being watched" << std::endl;
     return false;
   }
@@ -12,7 +13,8 @@ bool FileWatcher::watch(File &file) {
   return true;
 }
 
-bool FileWatcher::poll() {
+bool FileWatcher::poll()
+{
   bool changed = false;
 
   // std::cout << "last: " << lastPollTime << std::endl;
@@ -20,10 +22,10 @@ bool FileWatcher::poll() {
   if (al_system_time() > lastPollTime + pollInterval) {
     lastPollTime = al_system_time();
 
-    for (auto &[path, watchedFile] : watchedFiles) {
-      if (watchedFile.file.modified() > watchedFile.modified) {
-        watchedFile.modified = watchedFile.file.modified();
-        std::cout << "File modified: " << path << std::endl;
+    for (auto& watchedFile : watchedFiles) {
+      if (watchedFile.second.file.modified() > watchedFile.second.modified) {
+        watchedFile.second.modified = watchedFile.second.file.modified();
+        std::cout << "File modified: " << watchedFile.first << std::endl;
         changed = true;
       }
     }
@@ -32,4 +34,4 @@ bool FileWatcher::poll() {
   return changed;
 }
 
-} // namespace al
+}  // namespace al
