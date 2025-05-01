@@ -15,7 +15,7 @@
 	url = https://github.com/glfw/glfw.git
 [submodule "external/cpptoml"]
 	path = modules/config/external/cpptoml
-	url = https://github.com/skystrife/cpptoml.git
+	url = https://github.com/AlloSphere-Research-Group/cpptoml.git
 [submodule "external/serial"]
 	path = modules/serial/external/serial
 	url = https://github.com/wjwwood/serial
