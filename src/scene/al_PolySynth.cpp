@@ -325,6 +325,26 @@ void PolySynth::render(AudioIOData &io) {
           internalAudioIO.zeroOut();
           internalAudioIO.zeroBus();
           internalAudioIO.frame(offset);
+
+          ///
+          // io.frame(offset);
+          // internalAudioIO.frame(offset);
+          for (int i = 0; i < mVoiceMaxInputChannels; i++) {
+            const float* inbuf = io.inBuffer(i);
+            float* inbufInternal = internalAudioIO.inBufferW(i);
+            for(int s = 0 ; s < io.framesPerBuffer(); s++){
+          // while (io() && internalAudioIO()) {
+              // io.out(i) += internalAudioIO.out(i);
+              // internalAudioIO.in(i) = in.in(i);
+              inbufInternal[s] = inbuf[s];
+            }
+          }
+            // for (int i = 0; i < mVoiceBusChannels; i++) {
+            //   io.bus(i) += internalAudioIO.bus(i);
+            // }
+          // }
+
+          internalAudioIO.frame(offset);
           voice->onProcess(internalAudioIO);
 
           if (mBusRoutingCallback) {

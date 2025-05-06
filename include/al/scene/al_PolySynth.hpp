@@ -614,7 +614,7 @@ protected:
   bool m_internalAudioConfigured = false;
 
   uint16_t mVoiceMaxOutputChannels = 2;
-  uint16_t mVoiceMaxInputChannels = 0;
+  uint16_t mVoiceMaxInputChannels = 1;
   uint16_t mVoiceBusChannels = 0;
   std::shared_ptr<BusRoutingCallback> mBusRoutingCallback;
   AudioIOData internalAudioIO;
