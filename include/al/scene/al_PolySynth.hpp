@@ -397,6 +397,16 @@ public:
   void setVoiceMaxOutputChannels(uint16_t channels);
 
   /**
+   * @brief Determines the number of input channels allocated for the internal
+   * AudioIOData objects
+   * @param channels
+   *
+   * Always call prepare() after calling this function. The changes are only
+   * applied by prepare().
+   */
+  void setVoiceMaxInputChannels(uint16_t channels);
+
+  /**
    * @brief Determines the number of buses for the internal AudioIOData objects
    * @param channels
    *

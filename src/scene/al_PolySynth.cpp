@@ -612,6 +612,13 @@ void PolySynth::setVoiceMaxOutputChannels(uint16_t channels) {
   }
 }
 
+void PolySynth::setVoiceMaxInputChannels(uint16_t channels) {
+  mVoiceMaxInputChannels = channels;
+  // for (size_t i = 0; i < channels; i++) {
+  //   mChannelMap[i] = i;
+  // }
+}
+
 void PolySynth::setBusRoutingCallback(PolySynth::BusRoutingCallback cb) {
   mBusRoutingCallback = std::make_shared<BusRoutingCallback>(cb);
 }

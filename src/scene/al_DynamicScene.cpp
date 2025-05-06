@@ -203,6 +203,17 @@ void DynamicScene::render(AudioIOData &io) {
           internalAudioIO.zeroOut();
           internalAudioIO.zeroBus();
           internalAudioIO.frame(offset);
+
+          // Hack to copy input buffer to our internalAudioIO data
+          for (int i = 0; i < mVoiceMaxInputChannels; i++) {
+            const float* inbuf = io.inBuffer(i);
+            float* inbufInternal = internalAudioIO.inBufferW(i);
+            for(int s = 0 ; s < io.framesPerBuffer(); s++){
+              inbufInternal[s] = inbuf[s];
+            }
+          }
+
+
           voice->onProcess(internalAudioIO);
           Vec3d listeningDir;
           vector<Vec3f> posOffsets;
