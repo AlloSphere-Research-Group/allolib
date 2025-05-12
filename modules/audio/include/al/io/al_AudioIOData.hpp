@@ -200,9 +200,11 @@ class AudioIOData {
 
   /// Get input sample at specified channel and frame
   const float& in(unsigned int chan, unsigned int frame) const;
+  float& inW(unsigned int chan, unsigned int frame) const;
 
   /// Get non-interleaved input buffer on specified channel
   const float* inBuffer(unsigned int chan = 0) const { return &in(chan, 0); }
+  float* inBufferW(unsigned int chan = 0) const { return &inW(chan, 0); }
 
   /// Get output sample at current frame iteration on specified channel
   float& out(unsigned int chan) const { return out(chan, frame()); }
@@ -309,6 +311,12 @@ inline float& AudioIOData::bus(unsigned int c, unsigned int f) const {
 }
 
 inline const float& AudioIOData::in(unsigned int c, unsigned int f) const {
+  assert(c < mNumI);
+  assert(f < framesPerBuffer());
+  return mBufI[c * framesPerBuffer() + f];
+}
+
+inline float& AudioIOData::inW(unsigned int c, unsigned int f) const {
   assert(c < mNumI);
   assert(f < framesPerBuffer());
   return mBufI[c * framesPerBuffer() + f];

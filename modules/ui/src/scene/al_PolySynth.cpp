@@ -325,6 +325,26 @@ void PolySynth::render(AudioIOData &io) {
           internalAudioIO.zeroOut();
           internalAudioIO.zeroBus();
           internalAudioIO.frame(offset);
+
+          ///
+          // io.frame(offset);
+          // internalAudioIO.frame(offset);
+          for (int i = 0; i < mVoiceMaxInputChannels; i++) {
+            const float* inbuf = io.inBuffer(i);
+            float* inbufInternal = internalAudioIO.inBufferW(i);
+            for(int s = 0 ; s < io.framesPerBuffer(); s++){
+          // while (io() && internalAudioIO()) {
+              // io.out(i) += internalAudioIO.out(i);
+              // internalAudioIO.in(i) = in.in(i);
+              inbufInternal[s] = inbuf[s];
+            }
+          }
+            // for (int i = 0; i < mVoiceBusChannels; i++) {
+            //   io.bus(i) += internalAudioIO.bus(i);
+            // }
+          // }
+
+          internalAudioIO.frame(offset);
           voice->onProcess(internalAudioIO);
 
           if (mBusRoutingCallback) {
@@ -590,6 +610,13 @@ void PolySynth::setVoiceMaxOutputChannels(uint16_t channels) {
   for (size_t i = 0; i < channels; i++) {
     mChannelMap[i] = i;
   }
+}
+
+void PolySynth::setVoiceMaxInputChannels(uint16_t channels) {
+  mVoiceMaxInputChannels = channels;
+  // for (size_t i = 0; i < channels; i++) {
+  //   mChannelMap[i] = i;
+  // }
 }
 
 void PolySynth::setBusRoutingCallback(PolySynth::BusRoutingCallback cb) {

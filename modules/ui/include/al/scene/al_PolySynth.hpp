@@ -397,6 +397,16 @@ public:
   void setVoiceMaxOutputChannels(uint16_t channels);
 
   /**
+   * @brief Determines the number of input channels allocated for the internal
+   * AudioIOData objects
+   * @param channels
+   *
+   * Always call prepare() after calling this function. The changes are only
+   * applied by prepare().
+   */
+  void setVoiceMaxInputChannels(uint16_t channels);
+
+  /**
    * @brief Determines the number of buses for the internal AudioIOData objects
    * @param channels
    *
@@ -614,7 +624,7 @@ protected:
   bool m_internalAudioConfigured = false;
 
   uint16_t mVoiceMaxOutputChannels = 2;
-  uint16_t mVoiceMaxInputChannels = 0;
+  uint16_t mVoiceMaxInputChannels = 1;
   uint16_t mVoiceBusChannels = 0;
   std::shared_ptr<BusRoutingCallback> mBusRoutingCallback;
   AudioIOData internalAudioIO;
