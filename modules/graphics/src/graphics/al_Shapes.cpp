@@ -674,7 +674,7 @@ int addCylinder(Mesh &m, float radius, float height, unsigned slices,
   return addPrism(m, radius, radius, height, slices, twist, caps);
 }
 
-int addTexCylinder(Mesh &m, float radius, float height, unsigned slices) {
+int addTexCylinder(Mesh &m, float radius, float height, unsigned slices, bool isSkybox) {
   m.primitive(Mesh::TRIANGLES);
   unsigned Nv = m.vertices().size();
   float height_2 = height / 2;
@@ -682,10 +682,14 @@ int addTexCylinder(Mesh &m, float radius, float height, unsigned slices) {
   double frq = 2 * M_PI / slices;
   CSin csin(frq, radius);
   for (unsigned i = 0; i <= slices; ++i) {
-    m.vertex(-csin.i, -height_2, csin.r);
-    m.texCoord((float)i / slices, 0.f);
-    m.vertex(-csin.i, height_2, csin.r);
-    m.texCoord((float)i / slices, 1.f);
+    float u = (float)i / slices;
+    if (isSkybox) {
+      u = 1.f - u;
+    }
+    m.vertex(csin.i, -height_2, csin.r);
+    m.texCoord(u, 1.f);
+    m.vertex(csin.i, height_2, csin.r);
+    m.texCoord(u, 0.f);
     csin();
 
     if (i != slices) {

@@ -293,7 +293,7 @@ int addCylinder(Mesh &m, float radius = 1, float height = 2,
 /// @param slices Number of polygon vertices
 /// @return Number of vertices added
 int addTexCylinder(Mesh &m, float radius = 1, float height = 2,
-                   unsigned slices = 16);
+                   unsigned slices = 16, bool isSkybox = false);
 
 /// Add a tessellated rectangular surface as an indexed triangle strip
 
