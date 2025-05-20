@@ -261,8 +261,6 @@ int addQuad(Mesh &m, float x1, float y1, float z1, float x2, float y2, float z2,
 int addPrism(Mesh &m, float btmRadius = 1, float topRadius = 1,
              float height = 2, unsigned slices = 16, float twist = 0,
              bool caps = true);
-int addTexPrism(Mesh &m, float btmRadius = 1, float topRadius = 1,
-                float height = 2, unsigned slices = 16, bool flip = false);
 
 /// Add an annulus ("little ring") as an indexed triangles
 
@@ -275,8 +273,7 @@ int addTexPrism(Mesh &m, float btmRadius = 1, float topRadius = 1,
 int addAnnulus(Mesh &m, float inRadius = 0.5, float outRadius = 1,
                unsigned slices = 16, float twist = 0);
 
-/// Add an open cylinder as an indexed triangle strip
-
+/// Add an open cylinder as an indexed triangle strip.
 /// To create a cylinder with different radii for the top and bottom, /see
 /// addPrism.
 ///
@@ -288,8 +285,15 @@ int addAnnulus(Mesh &m, float inRadius = 0.5, float outRadius = 1,
 /// \returns number of vertices added
 int addCylinder(Mesh &m, float radius = 1, float height = 2,
                 unsigned slices = 16, float twist = 0, bool caps = true);
+
+/// @brief Add an open cylinder with texture coordinates
+/// @param m Mesh to add vertices and texture coordinates to
+/// @param radius Radius (on xz plane)
+/// @param height Height (along y axis)
+/// @param slices Number of polygon vertices
+/// @return Number of vertices added
 int addTexCylinder(Mesh &m, float radius = 1, float height = 2,
-                   unsigned slices = 16, bool flip = false);
+                   unsigned slices = 16);
 
 /// Add a tessellated rectangular surface as an indexed triangle strip
 
