@@ -29,12 +29,15 @@ set(sources
 
 add_library(alaudiobackend ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
+if (AL_WINDOWS)
+  target_compile_definitions(alaudiobackend PUBLIC NOMINMAX)
+endif (AL_WINDOWS)
+
 set_target_properties(alaudiobackend PROPERTIES
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON
 )
-
 # target_include_directories(alaudiobackend PUBLIC
 # )
 

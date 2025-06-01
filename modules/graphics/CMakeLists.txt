@@ -82,6 +82,10 @@ set(sources
 
 add_library(algraphics ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
+if(AL_WINDOWS)
+  target_compile_definitions(algraphics PUBLIC NOMINMAX)
+endif(AL_WINDOWS)
+
 set_target_properties(algraphics PROPERTIES
   DEBUG_POSTFIX d
   CXX_STANDARD 14

@@ -39,6 +39,10 @@ add_library(oscpack ${AL_LIBRARY_TYPE}
 
 target_include_directories(oscpack PUBLIC external/oscpack)
 
+if(AL_WINDOWS)
+  target_compile_definitions(oscpack PUBLIC NOMINMAX)
+endif(AL_WINDOWS)
+
 set_target_properties(oscpack PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON

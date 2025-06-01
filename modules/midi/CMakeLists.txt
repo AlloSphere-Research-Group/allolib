@@ -28,6 +28,10 @@ set(sources
 
 add_library(almidi ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
+if(AL_WINDOWS)
+  target_compile_definitions(almidi PUBLIC NOMINMAX)
+endif(AL_WINDOWS)
+
 set_target_properties(almidi PROPERTIES
   DEBUG_POSTFIX d
   CXX_STANDARD 14

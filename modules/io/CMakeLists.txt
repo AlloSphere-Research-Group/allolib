@@ -45,6 +45,10 @@ set(sources
 
 add_library(alio ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
+if(AL_WINDOWS)
+  target_compile_definitions(alio PUBLIC NOMINMAX)
+endif(AL_WINDOWS)
+
 set_target_properties(alio PROPERTIES
   DEBUG_POSTFIX d
   CXX_STANDARD 14

@@ -11,6 +11,10 @@ add_library(glad ${ALLOLIB_EXTERNAL_LIB_TYPE} src/glad.c)
 
 target_include_directories(glad PUBLIC include)
 
+if(AL_WINDOWS)
+  target_compile_definitions(glad PUBLIC NOMINMAX)
+endif(AL_WINDOWS)
+
 set_target_properties(glad PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
