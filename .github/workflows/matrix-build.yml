@@ -1,0 +1,91 @@
+name: Multi-OS Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, devel ]
+  pull_request:
+    branches: [ main, devel ]
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Cross-Platform-Build:
+    runs-on: ${{ matrix.os }}
+    name: "Cross-Platform Build"
+    
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-22.04
+            name: Linux
+          - os: windows-latest
+            name: Windows
+          - os: macos-latest
+            name: macOS
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Install dependencies (Linux)
+      if: matrix.os == 'ubuntu-22.04'
+      run: |
+        sudo apt-get update
+        sudo apt-get install build-essential \
+        libsndfile1-dev libassimp-dev libasound2-dev libxrandr-dev \
+        libopengl-dev libxinerama-dev libxcursor-dev libxi-dev \
+        libgl1-mesa-dev libglu1-mesa-dev libxmu-dev libxi-dev
+    
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install libsndfile
+
+    - name: Install dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        # Use chocolatey to install VS2017 with proper workloads
+        choco install -y visualstudio2017community --package-parameters "--add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.CLI.Support --add Microsoft.VisualStudio.Component.VC.CMake.Project --includeRecommended"
+        
+        # Verify installation
+        $msbuildPath = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
+        if (Test-Path $msbuildPath) {
+          Write-Host "VS2017 Community with MSBuild installed successfully"
+        } else {
+          Write-Host "VS2017 installation verification failed"
+          # List what was actually installed
+          Get-ChildItem "C:\Program Files*\Microsoft Visual Studio" -Recurse -Name "MSBuild.exe" 2>$null
+          exit 1
+        }
+      shell: powershell
+
+    - name: Initialize repository
+      run: |
+        git submodule update --recursive --init
+      shell: bash
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DALLOLIB_BUILD_EXAMPLES=1
+
+    - name: Build examples
+      run: |
+        cd build
+        cmake --build .
+      shell: bash
+    
+    - name: List build artifacts
+      run: |
+        echo "Build directory contents:"
+        find . -name "build" -type d -exec find {} -name "*.exe" -o -name "*_run" \; 2>/dev/null || true
+        echo "Binary directory contents:"
+        find . -name "bin" -type d -exec ls -la {} \; 2>/dev/null || true
+      shell: bash
