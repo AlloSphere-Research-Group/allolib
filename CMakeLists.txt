@@ -89,7 +89,7 @@ set(headers
   include/al/graphics/al_OpenGL.hpp
   include/al/graphics/al_RenderManager.hpp
   include/al/graphics/al_Shader.hpp
-  include/al/graphics/al_ShaderManager.hpp
+  # include/al/graphics/al_ShaderManager.hpp
   include/al/graphics/al_Shapes.hpp
   include/al/graphics/al_Texture.hpp
   include/al/graphics/al_VAO.hpp
@@ -101,7 +101,7 @@ set(headers
   include/al/io/al_ControlNav.hpp
   include/al/io/al_CSVReader.hpp
   include/al/io/al_File.hpp
-  include/al/io/al_FileWatcher.hpp
+  # include/al/io/al_FileWatcher.hpp
   include/al/io/al_Imgui.hpp
   include/al/io/al_MIDI.hpp
   include/al/io/al_PersistentConfig.hpp
@@ -217,7 +217,7 @@ set(sources
   src/graphics/al_OpenGL.cpp
   src/graphics/al_RenderManager.cpp
   src/graphics/al_Shader.cpp
-  src/graphics/al_ShaderManager.cpp
+  # src/graphics/al_ShaderManager.cpp
   src/graphics/al_Shapes.cpp
   src/graphics/al_Texture.cpp
   src/graphics/al_VAO.cpp
@@ -232,7 +232,7 @@ set(sources
   src/io/al_ControlNav.cpp
   src/io/al_CSVReader.cpp
   src/io/al_File.cpp
-  src/io/al_FileWatcher.cpp
+  # src/io/al_FileWatcher.cpp
   src/io/al_Imgui.cpp
   src/io/al_MIDI.cpp
   src/io/al_PersistentConfig.cpp
@@ -322,6 +322,8 @@ set_target_properties(al PROPERTIES
 
 if (AL_WINDOWS)
   target_compile_definitions(al PUBLIC NOMINMAX)
+  target_compile_options(al PUBLIC /wd4221 /wd4224 /wd4244  /wd4305  /wd4267 /wd4005 /wd4996)
+  set_target_properties(al PROPERTIES LINK_FLAGS "/ignore:4099")
 else()
     target_compile_options(al PRIVATE "-Wall")
 endif (AL_WINDOWS)
@@ -348,14 +350,14 @@ if(SNDFILE_LIBRARY)
 endif(SNDFILE_LIBRARY)
 
 # if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
-    target_compile_options(al PUBLIC
-        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-        -Wall>
-        $<$<CXX_COMPILER_ID:MSVC>:
-        /wd4221 /wd4224 /wd4244  /wd4305  /wd4267 /wd4005 /wd4996>)
-    if (AL_WINDOWS)
-        set_target_properties(al PROPERTIES LINK_FLAGS "/ignore:4099")
-    endif(AL_WINDOWS)
+    # target_compile_options(al PUBLIC
+    #     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+    #     -Wall>
+    #     $<$<CXX_COMPILER_ID:MSVC>:
+    #     /wd4221 /wd4224 /wd4244  /wd4305  /wd4267 /wd4005 /wd4996>)
+    # if (AL_WINDOWS)
+    #     set_target_properties(al PROPERTIES LINK_FLAGS "/ignore:4099")
+    # endif(AL_WINDOWS)
 # endif()
 
 target_include_directories(al PUBLIC
