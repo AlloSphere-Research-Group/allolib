@@ -1,0 +1,67 @@
+name: Cross-Platform Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, devel ]
+  pull_request:
+    branches: [ main, devel ]
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Cross-Platform-Build:
+    runs-on: ${{ matrix.os }}
+    name: "Cross-Platform Build"
+    
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-22.04
+            name: Linux
+          - os: windows-latest
+            name: Windows
+          - os: macos-latest
+            name: macOS
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Install dependencies (Linux)
+      if: matrix.os == 'ubuntu-22.04'
+      run: |
+        sudo apt-get update
+        sudo apt-get install build-essential \
+        libsndfile1-dev libassimp-dev libasound2-dev libxrandr-dev \
+        libopengl-dev libxinerama-dev libxcursor-dev libxi-dev \
+        libgl1-mesa-dev libglu1-mesa-dev libxmu-dev libxi-dev
+
+    - name: Initialize repository
+      run: |
+        git submodule update --recursive --init --filter=blob:none
+      shell: bash
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DALLOLIB_BUILD_EXAMPLES=1
+      shell: bash
+
+    - name: Build examples
+      run: |
+        cd build
+        cmake --build .
+      shell: bash
+    
+    - name: List build artifacts
+      run: |
+        echo "Build directory contents:"
+        find . -name "build" -type d -exec find {} -name "*.exe" -o -name "*_run" \; 2>/dev/null || true
+        echo "Binary directory contents:"
+        find . -name "bin" -type d -exec ls -la {} \; 2>/dev/null || true
+      shell: bash
