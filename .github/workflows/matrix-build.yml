@@ -39,33 +39,10 @@ jobs:
         libsndfile1-dev libassimp-dev libasound2-dev libxrandr-dev \
         libopengl-dev libxinerama-dev libxcursor-dev libxi-dev \
         libgl1-mesa-dev libglu1-mesa-dev libxmu-dev libxi-dev
-    
-    - name: Install dependencies (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install libsndfile
-
-    # - name: Install dependencies (Windows)
-    #   if: matrix.os == 'windows-latest'
-    #   run: |
-    #     # Use chocolatey to install VS2017 with proper workloads
-    #     choco install -y visualstudio2017community --package-parameters "--add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.CLI.Support --add Microsoft.VisualStudio.Component.VC.CMake.Project --includeRecommended"
-        
-    #     # Verify installation
-    #     $msbuildPath = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
-    #     if (Test-Path $msbuildPath) {
-    #       Write-Host "VS2017 Community with MSBuild installed successfully"
-    #     } else {
-    #       Write-Host "VS2017 installation verification failed"
-    #       # List what was actually installed
-    #       Get-ChildItem "C:\Program Files*\Microsoft Visual Studio" -Recurse -Name "MSBuild.exe" 2>$null
-    #       exit 1
-    #     }
-    #   shell: powershell
 
     - name: Initialize repository
       run: |
-        git submodule update --recursive --init
+        git submodule update --recursive --init --filter=blob:none
       shell: bash
 
     - name: Configure CMake
