@@ -41,7 +41,7 @@ macro(BuildExample example_src dir)
     # RUNTIME_OUTPUT_DIRECTORY_RELEASE ${example_directory}/${dir}/bin
     )
 
-  target_link_libraries(${EXAMPLE_TARGET} alapp alserial)
+  target_link_libraries(${EXAMPLE_TARGET} alapp alserial alaudio)
 
   #get_target_property(DLLS_TO_COPY al AL_DLL_LIBRARIES)
   #Copy_dlls("${EXAMPLE_DIRECTORY}/bin" "${EXAMPLE_TARGET}" "${EXTENSIONS_DLLS}")
