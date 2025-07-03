@@ -45,23 +45,23 @@ jobs:
       run: |
         brew install libsndfile
 
-    - name: Install dependencies (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        # Use chocolatey to install VS2017 with proper workloads
-        choco install -y visualstudio2017community --package-parameters "--add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.CLI.Support --add Microsoft.VisualStudio.Component.VC.CMake.Project --includeRecommended"
+    # - name: Install dependencies (Windows)
+    #   if: matrix.os == 'windows-latest'
+    #   run: |
+    #     # Use chocolatey to install VS2017 with proper workloads
+    #     choco install -y visualstudio2017community --package-parameters "--add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.CLI.Support --add Microsoft.VisualStudio.Component.VC.CMake.Project --includeRecommended"
         
-        # Verify installation
-        $msbuildPath = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
-        if (Test-Path $msbuildPath) {
-          Write-Host "VS2017 Community with MSBuild installed successfully"
-        } else {
-          Write-Host "VS2017 installation verification failed"
-          # List what was actually installed
-          Get-ChildItem "C:\Program Files*\Microsoft Visual Studio" -Recurse -Name "MSBuild.exe" 2>$null
-          exit 1
-        }
-      shell: powershell
+    #     # Verify installation
+    #     $msbuildPath = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
+    #     if (Test-Path $msbuildPath) {
+    #       Write-Host "VS2017 Community with MSBuild installed successfully"
+    #     } else {
+    #       Write-Host "VS2017 installation verification failed"
+    #       # List what was actually installed
+    #       Get-ChildItem "C:\Program Files*\Microsoft Visual Studio" -Recurse -Name "MSBuild.exe" 2>$null
+    #       exit 1
+    #     }
+    #   shell: powershell
 
     - name: Initialize repository
       run: |
@@ -72,7 +72,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -DALLOLIB_BUILD_EXAMPLES=1 -DCMAKE_BUILD_TYPE=Release
+        cmake .. -DALLOLIB_BUILD_EXAMPLES=1
       shell: bash
 
     - name: Build examples

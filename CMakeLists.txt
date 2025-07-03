@@ -347,7 +347,7 @@ if(SNDFILE_LIBRARY)
   target_compile_definitions(al PUBLIC AL_LIBSNDFILE)
 endif(SNDFILE_LIBRARY)
 
-if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
+# if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
     target_compile_options(al PUBLIC
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
         -Wall>
@@ -356,7 +356,7 @@ if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
     if (AL_WINDOWS)
         set_target_properties(al PROPERTIES LINK_FLAGS "/ignore:4099")
     endif(AL_WINDOWS)
-endif()
+# endif()
 
 target_include_directories(al PUBLIC
   include
