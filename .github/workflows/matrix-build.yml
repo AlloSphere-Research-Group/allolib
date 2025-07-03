@@ -72,7 +72,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -DALLOLIB_BUILD_EXAMPLES=1
+        cmake .. -DALLOLIB_BUILD_EXAMPLES=1 -DCMAKE_BUILD_TYPE=Release
       shell: bash
 
     - name: Build examples
