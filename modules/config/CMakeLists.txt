@@ -13,6 +13,10 @@ set(sources
 
 add_library(alconfig ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
+if(AL_WINDOWS)
+  target_compile_definitions(alconfig PUBLIC NOMINMAX)
+endif(AL_WINDOWS)
+
 set_target_properties(alconfig PROPERTIES
   DEBUG_POSTFIX d
   CXX_STANDARD 14

@@ -4,16 +4,16 @@ add_subdirectory(external/glad)
 add_subdirectory(external/stb)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries (general)" FORCE)
-set(BUILD_TESTING     OFF CACHE BOOL "Build test targets (general)" FORCE)
+set(BUILD_TESTING OFF CACHE BOOL "Build test targets (general)" FORCE)
 
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs" FORCE)
-set(GLFW_BUILD_TESTS    OFF CACHE BOOL "Build the GLFW test programs" FORCE)
-set(GLFW_BUILD_DOCS     OFF CACHE BOOL "Build the GLFW documentation" FORCE)
-set(GLFW_INSTALL        OFF CACHE BOOL "Generate installation target" FORCE)
-set(GLFW_VULKAN_STATIC  OFF CACHE BOOL "Assume Vulkan loader linked with app" FORCE)
-set(GLFW_USE_OSMESA     OFF CACHE BOOL "OSMesa for offscreen context" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "Generate installation target" FORCE)
+set(GLFW_VULKAN_STATIC OFF CACHE BOOL "Assume Vulkan loader linked with app" FORCE)
+set(GLFW_USE_OSMESA OFF CACHE BOOL "OSMesa for offscreen context" FORCE)
 set(GLFW_USE_HYBRID_HPG OFF CACHE BOOL "Force high-performance GPU" FORCE)
-set(GLFW_USE_WAYLAND    OFF CACHE BOOL "Use Wayland for window creation" FORCE)
+set(GLFW_USE_WAYLAND OFF CACHE BOOL "Use Wayland for window creation" FORCE)
 set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "MSVC runtime library DLL" FORCE)
 
 add_subdirectory(external/glfw)
@@ -81,6 +81,10 @@ set(sources
 )
 
 add_library(algraphics ${AL_LIBRARY_TYPE} ${headers} ${sources})
+
+if(AL_WINDOWS)
+  target_compile_definitions(algraphics PUBLIC NOMINMAX)
+endif(AL_WINDOWS)
 
 set_target_properties(algraphics PROPERTIES
   DEBUG_POSTFIX d

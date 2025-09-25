@@ -16,6 +16,10 @@ set(sources
 
 add_library(alsystem ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
+if(AL_WINDOWS)
+  target_compile_definitions(alsystem PUBLIC NOMINMAX)
+endif(AL_WINDOWS)
+
 set_target_properties(alsystem PROPERTIES
   DEBUG_POSTFIX d
   CXX_STANDARD 14

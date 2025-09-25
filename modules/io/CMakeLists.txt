@@ -1,4 +1,3 @@
-
 # add_subdirectory(external/cpptoml)
 
 # find_package(cpptoml REQUIRED)
@@ -33,12 +32,15 @@ set(sources
   src/io/al_Socket.cpp
   # src/io/al_Toml.cpp
   # src/io/al_Window.cpp
-
   # src/io/al_WindowGLFW.cpp
   # src/io/al_imgui_impl.cpp
 )
 
 add_library(alio ${AL_LIBRARY_TYPE} ${headers} ${sources})
+
+if(AL_WINDOWS)
+  target_compile_definitions(alio PUBLIC NOMINMAX)
+endif(AL_WINDOWS)
 
 set_target_properties(alio PROPERTIES
   DEBUG_POSTFIX d
