@@ -1,15 +1,17 @@
 #include "al/io/al_FileWatcher.hpp"
 
+#include <iostream>
+
 namespace al {
 
-bool FileWatcher::watch(File& file)
+bool FileWatcher::watch(const fs::path& file)
 {
-  auto search = watchedFiles.find(file.path());
+  auto search = watchedFiles.find(file);
   if (search != watchedFiles.end()) {
-    std::cerr << "File is already being watched" << std::endl;
+    std::cerr << "File already watched: " << file << std::endl;
     return false;
   }
-  watchedFiles[file.path()] = WatchedFile{file, file.modified()};
+  watchedFiles[file] = fs::last_write_time(file);
   return true;
 }
 
@@ -17,15 +19,15 @@ bool FileWatcher::poll()
 {
   bool changed = false;
 
-  // std::cout << "last: " << lastPollTime << std::endl;
-  // std::cout << " system: " << al_system_time() << std::endl;
-  if (al_system_time() > lastPollTime + pollInterval) {
-    lastPollTime = al_system_time();
+  const auto& now = std::chrono::system_clock::now();
 
-    for (auto& watchedFile : watchedFiles) {
-      if (watchedFile.second.file.modified() > watchedFile.second.modified) {
-        watchedFile.second.modified = watchedFile.second.file.modified();
-        std::cout << "File modified: " << watchedFile.first << std::endl;
+  if (now - lastPollTime > pollInterval) {
+    lastPollTime = now;
+
+    for (auto& [path, modified] : watchedFiles) {
+      if (fs::last_write_time(path) > modified) {
+        modified = fs::last_write_time(path);
+        std::cout << "File modified: " << path << std::endl;
         changed = true;
       }
     }

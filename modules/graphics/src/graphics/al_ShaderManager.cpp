@@ -1,38 +1,81 @@
 #include "al/graphics/al_ShaderManager.hpp"
 
+#include <fstream>
+#include <iostream>
+
 namespace al {
 
-void ShaderManager::setPollInterval(const al_sec& interval)
+void ShaderManager::setPollInterval(double interval)
 {
-  pollInterval = interval;
+  m_pollInterval = interval;
 
-  for (auto& shader : shaders) {
+  for (auto& shader : m_shaders) {
     shader.second.fileWatcher->setPollInterval(interval);
   }
 }
 
-std::string ShaderManager::loadGLSL(const std::string& filePath)
+std::string ShaderManager::loadGLSL(const fs::path& filePath)
 {
-  std::string code = File::read(filePath);
-  std::string include_code{"#include \""};
-  size_t from = code.find(include_code);
-  if (from != std::string::npos) {
-    size_t capture = from + include_code.size();
-    size_t to = code.find("\"", capture);
-    std::string include_filename = code.substr(capture, to - capture);
-    std::string replacement =
-        File::read(searchPaths.find(include_filename).filepath());
-    code = code.replace(from, to - from + 2, replacement);
-    // printf("code: %s\n", code.data());
+  if (filePath.empty()) {
+    return "";
+  }
+
+  if (!fs::is_regular_file(filePath) && !fs::is_symlink(filePath)) {
+    std::cerr << "[ShaderManager] Incorrect filename: " << filePath
+              << std::endl;
+    return "";
+  }
+
+  std::ifstream in(filePath);
+  if (!in) {
+    std::cerr << "[ShaderManager] File not found: " << filePath << std::endl;
+    return "";
+  }
+
+  std::string code;
+  in.seekg(0, std::ios::end);
+  code.resize(in.tellg());
+  in.seekg(0, std::ios::beg);
+  in.read(&code[0], code.size());
+  in.close();
+
+  std::string includeDirective{"#include \""};
+  size_t includeStart = code.find(includeDirective);
+
+  if (includeStart != std::string::npos) {
+    size_t inclFileStart = includeStart + includeDirective.size();
+    size_t includeEnd = code.find("\"", inclFileStart);
+
+    std::string inclFileName =
+        code.substr(inclFileStart, includeEnd - inclFileStart);
+    fs::path inclFilePath = m_shaderDirectory / inclFileName;
+    std::ifstream inclIn(inclFilePath);
+    if (!inclIn) {
+      std::cerr << "[ShaderManager] Include file not found: " << inclFilePath
+                << std::endl;
+      return "";
+    }
+
+    std::string replacement;
+    inclIn.seekg(0, std::ios::end);
+    replacement.resize(inclIn.tellg());
+    inclIn.seekg(0, std::ios::beg);
+    inclIn.read(&replacement[0], replacement.size());
+    inclIn.close();
+
+    code =
+        code.replace(includeStart, includeEnd - includeStart + 2, replacement);
+    std::cout << "[ShaderManager] Loading code from " << filePath << std::endl;
+    std::cout << code << std::endl;
   }
   return code;
 }
 
 void ShaderManager::compile(ManagedShaderProgram& shaderProgram)
 {
-  std::string vertexShader = loadGLSL(shaderProgram.vertexShaderPath);
-  std::string fragmentShader = loadGLSL(shaderProgram.fragmentShaderPath);
-  std::string geometricShader = loadGLSL(shaderProgram.geometricShaderPath);
+  std::string vertexShader = loadGLSL(shaderProgram.vertexPath);
+  std::string fragmentShader = loadGLSL(shaderProgram.fragmentPath);
+  std::string geometricShader = loadGLSL(shaderProgram.geometricPath);
 
   shaderProgram.program->compile(vertexShader, fragmentShader, geometricShader);
 }
@@ -42,28 +85,60 @@ void ShaderManager::add(const std::string& programName,
                         const std::string& fragmentShaderName,
                         const std::string& geometricShaderName)
 {
-  auto search = shaders.find(programName);
-   if (search != shaders.end())
-  {
-    shaders[programName].program->destroy();
-    std::cerr << "Shader Program with same name already exists" << std::endl;
+  auto search = m_shaders.find(programName);
+  if (search != m_shaders.end()) {
+    // m_shaders[programName].program->destroy();
+    std::cerr << "[ShaderManager] Shader with same name already exists"
+              << std::endl;
+    return;
   }
 
-  shaders[programName] = {std::make_unique<ShaderProgram>(),
-                          std::make_unique<FileWatcher>(),
-                          searchPaths.find(vertexShaderName).filepath(),
-                          searchPaths.find(fragmentShaderName).filepath(),
-                          searchPaths.find(geometricShaderName).filepath()};
-
-  auto& shaderProgram = shaders[programName];
-
-  shaderProgram.fileWatcher->watch(shaderProgram.vertexShaderPath);
-  shaderProgram.fileWatcher->watch(shaderProgram.fragmentShaderPath);
-  if (!shaderProgram.geometricShaderPath.empty()) {
-    shaderProgram.fileWatcher->watch(shaderProgram.geometricShaderPath);
+  if (vertexShaderName.empty() || fragmentShaderName.empty()) {
+    std::cerr << "[ShaderManager] Vertex / Fragment shader file required"
+              << std::endl;
+    return;
   }
 
-  shaderProgram.fileWatcher->setPollInterval(pollInterval);
+  fs::path vPath = m_shaderDirectory / vertexShaderName;
+  fs::path fPath = m_shaderDirectory / fragmentShaderName;
+
+  if (!fs::exists(vPath) || !fs::exists(fPath)) {
+    std::cerr << "[ShaderManager] Invalid vertex/fragment shader filename:"
+              << std::endl
+              << " vertex: " << vPath << std::endl
+              << " fragment: " << fPath << std::endl;
+    return;
+  }
+
+  for (const auto& entry :
+       fs::recursive_directory_iterator(m_shaderDirectory)) {
+    if (vertexShaderName.compare(entry.path().filename().string()) == 0) {
+      vPath = entry;
+      continue;
+    }
+    if (fragmentShaderName.compare(entry.path().filename().string()) == 0) {
+      fPath = entry;
+      continue;
+    }
+  }
+
+  fs::path gPath = geometricShaderName.empty()
+                       ? fs::path()
+                       : m_shaderDirectory / geometricShaderName;
+
+  m_shaders[programName] = {std::make_unique<ShaderProgram>(),
+                            std::make_unique<FileWatcher>(), vPath, fPath,
+                            gPath};
+
+  auto& shaderProgram = m_shaders[programName];
+
+  shaderProgram.fileWatcher->watch(shaderProgram.vertexPath);
+  shaderProgram.fileWatcher->watch(shaderProgram.fragmentPath);
+  if (!shaderProgram.geometricPath.empty()) {
+    shaderProgram.fileWatcher->watch(shaderProgram.geometricPath);
+  }
+
+  shaderProgram.fileWatcher->setPollInterval(m_pollInterval);
 
   compile(shaderProgram);
 }
@@ -71,7 +146,7 @@ void ShaderManager::add(const std::string& programName,
 bool ShaderManager::update()
 {
   bool updated = false;
-  for (auto& shader : shaders) {
+  for (auto& shader : m_shaders) {
     if (shader.second.fileWatcher->poll()) {
       compile(shader.second);
       std::cout << "Updated shader: " << shader.first << std::endl;
@@ -84,13 +159,12 @@ bool ShaderManager::update()
 void ShaderManager::print()
 {
   std::cout << "[ShaderManager] Managed shader list" << std::endl;
-  for (auto& shader : shaders) {
+  for (auto& shader : m_shaders) {
     std::cout << "Name: " << shader.first << std::endl;
-    std::cout << " vertex: " << shader.second.vertexShaderPath << std::endl;
-    std::cout << " fragment: " << shader.second.fragmentShaderPath << std::endl;
-    if (!shader.second.geometricShaderPath.empty()) {
-      std::cout << " geometric: " << shader.second.geometricShaderPath
-                << std::endl;
+    std::cout << " vertex: " << shader.second.vertexPath << std::endl;
+    std::cout << " fragment: " << shader.second.fragmentPath << std::endl;
+    if (!shader.second.geometricPath.empty()) {
+      std::cout << " geometric: " << shader.second.geometricPath << std::endl;
     }
   }
 }
