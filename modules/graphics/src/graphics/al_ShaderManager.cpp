@@ -14,13 +14,14 @@ void ShaderManager::setPollInterval(double interval)
   }
 }
 
-std::string ShaderManager::loadGLSL(const fs::path& filePath)
+std::string ShaderManager::loadGLSL(const std::filesystem::path& filePath)
 {
   if (filePath.empty()) {
     return "";
   }
 
-  if (!fs::is_regular_file(filePath) && !fs::is_symlink(filePath)) {
+  if (!std::filesystem::is_regular_file(filePath) &&
+      !std::filesystem::is_symlink(filePath)) {
     std::cerr << "[ShaderManager] Incorrect filename: " << filePath
               << std::endl;
     return "";
@@ -48,7 +49,7 @@ std::string ShaderManager::loadGLSL(const fs::path& filePath)
 
     std::string inclFileName =
         code.substr(inclFileStart, includeEnd - inclFileStart);
-    fs::path inclFilePath = m_shaderDirectory / inclFileName;
+    std::filesystem::path inclFilePath = m_shaderDirectory / inclFileName;
     std::ifstream inclIn(inclFilePath);
     if (!inclIn) {
       std::cerr << "[ShaderManager] Include file not found: " << inclFilePath
@@ -99,10 +100,10 @@ void ShaderManager::add(const std::string& programName,
     return;
   }
 
-  fs::path vPath = m_shaderDirectory / vertexShaderName;
-  fs::path fPath = m_shaderDirectory / fragmentShaderName;
+  std::filesystem::path vPath = m_shaderDirectory / vertexShaderName;
+  std::filesystem::path fPath = m_shaderDirectory / fragmentShaderName;
 
-  if (!fs::exists(vPath) || !fs::exists(fPath)) {
+  if (!std::filesystem::exists(vPath) || !std::filesystem::exists(fPath)) {
     std::cerr << "[ShaderManager] Invalid vertex/fragment shader filename:"
               << std::endl
               << " vertex: " << vPath << std::endl
@@ -111,7 +112,7 @@ void ShaderManager::add(const std::string& programName,
   }
 
   for (const auto& entry :
-       fs::recursive_directory_iterator(m_shaderDirectory)) {
+       std::filesystem::recursive_directory_iterator(m_shaderDirectory)) {
     if (vertexShaderName.compare(entry.path().filename().string()) == 0) {
       vPath = entry;
       continue;
@@ -122,9 +123,9 @@ void ShaderManager::add(const std::string& programName,
     }
   }
 
-  fs::path gPath = geometricShaderName.empty()
-                       ? fs::path()
-                       : m_shaderDirectory / geometricShaderName;
+  std::filesystem::path gPath = geometricShaderName.empty()
+                                    ? std::filesystem::path()
+                                    : m_shaderDirectory / geometricShaderName;
 
   m_shaders[programName] = {std::make_unique<ShaderProgram>(),
                             std::make_unique<FileWatcher>(), vPath, fPath,

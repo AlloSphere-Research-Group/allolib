@@ -4,14 +4,14 @@
 
 namespace al {
 
-bool FileWatcher::watch(const fs::path& file)
+bool FileWatcher::watch(const std::filesystem::path& file)
 {
   auto search = watchedFiles.find(file);
   if (search != watchedFiles.end()) {
     std::cerr << "File already watched: " << file << std::endl;
     return false;
   }
-  watchedFiles[file] = fs::last_write_time(file);
+  watchedFiles[file] = std::filesystem::last_write_time(file);
   return true;
 }
 
@@ -25,8 +25,8 @@ bool FileWatcher::poll()
     lastPollTime = now;
 
     for (auto& [path, modified] : watchedFiles) {
-      if (fs::last_write_time(path) > modified) {
-        modified = fs::last_write_time(path);
+      if (std::filesystem::last_write_time(path) > modified) {
+        modified = std::filesystem::last_write_time(path);
         std::cout << "File modified: " << path << std::endl;
         changed = true;
       }

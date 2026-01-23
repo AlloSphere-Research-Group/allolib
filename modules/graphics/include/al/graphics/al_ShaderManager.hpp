@@ -9,31 +9,33 @@
 #include "al/graphics/al_Shader.hpp"
 #include "al/io/al_FileWatcher.hpp"
 
-namespace fs = std::filesystem;
 namespace al {
 
 /// @brief contains ShaderProgram, FileWatcher and paths to shader files
 struct ManagedShaderProgram {
   std::unique_ptr<ShaderProgram> program;
   std::unique_ptr<FileWatcher> fileWatcher;
-  fs::path vertexPath;
-  fs::path fragmentPath;
-  fs::path geometricPath;
+  std::filesystem::path vertexPath;
+  std::filesystem::path fragmentPath;
+  std::filesystem::path geometricPath;
 };
 
 /// @brief Class that manages shaders and automatically recompiles on update
 class ShaderManager {
  public:
   /// @brief Default constructor. Will add appPaths to the searchPaths
-  ShaderManager() : m_shaderDirectory{fs::current_path()} {}
+  ShaderManager() : m_shaderDirectory{std::filesystem::current_path()} {}
 
   /// @brief Constructor using a existing SearchPaths
   /// @param paths Existing SearchPaths object
-  ShaderManager(const fs::path& dir) : m_shaderDirectory{dir} {}
+  ShaderManager(const std::filesystem::path& dir) : m_shaderDirectory{dir} {}
 
   /// @brief Set internal SearchPaths to the provided SearchPaths obj
   /// @param paths Desired SearchPaths
-  inline void setDirectory(const fs::path& dir) { m_shaderDirectory = dir; }
+  inline void setDirectory(const std::filesystem::path& dir)
+  {
+    m_shaderDirectory = dir;
+  }
 
   /// @brief Set polling intervals for each shader files
   /// @param interval Desired interval in seconds
@@ -78,18 +80,18 @@ class ShaderManager {
   /// @brief Load GLSL file and parse the include headers
   /// @param filePath Path to the GLSL file
   /// @return Parsed shader file as string
-  std::string loadGLSL(const fs::path& filePath);
+  std::string loadGLSL(const std::filesystem::path& filePath);
 
   /// @brief Load shader file and compile shader program
   /// @param shaderProgram Obj containing information about shader program
   void compile(ManagedShaderProgram& shaderProgram);
 
-  protected:
+ protected:
   /// @brief Map of shader names to program and info
   std::map<std::string, ManagedShaderProgram> m_shaders;
 
   /// @brief Directory containing shaders
-  fs::path m_shaderDirectory;
+  std::filesystem::path m_shaderDirectory;
 
   /// @brief Polling interval in seconds
   double m_pollInterval{0};

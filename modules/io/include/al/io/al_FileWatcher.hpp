@@ -6,8 +6,6 @@
 #include <map>
 #include <string>
 
-namespace fs = std::filesystem;
-
 namespace al {
 
 /// @brief Monitors files and notifies if the files have been modified
@@ -19,14 +17,14 @@ class FileWatcher {
   /// @brief add file to the watched file map
   /// @param file file object containing file information
   /// @return false if file is already being watched
-  bool watch(const fs::path& file);
+  bool watch(const std::filesystem::path& file);
 
   /// @brief add file at the path to the watched file map
   /// @param path path to the file
   /// @return false if file is already being watched
   inline bool watch(const std::string& path)
   {
-    fs::path filepath{path};
+    std::filesystem::path filepath{path};
     return watch(filepath);
   }
 
@@ -34,13 +32,13 @@ class FileWatcher {
   /// @param path path to file
   inline void unwatch(const std::string& path)
   {
-    fs::path filepath{path};
+    std::filesystem::path filepath{path};
     watchedFiles.erase(filepath);
   }
 
   /// @brief remove file from the watched file map
   /// @param file file object containing file information
-  inline void unwatch(const fs::path& file) { watchedFiles.erase(file); }
+  inline void unwatch(const std::filesystem::path& file) { watchedFiles.erase(file); }
 
   /// @brief set the polling interval
   /// @param interval interval length
@@ -56,7 +54,7 @@ class FileWatcher {
 
  protected:
   /// @brief map of file path and file information
-  std::map<fs::path, fs::file_time_type> watchedFiles;
+  std::map<std::filesystem::path, std::filesystem::file_time_type> watchedFiles;
   /// @brief last system time files have been polled
   std::chrono::system_clock::time_point lastPollTime;
   /// @brief interval of file polling
