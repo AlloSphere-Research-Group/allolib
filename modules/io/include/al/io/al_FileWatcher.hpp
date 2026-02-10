@@ -44,7 +44,7 @@ public:
 
   /// @brief set the polling interval
   /// @param interval interval length
-  inline void setPollInterval(const al_sec interval) {
+  inline void setPollInterval(const al_sec& interval) {
     pollInterval = interval;
   }
 

@@ -2,15 +2,17 @@
 
 namespace al {
 
-void ShaderManager::setPollInterval(const al_sec interval) {
+void ShaderManager::setPollInterval(const al_sec& interval)
+{
   pollInterval = interval;
 
-  for (auto &[name, managedShader] : shaders) {
-    managedShader.fileWatcher->setPollInterval(interval);
+  for (auto& shader : shaders) {
+    shader.second.fileWatcher->setPollInterval(interval);
   }
 }
 
-std::string ShaderManager::loadGLSL(const std::string &filePath) {
+std::string ShaderManager::loadGLSL(const std::string& filePath)
+{
   std::string code = File::read(filePath);
   std::string include_code{"#include \""};
   size_t from = code.find(include_code);
@@ -26,7 +28,8 @@ std::string ShaderManager::loadGLSL(const std::string &filePath) {
   return code;
 }
 
-void ShaderManager::compile(ManagedShaderProgram &shaderProgram) {
+void ShaderManager::compile(ManagedShaderProgram& shaderProgram)
+{
   std::string vertexShader = loadGLSL(shaderProgram.vertexShaderPath);
   std::string fragmentShader = loadGLSL(shaderProgram.fragmentShaderPath);
   std::string geometricShader = loadGLSL(shaderProgram.geometricShaderPath);
@@ -34,11 +37,14 @@ void ShaderManager::compile(ManagedShaderProgram &shaderProgram) {
   shaderProgram.program->compile(vertexShader, fragmentShader, geometricShader);
 }
 
-void ShaderManager::add(const std::string &programName,
-                        const std::string &vertexShaderName,
-                        const std::string &fragmentShaderName,
-                        const std::string &geometricShaderName) {
-  if (auto search = shaders.find(programName); search != shaders.end()) {
+void ShaderManager::add(const std::string& programName,
+                        const std::string& vertexShaderName,
+                        const std::string& fragmentShaderName,
+                        const std::string& geometricShaderName)
+{
+  auto search = shaders.find(programName);
+   if (search != shaders.end())
+  {
     shaders[programName].program->destroy();
     std::cerr << "Shader Program with same name already exists" << std::endl;
   }
@@ -49,7 +55,7 @@ void ShaderManager::add(const std::string &programName,
                           searchPaths.find(fragmentShaderName).filepath(),
                           searchPaths.find(geometricShaderName).filepath()};
 
-  auto &shaderProgram = shaders[programName];
+  auto& shaderProgram = shaders[programName];
 
   shaderProgram.fileWatcher->watch(shaderProgram.vertexShaderPath);
   shaderProgram.fileWatcher->watch(shaderProgram.fragmentShaderPath);
@@ -62,30 +68,30 @@ void ShaderManager::add(const std::string &programName,
   compile(shaderProgram);
 }
 
-bool ShaderManager::update() {
+bool ShaderManager::update()
+{
   bool updated = false;
-  for (auto &[name, managedShaderProgram] : shaders) {
-    if (managedShaderProgram.fileWatcher->poll()) {
-      compile(managedShaderProgram);
-      std::cout << "Updated shader: " << name << std::endl;
+  for (auto& shader : shaders) {
+    if (shader.second.fileWatcher->poll()) {
+      compile(shader.second);
+      std::cout << "Updated shader: " << shader.first << std::endl;
       updated = true;
     }
   }
   return updated;
 }
 
-void ShaderManager::print() {
+void ShaderManager::print()
+{
   std::cout << "[ShaderManager] Managed shader list" << std::endl;
-  for (auto &[name, managedShaderProgram] : shaders) {
-    std::cout << "Name: " << name << std::endl;
-    std::cout << " vertex: " << managedShaderProgram.vertexShaderPath
-              << std::endl;
-    std::cout << " fragment: " << managedShaderProgram.fragmentShaderPath
-              << std::endl;
-    if (!managedShaderProgram.geometricShaderPath.empty()) {
-      std::cout << " geometric: " << managedShaderProgram.geometricShaderPath
+  for (auto& shader : shaders) {
+    std::cout << "Name: " << shader.first << std::endl;
+    std::cout << " vertex: " << shader.second.vertexShaderPath << std::endl;
+    std::cout << " fragment: " << shader.second.fragmentShaderPath << std::endl;
+    if (!shader.second.geometricShaderPath.empty()) {
+      std::cout << " geometric: " << shader.second.geometricShaderPath
                 << std::endl;
     }
   }
 }
-} // namespace al
+}  // namespace al

@@ -24,26 +24,26 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(AL_WINDOWS 1 CACHE BOOL "Building on Windows")
   set(PLATFORM_DEFINITION -DAL_WINDOWS)
   if (NOT ${CMAKE_GENERATOR_PLATFORM} STREQUAL "x64")
-  message("Warning! Not building for Win64 : ${CMAKE_GENERATOR_PLATFORM}")
+    message("Warning! Not building for Win64 : ${CMAKE_GENERATOR_PLATFORM}")
   endif(NOT ${CMAKE_GENERATOR_PLATFORM} STREQUAL "x64")
 else ()
   message(FATAL_ERROR "system platform not defined")
 endif ()
 
 if(ALLOLIB_BUILD_SHARED)
-    set(AL_LIBRARY_TYPE "SHARED")
+  set(AL_LIBRARY_TYPE "SHARED")
 else()
-    set(AL_LIBRARY_TYPE "STATIC")
+  set(AL_LIBRARY_TYPE "STATIC")
 endif()
 
 
 ## Gamma ##
 if(ALLOLIB_BUILD_SHARED)
-    set(GAMMA_BUILD_SHARED ON CACHE BOOL "" FORCE)
-    set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+  set(GAMMA_BUILD_SHARED ON CACHE BOOL "" FORCE)
+  set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 else(ALLOLIB_BUILD_SHARED)
-    set(GAMMA_BUILD_SHARED OFF CACHE BOOL "" FORCE)
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+  set(GAMMA_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+  set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 endif(ALLOLIB_BUILD_SHARED)
 
 add_subdirectory(modules/audio/gamma/external/Gamma)
@@ -58,11 +58,11 @@ add_subdirectory(modules/graphics)
 
 add_subdirectory(modules/audio/core)
 if(ALLOLIB_USE_DUMMY_AUDIO) # TODO better way to select audio backend rtaudio/portaudio/dummy
-  add_subdirectory(modules/audio/backend/dummy) 
+  add_subdirectory(modules/audio/backend/dummy)
 elseif(ALLOLIB_USE_PORTAUDIO)
-  add_subdirectory(modules/audio/backend/portaudio) 
-else()  
-  add_subdirectory(modules/audio/backend/rtaudio) 
+  add_subdirectory(modules/audio/backend/portaudio)
+else()
+  add_subdirectory(modules/audio/backend/rtaudio)
 endif()
 
 add_subdirectory(modules/io)
@@ -83,9 +83,9 @@ add_subdirectory(modules/extensions/serial)
 
 ## allolib extension modules ##
 # if (ALLOLIB_ADD_EXTENSIONS)
-  # message("including allolib extensions")
-  # add_subdirectory(extensions)
-  # add_subdirectory(../al_ext ../al_ext)
+# message("including allolib extensions")
+# add_subdirectory(extensions)
+# add_subdirectory(../al_ext ../al_ext)
 # endif()
 
 
@@ -163,11 +163,11 @@ add_subdirectory(modules/extensions/serial)
 
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    # On macOS if jack is present, RtMidi will link to jack but not provide the
-    # /usr/local/lib location as link directory. This statement only serves the
-    # purpose of working around that bug. Perhaps can be removed on future
-    # updates of RtMidi
-    link_directories("/usr/local/lib")
+  # On macOS if jack is present, RtMidi will link to jack but not provide the
+  # /usr/local/lib location as link directory. This statement only serves the
+  # purpose of working around that bug. Perhaps can be removed on future
+  # updates of RtMidi
+  link_directories("/usr/local/lib")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 
