@@ -30,11 +30,17 @@ class ShaderManager {
   /// @param paths Existing SearchPaths object
   ShaderManager(const std::filesystem::path& dir) : m_shaderDirectory{dir} {}
 
-  /// @brief Set internal SearchPaths to the provided SearchPaths obj
-  /// @param paths Desired SearchPaths
-  inline void setDirectory(const std::filesystem::path& dir)
+  /// @brief Set internal path to shader directory
+  /// @param paths std::filesystem::path to directory
+  inline void directory(const std::filesystem::path& dir)
   {
     m_shaderDirectory = dir;
+  }
+
+  /// @brief Get internal path to shader directory
+  /// @return std::filesystem::path to directory
+  inline const std::filesystem::path& directory() {
+    return m_shaderDirectory;
   }
 
   /// @brief Set polling intervals for each shader files

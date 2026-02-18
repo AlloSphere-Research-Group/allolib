@@ -160,6 +160,7 @@ bool ShaderManager::update()
 void ShaderManager::print()
 {
   std::cout << "[ShaderManager] Managed shader list" << std::endl;
+  std::cout << " Directory: " << directory() << std::endl;
   for (auto& shader : m_shaders) {
     std::cout << "Name: " << shader.first << std::endl;
     std::cout << " vertex: " << shader.second.vertexPath << std::endl;
