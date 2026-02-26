@@ -721,8 +721,7 @@ int addSurface(Mesh &m, int Nx, int Ny, double width, double height, double x,
     double u = x - width * 0.5;
     for (int i = 0; i < Nx; ++i) {
       m.vertex(u, v);
-      // m.texCoord(float(i)/(Nx-1), float(j)/(Ny-1)); //TODO: make Mesh
-      // method
+      m.texCoord(float(i)/(Nx-1), float(j)/(Ny-1)); 
       u += du;
     }
     v += dv;
