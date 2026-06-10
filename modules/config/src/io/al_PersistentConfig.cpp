@@ -2,28 +2,34 @@
 
 using namespace al;
 
-void PersistentConfig::setAppName(std::string appName) {
+void PersistentConfig::setAppName(std::string appName)
+{
   mAppName = appName;
   //    std::cout << "Persistent config created for " << appName << std::endl;
 }
 
-void PersistentConfig::registerDouble(std::string name, double *value) {
+void PersistentConfig::registerDouble(std::string name, double* value)
+{
   mDoubles.push_back({name, value});
 }
 
-void PersistentConfig::registerInt(std::string name, int64_t *value) {
+void PersistentConfig::registerInt(std::string name, int64_t* value)
+{
   mInts.push_back({name, value});
 }
 
-void PersistentConfig::registerString(std::string name, std::string *value) {
+void PersistentConfig::registerString(std::string name, std::string* value)
+{
   mStrings.push_back({name, value});
 }
 
-void PersistentConfig::registerParameter(Parameter &param) {
+void PersistentConfig::registerParameter(Parameter& param)
+{
   auto fullAddress = param.getFullAddress();
   if (fullAddress.find('.') == std::string::npos) {
     mParameters.push_back(&param);
-  } else {
+  }
+  else {
     std::cerr << "ERROR: Parameters with '.' in name are not supported in "
                  "PersistentConfig. Not including."
               << fullAddress << std::endl;
@@ -31,11 +37,13 @@ void PersistentConfig::registerParameter(Parameter &param) {
   }
 }
 
-void PersistentConfig::registerParameter(ParameterInt &param) {
+void PersistentConfig::registerParameter(ParameterInt& param)
+{
   auto fullAddress = param.getFullAddress();
   if (fullAddress.find('.') == std::string::npos) {
     mParameterInts.push_back(&param);
-  } else {
+  }
+  else {
     std::cerr << "ERROR: Parameters with '.' in name are not supported in "
                  "PersistentConfig. Not including."
               << fullAddress << std::endl;
@@ -43,11 +51,13 @@ void PersistentConfig::registerParameter(ParameterInt &param) {
   }
 }
 
-void PersistentConfig::registerParameter(ParameterString &param) {
+void PersistentConfig::registerParameter(ParameterString& param)
+{
   auto fullAddress = param.getFullAddress();
   if (fullAddress.find('.') == std::string::npos) {
     mParameterStrings.push_back(&param);
-  } else {
+  }
+  else {
     std::cerr << "ERROR: Parameters with '.' in name are not supported in "
                  "PersistentConfig. Not including."
               << fullAddress << std::endl;
@@ -55,11 +65,13 @@ void PersistentConfig::registerParameter(ParameterString &param) {
   }
 }
 
-void PersistentConfig::registerParameter(ParameterVec3 &param) {
+void PersistentConfig::registerParameter(ParameterVec3& param)
+{
   auto fullAddress = param.getFullAddress();
   if (fullAddress.find('.') == std::string::npos) {
     mParameterVec3s.push_back(&param);
-  } else {
+  }
+  else {
     std::cerr << "ERROR: Parameters with '.' in name are not supported in "
                  "PersistentConfig. Not including: "
               << fullAddress << std::endl;
@@ -67,11 +79,13 @@ void PersistentConfig::registerParameter(ParameterVec3 &param) {
   }
 }
 
-void PersistentConfig::registerParameter(ParameterVec4 &param) {
+void PersistentConfig::registerParameter(ParameterVec4& param)
+{
   auto fullAddress = param.getFullAddress();
   if (fullAddress.find('.') == std::string::npos) {
     mParameterVec4s.push_back(&param);
-  } else {
+  }
+  else {
     std::cerr << "ERROR: Parameters with '.' in name are not supported in "
                  "PersistentConfig. Not including: "
               << fullAddress << std::endl;
@@ -79,11 +93,13 @@ void PersistentConfig::registerParameter(ParameterVec4 &param) {
   }
 }
 
-void PersistentConfig::registerParameter(ParameterColor &param) {
+void PersistentConfig::registerParameter(ParameterColor& param)
+{
   auto fullAddress = param.getFullAddress();
   if (fullAddress.find('.') == std::string::npos) {
     mParameterColors.push_back(&param);
-  } else {
+  }
+  else {
     std::cerr << "ERROR: Parameters with '.' in name are not supported in "
                  "PersistentConfig. Not including: "
               << fullAddress << std::endl;
@@ -91,11 +107,13 @@ void PersistentConfig::registerParameter(ParameterColor &param) {
   }
 }
 
-void PersistentConfig::registerParameter(ParameterPose &param) {
+void PersistentConfig::registerParameter(ParameterPose& param)
+{
   auto fullAddress = param.getFullAddress();
   if (fullAddress.find('.') == std::string::npos) {
     mParameterPoses.push_back(&param);
-  } else {
+  }
+  else {
     std::cerr << "ERROR: Parameters with '.' in name are not supported in "
                  "PersistentConfig. Not including: "
               << fullAddress << std::endl;
@@ -103,25 +121,25 @@ void PersistentConfig::registerParameter(ParameterPose &param) {
   }
 }
 
-bool PersistentConfig::read() {
+bool PersistentConfig::read()
+{
   if (!File::exists(mAppName + ".toml")) {
     write();
   }
-  TomlLoader loader;
-  loader.setFile(mAppName + ".toml");
-  for (auto &configEntry : mDoubles) {
-    if (loader.hasKey<double>(configEntry.first)) {
-      *configEntry.second = loader.getd(configEntry.first);
+  TomlFile configFile{mAppName + ".toml"};
+  for (auto& configEntry : mDoubles) {
+    if (configFile.hasKey(configEntry.first)) {
+      *configEntry.second = configFile.getd(configEntry.first);
     }
   }
-  for (auto &configEntry : mInts) {
-    if (loader.hasKey<int64_t>(configEntry.first)) {
-      *configEntry.second = loader.geti(configEntry.first);
+  for (auto& configEntry : mInts) {
+    if (configFile.hasKey(configEntry.first)) {
+      *configEntry.second = configFile.geti(configEntry.first);
     }
   }
-  for (auto &configEntry : mStrings) {
-    if (loader.hasKey<std::string>(configEntry.first)) {
-      *configEntry.second = loader.gets(configEntry.first);
+  for (auto& configEntry : mStrings) {
+    if (configFile.hasKey(configEntry.first)) {
+      *configEntry.second = configFile.gets(configEntry.first);
     }
   }
 
@@ -131,8 +149,8 @@ bool PersistentConfig::read() {
       name = param->getGroup() + ".";
     }
     name += param->getName();
-    if (loader.hasKey<std::string>(name)) {
-      param->setNoCalls(loader.getd(name));
+    if (configFile.hasKey(name)) {
+      param->setNoCalls(configFile.getd(name));
     }
   }
   for (auto param : mParameterInts) {
@@ -141,8 +159,8 @@ bool PersistentConfig::read() {
       name = param->getGroup() + ".";
     }
     name += param->getName();
-    if (loader.hasKey<int64_t>(name)) {
-      param->setNoCalls(loader.geti(name));
+    if (configFile.hasKey(name)) {
+      param->setNoCalls(configFile.geti(name));
     }
   }
   for (auto param : mParameterStrings) {
@@ -151,8 +169,8 @@ bool PersistentConfig::read() {
       name = param->getGroup() + ".";
     }
     name += param->getName();
-    if (loader.hasKey<std::string>(name)) {
-      param->setNoCalls(loader.gets(name));
+    if (configFile.hasKey(name)) {
+      param->setNoCalls(configFile.gets(name));
     }
   }
   for (auto param : mParameterColors) {
@@ -161,8 +179,15 @@ bool PersistentConfig::read() {
       name = param->getGroup() + ".";
     }
     name += param->getName();
-    if (loader.root->get_array_of<double>(name)) {
-      auto vals = loader.getVector<double>(name);
+    if (configFile.hasKey(name)) {
+      auto vals = configFile.getVector<double>(name);
+      if (vals.size() != 4) {
+        std::cerr << "ERROR: Color parameter " << name
+                  << " has wrong number of components in config file. Expected "
+                     "4, got "
+                  << vals.size() << ". Ignoring." << std::endl;
+        continue;
+      }
       param->setNoCalls(Color(vals[0], vals[1], vals[2], vals[3]));
     }
   }
@@ -172,8 +197,15 @@ bool PersistentConfig::read() {
       name = param->getGroup() + ".";
     }
     name += param->getName();
-    if (loader.root->get_array_of<double>(name)) {
-      auto vals = loader.getVector<double>(name);
+    if (configFile.hasKey(name)) {
+      auto vals = configFile.getVector<double>(name);
+      if (vals.size() != 7) {
+        std::cerr << "ERROR: Pose parameter " << name
+                  << " has wrong number of components in config file. Expected "
+                     "7, got "
+                  << vals.size() << ". Ignoring." << std::endl;
+        continue;
+      }
       param->setNoCalls(Pose(Vec3d(vals[0], vals[1], vals[2]),
                              Quatd(vals[3], vals[4], vals[5], vals[6])));
     }
@@ -181,17 +213,17 @@ bool PersistentConfig::read() {
   return true;
 }
 
-void PersistentConfig::write() {
-  TomlLoader loader;
-  loader.setFile(mAppName + ".toml");
-  for (auto &configEntry : mDoubles) {
-    loader.set(configEntry.first, *configEntry.second);
+void PersistentConfig::write()
+{
+  TomlFile configFile{mAppName + ".toml"};
+  for (auto& configEntry : mDoubles) {
+    configFile.set(configEntry.first, *configEntry.second);
   }
-  for (auto &configEntry : mInts) {
-    loader.set(configEntry.first, *configEntry.second);
+  for (auto& configEntry : mInts) {
+    configFile.set(configEntry.first, *configEntry.second);
   }
-  for (auto &configEntry : mStrings) {
-    loader.set(configEntry.first, *configEntry.second);
+  for (auto& configEntry : mStrings) {
+    configFile.set(configEntry.first, *configEntry.second);
   }
 
   for (auto param : mParameters) {
@@ -200,7 +232,7 @@ void PersistentConfig::write() {
       name = param->getGroup() + ".";
     }
     name += param->getName();
-    loader.set(name, param->get());
+    configFile.set(name, param->get());
   }
   for (auto param : mParameterInts) {
     std::string name;
@@ -208,7 +240,7 @@ void PersistentConfig::write() {
       name = param->getGroup() + ".";
     }
     name += param->getName();
-    loader.set(name, param->get());
+    configFile.set(name, param->get());
   }
   for (auto param : mParameterStrings) {
     std::string name;
@@ -216,7 +248,7 @@ void PersistentConfig::write() {
       name = param->getGroup() + ".";
     }
     name += param->getName();
-    loader.set(name, param->get());
+    configFile.set(name, param->get());
   }
   for (auto param : mParameterColors) {
     std::string name;
@@ -231,7 +263,7 @@ void PersistentConfig::write() {
     rgba[1] = bg.g;
     rgba[2] = bg.b;
     rgba[3] = bg.a;
-    loader.setVector<double>(name, rgba);
+    configFile.setVector<double>(name, rgba);
   }
   for (auto param : mParameterPoses) {
     std::string name;
@@ -249,8 +281,8 @@ void PersistentConfig::write() {
     poseList[4] = pose.quat().x;
     poseList[5] = pose.quat().y;
     poseList[6] = pose.quat().z;
-    loader.setVector<double>(name, poseList);
+    configFile.setVector<double>(name, poseList);
   }
 
-  loader.writeFile();
+  configFile.write();
 }

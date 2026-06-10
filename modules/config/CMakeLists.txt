@@ -19,7 +19,7 @@ endif(AL_WINDOWS)
 
 set_target_properties(alconfig PROPERTIES
   DEBUG_POSTFIX d
-  CXX_STANDARD 14
+  CXX_STANDARD 20
   CXX_STANDARD_REQUIRED ON
 )
 

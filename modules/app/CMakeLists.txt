@@ -48,7 +48,7 @@ add_library(alapp ${AL_LIBRARY_TYPE} ${headers} ${sources})
 
 set_target_properties(alapp PROPERTIES
   DEBUG_POSTFIX d
-  CXX_STANDARD 14
+  CXX_STANDARD 20
   CXX_STANDARD_REQUIRED ON
 )
 

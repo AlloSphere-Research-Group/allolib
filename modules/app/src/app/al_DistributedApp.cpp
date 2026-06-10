@@ -11,7 +11,8 @@
 
 using namespace al;
 
-void DistributedApp::prepare() {
+void DistributedApp::prepare()
+{
   if (initialized) {
     return;
   }
@@ -35,7 +36,7 @@ void DistributedApp::prepare() {
       configfile << "broadcastAddress = \"192.168.10.255\"" << std::endl;
 
       configfile << "[[node]]" << std::endl;
-      configfile << "host = \"ar01.1g\"\n";
+      configfile << "host = \"ar01.10g\"\n";
       configfile << "rank = 0\n";
       configfile << "group = 0\n";
       configfile << "role = \"desktop\"\n\n";
@@ -52,13 +53,14 @@ void DistributedApp::prepare() {
     }
   }
 
-  TomlLoader appConfig("distributed_app.toml");
-  auto nodesTable = appConfig.root->get_table_array("node");
+  TomlFile appConfig("distributed_app.toml");
+  // need to keep track of lifetime of shared_ptrs
+  auto nodesTable = appConfig.root()->get_table_array("node");
   std::vector<std::string> mListeners;
   // First get role from config file
   mFoundHost = false;
   if (nodesTable) {
-    for (const auto &table : *nodesTable) {
+    for (const auto& table : *nodesTable) {
       std::string host = *table->get_as<std::string>("host");
       std::string role = *table->get_as<std::string>("role");
 
@@ -69,34 +71,37 @@ void DistributedApp::prepare() {
       }
       mRoleMap[host] = role;
       if (table->contains("dataRoot")) {
-        if (name() == host) { // Set configuration for this node when found
+        if (name() == host) {  // Set configuration for this node when found
           std::string dataRootValue = *table->get_as<std::string>("dataRoot");
           dataRoot = File::conformPathToOS(dataRootValue);
         }
-      } else {
+      }
+      else {
         std::cout << "WARNING: node " << host.c_str() << " not given dataRoot"
                   << std::endl;
       }
 
       if (table->contains("rank")) {
-        if (name() == host) { // Set configuration for this node when found
+        if (name() == host) {  // Set configuration for this node when found
           rank = *table->get_as<int>("rank");
         }
-      } else {
+      }
+      else {
         std::cout << "WARNING: node " << host.c_str() << " not given rank"
                   << std::endl;
       }
       if (table->contains("group")) {
-        if (name() == host) { // Set configuration for this node when found
+        if (name() == host) {  // Set configuration for this node when found
           group = *table->get_as<int>("group");
         }
-      } else {
+      }
+      else {
         std::cout << "WARNING: node " << host.c_str() << " not given group"
                   << std::endl;
       }
     }
-    if (!mFoundHost) { // if host name isn't found, use default settings
-                       // and warn
+    if (!mFoundHost) {  // if host name isn't found, use default settings
+                        // and warn
       std::cout
           << "WARNING: node " << name()
           << " not found in node table!\n\t*Using default desktop setting!*"
@@ -106,7 +111,8 @@ void DistributedApp::prepare() {
       group = 0;
       oscDomain()->interfaceIP = "127.0.0.1";
     }
-  } else { // No nodes table in config file. Use desktop role or sphere roles
+  }
+  else {  // No nodes table in config file. Use desktop role or sphere roles
     auto defaultCapabilities = al::sphere::getSphereNodes();
     if (defaultCapabilities.find(name()) != defaultCapabilities.end()) {
       mCapabilites = defaultCapabilities[name()].mCapabilites;
@@ -114,7 +120,8 @@ void DistributedApp::prepare() {
       rank = defaultCapabilities[name()].rank;
 
       //      mRoleMap["ar01.1g"] = "simulator";
-    } else {
+    }
+    else {
       setRole("desktop");
       rank = 0;
       group = 0;
@@ -123,15 +130,18 @@ void DistributedApp::prepare() {
     }
   }
 
-  if (appConfig.hasKey<std::string>("broadcastAddress")) {
+  if (appConfig.hasKey("broadcastAddress")) {
     additionalConfig["broadcastAddress"] = appConfig.gets("broadcastAddress");
-  } else if (hasCapability(CAP_STATE_RECEIVE) | hasCapability(CAP_STATE_SEND)) {
+  }
+  else if (hasCapability(CAP_STATE_RECEIVE) | hasCapability(CAP_STATE_SEND)) {
     if (al::sphere::isSphereMachine()) {
       additionalConfig["broadcastAddress"] = "192.168.10.255";
-    } else {
+    }
+    else {
       additionalConfig["broadcastAddress"] = "127.0.0.1";
     }
-  } else {
+  }
+  else {
     additionalConfig["broadcastAddress"] = "127.0.0.1";
   }
 
@@ -147,17 +157,20 @@ void DistributedApp::prepare() {
     std::cout << "Primary port BUSY: " << name() << std::endl;
     // For some reason, if we leave it at 0.0.0.0 messages are blocked on
     // windows
-  } else if (rank == 0) {
+  }
+  else if (rank == 0) {
     testServer.stop();
     std::cout << "Primary port ACQUIRED: " << name() << std::endl;
-  } else {
+  }
+  else {
     testServer.stop();
     std::cout << "Secondary: rank " << rank << std::endl;
   }
 
   if (hasCapability(CAP_AUDIO_IO)) {
     mAudioControl.registerAudioIO(audioIO());
-  } else {
+  }
+  else {
     mDomainList.erase(
         std::find(mDomainList.begin(), mDomainList.end(), mAudioDomain));
   }
@@ -180,8 +193,9 @@ void DistributedApp::prepare() {
   initialized = true;
 }
 
-std::string DistributedApp::getPrimaryHost() {
-  for (const auto &node : mRoleMap) {
+std::string DistributedApp::getPrimaryHost()
+{
+  for (const auto& node : mRoleMap) {
     if (node.second == "simulator" || node.second == "desktop") {
       return node.first;
     }
@@ -189,7 +203,8 @@ std::string DistributedApp::getPrimaryHost() {
   return std::string();
 }
 
-void DistributedApp::start() {
+void DistributedApp::start()
+{
   prepare();
   stdControls.app = this;
 
@@ -222,7 +237,8 @@ void DistributedApp::start() {
     if (!isPrimary()) {
       omniRendering->drawOmni = true;
     }
-  } else if (hasCapability(CAP_RENDERING)) {
+  }
+  else if (hasCapability(CAP_RENDERING)) {
     mDefaultWindowDomain = graphicsDomain()->newWindow();
     mDefaultWindowDomain->init(graphicsDomain().get());
     mDefaultWindowDomain->window().append(stdControls);
@@ -254,9 +270,10 @@ void DistributedApp::start() {
     if (!mFoundHost) {
       std::cout << "Using default configuration (no distributed_app.toml)"
                 << std::endl;
-    } else {
+    }
+    else {
       //      std::cout << "Running REPLICA" << std::endl;
-      for (const auto &hostRole : mRoleMap) {
+      for (const auto& hostRole : mRoleMap) {
         if (hostRole.first != name()) {
           parameterServer().addListener(hostRole.first, oscDomain()->port);
         }
@@ -267,7 +284,7 @@ void DistributedApp::start() {
 
   onInit();
 
-  for (auto &domain : mDomainList) {
+  for (auto& domain : mDomainList) {
     mRunningDomains.push(domain);
     if (!domain->start()) {
       std::cerr << "ERROR starting domain " << std::endl;
@@ -284,7 +301,7 @@ void DistributedApp::start() {
 
   onExit();
   mDefaultWindowDomain = nullptr;
-  for (auto &domain : mDomainList) {
+  for (auto& domain : mDomainList) {
     if (!domain->cleanup()) {
       std::cerr << "ERROR cleaning up domain " << std::endl;
     }
@@ -294,13 +311,15 @@ void DistributedApp::start() {
 
 std::string DistributedApp::name() { return al_get_hostname(); }
 
-void al::DistributedApp::registerDynamicScene(DynamicScene &scene) {
-  if (dynamic_cast<DistributedScene *>(&scene)) {
+void al::DistributedApp::registerDynamicScene(DynamicScene& scene)
+{
+  if (dynamic_cast<DistributedScene*>(&scene)) {
     // If distributed scene, connect according to this app's role
-    DistributedScene *s = dynamic_cast<DistributedScene *>(&scene);
+    DistributedScene* s = dynamic_cast<DistributedScene*>(&scene);
     if (isPrimary()) {
       s->registerNotifier(parameterServer());
-    } else {
+    }
+    else {
       parameterServer().registerOSCConsumer(s, s->name());
     }
   }
@@ -308,57 +327,70 @@ void al::DistributedApp::registerDynamicScene(DynamicScene &scene) {
   scene.prepare(audioIO());
 }
 
-Graphics &DistributedApp::graphics() {
+Graphics& DistributedApp::graphics()
+{
   if (hasCapability(CAP_OMNIRENDERING)) {
     return omniRendering->graphics();
-  } else {
+  }
+  else {
     return mDefaultWindowDomain->graphics();
   }
 }
 
-Window &DistributedApp::defaultWindow() {
+Window& DistributedApp::defaultWindow()
+{
   if (hasCapability(CAP_OMNIRENDERING)) {
     return omniRendering->window();
-  } else {
+  }
+  else {
     return mDefaultWindowDomain->window();
   }
 }
 
-Viewpoint &DistributedApp::view() {
+Viewpoint& DistributedApp::view()
+{
   if (hasCapability(CAP_OMNIRENDERING)) {
     return omniRendering->view();
-  } else {
+  }
+  else {
     return mDefaultWindowDomain->view();
   }
 }
 
-Pose &DistributedApp::pose() {
+Pose& DistributedApp::pose()
+{
   if (hasCapability(CAP_OMNIRENDERING)) {
     return omniRendering->nav();
-  } else {
+  }
+  else {
     return mDefaultWindowDomain->nav();
   }
 }
 
-Lens &DistributedApp::lens() { return view().lens(); }
+Lens& DistributedApp::lens() { return view().lens(); }
 
-Nav &DistributedApp::nav() {
+Nav& DistributedApp::nav()
+{
   if (hasCapability(CAP_OMNIRENDERING)) {
     return omniRendering->nav();
-  } else {
+  }
+  else {
     return mDefaultWindowDomain->nav();
   }
 }
 
-NavInputControl &DistributedApp::navControl() {
+NavInputControl& DistributedApp::navControl()
+{
   if (hasCapability(CAP_OMNIRENDERING)) {
     return omniRendering->navControl();
-  } else {
+  }
+  else {
     return mDefaultWindowDomain->navControl();
   }
 }
 
-void DistributedApp::printCapabilities() {
+void DistributedApp::printCapabilities()
+{
   if (hasCapability(CAP_SIMULATOR)) {
     std::cout << "SIMULATOR" << std::endl;
   }

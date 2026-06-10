@@ -1,42 +1,71 @@
 #include "al/io/al_Toml.hpp"
 
-static al::TomlLoader& global_toml_loader() {
-  static al::TomlLoader root = []() {
-    al::TomlLoader l;
-    // try loading default config filename
-    try {
-      l.setFile("data/al.toml");
-    } catch (cpptoml::parse_exception&) {
+#include <fstream>
+#include <iostream>
+#include <sstream>
+
+namespace al {
+TomlFile::TomlFile() {}
+
+TomlFile::TomlFile(const std::filesystem::path& path) { open(path); }
+
+bool TomlFile::open(const std::filesystem::path& path)
+{
+  if (!std::filesystem::exists(path)) {
+    std::cout << "[TomlFile] Creating config file: " << path << std::endl;
+
+    std::ofstream configFile{path};
+    if (!configFile.is_open()) {
+      std::cerr << "[TomlFile] ERROR: Unable to create config file: " << path
+                << std::endl;
+      return false;
     }
-    return l;
-  }();
-  return root;
+
+    configFile.close();
+  }
+
+  m_path = path;
+
+  try {
+    // will throw cpptoml::parse_exception if file is not found
+    m_root = cpptoml::parse_file(path.string());
+  }
+  catch (const cpptoml::parse_exception& err) {
+    std::cerr << "[TomlFile] Failed to parse " << path << ": " << err.what()
+              << std::endl;
+  }
+  catch (...) {
+    std::cerr << "[TomlFile] Unexpected error" << std::endl;
+  }
+
+  return true;
 }
 
-void al::TOML::setFile(const std::string& file) {
-  global_toml_loader().setFile(file);
+bool TomlFile::write(std::filesystem::path path)
+{
+  if (path.empty()) {
+    path = m_path;
+  }
+
+  std::ofstream configFile{path, std::ios::trunc};
+  if (!configFile.is_open()) {
+    std::cerr << "[TomlFile] ERROR: Failed to open file: " << path << std::endl;
+    return false;
+  }
+
+  std::ostringstream ss;
+  ss << (*m_root);
+  configFile << ss.str();
+
+  return true;
 }
-double al::TOML::getd(const std::string& key) {
-  return global_toml_loader().getd(key);
+
+bool TomlFile::hasKey(const std::string& keyName)
+{
+  if (!m_root) {
+    return false;
+  }
+
+  return m_root->contains(keyName) || m_root->contains_qualified(keyName);
 }
-int64_t al::TOML::geti(const std::string& key) {
-  return global_toml_loader().geti(key);
-}
-std::string al::TOML::gets(const std::string& key) {
-  return global_toml_loader().gets(key);
-}
-bool al::TOML::getb(const std::string& key) {
-  return global_toml_loader().getb(key);
-}
-double al::TOML::getd(const std::string& table, const std::string& key) {
-  return global_toml_loader().getd(table, key);
-}
-int64_t al::TOML::geti(const std::string& table, const std::string& key) {
-  return global_toml_loader().geti(table, key);
-}
-std::string al::TOML::gets(const std::string& table, const std::string& key) {
-  return global_toml_loader().gets(table, key);
-}
-bool al::TOML::getb(const std::string& table, const std::string& key) {
-  return global_toml_loader().getb(table, key);
-}
+}  // namespace al
