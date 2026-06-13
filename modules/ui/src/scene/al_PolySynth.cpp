@@ -1,4 +1,6 @@
 #include "al/scene/al_PolySynth.hpp"
+#include <cstdint>
+#include <cstring>
 
 #include <memory>
 

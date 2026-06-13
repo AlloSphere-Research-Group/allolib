@@ -2,6 +2,7 @@
 #define STATEDISTRIBUTIONDOMAIN_H
 
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <iostream>

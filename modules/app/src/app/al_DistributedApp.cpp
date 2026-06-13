@@ -1,4 +1,5 @@
 #include "al/app/al_DistributedApp.hpp"
+#include <cstdint>
 
 #include "al/sphere/al_SphereUtils.hpp"
 

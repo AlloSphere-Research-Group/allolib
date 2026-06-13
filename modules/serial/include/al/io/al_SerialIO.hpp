@@ -2,6 +2,7 @@
 #define AL_SERIAL_IO_HPP
 
 #include <functional>
+#include <cstdint>
 #include <thread>
 
 #include "serial/serial.h"

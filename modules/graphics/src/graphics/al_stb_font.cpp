@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "al_stb_font.hpp"
+#include <cstdint>
 #include <cstddef>  // offsetof
 #include <iostream>
 

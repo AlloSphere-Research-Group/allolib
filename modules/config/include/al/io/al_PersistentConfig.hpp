@@ -2,6 +2,7 @@
 #define INCLUDE_PERSISTENTCONFIG_HPP
 
 #include <cinttypes>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>

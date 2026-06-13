@@ -1,4 +1,6 @@
 #include "al/protocol/al_CommandConnection.hpp"
+#include <cstdint>
+#include <cstring>
 
 #include <algorithm>
 #include <array>

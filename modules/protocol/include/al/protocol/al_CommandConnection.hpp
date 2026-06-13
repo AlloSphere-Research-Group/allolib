@@ -47,6 +47,8 @@
 */
 
 #include <atomic>
+#include <cstdint>
+#include <cstring>
 #include <cinttypes>
 #include <condition_variable>
 #include <iostream>

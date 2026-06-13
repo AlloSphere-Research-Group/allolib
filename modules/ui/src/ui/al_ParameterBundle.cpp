@@ -1,5 +1,6 @@
 
 #include "al/ui/al_ParameterBundle.hpp"
+#include <cstdint>
 
 #include <cstring>
 #include <string>

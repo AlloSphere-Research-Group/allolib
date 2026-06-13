@@ -1,4 +1,6 @@
 #include "al/core/protocol/al_Serialize.h"
+#include <cstdint>
+#include <cstring>
 #include <stdio.h>
 
 #ifdef __cplusplus

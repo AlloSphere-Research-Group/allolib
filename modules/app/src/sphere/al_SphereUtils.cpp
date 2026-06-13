@@ -1,6 +1,7 @@
 
 #define GLFW_INCLUDE_NONE
 #include "al/sphere/al_SphereUtils.hpp"
+#include <cstdint>
 
 // gethostname
 #ifdef AL_WINDOWS

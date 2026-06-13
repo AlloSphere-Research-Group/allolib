@@ -2,6 +2,7 @@
 #define AL_SPEAKERADJUSTMENT
 
 #include <vector>
+#include <cstdint>
 
 #include "al/io/al_AudioIOData.hpp"
 #include "al/sound/al_Speaker.hpp"

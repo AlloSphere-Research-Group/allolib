@@ -2,6 +2,7 @@
 #define INCLUDE_AL_DOWNMIXER_HPP
 
 #include <map>
+#include <cstdint>
 #include <vector>
 
 #include "al/sound/al_Speaker.hpp"

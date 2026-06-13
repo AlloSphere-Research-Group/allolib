@@ -33,6 +33,7 @@ does not perform any handshake for connection.)
 
 #else
 #include <sys/ioctl.h>
+#include <cstdint>
 #endif
 
 #include "al/io/al_Socket.hpp"
