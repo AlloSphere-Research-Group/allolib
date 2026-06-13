@@ -2,6 +2,7 @@
 #define AL_ARDUINO_HPP
 
 #include <functional>
+#include <cstdint>
 #include <thread>
 
 #include "serial/serial.h"

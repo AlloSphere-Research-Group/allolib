@@ -2,6 +2,7 @@
 #define OSCDOMAIN_H
 
 #include <functional>
+#include <cstdint>
 #include <iostream>
 
 #include "al_ComputationDomain.hpp"

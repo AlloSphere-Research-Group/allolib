@@ -44,6 +44,7 @@
 */
 
 #include <algorithm>
+#include <cstdint>
 #include <cmath>
 
 #include "al/math/al_Constants.hpp"

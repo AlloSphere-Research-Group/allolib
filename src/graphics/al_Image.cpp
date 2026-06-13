@@ -1,4 +1,5 @@
 #include "al/graphics/al_Image.hpp"
+#include <cstdint>
 
 #include <cstring>
 #include <iostream>

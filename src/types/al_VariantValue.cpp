@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <cstdint>
 #include <stdexcept>
 
 #include "al/types/al_VariantValue.hpp"

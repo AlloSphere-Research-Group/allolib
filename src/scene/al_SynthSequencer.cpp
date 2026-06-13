@@ -1,5 +1,6 @@
 
 #include "al/scene/al_SynthSequencer.hpp"
+#include <cstdint>
 
 #include <algorithm>
 #include <cassert>

@@ -45,6 +45,7 @@
 */
 
 #include <cstring>
+#include <cstdint>
 #include <inttypes.h>
 #include <vector>
 

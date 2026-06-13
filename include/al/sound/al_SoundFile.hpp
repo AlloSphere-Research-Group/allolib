@@ -2,6 +2,7 @@
 #define INCLUDE_AL_SOUNDFILE_HPP
 
 #include <atomic>
+#include <cstdint>
 #include <vector>
 
 namespace al {

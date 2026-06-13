@@ -1,5 +1,10 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 project(allolib)
+
+# Tells third-party submodules (Gamma, cpptoml, json, oscpack) to
+# override their cmake_minimum_required(VERSION < 3.5) policy.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+set(OpenGL_GL_PREFERENCE GLVND)
 
 MACRO(MACRO_ENSURE_OUT_OF_SOURCE_BUILD MSG)
      STRING(COMPARE EQUAL "${CMAKE_SOURCE_DIR}"

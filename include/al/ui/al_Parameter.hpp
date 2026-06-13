@@ -43,6 +43,7 @@
 */
 
 #include <float.h>
+#include <cstdint>
 
 #include <algorithm>
 #include <atomic>
