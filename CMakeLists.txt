@@ -69,6 +69,12 @@ else()
   add_subdirectory(modules/audio-backend-rtaudio) 
 endif()
 
+if(POLICY CMP0079)
+  cmake_policy(SET CMP0079 NEW) # allow linking a target defined in another directory
+endif()
+# resolves the static-library cycle for single-pass linkers like GNU ld
+target_link_libraries(alaudio PUBLIC alaudiobackend)
+
 add_subdirectory(modules/io)
 add_subdirectory(modules/midi) # move to extension?
 add_subdirectory(modules/serial) # move to extension?
