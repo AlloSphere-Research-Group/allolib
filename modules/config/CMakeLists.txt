@@ -1,5 +1,5 @@
 
-add_subdirectory(external/cpptoml)
+add_subdirectory(external/cpptoml EXCLUDE_FROM_ALL)
 
 set(headers
   include/al/io/al_PersistentConfig.hpp
