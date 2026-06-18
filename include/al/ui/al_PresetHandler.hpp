@@ -59,16 +59,14 @@
 namespace al {
 
 /**
- * @brief The PresetHandler class handles sorting and recalling of presets.
  * @ingroup UI
+ * @brief The PresetHandler class handles sorting and recalling of presets.
  *
  * Presets are saved by name with the ".preset" suffix.
  * These files are read and written in a simple text format that mirrors OSC
  * messages. A line setting parameter "param" to 0.5 would look like:
  *
- * @code
-/param f 0.5
- * @endcode
+ * @code \/param f 0.5 @endcode
  *
  * Comments can be added with '#' and everything after a line starting with '::'
  * will be ignored.
@@ -88,7 +86,7 @@ public:
 
   /**
    * @brief Constructor with option to set time master mode
-   * @param timeMasterMode
+   * @param timeMasterMode desired time master mode
    *
    * Only two modes are currently valid for PresetHandler:
    * TIME_MASTER_CPU and TIME_MASTER_ASYNC. The first will start a CPU
@@ -233,6 +231,7 @@ public:
   void setMorphTime(float time);
   void setMaxMorphTime(float time);
   void stopMorphing() { mTotalSteps.store(0); }
+  bool morphingActive() { return mMorphingActive.load(); }
   void morphTo(ParameterStates &parameterStates, float morphTime);
   void morphTo(const std::string &presetName, float morphTime);
 
@@ -411,6 +410,7 @@ private:
 
   std::atomic<uint64_t> mMorphStepCount{0};
   std::atomic<uint64_t> mTotalSteps{0};
+  std::atomic<bool> mMorphingActive{false};
   bool mCpuThreadRunning{false}; // To keep the morphing thread alive
   std::unique_ptr<std::thread> mMorphingThread;
   double mMorphInterval{0.02};

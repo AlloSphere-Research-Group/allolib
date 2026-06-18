@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <chrono>
 
 #include "al/io/al_File.hpp"
 #include "al/system/al_Time.hpp"

@@ -33,11 +33,11 @@ struct SoundFile {
   //
   //  ~SoundFile() = default;
 
-  bool open(const char* path);
-  float* getFrame(long long int frame);  // unsafe, without frameCount check
+  bool open(const char *path);
+  float *getFrame(long long int frame); // unsafe, without frameCount check
 };
 
-SoundFile getResampledSoundFile(SoundFile* toConvert,
+SoundFile getResampledSoundFile(SoundFile *toConvert,
                                 unsigned int newSampleRate);
 
 /// @brief Soundfile player class
@@ -46,7 +46,7 @@ struct SoundFilePlayer {
   long long int frame = 0;
   bool pause = true;
   bool loop = false;
-  SoundFile* soundFile = nullptr;  // non-owning
+  SoundFile *soundFile = nullptr; // non-owning
 
   // In case of adding some constructor other than default constructor,
   //   remember to implement or explicitly specify related functions
@@ -61,7 +61,7 @@ struct SoundFilePlayer {
   //
   //  ~SoundFilePlayer() = default;
 
-  void getFrames(uint64_t numFrames, float* buffer, int bufferLength);
+  void getFrames(uint64_t numFrames, float *buffer, int bufferLength);
 };
 
 /**
@@ -72,8 +72,8 @@ struct SoundFilePlayer {
  * comprehensive support, use the soundfile module in al_ext
  */
 class SoundFileStreaming {
- public:
-  SoundFileStreaming(const char* path = nullptr);
+public:
+  SoundFileStreaming(const char *path = nullptr);
   ~SoundFileStreaming();
 
   bool isOpen() { return mImpl != nullptr; }
@@ -86,14 +86,14 @@ class SoundFileStreaming {
   uint16_t numChannels();
 
   /// Open file for reading.
-  bool open(const char* path);
+  bool open(const char *path);
   /// Close file and cleanup
   void close();
   /// Read interleaved frames into preallocated buffer;
-  uint64_t getFrames(uint64_t numFrames, float* buffer);
+  uint64_t getFrames(uint64_t numFrames, float *buffer);
 
- private:
-  void* mImpl{nullptr};
+private:
+  void *mImpl{nullptr};
 };
 
 /// @brief Soundfile player class with thread-safe access to playback controls
@@ -104,6 +104,7 @@ struct SoundFilePlayerTS {
   std::atomic<bool> pauseSignal;
   std::atomic<bool> loopSignal;
   std::atomic<bool> rewindSignal;
+  std::atomic<bool> playingState{false};
   // TODO - volume and fading
 
   // In case of adding some constructor other than default constructor,
@@ -119,7 +120,7 @@ struct SoundFilePlayerTS {
   //
   //  ~SoundFilePlayerTS() = default;
 
-  bool open(const char* path) {
+  bool open(const char *path) {
     bool ret = soundFile.open(path);
     player.soundFile = &soundFile;
     return ret;
@@ -134,16 +135,19 @@ struct SoundFilePlayerTS {
   void setLoop() { loopSignal.store(true); }
   void setNoLoop() { loopSignal.store(false); }
 
-  void getFrames(int numFrames, float* buffer, int bufferLength) {
+  bool isPlaying() { return playingState.load(); }
+
+  void getFrames(int numFrames, float *buffer, int bufferLength) {
     player.pause = pauseSignal.load();
     player.loop = loopSignal.load();
     if (rewindSignal.exchange(false)) {
       player.frame = 0;
     }
     player.getFrames(numFrames, buffer, bufferLength);
+    playingState.store(player.pause);
   }
 };
 
-}  // namespace al
+} // namespace al
 
 #endif

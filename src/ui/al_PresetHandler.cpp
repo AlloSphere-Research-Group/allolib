@@ -277,7 +277,7 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
           std::advance(copyStart, targetValues.size());
           targetValues.insert(targetValues.end(), copyStart,
                               mStartValues[address].end());
-        } else if (targetValues.size() > mStartValues.size()) {
+        } else if (targetValues.size() > mStartValues[address].size()) {
           std::cout << "morphTo() too many values. Discarding values"
                     << std::endl;
         }
@@ -1144,6 +1144,7 @@ bool PresetHandler::stepMorphing() {
   uint64_t totalSteps = mTotalSteps.load();
   uint64_t stepCount = mMorphStepCount.fetch_add(1);
   if (stepCount <= totalSteps && totalSteps > 0) {
+    mMorphingActive.store(true);
     double morphPhase = double(stepCount) / totalSteps;
     if (totalSteps == 1) {
       morphPhase = 1.0;
@@ -1152,6 +1153,7 @@ bool PresetHandler::stepMorphing() {
     setInterpolatedValuesDelta(mStartValues, mDeltaValues, morphPhase);
     return true;
   }
+  mMorphingActive.store(false);
   return false;
 }
 

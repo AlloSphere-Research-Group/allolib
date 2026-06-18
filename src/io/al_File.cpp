@@ -564,7 +564,7 @@ void SearchPaths::print(std::ostream &stream) const {
   std::list<searchpath>::const_iterator it = mSearchPaths.begin();
   while (it != mSearchPaths.end()) {
     const SearchPaths::searchpath &sp = (*it++);
-    stream << "SearchPath" << this << " appPath: " << sp.first
+    stream << "SearchPath " << this << " path: " << sp.first
            << "(recursive: " << sp.second << ")" << std::endl;
   }
 }

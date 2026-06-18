@@ -45,7 +45,7 @@ struct MyApp : App {
     material.shininess(1);
     // material.emission(1, 1, 1);
 
-    addSphereWithTexcoords(mesh, 2);
+    addTexSphere(mesh, 2);
     const size_t n = mesh.vertices().size();
     auto& c = mesh.colors();
     c.resize(n);

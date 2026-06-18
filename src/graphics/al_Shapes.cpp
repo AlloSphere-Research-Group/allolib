@@ -391,7 +391,7 @@ int addSphere(Mesh &m, double radius, int slices, int stacks) {
   return m.vertices().size() - Nv;
 }
 
-int addSphereWithTexcoords(Mesh &m, double radius, int bands, bool isSkybox) {
+int addTexSphere(Mesh &m, double radius, int bands, bool isSkybox) {
   m.primitive(Mesh::TRIANGLES);
 
   double &r = radius;
@@ -664,6 +664,37 @@ int addPrism(Mesh &m, float btmRadius, float topRadius, float height,
   return 2 * slices + 2 * caps;
 }
 
+int addTexPrism(Mesh &m, float btmRadius, float topRadius, float height,
+                unsigned slices, bool flip) {
+  m.primitive(Mesh::TRIANGLES);
+  unsigned Nv = m.vertices().size();
+  float height_2 = height / 2;
+
+  double frq = 2 * M_PI / slices;
+  CSin csinb(frq, btmRadius);
+  CSin csint(frq, topRadius);
+  for (unsigned i = 0; i <= slices; ++i) {
+    m.vertex(csinb.r, csinb.i, -height_2);
+    m.texCoord((float)i / slices, 1.f);
+    csinb();
+    m.vertex(csint.r, csint.i, height_2);
+    m.texCoord((float)i / slices, 0.f);
+    csint();
+
+    if (i != slices) {
+      int j = i + 1; // next slice over
+      int ib0 = Nv + 2 * i;
+      int ib1 = Nv + 2 * j;
+      int it0 = ib0 + 1;
+      int it1 = ib1 + 1;
+      m.index(ib0, ib1, it0);
+      m.index(it0, ib1, it1);
+    }
+  }
+
+  return 2 * (slices + 1);
+}
+
 int addAnnulus(Mesh &m, float inRadius, float outRadius, unsigned slices,
                float twist) {
   return addPrism(m, inRadius, outRadius, 0, slices, twist, false);
@@ -672,6 +703,11 @@ int addAnnulus(Mesh &m, float inRadius, float outRadius, unsigned slices,
 int addCylinder(Mesh &m, float radius, float height, unsigned slices,
                 float twist, bool caps) {
   return addPrism(m, radius, radius, height, slices, twist, caps);
+}
+
+int addTexCylinder(Mesh &m, float radius, float height, unsigned slices,
+                   bool flip) {
+  return addTexPrism(m, radius, radius, height, slices, flip);
 }
 
 int addSurface(Mesh &m, int Nx, int Ny, double width, double height, double x,

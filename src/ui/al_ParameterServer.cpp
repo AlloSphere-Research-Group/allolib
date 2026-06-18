@@ -162,6 +162,9 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, ParameterMeta *param,
     notifyListeners(OSCaddress, p->get(), src);
   } else if (Parameter *p = dynamic_cast<Parameter *>(param)) { // Parameter
     notifyListeners(OSCaddress, p->get(), src);
+  } else if (ParameterInt *p =
+                 dynamic_cast<ParameterInt *>(param)) { // ParameterInt
+    notifyListeners(OSCaddress, p->get(), src);
   } else if (ParameterString *p =
                  dynamic_cast<ParameterString *>(param)) { // ParameterString
     notifyListeners(OSCaddress, p->get(), src);
@@ -445,11 +448,23 @@ bool ParameterServer::serverRunning() {
   }
 }
 
+std::vector<ParameterMeta *> ParameterServer::meta() { return mParameters; }
+
 std::vector<Parameter *> ParameterServer::parameters() {
   std::vector<Parameter *> params;
   for (auto *p : mParameters) {
     if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {
       params.push_back(static_cast<Parameter *>(p));
+    }
+  }
+  return params;
+}
+
+std::vector<ParameterInt *> ParameterServer::intParameters() {
+  std::vector<ParameterInt *> params;
+  for (auto *p : mParameters) {
+    if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) == 0) {
+      params.push_back(static_cast<ParameterInt *>(p));
     }
   }
   return params;
