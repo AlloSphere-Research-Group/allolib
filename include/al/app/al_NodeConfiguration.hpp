@@ -2,6 +2,7 @@
 #define INCLUDE_AL_NODECONFIGURATION
 
 #include <cinttypes>
+#include <cstdint>
 #include <iostream>
 
 namespace al {

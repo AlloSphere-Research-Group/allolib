@@ -1,8 +1,10 @@
 #include "al/ui/al_Composition.hpp"
 
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <thread>
 
 #include "al/io/al_File.hpp"
 #include "al/system/al_Time.hpp"

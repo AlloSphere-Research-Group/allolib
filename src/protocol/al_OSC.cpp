@@ -1,4 +1,5 @@
 #include "al/protocol/al_OSC.hpp"
+#include <cstdint>
 
 #include <ctype.h> // isgraph
 #include <stdio.h> // printf

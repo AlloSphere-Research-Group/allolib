@@ -1,4 +1,5 @@
 #include "al/scene/al_DistributedScene.hpp"
+#include <cstdint>
 
 using namespace al;
 

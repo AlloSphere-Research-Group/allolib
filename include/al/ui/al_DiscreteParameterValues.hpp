@@ -2,6 +2,7 @@
 #define AL_DISCRETEPARAMETERVALUES_HPP
 
 #include <iostream>
+#include <cstdint>
 #include <mutex>
 #include <string>
 #include <vector>

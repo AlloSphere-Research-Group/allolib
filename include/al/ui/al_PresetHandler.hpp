@@ -41,6 +41,7 @@
 */
 
 #include <algorithm>
+#include <cstdint>
 #include <atomic>
 #include <condition_variable>
 #include <functional>

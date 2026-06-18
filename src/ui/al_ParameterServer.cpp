@@ -1,5 +1,6 @@
 
 #include "al/ui/al_ParameterServer.hpp"
+#include <cstdint>
 #include "al/io/al_Socket.hpp"
 
 #include <algorithm>

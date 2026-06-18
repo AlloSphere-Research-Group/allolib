@@ -1,4 +1,5 @@
 #include "al/io/al_Toml.hpp"
+#include <cstdint>
 
 static al::TomlLoader& global_toml_loader() {
   static al::TomlLoader root = []() {

@@ -1,4 +1,5 @@
 #include "al/ui/al_DiscreteParameterValues.hpp"
+#include <cstdint>
 
 #include <algorithm>
 #include <cassert>

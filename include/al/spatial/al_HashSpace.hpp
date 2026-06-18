@@ -2,6 +2,7 @@
 #define INCLUDE_AL_HASHSPACE_HPP
 
 #include <algorithm>
+#include <cstdint>
 #include <vector>
 
 #include "al/math/al_Vec.hpp"

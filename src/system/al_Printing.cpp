@@ -1,4 +1,5 @@
 #include "al/system/al_Printing.hpp"
+#include <cstdint>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

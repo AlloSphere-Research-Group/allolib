@@ -46,6 +46,7 @@
 */
 
 #include <cassert>
+#include <cstdint>
 #include <cinttypes>
 #include <cstdio>
 #include <cstring>

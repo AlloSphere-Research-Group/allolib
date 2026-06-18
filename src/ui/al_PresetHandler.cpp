@@ -1,5 +1,6 @@
 
 #include "al/ui/al_PresetHandler.hpp"
+#include <cstdint>
 
 #include <cassert>
 #include <chrono>

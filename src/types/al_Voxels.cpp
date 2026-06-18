@@ -1,4 +1,6 @@
 #include "al/util/al_Voxels.hpp"
+#include <cstdint>
+#include <cstring>
 #include "al/core/io/al_File.hpp"
 #include "al/core/system/al_Printing.hpp"
 #include "al/util/al_Image.hpp"

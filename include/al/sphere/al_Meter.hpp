@@ -42,6 +42,7 @@
 */
 
 #include "al/graphics/al_Graphics.hpp"
+#include <cstring>
 #include "al/graphics/al_Mesh.hpp"
 #include "al/graphics/al_Shapes.hpp"
 #include "al/io/al_AudioIOData.hpp"
