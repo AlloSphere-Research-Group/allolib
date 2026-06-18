@@ -43,6 +43,7 @@
 */
 
 #include <string>
+#include <cstdint>
 #include <vector>
 #include "al_Serialize.h"
 

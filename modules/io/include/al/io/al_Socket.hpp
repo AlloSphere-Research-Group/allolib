@@ -46,6 +46,7 @@
 */
 
 #include <string>
+#include <cstdint>
 
 #include "al/system/al_Time.hpp"
 #include "al/types/al_ValueSource.hpp"

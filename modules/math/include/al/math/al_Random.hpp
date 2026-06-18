@@ -43,6 +43,7 @@
 */
 
 #include "al/math/al_StdRandom.hpp"
+#include <cstdint>
 
 /* req'd for int to float conversion */
 #include <time.h> /* req'd for time() */

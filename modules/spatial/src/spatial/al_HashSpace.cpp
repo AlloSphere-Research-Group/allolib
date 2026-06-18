@@ -1,4 +1,5 @@
 #include "al/spatial/al_HashSpace.hpp"
+#include <cstdint>
 #include "al/math/al_Functions.hpp"
 
 using namespace al;

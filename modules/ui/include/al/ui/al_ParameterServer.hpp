@@ -43,6 +43,7 @@
 */
 
 #include <mutex>
+#include <cstdint>
 
 #include "al/protocol/al_OSC.hpp"
 #include "al/ui/al_Parameter.hpp"

@@ -1,5 +1,7 @@
 #ifndef AL_VALUESOURCE_HPP
 #define AL_VALUESOURCE_HPP
+#include <cstdint>
+#include <string>
 
 namespace al {
 struct ValueSource {

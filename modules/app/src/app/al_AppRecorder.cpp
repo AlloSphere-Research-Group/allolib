@@ -1,6 +1,7 @@
 ﻿#include "al/app/al_AppRecorder.hpp"
 
 #include "al/graphics/al_Image.hpp"
+#include <cstdint>
 
 #include "Gamma/SoundFile.h"
 

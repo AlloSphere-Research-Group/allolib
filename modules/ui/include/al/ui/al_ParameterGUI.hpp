@@ -41,6 +41,7 @@
 */
 
 #include <climits>
+#include <cstdint>
 
 #include "al/io/al_AudioIO.hpp"
 #include "al/io/al_ControlNav.hpp"

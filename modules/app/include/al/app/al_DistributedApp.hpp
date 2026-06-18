@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <cstdint>
 #include <map>
 
 #include "al/app/al_App.hpp"

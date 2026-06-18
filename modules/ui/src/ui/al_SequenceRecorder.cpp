@@ -1,5 +1,6 @@
 
 #include "al/ui/al_SequenceRecorder.hpp"
+#include <cstring>
 
 #include <cassert>
 #include <fstream>

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.11)
 
 if(ALLOLIB_BUILD_SHARED)
     set(RTMIDI_BUILD_STATIC_LIBS OFF  CACHE BOOL "" FORCE)

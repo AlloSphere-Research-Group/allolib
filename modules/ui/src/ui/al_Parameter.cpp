@@ -1,5 +1,7 @@
 
 #include "al/ui/al_Parameter.hpp"
+#include <cstdint>
+#include <cstring>
 
 #include <fstream>
 #include <iostream>
