@@ -1,4 +1,4 @@
-
+set(CPPTOML_BUILD_EXAMPLES OFF)
 add_subdirectory(external/cpptoml EXCLUDE_FROM_ALL)
 
 set(headers
