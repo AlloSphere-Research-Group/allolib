@@ -1,5 +1,7 @@
 
 #include "al/sound/al_DownMixer.hpp"
+#include <cstdint>
+#include <cstring>
 #include "al/io/al_AudioIOData.hpp"
 
 #include <cinttypes>

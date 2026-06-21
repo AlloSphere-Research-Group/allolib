@@ -1,4 +1,5 @@
 #include "al/io/al_AudioIOData.hpp"
+#include <cstdint>
 
 #include <algorithm>
 #include <cassert>

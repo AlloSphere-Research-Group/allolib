@@ -1,4 +1,6 @@
 #include "al/io/al_CSVReader.hpp"
+#include <cstdint>
+#include <cstring>
 
 #include <cassert>
 #include <cctype>

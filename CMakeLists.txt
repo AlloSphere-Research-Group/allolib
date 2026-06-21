@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.11)
 project(allolib)
 
+# Tells third-party submodules (Gamma, cpptoml, json) to
+# override their cmake_minimum_required(VERSION < 3.5) policy.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+set(OpenGL_GL_PREFERENCE GLVND)
+
 # option(AL_VERBOSE_OUTPUT "" OFF)
 option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build by default
 option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built by default
@@ -63,6 +68,12 @@ elseif(ALLOLIB_USE_PORTAUDIO)
 else()  
   add_subdirectory(modules/audio-backend-rtaudio) 
 endif()
+
+if(POLICY CMP0079)
+  cmake_policy(SET CMP0079 NEW) # allow linking a target defined in another directory
+endif()
+# resolves the static-library cycle for single-pass linkers like GNU ld
+target_link_libraries(alaudio PUBLIC alaudiobackend)
 
 add_subdirectory(modules/io)
 add_subdirectory(modules/midi) # move to extension?

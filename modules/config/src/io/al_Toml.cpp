@@ -1,4 +1,5 @@
 #include "al/io/al_Toml.hpp"
+#include <cstdint>
 
 #include <fstream>
 #include <iostream>

@@ -48,6 +48,7 @@
 #define INCLUDE_ALLO_VOXELS_HPP
 
 #include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <sstream>

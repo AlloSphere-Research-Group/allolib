@@ -1,4 +1,5 @@
 #include "al/app/al_OSCDomain.hpp"
+#include <cstdint>
 
 using namespace al;
 

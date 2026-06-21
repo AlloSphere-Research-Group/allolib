@@ -50,6 +50,7 @@
 */
 
 #include <stdio.h>
+#include <cstring>
 
 #include <iostream>
 

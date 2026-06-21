@@ -1,4 +1,6 @@
 #include "al/ui/al_ParameterGUI.hpp"
+#include <cstdint>
+#include <cstring>
 
 #include <string>
 

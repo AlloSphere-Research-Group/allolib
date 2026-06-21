@@ -1,4 +1,5 @@
 #include "al/io/al_PersistentConfig.hpp"
+#include <cstdint>
 
 using namespace al;
 
