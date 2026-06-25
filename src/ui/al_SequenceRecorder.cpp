@@ -174,7 +174,20 @@ void SequenceRecorder::recorderFunction(SequenceRecorder *recorder,
     //		std::cout << recorder->mStepToInsert.presetName << ":" <<
     // recorder->mStepToInsert.waitTime << std::endl;
   }
+  size_t presetCount = 0;
+  for (const auto &s : steps)
+    if (s.type == PresetSequencer::PRESET) presetCount++;
+  if (presetCount == 0) {
+    std::cout << "Preset sequence not saved: no preset changes were recorded. "
+                 "Ensure Keyboard Mode is Presets and that MIDI/laptop keys "
+                 "trigger presets (you should hear/see changes) before Stop."
+              << std::endl;
+    return;
+  }
   if (steps.size() < 2) {
+    std::cout << "Preset sequence not saved: need at least 2 steps (press at "
+                 "least 2 different keys while recording)."
+              << std::endl;
     return;
   }
   if (sequenceName.size() < 1) {

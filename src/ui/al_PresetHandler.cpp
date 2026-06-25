@@ -373,9 +373,19 @@ void PresetHandler::recallPresetSynchronous(std::string name) {
         }
         param->setFields(mTargetValues[param->getFullAddress()]);
       } else {
-        std::cerr << "Warning: parameter " << param->getFullAddress()
-                  << "not matched" << __FILE__ << "  " << __FUNCTION__
-                  << std::endl;
+        // Do not warn for parameters that are skipped (e.g. optional/store-only)
+        bool isSkipped = false;
+        {
+          std::lock_guard<std::mutex> skipLk(mSkipParametersLock);
+          isSkipped =
+              (std::find(mSkipParameters.begin(), mSkipParameters.end(),
+                         param->getFullAddress()) != mSkipParameters.end());
+        }
+        if (!isSkipped) {
+          std::cerr << "Warning: parameter " << param->getFullAddress()
+                    << " not matched " << __FILE__ << "  " << __FUNCTION__
+                    << std::endl;
+        }
       }
     }
     // FIXME recall bundles

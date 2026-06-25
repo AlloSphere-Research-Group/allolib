@@ -13,7 +13,7 @@
 using namespace al;
 
 PresetSequencer::PresetSequencer(TimeMasterMode timeMasterMode)
-    : mRunning(false), mBeginCallbackEnabled(false), mEndCallbackEnabled(false),
+    : mBeginCallbackEnabled(false), mEndCallbackEnabled(false),
       mSequencerThread(nullptr) {
   mTimeMasterMode = timeMasterMode;
   if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
@@ -73,25 +73,28 @@ void PresetSequencer::playSequence(std::string sequenceName, double timeScale,
 }
 
 void PresetSequencer::stopSequence(bool triggerCallbacks) {
-  if (mRunning == true) {
+  bool wasRunning = mRunning.exchange(false);
+  if (wasRunning) {
     bool previousCallbackStatus = false;
     if (!triggerCallbacks) {
       previousCallbackStatus = mEndCallbackEnabled;
       enableEndCallback(false);
     }
-    mRunning = false;
     if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
       std::unique_lock<std::mutex> lk(mPlayWaitLock);
     }
-
-    if (mPresetHandler) {
-      mPresetHandler->stopMorphing();
-    }
-    // Wait until CPU thread is waiting to start again.
     if (!triggerCallbacks) {
       enableEndCallback(previousCallbackStatus);
     }
   }
+  // Always stop morphing so the preset handler stops interpolating (fixes
+  // threaded update not seeing mRunning in time).
+  if (mPresetHandler) {
+    mPresetHandler->stopMorphing();
+  }
+  // Do not recall preset here — can block or deadlock with update/morph threads,
+  // and can contribute to crash on quit. After Stop, stay on current preset;
+  // user can load another from the preset list or start another sequence.
 }
 
 void PresetSequencer::setTime(double time) {
@@ -109,6 +112,22 @@ void PresetSequencer::rewind() {
   } else { // If lock can't be acquired, request time change
     setTime(0.0);
   }
+}
+
+bool PresetSequencer::recallFirstPresetOfSequence() {
+  if (!mPresetHandler) return false;
+  std::string firstPresetName;
+  if (!mSequenceLock.try_lock()) return false;
+  for (size_t i = 0; i < mSteps.size(); ++i) {
+    if (mSteps[i].type == PRESET) {
+      firstPresetName = mSteps[i].name;
+      break;
+    }
+  }
+  mSequenceLock.unlock();
+  if (firstPresetName.empty()) return false;
+  mPresetHandler->recallPresetSynchronous(firstPresetName);
+  return true;
 }
 
 std::vector<std::string> al::PresetSequencer::getSequenceList() {
@@ -438,8 +457,6 @@ void PresetSequencer::updateSequencer() {
 
     if (mPresetHandler && (mRunning || mStartRunning)) {
       mPresetHandler->morphTo(step.name, step.morphTime);
-      //            std::cout << "recalling " << step.presetName <<
-      //            std::endl;
     }
     mLastPresetTime = mTargetTime;
     mParameterTargetTime = mTargetTime;
@@ -483,6 +500,11 @@ void PresetSequencer::updateSequencer() {
   if (mTargetTime <= mCurrentTime && mParameterList.empty() &&
       mParameterTargetTime <= mCurrentTime) {
     mRunning = false;
+    if (mPresetHandler) {
+      mPresetHandler->stopMorphing();
+    }
+    // Do not recall preset here — we're on the update thread with lock held;
+    // recallPresetSynchronous can deadlock. Use Stop button to recall first preset.
   }
   mSequenceLock.unlock();
 }

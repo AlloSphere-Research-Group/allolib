@@ -167,6 +167,13 @@ class PresetSequencer : public osc::MessageConsumer {
    */
   void rewind();
 
+  /**
+   * Recall the first preset of the current sequence. Call from GUI thread only
+   * (e.g. after Stop) so the atom "quits" to the start and you can play
+   * another sequence. Returns true if a preset was recalled.
+   */
+  bool recallFirstPresetOfSequence();
+
   bool playbackFinished() { return mSteps.size() == mCurrentStep; }
 
   /**
@@ -351,7 +358,7 @@ class PresetSequencer : public osc::MessageConsumer {
   TimeMasterMode mTimeMasterMode;
 
   bool mSequencerActive{false};
-  bool mRunning;
+  std::atomic<bool> mRunning{false};
   bool mStartRunning;
   std::queue<Step> mParameterList;
   double mCurrentTime = 0.0;  // Current time (in seconds)

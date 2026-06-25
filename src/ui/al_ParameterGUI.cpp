@@ -740,21 +740,20 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
         //                presetSequencer->getSequenceTotalDuration(seqList[currentPresetSequencerItem]);
       }
       if (ImGui::Button("Play")) {
-        if (!presetSequencer->running()) {
-          presetSequencer->stopSequence();
-          if (presetSequencer->playbackFinished()) {
-            if (state.currentTime != 0) {
-              presetSequencer->setTime(-state.startOffset);
-            }
+        // Always stop first so we can switch sequence without pressing Stop
+        presetSequencer->stopSequence();
+        if (presetSequencer->playbackFinished()) {
+          if (state.currentTime != 0) {
+            presetSequencer->setTime(-state.startOffset);
           }
-          if (currentPresetSequencerItem >= 0) {
-            double sliderTime = state.currentTime;
-            presetSequencer->playSequence(
-                stateMap[presetSequencer].seqList[currentPresetSequencerItem],
-                1.0, sliderTime - state.startOffset);
-          } else {
-            std::cout << "No sequence selected for playback." << std::endl;
-          }
+        }
+        if (currentPresetSequencerItem >= 0) {
+          double sliderTime = state.currentTime;
+          presetSequencer->playSequence(
+              stateMap[presetSequencer].seqList[currentPresetSequencerItem],
+              1.0, sliderTime - state.startOffset);
+        } else {
+          std::cout << "No sequence selected for playback." << std::endl;
         }
       }
       ImGui::SameLine();
@@ -764,7 +763,8 @@ void ParameterGUI::drawPresetSequencer(PresetSequencer *presetSequencer,
       ImGui::SameLine();
       if (ImGui::Button("Stop")) {
         presetSequencer->stopSequence();
-        presetSequencer->setTime(stateMap[presetSequencer].totalDuration);
+        // Recall first preset so the atom "quits" and you can play another
+        presetSequencer->recallFirstPresetOfSequence();
       }
       float time = state.currentTime;
       //        std::cout << time << std::endl;
