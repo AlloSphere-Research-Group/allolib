@@ -886,7 +886,6 @@ inline Vec<N, T> operator/(const T &s, const Vec<N, T> &v) {
   for (auto &e : r)
     e = s / e;
   return r;
-  return r;
 }
 
 // Specialized vector functions
