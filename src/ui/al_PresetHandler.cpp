@@ -1,7 +1,9 @@
 
 #include "al/ui/al_PresetHandler.hpp"
+#include <cstdint>
 
 #include <cassert>
+#include <chrono>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -15,22 +17,13 @@ using namespace al;
 // PresetHandler --------------------------------------------------------------
 
 PresetHandler::PresetHandler(std::string rootDirectory, bool verbose)
-    : mVerbose(verbose), mRootDir(rootDirectory) {
-  setCurrentPresetMap("default");
-  setRootPath(rootDirectory);
-
-  if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
-    mCpuThreadRunning = true;
-    mMorphingThread =
-        std::make_unique<std::thread>(PresetHandler::morphingFunction, this);
-  }
-}
+    : PresetHandler(TimeMasterMode::TIME_MASTER_CPU, rootDirectory, verbose) {}
 
 PresetHandler::PresetHandler(TimeMasterMode timeMasterMode,
                              std::string rootDirectory, bool verbose)
     : mVerbose(verbose), mRootDir(rootDirectory),
       mTimeMasterMode(timeMasterMode) {
-  setCurrentPresetMap("default");
+  // setCurrentPresetMap("default");
   setRootPath(rootDirectory);
   if (mTimeMasterMode == TimeMasterMode::TIME_MASTER_CPU) {
     startCpuThread();
@@ -41,6 +34,7 @@ PresetHandler::PresetHandler(TimeMasterMode timeMasterMode,
     std::cerr << "ERROR: PresetSequencer: TimeMasterMode not supported, "
                  "treating as TIME_MASTER_CPU"
               << std::endl;
+    startCpuThread();
   }
 }
 
@@ -50,7 +44,8 @@ void PresetHandler::setSubDirectory(std::string directory) {
   std::string path = getRootPath();
   if (!File::exists(path + directory)) {
     if (!Dir::make(path + directory)) {
-      std::cout << "Error creating directory: " << mRootDir << std::endl;
+      std::cout << "Error creating directory: " << path + directory
+                << std::endl;
       return;
     }
   }
@@ -139,14 +134,14 @@ std::vector<std::string> PresetHandler::availablePresetMaps() {
 
 void PresetHandler::storePreset(std::string name) {
   int index = -1;
-  for (auto preset : mPresetsMap) {
+  for (const auto &preset : mPresetsMap) {
     if (preset.second == name) {
       index = preset.first;
       break;
     }
   }
   if (index < 0) {
-    for (auto preset : mPresetsMap) {
+    for (const auto &preset : mPresetsMap) {
       if (index <= preset.first) {
         index = preset.first + 1;
       }
@@ -161,7 +156,7 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
   std::replace(name.begin(), name.end(), ':', '_');
 
   if (name == "") {
-    for (auto preset : mPresetsMap) {
+    for (const auto &preset : mPresetsMap) {
       if (preset.first == index) {
         name = preset.second;
         break;
@@ -173,22 +168,30 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
   }
   ParameterStates values;
   for (ParameterMeta *p : mParameters) {
-    std::vector<ParameterField> fields;
-    p->getFields(fields);
-    values[p->getFullAddress()] = fields;
+    std::string address = p->getFullAddress();
+    if (std::find(mSkipParameters.begin(), mSkipParameters.end(), address) ==
+        mSkipParameters.end()) {
+      std::vector<VariantValue> fields;
+      p->getFields(fields);
+      values[address] = fields;
+    }
   }
-  for (auto bundleGroup : mBundles) {
+  for (const auto &bundleGroup : mBundles) {
     std::string bundleName = "/" + bundleGroup.first + "/";
 
     for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
       std::string bundlePrefix = bundleName + std::to_string(i);
       for (ParameterMeta *p : bundleGroup.second.at(i)->parameters()) {
-        std::vector<ParameterField> fields;
-        p->getFields(fields);
-        values[bundlePrefix + p->getFullAddress()] = fields;
+
+        if (std::find(mSkipParameters.begin(), mSkipParameters.end(),
+                      p->getFullAddress()) == mSkipParameters.end()) {
+          std::vector<VariantValue> fields;
+          p->getFields(fields);
+          values[bundlePrefix + p->getFullAddress()] = fields;
+        }
       }
       // FIXME enable recursive nesting for bundles
-      for (auto subBundleGroup : bundleGroup.second.at(i)->bundles()) {
+      for (const auto &subBundleGroup : bundleGroup.second.at(i)->bundles()) {
         for (auto *bundle : subBundleGroup.second) {
           auto bundleStates = getBundleStates(bundle, subBundleGroup.first);
           for (auto &bundleValues : bundleStates) {
@@ -219,7 +222,7 @@ void PresetHandler::recallPreset(std::string name) {
   morphTo(name, mMorphTime.get());
 
   int index = -1;
-  for (auto preset : mPresetsMap) {
+  for (const auto &preset : mPresetsMap) {
     if (preset.second == name) {
       index = preset.first;
       break;
@@ -259,13 +262,66 @@ void PresetHandler::setInterpolatedPreset(int index1, int index2,
 void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
   {
     std::lock_guard<std::mutex> lk(mTargetLock);
-    mMorphTime.set(morphTime);
-    mTargetValues = parameterStates;
+    //    mDeltaValues = parameterStates;
+    mDeltaValues.clear();
+    mStartValues.clear();
     for (ParameterMeta *param : mParameters) {
-      if (mTargetValues.find(param->getFullAddress()) != mTargetValues.end()) {
-        std::vector<ParameterField> params;
-        param->getFields(params);
-        mStartValues[param->getFullAddress()] = params;
+      auto address = param->getFullAddress();
+      if (parameterStates.find(address) != parameterStates.end()) {
+        mStartValues[address].clear();
+        param->getFields(mStartValues[address]);
+        auto &params = mStartValues[address];
+        auto &targetValues = parameterStates[address];
+        if (targetValues.size() < mStartValues[address].size()) {
+          auto copyStart = mStartValues[address].begin();
+          std::advance(copyStart, targetValues.size());
+          targetValues.insert(targetValues.end(), copyStart,
+                              mStartValues[address].end());
+        } else if (targetValues.size() > mStartValues[address].size()) {
+          std::cout << "morphTo() too many values. Discarding values"
+                    << std::endl;
+        }
+        auto &deltaValues = mDeltaValues[address];
+        deltaValues.resize(targetValues.size());
+        for (size_t i = 0; i < targetValues.size(); i++) {
+          // TODO move thsi to VariantValue as overloaded operator?
+          if (targetValues[i].type() == VariantType::VARIANT_FLOAT &&
+              params[i].type() == VariantType::VARIANT_FLOAT) {
+            deltaValues[i] = VariantValue(targetValues[i].get<float>() -
+                                          params[i].get<float>());
+          } else if (targetValues[i].type() == VariantType::VARIANT_DOUBLE &&
+                     params[i].type() == VariantType::VARIANT_FLOAT) {
+            deltaValues[i] = VariantValue(targetValues[i].get<double>() -
+                                          params[i].get<float>());
+          } else if (targetValues[i].type() == VariantType::VARIANT_DOUBLE &&
+                     params[i].type() == VariantType::VARIANT_DOUBLE) {
+            deltaValues[i] = VariantValue(targetValues[i].get<double>() -
+                                          params[i].get<double>());
+          } else if (targetValues[i].type() == VariantType::VARIANT_INT32 &&
+                     params[i].type() == VariantType::VARIANT_INT32) {
+            deltaValues[i] = VariantValue(targetValues[i].get<int32_t>() -
+                                          params[i].get<int32_t>());
+          } else if (targetValues[i].type() == VariantType::VARIANT_FLOAT &&
+                     params[i].type() == VariantType::VARIANT_INT32) {
+            deltaValues[i] = VariantValue(targetValues[i].get<float>() -
+                                          params[i].get<int32_t>());
+          } else if (targetValues[i].type() == VariantType::VARIANT_DOUBLE &&
+                     params[i].type() == VariantType::VARIANT_INT32) {
+            deltaValues[i] = VariantValue(targetValues[i].get<double>() -
+                                          params[i].get<int32_t>());
+          } else if (targetValues[i].type() == VariantType::VARIANT_INT32 &&
+                     params[i].type() == VariantType::VARIANT_FLOAT) {
+            deltaValues[i] = VariantValue(targetValues[i].get<int32_t>() -
+                                          params[i].get<float>());
+          } else if (targetValues[i].type() == VariantType::VARIANT_STRING &&
+                     params[i].type() == VariantType::VARIANT_STRING) {
+            deltaValues[i] = VariantValue(targetValues[i].get<int32_t>() -
+                                          params[i].get<float>());
+          } else {
+            std::cout << "Parameter type unsupported in morph" << std::endl;
+          }
+        }
+        //        break;
       }
     }
 
@@ -275,26 +331,69 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
           for (unsigned int i = 0; i < bundles.size(); i++) {
             std::string bundlePrefix = prefix + std::to_string(i);
             for (auto *param : bundles.at(i)->parameters()) {
-              if (mTargetValues.find(bundlePrefix + param->getFullAddress()) !=
-                  mTargetValues.end()) {
-                mStartValues[bundlePrefix + param->getFullAddress()] =
-                    std::vector<ParameterField>();
-                param->getFields(
-                    mStartValues[bundlePrefix + param->getFullAddress()]);
+
+              if (std::find(mSkipParameters.begin(), mSkipParameters.end(),
+                            param->getFullAddress()) == mSkipParameters.end()) {
+                std::string address = bundlePrefix + param->getFullAddress();
+
+                mStartValues[param->getFullAddress()].clear();
+                param->getFields(mStartValues[address]);
+                auto &params = mStartValues[address];
+                auto targetValues = parameterStates[address];
+                auto &deltaValues = mDeltaValues[address];
+                for (size_t i = 0; i < targetValues.size(); i++) {
+                  // TODO move this to VariantValue as overloaded operator?
+                  if (targetValues[i].type() == VariantType::VARIANT_FLOAT &&
+                      params[i].type() == VariantType::VARIANT_FLOAT) {
+                    deltaValues[i] = VariantValue(targetValues[i].get<float>() -
+                                                  params[i].get<float>());
+                  } else if (targetValues[i].type() ==
+                                 VariantType::VARIANT_INT32 &&
+                             params[i].type() == VariantType::VARIANT_INT32) {
+                    deltaValues[i] =
+                        VariantValue(targetValues[i].get<int32_t>() -
+                                     params[i].get<int32_t>());
+                  } else if (targetValues[i].type() ==
+                                 VariantType::VARIANT_FLOAT &&
+                             params[i].type() == VariantType::VARIANT_INT32) {
+                    deltaValues[i] = VariantValue(targetValues[i].get<float>() -
+                                                  params[i].get<int32_t>());
+                  } else if (targetValues[i].type() ==
+                                 VariantType::VARIANT_INT32 &&
+                             params[i].type() == VariantType::VARIANT_FLOAT) {
+                    deltaValues[i] =
+                        VariantValue(targetValues[i].get<int32_t>() -
+                                     params[i].get<float>());
+                  } else if (targetValues[i].type() ==
+                                 VariantType::VARIANT_STRING &&
+                             params[i].type() == VariantType::VARIANT_STRING) {
+                    deltaValues[i] =
+                        VariantValue(targetValues[i].get<int32_t>() -
+                                     params[i].get<float>());
+                  } else {
+                    std::cout << "Parameter type unsupported in morph"
+                              << std::endl;
+                  }
+                }
+
+                break;
               }
             }
-            for (auto bundleGroup : bundles.at(i)->bundles()) {
+            for (const auto &bundleGroup : bundles.at(i)->bundles()) {
               prefix += "/" + bundleGroup.first + "/";
               processBundleGroup({bundleGroup.second}, prefix);
             }
           }
         };
 
-    for (auto bundleGroup : mBundles) {
+    for (const auto &bundleGroup : mBundles) {
       std::string prefix = "/" + bundleGroup.first + "/";
       processBundleGroup(bundleGroup.second, prefix);
     }
 
+    if (morphTime != mMorphTime) {
+      mMorphTime.set(morphTime);
+    }
     mMorphStepCount = 0;
     if (mMorphTime.get() <= 0.0) {
       mTotalSteps.store(1);
@@ -302,15 +401,20 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
       mTotalSteps.store(ceilf(mMorphTime.get() / mMorphInterval));
     }
   }
+  if (mVerbose) {
+    std::cout << "start morph. steps " << mTotalSteps.load()
+              << " time: " << mMorphTime.get() << " interval " << mMorphInterval
+              << std::endl;
+  }
 
   mCurrentPresetName = "";
 }
 
-void PresetHandler::morphTo(std::string presetName, float morphTime) {
+void PresetHandler::morphTo(const std::string &presetName, float morphTime) {
   auto parameterStates = loadPresetValues(presetName);
   if (mUseCallbacks) {
     int index = -1;
-    for (auto mapped : mPresetsMap) {
+    for (const auto &mapped : mPresetsMap) {
       if (mapped.second == presetName) {
         index = mapped.first;
         break;
@@ -345,33 +449,32 @@ void PresetHandler::recallPresetSynchronous(std::string name) {
     mTotalSteps = 0;
     mMorphStepCount = 0;
     std::lock_guard<std::mutex> lk(mTargetLock);
-    mTargetValues = loadPresetValues(name);
+    auto targetValues = loadPresetValues(name);
     for (ParameterMeta *param : mParameters) {
-      std::vector<ParameterField> currentFields;
+      std::vector<VariantValue> currentFields;
       param->getFields(currentFields);
-      if (mTargetValues.find(param->getFullAddress()) != mTargetValues.end()) {
-        if (mTargetValues[param->getFullAddress()].size() ==
+      if (targetValues.find(param->getFullAddress()) != targetValues.end()) {
+        if (targetValues[param->getFullAddress()].size() ==
             currentFields.size()) {
           for (size_t i = 0; i < currentFields.size(); i++) {
             if (currentFields[i].type() !=
-                mTargetValues[param->getFullAddress()][i].type()) {
-              if (currentFields[i].type() == ParameterField::FLOAT &&
-                  mTargetValues[param->getFullAddress()][i].type() ==
-                      ParameterField::INT32) {
-                mTargetValues[param->getFullAddress()][i] = ParameterField(
-                    float(mTargetValues[param->getFullAddress()][i]
-                              .get<int32_t>()));
-              } else if (currentFields[i].type() == ParameterField::INT32 &&
-                         mTargetValues[param->getFullAddress()][i].type() ==
-                             ParameterField::FLOAT) {
-                mTargetValues[param->getFullAddress()][i] = ParameterField(
-                    int32_t(mTargetValues[param->getFullAddress()][i]
-                                .get<float>()));
+                targetValues[param->getFullAddress()][i].type()) {
+              if (currentFields[i].type() == VariantType::VARIANT_FLOAT &&
+                  targetValues[param->getFullAddress()][i].type() ==
+                      VariantType::VARIANT_INT32) {
+                targetValues[param->getFullAddress()][i] = VariantValue(float(
+                    targetValues[param->getFullAddress()][i].get<int32_t>()));
+              } else if (currentFields[i].type() ==
+                             VariantType::VARIANT_INT32 &&
+                         targetValues[param->getFullAddress()][i].type() ==
+                             VariantType::VARIANT_FLOAT) {
+                targetValues[param->getFullAddress()][i] = VariantValue(int32_t(
+                    targetValues[param->getFullAddress()][i].get<float>()));
               }
             }
           }
         }
-        param->setFields(mTargetValues[param->getFullAddress()]);
+        param->setFields(targetValues[param->getFullAddress()]);
       } else {
         // Do not warn for parameters that are skipped (e.g. optional/store-only)
         bool isSkipped = false;
@@ -381,7 +484,7 @@ void PresetHandler::recallPresetSynchronous(std::string name) {
               (std::find(mSkipParameters.begin(), mSkipParameters.end(),
                          param->getFullAddress()) != mSkipParameters.end());
         }
-        if (!isSkipped) {
+        if (!isSkipped && verbose()) {
           std::cerr << "Warning: parameter " << param->getFullAddress()
                     << " not matched " << __FILE__ << "  " << __FUNCTION__
                     << std::endl;
@@ -404,7 +507,7 @@ void PresetHandler::recallPresetSynchronous(std::string name) {
     //      for (auto *param : mParameters) {
     //        if (param->getFullAddress() == targetValue.first) {
     //          mStartValues[param->getFullAddress()] =
-    //          std::vector<ParameterField>();
+    //          std::vector<VariantValue>();
     //          param->get(mStartValues[param->getFullAddress()]);
     //          valueSet = true;
     //          break;
@@ -419,7 +522,7 @@ void PresetHandler::recallPresetSynchronous(std::string name) {
     //            targetValue.first)
     //            {
     //              mStartValues[bundlePrefix + param->getFullAddress()] =
-    //                  std::vector<ParameterField>();
+    //                  std::vector<VariantValue>();
     //              param->get(mStartValues[bundlePrefix +
     //              param->getFullAddress()]); valueSet = true; break;
     //            }
@@ -433,7 +536,7 @@ void PresetHandler::recallPresetSynchronous(std::string name) {
     //  }
   }
   int index = -1;
-  for (auto preset : mPresetsMap) {
+  for (const auto &preset : mPresetsMap) {
     if (preset.second == name) {
       index = preset.first;
       break;
@@ -465,7 +568,11 @@ std::map<int, std::string> PresetHandler::availablePresets() {
 }
 
 std::string PresetHandler::getPresetName(int index) {
-  return mPresetsMap[index];
+  if (mPresetsMap.find(index) != mPresetsMap.end()) {
+    return mPresetsMap[index];
+  } else {
+    return std::string();
+  }
 }
 
 void PresetHandler::skipParameter(std::string parameterAddr, bool skip) {
@@ -488,7 +595,7 @@ int PresetHandler::getCurrentPresetIndex() {
   std::map<int, std::string> presets = availablePresets();
   int current = -1;
   std::string currentPresetName = getCurrentPresetName();
-  for (auto preset : presets) {
+  for (const auto &preset : presets) {
     if (preset.second == currentPresetName) {
       current = preset.first;
       break;
@@ -501,6 +608,8 @@ float PresetHandler::getMorphTime() { return mMorphTime.get(); }
 
 void PresetHandler::setMorphTime(float time) { mMorphTime.set(time); }
 
+void PresetHandler::setMaxMorphTime(float time) { mMorphTime.max(time); }
+
 void PresetHandler::stepMorphing(double stepTime) {
   double drift = mMorphInterval - stepTime;
   if (drift > 0.01) {
@@ -510,13 +619,17 @@ void PresetHandler::stepMorphing(double stepTime) {
 }
 
 std::string PresetHandler::getCurrentPath() {
-  std::string relPath = File::conformPathToOS(getRootPath() + mSubDir);
+  std::string relPath = getRootPath() + mSubDir;
+  if (relPath.size() > 0) {
+    relPath = File::conformPathToOS(relPath);
+  }
   return relPath;
 }
 
 void PresetHandler::setRootPath(std::string path) {
-  assert(path.size() > 0);
-  if (!File::exists(path)) {
+  if (path.size() == 0) {
+    mRootDir = "";
+  } else if (!File::exists(path)) {
     if (!Dir::make(path)) {
       std::cerr << "Error creating directory: " << path << std::endl;
     } else {
@@ -529,7 +642,10 @@ void PresetHandler::setRootPath(std::string path) {
 }
 
 std::string al::PresetHandler::getRootPath() {
-  std::string relPath = File::conformDirectory(mRootDir);
+  std::string relPath;
+  if (mRootDir.size() > 0) {
+    relPath = File::conformDirectory(mRootDir);
+  }
   return relPath;
 }
 
@@ -638,7 +754,7 @@ void PresetHandler::setCurrentPresetMap(std::string mapName, bool autoCreate) {
   if (verbose()) {
     std::cout << "Setting preset map:" << mapName << std::endl;
   }
-  for (auto cb : mPresetsMapCbs) {
+  for (const auto &cb : mPresetsMapCbs) {
     cb(mapName);
   }
 }
@@ -816,117 +932,257 @@ void PresetHandler::storeCurrentPresetMap(std::string mapName,
   f.close();
 }
 
-void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
-                                          ParameterStates &endValues,
-                                          double factor) {
-  for (auto startValue : startValues) {
-    std::vector<ParameterField> interpValues;
-    for (auto endValue : endValues) {
-      if (startValue.first == endValue.first) {
-        assert(startValue.second.size() == endValue.second.size());
-        if (factor != 1.0) {
-          for (size_t i = 0; i < endValue.second.size(); i++) {
-            if (startValue.second[i].type() != endValue.second[i].type()) {
-              if (startValue.second[i].type() == ParameterField::FLOAT &&
-                  endValue.second[i].type() == ParameterField::INT32) {
-                endValue.second[i] =
-                    ParameterField(float(endValue.second[i].get<int32_t>()));
-              } else if (endValue.second[i].type() == ParameterField::FLOAT &&
-                         startValue.second[i].type() == ParameterField::INT32) {
-                startValue.second[i] =
-                    ParameterField(float(startValue.second[i].get<int32_t>()));
-              } else {
-                std::cerr << "Parameter data type mismatch. Aborting."
-                          << std::endl;
-                return;
-              }
-            }
-            if (startValue.second[i].type() == ParameterField::FLOAT) {
-              interpValues.push_back(ParameterField(
-                  startValue.second[i].get<float>() +
-                  (factor * (endValue.second[i].get<float>() -
-                             startValue.second[i].get<float>()))));
-            } else if (startValue.second[i].type() == ParameterField::INT32) {
-              float value =
-                  startValue.second[i].get<int32_t>() +
-                  (factor * (endValue.second[i].get<int32_t>() -
-                             (float)startValue.second[i].get<int32_t>()));
-              interpValues.push_back(ParameterField((int32_t)value));
-            } else if (startValue.second[i].type() == ParameterField::STRING) {
-              interpValues.push_back(endValue.second[i]);
-            }
-          }
-        } else {
-          assert(startValue.second.size() == endValue.second.size());
-          for (size_t i = 0; i < endValue.second.size(); i++) {
-            if (startValue.second[i].type() == ParameterField::FLOAT &&
-                endValue.second[i].type() == ParameterField::INT32) {
-              endValue.second[i] =
-                  ParameterField(float(endValue.second[i].get<int32_t>()));
-            } else if (endValue.second[i].type() == ParameterField::FLOAT &&
-                       startValue.second[i].type() == ParameterField::INT32) {
-              endValue.second[i] =
-                  ParameterField(int32_t(endValue.second[i].get<float>()));
-            }
-          }
-          interpValues = endValue.second;
-        }
-
-        for (auto *param : mParameters) {
-          if (param->getFullAddress() == startValue.first &&
-              interpValues.size() > 0) {
-            param->setFields(interpValues);
-            break;
-          }
-        }
-
-        std::function<void(std::vector<ParameterBundle *>, std::string)>
-            processBundleGroup = [&](std::vector<ParameterBundle *> bundles,
-                                     std::string prefix) {
-              for (unsigned int i = 0; i < bundles.size(); i++) {
-                std::string bundlePrefix = prefix + std::to_string(i);
-                for (auto *param : bundles.at(i)->parameters()) {
-                  if (bundlePrefix + param->getFullAddress() ==
-                          startValue.first &&
-                      interpValues.size() > 0) {
-                    param->setFields(interpValues);
-                    break;
-                  }
-                }
-                for (auto bundleGroup : bundles.at(i)->bundles()) {
-                  prefix += "/" + bundleGroup.first + "/";
-                  processBundleGroup({bundleGroup.second}, prefix);
-                }
-              }
-            };
-
-        for (auto bundleGroup : mBundles) {
-          std::string prefix = "/" + bundleGroup.first + "/";
-          processBundleGroup(bundleGroup.second, prefix);
-        }
-        continue;
+void setBundleGroupValues(std::string fullAddress,
+                          std::vector<VariantValue> &values,
+                          std::vector<ParameterBundle *> bundles,
+                          std::string &prefix) {
+  for (unsigned int i = 0; i < bundles.size(); i++) {
+    std::string bundlePrefix = prefix + std::to_string(i);
+    for (auto *param : bundles.at(i)->parameters()) {
+      if (bundlePrefix + param->getFullAddress() == fullAddress &&
+          values.size() > 0) {
+        param->setFields(values);
+        return;
       }
+    }
+    for (const auto &bundleGroup : bundles.at(i)->bundles()) {
+      prefix += "/" + bundleGroup.first + "/";
+      setBundleGroupValues(fullAddress, values, {bundleGroup.second}, prefix);
     }
   }
 }
 
-void PresetHandler::stepMorphing() {
+void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
+                                          ParameterStates &endValues,
+                                          double factor) {
+  for (auto &startValue : startValues) {
+    std::vector<VariantValue> interpValues;
+    interpValues.reserve(startValue.second.size());
+    auto &endValue = endValues[startValue.first];
+    assert(startValue.second.size() == endValue.size());
+    if (factor != 1.0) {
+      for (size_t i = 0; i < endValue.size(); i++) {
+        auto startDataType = startValue.second[i].type();
+        auto endDataType = endValue[i].type();
+        // FIXME this looks wrong
+        if (startDataType != endDataType) {
+          if (startDataType == VariantType::VARIANT_FLOAT &&
+              endDataType == VariantType::VARIANT_INT32) {
+            endValue[i] = VariantValue(float(endValue[i].get<int32_t>()));
+          } else if (endDataType == VariantType::VARIANT_FLOAT &&
+                     startDataType == VariantType::VARIANT_INT32) {
+            startValue.second[i] =
+                VariantValue(float(startValue.second[i].get<int32_t>()));
+          } else if (endDataType == VariantType::VARIANT_DOUBLE &&
+                     startDataType == VariantType::VARIANT_INT32) {
+            startValue.second[i] =
+                VariantValue(double(startValue.second[i].get<int32_t>()));
+          } else {
+            std::cerr << "Parameter data type mismatch. Aborting." << std::endl;
+            return;
+          }
+        } else {
+          if (startDataType == VariantType::VARIANT_FLOAT) {
+            interpValues.push_back(VariantValue(
+                startValue.second[i].get<float>() +
+                ((float)factor * (endValue[i].get<float>() -
+                                  startValue.second[i].get<float>()))));
+          } else if (startDataType == VariantType::VARIANT_INT32) {
+            float value =
+                startValue.second[i].get<int32_t>() +
+                ((float)factor * (endValue[i].get<int32_t>() -
+                                  (float)startValue.second[i].get<int32_t>()));
+            interpValues.push_back(VariantValue((int32_t)value));
+          } else if (startDataType == VariantType::VARIANT_STRING) {
+            interpValues.push_back(endValue[i]);
+          }
+        }
+      }
+    } else {
+      assert(startValue.second.size() == endValue.size());
+      for (size_t i = 0; i < endValue.size(); i++) {
+        if (startValue.second[i].type() == VariantType::VARIANT_FLOAT &&
+            endValue[i].type() == VariantType::VARIANT_INT32) {
+          endValue[i] = VariantValue(float(endValue[i].get<int32_t>()));
+        } else if (endValue[i].type() == VariantType::VARIANT_FLOAT &&
+                   startValue.second[i].type() == VariantType::VARIANT_INT32) {
+          endValue[i] = VariantValue(int32_t(endValue[i].get<float>()));
+        }
+      }
+      interpValues = endValue;
+    }
+
+    for (auto *param : mParameters) {
+      if (param->getFullAddress() == startValue.first &&
+          interpValues.size() > 0) {
+        param->setFields(interpValues);
+        break;
+      }
+    }
+
+    for (const auto &bundleGroup : mBundles) {
+      std::string prefix = "/" + bundleGroup.first + "/";
+      setBundleGroupValues(startValue.first, interpValues, bundleGroup.second,
+                           prefix);
+    }
+  }
+}
+
+void PresetHandler::setInterpolatedValuesDelta(ParameterStates &startValues,
+                                               ParameterStates &deltaValues,
+                                               double factor) {
+  for (auto &startValue : startValues) {
+    std::vector<VariantValue> interpValues;
+    auto &deltaValue = deltaValues[startValue.first];
+    interpValues.resize(deltaValue.size());
+    assert(startValue.second.size() == deltaValue.size());
+    if (factor == 0.0) {
+      for (size_t i = 0; i < deltaValue.size(); i++) {
+        interpValues[i] = startValue.second[i];
+      }
+    } else if (factor == 1.0) { // factor == 1.0
+      for (size_t i = 0; i < deltaValue.size(); i++) {
+        auto startDataType = startValue.second[i].type();
+        auto deltaDataType = deltaValue[i].type();
+        if (startDataType != deltaDataType) {
+          if (startDataType == VariantType::VARIANT_FLOAT &&
+              deltaDataType == VariantType::VARIANT_INT32) {
+            interpValues[i] = VariantValue(startValue.second[i].get<float>() +
+                                           float(deltaValue[i].get<int32_t>()));
+          } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
+                     startDataType == VariantType::VARIANT_DOUBLE) {
+            interpValues[i] = VariantValue(startValue.second[i].get<double>() +
+                                           factor * deltaValue[i].get<float>());
+          } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
+                     startDataType == VariantType::VARIANT_FLOAT) {
+            interpValues[i] = VariantValue(startValue.second[i].get<float>() +
+                                           deltaValue[i].get<double>());
+          } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
+                     startDataType == VariantType::VARIANT_INT32) {
+            interpValues[i] = VariantValue(startValue.second[i].get<int32_t>() +
+                                           ceil(deltaValue[i].get<float>()));
+          } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
+                     startDataType == VariantType::VARIANT_INT32) {
+            interpValues[i] = VariantValue(startValue.second[i].get<int32_t>() +
+                                           ceil(deltaValue[i].get<double>()));
+          } else {
+            std::cerr << "Parameter data type mismatch. Aborting." << std::endl;
+            return;
+          }
+        } else {
+          if (startDataType == VariantType::VARIANT_FLOAT) {
+            interpValues[i] = VariantValue(startValue.second[i].get<float>() +
+                                           deltaValue[i].get<float>());
+          } else if (startDataType == VariantType::VARIANT_DOUBLE) {
+            interpValues[i] = VariantValue(startValue.second[i].get<double>() +
+                                           deltaValue[i].get<double>());
+          } else if (startDataType == VariantType::VARIANT_INT32) {
+            interpValues[i] = VariantValue(startValue.second[i].get<int32_t>() +
+                                           deltaValue[i].get<int32_t>());
+          } else if (startDataType == VariantType::VARIANT_STRING) {
+            interpValues[i] = deltaValue[i];
+          }
+        }
+      }
+    } else {
+      for (size_t i = 0; i < deltaValue.size(); i++) {
+        auto startDataType = startValue.second[i].type();
+        auto deltaDataType = deltaValue[i].type();
+        if (startDataType != deltaDataType) {
+          if (startDataType == VariantType::VARIANT_FLOAT &&
+              deltaDataType == VariantType::VARIANT_INT32) {
+            interpValues[i] =
+                VariantValue(startValue.second[i].get<float>() +
+                             factor * float(deltaValue[i].get<int32_t>()));
+          } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
+                     startDataType == VariantType::VARIANT_DOUBLE) {
+            interpValues[i] = VariantValue(startValue.second[i].get<double>() +
+                                           factor * deltaValue[i].get<float>());
+          } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
+                     startDataType == VariantType::VARIANT_FLOAT) {
+            interpValues[i] =
+                VariantValue(startValue.second[i].get<float>() +
+                             factor * deltaValue[i].get<double>());
+          } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
+                     startDataType == VariantType::VARIANT_INT32) {
+            interpValues[i] =
+                VariantValue(startValue.second[i].get<int32_t>() +
+                             factor * ceil(deltaValue[i].get<float>()));
+          } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
+                     startDataType == VariantType::VARIANT_INT32) {
+            interpValues[i] =
+                VariantValue(startValue.second[i].get<int32_t>() +
+                             factor * ceil(deltaValue[i].get<double>()));
+          } else {
+            std::cerr << "Parameter data type mismatch. Aborting." << std::endl;
+            return;
+          }
+        } else {
+          if (startDataType == VariantType::VARIANT_FLOAT) {
+            interpValues[i] = VariantValue(startValue.second[i].get<float>() +
+                                           factor * deltaValue[i].get<float>());
+          } else if (startDataType == VariantType::VARIANT_INT32) {
+            interpValues[i] =
+                VariantValue(startValue.second[i].get<int32_t>() +
+                             factor * deltaValue[i].get<int32_t>());
+          } else if (startDataType == VariantType::VARIANT_STRING) {
+            interpValues[i] = deltaValue[i];
+          }
+        }
+      }
+    }
+
+    for (auto *param : mParameters) {
+      if (param->getFullAddress() == startValue.first &&
+          interpValues.size() > 0) {
+        param->setFields(interpValues);
+        break;
+      }
+    }
+
+    for (const auto &bundleGroup : mBundles) {
+      std::string prefix = "/" + bundleGroup.first + "/";
+      setBundleGroupValues(startValue.first, interpValues, bundleGroup.second,
+                           prefix);
+    }
+  }
+}
+
+bool PresetHandler::stepMorphing() {
   uint64_t totalSteps = mTotalSteps.load();
   uint64_t stepCount = mMorphStepCount.fetch_add(1);
   if (stepCount <= totalSteps && totalSteps > 0) {
+    mMorphingActive.store(true);
     double morphPhase = double(stepCount) / totalSteps;
     if (totalSteps == 1) {
       morphPhase = 1.0;
     }
     std::lock_guard<std::mutex> lk(mTargetLock);
-    setInterpolatedValues(mStartValues, mTargetValues, morphPhase);
+    setInterpolatedValuesDelta(mStartValues, mDeltaValues, morphPhase);
+    return true;
   }
+  mMorphingActive.store(false);
+  return false;
 }
 
 void PresetHandler::morphingFunction(al::PresetHandler *handler) {
   while (handler->mCpuThreadRunning) {
+    auto start = std::chrono::high_resolution_clock::now();
     handler->stepMorphing();
-    al::wait(handler->mMorphInterval);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+            .count() *
+        1.0e-6;
+
+    if (duration > handler->mMorphInterval) {
+      std::cout << "WARNING missed morphing step time by "
+                << duration - handler->mMorphInterval << " total=" << duration
+                << std::endl;
+    }
+    std::this_thread::sleep_until(
+        start +
+        std::chrono::microseconds((long long)(handler->mMorphInterval * 1e6)));
   }
 }
 
@@ -935,13 +1191,13 @@ PresetHandler::getBundleStates(ParameterBundle *bundle, std::string id) {
   ParameterStates values;
   std::string bundlePrefix = bundle->name() + "/" + id;
   for (ParameterMeta *p : bundle->parameters()) {
-    values[bundlePrefix + p->getFullAddress()] = std::vector<ParameterField>();
+    values[bundlePrefix + p->getFullAddress()] = std::vector<VariantValue>();
     p->getFields(values[bundlePrefix + p->getFullAddress()]);
   }
-  for (auto b : bundle->bundles()) {
+  for (const auto &b : bundle->bundles()) {
     for (auto *bundle : b.second) {
       auto subBundleValues = getBundleStates(bundle, b.first);
-      for (auto bundleValue : subBundleValues) {
+      for (const auto &bundleValue : subBundleValues) {
         values[bundlePrefix + "/" + bundleValue.first] = bundleValue.second;
       }
     }
@@ -983,7 +1239,7 @@ PresetHandler::loadPresetValues(std::string name) {
         }
         std::stringstream ss(line);
         std::string address, type;
-        std::vector<ParameterField> values;
+        std::vector<VariantValue> values;
         std::getline(ss, address, ' ');
         std::getline(ss, type, ' ');
         std::string value;
@@ -1043,22 +1299,22 @@ bool PresetHandler::savePresetValues(const ParameterStates &values,
   std::ofstream f(fileName);
   if (!f.is_open()) {
     if (mVerbose) {
-      std::cout << "Error while opening preset file fro write: " << fileName
+      std::cout << "Error while opening preset file for write: " << fileName
                 << std::endl;
     }
     return false;
   }
   f << "::" + presetName << std::endl;
-  for (auto value : values) {
+  for (const auto &value : values) {
     std::string types, valueString;
     for (auto &value2 : value.second) {
-      if (value2.type() == ParameterField::FLOAT) {
+      if (value2.type() == VariantType::VARIANT_FLOAT) {
         types += "f";
         valueString += std::to_string(value2.get<float>()) + " ";
-      } else if (value2.type() == ParameterField::STRING) {
+      } else if (value2.type() == VariantType::VARIANT_STRING) {
         types += "s";
         valueString += value2.get<std::string>() + " ";
-      } else if (value2.type() == ParameterField::INT32) {
+      } else if (value2.type() == VariantType::VARIANT_INT32) {
         types += "i";
         valueString += std::to_string(value2.get<int32_t>()) + " ";
       }
