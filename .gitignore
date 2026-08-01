@@ -50,3 +50,4 @@ al.dir/
 .vscode
 
 temp
+.cache

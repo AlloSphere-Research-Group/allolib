@@ -1,10 +1,17 @@
-cmake_minimum_required(VERSION 3.11)
-project(allolib VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.24...4.4)
+project(allolib VERSION 3.0.0 LANGUAGES C CXX)
 
 # Tells third-party submodules (Gamma, cpptoml, json) to
 # override their cmake_minimum_required(VERSION < 3.5) policy.
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 set(OpenGL_GL_PREFERENCE GLVND)
+
+# Shared module helpers (al_configure_module, al_install_module).
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/AlloLibModule.cmake)
+
+if(POLICY CMP0079)
+  cmake_policy(SET CMP0079 NEW) # allow linking a target defined in another directory
+endif()
 
 # option(AL_VERBOSE_OUTPUT "" OFF)
 option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build by default

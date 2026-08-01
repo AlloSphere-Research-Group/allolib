@@ -18,94 +18,86 @@ set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "MSVC runtime library DLL" FORCE)
 
 add_subdirectory(external/glfw)
 
-set(headers
-  include/al/graphics/al_BufferObject.hpp
-  include/al/graphics/al_DefaultShaders.hpp
-  include/al/graphics/al_DefaultShaderString.hpp
-  include/al/graphics/al_EasyFBO.hpp
-  include/al/graphics/al_EasyVAO.hpp
-  include/al/graphics/al_FBO.hpp
-  include/al/graphics/al_Font.hpp
-  include/al/graphics/al_GPUObject.hpp
-  include/al/graphics/al_Graphics.hpp
-  include/al/graphics/al_Image.hpp
-  include/al/graphics/al_Isosurface.hpp
-  include/al/graphics/al_Lens.hpp
-  include/al/graphics/al_Light.hpp
-  include/al/graphics/al_Mesh.hpp
-  include/al/graphics/al_OpenGL.hpp
-  include/al/graphics/al_RenderManager.hpp
-  include/al/graphics/al_Shader.hpp
-  include/al/graphics/al_ShaderManager.hpp
-  include/al/graphics/al_Shapes.hpp
-  include/al/graphics/al_Texture.hpp
-  include/al/graphics/al_VAO.hpp
-  include/al/graphics/al_VAOMesh.hpp
-  include/al/graphics/al_Viewpoint.hpp
-
-  include/al/io/al_Window.hpp
-  include/al/io/al_ControlNav.hpp
-)
-
-set(sources
-  src/graphics/al_BufferObject.cpp
-  src/graphics/al_DefaultShaders.cpp
-  src/graphics/al_DefaultShaderString.cpp
-  src/graphics/al_EasyFBO.cpp
-  src/graphics/al_EasyVAO.cpp
-  src/graphics/al_FBO.cpp
-  src/graphics/al_Font.cpp
-  src/graphics/al_GPUObject.cpp
-  src/graphics/al_Graphics.cpp
-  src/graphics/al_Image.cpp
-  src/graphics/al_Isosurface.cpp
-  src/graphics/al_Lens.cpp
-  src/graphics/al_Light.cpp
-  src/graphics/al_Mesh.cpp
-  src/graphics/al_OpenGL.cpp
-  src/graphics/al_RenderManager.cpp
-  src/graphics/al_Shader.cpp
-  src/graphics/al_ShaderManager.cpp
-  src/graphics/al_Shapes.cpp
-  src/graphics/al_Texture.cpp
-  src/graphics/al_VAO.cpp
-  src/graphics/al_VAOMesh.cpp
-  src/graphics/al_Viewpoint.cpp
-
-  src/graphics/al_stb_image.cpp
-  src/graphics/al_stb_font.cpp
-
-  src/io/al_Window.cpp
-  src/io/al_WindowGLFW.cpp
-  src/io/al_ControlNav.cpp
-)
-
-add_library(algraphics ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(algraphics ${AL_LIBRARY_TYPE})
 add_library(al::graphics ALIAS algraphics)
+
+target_sources(algraphics
+  PRIVATE
+    src/graphics/al_BufferObject.cpp
+    src/graphics/al_DefaultShaders.cpp
+    src/graphics/al_DefaultShaderString.cpp
+    src/graphics/al_EasyFBO.cpp
+    src/graphics/al_EasyVAO.cpp
+    src/graphics/al_FBO.cpp
+    src/graphics/al_Font.cpp
+    src/graphics/al_GPUObject.cpp
+    src/graphics/al_Graphics.cpp
+    src/graphics/al_Image.cpp
+    src/graphics/al_Isosurface.cpp
+    src/graphics/al_Lens.cpp
+    src/graphics/al_Light.cpp
+    src/graphics/al_Mesh.cpp
+    src/graphics/al_OpenGL.cpp
+    src/graphics/al_RenderManager.cpp
+    src/graphics/al_Shader.cpp
+    src/graphics/al_ShaderManager.cpp
+    src/graphics/al_Shapes.cpp
+    src/graphics/al_Texture.cpp
+    src/graphics/al_VAO.cpp
+    src/graphics/al_VAOMesh.cpp
+    src/graphics/al_Viewpoint.cpp
+    src/graphics/al_stb_image.cpp
+    src/graphics/al_stb_font.cpp
+    src/io/al_Window.cpp
+    src/io/al_WindowGLFW.cpp
+    src/io/al_ControlNav.cpp
+  PUBLIC
+    FILE_SET HEADERS
+      BASE_DIRS include
+      FILES
+        include/al/graphics/al_BufferObject.hpp
+        include/al/graphics/al_DefaultShaders.hpp
+        include/al/graphics/al_DefaultShaderString.hpp
+        include/al/graphics/al_EasyFBO.hpp
+        include/al/graphics/al_EasyVAO.hpp
+        include/al/graphics/al_FBO.hpp
+        include/al/graphics/al_Font.hpp
+        include/al/graphics/al_GPUObject.hpp
+        include/al/graphics/al_Graphics.hpp
+        include/al/graphics/al_Image.hpp
+        include/al/graphics/al_Isosurface.hpp
+        include/al/graphics/al_Lens.hpp
+        include/al/graphics/al_Light.hpp
+        include/al/graphics/al_Mesh.hpp
+        include/al/graphics/al_OpenGL.hpp
+        include/al/graphics/al_RenderManager.hpp
+        include/al/graphics/al_Shader.hpp
+        include/al/graphics/al_ShaderManager.hpp
+        include/al/graphics/al_Shapes.hpp
+        include/al/graphics/al_Texture.hpp
+        include/al/graphics/al_VAO.hpp
+        include/al/graphics/al_VAOMesh.hpp
+        include/al/graphics/al_Viewpoint.hpp
+        include/al/io/al_Window.hpp
+        include/al/io/al_ControlNav.hpp
+)
+
+al_configure_module(algraphics EXPORT_NAME graphics)
 
 if(AL_WINDOWS)
   target_compile_definitions(algraphics PUBLIC NOMINMAX)
-endif(AL_WINDOWS)
-
-set_target_properties(algraphics PROPERTIES
-  EXPORT_NAME graphics
-  DEBUG_POSTFIX d
-  CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON
-)
-
-target_include_directories(algraphics PUBLIC
-  include
-)
+endif()
 
 target_link_libraries(algraphics PUBLIC
-  almath
-  altypes
-  alspatial
-  alsystem
-  alio
+  al::math
+  al::types
+  al::spatial
+  al::system
+  al::io
   ${OPENGL_gl_LIBRARY}
   glad
   stb
   glfw
 )
+
+al_install_module(algraphics)

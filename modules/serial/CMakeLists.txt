@@ -1,6 +1,4 @@
-# ## serial ###
-# add_subdirectory(external/serial)
-# Even though serial has a cmake build file, it requires catkin...
+# serial has a cmake build file but requires catkin, so we build it here.
 
 set(serial_src_files
   "${CMAKE_CURRENT_LIST_DIR}/external/serial/src/serial.cc"
@@ -28,8 +26,6 @@ add_library(serial ${serial_src_files})
 target_include_directories(serial PUBLIC "${CMAKE_CURRENT_LIST_DIR}/external/serial/include")
 
 if(AL_MACOS)
-  find_library(IOKIT_LIBRARY IOKit)
-  find_library(FOUNDATION_LIBRARY Foundation)
   target_link_libraries(serial ${FOUNDATION_LIBRARY} ${IOKIT_LIBRARY})
 elseif(AL_WINDOWS)
   target_link_libraries(serial setupapi)
@@ -40,38 +36,32 @@ else()
   message(FATAL_ERROR "System platform variable not set properly")
 endif()
 
-# c++14 It's very important to set this for the extension as not
-# setting it will cause targets upstream to not use c++14
 set_target_properties(serial PROPERTIES
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON
 )
 
-# ## alserial ###
-set(headers
-  include/al/io/al_SerialIO.hpp
-)
+### alserial ###
 
-set(sources
-  src/io/al_SerialIO.cpp
-)
-
-add_library(alserial ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(alserial ${AL_LIBRARY_TYPE})
 add_library(al::serial ALIAS alserial)
 
-set_target_properties(alserial PROPERTIES
-  EXPORT_NAME serial
-  DEBUG_POSTFIX d
-  CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON
+target_sources(alserial
+  PRIVATE
+    src/io/al_SerialIO.cpp
+  PUBLIC
+    FILE_SET HEADERS
+      BASE_DIRS include
+      FILES
+        include/al/io/al_SerialIO.hpp
 )
 
-target_include_directories(alserial PUBLIC
-  include
-)
+al_configure_module(alserial EXPORT_NAME serial)
 
 target_link_libraries(alserial PUBLIC
-  altypes
-  alsystem
+  al::types
+  al::system
   serial
 )
+
+al_install_module(alserial)

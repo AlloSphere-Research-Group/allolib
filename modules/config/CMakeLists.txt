@@ -1,36 +1,30 @@
-
 add_subdirectory(external/cpptoml)
 
-set(headers
-  include/al/io/al_PersistentConfig.hpp
-  include/al/io/al_Toml.hpp
-)
-
-set(sources
-  src/io/al_PersistentConfig.cpp
-  src/io/al_Toml.cpp
-)
-
-add_library(alconfig ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(alconfig ${AL_LIBRARY_TYPE})
 add_library(al::config ALIAS alconfig)
+
+target_sources(alconfig
+  PRIVATE
+    src/io/al_PersistentConfig.cpp
+    src/io/al_Toml.cpp
+  PUBLIC
+    FILE_SET HEADERS
+      BASE_DIRS include
+      FILES
+        include/al/io/al_PersistentConfig.hpp
+        include/al/io/al_Toml.hpp
+)
+
+al_configure_module(alconfig EXPORT_NAME config)
 
 if(AL_WINDOWS)
   target_compile_definitions(alconfig PUBLIC NOMINMAX)
-endif(AL_WINDOWS)
-
-set_target_properties(alconfig PROPERTIES
-  EXPORT_NAME config
-  DEBUG_POSTFIX d
-  CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON
-)
-
-target_include_directories(alconfig PUBLIC
-  include
-)
+endif()
 
 target_link_libraries(alconfig PUBLIC
-  alio
-  alui
+  al::io
+  al::ui
   cpptoml
 )
+
+al_install_module(alconfig)

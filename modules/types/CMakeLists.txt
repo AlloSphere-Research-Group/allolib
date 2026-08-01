@@ -1,32 +1,18 @@
-
-# add_subdirectory(external/oscpack)
-
-# find_package(oscpack REQUIRED)
-
-set(headers
-  include/al/types/al_Color.hpp
-  include/al/types/al_VariantValue.hpp
-)
-
-set(sources
-  src/types/al_Color.cpp
-  src/types/al_VariantValue.cpp
-)
-
-add_library(altypes ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(altypes ${AL_LIBRARY_TYPE})
 add_library(al::types ALIAS altypes)
 
-set_target_properties(altypes PROPERTIES
-  EXPORT_NAME types
-  DEBUG_POSTFIX d
-  CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON
+target_sources(altypes
+  PRIVATE
+    src/types/al_Color.cpp
+    src/types/al_VariantValue.cpp
+  PUBLIC
+    FILE_SET HEADERS
+      BASE_DIRS include
+      FILES
+        include/al/types/al_Color.hpp
+        include/al/types/al_VariantValue.hpp
 )
 
-target_include_directories(altypes PUBLIC
-  include
-)
-
-target_link_libraries(altypes PUBLIC
-  almath
-)
+al_configure_module(altypes EXPORT_NAME types)
+target_link_libraries(altypes PUBLIC al::math)
+al_install_module(altypes)
