@@ -71,8 +71,10 @@ set(sources
 )
 
 add_library(alui ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::ui ALIAS alui)
 
 set_target_properties(alui PROPERTIES
+  EXPORT_NAME ui
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

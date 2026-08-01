@@ -12,12 +12,14 @@ set(sources
 )
 
 add_library(alconfig ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::config ALIAS alconfig)
 
 if(AL_WINDOWS)
   target_compile_definitions(alconfig PUBLIC NOMINMAX)
 endif(AL_WINDOWS)
 
 set_target_properties(alconfig PROPERTIES
+  EXPORT_NAME config
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

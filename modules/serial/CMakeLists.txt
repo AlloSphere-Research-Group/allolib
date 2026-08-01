@@ -57,8 +57,10 @@ set(sources
 )
 
 add_library(alserial ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::serial ALIAS alserial)
 
 set_target_properties(alserial PROPERTIES
+  EXPORT_NAME serial
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

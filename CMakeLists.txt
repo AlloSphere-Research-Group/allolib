@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.11)
-project(allolib)
+project(allolib VERSION 3.0.0)
 
 # Tells third-party submodules (Gamma, cpptoml, json) to
 # override their cmake_minimum_required(VERSION < 3.5) policy.
@@ -85,6 +85,19 @@ add_subdirectory(modules/ui) # and scene (interdependent, TODO split up)
 add_subdirectory(modules/config)
 add_subdirectory(modules/app) # and sphere (interdependencies)
 
+# Convenience umbrella targets. Prefer linking al::app (and explicit extras) in new code.
+add_library(al_all INTERFACE)
+add_library(al::all ALIAS al_all)
+target_link_libraries(al_all INTERFACE
+  al::app
+  al::serial
+)
+
+# Legacy monolithic name used by older consumers.
+add_library(al_legacy INTERFACE)
+add_library(al ALIAS al_legacy)
+target_link_libraries(al_legacy INTERFACE al::all)
+
 
 ## allolib extension modules ##
 # if (ALLOLIB_ADD_EXTENSIONS)
@@ -92,47 +105,6 @@ add_subdirectory(modules/app) # and sphere (interdependencies)
   # add_subdirectory(extensions)
   # add_subdirectory(../al_ext ../al_ext)
 # endif()
-
-
-# no longer have single library for allolib, but we could use something like libtool to pack them all together if needed
-# add_library(al ${AL_LIBRARY_TYPE} ${headers} ${sources})
-# add_library(al STATIC dummy.cpp)
-# target_link_libraries(al PUBLIC almath alspatial alsystem altypes algraphics alaudio alsound alio almidi alserial alprotocol alimgui alui alconfig alapp)
-
-# set_target_properties(al PROPERTIES
-#   DEBUG_POSTFIX d
-#   CXX_STANDARD 14
-#   CXX_STANDARD_REQUIRED ON
-# )
-
-# if (AL_WINDOWS)
-#   target_compile_definitions(al PUBLIC NOMINMAX)
-# else()
-#     target_compile_options(al PRIVATE "-Wall")
-# endif (AL_WINDOWS)
-
-# TODO remove this by making separate modules for rtaudio / portaudio that supply audio domains
-# if (ALLOLIB_USE_PORTAUDIO)
-#     # TODO needs more work on Windows
-#     if(ALLOLIB_USE_DUMMY_AUDIO)
-#         message("ALLOLIB_USE_DUMMY_AUDIO ignored. Using PortAudio")
-#     endif(ALLOLIB_USE_DUMMY_AUDIO)
-#     target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_PORTAUDIO)
-#     target_link_libraries(al PUBLIC portaudio)
-# else ()
-#     if (ALLOLIB_USE_DUMMY_AUDIO)
-#         target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_DUMMY)
-#     else()
-#         target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
-
-#         target_link_libraries(al PUBLIC rtaudio)
-#     endif(ALLOLIB_USE_DUMMY_AUDIO)
-# endif()
-
-## only used by AppRecorder.cpp? TODO Remove this.
-# if(SNDFILE_LIBRARY)
-#   target_compile_definitions(al PUBLIC AL_LIBSNDFILE)
-# endif(SNDFILE_LIBRARY)
 
 
 # what is the purpose of these options in MSVC

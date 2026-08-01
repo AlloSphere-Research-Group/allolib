@@ -15,12 +15,14 @@ set(sources
 )
 
 add_library(alsystem ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::system ALIAS alsystem)
 
 if(AL_WINDOWS)
   target_compile_definitions(alsystem PUBLIC NOMINMAX)
 endif(AL_WINDOWS)
 
 set_target_properties(alsystem PROPERTIES
+  EXPORT_NAME system
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

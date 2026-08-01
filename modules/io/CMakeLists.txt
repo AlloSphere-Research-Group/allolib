@@ -44,12 +44,14 @@ set(sources
 )
 
 add_library(alio ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::io ALIAS alio)
 
 if(AL_WINDOWS)
   target_compile_definitions(alio PUBLIC NOMINMAX)
 endif(AL_WINDOWS)
 
 set_target_properties(alio PROPERTIES
+  EXPORT_NAME io
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

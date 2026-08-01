@@ -28,12 +28,14 @@ set(sources
 )
 
 add_library(alaudiobackend ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::audio_backend ALIAS alaudiobackend)
 
 if (AL_WINDOWS)
   target_compile_definitions(alaudiobackend PUBLIC NOMINMAX)
 endif (AL_WINDOWS)
 
 set_target_properties(alaudiobackend PROPERTIES
+  EXPORT_NAME audio_backend
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

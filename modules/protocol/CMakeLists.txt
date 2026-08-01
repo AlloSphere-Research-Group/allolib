@@ -69,8 +69,10 @@ set(sources
 )
 
 add_library(alprotocol ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::protocol ALIAS alprotocol)
 
 set_target_properties(alprotocol PROPERTIES
+  EXPORT_NAME protocol
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

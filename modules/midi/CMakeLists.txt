@@ -27,12 +27,14 @@ set(sources
 )
 
 add_library(almidi ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::midi ALIAS almidi)
 
 if(AL_WINDOWS)
   target_compile_definitions(almidi PUBLIC NOMINMAX)
 endif(AL_WINDOWS)
 
 set_target_properties(almidi PROPERTIES
+  EXPORT_NAME midi
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

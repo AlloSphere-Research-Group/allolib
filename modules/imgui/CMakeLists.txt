@@ -37,8 +37,10 @@ set(sources
 )
 
 add_library(alimgui ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::imgui ALIAS alimgui)
 
 set_target_properties(alimgui PROPERTIES
+  EXPORT_NAME imgui
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

@@ -14,8 +14,10 @@ set(sources
 )
 
 add_library(almath ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::math ALIAS almath)
 
 set_target_properties(almath PROPERTIES
+  EXPORT_NAME math
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

@@ -11,8 +11,10 @@ set(sources
 )
 
 add_library(alspatial ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::spatial ALIAS alspatial)
 
 set_target_properties(alspatial PROPERTIES
+  EXPORT_NAME spatial
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

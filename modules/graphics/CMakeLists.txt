@@ -81,12 +81,14 @@ set(sources
 )
 
 add_library(algraphics ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::graphics ALIAS algraphics)
 
 if(AL_WINDOWS)
   target_compile_definitions(algraphics PUBLIC NOMINMAX)
 endif(AL_WINDOWS)
 
 set_target_properties(algraphics PROPERTIES
+  EXPORT_NAME graphics
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON

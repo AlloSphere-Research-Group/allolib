@@ -45,8 +45,10 @@ set(sources
 )
 
 add_library(alapp ${AL_LIBRARY_TYPE} ${headers} ${sources})
+add_library(al::app ALIAS alapp)
 
 set_target_properties(alapp PROPERTIES
+  EXPORT_NAME app
   DEBUG_POSTFIX d
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON
