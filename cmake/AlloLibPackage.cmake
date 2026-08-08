@@ -38,6 +38,11 @@ unset(_inc)
 set_target_properties(al_all PROPERTIES EXPORT_NAME all)
 install(TARGETS al_all EXPORT AlloLibTargets)
 
+if(TARGET al_audio_device)
+  set_target_properties(al_audio_device PROPERTIES EXPORT_NAME audio_device)
+  install(TARGETS al_audio_device EXPORT AlloLibTargets)
+endif()
+
 # --- Bundled third-party targets -------------------------------------------
 set(_al_bundled_targets
   Gamma

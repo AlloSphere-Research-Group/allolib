@@ -37,7 +37,7 @@ endif()
 
 target_link_libraries(alaudiobackend PUBLIC
   rtaudio
-  al::audio
+  al::audio_io
 )
 
 al_install_module(alaudiobackend)

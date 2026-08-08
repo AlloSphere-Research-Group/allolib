@@ -23,8 +23,19 @@ option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build by de
 option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built by default
 # option(ALLOLIB_ADD_EXTENSIONS "" OFF) # extension libraries will be added as targets
 option(ALLOLIB_BUILD_TESTS "" OFF)
-option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF) # TODO remove see below
-option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF) # TODO remove see below
+
+set(ALLOLIB_AUDIO_BACKEND "rtaudio" CACHE STRING
+  "Audio backend: rtaudio, portaudio, or dummy")
+set_property(CACHE ALLOLIB_AUDIO_BACKEND PROPERTY STRINGS rtaudio portaudio dummy)
+
+# Deprecated booleans — mapped onto ALLOLIB_AUDIO_BACKEND if still set.
+option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio (deprecated; use ALLOLIB_AUDIO_BACKEND)" OFF)
+option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O (deprecated; use ALLOLIB_AUDIO_BACKEND)" OFF)
+if(ALLOLIB_USE_DUMMY_AUDIO)
+  set(ALLOLIB_AUDIO_BACKEND "dummy" CACHE STRING "Audio backend: rtaudio, portaudio, or dummy" FORCE)
+elseif(ALLOLIB_USE_PORTAUDIO)
+  set(ALLOLIB_AUDIO_BACKEND "portaudio" CACHE STRING "Audio backend: rtaudio, portaudio, or dummy" FORCE)
+endif()
 
 option(ALLOLIB_BUILD_SHARED "Build all libraries as shared libraries" OFF)
 # option(TRAVIS_BUILD "" OFF)
@@ -72,20 +83,26 @@ add_subdirectory(modules/system)
 
 add_subdirectory(modules/graphics)
 
+add_subdirectory(modules/audio-io)
 add_subdirectory(modules/audio)
-if(ALLOLIB_USE_DUMMY_AUDIO) # TODO better way to select audio backend rtaudio/portaudio/dummy
-  add_subdirectory(modules/audio-backend-dummy) 
-elseif(ALLOLIB_USE_PORTAUDIO)
-  add_subdirectory(modules/audio-backend-portaudio) 
-else()  
-  add_subdirectory(modules/audio-backend-rtaudio) 
+if(ALLOLIB_AUDIO_BACKEND STREQUAL "dummy")
+  add_subdirectory(modules/audio-backend-dummy)
+elseif(ALLOLIB_AUDIO_BACKEND STREQUAL "portaudio")
+  add_subdirectory(modules/audio-backend-portaudio)
+elseif(ALLOLIB_AUDIO_BACKEND STREQUAL "rtaudio")
+  add_subdirectory(modules/audio-backend-rtaudio)
+else()
+  message(FATAL_ERROR "Unknown ALLOLIB_AUDIO_BACKEND='${ALLOLIB_AUDIO_BACKEND}' (rtaudio, portaudio, dummy)")
 endif()
 
-if(POLICY CMP0079)
-  cmake_policy(SET CMP0079 NEW) # allow linking a target defined in another directory
-endif()
-# resolves the static-library cycle for single-pass linkers like GNU ld
-target_link_libraries(alaudio PUBLIC alaudiobackend)
+# Convenience: AudioIO + the selected backend (no DSP). Typical apps also link al::audio.
+add_library(al_audio_device INTERFACE)
+add_library(al::audio_device ALIAS al_audio_device)
+target_link_libraries(al_audio_device INTERFACE
+  al::audio_io
+  al::audio_backend
+)
+set_target_properties(al_audio_device PROPERTIES EXPORT_NAME audio_device)
 
 add_subdirectory(modules/io)
 add_subdirectory(modules/midi) # move to extension?
@@ -93,9 +110,10 @@ add_subdirectory(modules/serial) # move to extension?
 add_subdirectory(modules/protocol)
 
 add_subdirectory(modules/imgui)
-add_subdirectory(modules/ui) # and scene (interdependent, TODO split up)
+add_subdirectory(modules/parameter) # composition: Parameter, presets, sequences
+add_subdirectory(modules/ui) # graphics UI + scene (TODO split scene)
 add_subdirectory(modules/config)
-add_subdirectory(modules/app) # and sphere (interdependencies)
+add_subdirectory(modules/app) # and sphere (TODO extract sphere to al_ext)
 
 # Convenience umbrella targets. Prefer linking al::app (and explicit extras) in new code.
 add_library(al_all INTERFACE)

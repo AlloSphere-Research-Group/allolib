@@ -23,7 +23,7 @@ endif()
 
 target_link_libraries(alconfig PUBLIC
   al::io
-  al::ui
+  al::parameter
   cpptoml
 )
 

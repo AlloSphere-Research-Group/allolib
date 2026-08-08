@@ -16,7 +16,7 @@ target_include_directories(alaudiobackend PUBLIC
 )
 
 target_link_libraries(alaudiobackend PUBLIC
-  al::audio
+  al::audio_io
   ${PORTAUDIO_LIBRARY}
 )
 

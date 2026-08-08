@@ -6,8 +6,6 @@ add_library(al::audio ALIAS alaudio)
 
 target_sources(alaudio
   PRIVATE
-    src/io/al_AudioIO.cpp
-    src/io/al_AudioIOData.cpp
     src/sound/al_Ambisonics.cpp
     src/sound/al_Biquad.cpp
     src/sound/al_Dbap.cpp
@@ -23,8 +21,6 @@ target_sources(alaudio
     FILE_SET HEADERS
       BASE_DIRS include
       FILES
-        include/al/io/al_AudioIO.hpp
-        include/al/io/al_AudioIOData.hpp
         include/al/sound/al_Ambisonics.hpp
         include/al/sound/al_Biquad.hpp
         include/al/sound/al_Crossover.hpp
@@ -42,7 +38,9 @@ target_sources(alaudio
 
 al_configure_module(alaudio EXPORT_NAME audio)
 
+# Spatializers render into AudioIOData; no dependency on a concrete backend.
 target_link_libraries(alaudio PUBLIC
+  al::audio_io
   al::math
   al::spatial
   dr_libs

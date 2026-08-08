@@ -9,7 +9,7 @@ target_sources(alaudiobackend
 al_configure_module(alaudiobackend EXPORT_NAME audio_backend)
 
 target_link_libraries(alaudiobackend PUBLIC
-  al::audio
+  al::audio_io
 )
 
 al_install_module(alaudiobackend)

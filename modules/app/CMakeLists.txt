@@ -46,7 +46,8 @@ target_sources(alapp
 al_configure_module(alapp EXPORT_NAME app)
 
 target_link_libraries(alapp PUBLIC
-  al::audio_backend
+  al::audio_device
+  al::audio
   al::ui
   al::config
   Gamma
