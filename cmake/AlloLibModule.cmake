@@ -1,6 +1,10 @@
 # Thin helpers for AlloLib module conventions.
 # Module CMakeLists keep add_library, target_sources, and deps visible;
 # these functions only apply shared policy (standard, export name, install).
+#
+# Vendored third-party deps are temporarily bundled into AlloLib's install for
+# usability. Longer term they may move to vcpkg/Conan + find_dependency(); the
+# al:: module export surface is designed to stay the same either way.
 
 include(GNUInstallDirs)
 
@@ -33,6 +37,7 @@ function(al_install_module target)
   endif()
 
   get_target_property(_header_sets ${target} HEADER_SETS)
+
   if(_header_sets)
     install(
       TARGETS ${target}

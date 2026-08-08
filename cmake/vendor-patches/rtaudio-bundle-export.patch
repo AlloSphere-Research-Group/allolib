@@ -1,0 +1,149 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 21da42a..96d8096 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -299,73 +299,76 @@ string(REPLACE ";" " " api "${API_DEFS}")
+ set(prefix ${CMAKE_INSTALL_PREFIX})
+ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/rtaudio.pc.in" "rtaudio.pc" @ONLY)
+ 
+-# Add install rule.
+-install(TARGETS ${LIB_TARGETS}
+-        EXPORT RtAudioTargets
+-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtaudio)
+-
+-# Install public header files
+-install(FILES RtAudio.h rtaudio_c.h
+-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtaudio)
+-
+-# Store the package in the user registry.
+-export(PACKAGE RtAudio)
+-
+-# Set installation path for CMake files.
+-set(RTAUDIO_CMAKE_DESTINATION share/rtaudio)
+-
+-# Create CMake configuration export file.
+-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig.cmake.in "@PACKAGE_INIT@\n")
++# AlloLib bundles rtaudio into AlloLibBundledTargets when ALLOLIB_BUNDLE_DEPS=ON.
++if(NOT ALLOLIB_BUNDLE_DEPS)
++  # Add install rule.
++  install(TARGETS ${LIB_TARGETS}
++          EXPORT RtAudioTargets
++          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++          INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtaudio)
++
++  # Install public header files
++  install(FILES RtAudio.h rtaudio_c.h
++    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtaudio)
++
++  # Store the package in the user registry.
++  export(PACKAGE RtAudio)
++
++  # Set installation path for CMake files.
++  set(RTAUDIO_CMAKE_DESTINATION share/rtaudio)
++
++  # Create CMake configuration export file.
++  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig.cmake.in "@PACKAGE_INIT@\n")
++
++  if(NEED_PTHREAD)
++    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig.cmake.in "find_package(Threads REQUIRED)\n")
++  endif()
+ 
+-if(NEED_PTHREAD)
+-  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig.cmake.in "find_package(Threads REQUIRED)\n")
++  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig.cmake.in "include(\${CMAKE_CURRENT_LIST_DIR}/RtAudioTargets.cmake)")
++
++  # Install CMake configuration export file.
++  include(CMakePackageConfigHelpers)
++  configure_package_config_file(
++    ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig.cmake.in
++    ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig.cmake
++    INSTALL_DESTINATION ${RTAUDIO_CMAKE_DESTINATION}
++  )
++
++  write_basic_package_version_file(
++      ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig-version.cmake
++      VERSION ${FULL_VER}
++      COMPATIBILITY AnyNewerVersion
++  )
++
++  install(
++    FILES
++      ${CMAKE_BINARY_DIR}/RtAudioConfig.cmake
++      ${CMAKE_BINARY_DIR}/RtAudioConfig-version.cmake
++    DESTINATION
++      ${RTAUDIO_CMAKE_DESTINATION}
++  )
++
++  # Export library target (build-tree).
++  export(EXPORT RtAudioTargets
++         NAMESPACE RtAudio::)
++
++  # Export library target (install-tree).
++  install(EXPORT RtAudioTargets
++          DESTINATION ${RTAUDIO_CMAKE_DESTINATION}
++          NAMESPACE RtAudio::)
++
++  # Configure uninstall target.
++  configure_file(
++      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/RtAudioConfigUninstall.cmake.in"
++      "${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfigUninstall.cmake" @ONLY)
++
++  # Create uninstall target.
++  add_custom_target(${RTAUDIO_TARGETNAME_UNINSTALL}
++      COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfigUninstall.cmake)
++
++  install(
++      FILES ${CMAKE_CURRENT_BINARY_DIR}/rtaudio.pc
++      DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+ endif()
+-
+-file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig.cmake.in "include(\${CMAKE_CURRENT_LIST_DIR}/RtAudioTargets.cmake)")
+-
+-# Install CMake configuration export file.
+-include(CMakePackageConfigHelpers)
+-configure_package_config_file(
+-  ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig.cmake.in
+-  ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig.cmake
+-  INSTALL_DESTINATION ${RTAUDIO_CMAKE_DESTINATION}
+-)
+-
+-write_basic_package_version_file(
+-    ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfig-version.cmake
+-    VERSION ${FULL_VER}
+-    COMPATIBILITY AnyNewerVersion
+-)
+-
+-install(
+-  FILES
+-    ${CMAKE_BINARY_DIR}/RtAudioConfig.cmake
+-    ${CMAKE_BINARY_DIR}/RtAudioConfig-version.cmake
+-  DESTINATION
+-    ${RTAUDIO_CMAKE_DESTINATION}
+-)
+-
+-# Export library target (build-tree).
+-export(EXPORT RtAudioTargets
+-       NAMESPACE RtAudio::)
+-
+-# Export library target (install-tree).
+-install(EXPORT RtAudioTargets
+-        DESTINATION ${RTAUDIO_CMAKE_DESTINATION}
+-        NAMESPACE RtAudio::)
+-
+-# Configure uninstall target.
+-configure_file(
+-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/RtAudioConfigUninstall.cmake.in"
+-    "${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfigUninstall.cmake" @ONLY)
+-
+-# Create uninstall target.
+-add_custom_target(${RTAUDIO_TARGETNAME_UNINSTALL}
+-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/RtAudioConfigUninstall.cmake)
+-
+-install(
+-    FILES ${CMAKE_CURRENT_BINARY_DIR}/rtaudio.pc
+-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)

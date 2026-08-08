@@ -9,6 +9,12 @@ endif()
 set(RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(RTMIDI_TARGETNAME_UNINSTALL RTMIDI_UNINSTALL CACHE STRING "" FORCE)
 
+# pkg-config yields bare "-ljack", which fails with Apple's new linker even when
+# /opt/homebrew/lib is on the path. CoreMIDI is enough for typical macOS use.
+if(APPLE)
+  set(RTMIDI_API_JACK OFF CACHE BOOL "" FORCE)
+endif()
+
 add_subdirectory(external/rtmidi)
 
 add_library(almidi ${AL_LIBRARY_TYPE})

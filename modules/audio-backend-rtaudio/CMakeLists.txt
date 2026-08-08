@@ -14,6 +14,11 @@ set(RTAUDIO_TARGETNAME_UNINSTALL RTAUDIO_UNINSTALL CACHE STRING "" FORCE)
 # Required for RtAudio 5.2.0
 set(RTAUDIO_STATIC_MSVCRT OFF)
 
+# Bare "-ljack" from pkg-config fails with Apple's new linker; use CoreAudio.
+if(APPLE)
+  set(RTAUDIO_API_JACK OFF CACHE BOOL "" FORCE)
+endif()
+
 add_subdirectory(external/rtaudio)
 
 add_library(alaudiobackend ${AL_LIBRARY_TYPE})

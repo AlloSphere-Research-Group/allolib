@@ -13,8 +13,9 @@ add_library(imgui ${ALLOLIB_EXTERNAL_LIB_TYPE}
 )
 
 target_include_directories(imgui PUBLIC
-  external/imgui
-  external/imgui/examples
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/imgui>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/examples>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 set_target_properties(imgui PROPERTIES

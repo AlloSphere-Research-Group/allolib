@@ -23,7 +23,10 @@ endif()
 
 add_library(serial ${serial_src_files})
 
-target_include_directories(serial PUBLIC "${CMAKE_CURRENT_LIST_DIR}/external/serial/include")
+target_include_directories(serial PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/external/serial/include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 if(AL_MACOS)
   target_link_libraries(serial ${FOUNDATION_LIBRARY} ${IOKIT_LIBRARY})

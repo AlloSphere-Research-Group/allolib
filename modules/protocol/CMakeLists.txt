@@ -29,7 +29,10 @@ add_library(oscpack ${AL_LIBRARY_TYPE}
   external/oscpack/osc/OscOutboundPacketStream.cpp
 )
 
-target_include_directories(oscpack PUBLIC external/oscpack)
+target_include_directories(oscpack PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/oscpack>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 if(AL_WINDOWS)
   target_compile_definitions(oscpack PUBLIC NOMINMAX)

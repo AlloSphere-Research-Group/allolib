@@ -13,6 +13,11 @@ if(POLICY CMP0079)
   cmake_policy(SET CMP0079 NEW) # allow linking a target defined in another directory
 endif()
 
+# When ON, vendored deps skip their own install(EXPORT) so AlloLib can bundle
+# them into AlloLibBundledTargets (one export set per target). Requires the
+# temporary patches in cmake/vendor-patches/ (./cmake/vendor-patches/apply.sh).
+# A future vcpkg/Conan layout would leave this OFF and use find_dependency().
+set(ALLOLIB_BUNDLE_DEPS ON)
 # option(AL_VERBOSE_OUTPUT "" OFF)
 option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build by default
 option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built by default
@@ -152,6 +157,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     # purpose of working around that bug. Perhaps can be removed on future
     # updates of RtMidi
     link_directories("/usr/local/lib")
+    if(EXISTS "/opt/homebrew/lib")
+      link_directories("/opt/homebrew/lib")
+    endif()
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 
@@ -168,3 +176,5 @@ if (ALLOLIB_ADD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
+# Installable CMake package: AlloLibConfig + exported targets.
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/AlloLibPackage.cmake)

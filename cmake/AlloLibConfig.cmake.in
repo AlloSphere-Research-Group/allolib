@@ -1,0 +1,13 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/AlloLibDependencies.cmake")
+
+# Vendored third-party targets used by al::* modules (temporary bundling).
+# With vcpkg/Conan these would come from find_dependency() instead.
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/AlloLibBundledTargets.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/AlloLibBundledTargets.cmake")
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/AlloLibTargets.cmake")
+
+check_required_components(AlloLib)
