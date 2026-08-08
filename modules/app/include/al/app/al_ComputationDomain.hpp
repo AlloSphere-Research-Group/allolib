@@ -9,7 +9,7 @@
 #include <stack>
 #include <vector>
 
-#include "al/app/al_NodeConfiguration.hpp"
+#include "al/system/al_NodeConfiguration.hpp"
 #include "al/ui/al_Parameter.hpp"
 
 namespace al {
@@ -229,6 +229,10 @@ public:
    * work after calling stop()
    */
   virtual bool stop() = 0;
+
+  /// Request this domain's loop to exit. Default is a no-op.
+  virtual void quit() {}
+  virtual bool shouldQuit() const { return false; }
 
 protected:
   /**

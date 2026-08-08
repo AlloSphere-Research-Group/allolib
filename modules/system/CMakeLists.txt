@@ -11,6 +11,7 @@ target_sources(alsystem
     FILE_SET HEADERS
       BASE_DIRS include
       FILES
+        include/al/system/al_NodeConfiguration.hpp
         include/al/system/al_PeriodicThread.hpp
         include/al/system/al_Printing.hpp
         include/al/system/al_Thread.hpp

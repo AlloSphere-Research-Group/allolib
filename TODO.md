@@ -61,20 +61,27 @@ headless scene use does not pull OpenGL.
 `al::ui` — graphics-space interaction + imgui bindings. Depends on parameter
 and scene (widgets wrap scene types).
 
-### Sphere → al_ext (later)
+### Sphere (extracted; al_ext later)
 
-Sphere speakers, per-projection, meter, AlloSphere utils should move to **al_ext**
-so core stays general AV / distributed primitives.
+`modules/sphere` / `al::sphere`: AlloSphere speakers, per-projection, meter,
+host utils. Header paths stay `al/sphere/*`. App still PUBLIC-links it so
+OmniRenderer / DistributedApp keep working. May move to **al_ext** later.
 
-### App / domains (later rewrite)
+`NodeConfiguration` lives in `al::system` (`al/system/al_NodeConfiguration.hpp`);
+`al/app/al_NodeConfiguration.hpp` is a compatibility include.
 
-Today `al::app` is a kitchen sink (domains + sphere). Target:
+### App / domains
 
-- Small **components / domains** that compose
-- `al::app` = default bundle for a basic desktop app
-- Same pieces can build other app shapes without inheriting App
+`al::Runtime` owns the asynchronous domain graph and start/stop/cleanup.
+`App` is the default desktop recipe (OSC + Gamma audio + OpenGL + simulation);
+`DistributedApp` uses the same Runtime. Quit lives on Runtime / AsynchronousDomain,
+not only graphics.
 
-Do not rewrite App in the same pass as audio/parameter splits.
+Still to do:
+
+- Small **components / domains** that compose without inheriting App
+- Drop remaining RTTI wiring in `initializeDomains()`
+- Window accessors off App
 
 ---
 

@@ -114,7 +114,8 @@ add_subdirectory(modules/parameter) # composition: Parameter, presets, sequences
 add_subdirectory(modules/scene) # synth voices, spatialized scene
 add_subdirectory(modules/ui) # graphics UI + imgui bindings
 add_subdirectory(modules/config)
-add_subdirectory(modules/app) # and sphere (TODO extract sphere to al_ext)
+add_subdirectory(modules/sphere) # AlloSphere; may move to al_ext later
+add_subdirectory(modules/app)
 
 # Convenience umbrella targets. Prefer linking al::app (and explicit extras) in new code.
 add_library(al_all INTERFACE)

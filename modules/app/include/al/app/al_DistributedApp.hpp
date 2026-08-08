@@ -10,7 +10,7 @@
 #include <map>
 
 #include "al/app/al_App.hpp"
-#include "al/app/al_NodeConfiguration.hpp"
+#include "al/system/al_NodeConfiguration.hpp"
 #include "al/app/al_OmniRendererDomain.hpp"
 #include "al/app/al_StateDistributionDomain.hpp"
 #include "al/io/al_PersistentConfig.hpp"
@@ -158,7 +158,7 @@ public:
   }
 
   void setPort(uint16_t port) {
-    if (this->mRunningDomains.size() == 0) {
+    if (this->runtime().isRunning()) {
       std::cerr << __FUNCTION__
                 << " ERROR can't set port while application"
                    "is running. Port will be applied on next call to start()."
