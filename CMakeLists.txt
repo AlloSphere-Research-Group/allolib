@@ -111,7 +111,8 @@ add_subdirectory(modules/protocol)
 
 add_subdirectory(modules/imgui)
 add_subdirectory(modules/parameter) # composition: Parameter, presets, sequences
-add_subdirectory(modules/ui) # graphics UI + scene (TODO split scene)
+add_subdirectory(modules/scene) # synth voices, spatialized scene
+add_subdirectory(modules/ui) # graphics UI + imgui bindings
 add_subdirectory(modules/config)
 add_subdirectory(modules/app) # and sphere (TODO extract sphere to al_ext)
 

@@ -12,6 +12,7 @@ target_sources(alspatial
         include/al/spatial/al_HashSpace.hpp
         include/al/spatial/al_Pose.hpp
         include/al/spatial/al_Curve.hpp
+        include/al/spatial/al_DistAtten.hpp
 )
 
 al_configure_module(alspatial EXPORT_NAME spatial)

@@ -48,6 +48,7 @@ al_configure_module(alapp EXPORT_NAME app)
 target_link_libraries(alapp PUBLIC
   al::audio_device
   al::audio
+  al::scene
   al::ui
   al::config
   Gamma
