@@ -173,7 +173,8 @@ public:
     const int Nd = dup ? n : 1;
     for(int i=size()/n-1; i>=0; --i){
       const T& v = (*this)[i];
-      for(int j=0; j<Nd; ++j) Alloc::construct(elems()+n*i+j, v);
+      // Was Alloc::construct(...): see RingBuffer::write — vector slots are live.
+      for(int j=0; j<Nd; ++j) elems()[n * i + j] = v;
     }
   }
 
@@ -226,6 +227,10 @@ class RingBuffer : protected Alloc {
   /// constructing a new object, but instead returns the oldest element in
   /// the buffer. The returned reference should be assumed to be in an unknown
   /// state, thus should be initialized properly.
+  ///
+  /// Note: "unknown state" means the previous value is stale for the caller —
+  /// the slot is still a live object in mElems (std::vector). It is not
+  /// uninitialized raw memory.
   T& next() {
     if (mFill < size()) ++mFill;
     ++mPos;
@@ -235,8 +240,14 @@ class RingBuffer : protected Alloc {
     return mElems[pos()];
   }
 
-  /// Write new element
-  void write(const T& v) { Alloc::construct(&next(), v); }
+  /// Write new element (copy into the next live ring slot).
+  ///
+  /// Historically this used Alloc::construct(&next(), v) — the Allocore/Gamma
+  /// idiom for placement-new into raw storage. After the port to std::vector,
+  /// every slot is already constructed, so construct-over-live was incorrect
+  /// (and std::allocator::construct was removed in C++17/20). Assignment is
+  /// the right way to overwrite the slot.
+  void write(const T& v) { next() = v; }
 
   /// Get reference to element relative to newest element
   T& read(int i) { return mElems[wrapOnce(pos() - i, size())]; }
