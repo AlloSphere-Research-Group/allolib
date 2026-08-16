@@ -102,6 +102,12 @@ else()
   message(FATAL_ERROR "Unknown ALLOLIB_AUDIO_BACKEND='${ALLOLIB_AUDIO_BACKEND}' (rtaudio, portaudio, dummy)")
 endif()
 
+# Static alaudio_io calls AudioBackend; backends PUBLIC-link audio_io. Closing the
+# cycle here makes single-pass linkers (GNU ld) pull both archives — same fix as
+# devel's `target_link_libraries(alaudio PUBLIC alaudiobackend)` before the split.
+# (CMP0079 NEW is set above so this cross-directory link is allowed.)
+target_link_libraries(alaudio_io PUBLIC al::audio_backend)
+
 # Convenience: AudioIO + the selected backend (no DSP). Typical apps also link al::audio.
 add_library(al_audio_device INTERFACE)
 add_library(al::audio_device ALIAS al_audio_device)
