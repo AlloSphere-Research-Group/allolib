@@ -16,8 +16,15 @@ endif()
 # When ON, vendored deps skip their own install(EXPORT) so AlloLib can bundle
 # them into AlloLibBundledTargets (one export set per target). Requires the
 # temporary patches in cmake/vendor-patches/ (./cmake/vendor-patches/apply.sh).
-# A future vcpkg/Conan layout would leave this OFF and use find_dependency().
+# Only relevant when ALLOLIB_INSTALL=ON. A future vcpkg/Conan layout would leave
+# this OFF and use find_dependency().
 set(ALLOLIB_BUNDLE_DEPS ON)
+
+# Install / find_package(AlloLib) package generation. Default OFF: everyday
+# builds use add_subdirectory / submodule and never need export sets. Opt in
+# with -DALLOLIB_INSTALL=ON (then apply vendor-patches — see cmake/vendor-patches/).
+option(ALLOLIB_INSTALL "Generate install rules and AlloLib CMake package" OFF)
+
 # option(AL_VERBOSE_OUTPUT "" OFF)
 option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build by default
 option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built by default
@@ -196,5 +203,8 @@ if (ALLOLIB_ADD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
-# Installable CMake package: AlloLibConfig + exported targets.
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/AlloLibPackage.cmake)
+# Installable CMake package: AlloLibConfig + exported targets (future / opt-in).
+# Default OFF so source-tree builds and CI need no vendor export patches.
+if(ALLOLIB_INSTALL)
+  include(${CMAKE_CURRENT_LIST_DIR}/cmake/AlloLibPackage.cmake)
+endif()

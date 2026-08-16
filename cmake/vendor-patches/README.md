@@ -1,7 +1,10 @@
 # Temporary vendor patches (do not upstream)
 
-AlloLib currently **bundles** a few vendored libraries into
-`AlloLibBundledTargets` so `find_package(AlloLib)` + `al::app` works.
+Shelved for when `ALLOLIB_INSTALL=ON` (install / `find_package(AlloLib)`).
+Everyday source-tree builds leave install **off** and do **not** need these.
+
+AlloLib can **bundle** vendored libraries into `AlloLibBundledTargets` so
+`find_package(AlloLib)` + `al::app` works without system packages.
 
 CMake forbids a target appearing in more than one `install(EXPORT …)` set.
 Gamma, RtAudio, RtMidi, and cpptoml each register their own export. These
@@ -13,17 +16,16 @@ this directory and resolve those libraries with `find_dependency()` in
 `cmake/AlloLibDependencies.cmake`. Do not commit the patched submodule
 trees.
 
-## Apply / revert
-
-From the AlloLib repo root (after `git submodule update --init --recursive`):
+## When to use
 
 ```bash
+# After submodule init, only if you want the install package:
 ./cmake/vendor-patches/apply.sh
-./cmake/vendor-patches/revert.sh
+cmake -S . -B build -DALLOLIB_INSTALL=ON
 ```
 
 `apply.sh` is idempotent (`git apply --check` / `--reverse --check`).
 `revert.sh` restores the recorded submodule SHAs (clean upstream).
 
-Configure still succeeds without the patches; **exporting `al::app`**
-(`cmake` generate of the install package) needs them applied.
+Without patches, `-DALLOLIB_INSTALL=ON` will fail at generate time with
+“exported multiple times” for rtaudio/rtmidi/cpptoml/Gamma.

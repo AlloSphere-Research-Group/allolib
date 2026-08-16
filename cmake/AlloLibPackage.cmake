@@ -1,12 +1,16 @@
 # Install AlloLib as a relocatable CMake package.
 #
+# Included only when ALLOLIB_INSTALL=ON (default OFF). Everyday builds use
+# add_subdirectory / git submodule and skip this file.
+#
 # Two export sets (each target appears in only one):
 #   AlloLibBundledTargets — vendored third-party targets (no namespace)
 #   AlloLibTargets        — al::* modules (NAMESPACE al::)
 #
-# This bundled layout is for usability with in-tree submodules. A future
-# vcpkg/Conan layout would drop AlloLibBundledTargets and resolve those deps
-# via find_dependency() in AlloLibDependencies.cmake instead.
+# Bundling requires cmake/vendor-patches/apply.sh so vendors do not also
+# install(EXPORT) themselves. A future vcpkg/Conan layout would drop
+# AlloLibBundledTargets and resolve those deps via find_dependency() in
+# AlloLibDependencies.cmake instead.
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)

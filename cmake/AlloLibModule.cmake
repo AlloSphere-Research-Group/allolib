@@ -30,10 +30,15 @@ function(al_configure_module target)
 endfunction()
 
 # Install a module library (and FILE_SET HEADERS when present) into AlloLibTargets.
+# No-op unless ALLOLIB_INSTALL=ON (package install is opt-in future work).
 # Usage: al_install_module(<target>)
 function(al_install_module target)
   if(NOT TARGET ${target})
     message(FATAL_ERROR "al_install_module: target '${target}' does not exist")
+  endif()
+
+  if(NOT ALLOLIB_INSTALL)
+    return()
   endif()
 
   get_target_property(_header_sets ${target} HEADER_SETS)
