@@ -1,0 +1,43 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 65c088b..5fc582a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -73,19 +73,22 @@ configure_file(cmake/cpptomlConfig.cmake.in
+                ${CMAKE_CURRENT_BINARY_DIR}/cpptoml/cpptomlConfig.cmake
+                COPYONLY)
+ 
+-install(TARGETS cpptoml
+-        EXPORT cpptoml-exports)
+-install(FILES include/cpptoml.h
+-        DESTINATION include)
+-install(EXPORT cpptoml-exports
+-        FILE cpptomlTargets.cmake
+-        DESTINATION lib/cmake/cpptoml)
+-install(FILES
+-          ${CMAKE_CURRENT_BINARY_DIR}/cpptoml/cpptomlConfigVersion.cmake
+-          ${CMAKE_CURRENT_BINARY_DIR}/cpptoml/cpptomlConfig.cmake
+-        DESTINATION
+-          lib/cmake/cpptoml)
+-
+-export(EXPORT cpptoml-exports
+-       FILE ${CMAKE_CURRENT_BINARY_DIR}/cpptoml/cpptomlTargets.cmake)
+-export(PACKAGE cpptoml)
++# AlloLib bundles cpptoml into AlloLibBundledTargets when ALLOLIB_BUNDLE_DEPS=ON.
++if(NOT ALLOLIB_BUNDLE_DEPS)
++  install(TARGETS cpptoml
++          EXPORT cpptoml-exports)
++  install(FILES include/cpptoml.h
++          DESTINATION include)
++  install(EXPORT cpptoml-exports
++          FILE cpptomlTargets.cmake
++          DESTINATION lib/cmake/cpptoml)
++  install(FILES
++            ${CMAKE_CURRENT_BINARY_DIR}/cpptoml/cpptomlConfigVersion.cmake
++            ${CMAKE_CURRENT_BINARY_DIR}/cpptoml/cpptomlConfig.cmake
++          DESTINATION
++            lib/cmake/cpptoml)
++
++  export(EXPORT cpptoml-exports
++         FILE ${CMAKE_CURRENT_BINARY_DIR}/cpptoml/cpptomlTargets.cmake)
++  export(PACKAGE cpptoml)
++endif()

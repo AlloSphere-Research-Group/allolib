@@ -45,8 +45,10 @@ public:
   bool stop() override;
   bool cleanup(ComputationDomain *parent = nullptr) override;
 
-  void quit() { mShouldQuitApp = true; }
-  bool shouldQuit() { return mShouldQuitApp || mSubDomainList.size() == 0; }
+  void quit() override { mShouldQuitApp = true; }
+  bool shouldQuit() const override {
+    return mShouldQuitApp || mSubDomainList.size() == 0;
+  }
 
   bool running() { return mRunning; }
 

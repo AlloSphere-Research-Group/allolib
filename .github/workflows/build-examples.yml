@@ -15,7 +15,7 @@ jobs:
   Cross-Platform-Build:
     runs-on: ${{ matrix.os }}
     name: "Build Examples"
-    
+
     strategy:
       matrix:
         os: [ubuntu-22.04, windows-latest, macos-latest]
@@ -26,11 +26,11 @@ jobs:
             name: Windows
           - os: macos-latest
             name: macOS
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-    
+
     - name: Install dependencies (Linux)
       if: matrix.os == 'ubuntu-22.04'
       run: |
@@ -57,7 +57,7 @@ jobs:
         cd build
         cmake --build .
       shell: bash
-    
+
     - name: List build artifacts
       run: |
         echo "Build directory contents:"

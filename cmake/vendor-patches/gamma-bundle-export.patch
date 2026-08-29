@@ -1,0 +1,29 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 916e97b..adb39df 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -184,12 +184,15 @@ if(GAMMA_BUILD_TESTS)
+     COMMAND $<TARGET_FILE:gammaUnitTests> ${TEST_ARGS})
+ endif()
+ 
+-install(TARGETS Gamma
+-  EXPORT Gamma-targets
+-  RUNTIME DESTINATION bin
+-  LIBRARY DESTINATION lib
+-  ARCHIVE DESTINATION lib
+-)
+-
+-install(EXPORT Gamma-targets DESTINATION lib/cmake/Gamma)
+-install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/Gamma DESTINATION include)
++# AlloLib bundles Gamma into AlloLibBundledTargets when ALLOLIB_BUNDLE_DEPS=ON.
++if(NOT ALLOLIB_BUNDLE_DEPS)
++  install(TARGETS Gamma
++    EXPORT Gamma-targets
++    RUNTIME DESTINATION bin
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++  )
++
++  install(EXPORT Gamma-targets DESTINATION lib/cmake/Gamma)
++  install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/Gamma DESTINATION include)
++endif()

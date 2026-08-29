@@ -159,8 +159,7 @@ void DistributedApp::prepare() {
   if (hasCapability(CAP_AUDIO_IO)) {
     mAudioControl.registerAudioIO(audioIO());
   } else {
-    mDomainList.erase(
-        std::find(mDomainList.begin(), mDomainList.end(), mAudioDomain));
+    mRuntime.removeDomain(mAudioDomain);
   }
   parameterServer() << mAudioControl.gain;
   parameterServer() << setPose << mx << my << mz << tx << ty << tz;
@@ -266,31 +265,12 @@ void DistributedApp::start() {
     parameterServer().notifyAll();
   }
 
-  onInit();
-
-  for (auto &domain : mDomainList) {
-    mRunningDomains.push(domain);
-    if (!domain->start()) {
-      std::cerr << "ERROR starting domain " << std::endl;
-      break;
-    }
-  }
-
-  while (mRunningDomains.size() > 0) {
-    if (!mRunningDomains.top()->stop()) {
-      std::cerr << "ERROR stopping domain " << std::endl;
-    }
-    mRunningDomains.pop();
-  }
+  mRuntime.run([this]() { onInit(); });
 
   onExit();
   mDefaultWindowDomain = nullptr;
-  for (auto &domain : mDomainList) {
-    if (!domain->cleanup()) {
-      std::cerr << "ERROR cleaning up domain " << std::endl;
-    }
-  }
-  mDomainList.clear();
+  mRuntime.cleanup();
+  mRuntime.domains().clear();
 }
 
 std::string DistributedApp::name() { return al_get_hostname(); }

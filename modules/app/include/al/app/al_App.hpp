@@ -1,4 +1,4 @@
-﻿#ifndef AL_APP_H
+#ifndef AL_APP_H
 #define AL_APP_H
 
 #include <cassert>
@@ -6,13 +6,13 @@
 #include <functional>
 #include <iostream>
 #include <memory>
-#include <stack>
 #include <vector>
 
 #include "al/app/al_AudioDomain.hpp"
 #include "al/app/al_ComputationDomain.hpp"
 #include "al/app/al_OSCDomain.hpp"
 #include "al/app/al_OpenGLGraphicsDomain.hpp"
+#include "al/app/al_Runtime.hpp"
 #include "al/app/al_SimulationDomain.hpp"
 #include "al/graphics/al_Graphics.hpp"
 
@@ -25,6 +25,10 @@ namespace al {
 /**
  * @brief Simple App class
  * @ingroup App
+ *
+ * Default desktop recipe: OSC + Gamma audio + OpenGL graphics with a simulation
+ * subdomain. Lifecycle is owned by Runtime; App wires callbacks and window
+ * accessors.
  */
 class App {
 public:
@@ -33,12 +37,7 @@ public:
   virtual ~App() {}
 
   template <class DomainType> std::shared_ptr<DomainType> newDomain() {
-    auto newDomain = std::make_shared<DomainType>();
-    mDomainList.push_back(newDomain);
-    //    if (!newDomain->init()) {
-    //      std::cerr << "ERROR initializing domain " << std::endl;
-    //    }
-    return newDomain;
+    return mRuntime.newDomain<DomainType>();
   }
 
   virtual void start();
@@ -63,6 +62,9 @@ public:
 
   void quit(); ///< Requests domain to quit.
   bool shouldQuit();
+
+  Runtime &runtime() { return mRuntime; }
+  Runtime const &runtime() const { return mRuntime; }
 
   // Access to graphics domain properties
   virtual Window &defaultWindow();
@@ -185,8 +187,7 @@ protected:
   void createDomains();
   void initializeDomains();
 
-  std::vector<std::shared_ptr<AsynchronousDomain>> mDomainList;
-  std::stack<std::shared_ptr<AsynchronousDomain>> mRunningDomains;
+  Runtime mRuntime;
 };
 
 } // namespace al

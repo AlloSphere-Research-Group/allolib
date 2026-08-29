@@ -4,11 +4,9 @@ using namespace al;
 
 App::App() { createDomains(); }
 
-void App::quit() { graphicsDomain()->quit(); }
+void App::quit() { mRuntime.quit(); }
 
-bool App::shouldQuit() {
-  return graphicsDomain()->shouldQuit(); /*|| graphicsDomain()->shouldClose();*/
-}
+bool App::shouldQuit() { return mRuntime.shouldQuit(); }
 
 void App::fps(double f) {
   graphicsDomain()->fps(f);
@@ -286,29 +284,12 @@ void App::start() {
   stdControls.mWindow = &mDefaultWindowDomain->window();
 
   defaultWindow().append(mDefaultWindowDomain->navControl());
-  onInit();
-  for (auto &domain : mDomainList) {
-    mRunningDomains.push(domain);
-    if (!domain->start()) {
-      std::cerr << "ERROR starting domain " << std::endl;
-      break;
-    }
-  }
 
-  while (mRunningDomains.size() > 0) {
-    if (!mRunningDomains.top()->stop()) {
-      std::cerr << "ERROR stopping domain " << std::endl;
-    }
-    mRunningDomains.pop();
-  }
+  mRuntime.run([this]() { onInit(); });
 
   onExit();
   mDefaultWindowDomain = nullptr;
-  for (auto &domain : mDomainList) {
-    if (!domain->cleanup()) {
-      std::cerr << "ERROR cleaning up domain " << std::endl;
-    }
-  }
+  mRuntime.cleanup();
 }
 
 void App::createDomains() {
@@ -323,8 +304,7 @@ void App::createDomains() {
 }
 
 void App::initializeDomains() {
-  for (const auto &domain : mDomainList) {
-    auto *domainPtr = domain.get();
+  mRuntime.initialize([this](AsynchronousDomain *domainPtr) {
     if (auto d = dynamic_cast<OpenGLGraphicsDomain *>(domainPtr)) {
       d->onCreate = std::bind(&App::onCreate, this);
       assert(mSimulationDomain);
@@ -339,10 +319,7 @@ void App::initializeDomains() {
     } else {
       std::cout << "WARNING: Domain unknown for auto connection" << std::endl;
     }
-    if (!domain->init()) {
-      std::cerr << "ERROR initializing domain " << std::endl;
-    }
-  }
+  });
 }
 
 bool App::StandardWindowAppKeyControls::keyDown(const Keyboard &k) {

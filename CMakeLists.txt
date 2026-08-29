@@ -1,18 +1,48 @@
-cmake_minimum_required(VERSION 3.11)
-project(allolib)
+cmake_minimum_required(VERSION 3.24...4.4)
+project(allolib VERSION 3.0.0 LANGUAGES C CXX)
 
 # Tells third-party submodules (Gamma, cpptoml, json) to
 # override their cmake_minimum_required(VERSION < 3.5) policy.
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 set(OpenGL_GL_PREFERENCE GLVND)
 
+# Shared module helpers (al_configure_module, al_install_module).
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/AlloLibModule.cmake)
+
+if(POLICY CMP0079)
+  cmake_policy(SET CMP0079 NEW) # allow linking a target defined in another directory
+endif()
+
+# When ON, vendored deps skip their own install(EXPORT) so AlloLib can bundle
+# them into AlloLibBundledTargets (one export set per target). Requires the
+# temporary patches in cmake/vendor-patches/ (./cmake/vendor-patches/apply.sh).
+# Only relevant when ALLOLIB_INSTALL=ON. A future vcpkg/Conan layout would leave
+# this OFF and use find_dependency().
+set(ALLOLIB_BUNDLE_DEPS ON)
+
+# Install / find_package(AlloLib) package generation. Default OFF: everyday
+# builds use add_subdirectory / submodule and never need export sets. Opt in
+# with -DALLOLIB_INSTALL=ON (then apply vendor-patches — see cmake/vendor-patches/).
+option(ALLOLIB_INSTALL "Generate install rules and AlloLib CMake package" OFF)
+
 # option(AL_VERBOSE_OUTPUT "" OFF)
 option(ALLOLIB_ADD_EXAMPLES "" ON) # add example targets, but do not build by default
 option(ALLOLIB_BUILD_EXAMPLES "" OFF) # if ON all example targets will be built by default
 # option(ALLOLIB_ADD_EXTENSIONS "" OFF) # extension libraries will be added as targets
 option(ALLOLIB_BUILD_TESTS "" OFF)
-option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio" OFF) # TODO remove see below
-option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O" OFF) # TODO remove see below
+
+set(ALLOLIB_AUDIO_BACKEND "rtaudio" CACHE STRING
+  "Audio backend: rtaudio, portaudio, or dummy")
+set_property(CACHE ALLOLIB_AUDIO_BACKEND PROPERTY STRINGS rtaudio portaudio dummy)
+
+# Deprecated booleans — mapped onto ALLOLIB_AUDIO_BACKEND if still set.
+option(ALLOLIB_USE_PORTAUDIO "Use PortAudio instead of RtAudio (deprecated; use ALLOLIB_AUDIO_BACKEND)" OFF)
+option(ALLOLIB_USE_DUMMY_AUDIO "Use Dummy Audio I/O (deprecated; use ALLOLIB_AUDIO_BACKEND)" OFF)
+if(ALLOLIB_USE_DUMMY_AUDIO)
+  set(ALLOLIB_AUDIO_BACKEND "dummy" CACHE STRING "Audio backend: rtaudio, portaudio, or dummy" FORCE)
+elseif(ALLOLIB_USE_PORTAUDIO)
+  set(ALLOLIB_AUDIO_BACKEND "portaudio" CACHE STRING "Audio backend: rtaudio, portaudio, or dummy" FORCE)
+endif()
 
 option(ALLOLIB_BUILD_SHARED "Build all libraries as shared libraries" OFF)
 # option(TRAVIS_BUILD "" OFF)
@@ -60,20 +90,32 @@ add_subdirectory(modules/system)
 
 add_subdirectory(modules/graphics)
 
+add_subdirectory(modules/audio-io)
 add_subdirectory(modules/audio)
-if(ALLOLIB_USE_DUMMY_AUDIO) # TODO better way to select audio backend rtaudio/portaudio/dummy
-  add_subdirectory(modules/audio-backend-dummy) 
-elseif(ALLOLIB_USE_PORTAUDIO)
-  add_subdirectory(modules/audio-backend-portaudio) 
-else()  
-  add_subdirectory(modules/audio-backend-rtaudio) 
+if(ALLOLIB_AUDIO_BACKEND STREQUAL "dummy")
+  add_subdirectory(modules/audio-backend-dummy)
+elseif(ALLOLIB_AUDIO_BACKEND STREQUAL "portaudio")
+  add_subdirectory(modules/audio-backend-portaudio)
+elseif(ALLOLIB_AUDIO_BACKEND STREQUAL "rtaudio")
+  add_subdirectory(modules/audio-backend-rtaudio)
+else()
+  message(FATAL_ERROR "Unknown ALLOLIB_AUDIO_BACKEND='${ALLOLIB_AUDIO_BACKEND}' (rtaudio, portaudio, dummy)")
 endif()
 
-if(POLICY CMP0079)
-  cmake_policy(SET CMP0079 NEW) # allow linking a target defined in another directory
-endif()
-# resolves the static-library cycle for single-pass linkers like GNU ld
-target_link_libraries(alaudio PUBLIC alaudiobackend)
+# Static alaudio_io calls AudioBackend; backends PUBLIC-link audio_io. Closing the
+# cycle here makes single-pass linkers (GNU ld) pull both archives — same fix as
+# devel's `target_link_libraries(alaudio PUBLIC alaudiobackend)` before the split.
+# (CMP0079 NEW is set above so this cross-directory link is allowed.)
+target_link_libraries(alaudio_io PUBLIC al::audio_backend)
+
+# Convenience: AudioIO + the selected backend (no DSP). Typical apps also link al::audio.
+add_library(al_audio_device INTERFACE)
+add_library(al::audio_device ALIAS al_audio_device)
+target_link_libraries(al_audio_device INTERFACE
+  al::audio_io
+  al::audio_backend
+)
+set_target_properties(al_audio_device PROPERTIES EXPORT_NAME audio_device)
 
 add_subdirectory(modules/io)
 add_subdirectory(modules/midi) # move to extension?
@@ -81,9 +123,25 @@ add_subdirectory(modules/serial) # move to extension?
 add_subdirectory(modules/protocol)
 
 add_subdirectory(modules/imgui)
-add_subdirectory(modules/ui) # and scene (interdependent, TODO split up)
+add_subdirectory(modules/parameter) # composition: Parameter, presets, sequences
+add_subdirectory(modules/scene) # synth voices, spatialized scene
+add_subdirectory(modules/ui) # graphics UI + imgui bindings
 add_subdirectory(modules/config)
-add_subdirectory(modules/app) # and sphere (interdependencies)
+add_subdirectory(modules/sphere) # AlloSphere; may move to al_ext later
+add_subdirectory(modules/app)
+
+# Convenience umbrella targets. Prefer linking al::app (and explicit extras) in new code.
+add_library(al_all INTERFACE)
+add_library(al::all ALIAS al_all)
+target_link_libraries(al_all INTERFACE
+  al::app
+  al::serial
+)
+
+# Legacy monolithic name used by older consumers.
+add_library(al_legacy INTERFACE)
+add_library(al ALIAS al_legacy)
+target_link_libraries(al_legacy INTERFACE al::all)
 
 
 ## allolib extension modules ##
@@ -92,47 +150,6 @@ add_subdirectory(modules/app) # and sphere (interdependencies)
   # add_subdirectory(extensions)
   # add_subdirectory(../al_ext ../al_ext)
 # endif()
-
-
-# no longer have single library for allolib, but we could use something like libtool to pack them all together if needed
-# add_library(al ${AL_LIBRARY_TYPE} ${headers} ${sources})
-# add_library(al STATIC dummy.cpp)
-# target_link_libraries(al PUBLIC almath alspatial alsystem altypes algraphics alaudio alsound alio almidi alserial alprotocol alimgui alui alconfig alapp)
-
-# set_target_properties(al PROPERTIES
-#   DEBUG_POSTFIX d
-#   CXX_STANDARD 14
-#   CXX_STANDARD_REQUIRED ON
-# )
-
-# if (AL_WINDOWS)
-#   target_compile_definitions(al PUBLIC NOMINMAX)
-# else()
-#     target_compile_options(al PRIVATE "-Wall")
-# endif (AL_WINDOWS)
-
-# TODO remove this by making separate modules for rtaudio / portaudio that supply audio domains
-# if (ALLOLIB_USE_PORTAUDIO)
-#     # TODO needs more work on Windows
-#     if(ALLOLIB_USE_DUMMY_AUDIO)
-#         message("ALLOLIB_USE_DUMMY_AUDIO ignored. Using PortAudio")
-#     endif(ALLOLIB_USE_DUMMY_AUDIO)
-#     target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_PORTAUDIO)
-#     target_link_libraries(al PUBLIC portaudio)
-# else ()
-#     if (ALLOLIB_USE_DUMMY_AUDIO)
-#         target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_DUMMY)
-#     else()
-#         target_compile_definitions(al PUBLIC ${PLATFORM_DEFINITION} AL_AUDIO_RTAUDIO)
-
-#         target_link_libraries(al PUBLIC rtaudio)
-#     endif(ALLOLIB_USE_DUMMY_AUDIO)
-# endif()
-
-## only used by AppRecorder.cpp? TODO Remove this.
-# if(SNDFILE_LIBRARY)
-#   target_compile_definitions(al PUBLIC AL_LIBSNDFILE)
-# endif(SNDFILE_LIBRARY)
 
 
 # what is the purpose of these options in MSVC
@@ -173,6 +190,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     # purpose of working around that bug. Perhaps can be removed on future
     # updates of RtMidi
     link_directories("/usr/local/lib")
+    if(EXISTS "/opt/homebrew/lib")
+      link_directories("/opt/homebrew/lib")
+    endif()
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 
@@ -189,3 +209,8 @@ if (ALLOLIB_ADD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
+# Installable CMake package: AlloLibConfig + exported targets (future / opt-in).
+# Default OFF so source-tree builds and CI need no vendor export patches.
+if(ALLOLIB_INSTALL)
+  include(${CMAKE_CURRENT_LIST_DIR}/cmake/AlloLibPackage.cmake)
+endif()

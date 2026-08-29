@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "al/app/al_NodeConfiguration.hpp"
+#include "al/system/al_NodeConfiguration.hpp"
 #include "al/math/al_Constants.hpp"
 
 std::string al_get_hostname();

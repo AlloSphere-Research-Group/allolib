@@ -1,24 +1,15 @@
-## alaudiobackend_dummy
+add_library(alaudiobackend ${AL_LIBRARY_TYPE})
+add_library(al::audio_backend ALIAS alaudiobackend)
 
-set(headers
-
+target_sources(alaudiobackend
+  PRIVATE
+    src/io/al_AudioBackend.cpp
 )
 
-set(sources
-  src/io/al_AudioBackend.cpp
-)
-
-add_library(alaudiobackend ${AL_LIBRARY_TYPE} ${headers} ${sources})
-
-set_target_properties(alaudiobackend PROPERTIES
-  DEBUG_POSTFIX d
-  CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON
-)
-
-# target_include_directories(alaudiobackend PUBLIC
-# )
+al_configure_module(alaudiobackend EXPORT_NAME audio_backend)
 
 target_link_libraries(alaudiobackend PUBLIC
-  alaudio
+  al::audio_io
 )
+
+al_install_module(alaudiobackend)
