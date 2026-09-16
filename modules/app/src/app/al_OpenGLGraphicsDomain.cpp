@@ -16,44 +16,78 @@ bool OpenGLGraphicsDomain::init(ComputationDomain *parent) {
   return ret;
 }
 
-bool OpenGLGraphicsDomain::start() {
-  if (!mRunning) {
-    mRunning = true;
-    bool ret = true;
-    ret &= initializeSubdomains(true);
-    startFPS(); // WindowApp (FPS)
-    ret &= initializeSubdomains(false);
-
-    preOnCreate();
-    onCreate();
-    callStartCallbacks();
-    bool subdomainsOk = true;
-    while (!shouldQuit() && subdomainsOk) {
-      subdomainsOk &= tickSubdomains(true);
-      tickFPS();
-      mTimeDrift = dt_sec();
-      subdomainsOk &= tickSubdomains(false);
-    }
-
-    ret &= stop();
-    return ret;
-  } else {
+bool OpenGLGraphicsDomain::beginFrameExecution() {
+  if (mRunning) {
     return true;
   }
+  mRunning = true;
+  bool ret = true;
+  ret &= initializeSubdomains(true);
+  startFPS();
+  ret &= initializeSubdomains(false);
+
+  preOnCreate();
+  onCreate();
+  callStartCallbacks();
+  return ret;
 }
 
-bool OpenGLGraphicsDomain::stop() {
+bool OpenGLGraphicsDomain::endFrameExecution() {
+  if (!mRunning) {
+    return true;
+  }
   bool ret = true;
   callStopCallbacks();
 
   ret &= cleanupSubdomains(true);
 
-  onExit(); // user defined
+  onExit();
   postOnExit();
 
   ret &= cleanupSubdomains(false);
   mRunning = false;
   return ret;
+}
+
+bool OpenGLGraphicsDomain::tickFrame() {
+  if (shouldQuit()) {
+    return false;
+  }
+  bool ok = true;
+  ok &= tickSubdomains(true);
+  tickFPS();
+  mTimeDrift = dt_sec();
+  ok &= tickSubdomains(false);
+  return ok && !shouldQuit();
+}
+
+bool OpenGLGraphicsDomain::start() {
+  if (!beginFrameExecution()) {
+    return false;
+  }
+
+  if (mLoopMode == LoopMode::Runtime) {
+    // Runtime::run() pumps poll/tickFrame until quit.
+    return true;
+  }
+
+  bool subdomainsOk = true;
+  while (!shouldQuit() && subdomainsOk) {
+    subdomainsOk = tickFrame();
+  }
+
+  return endFrameExecution();
+}
+
+bool OpenGLGraphicsDomain::stop() {
+  if (mLoopMode == LoopMode::Runtime) {
+    return endFrameExecution();
+  }
+  // Self mode: start() already called endFrameExecution after the while.
+  if (mRunning) {
+    return endFrameExecution();
+  }
+  return true;
 }
 
 bool OpenGLGraphicsDomain::cleanup(ComputationDomain *parent) {

@@ -18,9 +18,9 @@ bool AudioDomain::init(ComputationDomain *parent) {
 
 bool AudioDomain::start() {
   bool ret = true;
-  if (audioIO().channelsIn() > 0 && audioIO().channelsOut() > 0) {
+  // Open if either direction is requested (output-only and input-only are valid).
+  if (audioIO().channelsIn() > 0 || audioIO().channelsOut() > 0) {
     ret &= audioIO().open();
-    gam::sampleRate(audioIO().framesPerSecond());
     ret &= audioIO().start();
   }
   return ret;

@@ -21,10 +21,13 @@ target_sources(alapp
       BASE_DIRS include
       FILES
         include/al/app/al_App.hpp
+        include/al/app/al_AppBuilder.hpp
+        include/al/app/al_Module.hpp
         include/al/app/al_AppRecorder.hpp
         include/al/app/al_DistributedApp.hpp
         include/al/app/al_FPS.hpp
         include/al/app/al_Runtime.hpp
+        include/al/app/al_KeepAliveDomain.hpp
         include/al/app/al_NodeConfiguration.hpp
         include/al/app/al_AudioDomain.hpp
         include/al/app/al_ComputationDomain.hpp

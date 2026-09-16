@@ -34,6 +34,8 @@ public:
 
   bool cleanup(ComputationDomain *parent = nullptr) override { return true; }
 
+  bool blocksInStart() const override { return true; }
+
   std::function<bool(const std::string &)> onLine =
       [](const std::string &line) {
         if (line.size() == 0) {
