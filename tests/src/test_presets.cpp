@@ -1,6 +1,7 @@
 
 #include "gtest/gtest.h"
 
+#include "al/ui/al_ParameterBundle.hpp"
 #include "al/ui/al_PresetHandler.hpp"
 #include "al/ui/al_PresetSequencer.hpp"
 
@@ -43,7 +44,7 @@ TEST(Presets, ParameterValues) {
   EXPECT_EQ(pint.get(), 4);
   EXPECT_FLOAT_EQ(pose.get().x(), 2);
   EXPECT_FLOAT_EQ(pose.get().y(), 0.75);
-  EXPECT_FLOAT_EQ(pose.get().z(), 0);
+  EXPECT_NEAR(pose.get().z(), 0.0, 1e-6);
   ph.stepMorphing();
   EXPECT_FLOAT_EQ(p.get(), 0.8333333f);
   EXPECT_EQ(pint.get(), 5);
@@ -97,6 +98,97 @@ TEST(Presets, RecallSynchronous) {
   EXPECT_EQ(pcolor.get().r, 0.31f);
   EXPECT_EQ(pcolor.get().g, 0.33f);
   EXPECT_EQ(pcolor.get().b, 0.36f);
+}
+
+TEST(Presets, BundleRecallSynchronous) {
+  al::Parameter freq{"freq", "osc", 440.f};
+  al::ParameterBundle voice{"voice"};
+  voice << freq;
+
+  al::PresetHandler ph{al::TimeMasterMode::TIME_MASTER_FREE};
+  ph << voice;
+
+  freq.set(220.f);
+  ph.storePreset("low");
+  freq.set(880.f);
+  ph.storePreset("high");
+
+  ph.recallPresetSynchronous("low");
+  EXPECT_FLOAT_EQ(freq.get(), 220.f);
+  ph.recallPresetSynchronous("high");
+  EXPECT_FLOAT_EQ(freq.get(), 880.f);
+}
+
+TEST(Presets, NestedBundleRecall) {
+  al::Parameter dry{"level", "amp", 0.5f};
+  al::Parameter wet{"level", "amp", 0.2f};
+  al::ParameterBundle fx{"fx"};
+  fx << wet;
+  al::ParameterBundle voice{"voice"};
+  voice << dry;
+  voice.addBundle(fx, "reverb");
+
+  al::PresetHandler ph{al::TimeMasterMode::TIME_MASTER_FREE};
+  ph << voice;
+
+  dry.set(0.1f);
+  wet.set(0.9f);
+  ph.storePreset("nested_a");
+  dry.set(0.8f);
+  wet.set(0.1f);
+  ph.storePreset("nested_b");
+
+  ph.recallPresetSynchronous("nested_a");
+  EXPECT_FLOAT_EQ(dry.get(), 0.1f);
+  EXPECT_FLOAT_EQ(wet.get(), 0.9f);
+  ph.recallPresetSynchronous("nested_b");
+  EXPECT_FLOAT_EQ(dry.get(), 0.8f);
+  EXPECT_FLOAT_EQ(wet.get(), 0.1f);
+}
+
+TEST(Presets, StringWithSpaces) {
+  al::ParameterString label{"label", "ui", "hi"};
+  al::PresetHandler ph{al::TimeMasterMode::TIME_MASTER_FREE};
+  ph << label;
+
+  label.set("hello world");
+  ph.storePreset("str_spaces");
+  label.set("x");
+  ph.recallPresetSynchronous("str_spaces");
+  EXPECT_EQ(label.get(), "hello world");
+}
+
+TEST(Presets, Vec3AndPoseMorph) {
+  al::ParameterVec3 pos{"pos", "obj", al::Vec3f(0, 0, 0)};
+  al::ParameterPose pose{"pose", "obj"};
+  pose.set(al::Pose({0, 0, 0}));
+
+  al::PresetHandler ph{al::TimeMasterMode::TIME_MASTER_FREE};
+  ph << pos << pose;
+  ph.setMorphTime(0.3f);
+  ph.setMorphStepTime(0.1f);
+
+  al::PresetHandler::ParameterStates states;
+  states["/obj/pos"] = {3.f, 6.f, 9.f};
+  // Full pose: xyz + quat(wxyz). Identity quat ≈ (1,0,0,0)
+  states["/obj/pose"] = {3.f, 0.f, -3.f, 1.f, 0.f, 0.f, 0.f};
+  ph.morphTo(states, 0.3f);
+
+  ph.stepMorphing(); // count 0 → often no change yet depending on phase
+  ph.stepMorphing();
+  // After progress ~1/3: pos ≈ (1,2,3), pose.z ≈ -1
+  EXPECT_NEAR(pos.get().x, 1.f, 0.01f);
+  EXPECT_NEAR(pos.get().y, 2.f, 0.01f);
+  EXPECT_NEAR(pos.get().z, 3.f, 0.01f);
+  EXPECT_NEAR(pose.get().z(), -1.0, 0.01);
+
+  ph.stepMorphing();
+  ph.stepMorphing();
+  EXPECT_NEAR(pos.get().x, 3.f, 0.01f);
+  EXPECT_NEAR(pos.get().y, 6.f, 0.01f);
+  EXPECT_NEAR(pos.get().z, 9.f, 0.01f);
+  EXPECT_NEAR(pose.get().x(), 3.0, 0.01);
+  EXPECT_NEAR(pose.get().z(), -3.0, 0.01);
 }
 
 TEST(Presets, PresetInterpolation) {

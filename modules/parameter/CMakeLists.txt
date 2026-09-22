@@ -1,13 +1,18 @@
-# Composition framework: Parameter, OSC server, presets, sequences.
-# Header paths remain al/ui/... until a later rename to al/parameter/.
-# Does not depend on graphics, imgui, or App.
+# Parameter / composition / future ECS signal layer.
+# Legacy headers remain under al/ui/...; new API under al/parameter/.
 
 add_library(alparameter ${AL_LIBRARY_TYPE})
 add_library(al::parameter ALIAS alparameter)
 
 target_sources(alparameter
   PRIVATE
+    src/parameter/al_Entity.cpp
+    src/parameter/al_KeyframeTrack.cpp
+    src/parameter/al_ParamSet.cpp
+    src/parameter/al_ParamState.cpp
+    src/parameter/al_Scene.cpp
     src/ui/al_DiscreteParameterValues.cpp
+    src/ui/al_ParamCodec.cpp
     src/ui/al_Parameter.cpp
     src/ui/al_ParameterBundle.cpp
     src/ui/al_ParameterMIDI.cpp
@@ -25,7 +30,15 @@ target_sources(alparameter
     FILE_SET HEADERS
       BASE_DIRS include
       FILES
+        include/al/parameter/al_Entity.hpp
+        include/al/parameter/al_KeyframeTrack.hpp
+        include/al/parameter/al_ParamSet.hpp
+        include/al/parameter/al_ParamState.hpp
+        include/al/parameter/al_Scene.hpp
+        include/al/parameter/al_Signal.hpp
         include/al/ui/al_DiscreteParameterValues.hpp
+        include/al/ui/al_ParamCodec.hpp
+        include/al/ui/al_ParamNumeric.hpp
         include/al/ui/al_Parameter.hpp
         include/al/ui/al_ParameterBundle.hpp
         include/al/ui/al_ParameterMIDI.hpp

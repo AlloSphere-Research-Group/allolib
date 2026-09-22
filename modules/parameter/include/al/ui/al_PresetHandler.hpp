@@ -53,6 +53,7 @@
 
 #include "al/protocol/al_OSC.hpp"
 #include "al/system/al_Time.hpp"
+#include "al/parameter/al_ParamState.hpp"
 #include "al/ui/al_Parameter.hpp"
 #include "al/ui/al_ParameterServer.hpp"
 
@@ -70,10 +71,12 @@ namespace al {
  *
  * Comments can be added with '#' and everything after a line starting with '::'
  * will be ignored.
+ *
+ * Snapshot type is ParamState (shared with composition / Entity ParamSet).
  */
 class PresetHandler {
 public:
-  typedef std::map<std::string, std::vector<VariantValue>> ParameterStates;
+  using ParameterStates = ParamState;
   /**
    * @brief PresetHandler contructor
    *

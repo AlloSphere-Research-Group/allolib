@@ -364,6 +364,10 @@ the other
    * regular parameters are meant to be changing within the voice.
    * In distributed scenes, to synchronize the internal values within voices,
    * the parameters must be registered through this function.
+   *
+   * Path convention (toward ECS): set the parameter group to identify the
+   * voice/entity, e.g. `param.setGroup("voice/" + id)` → `/voice/3/freq`.
+   * Trigger params should keep stable names for `/triggerOn` payloads.
    */
   virtual SynthVoice &registerParameter(ParameterMeta &param) {
     mContinuousParameters.push_back(&param);

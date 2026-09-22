@@ -13,6 +13,9 @@ set (gtest_src
     main.cpp
     src/test_dynamic_scene.cpp
     src/test_parameter_server.cpp
+    src/test_param_codec.cpp
+    src/test_param_state_entity.cpp
+    src/test_scene_keyframe.cpp
     src/test_preset_sequencer.cpp
     src/test_presets.cpp
     src/test_file.cpp

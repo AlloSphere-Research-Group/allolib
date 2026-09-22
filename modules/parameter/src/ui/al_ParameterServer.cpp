@@ -2,6 +2,7 @@
 #include "al/ui/al_ParameterServer.hpp"
 #include <cstdint>
 #include "al/io/al_Socket.hpp"
+#include "al/ui/al_ParamCodec.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -157,45 +158,13 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, Color value,
 
 void OSCNotifier::notifyListeners(std::string OSCaddress, ParameterMeta *param,
                                   ValueSource *src) {
-  if (ParameterBool *p =
-          dynamic_cast<ParameterBool *>(param)) { // ParameterBool
-    notifyListeners(OSCaddress, p->get(), src);
-  } else if (Parameter *p = dynamic_cast<Parameter *>(param)) { // Parameter
-    notifyListeners(OSCaddress, p->get(), src);
-  } else if (ParameterInt *p =
-                 dynamic_cast<ParameterInt *>(param)) { // ParameterInt
-    notifyListeners(OSCaddress, p->get(), src);
-  } else if (ParameterString *p =
-                 dynamic_cast<ParameterString *>(param)) { // ParameterString
-    notifyListeners(OSCaddress, p->get(), src);
-  } else if (ParameterPose *p =
-                 dynamic_cast<ParameterPose *>(param)) { // ParameterPose
-    notifyListeners(OSCaddress, p->get(), src);
-  } else if (ParameterMenu *p =
-                 dynamic_cast<ParameterMenu *>(param)) { // ParameterMenu
-    notifyListeners(OSCaddress, p->get(), src);
-  } else if (ParameterChoice *p =
-                 dynamic_cast<ParameterChoice *>(param)) { // ParameterChoice
-    notifyListeners(OSCaddress, (int32_t)p->get(), src);
-  } else if (ParameterVec3 *p =
-                 dynamic_cast<ParameterVec3 *>(param)) { // ParameterVec3
-    notifyListeners(OSCaddress, p->get(), src);
-  } else if (ParameterVec4 *p =
-                 dynamic_cast<ParameterVec4 *>(param)) { // ParameterVec4
-    notifyListeners(OSCaddress, p->get(), src);
-  } else if (ParameterVec5 *p =
-                 dynamic_cast<ParameterVec5 *>(param)) { // ParameterVec5
-    notifyListeners(OSCaddress, p->get(), src);
-  } else if (ParameterColor *p =
-                 dynamic_cast<ParameterColor *>(param)) { // ParameterColor
-    notifyListeners(OSCaddress, p->get(), src);
-  } else if (Trigger *p = dynamic_cast<Trigger *>(param)) { // Trigger
-    notifyListeners(OSCaddress, p->get(), src);
-  } else {
-    std::cout << "OSCNotifier::notifyListeners Unsupported Parameter type for "
-                 "notification"
-              << std::endl;
+  const ParamCodec *codec = paramCodecs().find(*param);
+  if (codec && codec->notify) {
+    codec->notify(*this, OSCaddress, param, src);
+    return;
   }
+  std::cout << "OSCNotifier::notifyListeners: no codec for "
+            << typeid(*param).name() << std::endl;
 }
 
 void OSCNotifier::startHandshakeServer(std::string address) {
@@ -278,75 +247,15 @@ ParameterServer &ParameterServer::registerParameter(ParameterMeta &param) {
   mParameters.push_back(&param);
   mParameterLock.unlock();
   mListenerLock.lock();
-  if (ParameterBool *p =
-          dynamic_cast<ParameterBool *>(&param)) { // ParameterBool
-    p->registerChangeCallback([this, p](float value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), value, src);
-    });
-  } else if (Parameter *p = dynamic_cast<Parameter *>(&param)) { // Parameter
-    //        std::cout << "Register parameter " << param.getName() <<
-    //        std::endl;
-    p->registerChangeCallback([this, p](float value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), value, src);
-    });
-  } else if (ParameterInt *p =
-                 dynamic_cast<ParameterInt *>(&param)) { // ParameterInt
-    //        std::cout << "Register parameter " << param.getName() <<
-    //        std::endl;
-    p->registerChangeCallback([this, p](int32_t value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), value, src);
-    });
-  } else if (ParameterPose *p =
-                 dynamic_cast<ParameterPose *>(&param)) { // ParameterPose
-    p->registerChangeCallback([this, p](al::Pose value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), value, src);
-    });
-  } else if (ParameterMenu *p =
-                 dynamic_cast<ParameterMenu *>(&param)) { // ParameterMenu
-    p->registerChangeCallback([this, p](int value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), value, src);
-    });
-  } else if (strcmp(typeid(param).name(), typeid(ParameterChoice).name()) ==
-             0) { // ParameterChoice
-    ParameterChoice *p = dynamic_cast<ParameterChoice *>(&param);
-    p->registerChangeCallback([this, p](uint16_t value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), (int)value, src);
-    });
-  } else if (ParameterVec3 *p =
-                 dynamic_cast<ParameterVec3 *>(&param)) { // ParameterVec3
-    p->registerChangeCallback([this, p](al::Vec3f value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), value, src);
-    });
-  } else if (ParameterVec4 *p =
-                 dynamic_cast<ParameterVec4 *>(&param)) { // ParameterVec4
-    p->registerChangeCallback([this, p](al::Vec4f value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), value, src);
-    });
-  } else if (ParameterVec5 *p =
-                 dynamic_cast<ParameterVec5 *>(&param)) { // ParameterVec5
-    p->registerChangeCallback([this, p](al::Vec5f value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), value, src);
-    });
-  } else if (ParameterColor *p =
-                 dynamic_cast<ParameterColor *>(&param)) { // ParameterColor
-    p->registerChangeCallback([this, p](Color value, ValueSource *src) {
-      Vec4f valueVec(value.r, value.g, value.b, value.a);
-      notifyListeners(p->getFullAddress(), valueVec, src);
-    });
-  } else if (ParameterString *p =
-                 dynamic_cast<ParameterString *>(&param)) { // ParameterColor
-    p->registerChangeCallback([this, p](std::string value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), value, src);
-    });
-  } else if (Trigger *p = dynamic_cast<Trigger *>(&param)) { // Trigger
-    p->registerChangeCallback([this, p](float value, ValueSource *src) {
-      notifyListeners(p->getFullAddress(), value);
+  const ParamCodec *codec = paramCodecs().find(param);
+  if (codec && codec->attach) {
+    codec->attach(param, [this, &param](ValueSource *src) {
+      notifyListeners(param.getFullAddress(), &param, src);
     });
   } else {
-    std::cout << "Unsupported Parameter type for server on registration"
-              << std::endl;
+    std::cout << "Unsupported Parameter type for server on registration: "
+              << typeid(param).name() << std::endl;
   }
-
   mListenerLock.unlock();
   return *this;
 }
@@ -450,74 +359,45 @@ bool ParameterServer::serverRunning() {
 
 std::vector<ParameterMeta *> ParameterServer::meta() { return mParameters; }
 
-std::vector<Parameter *> ParameterServer::parameters() {
-  std::vector<Parameter *> params;
-  for (auto *p : mParameters) {
-    if (strcmp(typeid(*p).name(), typeid(Parameter).name()) == 0) {
-      params.push_back(static_cast<Parameter *>(p));
+namespace {
+template <typename T>
+std::vector<T *> filterParameters(const std::vector<ParameterMeta *> &all) {
+  std::vector<T *> out;
+  for (auto *p : all) {
+    if (auto *typed = dynamic_cast<T *>(p)) {
+      out.push_back(typed);
     }
   }
-  return params;
+  return out;
+}
+} // namespace
+
+std::vector<Parameter *> ParameterServer::parameters() {
+  return filterParameters<Parameter>(mParameters);
 }
 
 std::vector<ParameterInt *> ParameterServer::intParameters() {
-  std::vector<ParameterInt *> params;
-  for (auto *p : mParameters) {
-    if (strcmp(typeid(*p).name(), typeid(ParameterInt).name()) == 0) {
-      params.push_back(static_cast<ParameterInt *>(p));
-    }
-  }
-  return params;
+  return filterParameters<ParameterInt>(mParameters);
 }
 
 std::vector<ParameterString *> ParameterServer::stringParameters() {
-  std::vector<ParameterString *> params;
-  for (auto *p : mParameters) {
-    if ((strcmp(typeid(*p).name(), typeid(ParameterString).name()) == 0)) {
-      params.push_back(static_cast<ParameterString *>(p));
-    }
-  }
-  return params;
+  return filterParameters<ParameterString>(mParameters);
 }
 
 std::vector<ParameterVec3 *> ParameterServer::vec3Parameters() {
-  std::vector<ParameterVec3 *> params;
-  for (auto *p : mParameters) {
-    if ((strcmp(typeid(*p).name(), typeid(ParameterVec3).name()) == 0)) {
-      params.push_back(static_cast<ParameterVec3 *>(p));
-    }
-  }
-  return params;
+  return filterParameters<ParameterVec3>(mParameters);
 }
 
 std::vector<ParameterVec4 *> ParameterServer::vec4Parameters() {
-  std::vector<ParameterVec4 *> params;
-  for (auto *p : mParameters) {
-    if ((strcmp(typeid(*p).name(), typeid(ParameterVec4).name()) == 0)) {
-      params.push_back(static_cast<ParameterVec4 *>(p));
-    }
-  }
-  return params;
+  return filterParameters<ParameterVec4>(mParameters);
 }
 
 std::vector<ParameterVec5 *> ParameterServer::vec5Parameters() {
-  std::vector<ParameterVec5 *> params;
-  for (auto *p : mParameters) {
-    if ((strcmp(typeid(*p).name(), typeid(ParameterVec5).name()) == 0)) {
-      params.push_back(static_cast<ParameterVec5 *>(p));
-    }
-  }
-  return params;
+  return filterParameters<ParameterVec5>(mParameters);
 }
 
 std::vector<ParameterPose *> ParameterServer::poseParameters() {
-  std::vector<ParameterPose *> params;
-  for (auto *p : mParameters) {
-    if ((strcmp(typeid(*p).name(), typeid(ParameterPose).name()) == 0)) {
-      params.push_back(static_cast<ParameterPose *>(p));
-    }
-  }
-  return params;
+  return filterParameters<ParameterPose>(mParameters);
 }
 
 void ParameterServer::registerOSCListener(osc::PacketHandler *handler) {
@@ -637,169 +517,9 @@ bool ParameterServer::setParameterValueFromMessage(ParameterMeta *param,
                                                    osc::Message &m) {
 
   ValueSource s{m.senderAddress(), m.senderPort()};
-  if (strcmp(typeid(*param).name(), typeid(ParameterBool).name()) ==
-      0) { // ParameterBool
-    ParameterBool *p = dynamic_cast<ParameterBool *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "f") {
-      float val;
-      m >> val;
-      // Extract the data out of the packet
-      p->set(val, &s);
-      // std::cout << "ParameterServer::onMessage" << val << std::endl;
-      return true;
-    }
-    // notifyListeners(p->getFullAddress(), p->get());
-  } else if (strcmp(typeid(*param).name(), typeid(Parameter).name()) ==
-             0) { // Parameter
-    Parameter *p = dynamic_cast<Parameter *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "f") {
-      float val;
-      m >> val;
-      // Extract the data out of the packet
-      p->set(val, &s);
-      // std::cout << "ParameterServer::onMessage" << val << std::endl;
-      return true;
-    }
-    // notifyListeners(p->getFullAddress(), p->get());
-  } else if (strcmp(typeid(*param).name(), typeid(ParameterInt).name()) ==
-             0) { // ParameterInt
-    ParameterInt *p = dynamic_cast<ParameterInt *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "i") {
-      int32_t val;
-      m >> val;
-      // Extract the data out of the packet
-      p->set(val, &s);
-      // std::cout << "ParameterServer::onMessage" << val << std::endl;
-      return true;
-    }
-    // notifyListeners(p->getFullAddress(), p->get());
-  } else if (strcmp(typeid(*param).name(), typeid(ParameterString).name()) ==
-             0) { // Parameter
-    ParameterString *p = dynamic_cast<ParameterString *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "s") {
-      std::string val;
-      m >> val;
-      // Extract the data out of the packet
-      p->set(val, &s);
-      // std::cout << "ParameterServer::onMessage" << val << std::endl;
-      return true;
-    }
-    // notifyListeners(p->getFullAddress(), p->get());
-  } else if (strcmp(typeid(*param).name(), typeid(ParameterPose).name()) ==
-             0) { // ParameterPose
-    ParameterPose *p = dynamic_cast<ParameterPose *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "fffffff") {
-      float x, y, z, w, qx, qy, qz;
-      m >> x >> y >> z >> w >> qx >> qy >> qz;
-      p->set(Pose(Vec3d(x, y, z), Quatd(w, qx, qy, qz)), &s);
-      return true;
-    } else if (address == p->getFullAddress() + "/pos" &&
-               m.typeTags() == "fff") {
-      float x, y, z;
-      m >> x >> y >> z;
-      Pose currentPose = p->get();
-      currentPose.pos() = Vec3d(x, y, z);
-      p->set(currentPose, &s);
-      return true;
-    } else if (address == p->getFullAddress() + "/pos/x" &&
-               m.typeTags() == "f") {
-      float x;
-      m >> x;
-      Pose currentPose = p->get();
-      currentPose.pos().x = x;
-      p->set(currentPose, &s);
-      return true;
-    } else if (address == p->getFullAddress() + "/pos/y" &&
-               m.typeTags() == "f") {
-      float y;
-      m >> y;
-      Pose currentPose = p->get();
-      currentPose.pos().y = y;
-      p->set(currentPose, &s);
-      return true;
-    } else if (address == p->getFullAddress() + "/pos/z" &&
-               m.typeTags() == "f") {
-      float z;
-      m >> z;
-      Pose currentPose = p->get();
-      currentPose.pos().z = z;
-      p->set(currentPose, &s);
-      return true;
-    }
-  } else if (strcmp(typeid(*param).name(), typeid(ParameterMenu).name()) ==
-             0) { // ParameterMenu
-    ParameterMenu *p = dynamic_cast<ParameterMenu *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "i") {
-      int value;
-      m >> value;
-      p->set(value, &s);
-      return true;
-    }
-  } else if (strcmp(typeid(*param).name(), typeid(ParameterChoice).name()) ==
-             0) { // ParameterChoice
-    ParameterChoice *p = dynamic_cast<ParameterChoice *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "i") {
-      int value;
-      m >> value;
-      p->set(value, &s);
-      return true;
-    }
-  } else if (strcmp(typeid(*param).name(), typeid(ParameterVec3).name()) ==
-             0) { // ParameterVec3
-    ParameterVec3 *p = dynamic_cast<ParameterVec3 *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "fff") {
-      float x, y, z;
-      m >> x >> y >> z;
-      p->set(Vec3f(x, y, z), &s);
-      return true;
-    }
-  } else if (strcmp(typeid(*param).name(), typeid(ParameterVec4).name()) ==
-             0) { // ParameterVec4
-    ParameterVec4 *p = dynamic_cast<ParameterVec4 *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "ffff") {
-      float a, b, c, d;
-      m >> a >> b >> c >> d;
-      p->set(Vec4f(a, b, c, d), &s);
-    }
-    return true;
-  } else if (strcmp(typeid(*param).name(), typeid(ParameterVec5).name()) ==
-             0) { // ParameterVec5
-    ParameterVec5 *p = dynamic_cast<ParameterVec5 *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "fffff") {
-      float a, b, c, d, e;
-      m >> a >> b >> c >> d >> e;
-      p->set(Vec5f(a, b, c, d, e), &s);
-    }
-    return true;
-  } else if (strcmp(typeid(*param).name(), typeid(ParameterColor).name()) ==
-             0) { // ParameterColor
-    ParameterColor *p = dynamic_cast<ParameterColor *>(param);
-    if (address == p->getFullAddress() && m.typeTags() == "ffff") {
-      float a, b, c, d;
-      m >> a >> b >> c >> d;
-      p->set(Color(a, b, c, d), &s);
-      return true;
-    }
-  } else if (strcmp(typeid(*param).name(), typeid(Trigger).name()) ==
-             0) { // Trigger
-    Trigger *p = dynamic_cast<Trigger *>(param);
-    if (address == p->getFullAddress()) {
-      if (m.typeTags().size() == 0) {
-        p->trigger();
-        return true;
-      } else if (m.typeTags() == "f") {
-        float val;
-        m >> val;
-        if (val == 1.0) {
-          p->trigger();
-        }
-        return true;
-      }
-    }
-  } else {
-    // TODO this check should be performed on registration
-    std::cout << "Unsupported registered Parameter on message "
-              << typeid(*param).name() << std::endl;
+  const ParamCodec *codec = paramCodecs().find(*param);
+  if (codec && codec->fromOsc) {
+    return codec->fromOsc(param, address, m, &s);
   }
   return false;
 }

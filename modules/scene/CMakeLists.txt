@@ -15,6 +15,7 @@ target_sources(alscene
     src/scene/al_SynthRecorder.cpp
     src/scene/al_SynthSequencer.cpp
     src/scene/al_SynthVoice.cpp
+    src/scene/al_VoiceEntity.cpp
   PUBLIC
     FILE_SET HEADERS
       BASE_DIRS include
@@ -27,6 +28,7 @@ target_sources(alscene
         include/al/scene/al_SynthRecorder.hpp
         include/al/scene/al_SynthSequencer.hpp
         include/al/scene/al_SynthVoice.hpp
+        include/al/scene/al_VoiceEntity.hpp
 )
 
 al_configure_module(alscene EXPORT_NAME scene)

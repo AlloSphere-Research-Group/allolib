@@ -44,6 +44,7 @@
 
 #include <float.h>
 #include <cstdint>
+#include <climits>
 
 #include <algorithm>
 #include <atomic>
@@ -61,18 +62,11 @@
 #include "al/protocol/al_OSC.hpp"
 #include "al/spatial/al_Pose.hpp"
 #include "al/types/al_Color.hpp"
+#include "al/types/al_TimeMasterMode.hpp"
 #include "al/types/al_ValueSource.hpp"
 #include "al/types/al_VariantValue.hpp"
 
 namespace al {
-
-enum class TimeMasterMode {
-  TIME_MASTER_AUDIO,
-  TIME_MASTER_GRAPHICS,
-  TIME_MASTER_UPDATE,
-  TIME_MASTER_FREE,
-  TIME_MASTER_CPU
-};
 
 class Parameter;
 
@@ -99,15 +93,24 @@ public:
   /**
    * @brief return the full OSC address for the parameter
    *
-   * The parameter needs to be registered to a ParameterServer to listen to
-   * OSC values on this address
+   * Path form is `/group/name` when group is set, otherwise `/name`.
+   * For ECS-style entities, use the entity id (or `scene/entityId`) as group
+   * so addresses stay unique and hierarchical.
    */
-  std::string getFullAddress() { return mFullAddress; }
+  std::string getFullAddress() const { return mFullAddress; }
 
   /**
    * @brief getName returns the name of the parameter
    */
-  std::string getName() { return mParameterName; }
+  std::string getName() const { return mParameterName; }
+
+  /**
+   * @brief Rename the parameter and rebuild its OSC address.
+   *
+   * Not thread-safe vs concurrent OSC/preset use — call before registration
+   * or while the param is idle.
+   */
+  void setName(std::string parameterName);
 
   /**
    * @brief returns the text that should accompany parameters when displayed
@@ -122,7 +125,31 @@ public:
   /**
    * @brief getGroup returns the name of the group for the parameter
    */
-  std::string getGroup() { return mGroup; }
+  std::string getGroup() const { return mGroup; }
+
+  /**
+   * @brief Set group (e.g. entity id) and rebuild OSC address `/group/name`.
+   *
+   * Not thread-safe vs concurrent OSC/preset use — call before registration
+   * or while the param is idle.
+   */
+  void setGroup(std::string group);
+
+  /**
+   * @brief Set name and group together; rebuilds OSC address once.
+   */
+  void setPath(std::string parameterName, std::string group);
+
+  /**
+   * @brief Called when setName/setGroup/setPath changes the OSC address.
+   *
+   * ParameterServer looks up addresses dynamically, so OSC still works after
+   * a path change. Register here if you cache addresses (UI maps, preset keys).
+   */
+  using PathChangeCallback = std::function<void(
+      ParameterMeta *param, const std::string &oldAddress,
+      const std::string &newAddress)>;
+  void registerPathChangeCallback(PathChangeCallback cb);
 
   /**
    * @brief Generic function to return the value of the parameter as a float.
@@ -168,40 +195,35 @@ public:
     return false;
   }
 
-  virtual void getFields(std::vector<VariantValue> & /*fields*/) {
-    std::cout
-        << "get(std::vector<ParameteterField> &fields) not implemented for "
-        << typeid(*this).name() << std::endl;
-  }
+  virtual void getFields(std::vector<VariantValue> & /*fields*/) {}
 
-  virtual void setFields(std::vector<VariantValue> & /*fields*/) {
-    std::cout
-        << "set(std::vector<ParameteterField> &fields) not implemented for "
-        << typeid(*this).name() << std::endl;
-  }
+  virtual void setFields(std::vector<VariantValue> & /*fields*/) {}
 
   virtual void sendValue(osc::Send &sender, std::string prefix = "") {
-    (void)prefix; // Remove compiler warning
-    std::cout << "sendValue function not implemented for "
-              << typeid(*this).name() << std::endl;
+    (void)sender;
+    (void)prefix;
   }
 
   virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
                         std::string id = "") {
-    (void)bundleName; // Remove compiler warning
-    std::cout << "sendMeta function not implemented for "
-              << typeid(*this).name() << std::endl;
+    (void)sender;
+    (void)bundleName;
+    (void)id;
   }
 
   void set(ParameterMeta *p);
 
 protected:
+  /// Build `/group/name` (or `/name`) from sanitized path segments.
+  void rebuildFullAddress();
+
   std::string mFullAddress;
   std::string mParameterName;
   std::string mDisplayName;
   std::string mGroup;
 
   std::map<std::string, float> mHints; // Provide hints for behavior
+  std::vector<PathChangeCallback> mPathChangeCallbacks;
 };
 
 /**
@@ -238,23 +260,25 @@ public:
 
   virtual ~ParameterWrapper();
 
+  using ParameterMeta::set;
+
   /**
    * @brief set the parameter's value
    *
    * This function is thread-safe and can be called from any number of threads.
    * It blocks to lock a mutex so its use in critical contexts should be
    * avoided.
+   *
+   * Min/max are metadata only unless an optional constraint is installed
+   * (see setConstraint / useMinMaxConstraint).
    */
   virtual void set(ParameterType value, ValueSource *src = nullptr) {
-    //        if (value > mMax) value = mMax;
-    //        if (value < mMin) value = mMin;
     mValueCache = get();
-    if (mProcessCallback) {
-      value = (*mProcessCallback)(value); //, mProcessUdata);
-    }
-
-    runChangeCallbacksSynchronous(value, src);
+    value = applySetFilters(value);
+    // Store before callbacks so get() returns the new value inside them;
+    // getPrevious() still returns the prior value via mValueCache.
     setLocking(value);
+    runChangeCallbacksSynchronous(value, src);
   }
 
   /**
@@ -277,12 +301,8 @@ public:
    */
 
   virtual void setNoCalls(ParameterType value, void *blockReceiver = nullptr) {
-    //        if (value > mMax) value = mMax;
-    //        if (value < mMin) value = mMin;
     mValueCache = get();
-    if (mProcessCallback) {
-      value = (*mProcessCallback)(value); //, mProcessUdata);
-    }
+    value = applySetFilters(value);
     if (blockReceiver) {
       for (auto cb : mCallbacks) {
         (*cb)(value);
@@ -322,10 +342,7 @@ public:
   virtual ParameterType getPrevious();
 
   /**
-   * @brief set the minimum value for the parameter
-   *
-   * The value returned by the get() function will be clamped and will not go
-   * under the value set by this function.
+   * @brief set the minimum value for the parameter (metadata for UI / constraints)
    */
   void min(ParameterType minValue, ValueSource *src = nullptr) {
     mMin = minValue;
@@ -336,10 +353,7 @@ public:
   ParameterType min() const { return mMin; }
 
   /**
-   * @brief set the maximum value for the parameter
-   *
-   * The value returned by the get() function will be clamped and will not go
-   * over the value set by this function.
+   * @brief set the maximum value for the parameter (metadata for UI / constraints)
    */
   void max(ParameterType maxValue, ValueSource *src = nullptr) {
     mMax = maxValue;
@@ -360,12 +374,37 @@ public:
 
   typedef const std::function<ParameterType(ParameterType)>
       ParameterProcessCallback;
+  typedef const std::function<ParameterType(ParameterType)>
+      ParameterConstraintCallback;
   typedef const std::function<void(ParameterType)> ParameterChangeCallback;
   typedef const std::function<void(ParameterType, ValueSource *)>
       ParameterChangeCallbackSrc;
 
   typedef const std::function<void(ValueSource *)>
       ParameterMetaChangeCallbackSrc;
+
+  /**
+   * @brief Optional filter applied on set before the processing callback.
+   *
+   * Use for clamping or validation. Min/max metadata alone do not clamp;
+   * call useMinMaxConstraint() to install a range clamp that tracks min()/max().
+   */
+  void setConstraint(ParameterConstraintCallback cb) {
+    mConstraint = std::make_shared<ParameterConstraintCallback>(std::move(cb));
+  }
+
+  void clearConstraint() { mConstraint.reset(); }
+
+  /// Install a constraint that clamps to the current min()/max() on each set.
+  void useMinMaxConstraint() {
+    setConstraint([this](ParameterType value) {
+      if (value > mMax)
+        value = mMax;
+      if (value < mMin)
+        value = mMin;
+      return value;
+    });
+  }
 
   /**
    * @brief setProcessingCallback sets a callback to be called whenever the
@@ -486,9 +525,19 @@ protected:
 
   void runChangeCallbacksSynchronous(ParameterType &value, ValueSource *src);
 
+  /// Apply optional constraint then processing callback. Used by set paths.
+  ParameterType applySetFilters(ParameterType value) {
+    if (mConstraint) {
+      value = (*mConstraint)(value);
+    }
+    if (mProcessCallback) {
+      value = (*mProcessCallback)(value);
+    }
+    return value;
+  }
+
   std::shared_ptr<ParameterProcessCallback> mProcessCallback;
-  // void * mProcessUdata;
-  // std::vector<void *> mCallbackUdata;
+  std::shared_ptr<ParameterConstraintCallback> mConstraint;
 
   bool mChanged{false};
 
@@ -503,6 +552,8 @@ private:
   std::vector<std::shared_ptr<ParameterMetaChangeCallbackSrc>>
       mMetaCallbacksSrc;
 };
+
+#include "al/ui/al_ParamNumeric.hpp"
 
 /**
  * @brief The Parameter class
@@ -529,14 +580,13 @@ private:
         float curFreq = freq.get()
  * @endcode
  *
- * The values are clamped between a minimum and maximum set using the min() and
- * max() functions.
+ * Min/max are metadata for UI (and optional Constraint filters on set).
  *
  * The ParameterServer class allows exposing Parameter objects via OSC.
  *
  */
 
-class Parameter : public ParameterWrapper<float> {
+class Parameter : public ParamNumeric<float> {
 public:
   /**
    * @brief Parameter
@@ -552,53 +602,27 @@ public:
    * is no locking. This is a safe assumption for most platforms today.
    */
   Parameter(std::string parameterName, std::string group = "",
-            float defaultValue = 0, float min = -99999.0, float max = 99999.0);
+            float defaultValue = 0, float min = -99999.0, float max = 99999.0)
+      : ParamNumeric<float>(std::move(parameterName), std::move(group),
+                            defaultValue, min, max) {}
 
   Parameter(std::string parameterName, float defaultValue, float min = -99999.0,
-            float max = 99999.0);
+            float max = 99999.0)
+      : ParamNumeric<float>(std::move(parameterName), "", defaultValue, min,
+                            max) {}
 
   [[deprecated("Prefix is ignored")]] Parameter(
       std::string parameterName, std::string Group, float defaultValue,
-      std::string prefix, float min = -99999.0, float max = 99999.0);
+      std::string /*prefix*/, float min = -99999.0, float max = 99999.0)
+      : ParamNumeric<float>(std::move(parameterName), std::move(Group),
+                            defaultValue, min, max) {}
 
-  Parameter(const al::Parameter &param) : ParameterWrapper<float>(param) {
-    mValue = param.mValue;
-    setDefault(param.getDefault());
-  }
-
-  /**
-   * @brief set the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   * It does not block and relies on the atomicity of float.
-   */
-  virtual void set(float value, ValueSource *src = nullptr) override;
+  Parameter(const Parameter &param) : ParamNumeric<float>(param) {}
 
   /**
-   * @brief set the parameter's value without calling callbacks
-   *
-   * This function is thread-safe and can be called from any number of threads.
-   * The processing callback is called, but the callbacks registered with
-   * registerChangeCallback() are not called. This is useful to avoid infinite
-   * recursion when a widget sets the parameter that then sets the widget.
+   * @brief get the parameter's value (lock-free; float is atomic on most platforms)
    */
-  virtual void setNoCalls(float value, void *blockReceiver = nullptr) override;
-
-  /**
-   * @brief get the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   *
-   * @return the parameter value
-   */
-  virtual float get() override;
-
-  virtual float toFloat() override { return mValue; }
-
-  virtual bool fromFloat(float value) override {
-    set(value);
-    return true;
-  }
+  float get() override { return mValue; }
 
   float operator=(const float value) {
     this->set(value);
@@ -609,11 +633,11 @@ public:
    * @brief Use this function to get value as VariantValue
    * @param fields
    */
-  virtual void getFields(std::vector<VariantValue> &fields) override {
+  void getFields(std::vector<VariantValue> &fields) override {
     fields.emplace_back(VariantValue(get()));
   }
 
-  virtual void setFields(std::vector<VariantValue> &fields) override {
+  void setFields(std::vector<VariantValue> &fields) override {
     assert(fields.size() == 1);
     if (fields.size() == 1) {
       if (fields[0].type() == VariantType::VARIANT_FLOAT) {
@@ -649,848 +673,130 @@ public:
     }
   }
 
-  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
-  }
-
-  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
-                        std::string id = "") override {
-    if (bundleName.size() == 0) {
-      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  std::string(), min(), max());
-    } else {
-      sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), std::string(), min(), max());
-    }
-  }
-
 private:
 };
 
-/// ParamaterInt
+/// ParameterInt
 /// @ingroup UI
-class ParameterInt : public ParameterWrapper<int32_t> {
+class ParameterInt : public ParamNumeric<int32_t> {
 public:
-  /**
-   * @brief ParameterInt
-   *
-   * @param parameterName The name of the parameter
-   * @param Group The group the parameter belongs to
-   * @param defaultValue The initial value for the parameter
-   * @param min Minimum value for the parameter
-   * @param max Maximum value for the parameter
-   *
-   * This Parameter class is designed for parameters that can be expressed as a
-   * single 32 bit integer number. It realies on float being atomic on the
-   * platform so there is no locking. This is a safe assumption for most
-   * desktop platforms today.
-   */
+  using ParamNumeric<int32_t>::ParamNumeric;
   ParameterInt(std::string parameterName, std::string Group = "",
-               int32_t defaultValue = 0, int32_t min = 0, int32_t max = 127);
-
+               int32_t defaultValue = 0, int32_t min = 0, int32_t max = 127)
+      : ParamNumeric<int32_t>(std::move(parameterName), std::move(Group),
+                              defaultValue, min, max) {}
   [[deprecated("Prefix is ignored")]] ParameterInt(
       std::string parameterName, std::string Group, int32_t defaultValue,
-      std::string prefix, int32_t min = 0, int32_t max = 127);
-
-  ParameterInt(const al::ParameterInt &param)
-      : ParameterWrapper<int32_t>(param) {
-    mValue = param.mValue;
-    setDefault(param.getDefault());
-  }
-
-  /**
-   * @brief set the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   * It does not block and relies on the atomicity of float.
-   */
-  virtual void set(int32_t value, ValueSource *src = nullptr) override;
-
-  /**
-   * @brief set the parameter's value without calling callbacks
-   *
-   * This function is thread-safe and can be called from any number of threads.
-   * The processing callback is called, but the callbacks registered with
-   * registerChangeCallback() are not called. This is useful to avoid infinite
-   * recursion when a widget sets the parameter that then sets the widget.
-   */
-  virtual void setNoCalls(int32_t value,
-                          void *blockReceiver = nullptr) override;
-
-  //  /**
-  //   * @brief get the parameter's value
-  //   *
-  //   * This function is thread-safe and can be called from any number of
-  //   threads
-  //   *
-  //   * @return the parameter value
-  //   */
-  //  virtual int32_t get() override;
-
-  virtual float toFloat() override { return float(mValue); }
-
-  virtual bool fromFloat(float value) override {
-    set(int32_t(value));
-    return true;
-  }
-
-  float operator=(const int32_t value) {
-    this->set(value);
-    return float(value);
-  }
-
-  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
-  }
-
-  virtual void getFields(std::vector<VariantValue> &fields) override {
-    fields.emplace_back(VariantValue(get()));
-  }
-
-  virtual void setFields(std::vector<VariantValue> &fields) override {
-    if (fields.size() == 1) {
-      if (fields[0].type() == VariantType::VARIANT_INT32) {
-        set(fields[0].get<int32_t>());
-      } else {
-        set(static_cast<int32_t>(fields[0].toDouble()));
-      }
-    } else {
-      std::cout << "Wrong number of parameters for " << getFullAddress()
-                << std::endl;
-    }
-  }
-
-  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
-                        std::string id = "") override {
-    if (bundleName.size() == 0) {
-      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  std::string(), min(), max());
-    } else {
-      sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), std::string(), min(), max());
-    }
-  }
-
-private:
+      std::string /*prefix*/, int32_t min = 0, int32_t max = 127)
+      : ParamNumeric<int32_t>(std::move(parameterName), std::move(Group),
+                              defaultValue, min, max) {}
+  ParameterInt(const ParameterInt &param) : ParamNumeric<int32_t>(param) {}
 };
 
-/// ParamaterInt64
+/// ParameterInt64
 /// @ingroup UI
-class ParameterInt64 : public ParameterWrapper<int64_t> {
+class ParameterInt64 : public ParamNumeric<int64_t> {
 public:
-  /**
-   * @brief ParameterInt64
-   *
-   * @param parameterName The name of the parameter
-   * @param Group The group the parameter belongs to
-   * @param defaultValue The initial value for the parameter
-   * @param min Minimum value for the parameter
-   * @param max Maximum value for the parameter
-   *
-   * This Parameter class is designed for parameters that can be expressed as a
-   * single 64 bit integer number.
-   */
+  using ParamNumeric<int64_t>::ParamNumeric;
   ParameterInt64(std::string parameterName, std::string Group = "",
                  int64_t defaultValue = 0, int64_t min = 0,
-                 int64_t max = INT64_MAX);
-
-  ParameterInt64(const al::ParameterInt64 &param)
-      : ParameterWrapper<int64_t>(param) {
-    mValue = param.mValue;
-    setDefault(param.getDefault());
-  }
-
-  /**
-   * @brief set the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   * It does not block and relies on the atomicity of float.
-   */
-  virtual void set(int64_t value, ValueSource *src = nullptr) override;
-
-  /**
-   * @brief set the parameter's value without calling callbacks
-   *
-   * This function is thread-safe and can be called from any number of threads.
-   * The processing callback is called, but the callbacks registered with
-   * registerChangeCallback() are not called. This is useful to avoid infinite
-   * recursion when a widget sets the parameter that then sets the widget.
-   */
-  virtual void setNoCalls(int64_t value,
-                          void *blockReceiver = nullptr) override;
-
-  //  /**
-  //   * @brief get the parameter's value
-  //   *
-  //   * This function is thread-safe and can be called from any number of
-  //   threads
-  //   *
-  //   * @return the parameter value
-  //   */
-  //  virtual int32_t get() override;
-
-  virtual float toFloat() override { return float(mValue); }
-
-  virtual bool fromFloat(float value) override {
-    set(int64_t(value));
-    return true;
-  }
-
-  float operator=(const int64_t value) {
-    this->set(value);
-    return float(value);
-  }
-
-  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
-  }
-
-  virtual void getFields(std::vector<VariantValue> &fields) override {
-    fields.emplace_back(VariantValue(get()));
-  }
-
-  virtual void setFields(std::vector<VariantValue> &fields) override {
-    if (fields.size() == 1) {
-      assert(fields[0].type() == VariantType::VARIANT_INT64);
-      set(fields[0].get<int64_t>());
-    } else {
-      std::cout << "Wrong number of parameters for " << getFullAddress()
-                << std::endl;
-    }
-  }
-
-  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
-                        std::string id = "") override {
-    if (bundleName.size() == 0) {
-      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  std::string(), min(), max());
-    } else {
-      sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), std::string(), min(), max());
-    }
-  }
-
-private:
+                 int64_t max = INT64_MAX)
+      : ParamNumeric<int64_t>(std::move(parameterName), std::move(Group),
+                              defaultValue, min, max) {}
+  ParameterInt64(const ParameterInt64 &param) : ParamNumeric<int64_t>(param) {}
 };
 
-/// ParamaterInt16
+/// ParameterInt16
 /// @ingroup UI
-class ParameterInt16 : public ParameterWrapper<int16_t> {
+class ParameterInt16 : public ParamNumeric<int16_t> {
 public:
-  /**
-   * @brief ParameterInt16
-   *
-   * @param parameterName The name of the parameter
-   * @param Group The group the parameter belongs to
-   * @param defaultValue The initial value for the parameter
-   * @param min Minimum value for the parameter
-   * @param max Maximum value for the parameter
-   *
-   * This Parameter class is designed for parameters that can be expressed as a
-   * single 16 bit integer number.
-   */
+  using ParamNumeric<int16_t>::ParamNumeric;
   ParameterInt16(std::string parameterName, std::string Group = "",
                  int16_t defaultValue = 0, int16_t min = 0,
-                 int16_t max = INT16_MAX);
-
-  ParameterInt16(const al::ParameterInt16 &param)
-      : ParameterWrapper<int16_t>(param) {
-    mValue = param.mValue;
-    setDefault(param.getDefault());
-  }
-
-  /**
-   * @brief set the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   * It does not block and relies on the atomicity of float.
-   */
-  virtual void set(int16_t value, ValueSource *src = nullptr) override;
-
-  /**
-   * @brief set the parameter's value without calling callbacks
-   *
-   * This function is thread-safe and can be called from any number of threads.
-   * The processing callback is called, but the callbacks registered with
-   * registerChangeCallback() are not called. This is useful to avoid infinite
-   * recursion when a widget sets the parameter that then sets the widget.
-   */
-  virtual void setNoCalls(int16_t value,
-                          void *blockReceiver = nullptr) override;
-
-  virtual float toFloat() override { return float(mValue); }
-
-  virtual bool fromFloat(float value) override {
-    set(int16_t(value));
-    return true;
-  }
-
-  float operator=(const int16_t value) {
-    this->set(value);
-    return float(value);
-  }
-
-  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
-  }
-
-  virtual void getFields(std::vector<VariantValue> &fields) override {
-    fields.emplace_back(VariantValue(get()));
-  }
-
-  virtual void setFields(std::vector<VariantValue> &fields) override {
-    if (fields.size() == 1) {
-      assert(fields[0].type() == VariantType::VARIANT_INT16);
-      set(fields[0].get<int16_t>());
-    } else {
-      std::cout << "Wrong number of parameters for " << getFullAddress()
-                << std::endl;
-    }
-  }
-
-  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
-                        std::string id = "") override {
-    if (bundleName.size() == 0) {
-      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  std::string(), min(), max());
-    } else {
-      sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), std::string(), min(), max());
-    }
-  }
-
-private:
+                 int16_t max = INT16_MAX)
+      : ParamNumeric<int16_t>(std::move(parameterName), std::move(Group),
+                              defaultValue, min, max) {}
+  ParameterInt16(const ParameterInt16 &param) : ParamNumeric<int16_t>(param) {}
 };
 
 /// ParameterInt8
 /// @ingroup UI
-class ParameterInt8 : public ParameterWrapper<int8_t> {
+class ParameterInt8 : public ParamNumeric<int8_t> {
 public:
-  /**
-   * @brief ParameterInt8
-   *
-   * @param parameterName The name of the parameter
-   * @param Group The group the parameter belongs to
-   * @param defaultValue The initial value for the parameter
-   * @param min Minimum value for the parameter
-   * @param max Maximum value for the parameter
-   *
-   * This Parameter class is designed for parameters that can be expressed as a
-   * single 8 bit integer number.
-   */
+  using ParamNumeric<int8_t>::ParamNumeric;
   ParameterInt8(std::string parameterName, std::string Group = "",
-                int8_t defaultValue = 0, int8_t min = 0, int8_t max = INT8_MAX);
-
-  ParameterInt8(const al::ParameterInt8 &param)
-      : ParameterWrapper<int8_t>(param) {
-    mValue = param.mValue;
-    setDefault(param.getDefault());
-  }
-
-  /**
-   * @brief set the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   * It does not block and relies on the atomicity of float.
-   */
-  virtual void set(int8_t value, ValueSource *src = nullptr) override;
-
-  /**
-   * @brief set the parameter's value without calling callbacks
-   *
-   * This function is thread-safe and can be called from any number of threads.
-   * The processing callback is called, but the callbacks registered with
-   * registerChangeCallback() are not called. This is useful to avoid infinite
-   * recursion when a widget sets the parameter that then sets the widget.
-   */
-  virtual void setNoCalls(int8_t value, void *blockReceiver = nullptr) override;
-
-  virtual float toFloat() override { return float(mValue); }
-
-  virtual bool fromFloat(float value) override {
-    set(int8_t(value));
-    return true;
-  }
-
-  float operator=(const int8_t value) {
-    this->set(value);
-    return float(value);
-  }
-
-  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
-  }
-
-  virtual void getFields(std::vector<VariantValue> &fields) override {
-    fields.emplace_back(VariantValue(get()));
-  }
-
-  virtual void setFields(std::vector<VariantValue> &fields) override {
-    if (fields.size() == 1) {
-      assert(fields[0].type() == VariantType::VARIANT_INT8);
-      set(fields[0].get<int8_t>());
-    } else {
-      std::cout << "Wrong number of parameters for " << getFullAddress()
-                << std::endl;
-    }
-  }
-
-  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
-                        std::string id = "") override {
-    if (bundleName.size() == 0) {
-      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  std::string(), min(), max());
-    } else {
-      sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), std::string(), min(), max());
-    }
-  }
-
-private:
+                int8_t defaultValue = 0, int8_t min = 0, int8_t max = INT8_MAX)
+      : ParamNumeric<int8_t>(std::move(parameterName), std::move(Group),
+                             defaultValue, min, max) {}
+  ParameterInt8(const ParameterInt8 &param) : ParamNumeric<int8_t>(param) {}
 };
 
 /// ParameterUInt8
 /// @ingroup UI
-class ParameterUInt8 : public ParameterWrapper<uint8_t> {
+class ParameterUInt8 : public ParamNumeric<uint8_t> {
 public:
-  /**
-   * @brief ParameterUInt8
-   *
-   * @param parameterName The name of the parameter
-   * @param Group The group the parameter belongs to
-   * @param defaultValue The initial value for the parameter
-   * @param min Minimum value for the parameter
-   * @param max Maximum value for the parameter
-   *
-   * This Parameter class is designed for parameters that can be expressed as a
-   * single 8 bit unsigned integer number.
-   */
+  using ParamNumeric<uint8_t>::ParamNumeric;
   ParameterUInt8(std::string parameterName, std::string Group = "",
                  uint8_t defaultValue = 0, uint8_t min = 0,
-                 uint8_t max = UINT8_MAX);
-
-  ParameterUInt8(const al::ParameterUInt8 &param)
-      : ParameterWrapper<uint8_t>(param) {
-    mValue = param.mValue;
-    setDefault(param.getDefault());
-  }
-
-  /**
-   * @brief set the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   * It does not block and relies on the atomicity of float.
-   */
-  virtual void set(uint8_t value, ValueSource *src = nullptr) override;
-
-  /**
-   * @brief set the parameter's value without calling callbacks
-   *
-   * This function is thread-safe and can be called from any number of threads.
-   * The processing callback is called, but the callbacks registered with
-   * registerChangeCallback() are not called. This is useful to avoid infinite
-   * recursion when a widget sets the parameter that then sets the widget.
-   */
-  virtual void setNoCalls(uint8_t value,
-                          void *blockReceiver = nullptr) override;
-
-  virtual float toFloat() override { return float(mValue); }
-
-  virtual bool fromFloat(float value) override {
-    set(uint8_t(value));
-    return true;
-  }
-
-  float operator=(const uint8_t value) {
-    this->set(value);
-    return float(value);
-  }
-
-  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
-  }
-
-  virtual void getFields(std::vector<VariantValue> &fields) override {
-    fields.emplace_back(VariantValue(get()));
-  }
-
-  virtual void setFields(std::vector<VariantValue> &fields) override {
-    if (fields.size() == 1) {
-      assert(fields[0].type() == VariantType::VARIANT_UINT8);
-      set(fields[0].get<uint8_t>());
-    } else {
-      std::cout << "Wrong number of parameters for " << getFullAddress()
-                << std::endl;
-    }
-  }
-
-  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
-                        std::string id = "") override {
-    if (bundleName.size() == 0) {
-      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  std::string(), min(), max());
-    } else {
-      sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), std::string(), min(), max());
-    }
-  }
-
-private:
+                 uint8_t max = UINT8_MAX)
+      : ParamNumeric<uint8_t>(std::move(parameterName), std::move(Group),
+                              defaultValue, min, max) {}
+  ParameterUInt8(const ParameterUInt8 &param) : ParamNumeric<uint8_t>(param) {}
 };
 
 /// ParameterUInt16
 /// @ingroup UI
-class ParameterUInt16 : public ParameterWrapper<uint16_t> {
+class ParameterUInt16 : public ParamNumeric<uint16_t> {
 public:
-  /**
-   * @brief ParameterUint16
-   *
-   * @param parameterName The name of the parameter
-   * @param Group The group the parameter belongs to
-   * @param defaultValue The initial value for the parameter
-   * @param min Minimum value for the parameter
-   * @param max Maximum value for the parameter
-   *
-   * This Parameter class is designed for parameters that can be expressed as a
-   * single 16 bit unsigned integer number.
-   */
+  using ParamNumeric<uint16_t>::ParamNumeric;
   ParameterUInt16(std::string parameterName, std::string Group = "",
                   uint16_t defaultValue = 0, uint16_t min = 0,
-                  uint16_t max = UINT16_MAX);
-
-  ParameterUInt16(const al::ParameterUInt16 &param)
-      : ParameterWrapper<uint16_t>(param) {
-    mValue = param.mValue;
-    setDefault(param.getDefault());
-  }
-
-  /**
-   * @brief set the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   * It does not block and relies on the atomicity of float.
-   */
-  virtual void set(uint16_t value, ValueSource *src = nullptr) override;
-
-  /**
-   * @brief set the parameter's value without calling callbacks
-   *
-   * This function is thread-safe and can be called from any number of threads.
-   * The processing callback is called, but the callbacks registered with
-   * registerChangeCallback() are not called. This is useful to avoid infinite
-   * recursion when a widget sets the parameter that then sets the widget.
-   */
-  virtual void setNoCalls(uint16_t value,
-                          void *blockReceiver = nullptr) override;
-
-  virtual float toFloat() override { return float(mValue); }
-
-  virtual bool fromFloat(float value) override {
-    set(uint16_t(value));
-    return true;
-  }
-
-  float operator=(const uint16_t value) {
-    this->set(value);
-    return float(value);
-  }
-
-  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
-  }
-
-  virtual void getFields(std::vector<VariantValue> &fields) override {
-    fields.emplace_back(VariantValue(get()));
-  }
-
-  virtual void setFields(std::vector<VariantValue> &fields) override {
-    if (fields.size() == 1) {
-      assert(fields[0].type() == VariantType::VARIANT_UINT16);
-      set(fields[0].get<uint16_t>());
-    } else {
-      std::cout << "Wrong number of parameters for " << getFullAddress()
-                << std::endl;
-    }
-  }
-
-  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
-                        std::string id = "") override {
-    if (bundleName.size() == 0) {
-      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  std::string(), min(), max());
-    } else {
-      sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), std::string(), min(), max());
-    }
-  }
-
-private:
+                  uint16_t max = UINT16_MAX)
+      : ParamNumeric<uint16_t>(std::move(parameterName), std::move(Group),
+                               defaultValue, min, max) {}
+  ParameterUInt16(const ParameterUInt16 &param)
+      : ParamNumeric<uint16_t>(param) {}
 };
 
-/// ParamaterUInt32
+/// ParameterUInt32
 /// @ingroup UI
-class ParameterUInt32 : public ParameterWrapper<uint32_t> {
+class ParameterUInt32 : public ParamNumeric<uint32_t> {
 public:
-  /**
-   * @brief ParameterUint32
-   *
-   * @param parameterName The name of the parameter
-   * @param Group The group the parameter belongs to
-   * @param defaultValue The initial value for the parameter
-   * @param min Minimum value for the parameter
-   * @param max Maximum value for the parameter
-   *
-   * This Parameter class is designed for parameters that can be expressed as a
-   * single 32 bit unsigned integer number.
-   */
+  using ParamNumeric<uint32_t>::ParamNumeric;
   ParameterUInt32(std::string parameterName, std::string Group = "",
                   uint32_t defaultValue = 0, uint32_t min = 0,
-                  uint32_t max = UINT32_MAX);
-
-  ParameterUInt32(const al::ParameterUInt32 &param)
-      : ParameterWrapper<uint32_t>(param) {
-    mValue = param.mValue;
-    setDefault(param.getDefault());
-  }
-
-  /**
-   * @brief set the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   * It does not block and relies on the atomicity of float.
-   */
-  virtual void set(uint32_t value, ValueSource *src = nullptr) override;
-
-  /**
-   * @brief set the parameter's value without calling callbacks
-   *
-   * This function is thread-safe and can be called from any number of threads.
-   * The processing callback is called, but the callbacks registered with
-   * registerChangeCallback() are not called. This is useful to avoid infinite
-   * recursion when a widget sets the parameter that then sets the widget.
-   */
-  virtual void setNoCalls(uint32_t value,
-                          void *blockReceiver = nullptr) override;
-
-  virtual float toFloat() override { return float(mValue); }
-
-  virtual bool fromFloat(float value) override {
-    set(uint32_t(value));
-    return true;
-  }
-
-  float operator=(const uint32_t value) {
-    this->set(value);
-    return float(value);
-  }
-
-  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
-  }
-
-  virtual void getFields(std::vector<VariantValue> &fields) override {
-    fields.emplace_back(VariantValue(get()));
-  }
-
-  virtual void setFields(std::vector<VariantValue> &fields) override {
-    if (fields.size() == 1) {
-      assert(fields[0].type() == VariantType::VARIANT_UINT32);
-      set(fields[0].get<uint32_t>());
-    } else {
-      std::cout << "Wrong number of parameters for " << getFullAddress()
-                << std::endl;
-    }
-  }
-
-  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
-                        std::string id = "") override {
-    if (bundleName.size() == 0) {
-      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  std::string(), min(), max());
-    } else {
-      sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), std::string(), min(), max());
-    }
-  }
-
-private:
+                  uint32_t max = UINT32_MAX)
+      : ParamNumeric<uint32_t>(std::move(parameterName), std::move(Group),
+                               defaultValue, min, max) {}
+  ParameterUInt32(const ParameterUInt32 &param)
+      : ParamNumeric<uint32_t>(param) {}
 };
 
-/// ParamaterUInt64
+/// ParameterUInt64
 /// @ingroup UI
-class ParameterUInt64 : public ParameterWrapper<uint64_t> {
+class ParameterUInt64 : public ParamNumeric<uint64_t> {
 public:
-  /**
-   * @brief ParameterUint64
-   *
-   * @param parameterName The name of the parameter
-   * @param Group The group the parameter belongs to
-   * @param defaultValue The initial value for the parameter
-   * @param min Minimum value for the parameter
-   * @param max Maximum value for the parameter
-   *
-   * This Parameter class is designed for parameters that can be expressed as a
-   * single 64 bit unsigned integer number.
-   */
+  using ParamNumeric<uint64_t>::ParamNumeric;
   ParameterUInt64(std::string parameterName, std::string Group = "",
                   uint64_t defaultValue = 0, uint64_t min = 0,
-                  uint64_t max = UINT64_MAX);
-
-  ParameterUInt64(const al::ParameterUInt64 &param)
-      : ParameterWrapper<uint64_t>(param) {
-    mValue = param.mValue;
-    setDefault(param.getDefault());
-  }
-
-  /**
-   * @brief set the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   * It does not block and relies on the atomicity of float.
-   */
-  virtual void set(uint64_t value, ValueSource *src = nullptr) override;
-
-  /**
-   * @brief set the parameter's value without calling callbacks
-   *
-   * This function is thread-safe and can be called from any number of threads.
-   * The processing callback is called, but the callbacks registered with
-   * registerChangeCallback() are not called. This is useful to avoid infinite
-   * recursion when a widget sets the parameter that then sets the widget.
-   */
-  virtual void setNoCalls(uint64_t value,
-                          void *blockReceiver = nullptr) override;
-
-  virtual float toFloat() override { return float(mValue); }
-
-  virtual bool fromFloat(float value) override {
-    set(uint64_t(value));
-    return true;
-  }
-
-  float operator=(const uint64_t value) {
-    this->set(value);
-    return float(value);
-  }
-
-  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
-  }
-
-  virtual void getFields(std::vector<VariantValue> &fields) override {
-    fields.emplace_back(VariantValue(get()));
-  }
-
-  virtual void setFields(std::vector<VariantValue> &fields) override {
-    if (fields.size() == 1) {
-      assert(fields[0].type() == VariantType::VARIANT_UINT64);
-      set(fields[0].get<uint64_t>());
-    } else {
-      std::cout << "Wrong number of parameters for " << getFullAddress()
-                << std::endl;
-    }
-  }
-
-  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
-                        std::string id = "") override {
-    if (bundleName.size() == 0) {
-      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  std::string(), min(), max());
-    } else {
-      sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), std::string(), min(), max());
-    }
-  }
-
-private:
+                  uint64_t max = UINT64_MAX)
+      : ParamNumeric<uint64_t>(std::move(parameterName), std::move(Group),
+                               defaultValue, min, max) {}
+  ParameterUInt64(const ParameterUInt64 &param)
+      : ParamNumeric<uint64_t>(param) {}
 };
 
-/// ParamaterDouble
+/// ParameterDouble
 /// @ingroup UI
-class ParameterDouble : public ParameterWrapper<double> {
+class ParameterDouble : public ParamNumeric<double> {
 public:
-  /**
-   * @brief ParameterDouble
-   *
-   * @param parameterName The name of the parameter
-   * @param Group The group the parameter belongs to
-   * @param defaultValue The initial value for the parameter
-   * @param min Minimum value for the parameter
-   * @param max Maximum value for the parameter
-   *
-   * This Parameter class is designed for parameters that can be expressed as a
-   * single double number.
-   */
+  using ParamNumeric<double>::ParamNumeric;
   ParameterDouble(std::string parameterName, std::string Group = "",
                   double defaultValue = 0, double min = -99999.0,
-                  double max = 99999.0);
-
-  ParameterDouble(const al::ParameterDouble &param)
-      : ParameterWrapper<double>(param) {
-    mValue = param.mValue;
-    setDefault(param.getDefault());
-  }
-
-  /**
-   * @brief set the parameter's value
-   *
-   * This function is thread-safe and can be called from any number of threads
-   * It does not block and relies on the atomicity of double.
-   */
-  virtual void set(double value, ValueSource *src = nullptr) override;
-
-  /**
-   * @brief set the parameter's value without calling callbacks
-   *
-   * This function is thread-safe and can be called from any number of threads.
-   * The processing callback is called, but the callbacks registered with
-   * registerChangeCallback() are not called. This is useful to avoid infinite
-   * recursion when a widget sets the parameter that then sets the widget.
-   */
-  virtual void setNoCalls(double value, void *blockReceiver = nullptr) override;
-
-  virtual float toFloat() override { return float(mValue); }
-
-  virtual bool fromFloat(float value) override {
-    set(double(value));
-    return true;
-  }
-
-  double operator=(const double value) {
-    this->set(value);
-    return double(value);
-  }
-
-  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
-    sender.send(prefix + getFullAddress(), get());
-  }
-
-  virtual void getFields(std::vector<VariantValue> &fields) override {
-    fields.emplace_back(VariantValue(get()));
-  }
-
-  virtual void setFields(std::vector<VariantValue> &fields) override {
-    if (fields.size() == 1) {
-      assert(fields[0].type() == VariantType::VARIANT_DOUBLE);
-      set(fields[0].get<double>());
-    } else {
-      std::cout << "Wrong number of parameters for " << getFullAddress()
-                << std::endl;
-    }
-  }
-
-  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
-                        std::string id = "") override {
-    if (bundleName.size() == 0) {
-      sender.send("/registerParameter", getName(), getGroup(), getDefault(),
-                  std::string(), min(), max());
-    } else {
-      sender.send("/registerBundleParameter", bundleName, id, getName(),
-                  getGroup(), getDefault(), std::string(), min(), max());
-    }
-  }
-
-private:
+                  double max = 99999.0)
+      : ParamNumeric<double>(std::move(parameterName), std::move(Group),
+                             defaultValue, min, max) {}
+  ParameterDouble(const ParameterDouble &param) : ParamNumeric<double>(param) {}
 };
 
 /// ParamaterBool
@@ -2247,6 +1553,7 @@ ParameterWrapper<ParameterType>::ParameterWrapper(
   mMin = param.mMin;
   mMax = param.mMax;
   mProcessCallback = param.mProcessCallback;
+  mConstraint = param.mConstraint;
   // mProcessUdata = param.mProcessUdata;
   mCallbacks = param.mCallbacks;
   mMutex = std::make_unique<std::mutex>();

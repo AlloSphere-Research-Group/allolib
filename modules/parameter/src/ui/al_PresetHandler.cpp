@@ -2,6 +2,7 @@
 #include "al/ui/al_PresetHandler.hpp"
 #include <cstdint>
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstring>
@@ -11,8 +12,315 @@
 #include <string>
 
 #include "al/io/al_File.hpp"
+#include "al/ui/al_ParameterBundle.hpp"
 
 using namespace al;
+
+namespace {
+
+double variantAsDouble(const VariantValue &v) {
+  switch (v.type()) {
+  case VariantType::VARIANT_FLOAT:
+    return v.get<float>();
+  case VariantType::VARIANT_DOUBLE:
+    return v.get<double>();
+  case VariantType::VARIANT_INT32:
+    return static_cast<double>(v.get<int32_t>());
+  case VariantType::VARIANT_INT8:
+    return static_cast<double>(v.get<int8_t>());
+  case VariantType::VARIANT_INT16:
+    return static_cast<double>(v.get<int16_t>());
+  case VariantType::VARIANT_UINT8:
+    return static_cast<double>(v.get<uint8_t>());
+  case VariantType::VARIANT_UINT16:
+    return static_cast<double>(v.get<uint16_t>());
+  case VariantType::VARIANT_UINT32:
+    return static_cast<double>(v.get<uint32_t>());
+  default:
+    return 0.0;
+  }
+}
+
+bool isNumericVariant(VariantType t) {
+  return t == VariantType::VARIANT_FLOAT || t == VariantType::VARIANT_DOUBLE ||
+         t == VariantType::VARIANT_INT32 || t == VariantType::VARIANT_INT8 ||
+         t == VariantType::VARIANT_INT16 || t == VariantType::VARIANT_UINT8 ||
+         t == VariantType::VARIANT_UINT16 || t == VariantType::VARIANT_UINT32;
+}
+
+/// Coerce \p incoming to match \p current's type (float/int32 swaps used by
+/// presets). Returns false if types are incompatible.
+bool coerceFieldToMatch(const VariantValue &current, VariantValue &incoming) {
+  if (current.type() == incoming.type()) {
+    return true;
+  }
+  if (current.type() == VariantType::VARIANT_FLOAT &&
+      incoming.type() == VariantType::VARIANT_INT32) {
+    incoming = VariantValue(float(incoming.get<int32_t>()));
+    return true;
+  }
+  if (current.type() == VariantType::VARIANT_INT32 &&
+      incoming.type() == VariantType::VARIANT_FLOAT) {
+    incoming = VariantValue(int32_t(incoming.get<float>()));
+    return true;
+  }
+  if (current.type() == VariantType::VARIANT_FLOAT &&
+      incoming.type() == VariantType::VARIANT_DOUBLE) {
+    incoming = VariantValue(float(incoming.get<double>()));
+    return true;
+  }
+  if (current.type() == VariantType::VARIANT_DOUBLE &&
+      incoming.type() == VariantType::VARIANT_FLOAT) {
+    incoming = VariantValue(double(incoming.get<float>()));
+    return true;
+  }
+  if (current.type() == VariantType::VARIANT_DOUBLE &&
+      incoming.type() == VariantType::VARIANT_INT32) {
+    incoming = VariantValue(double(incoming.get<int32_t>()));
+    return true;
+  }
+  if (current.type() == VariantType::VARIANT_INT32 &&
+      incoming.type() == VariantType::VARIANT_DOUBLE) {
+    incoming = VariantValue(int32_t(incoming.get<double>()));
+    return true;
+  }
+  return false;
+}
+
+VariantValue lerpFields(const VariantValue &start, const VariantValue &end,
+                        double factor) {
+  if (start.type() == VariantType::VARIANT_STRING) {
+    return end;
+  }
+  if (!isNumericVariant(start.type()) || !isNumericVariant(end.type())) {
+    return end;
+  }
+  double v = variantAsDouble(start) +
+             factor * (variantAsDouble(end) - variantAsDouble(start));
+  if (start.type() == VariantType::VARIANT_INT32) {
+    return VariantValue(static_cast<int32_t>(v));
+  }
+  if (start.type() == VariantType::VARIANT_DOUBLE) {
+    return VariantValue(v);
+  }
+  return VariantValue(static_cast<float>(v));
+}
+
+VariantValue applyDeltaField(const VariantValue &start,
+                             const VariantValue &delta, double factor) {
+  if (start.type() == VariantType::VARIANT_STRING) {
+    return factor >= 1.0 ? delta : start;
+  }
+  if (!isNumericVariant(start.type())) {
+    return start;
+  }
+  double v = variantAsDouble(start) + factor * variantAsDouble(delta);
+  if (start.type() == VariantType::VARIANT_INT32) {
+    return VariantValue(static_cast<int32_t>(v));
+  }
+  if (start.type() == VariantType::VARIANT_DOUBLE) {
+    return VariantValue(v);
+  }
+  return VariantValue(static_cast<float>(v));
+}
+
+std::string nestedBundlePrefix(const std::string &parentPrefix,
+                               ParameterBundle *sub, const std::string &id,
+                               size_t indexInId, size_t countForId) {
+  std::string subPrefix = parentPrefix + "/" + sub->name() + "/" + id;
+  if (countForId > 1) {
+    subPrefix += "/" + std::to_string(indexInId);
+  }
+  return subPrefix;
+}
+
+void collectBundleParameters(ParameterBundle *bundle, const std::string &prefix,
+                             PresetHandler::ParameterStates &values,
+                             const std::vector<std::string> &skip) {
+  for (ParameterMeta *p : bundle->parameters()) {
+    if (std::find(skip.begin(), skip.end(), p->getFullAddress()) !=
+        skip.end()) {
+      continue;
+    }
+    std::vector<VariantValue> fields;
+    p->getFields(fields);
+    values[prefix + p->getFullAddress()] = std::move(fields);
+  }
+  for (const auto &subGroup : bundle->bundles()) {
+    for (size_t j = 0; j < subGroup.second.size(); ++j) {
+      ParameterBundle *sub = subGroup.second[j];
+      collectBundleParameters(
+          sub,
+          nestedBundlePrefix(prefix, sub, subGroup.first, j,
+                             subGroup.second.size()),
+          values, skip);
+    }
+  }
+}
+
+void applyBundleParameters(ParameterBundle *bundle, const std::string &prefix,
+                           PresetHandler::ParameterStates &targetValues) {
+  for (ParameterMeta *p : bundle->parameters()) {
+    auto it = targetValues.find(prefix + p->getFullAddress());
+    if (it == targetValues.end()) {
+      continue;
+    }
+    auto &fields = it->second;
+    std::vector<VariantValue> current;
+    p->getFields(current);
+    if (current.size() == fields.size()) {
+      for (size_t i = 0; i < current.size(); ++i) {
+        coerceFieldToMatch(current[i], fields[i]);
+      }
+    }
+    p->setFields(fields);
+  }
+  for (const auto &subGroup : bundle->bundles()) {
+    for (size_t j = 0; j < subGroup.second.size(); ++j) {
+      ParameterBundle *sub = subGroup.second[j];
+      applyBundleParameters(sub,
+                            nestedBundlePrefix(prefix, sub, subGroup.first, j,
+                                               subGroup.second.size()),
+                            targetValues);
+    }
+  }
+}
+
+bool applyFieldsAtBundleAddress(ParameterBundle *bundle,
+                                const std::string &prefix,
+                                const std::string &fullAddress,
+                                std::vector<VariantValue> &fields) {
+  for (ParameterMeta *p : bundle->parameters()) {
+    if (prefix + p->getFullAddress() == fullAddress && fields.size() > 0) {
+      p->setFields(fields);
+      return true;
+    }
+  }
+  for (const auto &subGroup : bundle->bundles()) {
+    for (size_t j = 0; j < subGroup.second.size(); ++j) {
+      ParameterBundle *sub = subGroup.second[j];
+      if (applyFieldsAtBundleAddress(
+              sub,
+              nestedBundlePrefix(prefix, sub, subGroup.first, j,
+                                 subGroup.second.size()),
+              fullAddress, fields)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void collectBundleMorphDeltas(ParameterBundle *bundle,
+                              const std::string &prefix,
+                              PresetHandler::ParameterStates &parameterStates,
+                              PresetHandler::ParameterStates &startValues,
+                              PresetHandler::ParameterStates &deltaValues,
+                              const std::vector<std::string> &skip) {
+  for (ParameterMeta *param : bundle->parameters()) {
+    if (std::find(skip.begin(), skip.end(), param->getFullAddress()) !=
+        skip.end()) {
+      continue;
+    }
+    std::string address = prefix + param->getFullAddress();
+    if (parameterStates.find(address) == parameterStates.end()) {
+      continue;
+    }
+    startValues[address].clear();
+    param->getFields(startValues[address]);
+    auto &params = startValues[address];
+    auto &targetValues = parameterStates[address];
+    if (targetValues.size() < params.size()) {
+      auto copyStart = params.begin();
+      std::advance(copyStart, targetValues.size());
+      targetValues.insert(targetValues.end(), copyStart, params.end());
+    }
+    auto &deltas = deltaValues[address];
+    deltas.resize(targetValues.size());
+    for (size_t i = 0; i < targetValues.size(); i++) {
+      if (params[i].type() == VariantType::VARIANT_STRING ||
+          !isNumericVariant(params[i].type()) ||
+          !isNumericVariant(targetValues[i].type())) {
+        deltas[i] = VariantValue(0.0f);
+        continue;
+      }
+      double delta =
+          variantAsDouble(targetValues[i]) - variantAsDouble(params[i]);
+      if (params[i].type() == VariantType::VARIANT_INT32) {
+        deltas[i] = VariantValue(static_cast<int32_t>(delta));
+      } else if (params[i].type() == VariantType::VARIANT_DOUBLE) {
+        deltas[i] = VariantValue(delta);
+      } else {
+        deltas[i] = VariantValue(static_cast<float>(delta));
+      }
+    }
+  }
+  for (const auto &subGroup : bundle->bundles()) {
+    for (size_t j = 0; j < subGroup.second.size(); ++j) {
+      ParameterBundle *sub = subGroup.second[j];
+      collectBundleMorphDeltas(
+          sub,
+          nestedBundlePrefix(prefix, sub, subGroup.first, j,
+                             subGroup.second.size()),
+          parameterStates, startValues, deltaValues, skip);
+    }
+  }
+}
+
+std::string quotePresetString(const std::string &s) {
+  std::string out = "\"";
+  for (char c : s) {
+    if (c == '\\' || c == '"') {
+      out += '\\';
+    }
+    out += c;
+  }
+  out += '"';
+  return out;
+}
+
+bool readPresetStringToken(std::istream &ss, std::string &out) {
+  ss >> std::ws;
+  int ch = ss.peek();
+  if (ch == '"') {
+    ss.get();
+    out.clear();
+    bool escape = false;
+    while (ss.good()) {
+      char c;
+      ss.get(c);
+      if (!ss.good()) {
+        return false;
+      }
+      if (escape) {
+        out += c;
+        escape = false;
+      } else if (c == '\\') {
+        escape = true;
+      } else if (c == '"') {
+        return true;
+      } else {
+        out += c;
+      }
+    }
+    return false;
+  }
+  return static_cast<bool>(std::getline(ss, out, ' '));
+}
+
+} // namespace
+
+static void setBundleGroupValues(std::string fullAddress,
+                                 std::vector<VariantValue> &values,
+                                 std::vector<ParameterBundle *> bundles,
+                                 std::string prefix) {
+  for (size_t i = 0; i < bundles.size(); ++i) {
+    if (applyFieldsAtBundleAddress(bundles[i], prefix + std::to_string(i),
+                                   fullAddress, values)) {
+      return;
+    }
+  }
+}
 
 // PresetHandler --------------------------------------------------------------
 
@@ -178,28 +486,10 @@ void PresetHandler::storePreset(int index, std::string name, bool overwrite) {
   }
   for (const auto &bundleGroup : mBundles) {
     std::string bundleName = "/" + bundleGroup.first + "/";
-
-    for (unsigned int i = 0; i < bundleGroup.second.size(); i++) {
-      std::string bundlePrefix = bundleName + std::to_string(i);
-      for (ParameterMeta *p : bundleGroup.second.at(i)->parameters()) {
-
-        if (std::find(mSkipParameters.begin(), mSkipParameters.end(),
-                      p->getFullAddress()) == mSkipParameters.end()) {
-          std::vector<VariantValue> fields;
-          p->getFields(fields);
-          values[bundlePrefix + p->getFullAddress()] = fields;
-        }
-      }
-      // FIXME enable recursive nesting for bundles
-      for (const auto &subBundleGroup : bundleGroup.second.at(i)->bundles()) {
-        for (auto *bundle : subBundleGroup.second) {
-          auto bundleStates = getBundleStates(bundle, subBundleGroup.first);
-          for (auto &bundleValues : bundleStates) {
-            values[bundlePrefix + "/" + bundleValues.first] =
-                bundleValues.second;
-          }
-        }
-      }
+    for (size_t i = 0; i < bundleGroup.second.size(); ++i) {
+      collectBundleParameters(bundleGroup.second[i],
+                              bundleName + std::to_string(i), values,
+                              mSkipParameters);
     }
   }
 
@@ -284,111 +574,38 @@ void PresetHandler::morphTo(ParameterStates &parameterStates, float morphTime) {
         auto &deltaValues = mDeltaValues[address];
         deltaValues.resize(targetValues.size());
         for (size_t i = 0; i < targetValues.size(); i++) {
-          // TODO move thsi to VariantValue as overloaded operator?
-          if (targetValues[i].type() == VariantType::VARIANT_FLOAT &&
-              params[i].type() == VariantType::VARIANT_FLOAT) {
-            deltaValues[i] = VariantValue(targetValues[i].get<float>() -
-                                          params[i].get<float>());
-          } else if (targetValues[i].type() == VariantType::VARIANT_DOUBLE &&
-                     params[i].type() == VariantType::VARIANT_FLOAT) {
-            deltaValues[i] = VariantValue(targetValues[i].get<double>() -
-                                          params[i].get<float>());
-          } else if (targetValues[i].type() == VariantType::VARIANT_DOUBLE &&
-                     params[i].type() == VariantType::VARIANT_DOUBLE) {
-            deltaValues[i] = VariantValue(targetValues[i].get<double>() -
-                                          params[i].get<double>());
-          } else if (targetValues[i].type() == VariantType::VARIANT_INT32 &&
-                     params[i].type() == VariantType::VARIANT_INT32) {
-            deltaValues[i] = VariantValue(targetValues[i].get<int32_t>() -
-                                          params[i].get<int32_t>());
-          } else if (targetValues[i].type() == VariantType::VARIANT_FLOAT &&
-                     params[i].type() == VariantType::VARIANT_INT32) {
-            deltaValues[i] = VariantValue(targetValues[i].get<float>() -
-                                          params[i].get<int32_t>());
-          } else if (targetValues[i].type() == VariantType::VARIANT_DOUBLE &&
-                     params[i].type() == VariantType::VARIANT_INT32) {
-            deltaValues[i] = VariantValue(targetValues[i].get<double>() -
-                                          params[i].get<int32_t>());
-          } else if (targetValues[i].type() == VariantType::VARIANT_INT32 &&
-                     params[i].type() == VariantType::VARIANT_FLOAT) {
-            deltaValues[i] = VariantValue(targetValues[i].get<int32_t>() -
-                                          params[i].get<float>());
-          } else if (targetValues[i].type() == VariantType::VARIANT_STRING &&
-                     params[i].type() == VariantType::VARIANT_STRING) {
-            deltaValues[i] = VariantValue(targetValues[i].get<int32_t>() -
-                                          params[i].get<float>());
-          } else {
+          if (params[i].type() == VariantType::VARIANT_STRING) {
+            // Strings jump to target (no continuous morph).
+            deltaValues[i] = VariantValue(0.0f);
+            continue;
+          }
+          if (!isNumericVariant(params[i].type()) ||
+              !isNumericVariant(targetValues[i].type())) {
             std::cout << "Parameter type unsupported in morph" << std::endl;
+            deltaValues[i] = VariantValue(0.0f);
+            continue;
+          }
+          double delta =
+              variantAsDouble(targetValues[i]) - variantAsDouble(params[i]);
+          if (params[i].type() == VariantType::VARIANT_INT32) {
+            deltaValues[i] = VariantValue(static_cast<int32_t>(delta));
+          } else if (params[i].type() == VariantType::VARIANT_DOUBLE) {
+            deltaValues[i] = VariantValue(delta);
+          } else {
+            deltaValues[i] = VariantValue(static_cast<float>(delta));
           }
         }
         //        break;
       }
     }
 
-    std::function<void(std::vector<ParameterBundle *>, std::string)>
-        processBundleGroup = [&](std::vector<ParameterBundle *> bundles,
-                                 std::string prefix) {
-          for (unsigned int i = 0; i < bundles.size(); i++) {
-            std::string bundlePrefix = prefix + std::to_string(i);
-            for (auto *param : bundles.at(i)->parameters()) {
-
-              if (std::find(mSkipParameters.begin(), mSkipParameters.end(),
-                            param->getFullAddress()) == mSkipParameters.end()) {
-                std::string address = bundlePrefix + param->getFullAddress();
-
-                mStartValues[param->getFullAddress()].clear();
-                param->getFields(mStartValues[address]);
-                auto &params = mStartValues[address];
-                auto targetValues = parameterStates[address];
-                auto &deltaValues = mDeltaValues[address];
-                for (size_t i = 0; i < targetValues.size(); i++) {
-                  // TODO move this to VariantValue as overloaded operator?
-                  if (targetValues[i].type() == VariantType::VARIANT_FLOAT &&
-                      params[i].type() == VariantType::VARIANT_FLOAT) {
-                    deltaValues[i] = VariantValue(targetValues[i].get<float>() -
-                                                  params[i].get<float>());
-                  } else if (targetValues[i].type() ==
-                                 VariantType::VARIANT_INT32 &&
-                             params[i].type() == VariantType::VARIANT_INT32) {
-                    deltaValues[i] =
-                        VariantValue(targetValues[i].get<int32_t>() -
-                                     params[i].get<int32_t>());
-                  } else if (targetValues[i].type() ==
-                                 VariantType::VARIANT_FLOAT &&
-                             params[i].type() == VariantType::VARIANT_INT32) {
-                    deltaValues[i] = VariantValue(targetValues[i].get<float>() -
-                                                  params[i].get<int32_t>());
-                  } else if (targetValues[i].type() ==
-                                 VariantType::VARIANT_INT32 &&
-                             params[i].type() == VariantType::VARIANT_FLOAT) {
-                    deltaValues[i] =
-                        VariantValue(targetValues[i].get<int32_t>() -
-                                     params[i].get<float>());
-                  } else if (targetValues[i].type() ==
-                                 VariantType::VARIANT_STRING &&
-                             params[i].type() == VariantType::VARIANT_STRING) {
-                    deltaValues[i] =
-                        VariantValue(targetValues[i].get<int32_t>() -
-                                     params[i].get<float>());
-                  } else {
-                    std::cout << "Parameter type unsupported in morph"
-                              << std::endl;
-                  }
-                }
-
-                break;
-              }
-            }
-            for (const auto &bundleGroup : bundles.at(i)->bundles()) {
-              prefix += "/" + bundleGroup.first + "/";
-              processBundleGroup({bundleGroup.second}, prefix);
-            }
-          }
-        };
-
     for (const auto &bundleGroup : mBundles) {
       std::string prefix = "/" + bundleGroup.first + "/";
-      processBundleGroup(bundleGroup.second, prefix);
+      for (size_t i = 0; i < bundleGroup.second.size(); ++i) {
+        collectBundleMorphDeltas(bundleGroup.second[i],
+                                 prefix + std::to_string(i), parameterStates,
+                                 mStartValues, mDeltaValues, mSkipParameters);
+      }
     }
 
     if (morphTime != mMorphTime) {
@@ -442,10 +659,6 @@ std::string PresetHandler::recallPreset(int index) {
 
 void PresetHandler::recallPresetSynchronous(std::string name) {
   {
-    //    if (mMorphRemainingSteps.load() > 0) {
-    //      mMorphRemainingSteps.store(0);
-    //      mTotalSteps.store(0);
-    //    }
     mTotalSteps = 0;
     mMorphStepCount = 0;
     std::lock_guard<std::mutex> lk(mTargetLock);
@@ -454,78 +667,31 @@ void PresetHandler::recallPresetSynchronous(std::string name) {
       std::vector<VariantValue> currentFields;
       param->getFields(currentFields);
       if (targetValues.find(param->getFullAddress()) != targetValues.end()) {
-        if (targetValues[param->getFullAddress()].size() ==
-            currentFields.size()) {
+        auto &targetFields = targetValues[param->getFullAddress()];
+        if (targetFields.size() == currentFields.size()) {
           for (size_t i = 0; i < currentFields.size(); i++) {
-            if (currentFields[i].type() !=
-                targetValues[param->getFullAddress()][i].type()) {
-              if (currentFields[i].type() == VariantType::VARIANT_FLOAT &&
-                  targetValues[param->getFullAddress()][i].type() ==
-                      VariantType::VARIANT_INT32) {
-                targetValues[param->getFullAddress()][i] = VariantValue(float(
-                    targetValues[param->getFullAddress()][i].get<int32_t>()));
-              } else if (currentFields[i].type() ==
-                             VariantType::VARIANT_INT32 &&
-                         targetValues[param->getFullAddress()][i].type() ==
-                             VariantType::VARIANT_FLOAT) {
-                targetValues[param->getFullAddress()][i] = VariantValue(int32_t(
-                    targetValues[param->getFullAddress()][i].get<float>()));
-              }
+            if (!coerceFieldToMatch(currentFields[i], targetFields[i]) &&
+                verbose()) {
+              std::cerr << "Warning: type mismatch for "
+                        << param->getFullAddress() << std::endl;
             }
           }
         }
-        param->setFields(targetValues[param->getFullAddress()]);
+        param->setFields(targetFields);
       } else {
         if (verbose()) {
           std::cerr << "Warning: parameter " << param->getFullAddress()
-                    << "not matched" << __FILE__ << "  " << __FUNCTION__
-                    << std::endl;
+                    << " not matched" << std::endl;
         }
       }
     }
-    // FIXME recall bundles
-
-    //  {
-    //    if (mTotalSteps.load() >= 0) {
-    //      mTotalSteps.store(1);
-
-    //    }
-    //    std::lock_guard<std::mutex> lk(mTargetLock);
-    //    mTargetValues = loadPresetValues(name);
-    //    mStartValues.clear();
-    //    // FIXME morph recursively inside bundles
-    //    for (auto targetValue : mTargetValues) {
-    //      bool valueSet = false;
-    //      for (auto *param : mParameters) {
-    //        if (param->getFullAddress() == targetValue.first) {
-    //          mStartValues[param->getFullAddress()] =
-    //          std::vector<VariantValue>();
-    //          param->get(mStartValues[param->getFullAddress()]);
-    //          valueSet = true;
-    //          break;
-    //        }
-    //      }
-    //      for (auto bundleGroup : mBundles) {
-    //        for (size_t i = 0; i < bundleGroup.second.size(); i++) {
-    //          std::string bundlePrefix =
-    //              "/" + bundleGroup.first + "/" + std::to_string(i);
-    //          for (auto *param : bundleGroup.second.at(i)->parameters()) {
-    //            if (bundlePrefix + param->getFullAddress() ==
-    //            targetValue.first)
-    //            {
-    //              mStartValues[bundlePrefix + param->getFullAddress()] =
-    //                  std::vector<VariantValue>();
-    //              param->get(mStartValues[bundlePrefix +
-    //              param->getFullAddress()]); valueSet = true; break;
-    //            }
-    //          }
-    //        }
-    //      }
-    //      if (!valueSet) {
-    //        mStartValues[targetValue.first] = targetValue.second;
-    //      }
-    //    }
-    //  }
+    for (const auto &bundleGroup : mBundles) {
+      std::string bundleName = "/" + bundleGroup.first + "/";
+      for (size_t i = 0; i < bundleGroup.second.size(); ++i) {
+        applyBundleParameters(bundleGroup.second[i],
+                              bundleName + std::to_string(i), targetValues);
+      }
+    }
   }
   int index = -1;
   for (const auto &preset : mPresetsMap) {
@@ -924,26 +1090,6 @@ void PresetHandler::storeCurrentPresetMap(std::string mapName,
   f.close();
 }
 
-void setBundleGroupValues(std::string fullAddress,
-                          std::vector<VariantValue> &values,
-                          std::vector<ParameterBundle *> bundles,
-                          std::string &prefix) {
-  for (unsigned int i = 0; i < bundles.size(); i++) {
-    std::string bundlePrefix = prefix + std::to_string(i);
-    for (auto *param : bundles.at(i)->parameters()) {
-      if (bundlePrefix + param->getFullAddress() == fullAddress &&
-          values.size() > 0) {
-        param->setFields(values);
-        return;
-      }
-    }
-    for (const auto &bundleGroup : bundles.at(i)->bundles()) {
-      prefix += "/" + bundleGroup.first + "/";
-      setBundleGroupValues(fullAddress, values, {bundleGroup.second}, prefix);
-    }
-  }
-}
-
 void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
                                           ParameterStates &endValues,
                                           double factor) {
@@ -954,52 +1100,19 @@ void PresetHandler::setInterpolatedValues(ParameterStates &startValues,
     assert(startValue.second.size() == endValue.size());
     if (factor != 1.0) {
       for (size_t i = 0; i < endValue.size(); i++) {
-        auto startDataType = startValue.second[i].type();
-        auto endDataType = endValue[i].type();
-        // FIXME this looks wrong
-        if (startDataType != endDataType) {
-          if (startDataType == VariantType::VARIANT_FLOAT &&
-              endDataType == VariantType::VARIANT_INT32) {
-            endValue[i] = VariantValue(float(endValue[i].get<int32_t>()));
-          } else if (endDataType == VariantType::VARIANT_FLOAT &&
-                     startDataType == VariantType::VARIANT_INT32) {
-            startValue.second[i] =
-                VariantValue(float(startValue.second[i].get<int32_t>()));
-          } else if (endDataType == VariantType::VARIANT_DOUBLE &&
-                     startDataType == VariantType::VARIANT_INT32) {
-            startValue.second[i] =
-                VariantValue(double(startValue.second[i].get<int32_t>()));
-          } else {
+        if (!coerceFieldToMatch(startValue.second[i], endValue[i])) {
+          // Also allow coercing start toward end when end is the stored type.
+          if (!coerceFieldToMatch(endValue[i], startValue.second[i])) {
             std::cerr << "Parameter data type mismatch. Aborting." << std::endl;
             return;
           }
-        } else {
-          if (startDataType == VariantType::VARIANT_FLOAT) {
-            interpValues.push_back(VariantValue(
-                startValue.second[i].get<float>() +
-                ((float)factor * (endValue[i].get<float>() -
-                                  startValue.second[i].get<float>()))));
-          } else if (startDataType == VariantType::VARIANT_INT32) {
-            float value =
-                startValue.second[i].get<int32_t>() +
-                ((float)factor * (endValue[i].get<int32_t>() -
-                                  (float)startValue.second[i].get<int32_t>()));
-            interpValues.push_back(VariantValue((int32_t)value));
-          } else if (startDataType == VariantType::VARIANT_STRING) {
-            interpValues.push_back(endValue[i]);
-          }
         }
+        interpValues.push_back(
+            lerpFields(startValue.second[i], endValue[i], factor));
       }
     } else {
-      assert(startValue.second.size() == endValue.size());
       for (size_t i = 0; i < endValue.size(); i++) {
-        if (startValue.second[i].type() == VariantType::VARIANT_FLOAT &&
-            endValue[i].type() == VariantType::VARIANT_INT32) {
-          endValue[i] = VariantValue(float(endValue[i].get<int32_t>()));
-        } else if (endValue[i].type() == VariantType::VARIANT_FLOAT &&
-                   startValue.second[i].type() == VariantType::VARIANT_INT32) {
-          endValue[i] = VariantValue(int32_t(endValue[i].get<float>()));
-        }
+        coerceFieldToMatch(startValue.second[i], endValue[i]);
       }
       interpValues = endValue;
     }
@@ -1028,100 +1141,9 @@ void PresetHandler::setInterpolatedValuesDelta(ParameterStates &startValues,
     auto &deltaValue = deltaValues[startValue.first];
     interpValues.resize(deltaValue.size());
     assert(startValue.second.size() == deltaValue.size());
-    if (factor == 0.0) {
-      for (size_t i = 0; i < deltaValue.size(); i++) {
-        interpValues[i] = startValue.second[i];
-      }
-    } else if (factor == 1.0) { // factor == 1.0
-      for (size_t i = 0; i < deltaValue.size(); i++) {
-        auto startDataType = startValue.second[i].type();
-        auto deltaDataType = deltaValue[i].type();
-        if (startDataType != deltaDataType) {
-          if (startDataType == VariantType::VARIANT_FLOAT &&
-              deltaDataType == VariantType::VARIANT_INT32) {
-            interpValues[i] = VariantValue(startValue.second[i].get<float>() +
-                                           float(deltaValue[i].get<int32_t>()));
-          } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
-                     startDataType == VariantType::VARIANT_DOUBLE) {
-            interpValues[i] = VariantValue(startValue.second[i].get<double>() +
-                                           factor * deltaValue[i].get<float>());
-          } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
-                     startDataType == VariantType::VARIANT_FLOAT) {
-            interpValues[i] = VariantValue(startValue.second[i].get<float>() +
-                                           deltaValue[i].get<double>());
-          } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
-                     startDataType == VariantType::VARIANT_INT32) {
-            interpValues[i] = VariantValue(startValue.second[i].get<int32_t>() +
-                                           ceil(deltaValue[i].get<float>()));
-          } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
-                     startDataType == VariantType::VARIANT_INT32) {
-            interpValues[i] = VariantValue(startValue.second[i].get<int32_t>() +
-                                           ceil(deltaValue[i].get<double>()));
-          } else {
-            std::cerr << "Parameter data type mismatch. Aborting." << std::endl;
-            return;
-          }
-        } else {
-          if (startDataType == VariantType::VARIANT_FLOAT) {
-            interpValues[i] = VariantValue(startValue.second[i].get<float>() +
-                                           deltaValue[i].get<float>());
-          } else if (startDataType == VariantType::VARIANT_DOUBLE) {
-            interpValues[i] = VariantValue(startValue.second[i].get<double>() +
-                                           deltaValue[i].get<double>());
-          } else if (startDataType == VariantType::VARIANT_INT32) {
-            interpValues[i] = VariantValue(startValue.second[i].get<int32_t>() +
-                                           deltaValue[i].get<int32_t>());
-          } else if (startDataType == VariantType::VARIANT_STRING) {
-            interpValues[i] = deltaValue[i];
-          }
-        }
-      }
-    } else {
-      for (size_t i = 0; i < deltaValue.size(); i++) {
-        auto startDataType = startValue.second[i].type();
-        auto deltaDataType = deltaValue[i].type();
-        if (startDataType != deltaDataType) {
-          if (startDataType == VariantType::VARIANT_FLOAT &&
-              deltaDataType == VariantType::VARIANT_INT32) {
-            interpValues[i] =
-                VariantValue(startValue.second[i].get<float>() +
-                             factor * float(deltaValue[i].get<int32_t>()));
-          } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
-                     startDataType == VariantType::VARIANT_DOUBLE) {
-            interpValues[i] = VariantValue(startValue.second[i].get<double>() +
-                                           factor * deltaValue[i].get<float>());
-          } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
-                     startDataType == VariantType::VARIANT_FLOAT) {
-            interpValues[i] =
-                VariantValue(startValue.second[i].get<float>() +
-                             factor * deltaValue[i].get<double>());
-          } else if (deltaDataType == VariantType::VARIANT_FLOAT &&
-                     startDataType == VariantType::VARIANT_INT32) {
-            interpValues[i] =
-                VariantValue(startValue.second[i].get<int32_t>() +
-                             factor * ceil(deltaValue[i].get<float>()));
-          } else if (deltaDataType == VariantType::VARIANT_DOUBLE &&
-                     startDataType == VariantType::VARIANT_INT32) {
-            interpValues[i] =
-                VariantValue(startValue.second[i].get<int32_t>() +
-                             factor * ceil(deltaValue[i].get<double>()));
-          } else {
-            std::cerr << "Parameter data type mismatch. Aborting." << std::endl;
-            return;
-          }
-        } else {
-          if (startDataType == VariantType::VARIANT_FLOAT) {
-            interpValues[i] = VariantValue(startValue.second[i].get<float>() +
-                                           factor * deltaValue[i].get<float>());
-          } else if (startDataType == VariantType::VARIANT_INT32) {
-            interpValues[i] =
-                VariantValue(startValue.second[i].get<int32_t>() +
-                             factor * deltaValue[i].get<int32_t>());
-          } else if (startDataType == VariantType::VARIANT_STRING) {
-            interpValues[i] = deltaValue[i];
-          }
-        }
-      }
+    for (size_t i = 0; i < deltaValue.size(); i++) {
+      interpValues[i] =
+          applyDeltaField(startValue.second[i], deltaValue[i], factor);
     }
 
     for (auto *param : mParameters) {
@@ -1234,21 +1256,28 @@ PresetHandler::loadPresetValues(std::string name) {
         std::vector<VariantValue> values;
         std::getline(ss, address, ' ');
         std::getline(ss, type, ' ');
-        std::string value;
         auto currentType = type.begin();
-        // FIXME parse strings correctly to allow spaces in strings
-        while (std::getline(ss, value, ' ')) {
-          if (currentType == type.end()) {
-            std::cerr << "ERROR: Inconsistent type tags. Ingnoring extra values"
-                      << std::endl;
-            break;
-          }
+        while (currentType != type.end() && ss.good()) {
           if (*currentType == 'f') {
-            values.push_back(std::stof(value));
-          } else if (*currentType == 's') {
-            values.push_back(value);
+            float fval = 0.f;
+            if (!(ss >> fval)) {
+              break;
+            }
+            values.push_back(fval);
           } else if (*currentType == 'i') {
-            values.push_back(std::stoi(value));
+            int ival = 0;
+            if (!(ss >> ival)) {
+              break;
+            }
+            values.push_back(ival);
+          } else if (*currentType == 's') {
+            std::string sval;
+            if (!readPresetStringToken(ss, sval)) {
+              break;
+            }
+            values.push_back(sval);
+          } else {
+            break;
           }
           ++currentType;
         }
@@ -1256,9 +1285,6 @@ PresetHandler::loadPresetValues(std::string name) {
         if (address.size() > 0 && address[0] != '#' && type.size() > 0 &&
             std::find(mSkipParameters.begin(), mSkipParameters.end(),
                       address) == mSkipParameters.end()) {
-          // Address is not in ignore list, so add to values loaded
-          // Should we make sure the address corresponds to an existing
-          // preset?
           preset[address] = values;
         }
       }
@@ -1303,17 +1329,22 @@ bool PresetHandler::savePresetValues(const ParameterStates &values,
       if (value2.type() == VariantType::VARIANT_FLOAT) {
         types += "f";
         valueString += std::to_string(value2.get<float>()) + " ";
+      } else if (value2.type() == VariantType::VARIANT_DOUBLE) {
+        types += "f";
+        valueString +=
+            std::to_string(static_cast<float>(value2.get<double>())) + " ";
       } else if (value2.type() == VariantType::VARIANT_STRING) {
         types += "s";
-        valueString += value2.get<std::string>() + " ";
+        valueString += quotePresetString(value2.get<std::string>()) + " ";
       } else if (value2.type() == VariantType::VARIANT_INT32) {
         types += "i";
         valueString += std::to_string(value2.get<int32_t>()) + " ";
       }
     }
-    // TODO chop last blank space
-    std::string line = value.first + " " + types + " " + valueString;
-    f << line << std::endl;
+    if (!valueString.empty() && valueString.back() == ' ') {
+      valueString.pop_back();
+    }
+    f << value.first << " " << types << " " << valueString << std::endl;
   }
   f << "::" << std::endl;
   if (f.bad()) {

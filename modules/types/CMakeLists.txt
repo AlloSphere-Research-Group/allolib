@@ -10,6 +10,7 @@ target_sources(altypes
       BASE_DIRS include
       FILES
         include/al/types/al_Color.hpp
+        include/al/types/al_TimeMasterMode.hpp
         include/al/types/al_VariantValue.hpp
 )
 
