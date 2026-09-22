@@ -1,6 +1,7 @@
 #ifndef GRAPHICSDOMAIN_H
 #define GRAPHICSDOMAIN_H
 
+#include <atomic>
 #include <cassert>
 #include <functional>
 #include <iostream>
@@ -34,10 +35,18 @@ struct WindowSetupProperties {
  * @ingroup App
  *
  * This domain prepares a GLFW OpenGL domain.
+ *
+ * LoopMode::Self (default): start() runs the frame while-loop (App compat).
+ * LoopMode::Runtime: start() only arms the frame; Runtime pumps poll/tickFrame.
  */
 class OpenGLGraphicsDomain : public AsynchronousDomain, public FPS {
 public:
+  enum class LoopMode { Self, Runtime };
+
   virtual ~OpenGLGraphicsDomain() {}
+
+  void setLoopMode(LoopMode mode) { mLoopMode = mode; }
+  LoopMode loopMode() const { return mLoopMode; }
 
   // Domain functions
   bool init(ComputationDomain *parent = nullptr) override;
@@ -50,6 +59,13 @@ public:
     return mShouldQuitApp || mSubDomainList.size() == 0;
   }
 
+  ModuleSchedule schedule() const override { return ModuleSchedule::Main; }
+  bool blocksInStart() const override {
+    return mLoopMode == LoopMode::Self;
+  }
+  void poll() override {}
+  bool tickFrame() override;
+
   bool running() { return mRunning; }
 
   /**
@@ -58,6 +74,8 @@ public:
    *
    * newWindow() must be called after domain has been initialized, as it also
    * initializes the window domain, which requires an opengl context.
+   *
+   * Target model: window is a Surface owned by graphics, not a Module.
    */
   std::shared_ptr<GLFWOpenGLWindowDomain> newWindow();
 
@@ -75,6 +93,10 @@ public:
   virtual void postOnExit() {}
 
 private:
+  bool beginFrameExecution();
+  bool endFrameExecution();
+
+  LoopMode mLoopMode{LoopMode::Self};
   std::atomic<bool> mShouldQuitApp{false};
   bool mRunning{false};
 };

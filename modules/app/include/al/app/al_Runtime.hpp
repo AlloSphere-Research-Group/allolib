@@ -1,6 +1,7 @@
 #ifndef INCLUDE_AL_RUNTIME_HPP
 #define INCLUDE_AL_RUNTIME_HPP
 
+#include <atomic>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -16,10 +17,15 @@
 namespace al {
 
 /**
- * @brief Owns the asynchronous domain graph and its start/stop/cleanup cycle.
+ * @brief Owns root Modules and their start / pump / stop / cleanup cycle.
  * @ingroup App
  *
- * App and DistributedApp use Runtime for lifecycle. Domain callbacks (onCreate,
+ * Runtime owns every loop. When no root blocks inside start(), Runtime pumps
+ * Main-schedule modules (poll + tickFrame) or idles until quit() for
+ * Callback-only graphs. Legacy App path: any blocksInStart() root keeps the
+ * sequential blocking start stack.
+ *
+ * App and DistributedApp use Runtime for lifecycle. Callbacks (onCreate,
  * onSound, …) are still wired by the app recipe via initialize().
  */
 class Runtime {
@@ -57,6 +63,7 @@ public:
 private:
   std::vector<std::shared_ptr<AsynchronousDomain>> mDomainList;
   std::stack<std::shared_ptr<AsynchronousDomain>> mRunningDomains;
+  std::atomic<bool> mQuit{false};
 };
 
 } // namespace al

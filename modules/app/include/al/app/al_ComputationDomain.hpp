@@ -9,6 +9,7 @@
 #include <stack>
 #include <vector>
 
+#include "al/app/al_Module.hpp"
 #include "al/system/al_NodeConfiguration.hpp"
 #include "al/ui/al_Parameter.hpp"
 
@@ -211,6 +212,12 @@ public:
   virtual bool tick();
 };
 
+/**
+ * @brief Root Module on Runtime (legacy name: AsynchronousDomain).
+ *
+ * Prefer ModuleSchedule + poll/tickFrame over owning a private while-loop.
+ * start() should return promptly when blocksInStart() is false.
+ */
 class AsynchronousDomain : public ComputationDomain {
 public:
   /**
@@ -233,6 +240,26 @@ public:
   /// Request this domain's loop to exit. Default is a no-op.
   virtual void quit() {}
   virtual bool shouldQuit() const { return false; }
+
+  /// How Runtime should drive this root. Default: Callback.
+  virtual ModuleSchedule schedule() const { return ModuleSchedule::Callback; }
+
+  /**
+   * @brief If true, start() may block (legacy graphics/console self-loop).
+   *
+   * Runtime uses the old sequential start stack when any root returns true.
+   * Cooperative Main modules return false and are pumped via poll/tickFrame.
+   */
+  virtual bool blocksInStart() const { return false; }
+
+  /// Main-schedule: process platform input (optional).
+  virtual void poll() {}
+
+  /**
+   * @brief Main-schedule: one frame of work.
+   * @return false to signal failure / closed (Runtime will quit).
+   */
+  virtual bool tickFrame() { return true; }
 
 protected:
   /**
