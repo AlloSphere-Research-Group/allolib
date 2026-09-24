@@ -28,11 +28,15 @@ template <class TSharedState> class StateSendDomain;
 template <class TSharedState> class StateSimulationDomain;
 
 /**
- * @brief Domain for distributing state for a simulation domain
+ * @brief Simulation Stage that owns a POD state slot + optional sync Stages.
  * @ingroup App
  *
- * This domain can insert a domain sender or receiver to synchronize state
- * across the network.
+ * Prefer al_StateSync.hpp: attachSceneStateSync() with a StateBackend.
+ * This type is the Stage that holds TSharedState and runs simulationFunction.
+ * Send/recv are additional graphics Stages (not Runtime Modules).
+ *
+ * addStateSender / addStateReceiver attach the legacy OscBlob Stages.
+ * OscBlob cannot carry SceneStateBlob (osc::Send default buffer is 1024).
  */
 template <class TSharedState = DefaultState>
 class StateDistributionDomain : public StateSimulationDomain<TSharedState> {
@@ -197,21 +201,25 @@ public:
   bool tick() override {
     tickSubdomains(true);
 
-    assert(mState); // State must have been set at this point
-    //    assert(mSend);
+    assert(mState);
 
-    //    osc::Blob b(&mState, sizeof(mState));
-    //    mSend->send("/_state", b);
+    // osc::Send default buffer is 1024 — refuse oversized POD loudly.
+    constexpr size_t kOscDefaultBuf = 1024;
+    constexpr size_t kOscFramingSlop = 256;
+    if (sizeof(TSharedState) + kOscFramingSlop > kOscDefaultBuf) {
+      std::cerr
+          << "[StateSendDomain/OscBlob] sizeof(T)=" << sizeof(TSharedState)
+          << " exceeds osc::Send buffer (" << kOscDefaultBuf
+          << "). Use StateBackend::Cuttlebone (see al_StateSync.hpp).\n";
+      tickSubdomains(false);
+      return false;
+    }
 
     mStateLock.lock();
     osc::Blob b(mState.get(), sizeof(TSharedState));
     osc::Send s(mPort, mAddress.c_str());
-      //  std::cout << mAddress << ":" << mPort << std::endl;
     s.send("/_state", mId, b);
-
     mStateLock.unlock();
-    // std::cout << "StateSendDomain sent state to " << mAddress << ":" << mPort << std::endl;
-
 
     tickSubdomains(false);
     return true;

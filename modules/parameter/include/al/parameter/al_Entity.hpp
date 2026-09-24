@@ -1,12 +1,12 @@
-#ifndef AL_ENTITY_HPP
-#define AL_ENTITY_HPP
+#ifndef AL_PARAM_ENTITY_HPP
+#define AL_PARAM_ENTITY_HPP
 
 /**
  * @file al_Entity.hpp
- * @brief Minimal entity: id, path, default Pose, and a ParamSet.
+ * @brief ParamEntity: path + Pose + ParamSet (parameter-layer helper).
  *
- * Owned by Scene (aka World). Voices/DynamicScene remain until Scene grows;
- * bind via al/scene/al_VoiceEntity.hpp.
+ * Prefer al::Entity (al/scene/al_Entity.hpp) for ECS composition. ParamEntity
+ * remains for ParamState capture without components (e.g. voice bridges).
  */
 
 #include <cstdint>
@@ -19,20 +19,17 @@ namespace al {
 
 using EntityId = uint64_t;
 
-class Entity {
+class ParamEntity {
 public:
-  Entity() = default;
-  Entity(EntityId id, std::string name);
+  ParamEntity() = default;
+  ParamEntity(EntityId id, std::string name);
 
   EntityId id() const { return mId; }
   const std::string &name() const { return mName; }
-
-  /// Hierarchical path used as parameter group, e.g. "scene/actor3".
   const std::string &path() const { return mPath; }
 
   void setId(EntityId id);
   void setName(std::string name);
-  /// Sets path and rebinds ParamSet groups (e.g. "world/e12").
   void setPath(std::string path);
 
   Pose &pose() { return mPose; }
@@ -41,8 +38,7 @@ public:
   ParamSet &params() { return mParams; }
   const ParamSet &params() const { return mParams; }
 
-  /// Convenience: add param under this entity's path.
-  Entity &addParam(ParameterMeta &param);
+  ParamEntity &addParam(ParameterMeta &param);
 
 private:
   void syncParamPath();

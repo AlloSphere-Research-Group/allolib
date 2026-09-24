@@ -1,6 +1,12 @@
 #ifndef __PICKABLE_HPP__
 #define __PICKABLE_HPP__
 
+/**
+ * Legacy OO pickables (DynamicScene / older apps).
+ * ECS Scene path: al/scene/al_PickableComponent.hpp + al/ui/al_ScenePick.hpp.
+ * Kept supported; ScenePick reuses PickableBB for hit tests.
+ */
+
 #include <vector>
 
 #include "al/graphics/al_Graphics.hpp"

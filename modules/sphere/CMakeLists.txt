@@ -16,6 +16,7 @@ target_sources(alsphere
       FILES
         include/al/sphere/al_AlloSphereSpeakerLayout.hpp
         include/al/sphere/al_SphereUtils.hpp
+        include/al/sphere/al_SphereShell.hpp
         include/al/sphere/al_PerProjection.hpp
         include/al/sphere/al_Meter.hpp
 )
@@ -26,6 +27,7 @@ target_link_libraries(alsphere PUBLIC
   al::audio
   al::audio_io
   al::graphics
+  al::spatial
   al::system
 )
 

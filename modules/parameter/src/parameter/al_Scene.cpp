@@ -2,11 +2,11 @@
 
 namespace al {
 
-Scene::Scene(std::string name) : mName(std::move(name)) {}
+World::World(std::string name) : mName(std::move(name)) {}
 
-void Scene::setName(std::string name) { mName = std::move(name); }
+void World::setName(std::string name) { mName = std::move(name); }
 
-std::string Scene::entityPathFor(const std::string &entityName) const {
+std::string World::entityPathFor(const std::string &entityName) const {
   if (mName.empty()) {
     return entityName;
   }
@@ -16,29 +16,29 @@ std::string Scene::entityPathFor(const std::string &entityName) const {
   return mName + "/" + entityName;
 }
 
-Entity &Scene::create(std::string entityName) {
+ParamEntity &World::create(std::string entityName) {
   EntityId id = mNextId++;
   if (entityName.empty()) {
     entityName = "e" + std::to_string(id);
   }
-  auto entity = std::make_unique<Entity>(id, entityName);
+  auto entity = std::make_unique<ParamEntity>(id, entityName);
   entity->setPath(entityPathFor(entityName));
-  Entity &ref = *entity;
+  ParamEntity &ref = *entity;
   mEntities[id] = std::move(entity);
   return ref;
 }
 
-Entity *Scene::find(EntityId id) {
+ParamEntity *World::find(EntityId id) {
   auto it = mEntities.find(id);
   return it == mEntities.end() ? nullptr : it->second.get();
 }
 
-const Entity *Scene::find(EntityId id) const {
+const ParamEntity *World::find(EntityId id) const {
   auto it = mEntities.find(id);
   return it == mEntities.end() ? nullptr : it->second.get();
 }
 
-Entity *Scene::findByName(const std::string &entityName) {
+ParamEntity *World::findByName(const std::string &entityName) {
   for (auto &kv : mEntities) {
     if (kv.second->name() == entityName) {
       return kv.second.get();
@@ -47,15 +47,15 @@ Entity *Scene::findByName(const std::string &entityName) {
   return nullptr;
 }
 
-bool Scene::destroy(EntityId id) { return mEntities.erase(id) > 0; }
+bool World::destroy(EntityId id) { return mEntities.erase(id) > 0; }
 
-void Scene::clear() {
+void World::clear() {
   mEntities.clear();
   mNextId = 1;
 }
 
-std::vector<Entity *> Scene::entities() {
-  std::vector<Entity *> out;
+std::vector<ParamEntity *> World::entities() {
+  std::vector<ParamEntity *> out;
   out.reserve(mEntities.size());
   for (auto &kv : mEntities) {
     out.push_back(kv.second.get());
@@ -63,8 +63,8 @@ std::vector<Entity *> Scene::entities() {
   return out;
 }
 
-std::vector<const Entity *> Scene::entities() const {
-  std::vector<const Entity *> out;
+std::vector<const ParamEntity *> World::entities() const {
+  std::vector<const ParamEntity *> out;
   out.reserve(mEntities.size());
   for (const auto &kv : mEntities) {
     out.push_back(kv.second.get());
@@ -72,7 +72,7 @@ std::vector<const Entity *> Scene::entities() const {
   return out;
 }
 
-ParamState Scene::capture() const {
+ParamState World::capture() const {
   ParamState state;
   for (const auto &kv : mEntities) {
     ParamState part = kv.second->params().capture();
@@ -81,7 +81,7 @@ ParamState Scene::capture() const {
   return state;
 }
 
-void Scene::apply(const ParamState &state) {
+void World::apply(const ParamState &state) {
   for (auto &kv : mEntities) {
     kv.second->params().apply(state);
   }

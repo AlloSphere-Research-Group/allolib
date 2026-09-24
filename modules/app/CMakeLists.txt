@@ -16,6 +16,7 @@ target_sources(alapp
     src/app/al_OSCDomain.cpp
     src/app/al_SimulationDomain.cpp
     src/app/al_StateDistributionDomain.cpp
+    src/app/al_StateSync.cpp
   PUBLIC
     FILE_SET HEADERS
       BASE_DIRS include
@@ -38,6 +39,7 @@ target_sources(alapp
         include/al/app/al_SimulationDomain.hpp
         include/al/app/al_OmniRendererDomain.hpp
         include/al/app/al_StateDistributionDomain.hpp
+        include/al/app/al_StateSync.hpp
 )
 
 al_configure_module(alapp EXPORT_NAME app)

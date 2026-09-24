@@ -11,6 +11,7 @@ target_sources(alscene
     src/scene/al_DynamicScene.cpp
     src/scene/al_PolySynth.cpp
     src/scene/al_PositionedVoice.cpp
+    src/scene/al_Scene.cpp
     src/scene/al_SequencerMIDI.cpp
     src/scene/al_SynthRecorder.cpp
     src/scene/al_SynthSequencer.cpp
@@ -20,10 +21,15 @@ target_sources(alscene
     FILE_SET HEADERS
       BASE_DIRS include
       FILES
+        include/al/scene/al_Component.hpp
         include/al/scene/al_DistributedScene.hpp
         include/al/scene/al_DynamicScene.hpp
+        include/al/scene/al_Entity.hpp
+        include/al/scene/al_PickableComponent.hpp
         include/al/scene/al_PolySynth.hpp
         include/al/scene/al_PositionedVoice.hpp
+        include/al/scene/al_Scene.hpp
+        include/al/scene/al_SceneStateBlob.hpp
         include/al/scene/al_SequencerMIDI.hpp
         include/al/scene/al_SynthRecorder.hpp
         include/al/scene/al_SynthSequencer.hpp

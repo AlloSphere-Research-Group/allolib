@@ -28,6 +28,7 @@ target_sources(alui
         include/al/ui/al_Pickable.hpp
         include/al/ui/al_PickableManager.hpp
         include/al/ui/al_PickableRotateHandle.hpp
+        include/al/ui/al_ScenePick.hpp
 )
 
 al_configure_module(alui EXPORT_NAME ui)

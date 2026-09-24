@@ -4,7 +4,7 @@
 
 namespace al {
 
-void bindVoiceParams(Entity &entity, SynthVoice &voice) {
+void bindVoiceParams(ParamEntity &entity, SynthVoice &voice) {
   for (ParameterMeta *p : voice.triggerParameters()) {
     if (p) {
       entity.addParam(*p);
@@ -17,12 +17,12 @@ void bindVoiceParams(Entity &entity, SynthVoice &voice) {
   }
 }
 
-Entity &bindVoiceEntity(Scene &scene, SynthVoice &voice,
-                        std::string entityName) {
+ParamEntity &bindVoiceEntity(World &world, SynthVoice &voice,
+                             std::string entityName) {
   if (entityName.empty()) {
     entityName = "voice";
   }
-  Entity &entity = scene.create(std::move(entityName));
+  ParamEntity &entity = world.create(std::move(entityName));
   bindVoiceParams(entity, voice);
   return entity;
 }

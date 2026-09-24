@@ -16,6 +16,8 @@ set (gtest_src
     src/test_param_codec.cpp
     src/test_param_state_entity.cpp
     src/test_scene_keyframe.cpp
+    src/test_ecs_scene.cpp
+    src/test_scene_pick.cpp
     src/test_preset_sequencer.cpp
     src/test_presets.cpp
     src/test_file.cpp

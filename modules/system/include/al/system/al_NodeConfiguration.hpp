@@ -36,8 +36,8 @@ struct NodeConfiguration {
 
   Capability mCapabilites{CAP_NONE};
 
-  bool hasCapability(Capability cap) { return cap & mCapabilites; }
-  bool isPrimary() { return rank == 0; }
+  bool hasCapability(Capability cap) const { return cap & mCapabilites; }
+  bool isPrimary() const { return rank == 0; }
 
   /**
    * @brief setRole

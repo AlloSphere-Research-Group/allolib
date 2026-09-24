@@ -8,10 +8,10 @@
 
 using namespace al;
 
-TEST(SceneWorld, CreateDestroyCapture) {
-  World world("stage"); // alias of Scene
-  Entity &a = world.create("actor");
-  Entity &b = world.create("prop");
+TEST(World, CreateDestroyCapture) {
+  World world("stage");
+  ParamEntity &a = world.create("actor");
+  ParamEntity &b = world.create("prop");
   EXPECT_EQ(world.size(), 2u);
   EXPECT_EQ(a.path(), "stage/actor");
   EXPECT_EQ(b.path(), "stage/prop");
@@ -59,35 +59,33 @@ TEST(KeyframeTrack, LerpAndEase) {
   EXPECT_FLOAT_EQ(p.get(), 10.f);
 
   track.setEase(Ease::Smoothstep);
-  // Midpoint with smoothstep is still 0.5 for the unit curve
   EXPECT_DOUBLE_EQ(KeyframeTrack::easeUnit(Ease::Smoothstep, 0.5), 0.5);
   track.apply(1.0, targets);
   EXPECT_FLOAT_EQ(p.get(), 5.f);
 }
 
 TEST(VoiceEntity, BindAndCapture) {
-  Scene scene("poly");
+  World world("poly");
   SynthVoice voice;
   Parameter freq{"freq", "", 440.f};
   Parameter gain{"gain", "", 0.5f};
-  voice << freq; // trigger
+  voice << freq;
   voice.registerParameter(gain);
 
-  Entity &e = bindVoiceEntity(scene, voice, "v0");
+  ParamEntity &e = bindVoiceEntity(world, voice, "v0");
   EXPECT_EQ(e.path(), "poly/v0");
   EXPECT_EQ(freq.getFullAddress(), "/poly/v0/freq");
   EXPECT_EQ(gain.getFullAddress(), "/poly/v0/gain");
 
   freq.set(220.f);
   gain.set(0.25f);
-  ParamState snap = scene.capture();
+  ParamState snap = world.capture();
   freq.set(0.f);
   gain.set(0.f);
-  scene.apply(snap);
+  world.apply(snap);
   EXPECT_FLOAT_EQ(freq.get(), 220.f);
   EXPECT_FLOAT_EQ(gain.get(), 0.25f);
 
-  // Voice-level capture/apply without scene
   ParamState voiceSnap = captureVoiceState(voice);
   freq.set(1.f);
   applyVoiceState(voice, voiceSnap);

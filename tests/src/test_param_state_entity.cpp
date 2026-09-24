@@ -39,7 +39,7 @@ TEST(ParamSet, EntityPathBinding) {
 }
 
 TEST(Entity, ParamsAndPose) {
-  Entity e{42, "sprite"};
+  ParamEntity e{42, "sprite"};
   EXPECT_EQ(e.path(), "sprite");
 
   SignalFloat alpha{"alpha", "", 1.f};

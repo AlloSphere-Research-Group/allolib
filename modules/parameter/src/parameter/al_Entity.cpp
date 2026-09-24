@@ -4,32 +4,32 @@
 
 namespace al {
 
-Entity::Entity(EntityId id, std::string name)
+ParamEntity::ParamEntity(EntityId id, std::string name)
     : mId(id), mName(std::move(name)) {
   syncParamPath();
 }
 
-void Entity::setId(EntityId id) {
+void ParamEntity::setId(EntityId id) {
   mId = id;
   syncParamPath();
 }
 
-void Entity::setName(std::string name) {
+void ParamEntity::setName(std::string name) {
   mName = std::move(name);
   syncParamPath();
 }
 
-void Entity::setPath(std::string path) {
+void ParamEntity::setPath(std::string path) {
   mPath = std::move(path);
   mParams.setEntityPath(mPath);
 }
 
-Entity &Entity::addParam(ParameterMeta &param) {
+ParamEntity &ParamEntity::addParam(ParameterMeta &param) {
   mParams.add(param);
   return *this;
 }
 
-void Entity::syncParamPath() {
+void ParamEntity::syncParamPath() {
   if (mPath.empty()) {
     if (!mName.empty()) {
       mPath = mName;

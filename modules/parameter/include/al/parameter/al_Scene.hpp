@@ -1,12 +1,12 @@
-#ifndef AL_SCENE_ECS_HPP
-#define AL_SCENE_ECS_HPP
+#ifndef AL_WORLD_HPP
+#define AL_WORLD_HPP
 
 /**
  * @file al_Scene.hpp
- * @brief Entity container (the ECS "world") — destined to supersede DynamicScene.
+ * @brief World — ParamEntity container with ParamState capture/apply.
  *
- * Named Scene to match AlloLib vocabulary; World is an alias for ECS familiarity.
- * Owns Entities, assigns ids, and can capture/apply a full ParamState snapshot.
+ * Lightweight parameter graph helper. The Entity Component Scene lives in
+ * al/scene/al_Scene.hpp (al::Scene).
  */
 
 #include <memory>
@@ -19,34 +19,29 @@
 
 namespace al {
 
-class Scene {
+class World {
 public:
-  Scene() = default;
-  explicit Scene(std::string name);
+  World() = default;
+  explicit World(std::string name);
 
   const std::string &name() const { return mName; }
   void setName(std::string name);
 
-  /// Create entity with unique id; path becomes `sceneName/entityName` when
-  /// the scene is named.
-  Entity &create(std::string entityName = "");
+  ParamEntity &create(std::string entityName = "");
 
-  Entity *find(EntityId id);
-  const Entity *find(EntityId id) const;
-  Entity *findByName(const std::string &entityName);
+  ParamEntity *find(EntityId id);
+  const ParamEntity *find(EntityId id) const;
+  ParamEntity *findByName(const std::string &entityName);
 
   bool destroy(EntityId id);
   void clear();
 
   size_t size() const { return mEntities.size(); }
 
-  std::vector<Entity *> entities();
-  std::vector<const Entity *> entities() const;
+  std::vector<ParamEntity *> entities();
+  std::vector<const ParamEntity *> entities() const;
 
-  /// Snapshot all parameters on all entities (keyed by full OSC path).
   ParamState capture() const;
-
-  /// Apply state to all entity params (unmatched paths ignored).
   void apply(const ParamState &state);
 
 private:
@@ -54,11 +49,8 @@ private:
 
   std::string mName;
   EntityId mNextId{1};
-  std::unordered_map<EntityId, std::unique_ptr<Entity>> mEntities;
+  std::unordered_map<EntityId, std::unique_ptr<ParamEntity>> mEntities;
 };
-
-/// ECS-oriented name for the same type.
-using World = Scene;
 
 } // namespace al
 
