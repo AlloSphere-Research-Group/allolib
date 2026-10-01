@@ -155,7 +155,15 @@ bool AudioBackend::open(int framesPerSecond, unsigned int framesPerBuffer,
   }
 
   if (deviceBufferSize != framesPerBuffer) {
-    printf("WARNING: Device opened with buffer size: %d", deviceBufferSize);
+    // RtAudio may negotiate a different block size. AudioIO buffers were
+    // allocated for the *requested* size — leaving them mismatched overruns
+    // the heap on the first callback (seen as malloc checksum abort).
+    std::printf("WARNING: Device opened with buffer size %u (requested %u) — "
+                "resizing AudioIO buffers to match\n",
+                deviceBufferSize, framesPerBuffer);
+    auto *io = static_cast<AudioIO *>(userdata);
+    // Stream is already open; AudioIO::framesPerBuffer() refuses — call base.
+    io->AudioIOData::framesPerBuffer(deviceBufferSize);
   }
   return true;
 }
@@ -230,7 +238,10 @@ static int rtaudioCallback(void *output, void *input, unsigned int frameCount,
 
   AudioIO &io = *(AudioIO *)userData;
 
-  assert(frameCount == (unsigned)io.framesPerBuffer());
+  if (frameCount != static_cast<unsigned>(io.framesPerBuffer())) {
+    // Last-resort resize if open() missed a renegotiation mid-stream.
+    io.AudioIOData::framesPerBuffer(frameCount);
+  }
 
   if (input != NULL) {
     const float *inBuffers = (const float *)input;

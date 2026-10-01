@@ -298,7 +298,16 @@ bool AudioIO::close() {
 }
 
 bool AudioIO::open() {
-  return mBackend->open(mFramesPerSecond, mFramesPerBuffer, this);
+  const unsigned int requested = static_cast<unsigned int>(mFramesPerBuffer);
+  if (!mBackend->open(mFramesPerSecond, requested, this)) {
+    return false;
+  }
+  // Backend may have resized via AudioIOData::framesPerBuffer (device mismatch).
+  if (mFramesPerBuffer != requested) {
+    std::printf("[AudioIO] framesPerBuffer now %llu (was %u)\n",
+                static_cast<unsigned long long>(mFramesPerBuffer), requested);
+  }
+  return true;
 }
 
 void AudioIO::reopen() {
