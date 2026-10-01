@@ -8,8 +8,8 @@
  * Sized for StateBackend::Cuttlebone (fragmented UDP). Do NOT ship this over
  * OscBlob — sizeof exceeds osc::Send's default 1024-byte buffer.
  *
- * capacity is the pack budget; raise if the scene grows. StateSyncLimits
- * documents per-backend ceilings (checked at attach).
+ * capacity is chosen so sizeof(SceneStateBlob) fits under
+ * StateSyncLimits::kCuttleboneComfortableState (header + alignas padding).
  */
 
 #include <cstdint>
@@ -20,7 +20,8 @@
 namespace al {
 
 struct SceneStateBlob {
-  static constexpr uint32_t capacity = 65536;
+  /// Leave room for `size` + alignas padding under a 256 KiB cuttlebone budget.
+  static constexpr uint32_t capacity = 256 * 1024 - 64;
   uint32_t size{0};
   alignas(8) char data[capacity]{};
 

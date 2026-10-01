@@ -65,8 +65,9 @@ namespace StateSyncLimits {
 constexpr size_t kOscSendDefaultBuffer = 1024;
 /// Leave headroom for "/_state", id string, OSC framing.
 constexpr size_t kOscBlobMaxState = 768;
-/// Comfortable LAN bound for cuttlebone-fragmented STATE (tune later).
-constexpr size_t kCuttleboneComfortableState = 256 * 1024;
+/// Comfortable LAN bound for cuttlebone-fragmented STATE.
+/// Hydrogen atom mesh (~120KB) + Scene header fits; multi-voice needs more.
+constexpr size_t kCuttleboneComfortableState = 1024 * 1024;
 
 inline const char *backendName(StateBackend b) {
   switch (b) {

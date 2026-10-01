@@ -1,6 +1,7 @@
 
 #define GLFW_INCLUDE_NONE
 #include "al/sphere/al_SphereUtils.hpp"
+#include <cctype>
 #include <cstdint>
 
 // gethostname
@@ -25,7 +26,9 @@ std::string al_get_hostname() {
 using namespace al;
 
 bool sphere::isSimulatorMachine(const std::string &host) {
-  return (host.substr(0, 4) == "ar01");
+  // Audio/control nodes: ar00 (current primary), ar01 (legacy)
+  return host.size() >= 3 && host[0] == 'a' && host[1] == 'r' &&
+         std::isdigit(static_cast<unsigned char>(host[2]));
 }
 
 bool sphere::isSimulatorMachine() {
