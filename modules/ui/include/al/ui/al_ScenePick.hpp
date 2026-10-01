@@ -104,8 +104,10 @@ inline void sync(Scene &scene, const std::vector<int> &activeIds,
     if (id != skipPoseEntityId) {
       syncBoxToEntity(*ctx.boxes[id], *e, *pc, selectedId);
     } else {
-      ctx.boxes[id]->selected.set(id == selectedId || pc->selected);
-      pc->selected = (id == selectedId);
+      // Keep multi-select: do not collapse to focus id only
+      const bool sel = (id == selectedId) || pc->selected;
+      ctx.boxes[id]->selected.set(sel);
+      pc->selected = sel;
       pc->hover = ctx.boxes[id]->hover.get();
     }
   }
@@ -126,14 +128,18 @@ inline void sync(Scene &scene, const std::vector<int> &activeIds,
 }
 
 inline void draw(Graphics &g, ScenePickContext &ctx) {
+  // Depth test OFF so cages aren't eaten by panel quads depending on view.
   g.lighting(false);
+  g.blending(true);
+  g.blendTrans();
+  g.depthTesting(false);
   g.depthMask(false);
   for (auto &pair : ctx.boxes) {
     PickableBB &bb = *pair.second;
     if (bb.selected.get()) {
-      g.color(0.2f, 0.95f, 1.f, 0.55f);
+      g.color(0.2f, 0.95f, 1.f, 0.7f);
     } else if (bb.hover.get()) {
-      g.color(1.f, 0.85f, 0.2f, 0.4f);
+      g.color(1.f, 0.85f, 0.2f, 0.55f);
     } else {
       g.color(0.55f, 0.55f, 0.65f, 0.22f);
     }
@@ -144,6 +150,7 @@ inline void draw(Graphics &g, ScenePickContext &ctx) {
   }
   g.polygonFill();
   g.depthMask(true);
+  g.depthTesting(true);
 }
 
 inline int mouseToFbX(int x, int fbW, int winW) {
