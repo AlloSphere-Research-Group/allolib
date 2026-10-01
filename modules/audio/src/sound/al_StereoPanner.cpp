@@ -1,5 +1,6 @@
 #include "al/sound/al_StereoPanner.hpp"
 
+#include <cmath>
 #include <cstring>
 
 void al::StereoPanner::renderSample(al::AudioIOData &io, const al::Vec3f &pos,
@@ -42,11 +43,14 @@ void al::StereoPanner::renderBuffer(al::AudioIOData &io, const al::Vec3f &pos,
 
 void al::StereoPanner::equalPowerPan(const al::Vec3d &relPos, float &gainL,
                                      float &gainR) {
+  // Expect listener-local OpenGL frame: +X right, +Y up, -Z forward.
+  // Lateral fraction x/|xz| → pan 0 (left) .. 1 (right); front/back stay center.
   double panVal = 0.5;
-  if (relPos.z != 0.0 || relPos.x != 0.0) {
-    panVal = 1.0 - std::fabs(std::atan2(relPos.z, relPos.x) / M_PI);
+  const double r = std::hypot(relPos.x, relPos.z);
+  if (r > 1e-12) {
+    panVal = 0.5 + 0.5 * (relPos.x / r);
   }
 
-  gainL = std::cos((M_PI / 2.0) * panVal);
-  gainR = std::sin((M_PI / 2.0) * panVal);
+  gainL = static_cast<float>(std::cos((M_PI / 2.0) * panVal));
+  gainR = static_cast<float>(std::sin((M_PI / 2.0) * panVal));
 }

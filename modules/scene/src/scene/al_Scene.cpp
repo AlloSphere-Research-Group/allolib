@@ -142,7 +142,8 @@ void Scene::allNotesOff() { mAllNotesOff = true; }
 // ---- Internal lifecycle processing ----
 
 void Scene::processInsertions() {
-  if (mInsertLock.try_lock()) {
+  {
+    std::unique_lock<std::mutex> lk(mInsertLock);
     if (mEntitiesToInsert) {
       if (mActiveEntities) {
         auto *e = mEntitiesToInsert;
@@ -155,26 +156,23 @@ void Scene::processInsertions() {
       }
       mEntitiesToInsert = nullptr;
     }
-    mInsertLock.unlock();
   }
 
   if (mAllNotesOff) {
-    if (mFreeLock.try_lock()) {
-      mAllNotesOff = false;
-      if (mActiveEntities) {
-        auto *e = mActiveEntities;
-        Entity *last = e;
-        while (e) {
-          e->mId = -1;
-          e->mActive = false;
-          last = e;
-          e = e->mNext;
-        }
-        last->mNext = mFreeEntities;
-        mFreeEntities = mActiveEntities;
-        mActiveEntities = nullptr;
+    std::unique_lock<std::mutex> lk(mFreeLock);
+    mAllNotesOff = false;
+    if (mActiveEntities) {
+      auto *e = mActiveEntities;
+      Entity *last = e;
+      while (e) {
+        e->mId = -1;
+        e->mActive = false;
+        last = e;
+        e = e->mNext;
       }
-      mFreeLock.unlock();
+      last->mNext = mFreeEntities;
+      mFreeEntities = mActiveEntities;
+      mActiveEntities = nullptr;
     }
   }
 }
@@ -256,7 +254,9 @@ void Scene::update(double dt) {
 }
 
 void Scene::render(AudioIOData &io) {
-  if (!mAudioConfigured) {
+  if (!mAudioConfigured ||
+      mInternalAudioIO.framesPerBuffer() != io.framesPerBuffer() ||
+      mInternalAudioIO.channelsOut() < mEntityMaxOutputChannels) {
     prepare(io);
   }
 
@@ -265,6 +265,27 @@ void Scene::render(AudioIOData &io) {
     processTurnOffs();
   }
 
+  if (mSpatializer) {
+    renderAudioSpatial(io);
+  } else {
+    renderAudioDry(io);
+  }
+
+  if (mAudioGain != 1.0f) {
+    for (unsigned int c = 0; c < io.channelsOut(); c++) {
+      float *buf = io.outBuffer(c);
+      for (int f = 0; f < io.framesPerBuffer(); f++) {
+        buf[f] *= mAudioGain;
+      }
+    }
+  }
+
+  if (mMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
+    processInactive();
+  }
+}
+
+void Scene::renderAudioDry(AudioIOData &io) {
   auto *e = mActiveEntities;
   int fpb = io.framesPerBuffer();
 
@@ -286,19 +307,47 @@ void Scene::render(AudioIOData &io) {
     }
     e = e->mNext;
   }
+}
 
-  if (mAudioGain != 1.0f) {
-    for (unsigned int c = 0; c < io.channelsOut(); c++) {
-      float *buf = io.outBuffer(c);
-      for (int f = 0; f < fpb; f++) {
-        buf[f] *= mAudioGain;
+void Scene::renderAudioSpatial(AudioIOData &io) {
+  io.frame(0);
+  mSpatializer->prepare(io);
+
+  auto *e = mActiveEntities;
+  int fpb = io.framesPerBuffer();
+
+  while (e) {
+    if (e->active()) {
+      mInternalAudioIO.zeroOut();
+      mInternalAudioIO.frame(0);
+      e->doAudio(mInternalAudioIO);
+
+      Vec3d direction = e->pose().vec() - mListenerPose.vec();
+      // World → listener-local (Pose basis: +X right, +Y up, -Z forward).
+      // rotate() would be local→world and L/R-flips under yaw.
+      Vec3d listeningDir = mListenerPose.quat().rotateTransposed(direction);
+
+      if (mUseDistAtten) {
+        float distance = static_cast<float>(listeningDir.mag());
+        float atten = mDistAtten.attenuation(distance);
+        for (unsigned int c = 0; c < e->numOutChannels(); ++c) {
+          float *buf = mInternalAudioIO.outBuffer(c);
+          for (int f = 0; f < fpb; ++f) {
+            buf[f] *= atten;
+          }
+        }
+      }
+
+      Vec3f pos = listeningDir;
+      for (unsigned int c = 0; c < e->numOutChannels(); ++c) {
+        mSpatializer->renderBuffer(io, pos, mInternalAudioIO.outBuffer(c),
+                                   static_cast<unsigned int>(fpb));
       }
     }
+    e = e->mNext;
   }
 
-  if (mMasterMode == TimeMasterMode::TIME_MASTER_AUDIO) {
-    processInactive();
-  }
+  mSpatializer->finalize(io);
 }
 
 void Scene::render(Graphics &g) {

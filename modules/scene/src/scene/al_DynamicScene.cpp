@@ -210,9 +210,8 @@ void DynamicScene::render(AudioIOData &io) {
             PositionedVoice *posVoice = static_cast<PositionedVoice *>(voice);
             Vec3d direction = posVoice->pose().vec() - mListenerPose.vec();
 
-            // Rotate vector according to listener-rotation
-            Quatd srcRot = mListenerPose.quat();
-            listeningDir = srcRot.rotate(direction);
+            // World → listener-local (see Scene::renderAudioSpatial).
+            listeningDir = mListenerPose.quat().rotateTransposed(direction);
             posOffsets = posVoice->audioOutOffsets();
             assert(posOffsets.size() == 0 ||
                    posOffsets.size() == posVoice->numOutChannels());
@@ -414,9 +413,9 @@ void DynamicScene::audioThreadFunc(DynamicScene *scene, int id) {
             Vec3d direction =
                 posVoice->pose().vec() - scene->mListenerPose.vec();
 
-            // Rotate vector according to listener-rotation
-            Quatd srcRot = scene->mListenerPose.quat();
-            listeningDir = srcRot.rotate(direction);
+            // World → listener-local (see Scene::renderAudioSpatial).
+            listeningDir =
+                scene->mListenerPose.quat().rotateTransposed(direction);
             posOffsets = posVoice->audioOutOffsets();
             assert(posOffsets.size() == 0 ||
                    posOffsets.size() == posVoice->numOutChannels());

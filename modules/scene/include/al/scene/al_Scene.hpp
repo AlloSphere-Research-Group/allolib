@@ -11,11 +11,17 @@
  * Sync pathways:
  * - Parameters (shareParameter) — event / OSC / composition
  * - packState / unpackState — per-frame POD mirror (primary → replicas)
+ *
+ * Audio:
+ * - Default render path is dry channel-sum (no spatializer) — explicit opt-in
+ *   via enableSpatialAudio<TSpatilizer>(Speakers) (unlike DynamicScene which
+ *   always installs StereoPanner).
  */
 
 #include <functional>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -24,6 +30,10 @@
 #include "al/io/al_AudioIOData.hpp"
 #include "al/protocol/al_OSC.hpp"
 #include "al/scene/al_Entity.hpp"
+#include "al/sound/al_Spatializer.hpp"
+#include "al/sound/al_Speaker.hpp"
+#include "al/spatial/al_DistAtten.hpp"
+#include "al/spatial/al_Pose.hpp"
 #include "al/types/al_SingleRWRingBuffer.hpp"
 #include "al/types/al_TimeMasterMode.hpp"
 #include "al/ui/al_ParameterServer.hpp"
@@ -69,6 +79,27 @@ public:
   Pose &listenerPose() { return mListenerPose; }
   const Pose &listenerPose() const { return mListenerPose; }
 
+  /// Explicit spatial audio (off by default — dry bus mix until enabled).
+  template <class TSpatializer>
+  std::shared_ptr<TSpatializer> enableSpatialAudio(const Speakers &sl) {
+    auto spat = std::make_shared<TSpatializer>(sl);
+    spat->compile();
+    mSpatializer = spat;
+    return spat;
+  }
+
+  template <class TSpatializer>
+  std::shared_ptr<TSpatializer> enableSpatialAudio(const Speakers &&sl) {
+    return enableSpatialAudio<TSpatializer>(sl);
+  }
+
+  void disableSpatialAudio() { mSpatializer.reset(); }
+  bool spatialAudioEnabled() const { return static_cast<bool>(mSpatializer); }
+  DistAtten<> &distanceAttenuation() { return mDistAtten; }
+  const DistAtten<> &distanceAttenuation() const { return mDistAtten; }
+  void useDistanceAttenuation(bool on) { mUseDistAtten = on; }
+  bool useDistanceAttenuation() const { return mUseDistAtten; }
+
   void prepare(AudioIOData &io);
   void setEntityMaxOutputChannels(uint16_t channels) {
     mEntityMaxOutputChannels = channels;
@@ -91,6 +122,8 @@ private:
   void processInsertions();
   void processTurnOffs();
   void processInactive();
+  void renderAudioDry(AudioIOData &io);
+  void renderAudioSpatial(AudioIOData &io);
 
   Entity *allocateEntity(const std::string &name);
 
@@ -125,6 +158,10 @@ private:
   float mAudioGain{1.0f};
   int mIdCounter{1000};
   bool mAllNotesOff{false};
+
+  std::shared_ptr<Spatializer> mSpatializer;
+  DistAtten<> mDistAtten;
+  bool mUseDistAtten{true};
 
   TimeMasterMode mMasterMode;
   AudioIOData mInternalAudioIO;
