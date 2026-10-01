@@ -277,6 +277,46 @@ void ParamCodecRegistry::ensureBuiltins() {
   add<ParameterMenu>(makeScalarCodec<ParameterMenu, int32_t>('i'));
   add<ParameterChoice>(makeScalarCodec<ParameterChoice, uint64_t>('i'));
 
+  {
+    ParamCodec c;
+    c.attach = [](ParameterMeta &param,
+                  const std::function<void(ValueSource *)> &notify) {
+      auto *p = static_cast<ParameterIntList *>(&param);
+      p->registerChangeCallback(
+          [notify](std::vector<int32_t> /*v*/, ValueSource *src) {
+            notify(src);
+          });
+    };
+    c.fromOsc = [](ParameterMeta *param, const std::string &address,
+                   osc::Message &m, ValueSource *src) -> bool {
+      auto *p = static_cast<ParameterIntList *>(param);
+      if (address != p->getFullAddress()) {
+        return false;
+      }
+      const std::string &tags = m.typeTags();
+      for (char t : tags) {
+        if (t != 'i') {
+          return false;
+        }
+      }
+      std::vector<int32_t> vals;
+      vals.reserve(tags.size());
+      for (size_t i = 0; i < tags.size(); ++i) {
+        int v = 0;
+        m >> v;
+        vals.push_back(static_cast<int32_t>(v));
+      }
+      p->set(vals, src);
+      return true;
+    };
+    c.notify = [](OSCNotifier &notifier, const std::string &address,
+                  ParameterMeta *param, ValueSource *src) {
+      notifier.notifyListeners(
+          address, static_cast<ParameterIntList *>(param)->get(), src);
+    };
+    add<ParameterIntList>(std::move(c));
+  }
+
   add<ParameterPose>(makePoseCodec());
   add<ParameterVec3>(makeVecCodec<ParameterVec3, Vec3f, 3>("fff"));
   add<ParameterVec4>(makeVecCodec<ParameterVec4, Vec4f, 4>("ffff"));

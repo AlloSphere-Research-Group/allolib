@@ -44,6 +44,7 @@
 
 #include <mutex>
 #include <cstdint>
+#include <vector>
 
 #include "al/protocol/al_OSC.hpp"
 #include "al/ui/al_Parameter.hpp"
@@ -146,6 +147,11 @@ public:
   void notifyListeners(std::string OSCaddress, Pose value,
                        ValueSource *src = nullptr);
   void notifyListeners(std::string OSCaddress, Color value,
+                       ValueSource *src = nullptr);
+
+  /// Variable-length int list (OSC typetag all `i`, e.g. `,iii`).
+  void notifyListeners(std::string OSCaddress,
+                       const std::vector<int32_t> &value,
                        ValueSource *src = nullptr);
 
   void notifyListeners(std::string OSCaddress, ParameterMeta *param,

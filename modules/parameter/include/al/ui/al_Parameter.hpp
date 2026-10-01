@@ -994,6 +994,84 @@ public:
   }
 };
 
+/**
+ * Homogeneous int list over ParameterServer (OSC event path).
+ *
+ * Wire format: address + N × typetag `i` (e.g. `/emit/assetPool ,iii 2 5 9`).
+ * Empty list → message with no args (`,`).
+ *
+ * Use for sparse / discrete collections (texture pools, id sets). Do **not**
+ * also mirror the same data through Component::packState — pick one pathway.
+ * For opaque typed payloads later, add ParameterBlob (`b` + optional typetag
+ * header); start typed when the element type is known.
+ */
+class ParameterIntList : public ParameterWrapper<std::vector<int32_t>> {
+public:
+  using ParameterWrapper<std::vector<int32_t>>::get;
+  using ParameterWrapper<std::vector<int32_t>>::set;
+
+  ParameterIntList(std::string parameterName, std::string Group = "",
+                   std::vector<int32_t> defaultValue = {0})
+      : ParameterWrapper<std::vector<int32_t>>(std::move(parameterName),
+                                               std::move(Group),
+                                               std::move(defaultValue)) {}
+
+  ParameterIntList(const ParameterIntList &param)
+      : ParameterWrapper<std::vector<int32_t>>(param) {
+    mValue = param.mValue;
+    setDefault(param.getDefault());
+  }
+
+  virtual float toFloat() override {
+    return static_cast<float>(get().size());
+  }
+
+  virtual bool fromFloat(float value) override {
+    (void)value;
+    return false;
+  }
+
+  virtual void sendValue(osc::Send &sender, std::string prefix = "") override {
+    sender.beginMessage(prefix + getFullAddress());
+    for (int32_t v : get()) {
+      sender << static_cast<int>(v);
+    }
+    sender.endMessage();
+    sender.send();
+  }
+
+  virtual void getFields(std::vector<VariantValue> &fields) override {
+    fields.clear();
+    for (int32_t v : get()) {
+      fields.emplace_back(VariantValue(v));
+    }
+  }
+
+  virtual void setFields(std::vector<VariantValue> &fields) override {
+    std::vector<int32_t> vals;
+    vals.reserve(fields.size());
+    for (auto &f : fields) {
+      if (f.type() == VariantType::VARIANT_INT32) {
+        vals.push_back(f.get<int32_t>());
+      } else if (f.type() == VariantType::VARIANT_FLOAT) {
+        vals.push_back(static_cast<int32_t>(f.get<float>()));
+      }
+    }
+    set(vals);
+  }
+
+  virtual void sendMeta(osc::Send &sender, std::string bundleName = "",
+                        std::string id = "") override {
+    if (bundleName.size() == 0) {
+      sender.send("/registerParameter", getName(), getGroup(),
+                  std::string("intlist"), std::string(), 0.f, 0.f);
+    } else {
+      sender.send("/registerBundleParameter", bundleName, id, getName(),
+                  getGroup(), std::string("intlist"), std::string(), 0.f, 0.f);
+    }
+  }
+};
+
 class ParameterVec3 : public ParameterWrapper<al::Vec3f> {
 public:
   using ParameterWrapper<al::Vec3f>::get;

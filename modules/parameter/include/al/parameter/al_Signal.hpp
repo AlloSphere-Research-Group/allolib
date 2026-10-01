@@ -28,6 +28,7 @@ using SignalInt = ParameterInt;
 using SignalInt64 = ParameterInt64;
 using SignalDouble = ParameterDouble;
 using SignalString = ParameterString;
+using SignalIntList = ParameterIntList;
 using SignalVec3 = ParameterVec3;
 using SignalVec4 = ParameterVec4;
 using SignalVec5 = ParameterVec5;

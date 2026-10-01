@@ -156,6 +156,26 @@ void OSCNotifier::notifyListeners(std::string OSCaddress, Color value,
   mListenerLock.unlock();
 }
 
+void OSCNotifier::notifyListeners(std::string OSCaddress,
+                                  const std::vector<int32_t> &value,
+                                  ValueSource *src) {
+  mListenerLock.lock();
+  for (osc::Send *sender : mOSCSenders) {
+    auto ip = Socket::nameToIp(sender->address());
+
+    if (!src || (src->port == 0 && src->ipAddr != ip) ||
+        (src->port != sender->port() && src->ipAddr != ip)) {
+      sender->beginMessage(OSCaddress);
+      for (int32_t v : value) {
+        (*sender) << static_cast<int>(v);
+      }
+      sender->endMessage();
+      sender->send();
+    }
+  }
+  mListenerLock.unlock();
+}
+
 void OSCNotifier::notifyListeners(std::string OSCaddress, ParameterMeta *param,
                                   ValueSource *src) {
   const ParamCodec *codec = paramCodecs().find(*param);
